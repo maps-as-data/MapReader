@@ -1,0 +1,15 @@
+language: python
+
+python:
+  - "2.7"
+
+install:
+  - pip install -e .
+  - pip install -e ".[testing]"
+  - pip install coveralls
+
+script:
+  - py.test --cov=piffle
+
+after_success:
+  - coveralls

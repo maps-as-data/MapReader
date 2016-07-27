@@ -32,6 +32,8 @@ setup(
     license='Apache License, Version 2.0',
     packages=find_packages(),
     install_requires=[],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest-cov'],
     description='Python library for generating IIIF Image API urls',
     long_description=LONG_DESCRIPTION,
     classifiers=CLASSIFIERS,

@@ -14,3 +14,17 @@ http://image.server/path/myimgid/info.json"
 >>> print myimg.size(width=120).format('png')
 http://image.server/path/myimgid/full/120,/0/default.png
 ```
+
+## Development and Testing
+
+This project uses [git-flow](https://github.com/nvie/gitflow) branching conventions.
+
+Install locally for development (the use of virtualenv is recommended):
+
+`pip install -e .`
+
+Install test dependencies:
+
+`pip install -e ".[testing]"`
+
+Run unit tests: `py.test` or `python setup.py test`
