@@ -2,10 +2,8 @@
 Python library for generating [IIIF Image API](http://iiif.io/api/image/2.1/) URLs in an
 object-oriented, pythonic fashion.
 
-[![Build Status](https://travis-ci.org/emory-lits-labs/piffle.svg?branch=develop)](https://travis-ci.org/emory-lits-labs/piffle)
-
+[![Build Status](https://travis-ci.org/emory-lits-labs/piffle.svg?branch=develop)](https://travis-ci.org/emory-lits-labs/piffle) 
 [![Coverage Status](https://coveralls.io/repos/github/emory-lits-labs/piffle/badge.svg?branch=develop)](https://coveralls.io/github/emory-lits-labs/piffle?branch=develop)
-
 [![Code Health](https://landscape.io/github/emory-lits-labs/piffle/develop/landscape.svg?style=flat)](https://landscape.io/github/emory-lits-labs/piffle/develop)
 
 Example use:
