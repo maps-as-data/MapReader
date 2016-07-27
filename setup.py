@@ -23,6 +23,8 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
+test_requirements = ['pytest', 'pytest-cov']
+
 setup(
     name='piffle',
     version=piffle.__version__,
@@ -33,7 +35,10 @@ setup(
     packages=find_packages(),
     install_requires=[],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest-cov'],
+    tests_require=test_requirements,
+    extras_require={
+        'test': test_requirements
+    },
     description='Python library for generating IIIF Image API urls',
     long_description=LONG_DESCRIPTION,
     classifiers=CLASSIFIERS,

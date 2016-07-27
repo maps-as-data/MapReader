@@ -5,7 +5,7 @@ python:
 
 install:
   - pip install -e .
-  - pip install -e ".[testing]"
+  - pip install -e ".[test]"
   - pip install coveralls
 
 script:

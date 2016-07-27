@@ -25,6 +25,6 @@ Install locally for development (the use of virtualenv is recommended):
 
 Install test dependencies:
 
-`pip install -e ".[testing]"`
+`pip install -e ".[test]"`
 
 Run unit tests: `py.test` or `python setup.py test`
