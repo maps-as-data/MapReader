@@ -7,7 +7,7 @@ import piffle
 LONG_DESCRIPTION = None
 try:
     # read the description if it's there
-    with open('README.rst') as desc_f:
+    with open('README.md') as desc_f:
         LONG_DESCRIPTION = desc_f.read()
 except:
     pass

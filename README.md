@@ -6,6 +6,10 @@ object-oriented, pythonic fashion.
 [![Coverage Status](https://coveralls.io/repos/github/emory-lits-labs/piffle/badge.svg?branch=develop)](https://coveralls.io/github/emory-lits-labs/piffle?branch=develop)
 [![Code Health](https://landscape.io/github/emory-lits-labs/piffle/develop/landscape.svg?style=flat)](https://landscape.io/github/emory-lits-labs/piffle/develop)
 
+## Installation and example use:
+
+`pip install piffle`
+
 Example use:
 
 ```
