@@ -56,3 +56,13 @@ class TestIIIFImageClient:
         with pytest.raises(Exception):
             img.format('bogus')
 
+    def test_url_parse(self):
+        img = iiif.IIIFImageClient()
+        # simple API parameters
+        img.parse_from_url('http://imgserver.co/loris/img1/full/full/0/default.jpg')
+        img.api_params_as_dict()
+        # more complex API parameters
+        img.parse_from_url('http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg')
+        img.api_params_as_dict()
+
+
