@@ -108,3 +108,125 @@ class IIIFImageClient(object):
         img = self.get_copy()
         img.image_options['format'] = image_format
         return img
+
+    def parse_from_url(self, url):
+        '''Parses Image API parameters from URL provided
+        Per http://iiif.io/api/image/2.0/#image-request-uri-syntax, using slashes to navigate URL'''
+        
+        url_components = url.split('/')
+        
+        _quality, _format = url_components[-1].split('.')
+        _rotation = url_components[-2]
+        _size = url_components[-3]
+        _region = url_components[-4]
+        _image_id = url_components[-5]
+        _api_endpoint = '/'.join(url_components[:-6])
+        
+        # reinit
+        self.__init__(api_endpoint=_api_endpoint, image_id=_image_id, region=_region,
+                     size=_size, rotation=_rotation, quality=_quality, format=_format)
+                     
+    def api_params_as_dict(self):
+        
+        '''
+        Returns dictionary of region, size, and rotation parameter strings
+        parsed as dictionaries.
+        '''
+
+        return {
+            'region':self._region_as_dict(),
+            'size':self._size_as_dict(),
+            'rotation':self._rotation_as_dict()            
+        }
+
+    # methods to derive python dictionaries from IIIF strings
+    def _region_as_dict(self):
+
+        '''Return dictionary of parsed region request'''
+
+        # return dictionary
+        region_d = {
+        'full': False,
+        'x': None,
+        'y': None,
+        'w': None,
+        'h': None,
+        'pct': False
+        }
+
+        region = self.image_options['region']
+
+        # full?
+        if region == 'full':
+            region_d['full'] = True
+            # return immediately
+            return region_d
+
+        # percent?
+        if "pct" in region:
+            region_d['pct'] = True
+            region = region.split("pct:")[1]
+
+        # split to dictionary
+        region_d['x'],region_d['y'],region_d['w'],region_d['h'] = region.split(",")
+
+        return region_d
+
+    def _size_as_dict(self):
+
+        '''Return dictionary of parsed size request'''
+
+        # return dictionary
+        size_d = {
+        'full': False,
+        'w': None,
+        'h': None,
+        'exact': False,
+        'pct': False,
+        }
+
+        size = self.image_options['size']
+
+        # full?
+        if size == 'full':
+            size_d['full'] = True
+            # return immediately
+            return size_d
+
+        # percent?
+        if "pct" in size:
+            size_d['pct'] = int(size.split(":")[1])
+            return size_d
+
+        # exact?
+        if size.startswith('!'):
+            size_d['exact'] = True
+            size = size[1:]
+
+        # split width and height
+        w,h = size.split(",")
+        if w != '':
+            size_d['w'] = int(w)
+        if h != '':
+            size_d['h'] = int(h)
+
+        return size_d
+
+    def _rotation_as_dict(self):
+
+        '''Return dictionary of parsed rotation request'''
+
+        rotation_d = {
+        'degrees': None,
+        'mirrored': False
+        }
+
+        rotation = self.image_options['rotation']
+
+        if rotation.startswith('!'):
+            rotation_d['mirrored'] = True
+            rotation = rotation[1:]
+
+        rotation_d['degrees'] = int(rotation)
+
+        return rotation_d
