@@ -60,22 +60,21 @@ class TestIIIFImageClient:
     good_test_info_url = 'http://imgserver.co/loris/img1/info.json'
     good_test_image_url_simple = 'http://imgserver.co/loris/img1/full/full/0/default.jpg'
     good_test_image_url_copmlex = 'http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg'
+    
     bad_test_info_url = 'http://img1/info.json'
     bad_test_image_url_simple = 'http://imgserver.co/loris/img1/foobar/default.jpg'
     bad_test_image_url_copmlex = 'http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg'
 
     def test_init_from_url(self):
 
-        img = iiif.IIIFImageClient()
-
         # well-formed
-        img.init_from_url(good_test_info_url)
-        img.init_from_url(good_test_image_url_simple)
-        img.init_from_url(good_test_image_url_copmlex)
+        img = iiif.IIIFImageClient.init_from_url(good_test_info_url)
+        img = iiif.IIIFImageClient.init_from_url(good_test_image_url_simple)
+        img = iiif.IIIFImageClient.init_from_url(good_test_image_url_copmlex)
 
         # malformed
-        img.init_from_url(malformed_test_info_url)
-        img.init_from_url(malformed_test_image_url_simple)
-        img.init_from_url(malformed_test_image_url_copmlex)
+        img = iiif.IIIFImageClient.init_from_url(malformed_test_info_url)
+        img = iiif.IIIFImageClient.init_from_url(malformed_test_image_url_simple)
+        img = iiif.IIIFImageClient.init_from_url(malformed_test_image_url_copmlex)
 
 

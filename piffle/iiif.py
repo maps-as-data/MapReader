@@ -109,7 +109,6 @@ class IIIFImageClient(object):
         img.image_options['format'] = image_format
         return img
 
-
     @classmethod
     def init_from_url(ic, url):
         '''Init ImageClient using Image API parameters from URI.  Detect image vs. info request.
@@ -154,9 +153,10 @@ class IIIFImageClient(object):
     def dict_opts(self):
         
         '''
-        Aggregate method that fires other client methods that parse image request parameters.  Return a dictionary
-        with all image request parameters parsed to their most granular level.  Can be helpful for acting
-        logically on particular request parameters like heigh, width, mirroring, etc.
+        Aggregate method that fires other client methods that parse image request parameters.
+        Return a dictionary with all image request parameters parsed to their most granular level.
+        Can be helpful for acting logically on particular request parameters like height,
+        width, mirroring, etc.
         '''
 
         return {
