@@ -56,13 +56,26 @@ class TestIIIFImageClient:
         with pytest.raises(Exception):
             img.format('bogus')
 
-    def test_url_parse(self):
+    # initialize from URI examples
+    good_test_info_url = 'http://imgserver.co/loris/img1/info.json'
+    good_test_image_url_simple = 'http://imgserver.co/loris/img1/full/full/0/default.jpg'
+    good_test_image_url_copmlex = 'http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg'
+    bad_test_info_url = 'http://img1/info.json'
+    bad_test_image_url_simple = 'http://imgserver.co/loris/img1/foobar/default.jpg'
+    bad_test_image_url_copmlex = 'http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg'
+
+    def test_init_from_url(self):
+
         img = iiif.IIIFImageClient()
-        # simple API parameters
-        img.parse_from_url('http://imgserver.co/loris/img1/full/full/0/default.jpg')
-        img.api_params_as_dict()
-        # more complex API parameters
-        img.parse_from_url('http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg')
-        img.api_params_as_dict()
+
+        # well-formed
+        img.init_from_url(good_test_info_url)
+        img.init_from_url(good_test_image_url_simple)
+        img.init_from_url(good_test_image_url_copmlex)
+
+        # malformed
+        img.init_from_url(malformed_test_info_url)
+        img.init_from_url(malformed_test_image_url_simple)
+        img.init_from_url(malformed_test_image_url_copmlex)
 
 
