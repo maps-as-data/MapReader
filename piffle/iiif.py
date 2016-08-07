@@ -109,7 +109,7 @@ class IIIFImageClient(object):
         img.image_options['format'] = image_format
         return img
 
-    def parse_from_url(self, url):
+    def init_from_url(self, url):
         '''Parses Image API parameters from URL provided
         Per http://iiif.io/api/image/2.0/#image-request-uri-syntax, using slashes to navigate URL'''
         
