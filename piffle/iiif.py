@@ -1,5 +1,10 @@
 # iiifclient
 
+class InitURLError(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+        
+
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -122,7 +127,7 @@ class IIIFImageClient(object):
             url_components = url.split('/')
 
             if len(url_components) < 5:
-                raise Exception('Not enough IIIF image parameters provided for information request {scheme}://{server}{/prefix}/{identifier}/info.json: %s' % url)
+                raise InitURLError('Not enough IIIF image parameters provided for information request {scheme}://{server}{/prefix}/{identifier}/info.json: %s' % url)
 
             _image_id = url_components[-2]
             _api_endpoint = '/'.join(url_components[:-3])
@@ -137,7 +142,7 @@ class IIIFImageClient(object):
 
             # check for enough IIIF parameters
             if len(url_components) < 8:
-                raise Exception('Not enough IIIF image parameters provided for image request {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}: %s' % url)
+                raise InitURLError('Not enough IIIF image parameters provided for image request {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}: %s' % url)
             
             _quality, _format = url_components[-1].split('.')
             _rotation = url_components[-2]
@@ -171,7 +176,7 @@ class IIIFImageClient(object):
         '''Parses region parameter into dictionary'''
 
         # return dictionary
-        region_d = {
+        region_dict = {
         'full': False,
         'x': None,
         'y': None,
@@ -184,31 +189,31 @@ class IIIFImageClient(object):
 
         # full?
         if region == 'full':
-            region_d['full'] = True
+            region_dict['full'] = True
             # return immediately
-            return region_d
+            return region_dict
 
         # percent?
         if "pct" in region:
-            region_d['pct'] = True
+            region_dict['pct'] = True
             region = region.split("pct:")[1]
 
         # split to dictionary
         # if percentage type, cast to float
-        if region_d['pct']:
-            region_d['x'],region_d['y'],region_d['w'],region_d['h'] = [float(region_c) for region_c in region.split(",")]
+        if region_dict['pct']:
+            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [float(region_c) for region_c in region.split(",")]
         # else, force int
         else:
-            region_d['x'],region_d['y'],region_d['w'],region_d['h'] = [int(region_c) for region_c in region.split(",")]
+            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [int(region_c) for region_c in region.split(",")]
 
-        return region_d
+        return region_dict
 
     def size_as_dict(self):
 
         '''Parses size parameter into dictionary'''
 
         # return dictionary
-        size_d = {
+        size_dict = {
         'full': False,
         'w': None,
         'h': None,
@@ -220,34 +225,34 @@ class IIIFImageClient(object):
 
         # full?
         if size == 'full':
-            size_d['full'] = True
+            size_dict['full'] = True
             # return immediately
-            return size_d
+            return size_dict
 
         # percent?
         if "pct" in size:
-            size_d['pct'] = int(size.split(":")[1])
-            return size_d
+            size_dict['pct'] = int(size.split(":")[1])
+            return size_dict
 
         # exact?
         if size.startswith('!'):
-            size_d['exact'] = True
+            size_dict['exact'] = True
             size = size[1:]
 
         # split width and height
         w,h = size.split(",")
         if w != '':
-            size_d['w'] = int(w)
+            size_dict['w'] = int(w)
         if h != '':
-            size_d['h'] = int(h) 
+            size_dict['h'] = int(h) 
 
-        return size_d
+        return size_dict
 
     def rotation_as_dict(self):
 
         '''Parses rotation parameter into dictionary'''
 
-        rotation_d = {
+        rotation_dict = {
         'degrees': None,
         'mirrored': False
         }
@@ -255,10 +260,10 @@ class IIIFImageClient(object):
         rotation = self.image_options['rotation']
 
         if rotation.startswith('!'):
-            rotation_d['mirrored'] = True
+            rotation_dict['mirrored'] = True
             rotation = rotation[1:]
 
         # rotation allows float
-        rotation_d['degrees'] = float(rotation)
+        rotation_dict['degrees'] = float(rotation)
 
-        return rotation_d
+        return rotation_dict

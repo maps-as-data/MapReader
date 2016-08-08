@@ -4,7 +4,7 @@ import pytest
 api_endpoint = 'http://imgserver.co/'
 image_id = 'img1'
 
-# initialize from URI examples
+# test urls
 good_test_info_url = 'http://imgserver.co/loris/img1/info.json'
 good_test_image_url_simple = 'http://imgserver.co/loris/img1/full/full/0/default.jpg'
 good_test_image_url_complex = 'http://imgserver.co/loris/img1/2560,2560,256,256/256,/!90/default.jpg'
@@ -65,8 +65,6 @@ class TestIIIFImageClient:
         with pytest.raises(Exception):
             img.format('bogus')
 
-    
-
     def test_init_from_url(self):
         # well-formed
         img = iiif.IIIFImageClient.init_from_url(good_test_info_url)
@@ -76,37 +74,46 @@ class TestIIIFImageClient:
         img = iiif.IIIFImageClient.init_from_url(good_test_image_url_complex)
         assert type(img) == iiif.IIIFImageClient
         # malformed
-        with pytest.raises(Exception):
+        with pytest.raises(iiif.InitURLError):
             img = iiif.IIIFImageClient.init_from_url(malformed_test_info_url)
             img = iiif.IIIFImageClient.init_from_url(malformed_test_image_url_simple)
             img = iiif.IIIFImageClient.init_from_url(malformed_test_image_url_copmlex)
-
 
     def test_region_as_dict(self):
         img = iiif.IIIFImageClient.init_from_url(good_test_image_url_complex)
         assert img.region_as_dict() == {'full': False, 'h': 256, 'pct': False, 'w': 256, 'x': 2560, 'y': 2560}
 
-
     def test_size_as_dict(self):
         img = iiif.IIIFImageClient.init_from_url(good_test_image_url_complex)
         assert img.size_as_dict() == {'exact': False, 'full': False, 'h': None, 'pct': False, 'w': 256}
-
 
     def test_rotation_as_dict(self):
         img = iiif.IIIFImageClient.init_from_url(good_test_image_url_complex)
         assert img.rotation_as_dict() == {'degrees': 90.0, 'mirrored': True}
 
-
     def test_dict_opts(self):
         img = iiif.IIIFImageClient.init_from_url(good_test_image_url_complex)
-        assert img.dict_opts() == {'region': {'full': False,
-        'h': 256,
-        'pct': False,
-        'w': 256,
-        'x': 2560,
-        'y': 2560},
-        'rotation': {'degrees': 90.0, 'mirrored': True},
-        'size': {'exact': False, 'full': False, 'h': None, 'pct': False, 'w': 256}}
+        assert img.dict_opts() == {
+            'region': {
+                'full': False,
+                'h': 256,
+                'pct': False,
+                'w': 256,
+                'x': 2560,
+                'y': 2560
+            },
+            'rotation': {
+                'degrees': 90.0,
+                'mirrored': True
+            },
+            'size': {
+                'exact': False,
+                'full': False,
+                'h': None,
+                'pct': False,
+                'w': 256
+            }
+        }
 
 
 
