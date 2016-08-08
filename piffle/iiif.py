@@ -3,7 +3,7 @@
 class InitURLError(Exception):
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
-        
+
 
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
@@ -231,7 +231,7 @@ class IIIFImageClient(object):
 
         # percent?
         if "pct" in size:
-            size_dict['pct'] = int(size.split(":")[1])
+            size_dict['pct'] = float(size.split(":")[1])
             return size_dict
 
         # exact?
