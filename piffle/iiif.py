@@ -1,5 +1,10 @@
 # iiifclient
 
+class InitURLError(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+
+
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -108,3 +113,157 @@ class IIIFImageClient(object):
         img = self.get_copy()
         img.image_options['format'] = image_format
         return img
+
+    @classmethod
+    def init_from_url(ic, url):
+        '''Init ImageClient using Image API parameters from URI.  Detect image vs. info request.
+        Can count reliably from the end of the URI backwards, but cannot assume how many slashes 
+        make up the api_endpoint.  Returns new instance of IIIFImageClient.
+        Per http://iiif.io/api/image/2.0/#image-request-uri-syntax, using slashes to parse URI'''
+        
+        # info request
+        if url.endswith('info.json'):
+
+            url_components = url.split('/')
+
+            if len(url_components) < 5:
+                raise InitURLError('Not enough IIIF image parameters provided for information request {scheme}://{server}{/prefix}/{identifier}/info.json: %s' % url)
+
+            _image_id = url_components[-2]
+            _api_endpoint = '/'.join(url_components[:-3])
+
+            # reinit
+            return ic(api_endpoint=_api_endpoint, image_id=_image_id)
+
+        # image request
+        else:
+
+            url_components = url.split('/')
+
+            # check for enough IIIF parameters
+            if len(url_components) < 8:
+                raise InitURLError('Not enough IIIF image parameters provided for image request {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}: %s' % url)
+            
+            _quality, _format = url_components[-1].split('.')
+            _rotation = url_components[-2]
+            _size = url_components[-3]
+            _region = url_components[-4]
+            _image_id = url_components[-5]
+            _api_endpoint = '/'.join(url_components[:-6])
+            
+            # reinit
+            return ic(api_endpoint=_api_endpoint, image_id=_image_id, region=_region,
+                         size=_size, rotation=_rotation, quality=_quality, format=_format)
+                     
+    def dict_opts(self):
+        
+        '''
+        Aggregate method that fires other client methods that parse image request parameters.
+        Return a dictionary with all image request parameters parsed to their most granular level.
+        Can be helpful for acting logically on particular request parameters like height,
+        width, mirroring, etc.
+        '''
+
+        return {
+            'region':self.region_as_dict(),
+            'size':self.size_as_dict(),
+            'rotation':self.rotation_as_dict()            
+        }
+
+    # methods to derive python dictionaries from IIIF strings
+    def region_as_dict(self):
+
+        '''Parses region parameter into dictionary'''
+
+        # return dictionary
+        region_dict = {
+        'full': False,
+        'x': None,
+        'y': None,
+        'w': None,
+        'h': None,
+        'pct': False
+        }
+
+        region = self.image_options['region']
+
+        # full?
+        if region == 'full':
+            region_dict['full'] = True
+            # return immediately
+            return region_dict
+
+        # percent?
+        if "pct" in region:
+            region_dict['pct'] = True
+            region = region.split("pct:")[1]
+
+        # split to dictionary
+        # if percentage type, cast to float
+        if region_dict['pct']:
+            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [float(region_c) for region_c in region.split(",")]
+        # else, force int
+        else:
+            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [int(region_c) for region_c in region.split(",")]
+
+        return region_dict
+
+    def size_as_dict(self):
+
+        '''Parses size parameter into dictionary'''
+
+        # return dictionary
+        size_dict = {
+        'full': False,
+        'w': None,
+        'h': None,
+        'exact': False,
+        'pct': False,
+        }
+
+        size = self.image_options['size']
+
+        # full?
+        if size == 'full':
+            size_dict['full'] = True
+            # return immediately
+            return size_dict
+
+        # percent?
+        if "pct" in size:
+            size_dict['pct'] = float(size.split(":")[1])
+            return size_dict
+
+        # exact?
+        if size.startswith('!'):
+            size_dict['exact'] = True
+            size = size[1:]
+
+        # split width and height
+        w,h = size.split(",")
+        if w != '':
+            size_dict['w'] = int(w)
+        if h != '':
+            size_dict['h'] = int(h) 
+
+        return size_dict
+
+    def rotation_as_dict(self):
+
+        '''Parses rotation parameter into dictionary'''
+
+        rotation_dict = {
+        'degrees': None,
+        'mirrored': False
+        }
+
+        rotation = self.image_options['rotation']
+
+        if rotation.startswith('!'):
+            rotation_dict['mirrored'] = True
+            rotation = rotation[1:]
+
+        # rotation allows float
+        rotation_dict['degrees'] = float(rotation)
+
+        return rotation_dict
