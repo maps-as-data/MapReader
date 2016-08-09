@@ -1,8 +1,15 @@
 # iiifclient
 
-class InitURLError(Exception):
-    def __init__(self,*args,**kwargs):
-        Exception.__init__(self,*args,**kwargs)
+from urlparse import urlparse
+
+class IIIFImageClientException(Exception):
+    '''IIIFImageClient custom exception class'''
+    pass
+
+
+class URLParseError(IIIFImageClientException):
+    '''Exception raised when an IIIF image could not be parsed'''
+    pass
 
 
 class IIIFImageClient(object):
@@ -29,15 +36,21 @@ class IIIFImageClient(object):
         'size': 'full',    # full size, unscaled
         'rotation': '0',   # no rotation
         'quality': 'default',  # color, gray, bitonal, default
-        'format': default_format
+        'fmt': default_format
     }
     allowed_formats = ['jpg', 'tif', 'png', 'gif', 'jp2', 'pdf', 'webp']
 
     def __init__(self, api_endpoint=None, image_id=None, region=None,
-                 size=None, rotation=None, quality=None, format=None):
+                 size=None, rotation=None, quality=None, fmt=None):
         self.image_options = self.image_defaults.copy()
         if api_endpoint is not None:
-            self.api_endpoint = api_endpoint
+            # remove any trailing slash to avoid duplicate slashes
+            self.api_endpoint = api_endpoint.rstrip('/')
+
+        # FIXME: image_id is not required on init to allow subclassing
+        # and customizing via get_image_id, but should probably cause
+        # an error if you attempt to serialize the url and it is not set
+        # (same for a few other options, probably, too...)
         if image_id is not None:
             self.image_id = image_id
         if region is not None:
@@ -48,8 +61,8 @@ class IIIFImageClient(object):
             self.image_options['rotation'] = rotation
         if quality is not None:
             self.image_options['quality'] = quality
-        if format is not None:
-            self.image_options['format'] = format
+        if fmt is not None:
+            self.image_options['fmt'] = fmt
 
     def get_image_id(self):
         'Image id to be used in contructing urls'
@@ -58,10 +71,10 @@ class IIIFImageClient(object):
     def __unicode__(self):
         info = self.image_options.copy()
         info.update({
-            'endpoint': self.api_endpoint.rstrip('/'), # avoid duplicate slashes',
+            'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
         })
-        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rotation)s/%(quality)s.%(format)s' % info
+        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rotation)s/%(quality)s.%(fmt)s' % info
 
     def __str__(self):
         return str(unicode(self))
@@ -72,8 +85,8 @@ class IIIFImageClient(object):
 
     def info(self):
         'JSON info url'
-        return '%(endpoint)s/%(id)s/info.json' %  {
-            'endpoint': self.api_endpoint.rstrip('/'), # avoid duplicate slashes',
+        return '%(endpoint)s/%(id)s/info.json' % {
+            'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
         }
 
@@ -109,54 +122,74 @@ class IIIFImageClient(object):
     def format(self, image_format):
         'Set output image format'
         if image_format not in self.allowed_formats:
-            raise Exception('Image format %s unknown' % image_format)
+            raise IIIFImageClientException('Image format %s unknown' % image_format)
         img = self.get_copy()
-        img.image_options['format'] = image_format
+        img.image_options['fmt'] = image_format
         return img
 
     @classmethod
-    def init_from_url(ic, url):
-        '''Init ImageClient using Image API parameters from URI.  Detect image vs. info request.
-        Can count reliably from the end of the URI backwards, but cannot assume how many slashes 
-        make up the api_endpoint.  Returns new instance of IIIFImageClient.
-        Per http://iiif.io/api/image/2.0/#image-request-uri-syntax, using slashes to parse URI'''
-        
+    def init_from_url(cls, url):
+        '''Init ImageClient using Image API parameters from URI.  Detect
+        image vs. info request. Can count reliably from the end of the URI
+        backwards, but cannot assume how many slashes make up the api_endpoint.
+        Returns new instance of IIIFImageClient.
+        Per http://iiif.io/api/image/2.0/#image-request-uri-syntax, using
+        slashes to parse URI'''
+
+        # first parse as a url
+        parsed_url = urlparse(url)
+        # then split the path on slashes
+        path_components = parsed_url.path.split('/')
+        # pop off last portion of the url to determine if this is an info url
+        path_basename = path_components.pop()
+        opts = {}
+
         # info request
-        if url.endswith('info.json'):
-
-            url_components = url.split('/')
-
-            if len(url_components) < 5:
-                raise InitURLError('Not enough IIIF image parameters provided for information request {scheme}://{server}{/prefix}/{identifier}/info.json: %s' % url)
-
-            _image_id = url_components[-2]
-            _api_endpoint = '/'.join(url_components[:-3])
-
-            # reinit
-            return ic(api_endpoint=_api_endpoint, image_id=_image_id)
+        if path_basename == 'info.json':
+            if len(path_components) < 1:
+                raise URLParseError('Invalid IIIF image information url: %s'
+                                    % url)
+            image_id = path_components.pop()
 
         # image request
         else:
-
-            url_components = url.split('/')
-
             # check for enough IIIF parameters
-            if len(url_components) < 8:
-                raise InitURLError('Not enough IIIF image parameters provided for image request {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}: %s' % url)
-            
-            _quality, _format = url_components[-1].split('.')
-            _rotation = url_components[-2]
-            _size = url_components[-3]
-            _region = url_components[-4]
-            _image_id = url_components[-5]
-            _api_endpoint = '/'.join(url_components[:-6])
-            
-            # reinit
-            return ic(api_endpoint=_api_endpoint, image_id=_image_id, region=_region,
-                         size=_size, rotation=_rotation, quality=_quality, format=_format)
-                     
+            if len(path_components) < 4:
+                raise URLParseError('Invalid IIIF image request: %s' % url)
+
+            # pop off url portions as they are used so we can easily
+            # make use of leftover path to reconstruct the api endpoint
+            quality, fmt = path_basename.split('.')
+            rotation = path_components.pop()
+            size = path_components.pop()
+            region = path_components.pop()
+            image_id = path_components.pop()
+            opts.update({
+                'region': region,
+                'size': size,
+                'rotation': rotation,
+                'quality': quality,
+                'fmt': fmt
+            })
+
+        # construct the api endpoint url from the parsed url and whatever
+        # portions of the url path are leftover
+        print 'path components = ', path_components
+        # remove empty strings from the remaining path components
+        path_components = [p for p in path_components if p]
+        print parsed_url.netloc
+        print '/'.join(path_components) if path_components else ''
+        print [p for p in path_components if p]
+        api_endpoint = '%s://%s/%s' % (
+            parsed_url.scheme, parsed_url.netloc,
+            '/'.join(path_components) if path_components else '')
+
+        print 'api endpoint =', api_endpoint
+
+        # init and return instance
+        return cls(api_endpoint=api_endpoint, image_id=image_id, **opts)
+
     def dict_opts(self):
-        
         '''
         Aggregate method that fires other client methods that parse image request parameters.
         Return a dictionary with all image request parameters parsed to their most granular level.
@@ -165,24 +198,23 @@ class IIIFImageClient(object):
         '''
 
         return {
-            'region':self.region_as_dict(),
-            'size':self.size_as_dict(),
-            'rotation':self.rotation_as_dict()            
+            'region': self.region_as_dict(),
+            'size': self.size_as_dict(),
+            'rotation': self.rotation_as_dict()
         }
 
     # methods to derive python dictionaries from IIIF strings
     def region_as_dict(self):
+        '''Return region options as a dictionary'''
 
-        '''Parses region parameter into dictionary'''
-
-        # return dictionary
+        # preliminary region options
         region_dict = {
-        'full': False,
-        'x': None,
-        'y': None,
-        'w': None,
-        'h': None,
-        'pct': False
+            'full': False,
+            'x': None,
+            'y': None,
+            'w': None,
+            'h': None,
+            'pct': False
         }
 
         region = self.image_options['region']
@@ -201,24 +233,24 @@ class IIIFImageClient(object):
         # split to dictionary
         # if percentage type, cast to float
         if region_dict['pct']:
-            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [float(region_c) for region_c in region.split(",")]
+            x, y, w, h = [float(region_c) for region_c in region.split(",")]
         # else, force int
         else:
-            region_dict['x'],region_dict['y'],region_dict['w'],region_dict['h'] = [int(region_c) for region_c in region.split(",")]
+            x, y, w, h = [int(region_c) for region_c in region.split(",")]
+        region_dict.update({'x': x, 'y': y, 'w': w, 'h': h})
 
         return region_dict
 
     def size_as_dict(self):
+        '''Return size options as a dictionary'''
 
-        '''Parses size parameter into dictionary'''
-
-        # return dictionary
+        # preliminary dictionary
         size_dict = {
-        'full': False,
-        'w': None,
-        'h': None,
-        'exact': False,
-        'pct': False,
+            'full': False,
+            'w': None,
+            'h': None,
+            'exact': False,
+            'pct': False,
         }
 
         size = self.image_options['size']
@@ -240,21 +272,19 @@ class IIIFImageClient(object):
             size = size[1:]
 
         # split width and height
-        w,h = size.split(",")
+        w, h = size.split(",")
         if w != '':
             size_dict['w'] = int(w)
         if h != '':
-            size_dict['h'] = int(h) 
+            size_dict['h'] = int(h)
 
         return size_dict
 
     def rotation_as_dict(self):
-
-        '''Parses rotation parameter into dictionary'''
-
+        '''Return rotation options as a dictionary'''
         rotation_dict = {
-        'degrees': None,
-        'mirrored': False
+            'degrees': None,
+            'mirrored': False
         }
 
         rotation = self.image_options['rotation']
