@@ -43,7 +43,10 @@ class TestIIIFImageClient:
                                    image_id=image_id, **test_opts)
         assert img.api_endpoint == api_endpoint
         assert img.image_id == image_id
-        assert img.image_options == test_opts
+        expected_img_opts = test_opts.copy()
+        del expected_img_opts['region']
+        assert img.image_options == expected_img_opts
+        assert unicode(img.region) == test_opts['region']
 
         # TODO: should parse/verify options on init
         # with pytest.raises(iiif.IIIFImageClientException):
@@ -106,15 +109,10 @@ class TestIIIFImageClient:
         assert isinstance(img, iiif.IIIFImageClient)
 
         # malformed
-        with pytest.raises(iiif.URLParseError):
+        with pytest.raises(iiif.ParseError):
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['info'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
-
-    def test_region_as_dict(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
-        assert img.region_as_dict() == {'full': False, 'h': 256, 'pct': False,
-                                        'w': 256, 'x': 2560, 'y': 2560}
 
     def test_size_as_dict(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
@@ -125,14 +123,15 @@ class TestIIIFImageClient:
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert img.rotation_as_dict() == {'degrees': 90.0, 'mirrored': True}
 
-    def test_dict_opts(self):
+    def test_as_dicts(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
-        assert img.dict_opts() == {
+        assert img.as_dict() == {
             'region': {
                 'full': False,
-                'h': 256,
-                'pct': False,
-                'w': 256,
+                'square': False,
+                'height': 256,
+                'percentage': False,
+                'width': 256,
                 'x': 2560,
                 'y': 2560
             },
@@ -148,3 +147,108 @@ class TestIIIFImageClient:
                 'w': 256
             }
         }
+
+
+class TestImageRegion:
+
+    def test_defaults(self):
+        region = iiif.ImageRegion()
+        assert unicode(region) == 'full'
+        assert region.as_dict() == iiif.ImageRegion.region_defaults
+
+    def test_init(self):
+        # full
+        region = iiif.ImageRegion(full=True)
+        assert region.as_dict()['full'] is True
+        # square
+        region = iiif.ImageRegion(square=True)
+        assert region.as_dict()['square'] is True
+        assert region.as_dict()['full'] is False
+        # region
+        region = iiif.ImageRegion(x=5, y=7, width=100, height=103)
+        assert region.as_dict()['full'] is False
+        assert region.as_dict()['x'] == 5
+        assert region.as_dict()['y'] == 7
+        assert region.as_dict()['width'] == 100
+        assert region.as_dict()['height'] == 103
+        assert region.as_dict()['percentage'] is False
+        # percentage region
+        region = iiif.ImageRegion(x=5, y=7, width=100, height=103,
+                                  percentage=True)
+        assert region.as_dict()['full'] is False
+        assert region.as_dict()['x'] == 5
+        assert region.as_dict()['y'] == 7
+        assert region.as_dict()['width'] == 100
+        assert region.as_dict()['height'] == 103
+        assert region.as_dict()['percentage'] is True
+
+        # errors
+        with pytest.raises(iiif.IIIFImageClientException):
+            # invalid parameter
+            iiif.ImageRegion(bogus='foo')
+
+            # incomplete options
+            iiif.ImageRegion(x=1)
+            iiif.ImageRegion(x=1, y=2)
+            iiif.ImageRegion(x=1, y=2, w=20)
+            iiif.ImageRegion(percentage=True)
+
+            # TODO: type checking? (not yet implemented)
+
+    def test_render(self):
+        region = iiif.ImageRegion(full=True)
+        assert unicode(region) == 'full'
+        region = iiif.ImageRegion(square=True)
+        assert unicode(region) == 'square'
+        print region.as_dict()
+        region = iiif.ImageRegion(x=5, y=5, width=100, height=100)
+        assert unicode(region) == '5,5,100,100'
+        region = iiif.ImageRegion(x=5, y=5, width=100, height=100,
+                                  percentage=True)
+        assert unicode(region) == 'pct:5,5,100,100'
+        region = iiif.ImageRegion(x=5.1, y=3.14, width=100.76, height=100.89,
+                                  percentage=True)
+        assert unicode(region) == 'pct:5.1,3.14,100.76,100.89'
+
+    def test_parse(self):
+        region = iiif.ImageRegion()
+        # full
+        region_str = 'full'
+        region.parse(region_str)
+        assert unicode(region) == region_str  # round trip
+        assert region.as_dict()['full'] is True
+        # square
+        region_str = 'square'
+        region.parse(region_str)
+        assert unicode(region) == region_str  # round trip
+        assert region.as_dict()['full'] is False
+        assert region.as_dict()['square'] is True
+        # region
+        x, y, w, h = [5, 7, 100, 200]
+        region_str = '%d,%d,%d,%d' % (x, y, w, h)
+        region.parse(region_str)
+        assert unicode(region) == region_str  # round trip
+        region_opts = region.as_dict()
+        assert region_opts['full'] is False
+        assert region_opts['square'] is False
+        assert region_opts['x'] == x
+        assert region_opts['y'] == y
+        assert region_opts['width'] == w
+        assert region_opts['height'] == h
+        # percentage region
+        region_str = 'pct:%d,%d,%d,%d' % (x, y, w, h)
+        region.parse(region_str)
+        assert unicode(region) == region_str  # round trip
+        region_opts = region.as_dict()
+        assert region_opts['full'] is False
+        assert region_opts['square'] is False
+        assert region_opts['x'] == x
+        assert region_opts['y'] == y
+        assert region_opts['width'] == w
+        assert region_opts['height'] == h
+        assert region_opts['percentage'] is True
+
+        # invalid or incomplete region strings
+        with pytest.raises(iiif.ParseError):
+            region.parse('pct:1,3,')
+            region.parse('one,two,three,four')
