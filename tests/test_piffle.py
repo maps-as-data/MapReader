@@ -45,8 +45,10 @@ class TestIIIFImageClient:
         assert img.image_id == image_id
         expected_img_opts = test_opts.copy()
         del expected_img_opts['region']
+        del expected_img_opts['size']
         assert img.image_options == expected_img_opts
-        assert unicode(img.region) == test_opts['region']
+        assert unicode(img._region) == test_opts['region']
+        assert unicode(img._size) == test_opts['size']
 
         # TODO: should parse/verify options on init
         # with pytest.raises(iiif.IIIFImageClientException):
@@ -114,11 +116,6 @@ class TestIIIFImageClient:
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
 
-    def test_size_as_dict(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
-        assert img.size_as_dict() == {'exact': False, 'full': False,
-                                      'h': None, 'pct': False, 'w': 256}
-
     def test_rotation_as_dict(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert img.rotation_as_dict() == {'degrees': 90.0, 'mirrored': True}
@@ -142,9 +139,10 @@ class TestIIIFImageClient:
             'size': {
                 'exact': False,
                 'full': False,
-                'h': None,
-                'pct': False,
-                'w': 256
+                'max': False,
+                'height': None,
+                'percent': None,
+                'width': 256
             }
         }
 
@@ -200,7 +198,6 @@ class TestImageRegion:
         assert unicode(region) == 'full'
         region = iiif.ImageRegion(square=True)
         assert unicode(region) == 'square'
-        print region.as_dict()
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100)
         assert unicode(region) == '5,5,100,100'
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100,
@@ -252,3 +249,88 @@ class TestImageRegion:
         with pytest.raises(iiif.ParseError):
             region.parse('pct:1,3,')
             region.parse('one,two,three,four')
+
+
+class TestImageSize:
+
+    def test_defaults(self):
+        size = iiif.ImageSize()
+        assert unicode(size) == 'full'
+        assert size.as_dict() == iiif.ImageSize.size_defaults
+
+    def test_init(self):
+        # full
+        size = iiif.ImageSize(full=True)
+        assert size.as_dict()['full'] is True
+        # max
+        size = iiif.ImageSize(max=True)
+        assert size.as_dict()['max'] is True
+        assert size.as_dict()['full'] is False
+        # percentage
+        size = iiif.ImageSize(percent=50)
+        assert size.as_dict()['full'] is False
+        assert size.as_dict()['percent'] == 50
+        # width only
+        size = iiif.ImageSize(width=100)
+        assert size.as_dict()['width'] == 100
+        # height only
+        size = iiif.ImageSize(height=200)
+        assert size.as_dict()['height'] == 200
+
+        # errors
+        with pytest.raises(iiif.IIIFImageClientException):
+            # invalid parameter
+            iiif.ImageSize(bogus='foo')
+
+            # incomplete options ?
+            # type checking? (not yet implemented)
+
+    def test_render(self):
+        size = iiif.ImageSize(full=True)
+        assert unicode(size) == 'full'
+        size = iiif.ImageSize(max=True)
+        assert unicode(size) == 'max'
+        size = iiif.ImageSize(percent=50)
+        assert unicode(size) == 'pct:50'
+        size = iiif.ImageSize(width=100, height=105)
+        assert unicode(size) == '100,105'
+        size = iiif.ImageSize(width=100)
+        assert unicode(size) == '100,'
+        size = iiif.ImageSize(height=105)
+        assert unicode(size) == ',105'
+
+    def test_parse(self):
+        size = iiif.ImageSize()
+        # full
+        size_str = 'full'
+        size.parse(size_str)
+        assert unicode(size) == size_str  # round trip
+        assert size.as_dict()['full'] is True
+        # max
+        size_str = 'max'
+        size.parse(size_str)
+        assert unicode(size) == size_str  # round trip
+        assert size.as_dict()['full'] is False
+        assert size.as_dict()['max'] is True
+        # width and height
+        w, h = [100, 200]
+        size_str = '%d,%d' % (w, h)
+        size.parse(size_str)
+        assert unicode(size) == size_str  # round trip
+        size_opts = size.as_dict()
+        assert size_opts['full'] is False
+        assert size_opts['max'] is False
+        assert size_opts['width'] == w
+        assert size_opts['height'] == h
+        # percentage size
+        size_str = 'pct:55'
+        size.parse(size_str)
+        assert unicode(size) == size_str  # round trip
+        size_opts = size.as_dict()
+        assert size_opts['full'] is False
+        assert size_opts['percent'] == 55
+
+        # invalid or incomplete size strings
+        with pytest.raises(iiif.ParseError):
+            size.parse('pct:')
+            size.parse('one,two')

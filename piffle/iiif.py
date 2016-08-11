@@ -29,7 +29,7 @@ class ImageRegion(object):
 
     # region options
     options = OrderedDict([
-        ('full', None),
+        ('full', False),
         ('square', False),
         ('x', None),
         ('y', None),
@@ -53,9 +53,10 @@ class ImageRegion(object):
     def __init__(self, **options):
         self.options = self.region_defaults.copy()
         if options:
-            self.set_options(options)
+            self.set_options(**options)
 
     def set_options(self, **options):
+        '''Update region options.  Same parameters as initialiation.'''
         allowed_options = self.options.keys()
         # error if an unrecoganized option is specified
         for key in options:
@@ -89,14 +90,15 @@ class ImageRegion(object):
             return 'full'
         if self.options['square']:
             return 'square'
+
+        coords = '%(x)g,%(y)g,%(width)g,%(height)g' % self.options
         if self.options['percentage']:
-            return 'pct:%(x)g,%(y)g,%(width)g,%(height)g' %  \
-                self.options
-        else:
-            return '%(x)d,%(y)d,%(width)d,%(height)d' % self.options
+            return 'pct:%s' % coords
+
+        return coords
 
     def parse(self, region):
-        '''Parse an IIIF Image region string'''
+        '''Parse an IIIF Image region string and update the current region'''
 
         # reset to defaults before parsing
         self.options = self.region_defaults.copy()
@@ -138,6 +140,110 @@ class ImageRegion(object):
         self.options.update({'x': x, 'y': y, 'width': width, 'height': height})
 
 
+class ImageSize(object):
+    # size options
+    options = OrderedDict([
+        ('full', False),
+        ('max', False),
+        ('width', None),
+        ('height', None),
+        ('percent', None),
+        ('exact', False)
+    ])
+
+    # NOTE: full is being deprecated and replaced with max;
+    # how to handle? support both but output non-deprecated?
+
+    size_defaults = {
+        'full': True,
+        'max': False,
+        'width': None,
+        'height': None,
+        'percent': None,
+        'exact': False
+    }
+
+    def __init__(self, **options):
+        self.options = self.size_defaults.copy()
+        if options:
+            self.set_options(**options)
+
+    def set_options(self, **options):
+        '''Update size options.  Same parameters as initialiation.'''
+        allowed_options = self.options.keys()
+        # error if an unrecoganized option is specified
+        for key in options:
+            if key not in allowed_options:
+                raise IIIFImageClientException('Unknown option: %s' % key)
+
+        # TODO: do we need to type checking? bool/int/float?
+
+        self.options.update(**options)
+        # if any non-full value is specified, set full to false
+        # NOTE: if e.g. square is specified but false, this is wrong
+        allowed_options.remove('full')
+        if any([key in allowed_options for key in options.keys()]):
+            self.options['full'] = False
+
+    def as_dict(self):
+        '''Return size options as a dictionary'''
+        return self.options
+
+    def __unicode__(self):
+        if self.options['full']:
+            return 'full'
+        if self.options['max']:
+            return 'max'
+        if self.options['percent']:
+            return 'pct:%g' % self.options['percent']
+
+        size = '%s,%s' % (self.options['width'] or '',
+                          self.options['height'] or '')
+        if self.options['exact']:
+            return '!%s' % size
+        return size
+
+    def parse(self, size):
+        # reset to defaults before parsing
+        self.options = self.size_defaults.copy()
+
+        # full?
+        if size == 'full':
+            self.options['full'] = True
+            return
+        # for any other case, full should be false
+        else:
+            self.options['full'] = False
+
+        # max?
+        if size == 'max':
+            self.options['max'] = True
+            return
+
+        # percent?
+        if "pct" in size:
+            try:
+                self.options['percent'] = float(size.split(":")[1])
+                return
+            except ValueError:
+                raise ParseError('Error parsing size: %s' % size)
+
+        # exact?
+        if size.startswith('!'):
+            self.options['exact'] = True
+            size = size.lstrip('!')
+
+        # split width and height
+        width, height = size.split(",")
+        try:
+            if width != '':
+                self.options['width'] = int(width)
+            if height != '':
+                self.options['height'] = int(height)
+        except ValueError:
+            raise ParseError('Error parsing size: %s' % size)
+
+
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -158,7 +264,6 @@ class IIIFImageClient(object):
 
     # iiif defaults for each sections
     image_defaults = {
-        'size': 'full',    # full size, unscaled
         'rotation': '0',   # no rotation
         'quality': 'default',  # color, gray, bitonal, default
         'fmt': default_format
@@ -168,6 +273,11 @@ class IIIFImageClient(object):
     def __init__(self, api_endpoint=None, image_id=None, region=None,
                  size=None, rotation=None, quality=None, fmt=None):
         self.image_options = self.image_defaults.copy()
+        # NOTE: using underscore to differenteate objects from methods
+        # but it could be reasonable to make objects public
+        self._region = ImageRegion()
+        self._size = ImageSize()
+
         if api_endpoint is not None:
             # remove any trailing slash to avoid duplicate slashes
             self.api_endpoint = api_endpoint.rstrip('/')
@@ -179,14 +289,11 @@ class IIIFImageClient(object):
         if image_id is not None:
             self.image_id = image_id
 
-        # init region
-        self.region = ImageRegion()
         # for now, if region option is specified parse as string
         if region is not None:
-            self.region.parse(region)
-
+            self._region.parse(region)
         if size is not None:
-            self.image_options['size'] = size
+            self._size.parse(size)
         if rotation is not None:
             self.image_options['rotation'] = rotation
         if quality is not None:
@@ -203,7 +310,8 @@ class IIIFImageClient(object):
         info.update({
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
-            'region': unicode(self.region)
+            'region': unicode(self._region),
+            'size': unicode(self._size),
         })
         return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rotation)s/%(quality)s.%(fmt)s' % info
 
@@ -231,23 +339,10 @@ class IIIFImageClient(object):
         '''Set image size.  May specify any one of width, height, or percent,
         or both width and height, optionally specifying best fit / exact
         scaling.'''
-        # width only
-        if width is not None and height is None:
-            size = '%s,' % (width, )
-        # height only
-        elif height is not None and width is None:
-            size = ',%s' % (height, )
-        # percent
-        elif percent is not None:
-            size = 'pct:%s' % (percent, )
-        # both width and height
-        elif width is not None and height is not None:
-            size = '%s,%s' % (width, height)
-            if exact:
-                size = '!%s' % size
 
         img = self.get_copy()
-        img.image_options['size'] = size
+        img._size.set_options(width=width, height=height, percent=percent,
+                              exact=exact)
         return img
 
     def format(self, image_format):
@@ -323,49 +418,10 @@ class IIIFImageClient(object):
         width, mirroring, etc.
         '''
         return {
-            'region': self.region.as_dict(),
-            'size': self.size_as_dict(),
+            'region': self._region.as_dict(),
+            'size': self._size.as_dict(),
             'rotation': self.rotation_as_dict()
         }
-
-    def size_as_dict(self):
-        '''Return size options as a dictionary'''
-
-        # preliminary dictionary
-        size_dict = {
-            'full': False,
-            'w': None,
-            'h': None,
-            'exact': False,
-            'pct': False,
-        }
-
-        size = self.image_options['size']
-
-        # full?
-        if size == 'full':
-            size_dict['full'] = True
-            # return immediately
-            return size_dict
-
-        # percent?
-        if "pct" in size:
-            size_dict['pct'] = float(size.split(":")[1])
-            return size_dict
-
-        # exact?
-        if size.startswith('!'):
-            size_dict['exact'] = True
-            size = size[1:]
-
-        # split width and height
-        w, h = size.split(",")
-        if w != '':
-            size_dict['w'] = int(w)
-        if h != '':
-            size_dict['h'] = int(h)
-
-        return size_dict
 
     def rotation_as_dict(self):
         '''Return rotation options as a dictionary'''
