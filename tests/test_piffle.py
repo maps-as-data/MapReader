@@ -127,7 +127,7 @@ class TestIIIFImageClient:
                 'full': False,
                 'square': False,
                 'height': 256,
-                'percentage': False,
+                'percent': False,
                 'width': 256,
                 'x': 2560,
                 'y': 2560
@@ -169,16 +169,16 @@ class TestImageRegion:
         assert region.as_dict()['y'] == 7
         assert region.as_dict()['width'] == 100
         assert region.as_dict()['height'] == 103
-        assert region.as_dict()['percentage'] is False
+        assert region.as_dict()['percent'] is False
         # percentage region
         region = iiif.ImageRegion(x=5, y=7, width=100, height=103,
-                                  percentage=True)
+                                  percent=True)
         assert region.as_dict()['full'] is False
         assert region.as_dict()['x'] == 5
         assert region.as_dict()['y'] == 7
         assert region.as_dict()['width'] == 100
         assert region.as_dict()['height'] == 103
-        assert region.as_dict()['percentage'] is True
+        assert region.as_dict()['percent'] is True
 
         # errors
         with pytest.raises(iiif.IIIFImageClientException):
@@ -189,7 +189,7 @@ class TestImageRegion:
             iiif.ImageRegion(x=1)
             iiif.ImageRegion(x=1, y=2)
             iiif.ImageRegion(x=1, y=2, w=20)
-            iiif.ImageRegion(percentage=True)
+            iiif.ImageRegion(percent=True)
 
             # TODO: type checking? (not yet implemented)
 
@@ -201,10 +201,10 @@ class TestImageRegion:
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100)
         assert unicode(region) == '5,5,100,100'
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100,
-                                  percentage=True)
+                                  percent=True)
         assert unicode(region) == 'pct:5,5,100,100'
         region = iiif.ImageRegion(x=5.1, y=3.14, width=100.76, height=100.89,
-                                  percentage=True)
+                                  percent=True)
         assert unicode(region) == 'pct:5.1,3.14,100.76,100.89'
 
     def test_parse(self):
@@ -243,7 +243,7 @@ class TestImageRegion:
         assert region_opts['y'] == y
         assert region_opts['width'] == w
         assert region_opts['height'] == h
-        assert region_opts['percentage'] is True
+        assert region_opts['percent'] is True
 
         # invalid or incomplete region strings
         with pytest.raises(iiif.ParseError):

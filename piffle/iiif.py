@@ -14,6 +14,12 @@ class ParseError(IIIFImageClientException):
     pass
 
 
+# NOTE: possible image component base class?
+# commonalities so far: setting defaults on init / parse
+# handling exact matches like full/square? (but maybe only region/size),
+# validating options (and could add option type checking)
+
+
 class ImageRegion(object):
     '''IIIF Image region.  Region options can be specified on
     initialization.
@@ -24,7 +30,7 @@ class ImageRegion(object):
     :param y: y coordinate
     :param width: region width
     :param height: region height
-    :param percentage: region is a percentage
+    :param percent: region is a percentage
     '''
 
     # region options
@@ -35,7 +41,7 @@ class ImageRegion(object):
         ('y', None),
         ('width', None),
         ('height', None),
-        ('percentage', False)
+        ('percent', False)
     ])
 
     region_defaults = {
@@ -45,7 +51,7 @@ class ImageRegion(object):
         'y': None,
         'width': None,
         'height': None,
-        'percentage': False
+        'percent': False
     }
 
     coords = ['x', 'y', 'width', 'height']
@@ -66,7 +72,7 @@ class ImageRegion(object):
         # error if some but not all coordinates are specified
         # or if percentage is specified but not all coordinates are present
         if (any([coord in options for coord in self.coords]) or
-           'percentage' in options) and not \
+           'percent' in options) and not \
            all([coord in options for coord in self.coords]):
             # partial region specified
             raise IIIFImageClientException('Incomplete region specified')
@@ -92,7 +98,7 @@ class ImageRegion(object):
             return 'square'
 
         coords = '%(x)g,%(y)g,%(width)g,%(height)g' % self.options
-        if self.options['percentage']:
+        if self.options['percent']:
             return 'pct:%s' % coords
 
         return coords
@@ -118,13 +124,13 @@ class ImageRegion(object):
 
         # percent?
         if "pct" in region:
-            self.options['percentage'] = True
+            self.options['percent'] = True
             region = region.split("pct:")[1]
 
         # split to dictionary
         # if percentage type, cast to float
         try:
-            if self.options['percentage']:
+            if self.options['percent']:
                 coords = [float(region_c) for region_c in region.split(",")]
             # else, force int
             else:
@@ -153,6 +159,7 @@ class ImageSize(object):
 
     # NOTE: full is being deprecated and replaced with max;
     # how to handle? support both but output non-deprecated?
+    # maybe set to configure based in IIIF image spec version?
 
     size_defaults = {
         'full': True,
