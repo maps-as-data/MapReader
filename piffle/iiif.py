@@ -251,6 +251,55 @@ class ImageSize(object):
             raise ParseError('Error parsing size: %s' % size)
 
 
+class ImageRotation(object):
+    # rotation options
+    options = OrderedDict([
+        ('degrees', None),
+        ('mirrored', False),
+    ])
+
+    rotation_defaults = {
+        'degrees': 0,
+        'mirrored': False
+    }
+
+    def __init__(self, **options):
+        self.options = self.rotation_defaults.copy()
+        if options:
+            self.set_options(**options)
+
+    def set_options(self, **options):
+        '''Update size options.  Same parameters as initialiation.'''
+        allowed_options = self.options.keys()
+        # error if an unrecoganized option is specified
+        for key in options:
+            if key not in allowed_options:
+                raise IIIFImageClientException('Unknown option: %s' % key)
+
+        # TODO: do we need to type checking? bool/int/float?
+
+        self.options.update(**options)
+
+    def as_dict(self):
+        '''Return rotation options as a dictionary'''
+        return self.options
+
+    def __unicode__(self):
+        return '%s%g' % ('!' if self.options['mirrored'] else '',
+                         self.options['degrees'])
+
+    def parse(self, rotation):
+        # reset to defaults before parsing
+        self.options = self.rotation_defaults.copy()
+
+        if rotation.startswith('!'):
+            self.options['mirrored'] = True
+            rotation = rotation.lstrip('!')
+
+        # rotation allows float
+        self.options['degrees'] = float(rotation)
+
+
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -271,7 +320,6 @@ class IIIFImageClient(object):
 
     # iiif defaults for each sections
     image_defaults = {
-        'rotation': '0',   # no rotation
         'quality': 'default',  # color, gray, bitonal, default
         'fmt': default_format
     }
@@ -284,6 +332,7 @@ class IIIFImageClient(object):
         # but it could be reasonable to make objects public
         self._region = ImageRegion()
         self._size = ImageSize()
+        self._rotation = ImageRotation()
 
         if api_endpoint is not None:
             # remove any trailing slash to avoid duplicate slashes
@@ -302,7 +351,8 @@ class IIIFImageClient(object):
         if size is not None:
             self._size.parse(size)
         if rotation is not None:
-            self.image_options['rotation'] = rotation
+            self._rotation.parse(rotation)
+
         if quality is not None:
             self.image_options['quality'] = quality
         if fmt is not None:
@@ -319,8 +369,9 @@ class IIIFImageClient(object):
             'id': self.get_image_id(),
             'region': unicode(self._region),
             'size': unicode(self._size),
+            'rot': unicode(self._rotation)
         })
-        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rotation)s/%(quality)s.%(fmt)s' % info
+        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rot)s/%(quality)s.%(fmt)s' % info
 
     def __str__(self):
         return str(unicode(self))
@@ -350,6 +401,19 @@ class IIIFImageClient(object):
         img = self.get_copy()
         img._size.set_options(width=width, height=height, percent=percent,
                               exact=exact)
+        return img
+
+    def region(self, **options):
+        '''Set image region.'''
+        img = self.get_copy()
+        img._region.set_options(**options)
+        print img._region.options
+        return img
+
+    def rotation(self, **options):
+        '''Set image rotation.'''
+        img = self.get_copy()
+        img._rotation.set_options(**options)
         return img
 
     def format(self, image_format):
@@ -418,32 +482,16 @@ class IIIFImageClient(object):
 
     def as_dict(self):
         '''
-        Aggregate method that fires other client methods that parse image
+        Dictionary of with all image request options.
         request parameters. Returns a dictionary with all image request
         parameters parsed to their most granular level. Can be helpful
         for acting logically on particular request parameters like height,
         width, mirroring, etc.
         '''
-        return {
-            'region': self._region.as_dict(),
-            'size': self._size.as_dict(),
-            'rotation': self.rotation_as_dict()
-        }
-
-    def rotation_as_dict(self):
-        '''Return rotation options as a dictionary'''
-        rotation_dict = {
-            'degrees': None,
-            'mirrored': False
-        }
-
-        rotation = self.image_options['rotation']
-
-        if rotation.startswith('!'):
-            rotation_dict['mirrored'] = True
-            rotation = rotation[1:]
-
-        # rotation allows float
-        rotation_dict['degrees'] = float(rotation)
-
-        return rotation_dict
+        return OrderedDict([
+            ('region', self._region.as_dict()),
+            ('size', self._size.as_dict()),
+            ('rotation', self._rotation.as_dict()),
+            ('quality', self.image_options['quality']),
+            ('format', self.image_options['fmt'])
+        ])

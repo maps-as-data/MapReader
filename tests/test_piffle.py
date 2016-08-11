@@ -46,9 +46,12 @@ class TestIIIFImageClient:
         expected_img_opts = test_opts.copy()
         del expected_img_opts['region']
         del expected_img_opts['size']
+        del expected_img_opts['rotation']
+        print img.image_options
         assert img.image_options == expected_img_opts
         assert unicode(img._region) == test_opts['region']
         assert unicode(img._size) == test_opts['size']
+        assert unicode(img._rotation) == test_opts['rotation']
 
         # TODO: should parse/verify options on init
         # with pytest.raises(iiif.IIIFImageClientException):
@@ -77,6 +80,21 @@ class TestIIIFImageClient:
         assert '%s/%s/full/pct:%s/0/default.jpg' % \
                (api_endpoint, image_id, percent) == \
                unicode(img.size(percent=percent))
+
+    def test_region(self):
+        # region options passed through to region object and output
+        img = get_test_imgclient()
+        x, y, width, height = 5, 10, 100, 150
+        assert '%s/%s/%s,%s,%s,%s/full/0/default.jpg' % \
+               (api_endpoint, image_id, x, y, width, height) \
+            == unicode(img.region(x=x, y=y, width=width, height=height))
+
+    def test_rotation(self):
+        # rotation options passed through to region object and output
+        img = get_test_imgclient()
+        assert '%s/%s/full/full/90/default.jpg' % \
+               (api_endpoint, image_id) \
+            == unicode(img.rotation(degrees=90))
 
     def test_format(self):
         img = get_test_imgclient()
@@ -116,10 +134,6 @@ class TestIIIFImageClient:
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
 
-    def test_rotation_as_dict(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
-        assert img.rotation_as_dict() == {'degrees': 90.0, 'mirrored': True}
-
     def test_as_dicts(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert img.as_dict() == {
@@ -143,7 +157,9 @@ class TestIIIFImageClient:
                 'height': None,
                 'percent': None,
                 'width': 256
-            }
+            },
+            'quality': 'default',
+            'format': 'jpg'
         }
 
 
@@ -334,3 +350,38 @@ class TestImageSize:
         with pytest.raises(iiif.ParseError):
             size.parse('pct:')
             size.parse('one,two')
+
+
+class TestImageRotation:
+
+    def test_defaults(self):
+        rotation = iiif.ImageRotation()
+        assert unicode(rotation) == '0'
+        assert rotation.as_dict() == iiif.ImageRotation.rotation_defaults
+
+    def test_init(self):
+        # degrees
+        rotation = iiif.ImageRotation(degrees=90)
+        assert rotation.as_dict()['degrees'] == 90
+        assert rotation.as_dict()['mirrored'] is False
+        rotation = iiif.ImageRotation(degrees=95, mirrored=True)
+        assert rotation.as_dict()['degrees'] == 95
+        assert rotation.as_dict()['mirrored'] is True
+
+    def test_render(self):
+        rotation = iiif.ImageRotation()
+        assert unicode(rotation) == '0'
+        rotation = iiif.ImageRotation(degrees=90)
+        assert unicode(rotation) == '90'
+        rotation = iiif.ImageRotation(degrees=95, mirrored=True)
+        assert unicode(rotation) == '!95'
+
+    def test_parse(self):
+        rotation = iiif.ImageRotation()
+        rotation_str = '180'
+        rotation.parse(rotation_str)
+        assert unicode(rotation) == rotation_str  # round trip
+        rotation_str = '!90'
+        rotation.parse(rotation_str)
+        assert unicode(rotation) == rotation_str  # round trip
+        assert rotation.as_dict()['mirrored'] is True
