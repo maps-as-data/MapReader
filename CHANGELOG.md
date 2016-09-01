@@ -2,10 +2,10 @@
 
 ## 0.2
 
-New methods to parse urls and provide image option information. Contributed by [Graham Hukill (@ghukill)](https://github.com/ghukill) [PR #1](https://github.com/emory-lits-labs/piffle/pull/1)
-
+* New methods to parse urls and provide image option information. Contributed by [Graham Hukill (@ghukill)](https://github.com/ghukill) [PR #1](https://github.com/emory-lits-labs/piffle/pull/1)
 * New method to parse a IIIF Image url and initialize IIIFImageClient via url
-* New methods to provide IIIF Image options as dictionary
+* New methods to make IIIF Image options available as dictionary
+* Options are now stored internally in logical, dictionary form rather than as IIIF option strings
 
 ## 0.1
 
