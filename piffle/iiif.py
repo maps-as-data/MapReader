@@ -412,7 +412,6 @@ class IIIFImageClient(object):
         '''Set image region.'''
         img = self.get_copy()
         img._region.set_options(**options)
-        print img._region.options
         return img
 
     def rotation(self, **options):
