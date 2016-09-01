@@ -158,8 +158,13 @@ class ImageSize(object):
     ])
 
     # NOTE: full is being deprecated and replaced with max;
-    # how to handle? support both but output non-deprecated?
-    # maybe set to configure based in IIIF image spec version?
+    # full is deprecated in 2.1 and will be removed for 3.0
+    # Eventually piffle will need to address that, maybe with some kind of
+    # support for selecting a particular version of the IIIF image spec.
+    # For now, default size is still full, and max and full are treated as
+    # separate modes.  A parsed url with max will return max, and a parsed
+    # url with full will return full, but that will probably change
+    # once the deprecated full is handled properly.
 
     size_defaults = {
         'full': True,
