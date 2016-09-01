@@ -10,13 +10,16 @@ VALID_URLS = {
     # longer api endpoint path
     'info-loris': '%s/loris/%s/info.json' % (api_endpoint, image_id),
     'simple': '%s/%s/full/full/0/default.jpg' % (api_endpoint, image_id),
-    'complex': '%s/%s/2560,2560,256,256/256,/!90/default.jpg' % (api_endpoint, image_id)
+    'complex': '%s/%s/2560,2560,256,256/256,/!90/default.jpg' % (api_endpoint, image_id),
+    'exact': '%s/%s/full/!256,256/0/default.jpg' % (api_endpoint, image_id)
 }
 
 INVALID_URLS = {
     'info': 'http://img1/info.json',
     'simple': 'http://imgserver.co/img1/foobar/default.jpg',
-    'complex': 'http://imgserver.co/img1/2560,2560,256,256/256,/!90/default.jpg'
+    'complex': 'http://imgserver.co/img1/2560,2560,256,256/256,/!90/default.jpg',
+    'bad_size': '%s/%s/full/a,/0/default.jpg' % (api_endpoint, image_id),
+    'bad_region': '%s/%s/200,200/full/0/default.jpg' % (api_endpoint, image_id)
 }
 
 
@@ -35,6 +38,14 @@ class TestIIIFImageClient:
         # info url
         assert '%s/%s/info.json' % (api_endpoint, image_id) \
                == unicode(img.info())
+
+    def test_outputs(self):
+        img = get_test_imgclient()
+        # str and unicode should be equivalent
+        assert unicode(img.info()) == unicode(str(img.info()))
+        # repr should have class and image id
+        assert 'IIIFImageClient' in repr(img)
+        assert img.get_image_id() in repr(img)
 
     def test_init_opts(self):
         test_opts = {'region': '2560,2560,256,256', 'size': '256,',
@@ -95,6 +106,8 @@ class TestIIIFImageClient:
         assert '%s/%s/full/full/90/default.jpg' % \
                (api_endpoint, image_id) \
             == unicode(img.rotation(degrees=90))
+        with pytest.raises(iiif.IIIFImageClientException):
+            img.rotation(foo='bar')
 
     def test_format(self):
         img = get_test_imgclient()
@@ -127,12 +140,18 @@ class TestIIIFImageClient:
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert unicode(img) == VALID_URLS['complex']
         assert isinstance(img, iiif.IIIFImageClient)
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['exact'])
+        assert unicode(img) == VALID_URLS['exact']
+        assert isinstance(img, iiif.IIIFImageClient)
+        assert img._size.options['exact'] is True
 
         # malformed
         with pytest.raises(iiif.ParseError):
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['info'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
+            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_size'])
+            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_region'])
 
     def test_as_dicts(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
