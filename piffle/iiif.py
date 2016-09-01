@@ -1,15 +1,308 @@
 # iiifclient
 
+from collections import OrderedDict
 from urlparse import urlparse
+
 
 class IIIFImageClientException(Exception):
     '''IIIFImageClient custom exception class'''
     pass
 
 
-class URLParseError(IIIFImageClientException):
+class ParseError(IIIFImageClientException):
     '''Exception raised when an IIIF image could not be parsed'''
     pass
+
+
+# NOTE: possible image component base class?
+# commonalities so far: setting defaults on init / parse
+# handling exact matches like full/square? (but maybe only region/size),
+# validating options (and could add option type checking)
+
+
+class ImageRegion(object):
+    '''IIIF Image region.  Region options can be specified on
+    initialization.
+
+    :param full: full region, defaults to true
+    :param square: square region, defaults to false
+    :param x: x coordinate
+    :param y: y coordinate
+    :param width: region width
+    :param height: region height
+    :param percent: region is a percentage
+    '''
+
+    # region options
+    options = OrderedDict([
+        ('full', False),
+        ('square', False),
+        ('x', None),
+        ('y', None),
+        ('width', None),
+        ('height', None),
+        ('percent', False)
+    ])
+
+    region_defaults = {
+        'full': True,
+        'square': False,
+        'x': None,
+        'y': None,
+        'width': None,
+        'height': None,
+        'percent': False
+    }
+
+    coords = ['x', 'y', 'width', 'height']
+
+    def __init__(self, **options):
+        self.options = self.region_defaults.copy()
+        if options:
+            self.set_options(**options)
+
+    def set_options(self, **options):
+        '''Update region options.  Same parameters as initialiation.'''
+        allowed_options = self.options.keys()
+        # error if an unrecoganized option is specified
+        for key in options:
+            if key not in allowed_options:
+                raise IIIFImageClientException('Unknown option: %s' % key)
+
+        # error if some but not all coordinates are specified
+        # or if percentage is specified but not all coordinates are present
+        if (any([coord in options for coord in self.coords]) or
+           'percent' in options) and not \
+           all([coord in options for coord in self.coords]):
+            # partial region specified
+            raise IIIFImageClientException('Incomplete region specified')
+
+        # TODO: do we need to type checking? bool/int/float?
+
+        self.options.update(**options)
+        # if any non-full value is specified, set full to false
+        # NOTE: if e.g. square is specified but false, this is wrong
+        allowed_options.remove('full')
+        if any([key in allowed_options for key in options.keys()]):
+            self.options['full'] = False
+
+    def as_dict(self):
+        '''Return region options as a dictionary'''
+        return self.options
+
+    def __unicode__(self):
+        '''Render region information in IIIF region format'''
+        if self.options['full']:
+            return 'full'
+        if self.options['square']:
+            return 'square'
+
+        coords = '%(x)g,%(y)g,%(width)g,%(height)g' % self.options
+        if self.options['percent']:
+            return 'pct:%s' % coords
+
+        return coords
+
+    def parse(self, region):
+        '''Parse an IIIF Image region string and update the current region'''
+
+        # reset to defaults before parsing
+        self.options = self.region_defaults.copy()
+
+        # full?
+        if region == 'full':
+            self.options['full'] = True
+            # return immediately
+            return
+        else:
+            self.options['full'] = False
+
+        if region == 'square':
+            self.options['square'] = True
+            # return immediately
+            return self
+
+        # percent?
+        if "pct" in region:
+            self.options['percent'] = True
+            region = region.split("pct:")[1]
+
+        # split to dictionary
+        # if percentage type, cast to float
+        try:
+            if self.options['percent']:
+                coords = [float(region_c) for region_c in region.split(",")]
+            # else, force int
+            else:
+                coords = [int(region_c) for region_c in region.split(",")]
+        except ValueError:
+            # failure converting to integer or float
+            raise ParseError('Invalid region coordinates: %s' % region)
+
+        if len(coords) != 4:
+            raise ParseError('Invalid region coordinates: %s' % region)
+
+        x, y, width, height = coords
+        self.options.update({'x': x, 'y': y, 'width': width, 'height': height})
+
+
+class ImageSize(object):
+    # size options
+    options = OrderedDict([
+        ('full', False),
+        ('max', False),
+        ('width', None),
+        ('height', None),
+        ('percent', None),
+        ('exact', False)
+    ])
+
+    # NOTE: full is being deprecated and replaced with max;
+    # full is deprecated in 2.1 and will be removed for 3.0
+    # Eventually piffle will need to address that, maybe with some kind of
+    # support for selecting a particular version of the IIIF image spec.
+    # For now, default size is still full, and max and full are treated as
+    # separate modes.  A parsed url with max will return max, and a parsed
+    # url with full will return full, but that will probably change
+    # once the deprecated full is handled properly.
+
+    size_defaults = {
+        'full': True,
+        'max': False,
+        'width': None,
+        'height': None,
+        'percent': None,
+        'exact': False
+    }
+
+    def __init__(self, **options):
+        self.options = self.size_defaults.copy()
+        if options:
+            self.set_options(**options)
+
+    def set_options(self, **options):
+        '''Update size options.  Same parameters as initialiation.'''
+        allowed_options = self.options.keys()
+        # error if an unrecoganized option is specified
+        for key in options:
+            if key not in allowed_options:
+                raise IIIFImageClientException('Unknown option: %s' % key)
+
+        # TODO: do we need to type checking? bool/int/float?
+
+        self.options.update(**options)
+        # if any non-full value is specified, set full to false
+        # NOTE: if e.g. square is specified but false, this is wrong
+        allowed_options.remove('full')
+        if any([key in allowed_options for key in options.keys()]):
+            self.options['full'] = False
+
+    def as_dict(self):
+        '''Return size options as a dictionary'''
+        return self.options
+
+    def __unicode__(self):
+        if self.options['full']:
+            return 'full'
+        if self.options['max']:
+            return 'max'
+        if self.options['percent']:
+            return 'pct:%g' % self.options['percent']
+
+        size = '%s,%s' % (self.options['width'] or '',
+                          self.options['height'] or '')
+        if self.options['exact']:
+            return '!%s' % size
+        return size
+
+    def parse(self, size):
+        # reset to defaults before parsing
+        self.options = self.size_defaults.copy()
+
+        # full?
+        if size == 'full':
+            self.options['full'] = True
+            return
+        # for any other case, full should be false
+        else:
+            self.options['full'] = False
+
+        # max?
+        if size == 'max':
+            self.options['max'] = True
+            return
+
+        # percent?
+        if "pct" in size:
+            try:
+                self.options['percent'] = float(size.split(":")[1])
+                return
+            except ValueError:
+                raise ParseError('Error parsing size: %s' % size)
+
+        # exact?
+        if size.startswith('!'):
+            self.options['exact'] = True
+            size = size.lstrip('!')
+
+        # split width and height
+        width, height = size.split(",")
+        try:
+            if width != '':
+                self.options['width'] = int(width)
+            if height != '':
+                self.options['height'] = int(height)
+        except ValueError:
+            raise ParseError('Error parsing size: %s' % size)
+
+
+class ImageRotation(object):
+    # rotation options
+    options = OrderedDict([
+        ('degrees', None),
+        ('mirrored', False),
+    ])
+
+    rotation_defaults = {
+        'degrees': 0,
+        'mirrored': False
+    }
+
+    def __init__(self, **options):
+        self.options = self.rotation_defaults.copy()
+        if options:
+            self.set_options(**options)
+
+    def set_options(self, **options):
+        '''Update size options.  Same parameters as initialiation.'''
+        allowed_options = self.options.keys()
+        # error if an unrecoganized option is specified
+        for key in options:
+            if key not in allowed_options:
+                raise IIIFImageClientException('Unknown option: %s' % key)
+
+        # TODO: do we need to type checking? bool/int/float?
+
+        self.options.update(**options)
+
+    def as_dict(self):
+        '''Return rotation options as a dictionary'''
+        return self.options
+
+    def __unicode__(self):
+        return '%s%g' % ('!' if self.options['mirrored'] else '',
+                         self.options['degrees'])
+
+    def parse(self, rotation):
+        # reset to defaults before parsing
+        self.options = self.rotation_defaults.copy()
+
+        if rotation.startswith('!'):
+            self.options['mirrored'] = True
+            rotation = rotation.lstrip('!')
+
+        # rotation allows float
+        self.options['degrees'] = float(rotation)
 
 
 class IIIFImageClient(object):
@@ -32,9 +325,6 @@ class IIIFImageClient(object):
 
     # iiif defaults for each sections
     image_defaults = {
-        'region': 'full',  # full image, no cropping
-        'size': 'full',    # full size, unscaled
-        'rotation': '0',   # no rotation
         'quality': 'default',  # color, gray, bitonal, default
         'fmt': default_format
     }
@@ -43,6 +333,12 @@ class IIIFImageClient(object):
     def __init__(self, api_endpoint=None, image_id=None, region=None,
                  size=None, rotation=None, quality=None, fmt=None):
         self.image_options = self.image_defaults.copy()
+        # NOTE: using underscore to differenteate objects from methods
+        # but it could be reasonable to make objects public
+        self._region = ImageRegion()
+        self._size = ImageSize()
+        self._rotation = ImageRotation()
+
         if api_endpoint is not None:
             # remove any trailing slash to avoid duplicate slashes
             self.api_endpoint = api_endpoint.rstrip('/')
@@ -53,12 +349,15 @@ class IIIFImageClient(object):
         # (same for a few other options, probably, too...)
         if image_id is not None:
             self.image_id = image_id
+
+        # for now, if region option is specified parse as string
         if region is not None:
-            self.image_options['region'] = region
+            self._region.parse(region)
         if size is not None:
-            self.image_options['size'] = size
+            self._size.parse(size)
         if rotation is not None:
-            self.image_options['rotation'] = rotation
+            self._rotation.parse(rotation)
+
         if quality is not None:
             self.image_options['quality'] = quality
         if fmt is not None:
@@ -73,8 +372,11 @@ class IIIFImageClient(object):
         info.update({
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
+            'region': unicode(self._region),
+            'size': unicode(self._size),
+            'rot': unicode(self._rotation)
         })
-        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rotation)s/%(quality)s.%(fmt)s' % info
+        return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rot)s/%(quality)s.%(fmt)s' % info
 
     def __str__(self):
         return str(unicode(self))
@@ -100,23 +402,23 @@ class IIIFImageClient(object):
         '''Set image size.  May specify any one of width, height, or percent,
         or both width and height, optionally specifying best fit / exact
         scaling.'''
-        # width only
-        if width is not None and height is None:
-            size = '%s,' % (width, )
-        # height only
-        elif height is not None and width is None:
-            size = ',%s' % (height, )
-        # percent
-        elif percent is not None:
-            size = 'pct:%s' % (percent, )
-        # both width and height
-        elif width is not None and height is not None:
-            size = '%s,%s' % (width, height)
-            if exact:
-                size = '!%s' % size
 
         img = self.get_copy()
-        img.image_options['size'] = size
+        img._size.set_options(width=width, height=height, percent=percent,
+                              exact=exact)
+        return img
+
+    def region(self, **options):
+        '''Set image region.'''
+        img = self.get_copy()
+        img._region.set_options(**options)
+        print img._region.options
+        return img
+
+    def rotation(self, **options):
+        '''Set image rotation.'''
+        img = self.get_copy()
+        img._rotation.set_options(**options)
         return img
 
     def format(self, image_format):
@@ -147,7 +449,7 @@ class IIIFImageClient(object):
         # info request
         if path_basename == 'info.json':
             if len(path_components) < 1:
-                raise URLParseError('Invalid IIIF image information url: %s'
+                raise ParseError('Invalid IIIF image information url: %s'
                                     % url)
             image_id = path_components.pop()
 
@@ -155,7 +457,7 @@ class IIIFImageClient(object):
         else:
             # check for enough IIIF parameters
             if len(path_components) < 4:
-                raise URLParseError('Invalid IIIF image request: %s' % url)
+                raise ParseError('Invalid IIIF image request: %s' % url)
 
             # pop off url portions as they are used so we can easily
             # make use of leftover path to reconstruct the api endpoint
@@ -174,126 +476,27 @@ class IIIFImageClient(object):
 
         # construct the api endpoint url from the parsed url and whatever
         # portions of the url path are leftover
-        print 'path components = ', path_components
         # remove empty strings from the remaining path components
         path_components = [p for p in path_components if p]
-        print parsed_url.netloc
-        print '/'.join(path_components) if path_components else ''
-        print [p for p in path_components if p]
         api_endpoint = '%s://%s/%s' % (
             parsed_url.scheme, parsed_url.netloc,
             '/'.join(path_components) if path_components else '')
 
-        print 'api endpoint =', api_endpoint
-
         # init and return instance
         return cls(api_endpoint=api_endpoint, image_id=image_id, **opts)
 
-    def dict_opts(self):
+    def as_dict(self):
         '''
-        Aggregate method that fires other client methods that parse image request parameters.
-        Return a dictionary with all image request parameters parsed to their most granular level.
-        Can be helpful for acting logically on particular request parameters like height,
+        Dictionary of with all image request options.
+        request parameters. Returns a dictionary with all image request
+        parameters parsed to their most granular level. Can be helpful
+        for acting logically on particular request parameters like height,
         width, mirroring, etc.
         '''
-
-        return {
-            'region': self.region_as_dict(),
-            'size': self.size_as_dict(),
-            'rotation': self.rotation_as_dict()
-        }
-
-    # methods to derive python dictionaries from IIIF strings
-    def region_as_dict(self):
-        '''Return region options as a dictionary'''
-
-        # preliminary region options
-        region_dict = {
-            'full': False,
-            'x': None,
-            'y': None,
-            'w': None,
-            'h': None,
-            'pct': False
-        }
-
-        region = self.image_options['region']
-
-        # full?
-        if region == 'full':
-            region_dict['full'] = True
-            # return immediately
-            return region_dict
-
-        # percent?
-        if "pct" in region:
-            region_dict['pct'] = True
-            region = region.split("pct:")[1]
-
-        # split to dictionary
-        # if percentage type, cast to float
-        if region_dict['pct']:
-            x, y, w, h = [float(region_c) for region_c in region.split(",")]
-        # else, force int
-        else:
-            x, y, w, h = [int(region_c) for region_c in region.split(",")]
-        region_dict.update({'x': x, 'y': y, 'w': w, 'h': h})
-
-        return region_dict
-
-    def size_as_dict(self):
-        '''Return size options as a dictionary'''
-
-        # preliminary dictionary
-        size_dict = {
-            'full': False,
-            'w': None,
-            'h': None,
-            'exact': False,
-            'pct': False,
-        }
-
-        size = self.image_options['size']
-
-        # full?
-        if size == 'full':
-            size_dict['full'] = True
-            # return immediately
-            return size_dict
-
-        # percent?
-        if "pct" in size:
-            size_dict['pct'] = float(size.split(":")[1])
-            return size_dict
-
-        # exact?
-        if size.startswith('!'):
-            size_dict['exact'] = True
-            size = size[1:]
-
-        # split width and height
-        w, h = size.split(",")
-        if w != '':
-            size_dict['w'] = int(w)
-        if h != '':
-            size_dict['h'] = int(h)
-
-        return size_dict
-
-    def rotation_as_dict(self):
-        '''Return rotation options as a dictionary'''
-        rotation_dict = {
-            'degrees': None,
-            'mirrored': False
-        }
-
-        rotation = self.image_options['rotation']
-
-        if rotation.startswith('!'):
-            rotation_dict['mirrored'] = True
-            rotation = rotation[1:]
-
-        # rotation allows float
-        rotation_dict['degrees'] = float(rotation)
-
-        return rotation_dict
+        return OrderedDict([
+            ('region', self._region.as_dict()),
+            ('size', self._size.as_dict()),
+            ('rotation', self._rotation.as_dict()),
+            ('quality', self.image_options['quality']),
+            ('format', self.image_options['fmt'])
+        ])
