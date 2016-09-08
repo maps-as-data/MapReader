@@ -58,11 +58,10 @@ class TestIIIFImageClient:
         del expected_img_opts['region']
         del expected_img_opts['size']
         del expected_img_opts['rotation']
-        print img.image_options
         assert img.image_options == expected_img_opts
-        assert unicode(img._region) == test_opts['region']
-        assert unicode(img._size) == test_opts['size']
-        assert unicode(img._rotation) == test_opts['rotation']
+        assert unicode(img.region) == test_opts['region']
+        assert unicode(img.size) == test_opts['size']
+        assert unicode(img.rotation) == test_opts['rotation']
 
         # TODO: should parse/verify options on init
         # with pytest.raises(iiif.IIIFImageClientException):
@@ -121,6 +120,38 @@ class TestIIIFImageClient:
         with pytest.raises(iiif.IIIFImageClientException):
             img.format('bogus')
 
+    def test_combine_options(self):
+        img = get_test_imgclient()
+        width = 100
+        fmt = 'png'
+        assert '%s/%s/full/%s,/0/default.%s' % \
+               (api_endpoint, image_id, width, fmt)\
+            == unicode(img.size(width=width).format(fmt))
+
+        img = get_test_imgclient()
+        x, y, width, height = 5, 10, 100, 150
+        assert '%s/%s/%s,%s,%s,%s/full/0/default.%s' % \
+               (api_endpoint, image_id, x, y, width, height, fmt) \
+            == unicode(img.region(x=x, y=y,
+                                  width=width, height=height).format(fmt))
+
+        assert '%s/%s/%s,%s,%s,%s/%s,/0/default.%s' % \
+               (api_endpoint, image_id, x, y, width, height, width, fmt) \
+            == unicode(img.size(width=width)
+                          .region(x=x, y=y, width=width, height=height)
+                          .format(fmt))
+        rotation = 90
+        assert '%s/%s/%s,%s,%s,%s/%s,/%s/default.%s' % \
+               (api_endpoint, image_id, x, y, width, height, width, rotation, fmt) \
+            == unicode(img.size(width=width)
+                          .region(x=x, y=y, width=width, height=height)
+                          .rotation(degrees=90)
+                          .format(fmt))
+
+        # original image object should be unchanged, and still show defaults
+        assert '%s/%s/full/full/0/default.jpg' % (api_endpoint, image_id) \
+               == unicode(img)
+
     def test_init_from_url(self):
         # well-formed
         # - info url
@@ -143,7 +174,7 @@ class TestIIIFImageClient:
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['exact'])
         assert unicode(img) == VALID_URLS['exact']
         assert isinstance(img, iiif.IIIFImageClient)
-        assert img._size.options['exact'] is True
+        assert img.size.options['exact'] is True
 
         # malformed
         with pytest.raises(iiif.ParseError):

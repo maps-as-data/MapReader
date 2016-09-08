@@ -21,9 +21,13 @@ class ParseError(IIIFImageClientException):
 
 
 class ImageRegion(object):
-    '''IIIF Image region.  Region options can be specified on
-    initialization.
+    '''IIIF Image region. Intended to be used with :class:`IIIFImageClient`.
+    Can be initialized with related image object and region options.
 
+    When associated with an image, region is callable and will return
+    an updated image object with the modified region options.
+
+    :param img: :class:`IIFImageClient`
     :param full: full region, defaults to true
     :param square: square region, defaults to false
     :param x: x coordinate
@@ -56,10 +60,17 @@ class ImageRegion(object):
 
     coords = ['x', 'y', 'width', 'height']
 
-    def __init__(self, **options):
+    def __init__(self, img=None, **options):
+        self.img = img
         self.options = self.region_defaults.copy()
         if options:
             self.set_options(**options)
+
+    def __call__(self, **options):
+        if self.img is not None:
+            img = self.img.get_copy()
+            img.region.set_options(**options)
+            return img
 
     def set_options(self, **options):
         '''Update region options.  Same parameters as initialiation.'''
@@ -83,7 +94,8 @@ class ImageRegion(object):
         # if any non-full value is specified, set full to false
         # NOTE: if e.g. square is specified but false, this is wrong
         allowed_options.remove('full')
-        if any([key in allowed_options for key in options.keys()]):
+        if any([(key in allowed_options and options[key])
+               for key in options.keys()]):
             self.options['full'] = False
 
     def as_dict(self):
@@ -147,6 +159,19 @@ class ImageRegion(object):
 
 
 class ImageSize(object):
+    '''IIIF Image Size.  Intended to be used with :class:`IIIFImageClient`.
+    Can be initialized with related image object and size options.
+
+    When associated with an image, size is callable and will return
+    an updated image object with the modified size.
+
+    :param img: :class:`IIFImageClient`
+    :param width: optional width
+    :param height: optional height
+    :param percent: optional percent
+    :param exact: size should be exact (boolean, optional)
+    '''
+
     # size options
     options = OrderedDict([
         ('full', False),
@@ -175,10 +200,17 @@ class ImageSize(object):
         'exact': False
     }
 
-    def __init__(self, **options):
+    def __init__(self, img=None, **options):
+        self.img = img
         self.options = self.size_defaults.copy()
         if options:
             self.set_options(**options)
+
+    def __call__(self, **options):
+        if self.img is not None:
+            img = self.img.get_copy()
+            img.size.set_options(**options)
+            return img
 
     def set_options(self, **options):
         '''Update size options.  Same parameters as initialiation.'''
@@ -194,7 +226,8 @@ class ImageSize(object):
         # if any non-full value is specified, set full to false
         # NOTE: if e.g. square is specified but false, this is wrong
         allowed_options.remove('full')
-        if any([key in allowed_options for key in options.keys()]):
+        if any([key in allowed_options and options[key]
+                for key in options.keys()]):
             self.options['full'] = False
 
     def as_dict(self):
@@ -257,6 +290,18 @@ class ImageSize(object):
 
 
 class ImageRotation(object):
+    '''IIIF Image rotation Intended to be used with :class:`IIIFImageClient`.
+    Can be initialized with related image object and rotation options.
+
+    When associated with an image, rotation is callable and will return
+    an updated image object with the modified rotatoin options.
+
+    :param img: :class:`IIFImageClient`
+    :param degrees: degrees rotation, optional
+    :param mirrored: image should be mirrored (boolean, optional, default
+       is False)
+    '''
+
     # rotation options
     options = OrderedDict([
         ('degrees', None),
@@ -268,10 +313,17 @@ class ImageRotation(object):
         'mirrored': False
     }
 
-    def __init__(self, **options):
+    def __init__(self, img=None, **options):
+        self.img = img
         self.options = self.rotation_defaults.copy()
         if options:
             self.set_options(**options)
+
+    def __call__(self, **options):
+        if self.img is not None:
+            img = self.img.get_copy()
+            img.rotation.set_options(**options)
+            return img
 
     def set_options(self, **options):
         '''Update size options.  Same parameters as initialiation.'''
@@ -311,12 +363,14 @@ class IIIFImageClient(object):
     when custom logic is needed to set the image id.  Provides
     a fluid interface, so that IIIF methods can be chained, e.g.::
 
-        iiif_img.size(width=300).format('png')
+        iiif_img.size(width=300).rotation(90).format('png')
+
+   Note that this returns a new image instance with the specified
+   options, and the original image will remain unchanged.
 
     .. Note::
 
-        Methods to set region, rotation, and quality are not yet
-        implemented.
+        Method to set quality not yet available.
     '''
 
     api_endpoint = None
@@ -335,9 +389,9 @@ class IIIFImageClient(object):
         self.image_options = self.image_defaults.copy()
         # NOTE: using underscore to differenteate objects from methods
         # but it could be reasonable to make objects public
-        self._region = ImageRegion()
-        self._size = ImageSize()
-        self._rotation = ImageRotation()
+        self.region = ImageRegion(self)
+        self.size = ImageSize(self)
+        self.rotation = ImageRotation(self)
 
         if api_endpoint is not None:
             # remove any trailing slash to avoid duplicate slashes
@@ -352,11 +406,11 @@ class IIIFImageClient(object):
 
         # for now, if region option is specified parse as string
         if region is not None:
-            self._region.parse(region)
+            self.region.parse(region)
         if size is not None:
-            self._size.parse(size)
+            self.size.parse(size)
         if rotation is not None:
-            self._rotation.parse(rotation)
+            self.rotation.parse(rotation)
 
         if quality is not None:
             self.image_options['quality'] = quality
@@ -372,9 +426,9 @@ class IIIFImageClient(object):
         info.update({
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
-            'region': unicode(self._region),
-            'size': unicode(self._size),
-            'rot': unicode(self._rotation)
+            'region': unicode(self.region),
+            'size': unicode(self.size),
+            'rot': unicode(self.rotation)
         })
         return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rot)s/%(quality)s.%(fmt)s' % info
 
@@ -394,31 +448,16 @@ class IIIFImageClient(object):
 
     def get_copy(self):
         'Get a clone of the current settings for modification.'
-        return self.__class__(self.api_endpoint, self.image_id, **self.image_options)
+        clone = self.__class__(self.api_endpoint, self.image_id,
+                               **self.image_options)
+        # copy region, size, and rotation - no longer included in
+        # image_options dict
+        clone.region.set_options(**self.region.as_dict())
+        clone.size.set_options(**self.size.as_dict())
+        clone.rotation.set_options(**self.rotation.as_dict())
+        return clone
 
-    # methods to set region, rotation, quality not yet implemented
-
-    def size(self, width=None, height=None, percent=None, exact=False):
-        '''Set image size.  May specify any one of width, height, or percent,
-        or both width and height, optionally specifying best fit / exact
-        scaling.'''
-
-        img = self.get_copy()
-        img._size.set_options(width=width, height=height, percent=percent,
-                              exact=exact)
-        return img
-
-    def region(self, **options):
-        '''Set image region.'''
-        img = self.get_copy()
-        img._region.set_options(**options)
-        return img
-
-    def rotation(self, **options):
-        '''Set image rotation.'''
-        img = self.get_copy()
-        img._rotation.set_options(**options)
-        return img
+    # method to set quality not yet implemented
 
     def format(self, image_format):
         'Set output image format'
@@ -493,9 +532,9 @@ class IIIFImageClient(object):
         width, mirroring, etc.
         '''
         return OrderedDict([
-            ('region', self._region.as_dict()),
-            ('size', self._size.as_dict()),
-            ('rotation', self._rotation.as_dict()),
+            ('region', self.region.as_dict()),
+            ('size', self.size.as_dict()),
+            ('rotation', self.rotation.as_dict()),
             ('quality', self.image_options['quality']),
             ('format', self.image_options['fmt'])
         ])
