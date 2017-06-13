@@ -1,5 +1,9 @@
 # Change & Version Information
 
+## 0.3
+
+* Now Python 3 compatible
+
 ## 0.2.1
 
 * Bug fix: chaining multiple different options combines all of them properly and does not modify
