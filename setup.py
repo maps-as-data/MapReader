@@ -19,7 +19,13 @@ CLASSIFIERS = [
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
@@ -33,7 +39,7 @@ setup(
     url='https://github.com/emory-lits-labs/piffle',
     license='Apache License, Version 2.0',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=['six', 'future'],
     setup_requires=['pytest-runner'],
     tests_require=test_requirements,
     extras_require={
