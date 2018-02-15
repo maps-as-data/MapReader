@@ -354,7 +354,7 @@ class ImageRotation(object):
         # reset to defaults before parsing
         self.options = self.rotation_defaults.copy()
 
-        if rotation.startswith('!'):
+        if str(rotation).startswith('!'):
             self.options['mirrored'] = True
             rotation = rotation.lstrip('!')
 
