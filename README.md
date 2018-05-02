@@ -5,7 +5,6 @@ object-oriented, pythonic fashion.
 
 [![Build Status](https://travis-ci.org/Princeton-CDH/piffle.svg?branch=master)](https://travis-ci.org/Princeton-CDH/piffle)
 [![Coverage Status](https://coveralls.io/repos/github/Princeton-CDH/piffle/badge.svg?branch=master)](https://coveralls.io/github/Princeton-CDH/piffle?branch=master)
-[![Code Health](https://landscape.io/github/Princeton-CDH/piffle/master/landscape.svg?style=flat)](https://landscape.io/github/Princeton-CDH/piffle/master)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/cdhdevteam)
 
 Piffle is tested on Python 2.7 and 3.3-3.6.
