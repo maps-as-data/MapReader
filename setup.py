@@ -47,5 +47,6 @@ setup(
     },
     description='Python library for generating IIIF Image API urls',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     classifiers=CLASSIFIERS,
 )
