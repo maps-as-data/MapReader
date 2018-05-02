@@ -8,6 +8,7 @@ python:
   - "3.6"
 
 install:
+  - pip install --upgrade setuptools
   - pip install -e .
   - pip install -e ".[test]"
   - pip install coveralls

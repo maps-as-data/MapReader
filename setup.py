@@ -29,7 +29,7 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-test_requirements = ['pytest', 'pytest-cov']
+test_requirements = ['pytest', 'pytest-cov', 'mock']
 
 setup(
     name='piffle',
@@ -39,7 +39,7 @@ setup(
     url='https://github.com/emory-lits-labs/piffle',
     license='Apache License, Version 2.0',
     packages=find_packages(),
-    install_requires=['six', 'future'],
+    install_requires=['requests', 'cached-property', 'six', 'future'],
     setup_requires=['pytest-runner'],
     tests_require=test_requirements,
     extras_require={
