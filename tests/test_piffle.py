@@ -1,5 +1,9 @@
 from piffle import iiif
+from mock import patch
+import six
 import pytest
+import requests
+
 
 api_endpoint = 'http://imgserver.co'
 image_id = 'img1'
@@ -17,9 +21,16 @@ VALID_URLS = {
 INVALID_URLS = {
     'info': 'http://img1/info.json',
     'simple': 'http://imgserver.co/img1/foobar/default.jpg',
-    'complex': 'http://imgserver.co/img1/2560,2560,256,256/256,/!90/default.jpg',
+    'complex': 'http://imgserver.co/img1/2560,2560,256,/256,/!90/default.jpg',
     'bad_size': '%s/%s/full/a,/0/default.jpg' % (api_endpoint, image_id),
     'bad_region': '%s/%s/200,200/full/0/default.jpg' % (api_endpoint, image_id)
+}
+
+sample_image_info = {
+    '@context': "http://iiif.io/api/image/2/context.json",
+    '@id': VALID_URLS['simple'],
+    'height': 3039,
+    'width': 2113,
 }
 
 
@@ -34,15 +45,15 @@ class TestIIIFImageClient:
         img = get_test_imgclient()
         # default image url
         assert '%s/%s/full/full/0/default.jpg' % (api_endpoint, image_id) \
-               == unicode(img)
+               == six.text_type(img)
         # info url
         assert '%s/%s/info.json' % (api_endpoint, image_id) \
-               == unicode(img.info())
+               == six.text_type(img.info())
 
     def test_outputs(self):
         img = get_test_imgclient()
         # str and unicode should be equivalent
-        assert unicode(img.info()) == unicode(str(img.info()))
+        assert six.text_type(img.info()) == six.text_type(str(img.info()))
         # repr should have class and image id
         assert 'IIIFImageClient' in repr(img)
         assert img.get_image_id() in repr(img)
@@ -59,9 +70,9 @@ class TestIIIFImageClient:
         del expected_img_opts['size']
         del expected_img_opts['rotation']
         assert img.image_options == expected_img_opts
-        assert unicode(img.region) == test_opts['region']
-        assert unicode(img.size) == test_opts['size']
-        assert unicode(img.rotation) == test_opts['rotation']
+        assert six.text_type(img.region) == test_opts['region']
+        assert six.text_type(img.size) == test_opts['size']
+        assert six.text_type(img.rotation) == test_opts['rotation']
 
         # TODO: should parse/verify options on init
         # with pytest.raises(iiif.IIIFImageClientException):
@@ -72,24 +83,24 @@ class TestIIIFImageClient:
         width, height, percent = 100, 150, 50
         # width only
         assert '%s/%s/full/%s,/0/default.jpg' % (api_endpoint, image_id, width)\
-            == unicode(img.size(width=width))
+            == six.text_type(img.size(width=width))
 
         # height only
         assert '%s/%s/full/,%s/0/default.jpg' % \
                (api_endpoint, image_id, height) == \
-               unicode(img.size(height=height))
+               six.text_type(img.size(height=height))
         # width and height
         assert '%s/%s/full/%s,%s/0/default.jpg' % \
                (api_endpoint, image_id, width, height) == \
-               unicode(img.size(width=width, height=height))
+               six.text_type(img.size(width=width, height=height))
         # exact width and height
         assert '%s/%s/full/!%s,%s/0/default.jpg' % \
                (api_endpoint, image_id, width, height) == \
-               unicode(img.size(width=width, height=height, exact=True))
+               six.text_type(img.size(width=width, height=height, exact=True))
         # percent
         assert '%s/%s/full/pct:%s/0/default.jpg' % \
                (api_endpoint, image_id, percent) == \
-               unicode(img.size(percent=percent))
+               six.text_type(img.size(percent=percent))
 
     def test_region(self):
         # region options passed through to region object and output
@@ -97,14 +108,14 @@ class TestIIIFImageClient:
         x, y, width, height = 5, 10, 100, 150
         assert '%s/%s/%s,%s,%s,%s/full/0/default.jpg' % \
                (api_endpoint, image_id, x, y, width, height) \
-            == unicode(img.region(x=x, y=y, width=width, height=height))
+            == six.text_type(img.region(x=x, y=y, width=width, height=height))
 
     def test_rotation(self):
         # rotation options passed through to region object and output
         img = get_test_imgclient()
         assert '%s/%s/full/full/90/default.jpg' % \
                (api_endpoint, image_id) \
-            == unicode(img.rotation(degrees=90))
+            == six.text_type(img.rotation(degrees=90))
         with pytest.raises(iiif.IIIFImageClientException):
             img.rotation(foo='bar')
 
@@ -113,9 +124,9 @@ class TestIIIFImageClient:
         png = img.format('png')
         jpg = img.format('jpg')
         gif = img.format('gif')
-        assert unicode(png).endswith('.png')
-        assert unicode(jpg).endswith('.jpg')
-        assert unicode(gif).endswith('.gif')
+        assert six.text_type(png).endswith('.png')
+        assert six.text_type(jpg).endswith('.jpg')
+        assert six.text_type(gif).endswith('.gif')
 
         with pytest.raises(iiif.IIIFImageClientException):
             img.format('bogus')
@@ -126,31 +137,31 @@ class TestIIIFImageClient:
         fmt = 'png'
         assert '%s/%s/full/%s,/0/default.%s' % \
                (api_endpoint, image_id, width, fmt)\
-            == unicode(img.size(width=width).format(fmt))
+            == six.text_type(img.size(width=width).format(fmt))
 
         img = get_test_imgclient()
         x, y, width, height = 5, 10, 100, 150
         assert '%s/%s/%s,%s,%s,%s/full/0/default.%s' % \
                (api_endpoint, image_id, x, y, width, height, fmt) \
-            == unicode(img.region(x=x, y=y,
+            == six.text_type(img.region(x=x, y=y,
                                   width=width, height=height).format(fmt))
 
         assert '%s/%s/%s,%s,%s,%s/%s,/0/default.%s' % \
                (api_endpoint, image_id, x, y, width, height, width, fmt) \
-            == unicode(img.size(width=width)
+            == six.text_type(img.size(width=width)
                           .region(x=x, y=y, width=width, height=height)
                           .format(fmt))
         rotation = 90
         assert '%s/%s/%s,%s,%s,%s/%s,/%s/default.%s' % \
                (api_endpoint, image_id, x, y, width, height, width, rotation, fmt) \
-            == unicode(img.size(width=width)
+            == six.text_type(img.size(width=width)
                           .region(x=x, y=y, width=width, height=height)
                           .rotation(degrees=90)
                           .format(fmt))
 
         # original image object should be unchanged, and still show defaults
         assert '%s/%s/full/full/0/default.jpg' % (api_endpoint, image_id) \
-               == unicode(img)
+               == six.text_type(img)
 
     def test_init_from_url(self):
         # well-formed
@@ -159,7 +170,7 @@ class TestIIIFImageClient:
         assert isinstance(img, iiif.IIIFImageClient)
         assert img.image_id == image_id
         # round trip back to original url
-        assert unicode(img.info()) == VALID_URLS['info']
+        assert six.text_type(img.info()) == VALID_URLS['info']
         assert img.api_endpoint == api_endpoint
         # -info with more complex endpoint base url
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['info-loris'])
@@ -167,22 +178,28 @@ class TestIIIFImageClient:
         # - image
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         assert isinstance(img, iiif.IIIFImageClient)
-        assert unicode(img) == VALID_URLS['simple']
+        assert six.text_type(img) == VALID_URLS['simple']
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
-        assert unicode(img) == VALID_URLS['complex']
+        assert six.text_type(img) == VALID_URLS['complex']
         assert isinstance(img, iiif.IIIFImageClient)
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['exact'])
-        assert unicode(img) == VALID_URLS['exact']
+        assert six.text_type(img) == VALID_URLS['exact']
         assert isinstance(img, iiif.IIIFImageClient)
         assert img.size.options['exact'] is True
 
         # malformed
         with pytest.raises(iiif.ParseError):
             img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['info'])
-            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
-            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
-            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_size'])
-            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_region'])
+        with pytest.raises(iiif.ParseError):
+            iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
+        with pytest.raises(iiif.ParseError):
+            iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
+        with pytest.raises(iiif.ParseError):
+            iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_size'])
+        with pytest.raises(iiif.ParseError):
+            iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_region'])
+        with pytest.raises(iiif.ParseError):
+            iiif.IIIFImageClient.init_from_url('http://info.json')
 
     def test_as_dicts(self):
         img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
@@ -212,12 +229,54 @@ class TestIIIFImageClient:
             'format': 'jpg'
         }
 
+    @patch('piffle.iiif.requests')
+    def test_image_info(self, mockrequests):
+        # test image info logic by mocking requests
+        mockrequests.codes.ok = requests.codes.ok
+        mockresponse = mockrequests.get.return_value
+        mockresponse.status_code = requests.codes.ok
+        mockresponse.json.return_value = sample_image_info
+
+        # valid response
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        assert img.image_info == sample_image_info
+        mockrequests.get.assert_called_with(img.info())
+        mockresponse.json.assert_called_with()
+
+        # error response
+        mockresponse.status_code = 400
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img.image_info
+        mockresponse.raise_for_status.assert_called_with()
+
+    def test_image_width_height(self):
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=sample_image_info):
+            assert img.image_width == sample_image_info['width']
+            assert img.image_height == sample_image_info['height']
+
+    def test_canonicalize(self):
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        square_img_info = sample_image_info.copy()
+        square_img_info.update({'height': 100, 'width': 100})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=square_img_info):
+            # square region for square image = full
+            img.region.parse('square')
+            # percentage: convert to w,h (= 25,25)
+            img.size.parse('pct:25')
+            img.rotation.parse('90.0')
+            assert six.text_type(img.canonicalize()) == \
+                '%s/%s/full/25,25/90/default.jpg' % (api_endpoint, image_id)
+
 
 class TestImageRegion:
 
     def test_defaults(self):
         region = iiif.ImageRegion()
-        assert unicode(region) == 'full'
+        assert six.text_type(region) == 'full'
         assert region.as_dict() == iiif.ImageRegion.region_defaults
 
     def test_init(self):
@@ -256,41 +315,45 @@ class TestImageRegion:
             iiif.ImageRegion(x=1, y=2)
             iiif.ImageRegion(x=1, y=2, w=20)
             iiif.ImageRegion(percent=True)
+            iiif.ImageRegion().set_options(percent=True, x=1)
 
             # TODO: type checking? (not yet implemented)
 
+        with pytest.raises(iiif.ParseError):
+            iiif.ImageRegion().parse('1,2')
+
     def test_render(self):
         region = iiif.ImageRegion(full=True)
-        assert unicode(region) == 'full'
+        assert six.text_type(region) == 'full'
         region = iiif.ImageRegion(square=True)
-        assert unicode(region) == 'square'
+        assert six.text_type(region) == 'square'
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100)
-        assert unicode(region) == '5,5,100,100'
+        assert six.text_type(region) == '5,5,100,100'
         region = iiif.ImageRegion(x=5, y=5, width=100, height=100,
                                   percent=True)
-        assert unicode(region) == 'pct:5,5,100,100'
+        assert six.text_type(region) == 'pct:5,5,100,100'
         region = iiif.ImageRegion(x=5.1, y=3.14, width=100.76, height=100.89,
                                   percent=True)
-        assert unicode(region) == 'pct:5.1,3.14,100.76,100.89'
+        assert six.text_type(region) == 'pct:5.1,3.14,100.76,100.89'
 
     def test_parse(self):
         region = iiif.ImageRegion()
         # full
         region_str = 'full'
         region.parse(region_str)
-        assert unicode(region) == region_str  # round trip
+        assert six.text_type(region) == region_str  # round trip
         assert region.as_dict()['full'] is True
         # square
         region_str = 'square'
         region.parse(region_str)
-        assert unicode(region) == region_str  # round trip
+        assert six.text_type(region) == region_str  # round trip
         assert region.as_dict()['full'] is False
         assert region.as_dict()['square'] is True
         # region
         x, y, w, h = [5, 7, 100, 200]
         region_str = '%d,%d,%d,%d' % (x, y, w, h)
         region.parse(region_str)
-        assert unicode(region) == region_str  # round trip
+        assert six.text_type(region) == region_str  # round trip
         region_opts = region.as_dict()
         assert region_opts['full'] is False
         assert region_opts['square'] is False
@@ -301,7 +364,7 @@ class TestImageRegion:
         # percentage region
         region_str = 'pct:%d,%d,%d,%d' % (x, y, w, h)
         region.parse(region_str)
-        assert unicode(region) == region_str  # round trip
+        assert six.text_type(region) == region_str  # round trip
         region_opts = region.as_dict()
         assert region_opts['full'] is False
         assert region_opts['square'] is False
@@ -314,14 +377,76 @@ class TestImageRegion:
         # invalid or incomplete region strings
         with pytest.raises(iiif.ParseError):
             region.parse('pct:1,3,')
+        with pytest.raises(iiif.ParseError):
             region.parse('one,two,three,four')
+
+    def test_canonicalize(self):
+        # any canonicalization that requires image dimensions to calculate
+        # should raise an error
+        region = iiif.ImageRegion()
+        region.parse('square')
+        with pytest.raises(iiif.IIIFImageClientException):
+            region.canonicalize()
+
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        # full to full - trivial canonicalization
+        img.region.canonicalize()
+        assert six.text_type(img.region) == 'full'
+        # x,y,w,h should be preserved as is
+        dimensions = '0,0,200,250'
+        img.region.parse(dimensions)
+        img.region.canonicalize()
+        # round trip, should be the same
+        assert six.text_type(img.region) == dimensions
+
+        # test with square image size
+        square_img_info = sample_image_info.copy()
+        square_img_info.update({'height': 100, 'width': 100})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=square_img_info):
+            # square requested, image is square = full
+            img.region.parse('square')
+            img.region.canonicalize()
+            assert six.text_type(img.region) == 'full'
+
+            # percentages
+            img.region.parse('pct:10,1,50,75')
+            img.region.canonicalize()
+            assert six.text_type(img.region) == '10,1,50,75'
+
+            # percentages should be converted to integers
+            img.region.parse('pct:10,1,50.5,75.3')
+            assert six.text_type(img.region) == 'pct:10,1,50.5,75.3'
+            img.region.canonicalize()
+            assert six.text_type(img.region) == '10,1,50,75'
+
+
+        # test with square with non-square image size
+        tall_img_info = sample_image_info.copy()
+        tall_img_info.update({'width': 100, 'height': 150})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=tall_img_info):
+            # square requested, should convert to x,y,w,h
+            img.region.parse('square')
+            img.region.canonicalize()
+            assert six.text_type(img.region) == '0,25,100,100'
+
+        wide_img_info = sample_image_info.copy()
+        wide_img_info.update({'width': 200, 'height': 50})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=wide_img_info):
+            # square requested, should convert to x,y,w,h
+            img.region.parse('square')
+            img.region.canonicalize()
+
+            assert six.text_type(img.region) == '75,0,50,50'
 
 
 class TestImageSize:
 
     def test_defaults(self):
         size = iiif.ImageSize()
-        assert unicode(size) == 'full'
+        assert six.text_type(size) == 'full'
         assert size.as_dict() == iiif.ImageSize.size_defaults
 
     def test_init(self):
@@ -353,36 +478,36 @@ class TestImageSize:
 
     def test_render(self):
         size = iiif.ImageSize(full=True)
-        assert unicode(size) == 'full'
+        assert six.text_type(size) == 'full'
         size = iiif.ImageSize(max=True)
-        assert unicode(size) == 'max'
+        assert six.text_type(size) == 'max'
         size = iiif.ImageSize(percent=50)
-        assert unicode(size) == 'pct:50'
+        assert six.text_type(size) == 'pct:50'
         size = iiif.ImageSize(width=100, height=105)
-        assert unicode(size) == '100,105'
+        assert six.text_type(size) == '100,105'
         size = iiif.ImageSize(width=100)
-        assert unicode(size) == '100,'
+        assert six.text_type(size) == '100,'
         size = iiif.ImageSize(height=105)
-        assert unicode(size) == ',105'
+        assert six.text_type(size) == ',105'
 
     def test_parse(self):
         size = iiif.ImageSize()
         # full
         size_str = 'full'
         size.parse(size_str)
-        assert unicode(size) == size_str  # round trip
+        assert six.text_type(size) == size_str  # round trip
         assert size.as_dict()['full'] is True
         # max
         size_str = 'max'
         size.parse(size_str)
-        assert unicode(size) == size_str  # round trip
+        assert six.text_type(size) == size_str  # round trip
         assert size.as_dict()['full'] is False
         assert size.as_dict()['max'] is True
         # width and height
         w, h = [100, 200]
         size_str = '%d,%d' % (w, h)
         size.parse(size_str)
-        assert unicode(size) == size_str  # round trip
+        assert six.text_type(size) == size_str  # round trip
         size_opts = size.as_dict()
         assert size_opts['full'] is False
         assert size_opts['max'] is False
@@ -391,7 +516,7 @@ class TestImageSize:
         # percentage size
         size_str = 'pct:55'
         size.parse(size_str)
-        assert unicode(size) == size_str  # round trip
+        assert six.text_type(size) == size_str  # round trip
         size_opts = size.as_dict()
         assert size_opts['full'] is False
         assert size_opts['percent'] == 55
@@ -399,14 +524,57 @@ class TestImageSize:
         # invalid or incomplete size strings
         with pytest.raises(iiif.ParseError):
             size.parse('pct:')
+        with pytest.raises(iiif.ParseError):
             size.parse('one,two')
+
+    def test_canonicalize(self):
+        # any canonicalization that requires image dimensions to calculate
+        # should raise an error
+        size = iiif.ImageSize()
+        size.parse(',5')
+        with pytest.raises(iiif.IIIFImageClientException):
+            size.canonicalize()
+
+        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        # full to full - trivial canonicalization
+        img.size.canonicalize()
+        assert six.text_type(img.size) == 'full'
+
+        # test sizes with square image size
+        square_img_info = sample_image_info.copy()
+        square_img_info.update({'height': 100, 'width': 100})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=square_img_info):
+            # requested as ,h - convert to w,
+            img.size.parse(',50')
+            img.size.canonicalize()
+            assert six.text_type(img.size) == '50,'
+
+            # percentage: convert to w,h
+            img.size.parse('pct:25')
+            img.size.canonicalize()
+            assert six.text_type(img.size) == '25,25'
+
+            # exact
+            img.size.parse('!50,50')
+            img.size.canonicalize()
+            assert six.text_type(img.size) == '50,50'
+
+        # test sizes with rectangular image size
+        rect_img_info = sample_image_info.copy()
+        rect_img_info.update({'width': 50, 'height': 100})
+        with patch.object(iiif.IIIFImageClient, 'image_info',
+                          new=rect_img_info):
+            img.size.parse('!50,50')
+            img.size.canonicalize()
+            assert six.text_type(img.size) == '25,50'
 
 
 class TestImageRotation:
 
     def test_defaults(self):
         rotation = iiif.ImageRotation()
-        assert unicode(rotation) == '0'
+        assert six.text_type(rotation) == '0'
         assert rotation.as_dict() == iiif.ImageRotation.rotation_defaults
 
     def test_init(self):
@@ -420,18 +588,30 @@ class TestImageRotation:
 
     def test_render(self):
         rotation = iiif.ImageRotation()
-        assert unicode(rotation) == '0'
+        assert six.text_type(rotation) == '0'
         rotation = iiif.ImageRotation(degrees=90)
-        assert unicode(rotation) == '90'
+        assert six.text_type(rotation) == '90'
         rotation = iiif.ImageRotation(degrees=95, mirrored=True)
-        assert unicode(rotation) == '!95'
+        assert six.text_type(rotation) == '!95'
+
+        # canonicalization
+        # - trim any trailing zeros in a decimal value
+        assert six.text_type(iiif.ImageRotation(degrees=93.0)) == '93'
+        # - leading zero if less than 1
+        assert six.text_type(iiif.ImageRotation(degrees=0.05)) == '0.05'
+        # - ! if mirrored, followed by integer if possible
+        rotation = iiif.ImageRotation(degrees=95.00, mirrored=True)
+        assert six.text_type(rotation) == '!95'
+        # explicitly test canonicalize method, even though it does nothing
+        rotation.canonicalize()
+        assert six.text_type(rotation) == '!95'
 
     def test_parse(self):
         rotation = iiif.ImageRotation()
         rotation_str = '180'
         rotation.parse(rotation_str)
-        assert unicode(rotation) == rotation_str  # round trip
+        assert six.text_type(rotation) == rotation_str  # round trip
         rotation_str = '!90'
         rotation.parse(rotation_str)
-        assert unicode(rotation) == rotation_str  # round trip
+        assert six.text_type(rotation) == rotation_str  # round trip
         assert rotation.as_dict()['mirrored'] is True

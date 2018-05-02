@@ -1,7 +1,13 @@
 # iiifclient
+# -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from urlparse import urlparse
+from future.utils import python_2_unicode_compatible
+import six
+from six.moves.urllib.parse import urlparse
+
+from cached_property import cached_property
+import requests
 
 
 class IIIFImageClientException(Exception):
@@ -20,6 +26,7 @@ class ParseError(IIIFImageClientException):
 # validating options (and could add option type checking)
 
 
+@python_2_unicode_compatible
 class ImageRegion(object):
     '''IIIF Image region. Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and region options.
@@ -74,7 +81,7 @@ class ImageRegion(object):
 
     def set_options(self, **options):
         '''Update region options.  Same parameters as initialiation.'''
-        allowed_options = self.options.keys()
+        allowed_options = list(self.options.keys())
         # error if an unrecoganized option is specified
         for key in options:
             if key not in allowed_options:
@@ -102,7 +109,7 @@ class ImageRegion(object):
         '''Return region options as a dictionary'''
         return self.options
 
-    def __unicode__(self):
+    def __str__(self):
         '''Render region information in IIIF region format'''
         if self.options['full']:
             return 'full'
@@ -157,7 +164,82 @@ class ImageRegion(object):
         x, y, width, height = coords
         self.options.update({'x': x, 'y': y, 'width': width, 'height': height})
 
+    def canonicalize(self):
+        '''Canonicalize the current region options so that
+        serialization results in canonical format.'''
+        # From the spec:
+        #   “full” if the whole image is requested, (including a “square”
+        #    region of a square image), otherwise the x,y,w,h syntax.
 
+        if self.options['full']:
+            # nothing to do
+            return
+
+        # if already in x,y,w,h format - nothing to do
+        if not any([self.options['full'], self.options['square'],
+                    self.options['percent']]):
+            return
+
+        # possbly an error here for every other case if self.img is not set,
+        # since it's probably not possible to canonicalize without knowing
+        # image size  (any exceptions?)
+        if self.img is None:
+            raise IIIFImageClientException('Cannot canonicalize without image')
+
+        if self.options['square']:
+            # if image is square, then return full
+            if self.img is not None and \
+             self.img.image_width == self.img.image_height:
+                self.options['full'] = True
+                self.options['square'] = False
+                return
+
+            # otherwise convert to x,y,w,h
+            # from the spec:
+            #  The region is defined as an area where the width and height
+            #  are both equal to the length of the shorter dimension of the
+            #  complete image. The region may be positioned anywhere in the
+            #  longer dimension of the image content at the server’s
+            #  discretion, and centered is often a reasonable default.
+
+            # determine size of the short edge
+            short_edge = min(self.img.image_width, self.img.image_height)
+            width = height = short_edge
+            # calculate starting long edge point to center the square
+            if self.img.image_height == short_edge:
+                y = 0
+                x = (self.img.image_width - short_edge) / 2
+            else:
+                x = 0
+                y = (self.img.image_height - short_edge) / 2
+
+            self.options.update({'x': x, 'y': y, 'width': width,
+                                 'height': height, 'square': False})
+
+        if self.options['percent']:
+            # convert percentages to x,y,w,h
+            # From the spec:
+            #  The region to be returned is specified as a sequence of
+            #  percentages of the full image’s dimensions, as reported in
+            #  the image information document. Thus, x represents the number
+            #  of pixels from the 0 position on the horizontal axis, calculated
+            #  as a percentage of the reported width. w represents the width
+            #  of the region, also calculated as a percentage of the reported
+            #  width. The same applies to y and h respectively. These may be
+            #  floating point numbers.
+
+            # convert percentages to dimensions based on image size
+            self.options.update({
+                'percent': False,
+                'x': int((self.options['x']/100) * self.img.image_width),
+                'y': int((self.options['y']/100) * self.img.image_height),
+                'width': int((self.options['width']/100) * self.img.image_width),
+                'height': int((self.options['height']/100) * self.img.image_height)
+            })
+            return
+
+
+@python_2_unicode_compatible
 class ImageSize(object):
     '''IIIF Image Size.  Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and size options.
@@ -214,7 +296,7 @@ class ImageSize(object):
 
     def set_options(self, **options):
         '''Update size options.  Same parameters as initialiation.'''
-        allowed_options = self.options.keys()
+        allowed_options = list(self.options.keys())
         # error if an unrecoganized option is specified
         for key in options:
             if key not in allowed_options:
@@ -234,7 +316,7 @@ class ImageSize(object):
         '''Return size options as a dictionary'''
         return self.options
 
-    def __unicode__(self):
+    def __str__(self):
         if self.options['full']:
             return 'full'
         if self.options['max']:
@@ -288,7 +370,72 @@ class ImageSize(object):
         except ValueError:
             raise ParseError('Error parsing size: %s' % size)
 
+    def canonicalize(self):
+        '''Canonicalize the current size options so that
+        serialization results in canonical format.'''
+        # From the spec:
+        #   “full” if the default size is requested,
+        #   the w, syntax for images that should be scaled maintaining the
+        #   aspect ratio, and the w,h syntax for explicit sizes that change
+        #   the aspect ratio.
+        #   Note: The size keyword “full” will be replaced with “max” in
+        #   version 3.0
 
+        if self.options['full']:
+            # nothing to do
+            return
+
+        # possbly an error here for every other case if self.img is not set,
+        # since it's probably not possible to canonicalize without knowing
+        # image size  (any exceptions?)
+        if self.img is None:
+            raise IIIFImageClientException('Cannot canonicalize without image')
+
+        if self.options['percent']:
+            # convert percentage to w,h
+            scale = self.options['percent'] / 100
+            self.options.update({
+                'height': int(self.img.image_height * scale),
+                'width': int(self.img.image_width * scale),
+                'percent': None,
+            })
+            return
+
+        if self.options['exact']:
+            # from the spec:
+            #   The image content is scaled for the best fit such that the
+            #   resulting width and height are less than or equal to the
+            #   requested width and height. The exact scaling may be determined
+            #   by the service provider, based on characteristics including
+            #   image quality and system performance. The dimensions of the
+            #   returned image content are calculated to maintain the aspect
+            #   ratio of the extracted region.
+
+            # determine which edge results in a smaller scale
+            wscale = float(self.options['width']) / float(self.img.image_width)
+            hscale = float(self.options['height']) / float(self.img.image_height)
+            scale = min(wscale, hscale)
+            # use that scale on original image size, to preserve
+            # original aspect ratio
+            self.options.update({
+                'exact': False,
+                'height': int(scale * self.img.image_height),
+                'width': int(scale * self.img.image_width)
+            })
+            return
+
+        # if height only is specified (,h), convert to width only (w,)
+        if self.options['height'] and self.options['width'] is None:
+            # determine the scale in use, and convert from
+            # height only to width only
+            scale = float(self.options['height']) / float(self.img.image_height)
+            self.options.update({
+                'height': None,
+                'width': int(scale * self.img.image_width)
+            })
+
+
+@python_2_unicode_compatible
 class ImageRotation(object):
     '''IIIF Image rotation Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and rotation options.
@@ -341,7 +488,7 @@ class ImageRotation(object):
         '''Return rotation options as a dictionary'''
         return self.options
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s%g' % ('!' if self.options['mirrored'] else '',
                          self.options['degrees'])
 
@@ -349,14 +496,26 @@ class ImageRotation(object):
         # reset to defaults before parsing
         self.options = self.rotation_defaults.copy()
 
-        if rotation.startswith('!'):
+        if str(rotation).startswith('!'):
             self.options['mirrored'] = True
             rotation = rotation.lstrip('!')
 
         # rotation allows float
         self.options['degrees'] = float(rotation)
 
+    def canonicalize(self):
+        '''Canonicalize the current region options so that
+        serialization results in canonical format.'''
+        # NOTE: explicitly including a canonicalize as a method to make it
+        # clear that this field supports canonicalization, but no work
+        # is needed since the existing render does the right things:
+        # - trim any trailing zeros in a decimal value
+        # - leading zero if less than 1
+        # - ! if mirrored, followed by integer if possible
+        return
 
+
+@python_2_unicode_compatible
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -421,19 +580,16 @@ class IIIFImageClient(object):
         'Image id to be used in contructing urls'
         return self.image_id
 
-    def __unicode__(self):
+    def __str__(self):
         info = self.image_options.copy()
         info.update({
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
-            'region': unicode(self.region),
-            'size': unicode(self.size),
-            'rot': unicode(self.rotation)
+            'region': six.text_type(self.region),
+            'size': six.text_type(self.size),
+            'rot': six.text_type(self.rotation)
         })
         return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rot)s/%(quality)s.%(fmt)s' % info
-
-    def __str__(self):
-        return str(unicode(self))
 
     def __repr__(self):
         return '<IIIFImageClient %s>' % self.get_image_id()
@@ -445,6 +601,25 @@ class IIIFImageClient(object):
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
         }
+
+    @cached_property
+    def image_info(self):
+        'Retrieve image information provided as JSON at info url'
+        resp = requests.get(self.info())
+        if resp.status_code == requests.codes.ok:
+            return resp.json()
+        else:
+            resp.raise_for_status()
+
+    @property
+    def image_width(self):
+        'Image width as reported in :attr:`image_info`'
+        return self.image_info['width']
+
+    @property
+    def image_height(self):
+        'Image height as reported in :attr:`image_info`'
+        return self.image_info['height']
 
     def get_copy(self):
         'Get a clone of the current settings for modification.'
@@ -467,6 +642,14 @@ class IIIFImageClient(object):
         img.image_options['fmt'] = image_format
         return img
 
+    def canonicalize(self):
+        '''Canonicalize the URI'''
+        img = self.get_copy()
+        img.region.canonicalize()
+        img.size.canonicalize()
+        img.rotation.canonicalize()
+        return img
+
     @classmethod
     def init_from_url(cls, url):
         '''Init ImageClient using Image API parameters from URI.  Detect
@@ -479,13 +662,19 @@ class IIIFImageClient(object):
         # first parse as a url
         parsed_url = urlparse(url)
         # then split the path on slashes
-        path_components = parsed_url.path.split('/')
+        # and remove any empty strings
+        path_components = [path for path in parsed_url.path.split('/') if path]
+        if not path_components:
+            raise ParseError('Invalid IIIF image url: %s'
+                                % url)
         # pop off last portion of the url to determine if this is an info url
         path_basename = path_components.pop()
         opts = {}
 
         # info request
         if path_basename == 'info.json':
+            # NOTE: this is unlikely to happen; more likely, if information is
+            # missing, we will misinterpret the api endpoint or the image id
             if len(path_components) < 1:
                 raise ParseError('Invalid IIIF image information url: %s'
                                     % url)

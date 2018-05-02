@@ -1,5 +1,10 @@
 # Change & Version Information
 
+## 0.3
+
+* Now Python 3 compatible
+* URI canonicalization for size, region, rotation, and URL as a whole
+
 ## 0.2.1
 
 * Bug fix: chaining multiple different options combines all of them properly and does not modify
