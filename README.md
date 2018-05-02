@@ -3,8 +3,8 @@
 Python library for generating and parsing [IIIF Image API](http://iiif.io/api/image/2.1/) URLs in an
 object-oriented, pythonic fashion.
 
-[![Build Status](https://travis-ci.org/Princeton-CDH/piffle.svg?branch=master)](https://travis-ci.org/Princeton-CDH/piffle)
-[![Coverage Status](https://coveralls.io/repos/github/Princeton-CDH/piffle/badge.svg?branch=master)](https://coveralls.io/github/Princeton-CDH/piffle?branch=master)
+[![Build Status](https://travis-ci.org/Princeton-CDH/piffle.svg?branch=develop)](https://travis-ci.org/Princeton-CDH/piffle)
+[![Coverage Status](https://coveralls.io/repos/github/Princeton-CDH/piffle/badge.svg?branch=develop)](https://coveralls.io/github/Princeton-CDH/piffle?branch=develop)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/cdhdevteam)
 
 Piffle is tested on Python 2.7 and 3.3-3.6.
