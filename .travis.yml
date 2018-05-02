@@ -11,10 +11,10 @@ install:
   - pip install --upgrade setuptools
   - pip install -e .
   - pip install -e ".[test]"
-  - pip install coveralls
+  - pip install codecov
 
 script:
   - py.test --cov=piffle
 
 after_success:
-  - coveralls
+  - codecov
