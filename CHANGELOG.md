@@ -1,5 +1,9 @@
 # Change & Version Information
 
+## 0.3.2
+
+* Dropped support for Python 3.3
+
 ## 0.3
 
 * Now Python 3 compatible

@@ -5,9 +5,9 @@ object-oriented, pythonic fashion.
 
 [![Build Status](https://travis-ci.org/Princeton-CDH/piffle.svg?branch=master)](https://travis-ci.org/Princeton-CDH/piffle)
 [![Coverage Status](https://coveralls.io/repos/github/Princeton-CDH/piffle/badge.svg?branch=master)](https://coveralls.io/github/Princeton-CDH/piffle?branch=master)
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/cdhdevteam)
+[![Maintainability](https://api.codeclimate.com/v1/badges/d37850d90592f9d628df/maintainability)](https://codeclimate.com/github/Princeton-CDH/piffle/maintainability)
 
-Piffle is tested on Python 2.7 and 3.3-3.6.
+Piffle is tested on Python 2.7 and 3.4-3.6.
 
 Piffle was originally developed by Emory University as a part of
 [Readux](https://github.com/ecds/readux>) and forked as a separate project
