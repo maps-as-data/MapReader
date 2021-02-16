@@ -10,12 +10,10 @@ import requests
 
 class IIIFImageClientException(Exception):
     '''IIIFImageClient custom exception class'''
-    pass
 
 
 class ParseError(IIIFImageClientException):
     '''Exception raised when an IIIF image could not be parsed'''
-    pass
 
 
 # NOTE: possible image component base class?
@@ -130,8 +128,8 @@ class ImageRegion(object):
             self.options['full'] = True
             # return immediately
             return
-        else:
-            self.options['full'] = False
+
+        self.options['full'] = False
 
         if region == 'square':
             self.options['square'] = True
@@ -334,9 +332,9 @@ class ImageSize(object):
         if size == 'full':
             self.options['full'] = True
             return
+
         # for any other case, full should be false
-        else:
-            self.options['full'] = False
+        self.options['full'] = False
 
         # max?
         if size == 'max':
@@ -602,8 +600,8 @@ class IIIFImageClient(object):
         resp = requests.get(self.info())
         if resp.status_code == requests.codes.ok:
             return resp.json()
-        else:
-            resp.raise_for_status()
+
+        resp.raise_for_status()
 
     @property
     def image_width(self):
