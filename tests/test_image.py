@@ -1,7 +1,8 @@
-from piffle import iiif
-from mock import patch
+from unittest.mock import patch
 import pytest
 import requests
+
+from piffle import image
 
 
 api_endpoint = 'http://imgserver.co'
@@ -26,7 +27,7 @@ INVALID_URLS = {
 }
 
 sample_image_info = {
-    '@context': "http://iiif.io/api/image/2/context.json",
+    '@context': "http://image.io/api/image/2/context.json",
     '@id': VALID_URLS['simple'],
     'height': 3039,
     'width': 2113,
@@ -34,8 +35,8 @@ sample_image_info = {
 
 
 def get_test_imgclient():
-    return iiif.IIIFImageClient(api_endpoint=api_endpoint,
-                                image_id=image_id)
+    return image.IIIFImageClient(api_endpoint=api_endpoint,
+                                 image_id=image_id)
 
 
 class TestIIIFImageClient:
@@ -60,7 +61,7 @@ class TestIIIFImageClient:
     def test_init_opts(self):
         test_opts = {'region': '2560,2560,256,256', 'size': '256,',
                      'rotation': '90', 'quality': 'color', 'fmt': 'png'}
-        img = iiif.IIIFImageClient(api_endpoint=api_endpoint,
+        img = image.IIIFImageClient(api_endpoint=api_endpoint,
                                    image_id=image_id, **test_opts)
         assert img.api_endpoint == api_endpoint
         assert img.image_id == image_id
@@ -74,8 +75,8 @@ class TestIIIFImageClient:
         assert str(img.rotation) == test_opts['rotation']
 
         # TODO: should parse/verify options on init
-        # with pytest.raises(iiif.IIIFImageClientException):
-        #     img = iiif.IIIFImageClient(api_endpoint=api_endpoint, fmt='bogus')
+        # with pytest.raises(image.IIIFImageClientException):
+        #     img = image.IIIFImageClient(api_endpoint=api_endpoint, fmt='bogus')
 
     def test_size(self):
         img = get_test_imgclient()
@@ -115,7 +116,7 @@ class TestIIIFImageClient:
         assert '%s/%s/full/full/90/default.jpg' % \
                (api_endpoint, image_id) \
             == str(img.rotation(degrees=90))
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             img.rotation(foo='bar')
 
     def test_format(self):
@@ -127,7 +128,7 @@ class TestIIIFImageClient:
         assert str(jpg).endswith('.jpg')
         assert str(gif).endswith('.gif')
 
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             img.format('bogus')
 
     def test_combine_options(self):
@@ -165,43 +166,43 @@ class TestIIIFImageClient:
     def test_init_from_url(self):
         # well-formed
         # - info url
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['info'])
-        assert isinstance(img, iiif.IIIFImageClient)
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['info'])
+        assert isinstance(img, image.IIIFImageClient)
         assert img.image_id == image_id
         # round trip back to original url
         assert str(img.info()) == VALID_URLS['info']
         assert img.api_endpoint == api_endpoint
         # -info with more complex endpoint base url
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['info-loris'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['info-loris'])
         assert img.api_endpoint == '%s/loris' % api_endpoint
         # - image
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
-        assert isinstance(img, iiif.IIIFImageClient)
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        assert isinstance(img, image.IIIFImageClient)
         assert str(img) == VALID_URLS['simple']
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert str(img) == VALID_URLS['complex']
-        assert isinstance(img, iiif.IIIFImageClient)
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['exact'])
+        assert isinstance(img, image.IIIFImageClient)
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['exact'])
         assert str(img) == VALID_URLS['exact']
-        assert isinstance(img, iiif.IIIFImageClient)
+        assert isinstance(img, image.IIIFImageClient)
         assert img.size.options['exact'] is True
 
         # malformed
-        with pytest.raises(iiif.ParseError):
-            img = iiif.IIIFImageClient.init_from_url(INVALID_URLS['info'])
-        with pytest.raises(iiif.ParseError):
-            iiif.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
-        with pytest.raises(iiif.ParseError):
-            iiif.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
-        with pytest.raises(iiif.ParseError):
-            iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_size'])
-        with pytest.raises(iiif.ParseError):
-            iiif.IIIFImageClient.init_from_url(INVALID_URLS['bad_region'])
-        with pytest.raises(iiif.ParseError):
-            iiif.IIIFImageClient.init_from_url('http://info.json')
+        with pytest.raises(image.ParseError):
+            img = image.IIIFImageClient.init_from_url(INVALID_URLS['info'])
+        with pytest.raises(image.ParseError):
+            image.IIIFImageClient.init_from_url(INVALID_URLS['simple'])
+        with pytest.raises(image.ParseError):
+            image.IIIFImageClient.init_from_url(INVALID_URLS['complex'])
+        with pytest.raises(image.ParseError):
+            image.IIIFImageClient.init_from_url(INVALID_URLS['bad_size'])
+        with pytest.raises(image.ParseError):
+            image.IIIFImageClient.init_from_url(INVALID_URLS['bad_region'])
+        with pytest.raises(image.ParseError):
+            image.IIIFImageClient.init_from_url('http://info.json')
 
     def test_as_dicts(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['complex'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['complex'])
         assert img.as_dict() == {
             'region': {
                 'full': False,
@@ -228,7 +229,7 @@ class TestIIIFImageClient:
             'format': 'jpg'
         }
 
-    @patch('piffle.iiif.requests')
+    @patch('piffle.image.requests')
     def test_image_info(self, mockrequests):
         # test image info logic by mocking requests
         mockrequests.codes.ok = requests.codes.ok
@@ -237,30 +238,30 @@ class TestIIIFImageClient:
         mockresponse.json.return_value = sample_image_info
 
         # valid response
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         assert img.image_info == sample_image_info
         mockrequests.get.assert_called_with(img.info())
         mockresponse.json.assert_called_with()
 
         # error response
         mockresponse.status_code = 400
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         img.image_info
         mockresponse.raise_for_status.assert_called_with()
 
     def test_image_width_height(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
 
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=sample_image_info):
             assert img.image_width == sample_image_info['width']
             assert img.image_height == sample_image_info['height']
 
     def test_canonicalize(self):
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         square_img_info = sample_image_info.copy()
         square_img_info.update({'height': 100, 'width': 100})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=square_img_info):
             # square region for square image = full
             img.region.parse('square')
@@ -274,20 +275,20 @@ class TestIIIFImageClient:
 class TestImageRegion:
 
     def test_defaults(self):
-        region = iiif.ImageRegion()
+        region = image.ImageRegion()
         assert str(region) == 'full'
-        assert region.as_dict() == iiif.ImageRegion.region_defaults
+        assert region.as_dict() == image.ImageRegion.region_defaults
 
     def test_init(self):
         # full
-        region = iiif.ImageRegion(full=True)
+        region = image.ImageRegion(full=True)
         assert region.as_dict()['full'] is True
         # square
-        region = iiif.ImageRegion(square=True)
+        region = image.ImageRegion(square=True)
         assert region.as_dict()['square'] is True
         assert region.as_dict()['full'] is False
         # region
-        region = iiif.ImageRegion(x=5, y=7, width=100, height=103)
+        region = image.ImageRegion(x=5, y=7, width=100, height=103)
         assert region.as_dict()['full'] is False
         assert region.as_dict()['x'] == 5
         assert region.as_dict()['y'] == 7
@@ -295,8 +296,8 @@ class TestImageRegion:
         assert region.as_dict()['height'] == 103
         assert region.as_dict()['percent'] is False
         # percentage region
-        region = iiif.ImageRegion(x=5, y=7, width=100, height=103,
-                                  percent=True)
+        region = image.ImageRegion(x=5, y=7, width=100, height=103,
+                                   percent=True)
         assert region.as_dict()['full'] is False
         assert region.as_dict()['x'] == 5
         assert region.as_dict()['y'] == 7
@@ -305,38 +306,38 @@ class TestImageRegion:
         assert region.as_dict()['percent'] is True
 
         # errors
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             # invalid parameter
-            iiif.ImageRegion(bogus='foo')
+            image.ImageRegion(bogus='foo')
 
             # incomplete options
-            iiif.ImageRegion(x=1)
-            iiif.ImageRegion(x=1, y=2)
-            iiif.ImageRegion(x=1, y=2, w=20)
-            iiif.ImageRegion(percent=True)
-            iiif.ImageRegion().set_options(percent=True, x=1)
+            image.ImageRegion(x=1)
+            image.ImageRegion(x=1, y=2)
+            image.ImageRegion(x=1, y=2, w=20)
+            image.ImageRegion(percent=True)
+            image.ImageRegion().set_options(percent=True, x=1)
 
             # TODO: type checking? (not yet implemented)
 
-        with pytest.raises(iiif.ParseError):
-            iiif.ImageRegion().parse('1,2')
+        with pytest.raises(image.ParseError):
+            image.ImageRegion().parse('1,2')
 
     def test_render(self):
-        region = iiif.ImageRegion(full=True)
+        region = image.ImageRegion(full=True)
         assert str(region) == 'full'
-        region = iiif.ImageRegion(square=True)
+        region = image.ImageRegion(square=True)
         assert str(region) == 'square'
-        region = iiif.ImageRegion(x=5, y=5, width=100, height=100)
+        region = image.ImageRegion(x=5, y=5, width=100, height=100)
         assert str(region) == '5,5,100,100'
-        region = iiif.ImageRegion(x=5, y=5, width=100, height=100,
-                                  percent=True)
+        region = image.ImageRegion(x=5, y=5, width=100, height=100,
+                                   percent=True)
         assert str(region) == 'pct:5,5,100,100'
-        region = iiif.ImageRegion(x=5.1, y=3.14, width=100.76, height=100.89,
-                                  percent=True)
+        region = image.ImageRegion(x=5.1, y=3.14, width=100.76, height=100.89,
+                                   percent=True)
         assert str(region) == 'pct:5.1,3.14,100.76,100.89'
 
     def test_parse(self):
-        region = iiif.ImageRegion()
+        region = image.ImageRegion()
         # full
         region_str = 'full'
         region.parse(region_str)
@@ -374,20 +375,20 @@ class TestImageRegion:
         assert region_opts['percent'] is True
 
         # invalid or incomplete region strings
-        with pytest.raises(iiif.ParseError):
+        with pytest.raises(image.ParseError):
             region.parse('pct:1,3,')
-        with pytest.raises(iiif.ParseError):
+        with pytest.raises(image.ParseError):
             region.parse('one,two,three,four')
 
     def test_canonicalize(self):
         # any canonicalization that requires image dimensions to calculate
         # should raise an error
-        region = iiif.ImageRegion()
+        region = image.ImageRegion()
         region.parse('square')
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             region.canonicalize()
 
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         # full to full - trivial canonicalization
         img.region.canonicalize()
         assert str(img.region) == 'full'
@@ -401,7 +402,7 @@ class TestImageRegion:
         # test with square image size
         square_img_info = sample_image_info.copy()
         square_img_info.update({'height': 100, 'width': 100})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=square_img_info):
             # square requested, image is square = full
             img.region.parse('square')
@@ -419,11 +420,10 @@ class TestImageRegion:
             img.region.canonicalize()
             assert str(img.region) == '10,1,50,75'
 
-
         # test with square with non-square image size
         tall_img_info = sample_image_info.copy()
         tall_img_info.update({'width': 100, 'height': 150})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=tall_img_info):
             # square requested, should convert to x,y,w,h
             img.region.parse('square')
@@ -432,7 +432,7 @@ class TestImageRegion:
 
         wide_img_info = sample_image_info.copy()
         wide_img_info.update({'width': 200, 'height': 50})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=wide_img_info):
             # square requested, should convert to x,y,w,h
             img.region.parse('square')
@@ -444,53 +444,53 @@ class TestImageRegion:
 class TestImageSize:
 
     def test_defaults(self):
-        size = iiif.ImageSize()
+        size = image.ImageSize()
         assert str(size) == 'full'
-        assert size.as_dict() == iiif.ImageSize.size_defaults
+        assert size.as_dict() == image.ImageSize.size_defaults
 
     def test_init(self):
         # full
-        size = iiif.ImageSize(full=True)
+        size = image.ImageSize(full=True)
         assert size.as_dict()['full'] is True
         # max
-        size = iiif.ImageSize(max=True)
+        size = image.ImageSize(max=True)
         assert size.as_dict()['max'] is True
         assert size.as_dict()['full'] is False
         # percentage
-        size = iiif.ImageSize(percent=50)
+        size = image.ImageSize(percent=50)
         assert size.as_dict()['full'] is False
         assert size.as_dict()['percent'] == 50
         # width only
-        size = iiif.ImageSize(width=100)
+        size = image.ImageSize(width=100)
         assert size.as_dict()['width'] == 100
         # height only
-        size = iiif.ImageSize(height=200)
+        size = image.ImageSize(height=200)
         assert size.as_dict()['height'] == 200
 
         # errors
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             # invalid parameter
-            iiif.ImageSize(bogus='foo')
+            image.ImageSize(bogus='foo')
 
             # incomplete options ?
             # type checking? (not yet implemented)
 
     def test_render(self):
-        size = iiif.ImageSize(full=True)
+        size = image.ImageSize(full=True)
         assert str(size) == 'full'
-        size = iiif.ImageSize(max=True)
+        size = image.ImageSize(max=True)
         assert str(size) == 'max'
-        size = iiif.ImageSize(percent=50)
+        size = image.ImageSize(percent=50)
         assert str(size) == 'pct:50'
-        size = iiif.ImageSize(width=100, height=105)
+        size = image.ImageSize(width=100, height=105)
         assert str(size) == '100,105'
-        size = iiif.ImageSize(width=100)
+        size = image.ImageSize(width=100)
         assert str(size) == '100,'
-        size = iiif.ImageSize(height=105)
+        size = image.ImageSize(height=105)
         assert str(size) == ',105'
 
     def test_parse(self):
-        size = iiif.ImageSize()
+        size = image.ImageSize()
         # full
         size_str = 'full'
         size.parse(size_str)
@@ -521,20 +521,20 @@ class TestImageSize:
         assert size_opts['percent'] == 55
 
         # invalid or incomplete size strings
-        with pytest.raises(iiif.ParseError):
+        with pytest.raises(image.ParseError):
             size.parse('pct:')
-        with pytest.raises(iiif.ParseError):
+        with pytest.raises(image.ParseError):
             size.parse('one,two')
 
     def test_canonicalize(self):
         # any canonicalization that requires image dimensions to calculate
         # should raise an error
-        size = iiif.ImageSize()
+        size = image.ImageSize()
         size.parse(',5')
-        with pytest.raises(iiif.IIIFImageClientException):
+        with pytest.raises(image.IIIFImageClientException):
             size.canonicalize()
 
-        img = iiif.IIIFImageClient.init_from_url(VALID_URLS['simple'])
+        img = image.IIIFImageClient.init_from_url(VALID_URLS['simple'])
         # full to full - trivial canonicalization
         img.size.canonicalize()
         assert str(img.size) == 'full'
@@ -542,7 +542,7 @@ class TestImageSize:
         # test sizes with square image size
         square_img_info = sample_image_info.copy()
         square_img_info.update({'height': 100, 'width': 100})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=square_img_info):
             # requested as ,h - convert to w,
             img.size.parse(',50')
@@ -562,7 +562,7 @@ class TestImageSize:
         # test sizes with rectangular image size
         rect_img_info = sample_image_info.copy()
         rect_img_info.update({'width': 50, 'height': 100})
-        with patch.object(iiif.IIIFImageClient, 'image_info',
+        with patch.object(image.IIIFImageClient, 'image_info',
                           new=rect_img_info):
             img.size.parse('!50,50')
             img.size.canonicalize()
@@ -572,41 +572,41 @@ class TestImageSize:
 class TestImageRotation:
 
     def test_defaults(self):
-        rotation = iiif.ImageRotation()
+        rotation = image.ImageRotation()
         assert str(rotation) == '0'
-        assert rotation.as_dict() == iiif.ImageRotation.rotation_defaults
+        assert rotation.as_dict() == image.ImageRotation.rotation_defaults
 
     def test_init(self):
         # degrees
-        rotation = iiif.ImageRotation(degrees=90)
+        rotation = image.ImageRotation(degrees=90)
         assert rotation.as_dict()['degrees'] == 90
         assert rotation.as_dict()['mirrored'] is False
-        rotation = iiif.ImageRotation(degrees=95, mirrored=True)
+        rotation = image.ImageRotation(degrees=95, mirrored=True)
         assert rotation.as_dict()['degrees'] == 95
         assert rotation.as_dict()['mirrored'] is True
 
     def test_render(self):
-        rotation = iiif.ImageRotation()
+        rotation = image.ImageRotation()
         assert str(rotation) == '0'
-        rotation = iiif.ImageRotation(degrees=90)
+        rotation = image.ImageRotation(degrees=90)
         assert str(rotation) == '90'
-        rotation = iiif.ImageRotation(degrees=95, mirrored=True)
+        rotation = image.ImageRotation(degrees=95, mirrored=True)
         assert str(rotation) == '!95'
 
         # canonicalization
         # - trim any trailing zeros in a decimal value
-        assert str(iiif.ImageRotation(degrees=93.0)) == '93'
+        assert str(image.ImageRotation(degrees=93.0)) == '93'
         # - leading zero if less than 1
-        assert str(iiif.ImageRotation(degrees=0.05)) == '0.05'
+        assert str(image.ImageRotation(degrees=0.05)) == '0.05'
         # - ! if mirrored, followed by integer if possible
-        rotation = iiif.ImageRotation(degrees=95.00, mirrored=True)
+        rotation = image.ImageRotation(degrees=95.00, mirrored=True)
         assert str(rotation) == '!95'
         # explicitly test canonicalize method, even though it does nothing
         rotation.canonicalize()
         assert str(rotation) == '!95'
 
     def test_parse(self):
-        rotation = iiif.ImageRotation()
+        rotation = image.ImageRotation()
         rotation_str = '180'
         rotation.parse(rotation_str)
         assert str(rotation) == rotation_str  # round trip
@@ -614,3 +614,10 @@ class TestImageRotation:
         rotation.parse(rotation_str)
         assert str(rotation) == rotation_str  # round trip
         assert rotation.as_dict()['mirrored'] is True
+
+
+@pytest.mark.skip
+def test_deprecated():
+    with pytest.raises(DeprecationWarning) as warn:
+        from piffle import iiif
+    assert 'piffle.iiif is deprecated' in str(warn)

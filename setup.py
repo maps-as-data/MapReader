@@ -26,7 +26,7 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-test_requirements = ['pytest>=3.6', 'pytest-cov', 'mock']
+test_requirements = ['pytest>=3.6', 'pytest-cov']
 
 setup(
     name='piffle',
