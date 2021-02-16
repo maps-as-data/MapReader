@@ -1,5 +1,10 @@
 # Change & Version Information
 
+## 0.4
+
+* Dropped support for Python versions 2.7, 3.4, 3.6
+* Now tested against python 3.7 and 3.8
+
 ## 0.3.2
 
 * Dropped support for Python 3.3
