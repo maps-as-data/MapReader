@@ -1,0 +1,71 @@
+name: unit tests
+
+on:
+  push: # run on every push or PR to any branch
+  pull_request:
+  schedule: # run automatically on main branch each Tuesday at 11am
+    - cron: "0 16 * * 2"
+
+jobs:
+  python-unit:
+    name: Python unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.6, 3.7, 3.8]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+
+      # We base the python cache on the hash of all requirements files, so that
+      # if any change, the cache is invalidated.
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('setup.py') }}
+          restore-keys: |
+            pip-${{ hashFiles('setup.py') }}
+            pip-
+
+      - name: Install package with dependencies
+        run: |
+          pip install -e .
+          pip install -e '.[test]'
+          pip install codecov
+
+      - name: Run pytest
+        run: py.test --cov=piffle --cov-report=xml
+
+      - name: Upload test coverage to Codecov
+        uses: codecov/codecov-action@v1
+
+  # Set the color of the slack message used in the next step based on the
+      # status of the build: "danger" for failure, "good" for success,
+      # "warning" for error
+      - name: Set Slack message color based on build status
+        if: ${{ always() }}
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: echo "SLACK_COLOR=$(if [ "$JOB_STATUS" == "success" ]; then echo "good"; elif [ "$JOB_STATUS" == "failure" ]; then echo "danger"; else echo "warning"; fi)" >> $GITHUB_ENV
+
+      # Send a message to slack to report the build status. The webhook is stored
+      # at the organization level and available to all repositories. Only run on
+      # scheduled builds & pushes, since PRs automatically report to Slack.
+      - name: Report status to Slack
+        uses: rtCamp/action-slack-notify@master
+        if: ${{ always() && (github.event_name == 'schedule' || github.event_name == 'push') }}
+        continue-on-error: true
+        env:
+          SLACK_COLOR: ${{ env.SLACK_COLOR }}
+          SLACK_WEBHOOK: ${{ secrets.ACTIONS_SLACK_WEBHOOK }}
+          SLACK_TITLE: "Workflow `${{ github.workflow }}`: ${{ job.status }}"
+          SLACK_MESSAGE: "Run <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}> on <https://github.com/${{ github.repository }}/|${{ github.repository }}@${{ github.ref }}>"
+          SLACK_FOOTER: "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|View commit>"
+          MSG_MINIMAL: true # use compact slack message format
