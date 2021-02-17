@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from future.utils import python_2_unicode_compatible
-import six
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from cached_property import cached_property
 import requests
@@ -12,12 +10,10 @@ import requests
 
 class IIIFImageClientException(Exception):
     '''IIIFImageClient custom exception class'''
-    pass
 
 
 class ParseError(IIIFImageClientException):
     '''Exception raised when an IIIF image could not be parsed'''
-    pass
 
 
 # NOTE: possible image component base class?
@@ -26,7 +22,6 @@ class ParseError(IIIFImageClientException):
 # validating options (and could add option type checking)
 
 
-@python_2_unicode_compatible
 class ImageRegion(object):
     '''IIIF Image region. Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and region options.
@@ -133,8 +128,8 @@ class ImageRegion(object):
             self.options['full'] = True
             # return immediately
             return
-        else:
-            self.options['full'] = False
+
+        self.options['full'] = False
 
         if region == 'square':
             self.options['square'] = True
@@ -239,7 +234,6 @@ class ImageRegion(object):
             return
 
 
-@python_2_unicode_compatible
 class ImageSize(object):
     '''IIIF Image Size.  Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and size options.
@@ -338,9 +332,9 @@ class ImageSize(object):
         if size == 'full':
             self.options['full'] = True
             return
+
         # for any other case, full should be false
-        else:
-            self.options['full'] = False
+        self.options['full'] = False
 
         # max?
         if size == 'max':
@@ -435,7 +429,6 @@ class ImageSize(object):
             })
 
 
-@python_2_unicode_compatible
 class ImageRotation(object):
     '''IIIF Image rotation Intended to be used with :class:`IIIFImageClient`.
     Can be initialized with related image object and rotation options.
@@ -515,7 +508,6 @@ class ImageRotation(object):
         return
 
 
-@python_2_unicode_compatible
 class IIIFImageClient(object):
     '''Simple IIIF Image API client for generating IIIF image urls
     in an object-oriented, pythonic fashion.  Can be extended,
@@ -585,9 +577,9 @@ class IIIFImageClient(object):
         info.update({
             'endpoint': self.api_endpoint,
             'id': self.get_image_id(),
-            'region': six.text_type(self.region),
-            'size': six.text_type(self.size),
-            'rot': six.text_type(self.rotation)
+            'region': str(self.region),
+            'size': str(self.size),
+            'rot': str(self.rotation)
         })
         return '%(endpoint)s/%(id)s/%(region)s/%(size)s/%(rot)s/%(quality)s.%(fmt)s' % info
 
@@ -608,8 +600,8 @@ class IIIFImageClient(object):
         resp = requests.get(self.info())
         if resp.status_code == requests.codes.ok:
             return resp.json()
-        else:
-            resp.raise_for_status()
+
+        resp.raise_for_status()
 
     @property
     def image_width(self):
@@ -666,7 +658,7 @@ class IIIFImageClient(object):
         path_components = [path for path in parsed_url.path.split('/') if path]
         if not path_components:
             raise ParseError('Invalid IIIF image url: %s'
-                                % url)
+                             % url)
         # pop off last portion of the url to determine if this is an info url
         path_basename = path_components.pop()
         opts = {}
@@ -677,7 +669,7 @@ class IIIFImageClient(object):
             # missing, we will misinterpret the api endpoint or the image id
             if len(path_components) < 1:
                 raise ParseError('Invalid IIIF image information url: %s'
-                                    % url)
+                                 % url)
             image_id = path_components.pop()
 
         # image request
