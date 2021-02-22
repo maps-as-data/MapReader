@@ -26,7 +26,7 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-test_requirements = ['pytest>=3.6', 'pytest-cov', 'mock']
+test_requirements = ['pytest>=3.6', 'pytest-cov']
 
 setup(
     name='piffle',
@@ -36,7 +36,7 @@ setup(
     url='https://github.com/princeton-cdh/piffle',
     license='Apache License, Version 2.0',
     packages=find_packages(),
-    install_requires=['requests', 'cached-property'],
+    install_requires=['requests', 'cached-property', 'attrdict'],
     setup_requires=['pytest-runner'],
     tests_require=test_requirements,
     extras_require={

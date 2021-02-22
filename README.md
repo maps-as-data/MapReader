@@ -10,9 +10,7 @@ object-oriented, pythonic fashion.
 
 Piffle is tested on Python 3.6-3.8.
 
-Piffle was originally developed by Emory University as a part of
-[Readux](https://github.com/ecds/readux>) and forked as a separate project
-under [emory-lits-labs](https://github.com/emory-lits-labs/).
+Piffle was originally developed by Rebecca Sutton Koeser at Emory University as a part of [Readux](https://github.com/ecds/readux>) and forked as a separate project under [emory-lits-labs](https://github.com/emory-lits-labs/). It was later transferred to Rebecca Sutton Koeser at the Center for Digital Humanities at Princeton.
 
 ## Installation and example use:
 
@@ -21,7 +19,7 @@ under [emory-lits-labs](https://github.com/emory-lits-labs/).
 Example use for generating an IIIF image url:
 
 ```
->>> from piffle.iiif import IIIFImageClient
+>>> from piffle.image import IIIFImageClient
 >>> myimg = IIIFImageClient('http://image.server/path/', 'myimgid')
 >>> print myimg
 http://image.server/path/myimgid/full/full/0/default.jpg
@@ -34,7 +32,7 @@ http://image.server/path/myimgid/full/120,/0/default.png
 Example use for parsing an IIIF image url:
 
 ```
->>> from piffle.iiif import IIIFImageClient
+>>> from piffle.image import IIIFImageClient
 >>> myimg = IIIFImageClient.init_from_url('http://www.example.org/image-service/abcd1234/full/full/0/default.jpg')
 >>> print myimg
 http://www.example.org/image-service/abcd1234/full/full/0/default.jpg
