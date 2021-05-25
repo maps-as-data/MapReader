@@ -46,6 +46,30 @@ False
 0.0
 ```
 
+Example use for reading a IIIF manifest:
+
+```
+>>> from piffle.image import IIIFImageClient
+>>> from piffle.presentation import IIIFPresentation
+>>>  manifest = IIIFPresentation.from_url('https://iiif.bodleian.ox.ac.uk/iiif/manifest/60834383-7146-41ab-bfe1-48ee97bc04be.json')
+>>> manifest.label
+'Bodleian Library MS. Bodl. 264'
+>>> manifest.id
+'https://iiif.bodleian.ox.ac.uk/iiif/manifest/60834383-7146-41ab-bfe1-48ee97bc04be.json'
+>>> manifest.type
+'sc:Manifest'
+>>> for canvas in manifest.sequences[0].canvases[:5]:
+...     image_id = canvas.images[0].resource.id
+...     iiif_img = IIIFImageClient(*image_id.rsplit('/', 1))
+...     print(str(iiif_img.size(height=250)))
+...
+https://iiif.bodleian.ox.ac.uk/iiif/image/90701d49-5e0c-4fb5-9c7d-45af96565468/full/,250/0/default.jpg
+https://iiif.bodleian.ox.ac.uk/iiif/image/e878cc78-acd3-43ca-ba6e-90a392f15891/full/,250/0/default.jpg
+https://iiif.bodleian.ox.ac.uk/iiif/image/0f1ed064-a972-4215-b884-d8d658acefc5/full/,250/0/default.jpg
+https://iiif.bodleian.ox.ac.uk/iiif/image/6fe52b9a-5bb7-4b5b-bbcd-ad0489fcad2a/full/,250/0/default.jpg
+https://iiif.bodleian.ox.ac.uk/iiif/image/483ff8ec-347d-4070-8442-dbc15bc7b4de/full/,250/0/default.jpg
+```
+
 ## Development and Testing
 
 This project uses [git-flow](https://github.com/nvie/gitflow) branching conventions.
