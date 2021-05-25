@@ -4,6 +4,9 @@
 
 * Dropped support for Python versions 2.7, 3.4, 3.5
 * Now tested against python 3.7 and 3.8
+* Moved continues integration from Travis-CI to GitHub Actions
+* Renamed `piffle.iiif` to `piffle.image`, but for backwards compatibility `piffle.iiif` will still work
+* Now includes `piffle.presentation` for simple read access to IIIF Presentation content
 
 ## 0.3.2
 
