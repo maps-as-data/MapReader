@@ -1,0 +1,899 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest",
+  "@type": "sc:Manifest",
+  "label": [
+    "Chto my stroim : Tetrad\u02b9 s kartinkami"
+  ],
+  "viewingHint": "paged",
+  "viewingDirection": "left-to-right",
+  "sequences": [
+    {
+      "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/sequence/normal",
+      "@type": "sc:Sequence",
+      "canvases": [
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p02871v98d",
+          "@type": "sc:Canvas",
+          "label": "image 1",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/p02871v98d-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F28%2F71%2Fv9%2F8d-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6470,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F28%2F71%2Fv9%2F8d-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p02871v98d"
+            }
+          ],
+          "width": 6470,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/p02871v98d/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/prr172w722",
+          "@type": "sc:Canvas",
+          "label": "image 2",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/prr172w722-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pr%2Fr1%2F72%2Fw7%2F22-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6289,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pr%2Fr1%2F72%2Fw7%2F22-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/prr172w722"
+            }
+          ],
+          "width": 6289,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/prr172w722/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/png452h250",
+          "@type": "sc:Canvas",
+          "label": "image 3",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/png452h250-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pn%2Fg4%2F52%2Fh2%2F50-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pn%2Fg4%2F52%2Fh2%2F50-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/png452h250"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/png452h250/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pcf95k9204",
+          "@type": "sc:Canvas",
+          "label": "image 4",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pcf95k9204-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pc%2Ff9%2F5k%2F92%2F04-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pc%2Ff9%2F5k%2F92%2F04-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pcf95k9204"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pcf95k9204/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pvt151j60m",
+          "@type": "sc:Canvas",
+          "label": "image 5",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pvt151j60m-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pv%2Ft1%2F51%2Fj6%2F0m-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pv%2Ft1%2F51%2Fj6%2F0m-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pvt151j60m"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pvt151j60m/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p08613m187",
+          "@type": "sc:Canvas",
+          "label": "image 6",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/p08613m187-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F86%2F13%2Fm1%2F87-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F86%2F13%2Fm1%2F87-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p08613m187"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/p08613m187/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p7p88df99m",
+          "@type": "sc:Canvas",
+          "label": "image 7",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/p7p88df99m-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/p7%2Fp8%2F8d%2Ff9%2F9m-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/p7%2Fp8%2F8d%2Ff9%2F9m-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p7p88df99m"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/p7p88df99m/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph702r431f",
+          "@type": "sc:Canvas",
+          "label": "image 8",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/ph702r431f-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F70%2F2r%2F43%2F1f-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F70%2F2r%2F43%2F1f-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph702r431f"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/ph702r431f/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pth83n019h",
+          "@type": "sc:Canvas",
+          "label": "image 9",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pth83n019h-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pt%2Fh8%2F3n%2F01%2F9h-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pt%2Fh8%2F3n%2F01%2F9h-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pth83n019h"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pth83n019h/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phx11zd277",
+          "@type": "sc:Canvas",
+          "label": "image 10",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/phx11zd277-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2Fx1%2F1z%2Fd2%2F77-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2Fx1%2F1z%2Fd2%2F77-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phx11zd277"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/phx11zd277/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ppn89f6070",
+          "@type": "sc:Canvas",
+          "label": "image 11",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/ppn89f6070-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pp%2Fn8%2F9f%2F60%2F70-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pp%2Fn8%2F9f%2F60%2F70-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ppn89f6070"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/ppn89f6070/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pqv33sx017",
+          "@type": "sc:Canvas",
+          "label": "image 12",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pqv33sx017-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pq%2Fv3%2F3s%2Fx0%2F17-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 7200,
+                "height": 4136,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pq%2Fv3%2F3s%2Fx0%2F17-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pqv33sx017"
+            }
+          ],
+          "width": 7200,
+          "height": 4136,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pqv33sx017/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pjm215n89q",
+          "@type": "sc:Canvas",
+          "label": "image 13",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pjm215n89q-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pj%2Fm2%2F15%2Fn8%2F9q-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pj%2Fm2%2F15%2Fn8%2F9q-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pjm215n89q"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pjm215n89q/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pwm118n419",
+          "@type": "sc:Canvas",
+          "label": "image 14",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pwm118n419-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pw%2Fm1%2F18%2Fn4%2F19-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6356,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pw%2Fm1%2F18%2Fn4%2F19-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pwm118n419"
+            }
+          ],
+          "width": 6356,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pwm118n419/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc97x",
+          "@type": "sc:Canvas",
+          "label": "image 15",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/ph128pc97x-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F12%2F8p%2Fc9%2F7x-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F12%2F8p%2Fc9%2F7x-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc97x"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/ph128pc97x/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pbk129890w",
+          "@type": "sc:Canvas",
+          "label": "image 16",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pbk129890w-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pb%2Fk1%2F29%2F89%2F0w-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6287,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pb%2Fk1%2F29%2F89%2F0w-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pbk129890w"
+            }
+          ],
+          "width": 6287,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pbk129890w/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psq87cs902",
+          "@type": "sc:Canvas",
+          "label": "image 17",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/psq87cs902-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ps%2Fq8%2F7c%2Fs9%2F02-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ps%2Fq8%2F7c%2Fs9%2F02-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psq87cs902"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/psq87cs902/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc987",
+          "@type": "sc:Canvas",
+          "label": "image 18",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/ph128pc987-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F12%2F8p%2Fc9%2F87-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6287,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2F12%2F8p%2Fc9%2F87-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc987"
+            }
+          ],
+          "width": 6287,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/ph128pc987/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phm50vs000",
+          "@type": "sc:Canvas",
+          "label": "image 19",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/phm50vs000-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2Fm5%2F0v%2Fs0%2F00-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ph%2Fm5%2F0v%2Fs0%2F00-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phm50vs000"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/phm50vs000/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pj09908750",
+          "@type": "sc:Canvas",
+          "label": "image 20",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pj09908750-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pj%2F09%2F90%2F87%2F50-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6289,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pj%2F09%2F90%2F87%2F50-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pj09908750"
+            }
+          ],
+          "width": 6289,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pj09908750/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psn00bx49q",
+          "@type": "sc:Canvas",
+          "label": "image 21",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/psn00bx49q-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/ps%2Fn0%2F0b%2Fx4%2F9q-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 7200,
+                "height": 4077,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/ps%2Fn0%2F0b%2Fx4%2F9q-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psn00bx49q"
+            }
+          ],
+          "width": 7200,
+          "height": 4077,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/psn00bx49q/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        },
+        {
+          "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pzg64vk52v",
+          "@type": "sc:Canvas",
+          "label": "image 22",
+          "images": [
+            {
+              "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/annotation/pzg64vk52v-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://libimages1.princeton.edu/loris/plum_prod/pz%2Fg6%2F4v%2Fk5%2F2v-intermediate_file.jp2/full/!600,600/0/default.jpg",
+                "@type": "dcterms:Image",
+                "format": "image/jpeg",
+                "width": 6290,
+                "height": 7200,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://libimages1.princeton.edu/loris/plum_prod/pz%2Fg6%2F4v%2Fk5%2F2v-intermediate_file.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pzg64vk52v"
+            }
+          ],
+          "width": 6290,
+          "height": 7200,
+          "otherContent": [
+            {
+              "@id": "https://plum.princeton.edu/concern/container/ph415q7581/file_sets/pzg64vk52v/text",
+              "@type": "sc:AnnotationList",
+              "label": "Text of this Page"
+            }
+          ]
+        }
+      ],
+      "viewingHint": "paged",
+      "rendering": {
+        "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/pdf/gray",
+        "label": "Download as PDF",
+        "format": "application/pdf"
+      }
+    }
+  ],
+  "structures": [
+    {
+      "@id": "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/range/g69883452374360",
+      "@type": "sc:Range",
+      "label": "Logical",
+      "viewingHint": "top",
+      "canvases": [
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p02871v98d",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/prr172w722",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/png452h250",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pcf95k9204",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pvt151j60m",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p08613m187",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p7p88df99m",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph702r431f",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pth83n019h",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phx11zd277",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ppn89f6070",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pqv33sx017",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pjm215n89q",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pwm118n419",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc97x",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pbk129890w",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psq87cs902",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/ph128pc987",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/phm50vs000",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pj09908750",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/psn00bx49q",
+        "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/pzg64vk52v"
+      ]
+    }
+  ],
+  "metadata": [
+    {
+      "label": "Creator",
+      "value": [
+        "Savel\u02b9ev, L. (Leonid), 1904-1941"
+      ]
+    },
+    {
+      "label": "Publisher",
+      "value": [
+        "[Leningrad ; Moskva] : Gosudarstvennoe izdatel\u02b9stvo, 1930."
+      ]
+    },
+    {
+      "label": "Date created",
+      "value": [
+        "1930-01-01T00:00:00Z"
+      ]
+    },
+    {
+      "label": "Subject",
+      "value": [
+        "Industrialization\u2014Soviet Union\u2014Juvenile literature",
+        "Building\u2014Soviet Union\u2014Juvenile literature",
+        "Natural resources\u2014Soviet Union\u2014Juvenile literature"
+      ]
+    },
+    {
+      "label": "Language",
+      "value": [
+        "rus"
+      ]
+    },
+    {
+      "label": "Identifier",
+      "value": [
+        "ark:/88435/7p88ck29d"
+      ]
+    },
+    {
+      "label": "Replaces",
+      "value": [
+        "pudl0127/4765261"
+      ]
+    },
+    {
+      "label": "Format",
+      "value": "Book"
+    },
+    {
+      "label": "Extent",
+      "value": [
+        "[20] p. : color ill. ; 23 cm."
+      ]
+    },
+    {
+      "label": "Call number",
+      "value": [
+        "Pams / NR 20 / Cyrillic / Box 15 9331"
+      ]
+    },
+    {
+      "label": "Author",
+      "value": [
+        "Savel\u02b9ev, L. (Leonid), 1904-1941"
+      ]
+    },
+    {
+      "label": "Illustrator",
+      "value": [
+        "Tambi, V."
+      ]
+    },
+    {
+      "label": "Collection",
+      "value": [
+        "Soviet Era Books for Children and Youth",
+        "Treasures of the Cotsen Collection"
+      ]
+    }
+  ],
+  "thumbnail": {
+     "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F28%2F71%2Fv9%2F8d-intermediate_file.jp2/full/!200,150/0/default.jpg",
+     "service": {
+        "@context": "http://iiif.io/api/image/2/context.json",
+        "@id": "https://libimages1.princeton.edu/loris/plum_prod/p0%2F28%2F71%2Fv9%2F8d-intermediate_file.jp2",
+        "profile": "http://iiif.io/api/image/2/level2.json"
+     }
+   },
+  "seeAlso": {
+    "@id": "https://bibdata.princeton.edu/bibliographic/4765261/jsonld",
+    "format": "application/ld+json"
+  },
+  "license": "http://rightsstatements.org/vocab/NKC/1.0/",
+  "logo": "https://example.com/logo.png"
+}

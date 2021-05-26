@@ -19,26 +19,24 @@ CLASSIFIERS = [
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-test_requirements = ['pytest>=3.6', 'pytest-cov', 'mock']
+test_requirements = ['pytest>=3.6', 'pytest-cov']
 
 setup(
     name='piffle',
     version=piffle.__version__,
-    author='Emory University Libraries',
-    author_email='libsysdev-l@listserv.cc.emory.edu',
-    url='https://github.com/emory-lits-labs/piffle',
+    author='The Center for Digital Humanities at Princeton',
+    author_email='cdhdevteam@princeton.edu',
+    url='https://github.com/princeton-cdh/piffle',
     license='Apache License, Version 2.0',
     packages=find_packages(),
-    install_requires=['requests', 'cached-property', 'six', 'future'],
+    install_requires=['requests', 'cached-property', 'attrdict'],
     setup_requires=['pytest-runner'],
     tests_require=test_requirements,
     extras_require={
