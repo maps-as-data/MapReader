@@ -38,8 +38,9 @@ Table of contents
 -----------------
 
 - [Installation and setup](#installation)
-  - [Method 1: Anaconda + install dependencies manually](#method-1)
-  - [Method 2: Anaconda + install dependencies using `environment.yaml` file](#method-2)
+  - [Set up a conda environment](#set-up-a-conda-environment)
+  - [Method 1: pip](#method-1)
+  - [Method 2: poetry (for developers)](#method-2)
 - [Tutorials](./examples) are organized in Jupyter Notebooks as follows:
   - Classification
       - [classification_one_inch_maps_001](./examples/classification_one_inch_maps_001)
@@ -51,11 +52,11 @@ Table of contents
 
 ## Installation
 
+### Set up a conda environment
+
 We strongly recommend installation via Anaconda:
 
 * Refer to [Anaconda website and follow the instructions](https://docs.anaconda.com/anaconda/install/).
-
-### Method 1
 
 * Create a new environment for `mapreader` called `mr_py38`:
 
@@ -69,151 +70,29 @@ conda create -n mr_py38 python=3.8
 conda activate mr_py38
 ```
 
-* Clone `mapreader` source code:
+### Method 1
+
+* Install `mapreader`:
 
 ```bash
-git clone https://github.com/Living-with-machines/MapReader.git 
-```
-
-* Install `mapreader` dependencies:
-
-```
-# Install dependencies
-conda install -c conda-forge rasterio
-conda install shapely
-conda install -c conda-forge notebook
-
-pip install torch torchvision torchaudio
-pip install tensorboard
-pip install scikit-image
-pip install timm
-pip install "dask[complete]"
-pip install geopandas
-pip install tabulate
-pip install joblib
-pip install pyproj
-pip install geopy
-pip install aiohttp
-pip install simplekml
-pip install pytest
-pip install git+https://github.com/kasra-hosseini/parhugin.git
-```
-
-For annotations, `mapreader` uses [ipyannotate](https://github.com/ipyannotate/ipyannotate) which can be installed from:
-
-```
-pip install ipyannotate
-jupyter nbextension enable --py --sys-prefix ipyannotate
-```
-
-We use [kepler.gl](https://kepler.gl/) for visualization. To install:
-
-```
-pip install keplergl
-jupyter nbextension install --py --sys-prefix keplergl 
-jupyter nbextension enable --py --sys-prefix keplergl 
-```
-
-We also use [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html) for plotting. It can be installed via:
-
-```
-conda install -c conda-forge cartopy
-```
-
-(Refer to [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html) for more information.)
-
-Only for users who want to use Azure: 
-
-```
-pip install azure-storage-blob
-```
-
-* Finally, install `mapreader` library:
-
-```
-cd /path/to/MapReader
-pip install -v -e .
-```
-
-Alternatively:
-
-```
-cd /path/to/MapReader
-python setup.py install
-```
-
-* We have provided some [Jupyter Notebooks to show how different components in `mapreader` work](./examples). 
-  To allow the newly created `mr_py38` environment to show up in the notebooks:
-
-```bash
-python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
 * Continue with the [Tutorials](#table-of-contents)!
 
 ### Method 2
 
-* Create a new conda environment and install the dependencies using `environment.yaml` file:
-
-```bash
-conda env create --file environment.yaml python=3.8 --name mr_py38
-```
-
-* Activate the environment:
-
-```bash
-conda activate mr_py38
-```
-
-* For annotations, `mapreader` uses [ipyannotate](https://github.com/ipyannotate/ipyannotate) which can be installed from:
-
-```
-pip install ipyannotate
-jupyter nbextension enable --py --sys-prefix ipyannotate
-```
-
-We use [kepler.gl](https://kepler.gl/) for visualization. To install:
-
-```
-pip install keplergl
-jupyter nbextension install --py --sys-prefix keplergl 
-jupyter nbextension enable --py --sys-prefix keplergl 
-```
-
-We also use [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html) for plotting. It can be installed via:
-
-```
-conda install -c conda-forge cartopy
-```
-
-(Refer to [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html) for more information.)
-
-
 * Clone `mapreader` source code:
 
 ```bash
 git clone https://github.com/Living-with-machines/MapReader.git 
 ```
 
-* Finally, install `mapreader` library:
-
-```
-cd /path/to/MapReader
-pip install -v -e .
-```
-
-Alternatively:
-
-```
-cd /path/to/MapReader
-python setup.py install
-```
-
-* We have provided some [Jupyter Notebooks to show how different components in `mapreader` work](./examples). 
-  To allow the newly created `mr_py38` environment to show up in the notebooks:
+* Install using [poetry](https://python-poetry.org/):
 
 ```bash
-python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+cd /path/to/MapReader
+poetry install
 ```
 
 * Continue with the [Tutorials](#table-of-contents)!
