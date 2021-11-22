@@ -1,0 +1,41 @@
+name: Continuous integration
+
+on: [push]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.8, 3.9]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Update pip
+        run: |
+          python -m ensurepip
+          pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          $CONDA/bin/conda env update --file environment.yaml python=${{ matrix.python-version }} --name base
+
+      - name: Install MapReader 
+        run: |
+          $CONDA/bin/conda install pytest
+          $CONDA/bin/pip install .
+
+      - name: Test with pytest
+        run: |
+          $CONDA/bin/pytest ./mapreader/tests
