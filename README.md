@@ -16,7 +16,7 @@
     <br/>
 </p>
 
-MapReader is an end-to-end computer vision (CV) pipeline with two main components: preprocessing/annotation and training/inference.
+MapReader is an end-to-end computer vision (CV) pipeline with two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
