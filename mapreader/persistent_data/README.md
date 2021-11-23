@@ -1,8 +1,8 @@
-# Re-use terms of the metadata
+# Copyright and re-use terms of the metadata files
 
-The re-use terms of the following metadata files is CC-BY-NC-SA, restricting commercial re-use:
+Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license. 
 
-- `metadata_OS_One_Inch_GB_WFS.json` 
+This applies to the following metadata files stored in `mapreader/persistent_data`:
+
+- `metadata_OS_One_Inch_GB_WFS.json`
 - `metadata_OS_Six_Inch_GB_WFS.json`
-
-Full details: https://maps.nls.uk/copyright.html#exceptions-os

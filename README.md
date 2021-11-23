@@ -50,6 +50,8 @@ Table of contents
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
 - [Credits and re-use terms](#credits-and-re-use-terms)
+  - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
+  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](./mapreader/persistent_data). Read the re-use terms in this section.
 
 ## Installation
 
@@ -100,11 +102,17 @@ poetry install
 
 ## Credits and re-use terms
 
+### Digitized maps
+
+Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license. 
+
+This applies to all maps retrieved via MapReader.
+
 ### Metadata
 
-The re-use terms of the following metadata files stored in `mapreader/persistent_data` is CC-BY-NC-SA, restricting commercial re-use:
+Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license. 
+
+This applies to the following metadata files stored in `mapreader/persistent_data`:
 
 - `metadata_OS_One_Inch_GB_WFS.json`
 - `metadata_OS_Six_Inch_GB_WFS.json`
-
-Full details: https://maps.nls.uk/copyright.html#exceptions-os.
