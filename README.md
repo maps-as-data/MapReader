@@ -104,15 +104,8 @@ poetry install
 
 ### Digitized maps
 
-Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license. 
-
-This applies to all maps retrieved via MapReader.
+Use of these digitised maps for commercial purposes is currently restricted by contract. Use of these digitised maps for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
 
 ### Metadata
 
-Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license. 
-
-This applies to the following metadata files stored in `mapreader/persistent_data`:
-
-- `metadata_OS_One_Inch_GB_WFS.json`
-- `metadata_OS_Six_Inch_GB_WFS.json`
+Use of this metadata for commercial purposes is currently restricted by contract. Use of this metadata for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
