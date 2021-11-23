@@ -49,6 +49,7 @@ Table of contents
         * **Data access:** tileserver
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
+- [Credits and re-use terms](#credits-and-re-use-terms)
 
 ## Installation
 
@@ -96,3 +97,14 @@ poetry install
 ```
 
 * Continue with the [Tutorials](#table-of-contents)!
+
+## Credits and re-use terms
+
+### Metadata
+
+The re-use terms of the following metadata files stored in `mapreader/persistent_data` is CC-BY-NC-SA, restricting commercial re-use:
+
+- `metadata_OS_One_Inch_GB_WFS.json`
+- `metadata_OS_Six_Inch_GB_WFS.json`
+
+Full details: https://maps.nls.uk/copyright.html#exceptions-os.
