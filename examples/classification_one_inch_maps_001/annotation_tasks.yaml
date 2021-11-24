@@ -11,7 +11,7 @@ tasks:
     labels: ["No", "rail space"]
     
 # ---------------------------------------
-# Paths 
+# paths 
 # You need to specify:
 # 1. a name (e.g., task_test_one_inch_maps_001, see below)
 # 2. patch_paths: path to all the patches to be annotated 
