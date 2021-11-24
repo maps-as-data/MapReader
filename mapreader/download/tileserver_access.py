@@ -275,6 +275,7 @@ class TileServer:
         metadata_output_path = os.path.join(output_maps_dirname, output_metadata_filename)
 
         saved_metadata = None        
+        try_cond1 = try_cond2 = False
         if not os.path.isfile(metadata_output_path):
             with open(metadata_output_path, "w") as fio:
                 fio.writelines("|name|url|coord|pub_date|region|polygone\n")
