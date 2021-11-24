@@ -444,7 +444,6 @@ class TileServer:
         cartopy_installed = False
         try:
             import cartopy.crs as ccrs
-            import cartopy
             cartopy_installed = True
         except ImportError:
             print(f"[WARNING] cartopy is not installed!")
