@@ -96,6 +96,7 @@ git clone https://github.com/Living-with-machines/MapReader.git
 ```bash
 cd /path/to/MapReader
 poetry install
+poetry shell
 ```
 
 * Continue with the [Tutorials](#table-of-contents)!
