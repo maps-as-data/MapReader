@@ -81,6 +81,12 @@ conda activate mr_py38
 pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
+* We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](./examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
+
+```bash
+python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+```
+
 * Continue with the [Tutorials](#table-of-contents)!
 
 ### Method 2
