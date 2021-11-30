@@ -1,0 +1,7 @@
+default.profraw
+__pycache__
+.DS_Store
+.ipynb_checkpoints
+.history
+.vscode
+mapreader.egg-info
