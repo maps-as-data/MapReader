@@ -60,6 +60,7 @@ Table of contents
         * **Data access:** tileserver
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
+- [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
   - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
   - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](./mapreader/persistent_data). Read the re-use terms in this section.
@@ -117,6 +118,20 @@ poetry shell
 ```
 
 * Continue with the [Tutorials](#table-of-contents)!
+
+## How to cite MapReader
+
+Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing:
+
+```text
+XXX
+```
+
+and in BibTeX:
+
+```bibtex
+XXX
+```
 
 ## Credits and re-use terms
 
