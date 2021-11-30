@@ -34,7 +34,7 @@ MapReader provides a set of tools to:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
 
-Here is an example output of a MapReader CV model:
+Here is an example output of a MapReader CV model (see [MapReader's paper](XXX)):
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/1899856/144105429-f4f02d49-7b2a-4cdb-ae57-19d077aab713.png" 
