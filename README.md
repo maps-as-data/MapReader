@@ -37,7 +37,7 @@ MapReader provides a set of tools to:
 Here is an example output of a MapReader CV model:
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/1899856/144102500-1df300e1-38b8-4924-84b9-ab9b6150d975.png" 
+  <img src="https://user-images.githubusercontent.com/1899856/144105429-f4f02d49-7b2a-4cdb-ae57-19d077aab713.png" 
         alt="British railspace and buildings as predicted by a MapReader computer vision model" width="100%" align="center">
 </p>
 
