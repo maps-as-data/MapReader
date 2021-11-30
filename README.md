@@ -34,6 +34,17 @@ MapReader provides a set of tools to:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
 
+Here is an example output of a MapReader CV model:
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1899856/144105429-f4f02d49-7b2a-4cdb-ae57-19d077aab713.png" 
+        alt="British railspace and buildings as predicted by a MapReader computer vision model" width="100%" align="center">
+</p>
+
+<p align="center">
+<em>British railspace and buildings as predicted by a MapReader computer vision model. ~30.5M patches from ~16K nineteenthcentury OS map sheets were used. (a) Predicted railspace; (b) predicted buildings; (c) and (d) predicted railspace (red) and buildings (black) in and around Middlesbrough and London, respectively. MapReader extracts information from large images or a set of images at a patch-level, as depicted in the figure insets. For both railspace and buildings, we removed those patches that had no other neighboring patches with the same label in the distance of 250 meters.</em>
+</p>
+
 Table of contents
 -----------------
 
