@@ -16,7 +16,7 @@
     <br/>
 </p>
 
-MapReader is an end-to-end computer vision (CV) pipeline with two main components: preprocessing/annotation and training/inference:
+MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
@@ -25,7 +25,7 @@ MapReader is an end-to-end computer vision (CV) pipeline with two main component
 
 MapReader provides a set of tools to:
 
-- **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileserver which can be used to retrieve maps from OpenStreetMap *OSM* or National Library of Scotland *NLS*). :warning: Refer to the [Credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
+- **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileservers which can be used to retrieve maps from OpenStreetMap *OSM* or National Library of Scotland *NLS*). :warning: Refer to the [Credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
 - **preprocess** images/maps (e.g., divide them into patches, resampling the images, removing borders outside the neatline or reprojecting the map).
 - annotate images/maps or their patches (i.e. slices of an image/map) using an **interactive annotation tool**.
 - **train, fine-tune, and evaluate** various CV models.
