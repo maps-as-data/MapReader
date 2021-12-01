@@ -98,7 +98,10 @@ cd /path/to/MapReader
 poetry install
 poetry shell
 ```
-
+* Adding a `ipython` kernel to use in the [Tutorials](#table-of-contents)
+```bash
+ipython kernel install --name "<name-of-your-kernel>" --user
+```
 * Continue with the [Tutorials](#table-of-contents)!
 
 ## Credits and re-use terms
