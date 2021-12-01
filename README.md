@@ -125,8 +125,10 @@ poetry shell
 
 Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing:
 
+Link: https://arxiv.org/abs/2111.15592
+
 ```text
-Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen and Katherine McDonough (2021), [MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale](https://arxiv.org/abs/2111.15592), **arXiv:2111.15592**.
+Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen and Katherine McDonough (2021), MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale, arXiv:2111.15592.
 ```
 
 and in BibTeX:
@@ -142,7 +144,7 @@ and in BibTeX:
 }
 ```
 
-## Credits and re-use terms
+## Credits and re-use terms 
 
 ### Digitized maps
 
@@ -155,3 +157,8 @@ MapReader can retrieve maps from NLS (National Library of Scotland) via webserve
 We have provided some metadata files in `mapreader/persistent_data`. For all these file, please note the re-use terms:
 
 :warning: Use of the metadata for commercial purposes is currently restricted by contract. Use of this metadata for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
+
+### Acknowledgements
+
+This work was supported by Living with Machines (AHRC grant AH/S01179X/1) and The Alan Turing Institute (EPSRC grant EP/N510129/1). 
+Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
