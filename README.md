@@ -96,6 +96,17 @@ conda activate mr_py38
 pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
+On Windows, you might need to do:
+
+```bash
+conda activate mr_py38
+
+conda install -c conda-forge rasterio
+conda install -c conda-forge fiona
+
+pip install git+https://github.com/Living-with-machines/MapReader.git
+```
+
 * We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](./examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
 
 ```bash
