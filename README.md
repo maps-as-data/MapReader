@@ -96,7 +96,7 @@ conda activate mr_py38
 pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
-On Windows, you might need to do:
+* On Windows, you might need to do:
 
 ```bash
 conda activate mr_py38
