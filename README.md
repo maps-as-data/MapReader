@@ -106,6 +106,9 @@ conda activate mr_py38
 conda install -c conda-forge rasterio=1.2.10
 conda install -c conda-forge fiona=1.8.20
 
+# install git
+conda install git
+
 # install MapReader
 pip install git+https://github.com/Living-with-machines/MapReader.git
 
