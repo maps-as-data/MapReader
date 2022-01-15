@@ -18,13 +18,14 @@
 
 ## Gallery
 
-<p align="center">
+<center>
 
 | **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"> </a> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a> |
 |:---:|:---:|
 |  |  |
 
-</p>
+</center>
+
 
 
 MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
