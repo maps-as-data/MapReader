@@ -22,7 +22,9 @@
 
 | **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"> </a> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a> |
 |:---:|:---:|
-|  |  |
+| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
+
+
 
 </div>
 
