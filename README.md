@@ -24,10 +24,9 @@
 |:---:|:---:|
 | **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
 
-
-
 </div>
 
+## What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
 
@@ -64,6 +63,7 @@ Table of contents
 -----------------
 
 - [Gallery](#gallery)
+- [What is MapReader?](#what-is-mapreader)
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
