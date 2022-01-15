@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of maps at scale</h2>
+    <h2>A computer vision pipeline for the semantic exploration of<br>maps/images at scale</h2>
 </div>
  
 <p align="center">
@@ -15,6 +15,19 @@
     </a>
     <br/>
 </p>
+
+## Gallery
+
+<div align="center">
+
+| **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"> </a> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a> |
+|:---:|:---:|
+| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
+
+
+
+</div>
+
 
 MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
 
@@ -50,6 +63,7 @@ Below is an example of MapReader CV model output (see [the paper on MapReader](h
 Table of contents
 -----------------
 
+- [Gallery](#gallery)
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
@@ -61,6 +75,12 @@ Table of contents
         * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
         * **Data access:** tileserver
         * **Annotations** are done on map patches (i.e., slices of each map).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_plant_phenotype](./examples/classification_plant_phenotype)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
+        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
+        * **Data access:** locally stored
+        * **Annotations** are done on plant patches (i.e., slices of each plant image).
         * **Classifier:** train/fine-tuned PyTorch CV models.
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)

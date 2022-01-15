@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mapreader"
-version = "0.1.0"
-description = "A computer vision pipeline for the semantic exploration of maps at scale"
+version = "0.1.1"
+description = "A computer vision pipeline for the semantic exploration of maps/images at scale"
 authors = ["kasra-hosseini <khosseini@turing.ac.uk>"]
 license = "MIT License"
 
