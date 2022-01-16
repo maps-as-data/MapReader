@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of<br>maps/images at scale</h2>
+    <h2>A computer vision pipeline for the semantic exploration of maps/images at scale</h2>
 </div>
  
 <p align="center">
@@ -20,7 +20,7 @@
 
 <div align="center">
 
-| **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"> </a> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a> |
+| **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on historical maps. Figure shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).</sup> |
 |:---:|:---:|
 | **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
 
@@ -28,7 +28,7 @@
 
 ## What is MapReader?
 
-MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
+MapReader is an end-to-end computer vision (CV) pipeline for analyzing large collections of images/maps. It has two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
