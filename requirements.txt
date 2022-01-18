@@ -741,7 +741,7 @@ networkx==2.6.3; python_version >= "3.7" \
 notebook==6.4.7; python_version >= "3.6" \
     --hash=sha256:968e9c09639fe4b9dbf4b9f028daf861b563c124d735a99d6d48c09317553f31 \
     --hash=sha256:b01da66f11a203b3839d6afa4013674bcfff41c36552f9ad0fbcb2d93c92764a
-numpy==1.22.1 \
+numpy==1.22.1; python_version >= "3.8" \
     --hash=sha256:3d62d6b0870b53799204515145935608cdeb4cebb95a26800b6750e48884cc5b \
     --hash=sha256:831f2df87bd3afdfc77829bc94bd997a7c212663889d56518359c827d7113b1f \
     --hash=sha256:8d1563060e77096367952fb44fca595f2b2f477156de389ce7c0ade3aef29e21 \
