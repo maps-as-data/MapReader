@@ -247,6 +247,7 @@ def prepare_annotation(userID,
                        tree_level="child",
                        sortby=None,
                        min_alpha_channel=None,
+                       min_mean_pixel=None,
                        context_image=False,
                        xoffset=500,
                        yoffset=500,
@@ -315,7 +316,7 @@ def prepare_annotation(userID,
             mymaps.add_metadata(metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level)
 
         # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
-        if sortby == "mean" or isinstance(min_alpha_channel, float):
+        if sortby == "mean" or isinstance(min_alpha_channel, float) or isinstance(min_mean_pixel, float):
             mymaps.calc_pixel_stats(calc_std=False)
 
         # convert images to dataframe
@@ -327,6 +328,10 @@ def prepare_annotation(userID,
         if isinstance(min_alpha_channel, float):
             if "mean_pixel_A" in sliced_df.columns:
                 sliced_df = sliced_df[sliced_df["mean_pixel_A"] >= min_alpha_channel]
+
+        if isinstance(min_mean_pixel, float):
+            if "mean_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] >= min_mean_pixel]
         
         col_names = ["image_path", "parent_id"]
     else:
