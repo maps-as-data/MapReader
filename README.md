@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of maps at scale</h2>
+    <h2>A computer vision pipeline for the semantic exploration of<br>maps/images at scale</h2>
 </div>
  
 <p align="center">
@@ -16,7 +16,19 @@
     <br/>
 </p>
 
-MapReader is an end-to-end computer vision (CV) pipeline with two main components: preprocessing/annotation and training/inference:
+## Gallery
+
+<div align="center">
+
+| **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"> </a> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a> |
+|:---:|:---:|
+| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
+
+</div>
+
+## What is MapReader?
+
+MapReader is an end-to-end computer vision (CV) pipeline designed by the [Living with Machines](https://github.com/Living-with-machines) project. It has two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
@@ -25,7 +37,7 @@ MapReader is an end-to-end computer vision (CV) pipeline with two main component
 
 MapReader provides a set of tools to:
 
-- **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileserver which can be used to retrieve maps from OpenStreetMap *OSM* or National Library of Scotland *NLS*). :warning: Refer to the [Credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
+- **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileservers which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere). :warning: Refer to the [credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
 - **preprocess** images/maps (e.g., divide them into patches, resampling the images, removing borders outside the neatline or reprojecting the map).
 - annotate images/maps or their patches (i.e. slices of an image/map) using an **interactive annotation tool**.
 - **train, fine-tune, and evaluate** various CV models.
@@ -34,7 +46,7 @@ MapReader provides a set of tools to:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
 
-Here is an example output of a MapReader CV model:
+Below is an example of MapReader CV model output (see [the paper on MapReader](https://arxiv.org/abs/2111.15592) for more details):
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/1899856/144105429-f4f02d49-7b2a-4cdb-ae57-19d077aab713.png" 
@@ -42,12 +54,16 @@ Here is an example output of a MapReader CV model:
 </p>
 
 <p align="center">
-<em>British railspace and buildings as predicted by a MapReader computer vision model. ~30.5M patches from ~16K nineteenthcentury OS map sheets were used. (a) Predicted railspace; (b) predicted buildings; (c) and (d) predicted railspace (red) and buildings (black) in and around Middlesbrough and London, respectively. MapReader extracts information from large images or a set of images at a patch-level, as depicted in the figure insets. For both railspace and buildings, we removed those patches that had no other neighboring patches with the same label in the distance of 250 meters.</em>
+    <em>
+    British 'railspace' and buildings as predicted by a MapReader computer vision model. ~30.5M patches from ~16K nineteenth-century Ordnance Survey map sheets were used (courtesy of the National Library of Scotland). (a) Predicted railspace; (b) predicted buildings; (c) and (d) predicted railspace (red) and buildings (black) in and around Middlesbrough and London, respectively. MapReader extracts information from large images or a set of images at a patch level, as depicted in the insets. For both railspace and buildings, we removed those patches that had no other neighboring patches with the same label within a distance of 250 meters.
+    </em>
 </p>
 
 Table of contents
 -----------------
 
+- [Gallery](#gallery)
+- [What is MapReader?](#what-is-mapreader)
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
@@ -60,9 +76,17 @@ Table of contents
         * **Data access:** tileserver
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_plant_phenotype](./examples/classification_plant_phenotype)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
+        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
+        * **Data access:** locally stored
+        * **Annotations** are done on plant patches (i.e., slices of each plant image).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+- [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
   - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
   - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](./mapreader/persistent_data). Read the re-use terms in this section.
+  - [Acknowledgements](#acknowledgements)
 
 ## Installation
 
@@ -90,6 +114,27 @@ conda activate mr_py38
 
 ```bash
 pip install git+https://github.com/Living-with-machines/MapReader.git
+```
+
+* ⚠️ On *Windows*, you might need to do:
+
+```bash
+# activate the environment
+conda activate mr_py38
+
+# install rasterio and fiona manually
+conda install -c conda-forge rasterio=1.2.10
+conda install -c conda-forge fiona=1.8.20
+
+# install git
+conda install git
+
+# install MapReader
+pip install git+https://github.com/Living-with-machines/MapReader.git
+
+# open Jupyter Notebook (if you want to test/work with the notebooks in "examples" directory)
+cd /path/to/MapReader 
+jupyter notebook
 ```
 
 * We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](./examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
@@ -121,7 +166,30 @@ ipython kernel install --name "<name-of-your-kernel>" --user
 ```
 * Continue with the [Tutorials](#table-of-contents)!
 
-## Credits and re-use terms
+## How to cite MapReader
+
+Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing:
+
+Link: https://arxiv.org/abs/2111.15592
+
+```text
+Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen and Katherine McDonough (2021), MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale, arXiv:2111.15592.
+```
+
+and in BibTeX:
+
+```bibtex
+@misc{hosseini2021mapreader,
+      title={MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale}, 
+      author={Kasra Hosseini and Daniel C. S. Wilson and Kaspar Beelen and Katherine McDonough},
+      year={2021},
+      eprint={2111.15592},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
+
+## Credits and re-use terms 
 
 ### Digitized maps
 
@@ -134,3 +202,8 @@ MapReader can retrieve maps from NLS (National Library of Scotland) via webserve
 We have provided some metadata files in `mapreader/persistent_data`. For all these file, please note the re-use terms:
 
 :warning: Use of the metadata for commercial purposes is currently restricted by contract. Use of this metadata for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
+
+### Acknowledgements
+
+This work was supported by Living with Machines (AHRC grant AH/S01179X/1) and The Alan Turing Institute (EPSRC grant EP/N510129/1). 
+Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
