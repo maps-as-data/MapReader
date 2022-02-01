@@ -1158,13 +1158,6 @@ description = "Parallelize Python codes"
 category = "main"
 optional = false
 python-versions = ">=3.6"
-develop = false
-
-[package.source]
-type = "git"
-url = "https://github.com/kasra-hosseini/parhugin.git"
-reference = "develop"
-resolved_reference = "4792203af8c32443ab35771e12782eeaf0cb70b9"
 
 [[package]]
 name = "parso"
@@ -1951,7 +1944,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.8"
-content-hash = "5105c936b23a478ea6fc655fe66fb7bd074bf3ef35a353c4ca96e0df83bcddbd"
+content-hash = "bee22c17f66da6cc6974a6be38dcf973ae562e4a2820369dbbd3c74b3859bafc"
 
 [metadata.files]
 absl-py = [
@@ -2854,7 +2847,9 @@ pandocfilters = [
     {file = "pandocfilters-1.5.0-py2.py3-none-any.whl", hash = "sha256:33aae3f25fd1a026079f5d27bdd52496f0e0803b3469282162bafdcbdf6ef14f"},
     {file = "pandocfilters-1.5.0.tar.gz", hash = "sha256:0b679503337d233b4339a817bfc8c50064e2eff681314376a47cb582305a7a38"},
 ]
-parhugin = []
+parhugin = [
+    {file = "parhugin-0.0.3.tar.gz", hash = "sha256:edf0e987ceb65826f2ce11b11d9e4aac1a128e6ce2efea48d428ac4202720fcd"},
+]
 parso = [
     {file = "parso-0.8.3-py2.py3-none-any.whl", hash = "sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75"},
     {file = "parso-0.8.3.tar.gz", hash = "sha256:8c07be290bb59f03588915921e29e8a50002acaf2cdc5fa0e0114f91709fafa0"},
