@@ -151,5 +151,3 @@ werkzeug==2.0.2; python_version >= "3.6"
 widgetsnbextension==3.5.2
 yarl==1.7.2; python_version >= "3.6"
 zipp==3.7.0; python_version < "3.9" and python_version >= "3.7"
-
-git+https://github.com/Living-with-machines/MapReader.git
