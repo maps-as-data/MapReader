@@ -67,7 +67,7 @@ Table of contents
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
-  - [Method 2: poetry (for developers)](#method-2)
+  - [Method 2: source code (for developers)](#method-2)
 - [Tutorials](./examples) are organized in Jupyter Notebooks as follows:
   - Classification
       - [classification_one_inch_maps_001](./examples/classification_one_inch_maps_001)
@@ -153,16 +153,17 @@ python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py3
 git clone https://github.com/Living-with-machines/MapReader.git 
 ```
 
-* Install using [poetry](https://python-poetry.org/):
+* Install:
 
 ```bash
 cd /path/to/MapReader
-poetry install
-poetry shell
+pip install -v -e .
 ```
+
 * Adding a `ipython` kernel to use in the [Tutorials](#table-of-contents)
+
 ```bash
-ipython kernel install --name "<name-of-your-kernel>" --user
+python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name "<Python (my kernel)>"
 ```
 * Continue with the [Tutorials](#table-of-contents)!
 
