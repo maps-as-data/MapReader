@@ -16,7 +16,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
     include_package_data = True,
     platforms="OS Independent",
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     install_requires=[
         "pytest>=6.2.5,<7.0.0",
         "geopy==2.1.0",
@@ -48,6 +48,7 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Developers",
