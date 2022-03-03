@@ -23,7 +23,7 @@ setuptools.setup(
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
         "pandas>=1.3.4,<2.0.0",
-        "pyproj>=3.3.0,<4.0.0",
+        "pyproj>=3.2.0,<4.0.0",
         "rasterio>=1.2.10,<2.0.0",
         "azure-storage-blob>=12.9.0,<13.0.0",
         "aiohttp>=3.8.1,<4.0.0",
