@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from geopy.distance import geodesic, great_circle
+try:
+    from geopy.distance import geodesic, great_circle
+except ImportError:
+    pass
+
 from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg

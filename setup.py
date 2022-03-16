@@ -1,5 +1,13 @@
 import setuptools
 
+EXTRAS_REQUIRE = {
+        'maps': [
+            "geopy==2.1.0",
+            "keplergl>=0.3.2,<0.4.0",
+            "simplekml>=1.3.6,<2.0.0"
+            ]
+        }
+
 setuptools.setup(
     name="mapreader",
     version="0.1.2",
@@ -19,7 +27,6 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         "pytest>=6.2.5,<7.0.0",
-        "geopy==2.1.0",
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
         "pandas>=1.3.4,<2.0.0",
@@ -36,14 +43,13 @@ setuptools.setup(
         "jupyter>=1.0.0,<2.0.0",
         "ipykernel>=6.5.1,<7.0.0",
         "ipyannotate==0.1.0-beta.0",
-        "keplergl>=0.3.2,<0.4.0",
         "Cython>=0.29.24,<0.30.0",
         "proj>=0.2.0,<0.3.0",
         "PyYAML>=6.0,<7.0",
-        "simplekml>=1.3.6,<2.0.0",
         "tensorboard>=2.7.0,<3.0.0",
         "parhugin>=0.0.3,<0.0.4"
     ],
+    extras_require=EXTRAS_REQUIRE,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
