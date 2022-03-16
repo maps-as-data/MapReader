@@ -16,7 +16,7 @@ setuptools.setup(
     #author_email="",
     license="MIT License",
     keywords=["Computer Vision", "Classification", "Deep Learning", "living with machines"],
-    long_description = open('README.md').read(),
+    long_description = open('README.md', encoding="utf8").read(),
     long_description_content_type = 'text/markdown',
     zip_safe = False,
     url="https://github.com/Living-with-machines/MapReader",
