@@ -119,6 +119,12 @@ conda activate mr_py38
 pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
+and to work with maps:
+
+```bash
+pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[maps]'
+```
+
 * ⚠️ On *Windows*, you might need to do:
 
 ```bash
@@ -161,6 +167,13 @@ git clone https://github.com/Living-with-machines/MapReader.git
 ```bash
 cd /path/to/MapReader
 pip install -v -e .
+```
+
+and to work with maps:
+
+```bash
+cd /path/to/MapReader
+pip install -e ."[maps]"
 ```
 
 * Adding a `ipython` kernel to use in the [Tutorials](#table-of-contents)
