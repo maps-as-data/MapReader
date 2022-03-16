@@ -3,6 +3,7 @@
 
 try:
     from geopy.distance import geodesic, great_circle
+    import rasterio
 except ImportError:
     pass
 from glob import glob
@@ -13,7 +14,6 @@ import os
 import pandas as pd
 from pylab import cm as pltcm
 import pyproj
-import rasterio
 
 
 def extractGeoInfo(image_path, proj1='epsg:3857', proj2='epsg:4326', calc_size_in_m=False):

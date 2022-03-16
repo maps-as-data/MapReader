@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+try:
+    import rasterio
+    from rasterio.warp import calculate_default_transform, reproject, Resampling
+    from rasterio.windows import get_data_window
+except ImportError:
+    pass
+
 from glob import glob
 import numpy as np
 import os
-import rasterio
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from rasterio.windows import get_data_window
 import subprocess
 import distutils.spawn
 

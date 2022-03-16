@@ -16,7 +16,6 @@ from PIL import Image
 from pylab import cm as pltcm
 import pyproj
 import random
-import rasterio
 import sys
 
 from mapreader.slicers.slicers import sliceByPixel

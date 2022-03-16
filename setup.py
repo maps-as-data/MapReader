@@ -3,6 +3,7 @@ import setuptools
 EXTRAS_REQUIRE = {
         'maps': [
             "geopy==2.1.0",
+            "rasterio>=1.2.10,<2.0.0",
             "keplergl>=0.3.2,<0.4.0",
             "simplekml>=1.3.6,<2.0.0"
             ]
@@ -31,7 +32,6 @@ setuptools.setup(
         "numpy>=1.21.5,<2.0.0",
         "pandas>=1.3.4,<2.0.0",
         "pyproj>=3.2.0,<4.0.0",
-        "rasterio>=1.2.10,<2.0.0",
         "azure-storage-blob>=12.9.0,<13.0.0",
         "aiohttp>=3.8.1,<4.0.0",
         "Shapely>=1.8.0,<2.0.0",
