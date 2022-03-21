@@ -13,7 +13,7 @@
     <a href="https://mybinder.org/v2/gh/Living-with-machines/MapReader/main?labpath=examples%2Fquick_start%2Fquick_start.ipynb">
         <img alt="Binder" src="https://mybinder.org/badge_logo.svg">
     </a>
-    <a href="./LICENSE">
+    <a href="https://github.com/Living-with-machines/MapReader/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
     </a>
     <br/>
@@ -23,7 +23,7 @@
 
 <div align="center">
 
-| **classification_one_inch_maps_001**<br><a href="./examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on historical maps. Figure shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="./examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).</sup> |
+| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on historical maps. Figure shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).</sup> |
 |:---:|:---:|
 | **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
 
@@ -71,15 +71,15 @@ Table of contents
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
   - [Method 2: source code (for developers)](#method-2)
-- [Tutorials](./examples) are organized in Jupyter Notebooks as follows:
+- [Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows:
   - Classification
-      - [classification_one_inch_maps_001](./examples/classification_one_inch_maps_001)
+      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_one_inch_maps_001)
         * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
         * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
         * **Data access:** tileserver
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
-      - [classification_plant_phenotype](./examples/classification_plant_phenotype)
+      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_plant_phenotype)
         * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
         * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
         * **Data access:** locally stored
@@ -88,7 +88,7 @@ Table of contents
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
   - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
-  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](./mapreader/persistent_data). Read the re-use terms in this section.
+  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](https://github.com/Living-with-machines/MapReader/tree/main/mapreader/persistent_data). Read the re-use terms in this section.
   - [Acknowledgements](#acknowledgements)
 
 ## Installation
@@ -146,7 +146,7 @@ cd /path/to/MapReader
 jupyter notebook
 ```
 
-* We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](./examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
+* We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
 
 ```bash
 python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
