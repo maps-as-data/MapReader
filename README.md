@@ -32,9 +32,9 @@
 
 MapReader is an end-to-end computer vision (CV) pipeline for analyzing and exploring large collections of images and maps. 
 
-MapReader was originally developed to analyze large historical maps (hence the name). However, MapReader is **general** enough to be applicable in both <ins>non-map images</ins> and <ins>maps</ins> and in a wide variety of domains. 
+MapReader was originally developed to analyze large historical maps (hence the name). However, MapReader is a **generalisable** computer vision pipeline applicable in both <ins>non-map images</ins> and <ins>maps</ins> and in a wide variety of domains. See [Gallery](#gallery) for some examples.
 
-See [Gallery](#gallery) for some examples, and refer to each tutorial/example in [use cases](#use-cases) sections for more details on MapReader's relevant functionalities and how it can help to analyze and explore large image datasets.
+Refer to each tutorial/example in the [use cases](#use-cases) section for more details on MapReader's relevant functionalities for <ins>non-map</ins> and <ins>map</ins> images and how MapReader can help to analyze and explore large image datasets.
 
 MapReader has two main components: preprocessing/annotation and training/inference as shown in this figure:
 
@@ -64,6 +64,7 @@ Table of contents
   - [Method 1: pip](#method-1)
   - [Method 2: source code (for developers)](#method-2)
 - [Use cases](#use-cases)
+- [How to contribute](#how-to-contribute)
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
   - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
@@ -186,6 +187,9 @@ python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name
         * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
 
+## How to contribute
+
+We welcome contributions related to new applications, both with <ins>geospatial</ins> images (other maps, remote sensing data, aerial photography) and <ins>non-geospatial</ins> images (for example, other scientific image datasets).
 
 ## How to cite MapReader
 
