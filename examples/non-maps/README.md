@@ -1,6 +1,8 @@
 # MapReader and non-map images
 
 - [Tutorials](#tutorials)
+  - [classification_plant_phenotype](./classification_plant_phenotype)
+  - [classification_mnist](./classification_mnist)
 
 ## Tutorials
 
