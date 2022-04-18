@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of maps/images at scale</h2>
+    <h2>A computer vision pipeline for the semantic exploration of images or maps at scale</h2>
 </div>
  
 <p align="center">
@@ -29,9 +29,7 @@
 
 </div>
 
-## What is MapReader?
-
-MapReader is an end-to-end computer vision (CV) pipeline for analyzing large collections of images/maps. It has two main components: preprocessing/annotation and training/inference:
+MapReader is an end-to-end computer vision (CV) pipeline for analyzing large collections of images and maps. It has two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
@@ -48,19 +46,6 @@ MapReader provides a set of tools to:
 - Other functionalities include:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
-
-Below is an example of MapReader CV model output (see [the paper on MapReader](https://arxiv.org/abs/2111.15592) for more details):
-
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/1899856/144105429-f4f02d49-7b2a-4cdb-ae57-19d077aab713.png" 
-        alt="British railspace and buildings as predicted by a MapReader computer vision model" width="100%" align="center">
-</p>
-
-<p align="center">
-    <em>
-    British 'railspace' and buildings as predicted by a MapReader computer vision model. ~30.5M patches from ~16K nineteenth-century Ordnance Survey map sheets were used (courtesy of the National Library of Scotland). (a) Predicted railspace; (b) predicted buildings; (c) and (d) predicted railspace (red) and buildings (black) in and around Middlesbrough and London, respectively. MapReader extracts information from large images or a set of images at a patch level, as depicted in the insets. For both railspace and buildings, we removed those patches that had no other neighboring patches with the same label within a distance of 250 meters.
-    </em>
-</p>
 
 Table of contents
 -----------------
