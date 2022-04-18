@@ -34,9 +34,7 @@ def display_record(record):
 
     Refer to ipyannotate for more info.
     """
-
-    parent_path = os.path.dirname(annotation_tasks["paths"][record[3]]["parent_paths"])
-    
+ 
     # setup the images
     gridsize = (5, 1)
     plt.clf()
@@ -51,6 +49,7 @@ def display_record(record):
     plt.title(f"{record[0]}", size=20)
 
     if treelevel == "child" and contextimage:
+        parent_path = os.path.dirname(annotation_tasks["paths"][record[3]]["parent_paths"])
         # Here, we assume that min_x, min_y, max_x and max_y are in the patch name
         split_path = record[0].split("-")
         min_x, min_y, max_x, max_y = int(split_path[1]), int(split_path[2]), int(split_path[3]), int(split_path[4])
@@ -205,7 +204,7 @@ def prepare_data(df,
 
 # -------- annotation_interface
 def annotation_interface(data, list_labels, list_colors=["red", "green", "blue", "green"], 
-                         annotation_set="001", method="ipyannotate"):
+                         annotation_set="001", method="ipyannotate", list_shortcuts=None):
     """Setup the annotation interface
 
     Args:
@@ -217,10 +216,11 @@ def annotation_interface(data, list_labels, list_colors=["red", "green", "blue",
     """
 
     if method == "ipyannotate":
-        list_shortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 
-                          'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                          'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
-                          'u', 'v', 'w', 'x', 'y', 'z']
+        if not list_shortcuts:
+            list_shortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 
+                              'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+                              'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
+                              'u', 'v', 'w', 'x', 'y', 'z']
         list_colors *= 10
         canvas = OutputCanvas(display=display_record)
         # Collect all tasks
@@ -253,7 +253,8 @@ def prepare_annotation(userID,
                        xoffset=500,
                        yoffset=500,
                        urlmain="https://maps.nls.uk/view/",
-                       random_state="random"):
+                       random_state="random",
+                       list_shortcuts=None):
     """Prepare annotations
 
     Args:
@@ -297,7 +298,8 @@ def prepare_annotation(userID,
     if not annotation_set in annotation_tasks["paths"].keys():
         raise ValueError(f"{annotation_set} could not be found in {annotation_tasks_file}")
     else:
-        patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"] 
+        if tree_level == "child":
+            patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"] 
         parent_paths = os.path.join(annotation_tasks["paths"][annotation_set]["parent_paths"])
         annot_file = os.path.join(annotation_tasks["paths"][annotation_set]["annot_dir"],
                                  f"{task}_#{userID}#.csv")
@@ -341,7 +343,8 @@ def prepare_annotation(userID,
         col_names = ["image_path", "parent_id"]
     else:
         mymaps = loader(path_images=parent_paths)
-        mymaps.add_metadata(metadata_path=annot_file, index_col=-1, delimiter=",", tree_level=tree_level)
+        if os.path.isfile(annot_file):
+            mymaps.add_metadata(metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level)
         # convert images to dataframe
         sliced_df, _ = mymaps.convertImages(fmt="dataframe")
         col_names = ["image_path"]
@@ -358,7 +361,8 @@ def prepare_annotation(userID,
     else:
         annotation = annotation_interface(data2annotate, 
                                           list_labels=list_labels, 
-                                          annotation_set=annotation_set)
+                                          annotation_set=annotation_set,
+                                          list_shortcuts=list_shortcuts)
         return annotation
 
 # -------- save_annotation

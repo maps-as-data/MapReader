@@ -90,7 +90,9 @@ class loadAnnotations:
         self.col_label = new_label
    
     def show_image(self, 
-                   indx: int):
+                   indx: int,
+                   cmap="viridis"
+                   ):
         """Show an image by its index (i.e., iloc in pandas)
 
         Parameters
@@ -102,7 +104,7 @@ class loadAnnotations:
             print(f"[ERROR] length: {len(self.annotations)}")
             return
 
-        plt.imshow(io.imread(self.annotations.iloc[indx][self.col_path]))
+        plt.imshow(io.imread(self.annotations.iloc[indx][self.col_path]), cmap=cmap)
         plt.title(self.annotations.iloc[indx][self.col_label])
         plt.xticks([])
         plt.yticks([])
