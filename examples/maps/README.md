@@ -1,6 +1,7 @@
 # MapReader and maps
 
 - [Tutorials](#tutorials)
+  - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
 - [Why use MapReader?](#why-use-mapreader)
 - [Guidance for specific user groups](#guidance-for-specific-user-groups)
 
