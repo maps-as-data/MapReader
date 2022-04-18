@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of images and maps at scale</h2>
+    <h2>A computer vision pipeline for analyzing and exploring images and maps at scale</h2>
 </div>
  
 <p align="center">
@@ -23,10 +23,9 @@
 
 <div align="center">
 
-| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_one_inch_maps_001"> <img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on historical maps. Figure shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_plant_phenotype"> <img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial on how to train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).</sup> |
+| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001"><img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins>. Fig shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_plant_phenotype"><img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
 |:---:|:---:|
-| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |  |
-
+| **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" style="height:130px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>MNIST</ins>.</sup> | |
 </div>
 
 MapReader is an end-to-end computer vision (CV) pipeline for analyzing large collections of images and maps. It has two main components: preprocessing/annotation and training/inference:
@@ -51,24 +50,30 @@ Table of contents
 -----------------
 
 - [Gallery](#gallery)
-- [What is MapReader?](#what-is-mapreader)
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
   - [Method 2: source code (for developers)](#method-2)
-- [Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows:
-  - Classification
-      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_one_inch_maps_001)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
-        * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
-        * **Data access:** tileserver
-        * **Annotations** are done on map patches (i.e., slices of each map).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
-      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/classification_plant_phenotype)
+- Use cases: [tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows:
+  - [Non-map images](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps):
+      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_plant_phenotype)
         * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
         * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
         * **Data access:** locally stored
         * **Annotations** are done on plant patches (i.e., slices of each plant image).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
+        * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
+        * **Data access:** locally stored
+        * **Annotations** are done on MNIST (NOT patches/slices of MNIST images).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+  - [Maps](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps):
+      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
+        * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
+        * **Data access:** tileserver
+        * **Annotations** are done on map patches (i.e., slices of each map).
         * **Classifier:** train/fine-tuned PyTorch CV models.
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
