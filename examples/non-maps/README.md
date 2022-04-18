@@ -1,6 +1,6 @@
 # MapReader and non-map images
 
-Tutorials:
+## Tutorials
 
 - [classification_plant_phenotype](./classification_plant_phenotype)
   * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
