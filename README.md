@@ -34,9 +34,9 @@ MapReader is an end-to-end computer vision (CV) pipeline for analyzing and explo
 
 MapReader was originally developed to analyze large historical maps (hence the name). However, MapReader is **general** enough to be applicable in both <ins>non-map images</ins> and <ins>maps</ins> and in a wide variety of domains. 
 
-See [Gallery](#gallery) for some examples, and refer to each tutorial/example in [use cases](#use-cases) sections for more details on how MapReader can help and its relevant functionalities.
+See [Gallery](#gallery) for some examples, and refer to each tutorial/example in [use cases](#use-cases) sections for more details on MapReader's relevant functionalities and how it can help to analyze and explore large image datasets.
 
-Generally, MapReader has two main components: preprocessing/annotation and training/inference:
+MapReader has two main components: preprocessing/annotation and training/inference as shown in this figure:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
