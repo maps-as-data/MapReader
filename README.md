@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for the semantic exploration of images or maps at scale</h2>
+    <h2>A computer vision pipeline for the semantic exploration of images and maps at scale</h2>
 </div>
  
 <p align="center">
