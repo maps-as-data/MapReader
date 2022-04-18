@@ -28,14 +28,22 @@
 | **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" style="height:130px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>MNIST</ins>.</sup> | |
 </div>
 
-MapReader is an end-to-end computer vision (CV) pipeline for analyzing large collections of images and maps. It has two main components: preprocessing/annotation and training/inference:
+# What is MapReader?
+
+MapReader is an end-to-end computer vision (CV) pipeline for analyzing and exploring large collections of images and maps. 
+
+MapReader was originally developed to analyze large historical maps (hence the name). However, MapReader is **general** enough to be applicable in both <ins>non-map images</ins> and <ins>maps</ins> and in a wide variety of domains. 
+
+See [Gallery](#gallery) for some examples, and refer to each tutorial/example in [use cases](#use-cases) sections for more details on how MapReader can help and its relevant functionalities.
+
+Generally, MapReader has two main components: preprocessing/annotation and training/inference:
 
 <p align="center">
   <img src="./figs/MapReader_pipeline.png" 
         alt="MapReader pipeline" width="70%" align="center">
 </p>
 
-MapReader provides a set of tools to:
+It provides a set of tools to:
 
 - **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileservers which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere). :warning: Refer to the [credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
 - **preprocess** images/maps (e.g., divide them into patches, resampling the images, removing borders outside the neatline or reprojecting the map).
@@ -50,31 +58,12 @@ Table of contents
 -----------------
 
 - [Gallery](#gallery)
+- [What is MapReader?](#what-is-mapreader)
 - [Installation and setup](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
   - [Method 1: pip](#method-1)
   - [Method 2: source code (for developers)](#method-2)
-- Use cases: [tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows:
-  - [Non-map images](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps):
-      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_plant_phenotype)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
-        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
-        * **Data access:** locally stored
-        * **Annotations** are done on plant patches (i.e., slices of each plant image).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
-      - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
-        * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
-        * **Data access:** locally stored
-        * **Annotations** are done on MNIST (NOT patches/slices of MNIST images).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
-  - [Maps](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps):
-      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
-        * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
-        * **Data access:** tileserver
-        * **Annotations** are done on map patches (i.e., slices of each map).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
+- [Use cases](#use-cases)
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
   - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
@@ -172,6 +161,31 @@ pip install -e ."[maps]"
 python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name "<Python (my kernel)>"
 ```
 * Continue with the [Tutorials](#table-of-contents)!
+
+## Use cases
+
+[Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows:
+  - [Non-map images](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps):
+      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_plant_phenotype)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
+        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
+        * **Data access:** locally stored
+        * **Annotations** are done on plant patches (i.e., slices of each plant image).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
+        * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
+        * **Data access:** locally stored
+        * **Annotations** are done on MNIST (NOT patches/slices of MNIST images).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+  - [Maps](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps):
+      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
+        * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
+        * **Data access:** tileserver
+        * **Annotations** are done on map patches (i.e., slices of each map).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+
 
 ## How to cite MapReader
 
