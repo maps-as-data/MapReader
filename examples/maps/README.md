@@ -1,5 +1,9 @@
 # MapReader and maps
 
+- [Tutorials](#tutorials)
+- [Why use MapReader?](#why-use-mapreader)
+- [Guidance for specific user groups](#guidance-for-specific-user-groups)
+
 ## Tutorials
 
 - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
@@ -8,6 +12,19 @@
   * **Data access:** tileserver
   * **Annotations** are done on map patches (i.e., slices of each map).
   * **Classifier:** train/fine-tuned PyTorch CV models.
+
+## Why use MapReader?
+
+MapReader enables quick, flexible research with large map corpora. It is based on the patchwork method, e.g. scanned map sheets are preprocessed to divide up the content of the map into a grid of squares. Using image classificaion at the level of each patch allows users to define classes (labels) of features on maps related to their research questions. 
+
+#### You might be interested in using MapReader if:
+- you have access to a large corpora of georeferenced maps
+- you want to quickly test different labels to help refine your research question before/without committing to manual vector data creation
+- your maps were created before surveying accuracy reached modern standards, and therefore you do not want to create overly precise geolocated data based on the content of those maps
+
+#### MapReader is well-suited for finding spatial phenomena that:
+- have a homogeneous visual signal across many maps 
+- may not correspond to typical categories of map features that are traditionally digitized as vector data in a GIS
 
 
 ## Guidance for specific user groups
