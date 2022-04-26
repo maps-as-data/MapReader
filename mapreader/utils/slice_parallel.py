@@ -9,10 +9,12 @@ from mapreader import read
 from parhugin import multiFunc
 
 # Serial version fo the Func to be run in parallel
-def slice_serial(path2images_dir, 
-                 slice_size=100, 
-                 slice_method="pixel", 
-                 output_dirname="slice_100_100"):
+def slice_serial(
+    path2images_dir,
+    slice_size=100,
+    slice_method="pixel",
+    output_dirname="slice_100_100",
+):
     """Slice images stored in path2images_dir
     This function is the serial version and will be run in parallel using parhugin
     """
@@ -23,12 +25,15 @@ def slice_serial(path2images_dir,
     mymaps.add_metadata(metadata=path2metadata)
 
     # method can also be set to meters
-    mymaps.sliceAll(path_save=os.path.join(path2images_dir, output_dirname), 
-                    slice_size=slice_size,
-                    square_cuts=False, 
-                    verbose=False,
-                    rewrite=True,
-                    method=slice_method)
+    mymaps.sliceAll(
+        path_save=os.path.join(path2images_dir, output_dirname),
+        slice_size=slice_size,
+        square_cuts=False,
+        verbose=False,
+        rewrite=True,
+        method=slice_method,
+    )
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Run sliceAll method in parallel.")
