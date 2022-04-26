@@ -26,6 +26,7 @@
 | **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="height:200px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins>. Fig shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="height:200px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
 |:---:|:---:|
 | **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" style="height:130px;"></a><br><sup>Tutorial: train/fine-tune PyTorch CV classifiers on <ins>MNIST</ins>.</sup> | |
+| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  |
 </div>
 
 # What is MapReader?
