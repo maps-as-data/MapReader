@@ -7,8 +7,8 @@
 </div>
  
 <p align="center">
-    <a href="https://github.com/Living-with-machines/MapReader/workflows/Continuous%20integration/badge.svg">
-        <img alt="Continuous integration badge" src="https://github.com/Living-with-machines/MapReader/workflows/Continuous%20integration/badge.svg">
+    <a href="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
+        <img alt="Integration Tests badge" src="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
     </a>
     <a href="https://mybinder.org/v2/gh/Living-with-machines/MapReader/main?labpath=examples%2Fquick_start%2Fquick_start.ipynb">
         <img alt="Binder" src="https://mybinder.org/badge_logo.svg">
