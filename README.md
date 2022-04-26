@@ -34,8 +34,7 @@
 
 <div align="center">
 
-| **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a>  | |
-|:---:|:---:|
+**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a> 
 </div>
 
 # What is MapReader?
