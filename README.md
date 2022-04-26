@@ -37,6 +37,26 @@
 **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="height:200px;"> </a> 
 </div>
 
+---
+
+Table of contents
+-----------------
+
+- [Gallery](#gallery)
+- [What is MapReader?](#what-is-mapreader)
+- [Installation and setup](#installation)
+  - [Set up a conda environment](#set-up-a-conda-environment)
+  - [Method 1: pip](#method-1)
+  - [Method 2: source code (for developers)](#method-2)
+- [Use cases](#use-cases)
+- [How to contribute](#how-to-contribute)
+- [How to cite MapReader](#how-to-cite-mapreader)
+- [Credits and re-use terms](#credits-and-re-use-terms)
+  - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
+  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](https://github.com/Living-with-machines/MapReader/tree/main/mapreader/persistent_data). Read the re-use terms in this section.
+  - [Acknowledgements](#acknowledgements)
+
+
 # What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline for analyzing and exploring large collections of maps and images. 
@@ -62,26 +82,10 @@ It provides a set of tools to:
 - Other functionalities include:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
-  
+
+---
+
 MapReader is a groundbreaking interdisciplinary tool that emerged from a specific set of geospatial historical research questions. It was inspired by methods in biomedical imaging and geographic information science, which were adapted for annotation and use by historians. The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets, and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
-
-
-Table of contents
------------------
-
-- [Gallery](#gallery)
-- [What is MapReader?](#what-is-mapreader)
-- [Installation and setup](#installation)
-  - [Set up a conda environment](#set-up-a-conda-environment)
-  - [Method 1: pip](#method-1)
-  - [Method 2: source code (for developers)](#method-2)
-- [Use cases](#use-cases)
-- [How to contribute](#how-to-contribute)
-- [How to cite MapReader](#how-to-cite-mapreader)
-- [Credits and re-use terms](#credits-and-re-use-terms)
-  - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
-  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](https://github.com/Living-with-machines/MapReader/tree/main/mapreader/persistent_data). Read the re-use terms in this section.
-  - [Acknowledgements](#acknowledgements)
 
 ## Installation
 
