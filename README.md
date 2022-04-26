@@ -45,8 +45,7 @@ MapReader was developed in the [Living with Machines](https://livingwithmachines
 
 Refer to each tutorial/example in the [use cases](#use-cases) section for more details on MapReader's relevant functionalities for <ins>non-geospatial</ins> and <ins>geospatial</ins> images and how MapReader can help to analyze large image datasets.
 
-Contents
---------
+# Contents
 
 - [Gallery](#gallery)
 - [What is MapReader?](#what-is-mapreader)
