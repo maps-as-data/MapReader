@@ -3,7 +3,7 @@
     <p align="center">
     <h1>MapReader</h1>
     </p>
-    <h2>A computer vision pipeline for analyzing and exploring maps and images at scale</h2>
+    <h2>A computer vision pipeline for analyzing and exploring images at scale</h2>
 </div>
  
 <p align="center">
@@ -34,7 +34,7 @@ MapReader is an end-to-end computer vision (CV) pipeline for analyzing and explo
 
 MapReader was developed in the [Living with Machines](https://livingwithmachines.ac.uk/) project to analyze large collections of historical maps but is a _**generalisable**_ computer vision pipeline which can be applied to _**any images**_ in a wide variety of domains. See [Gallery](#gallery) for some examples.
 
-Refer to each tutorial/example in the [use cases](#use-cases) section for more details on MapReader's relevant functionalities for <ins>non-map</ins> and <ins>map</ins> images and how MapReader can help to analyze large image datasets.
+Refer to each tutorial/example in the [use cases](#use-cases) section for more details on MapReader's relevant functionalities for <ins>non-geospatial</ins> and <ins>geospatial</ins> images and how MapReader can help to analyze large image datasets.
 
 MapReader has two main components: preprocessing/annotation and training/inference as shown in this figure:
 
@@ -45,11 +45,11 @@ MapReader has two main components: preprocessing/annotation and training/inferen
 
 It provides a set of tools to:
 
-- **load** images/maps stored locally or **retrieve** maps via web-servers (e.g., tileservers which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere). :warning: Refer to the [credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
-- **preprocess** images/maps (e.g., divide them into patches, resampling the images, removing borders outside the neatline or reprojecting the map).
-- annotate images/maps or their patches (i.e. slices of an image/map) using an **interactive annotation tool**.
+- **load** images or maps stored locally or **retrieve** maps via web-servers (e.g., tileservers which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere). :warning: Refer to the [credits and re-use terms](#credits-and-re-use-terms) section if you are using digitized maps or metadata provided by NLS. 
+- **preprocess** images or maps (e.g., divide them into patches, resampling the images, removing borders outside the neatline or reprojecting the map).
+- annotate images or maps or their patches (i.e. slices of an image or map) using an **interactive annotation tool**.
 - **train, fine-tune, and evaluate** various CV models.
-- **predict** labels (i.e., model inference) on large sets of images/maps.
+- **predict** labels (i.e., model inference) on large sets of images or maps.
 - Other functionalities include:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
@@ -167,23 +167,23 @@ python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name
 
 [Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows.
 
-Follow the hyperlinks on input type names ("Non-map images" or "Maps") to read guidance specific to those image types. 
+Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to read guidance specific to those image types. 
 
-  - [Non-map images](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps):
-      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_plant_phenotype)
+  - [Non-Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial):
+      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype)
         * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
         * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
         * **Data access:** locally stored
         * **Annotations** are done on plant patches (i.e., slices of each plant image).
         * **Classifier:** train/fine-tuned PyTorch CV models.
-      - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-maps/classification_mnist)
+      - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist)
         * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
         * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
         * **Data access:** locally stored
         * **Annotations** are done on whole MNIST images, **not** on patches/slices of those images.
         * **Classifier:** train/fine-tuned PyTorch CV models.
-  - [Maps](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps):
-      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
+  - [Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial):
+      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001)
         * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
         * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
         * **Data access:** tileserver
