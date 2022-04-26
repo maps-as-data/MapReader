@@ -7,14 +7,14 @@
 </div>
  
 <p align="center">
-    <a href="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
-        <img alt="Integration Tests badge" src="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
-    </a>
     <a href="https://mybinder.org/v2/gh/Living-with-machines/MapReader/main?labpath=examples%2Fquick_start%2Fquick_start.ipynb">
         <img alt="Binder" src="https://mybinder.org/badge_logo.svg">
     </a>
     <a href="https://github.com/Living-with-machines/MapReader/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+    </a>
+    <a href="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
+        <img alt="Integration Tests badge" src="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
     </a>
     <br/>
 </p>
