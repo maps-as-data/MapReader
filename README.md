@@ -183,12 +183,13 @@ Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to 
         * **Annotations** are done on whole MNIST images, **not** on patches/slices of those images.
         * **Classifier:** train/fine-tuned PyTorch CV models.
   - [Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial):
-      - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
-        * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
-        * **Data access:** tileserver
-        * **Annotations** are done on map patches (i.e., slices of each map).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
+      - Maps:
+        - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001)
+          * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
+          * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
+          * **Data access:** tileserver
+          * **Annotations** are done on map patches (i.e., slices of each map).
+          * **Classifier:** train/fine-tuned PyTorch CV models.
 
 ## How to contribute
 
