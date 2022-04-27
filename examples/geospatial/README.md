@@ -1,13 +1,13 @@
 # MapReader and geospatial images
 
 - [Tutorials](#tutorials)
-  - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
+  - [classification_one_inch_maps_001](./classification_one_inch_maps_001)
 - [Why use MapReader?](#why-use-mapreader)
 - [Guidance for specific user groups](#guidance-for-specific-user-groups)
 
 ## Tutorials
 
-- [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
+- [classification_one_inch_maps_001](./classification_one_inch_maps_001)
   * **Goal:** train/fine-tune PyTorch CV classifiers on historical maps.
   * **Dataset:** from National Library of Scotland: [OS one-inch, 2nd edition layer](https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html).
   * **Data access:** tileserver
