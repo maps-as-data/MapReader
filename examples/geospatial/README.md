@@ -1,4 +1,4 @@
-# MapReader and maps
+# MapReader and geospatial images
 
 - [Tutorials](#tutorials)
   - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/maps/classification_one_inch_maps_001)
