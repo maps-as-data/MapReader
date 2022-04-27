@@ -25,10 +25,10 @@
 
 |   |   |
 |:---:|:---:|
-| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins> (Fig: rail infrastructure around London as predicted by a MapReader model).</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
-| **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on whole <ins>MNIST</ins> images (not on patches/slices of those images).</sup> | |
+| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins> (Fig: rail infrastructure around London as predicted by a MapReader model).</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
+| **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on whole <ins>MNIST</ins> images (not on patches/slices of those images).</sup> | |
 | | |
-**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" width="300"> </a> 
+**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/mapreader_paper.png" alt="MapReader's paper" width="300"> </a> 
 </div>
 
 ## What is MapReader?
@@ -63,7 +63,7 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 MapReader has two main components: preprocessing/annotation and training/inference as shown in this figure:
 
 <p align="center">
-  <img src="./figs/MapReader_pipeline.png" 
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/MapReader_pipeline.png" 
         alt="MapReader pipeline" width="70%" align="center">
 </p>
 
