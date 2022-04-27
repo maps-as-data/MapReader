@@ -23,11 +23,11 @@
 
 <div align="center">
 
-| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" style="width:370px;"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins>. Fig shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" style="width:380px;"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
+| **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" width="400" height="200"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins>. Fig shows the rail infrastructure around London as predicted by a MapReader CV model.</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" width="400" height="200"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
 |:---:|:---:|
-| **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" style="width:300px;"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>MNIST</ins>.</sup> | |
+| **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" width="400" height="200"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>MNIST</ins>.</sup> | |
 | | |
-**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="width:300px;"> </a> 
+**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" width="400"> </a> 
 </div>
 
 ## What is MapReader?
