@@ -32,7 +32,7 @@
 
 # What is MapReader?
 
-MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing large collections of maps and images. 
+MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
 MapReader was developed in the [Living with Machines](https://livingwithmachines.ac.uk/) project to analyze large collections of historical maps but is a _**generalisable**_ computer vision pipeline which can be applied to _**any images**_ in a wide variety of domains. See [Gallery](#gallery) for some examples.
 
