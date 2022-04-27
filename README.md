@@ -110,6 +110,14 @@ To work with geospatial images (e.g., maps):
 pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[maps]'
 ```
 
+* We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
+
+```bash
+python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+```
+
+* Continue with the examples in [Use cases](#use-cases)!
+
 * ⚠️ On *Windows* and for *geospatial images* (e.g., maps), you might need to do:
 
 ```bash
@@ -131,14 +139,6 @@ cd /path/to/MapReader
 jupyter notebook
 ```
 
-* We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
-
-```bash
-python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
-```
-
-* Continue with the examples in [Use cases](#use-cases)!
-
 ### Method 2
 
 * Clone `mapreader` source code:
@@ -154,18 +154,19 @@ cd /path/to/MapReader
 pip install -v -e .
 ```
 
-and to work with maps:
+To work with geospatial images (e.g., maps):
 
 ```bash
 cd /path/to/MapReader
 pip install -e ."[maps]"
 ```
 
-* Adding a `ipython` kernel to use in the [Tutorials](#table-of-contents)
+* We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
 
 ```bash
-python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name "<Python (my kernel)>"
+python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 ```
+
 * Continue with the examples in [Use cases](#use-cases)!
 
 ## Use cases
