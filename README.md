@@ -82,9 +82,7 @@ It provides a set of tools to:
 
 ### Set up a conda environment
 
-We strongly recommend installation via Anaconda:
-
-* Refer to [Anaconda website and follow the instructions](https://docs.anaconda.com/anaconda/install/).
+We recommend installation via Anaconda (refer to [Anaconda website and follow the instructions](https://docs.anaconda.com/anaconda/install/)).
 
 * Create a new environment for `mapreader` called `mr_py38`:
 
@@ -106,13 +104,13 @@ conda activate mr_py38
 pip install git+https://github.com/Living-with-machines/MapReader.git
 ```
 
-and to work with maps:
+To work with geospatial images (e.g., maps):
 
 ```bash
 pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[maps]'
 ```
 
-* ⚠️ On *Windows*, you might need to do:
+* ⚠️ On *Windows* and for *geospatial images* (e.g., maps), you might need to do:
 
 ```bash
 # activate the environment
@@ -133,13 +131,13 @@ cd /path/to/MapReader
 jupyter notebook
 ```
 
-* We have provided some [Jupyter Notebooks to show how different components in MapReader can be run](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
+* We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
 
 ```bash
 python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 ```
 
-* Continue with the [Tutorials](#table-of-contents)!
+* Continue with the examples in [Use cases](#use-cases)!
 
 ### Method 2
 
@@ -168,7 +166,7 @@ pip install -e ."[maps]"
 ```bash
 python -m ipykernel install --user --name "<name-of-your-kernel>" --display-name "<Python (my kernel)>"
 ```
-* Continue with the [Tutorials](#table-of-contents)!
+* Continue with the examples in [Use cases](#use-cases)!
 
 ## Use cases
 
