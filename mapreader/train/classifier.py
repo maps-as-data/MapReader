@@ -12,6 +12,7 @@ import random
 import socket
 import sys
 import time
+
 # from tqdm.autonotebook import tqdm
 from typing import Union
 
@@ -26,8 +27,9 @@ from torch.nn.modules.module import _addindent
 import torchvision
 from torchvision import models
 
+
 class classifier:
-    def __init__(self, device='default'):
+    def __init__(self, device="default"):
         """Instantiate class classifier
 
         Parameters
@@ -37,7 +39,7 @@ class classifier:
             this can be "default", "cpu", "cuda:0", ...
         """
 
-        if device in ['default', None]:
+        if device in ["default", None]:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
@@ -57,10 +59,10 @@ class classifier:
         self.best_epoch = 0
         # temp file to save checkpoints during training/validation
         self.tmp_save_filename = f"tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
-        
+
         # add colors for printing/logging
         self._print_colors()
-         
+
     def set_classnames(self, classname_dict):
         """Set names of the classes in the dataset
 
@@ -68,12 +70,14 @@ class classifier:
         ----------
         classname_dict : dictionary
             name of the classes in the dataset,
-            e.g., {0: "rail space", 1: "No rail space"} 
+            e.g., {0: "rail space", 1: "No rail space"}
         """
         self.class_names = classname_dict
         self.num_classes = len(self.class_names)
 
-    def add2dataloader(self, dataset, set_name=None, batch_size=16, shuffle=True, num_workers=0, **kwds):
+    def add2dataloader(
+        self, dataset, set_name=None, batch_size=16, shuffle=True, num_workers=0, **kwds
+    ):
         """Create and add a dataloader
 
         Parameters
@@ -85,15 +89,23 @@ class classifier:
         num_workers : int, optional
         """
 
-        dl = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, **kwds)
+        dl = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            **kwds,
+        )
         if set_name == None:
-            return dl 
+            return dl
         else:
-            self.dataloader[set_name] = dl 
+            self.dataloader[set_name] = dl
             self.dataset_sizes[set_name] = len(self.dataloader[set_name].dataset)
-            print(f"[INFO] added '{set_name}' dataloader with {self.dataset_sizes[set_name]} elements.")
+            print(
+                f"[INFO] added '{set_name}' dataloader with {self.dataset_sizes[set_name]} elements."
+            )
 
-    def print_classes_dl(self, set_name: str="train"):
+    def print_classes_dl(self, set_name: str = "train"):
         """Print classes and classnames (if available)
 
         Parameters
@@ -104,7 +116,7 @@ class classifier:
         print(f"[INFO] labels:      {self.dataloader[set_name].dataset.uniq_labels}")
         if self.class_names is not None:
             print(f"[INFO] class-names: {self.class_names}")
-    
+
     def add_model(self, model, input_size=224, is_inception=False):
         """Add a model to classifier object
 
@@ -121,11 +133,11 @@ class classifier:
             raise ValueError("[ERROR] specify class names using set_classnames method.")
         else:
             self.print_classes_dl()
-        
+
         self.model = model.to(self.device)
         self.input_size = input_size
         self.is_inception = is_inception
-    
+
     def del_model(self):
         """Delete the model"""
         self.model = None
@@ -135,8 +147,8 @@ class classifier:
         self.last_epoch = 0
         self.best_loss = torch.tensor(np.inf)
         self.best_epoch = 0
-    
-    def layerwise_lr(self, min_lr: float, max_lr: float, ltype: str="linspace"):
+
+    def layerwise_lr(self, min_lr: float, max_lr: float, ltype: str = "linspace"):
         """Define layer-wise learning rates
 
         linspace: use evenly spaced learning rates over a specified interval
@@ -152,32 +164,40 @@ class classifier:
             how to space the specified interval, by default "linspace"
         """
         if ltype.lower() in ["line", "linear", "linspace"]:
-            list_lrs = np.linspace(min_lr, max_lr, len(list(self.model.named_parameters())))
+            list_lrs = np.linspace(
+                min_lr, max_lr, len(list(self.model.named_parameters()))
+            )
         elif ltype.lower() in ["log", "geomspace"]:
-            list_lrs = np.geomspace(min_lr, max_lr, len(list(self.model.named_parameters())))
+            list_lrs = np.geomspace(
+                min_lr, max_lr, len(list(self.model.named_parameters()))
+            )
         else:
-            raise NotImplementedError(f"Implemented methods are: linspace and geomspace")
+            raise NotImplementedError(
+                f"Implemented methods are: linspace and geomspace"
+            )
 
         list2optim = []
         for i, (name, params) in enumerate(self.model.named_parameters()):
-            list2optim.append({'params': params, 'lr': list_lrs[i]})
-            
+            list2optim.append({"params": params, "lr": list_lrs[i]})
+
         return list2optim
 
-    def initialize_optimizer(self, 
-                             optim_type: str="adam", 
-                             params2optim="infer",
-                             optim_param_dict: dict={"lr": 1e-3}, 
-                             add_optim: bool=True):
+    def initialize_optimizer(
+        self,
+        optim_type: str = "adam",
+        params2optim="infer",
+        optim_param_dict: dict = {"lr": 1e-3},
+        add_optim: bool = True,
+    ):
         """Initialize an optimizer
         if add_optim is True, the optimizer will be added to object
 
         Note that the first argument of an optimizer is:
-            parameters to optimize, e.g., 
+            parameters to optimize, e.g.,
                 model_ft.parameters(): all parameters are being optimized
                 model_ft.fc.parameters(): only parameters of final layer are being optimized
                 params2optimize = model_ft.parameters()
-            Here, we use filter(lambda p: p.requires_grad, self.model.parameters()) 
+            Here, we use filter(lambda p: p.requires_grad, self.model.parameters())
 
         Parameters
         ----------
@@ -188,17 +208,17 @@ class classifier:
         add_optim : bool, optional
             add optimizer to the object, by default True
         """
-   
+
         if params2optim == "infer":
             params2optim = filter(lambda p: p.requires_grad, self.model.parameters())
-        
-        if optim_type.lower() in ['adam']:
+
+        if optim_type.lower() in ["adam"]:
             optimizer = optim.Adam(params2optim, **optim_param_dict)
-        elif optim_type.lower() in ['adamw']:
+        elif optim_type.lower() in ["adamw"]:
             optimizer = optim.AdamW(params2optim, **optim_param_dict)
-        elif optim_type.lower() in ['sgd']:
+        elif optim_type.lower() in ["sgd"]:
             optimizer = optim.SGD(params2optim, **optim_param_dict)
-        
+
         if add_optim:
             self.add_optimizer(optimizer)
         else:
@@ -207,11 +227,13 @@ class classifier:
     def add_optimizer(self, optimizer):
         """Add an optimizer to the object"""
         self.optimizer = optimizer
-        
-    def initialize_scheduler(self, 
-                             scheduler_type: str="steplr", 
-                             scheduler_param_dict: dict={"step_size": 10, "gamma": 0.1}, 
-                             add_scheduler: bool=True):
+
+    def initialize_scheduler(
+        self,
+        scheduler_type: str = "steplr",
+        scheduler_param_dict: dict = {"step_size": 10, "gamma": 0.1},
+        add_scheduler: bool = True,
+    ):
         """Initialize a scheduler
 
         Parameters
@@ -223,26 +245,34 @@ class classifier:
         add_scheduler : bool, optional
             add scheduler to the object, by default True
         """
-        
+
         if scheduler_type.lower() in ["steplr"]:
-            scheduler = optim.lr_scheduler.StepLR(self.optimizer, **scheduler_param_dict)
+            scheduler = optim.lr_scheduler.StepLR(
+                self.optimizer, **scheduler_param_dict
+            )
         elif scheduler_type.lower() in ["onecyclelr"]:
-            scheduler = optim.lr_scheduler.OneCycleLR(self.optimizer, **scheduler_param_dict)
+            scheduler = optim.lr_scheduler.OneCycleLR(
+                self.optimizer, **scheduler_param_dict
+            )
         else:
-            raise ValueError(f"[ERROR] scheduler of type: {scheduler_type} is not implemented.")
-            
+            raise ValueError(
+                f"[ERROR] scheduler of type: {scheduler_type} is not implemented."
+            )
+
         if add_scheduler:
             self.add_scheduler(scheduler)
         else:
             return scheduler
-    
+
     def add_scheduler(self, scheduler):
         """Add a scheduler to the object"""
         if self.optimizer is None:
-            raise ValueError("[ERROR] optimizer is needed. Use initialize_optimizer or add_optimizer")
-        
+            raise ValueError(
+                "[ERROR] optimizer is needed. Use initialize_optimizer or add_optimizer"
+            )
+
         self.scheduler = scheduler
-    
+
     def add_criterion(self, criterion):
         """Add a criterion to the object"""
         self.criterion = criterion
@@ -274,45 +304,55 @@ class classifier:
 
         # header
         col1, col2, col3 = "modules", "parameters", "dim"
-        line_divider = sum(print_space)*"-" + "----------"
+        line_divider = sum(print_space) * "-" + "----------"
         print(line_divider)
-        print(f"| {col1:>{print_space[0]}} | {col2:>{print_space[1]}} | {col3:>{print_space[2]}}")
+        print(
+            f"| {col1:>{print_space[0]}} | {col2:>{print_space[1]}} | {col3:>{print_space[2]}}"
+        )
         print(line_divider)
 
         # body
         total_params = 0
         total_trainable_params = 0
         for name, parameter in self.model.named_parameters():
-            
-            if (not parameter.requires_grad) and only_trainable: 
+
+            if (not parameter.requires_grad) and only_trainable:
                 continue
-            elif (not parameter.requires_grad):
+            elif not parameter.requires_grad:
                 cbeg, cend = self.color_red, self.color_reset
             else:
                 cbeg = cend = ""
 
             param = parameter.numel()
-            
-            print(f"{cbeg}| {name:>{print_space[0]}} | {param:>{print_space[1]}} | {str(list(parameter.shape)):>{print_space[2]}} |{cend}")
+
+            print(
+                f"{cbeg}| {name:>{print_space[0]}} | {param:>{print_space[1]}} | {str(list(parameter.shape)):>{print_space[2]}} |{cend}"
+            )
 
             total_params += param
-            if (parameter.requires_grad):
+            if parameter.requires_grad:
                 total_trainable_params += param
 
         # footer
         print(line_divider)
         if not only_trainable:
-            print(f"| {'Total params':>{print_space[0]}} | {total_params:>{print_space[1]}} | {'':>{print_space[2]}} |")
-        print(f"| {'Total trainable params':>{print_space[0]}} | {total_trainable_params:>{print_space[1]}} | {'':>{print_space[2]}} |")
+            print(
+                f"| {'Total params':>{print_space[0]}} | {total_params:>{print_space[1]}} | {'':>{print_space[2]}} |"
+            )
+        print(
+            f"| {'Total trainable params':>{print_space[0]}} | {total_trainable_params:>{print_space[1]}} | {'':>{print_space[2]}} |"
+        )
         print(line_divider)
 
         # add 6 to sum(print_space) as we have two times: " | " with size 3 in the other/above prints
         print(f"| {'Other parameters:':<{sum(print_space) + 6}} |")
         print(f"| {'* input size:   '+str(self.input_size):<{sum(print_space) + 6}} |")
-        print(f"| {'* is_inception: '+str(self.is_inception):<{sum(print_space) + 6}} |")
+        print(
+            f"| {'* is_inception: '+str(self.is_inception):<{sum(print_space) + 6}} |"
+        )
         print(line_divider)
-    
-    def freeze_layers(self, layers_to_freeze: list=[]):
+
+    def freeze_layers(self, layers_to_freeze: list = []):
         """Freeze a list of layers, wildcard is accepted
 
         Parameters
@@ -320,7 +360,7 @@ class classifier:
         layers_to_freeze : list, optional
             List of layers to freeze, by default []
         """
-        
+
         for one_layer in layers_to_freeze:
             for name, param in self.model.named_parameters():
                 if (one_layer[-1] == "*") and (one_layer.replace("*", "") in name):
@@ -328,8 +368,7 @@ class classifier:
                 elif (one_layer[-1] != "*") and (one_layer == name):
                     param.requires_grad = False
 
-
-    def unfreeze_layers(self, layers_to_unfreeze: list=[]):
+    def unfreeze_layers(self, layers_to_unfreeze: list = []):
         """Unfreeze a list of layers, wildcard is accepted
 
         Parameters
@@ -344,7 +383,7 @@ class classifier:
                 elif (one_layer[-1] != "*") and (one_layer == name):
                     param.requires_grad = True
 
-    def only_keep_layers(self, only_keep_layers_list: list=[]):
+    def only_keep_layers(self, only_keep_layers_list: list = []):
         """Only keep this list of layers in training
 
         Parameters
@@ -357,39 +396,45 @@ class classifier:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
-    
-    def inference(self, set_name="infer", verbosity_level=0, print_info_batch_freq: int=5):
+
+    def inference(
+        self, set_name="infer", verbosity_level=0, print_info_batch_freq: int = 5
+    ):
         """Model inference on dataset: set_name"""
-        self.train(phases=[set_name], 
-                   num_epochs=1, 
-                   save_model_dir=None,
-                   verbosity_level=verbosity_level,
-                   tensorboard_path=None,
-                   tmp_file_save_freq=2,
-                   remove_after_load=False,
-                   print_info_batch_freq=print_info_batch_freq)
+        self.train(
+            phases=[set_name],
+            num_epochs=1,
+            save_model_dir=None,
+            verbosity_level=verbosity_level,
+            tensorboard_path=None,
+            tmp_file_save_freq=2,
+            remove_after_load=False,
+            print_info_batch_freq=print_info_batch_freq,
+        )
 
     def train_component_summary(self):
         """Print some info about optimizer/criterion/model..."""
-        print(20*"=")
+        print(20 * "=")
         print("* Optimizer:")
         print(str(self.optimizer))
-        print(20*"=")
+        print(20 * "=")
         print("* Criterion:")
         print(str(self.criterion))
-        print(20*"=")
+        print(20 * "=")
         print("* Model:")
         self.model_summary(only_trainable=True)
-    
-    def train(self, 
-              phases: list=["train", "val"], 
-              num_epochs: int=25, 
-              save_model_dir: Union[None, str]="models",
-              verbosity_level: int=1,
-              tensorboard_path: Union[None, str]=None,
-              tmp_file_save_freq: int=2,
-              remove_after_load: bool=True,
-              print_info_batch_freq: int=5):
+
+    def train(
+        self,
+        phases: list = ["train", "val"],
+        num_epochs: int = 25,
+        save_model_dir: Union[None, str] = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: Union[None, str] = None,
+        tmp_file_save_freq: int = 2,
+        remove_after_load: bool = True,
+        print_info_batch_freq: int = 5,
+    ):
         """Wrapper function for train_core method to capture exceptions. Supported exceptions so far:
         - KeyboardInterrupt
 
@@ -397,13 +442,15 @@ class classifier:
         """
 
         try:
-            self.train_core(phases, 
-                            num_epochs, 
-                            save_model_dir, 
-                            verbosity_level, 
-                            tensorboard_path,
-                            tmp_file_save_freq,
-                            print_info_batch_freq=print_info_batch_freq)
+            self.train_core(
+                phases,
+                num_epochs,
+                save_model_dir,
+                verbosity_level,
+                tensorboard_path,
+                tmp_file_save_freq,
+                print_info_batch_freq=print_info_batch_freq,
+            )
         except KeyboardInterrupt:
             print("KeyboardInterrupted...Exiting...")
             if os.path.isfile(self.tmp_save_filename):
@@ -412,14 +459,16 @@ class classifier:
             else:
                 print(f"No temporary file was found.")
 
-    def train_core(self,
-                   phases: list = ["train", "val"],
-                   num_epochs: int = 25,
-                   save_model_dir: Union[None, str] = "models",
-                   verbosity_level: int = 1,
-                   tensorboard_path: Union[None, str] = None,
-                   tmp_file_save_freq: int = 2,
-                   print_info_batch_freq: int=5):
+    def train_core(
+        self,
+        phases: list = ["train", "val"],
+        num_epochs: int = 25,
+        save_model_dir: Union[None, str] = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: Union[None, str] = None,
+        tmp_file_save_freq: int = 2,
+        print_info_batch_freq: int = 5,
+    ):
         """Train/fine-tune a classifier
 
         Parameters
@@ -467,6 +516,7 @@ class classifier:
         if tensorboard_path is not None:
             try:
                 from torch.utils.tensorboard import SummaryWriter
+
                 tboard_writer = SummaryWriter(tensorboard_path)
             except ImportError:
                 print(
@@ -495,7 +545,7 @@ class classifier:
 
                 # TQDM
                 # batch_loop = tqdm(iter(self.dataloader[phase]), total=len(self.dataloader[phase]), leave=False)
-                # if phase.lower() in train_phase_names+valid_phase_names: 
+                # if phase.lower() in train_phase_names+valid_phase_names:
                 #     batch_loop.set_description(f"Epoch {epoch}/{end_epoch}")
 
                 phase_batch_size = self.dataloader[phase].batch_size
@@ -557,12 +607,14 @@ class classifier:
                     running_pred_label.extend(pred_label.cpu().tolist())
                     running_orig_label.extend(labels.cpu().tolist())
 
-                    if batch_idx % print_info_batch_freq == 0: 
-                        curr_inp_counts = min(total_inp_counts, (batch_idx+1) * phase_batch_size)
-                        progress_perc = curr_inp_counts / total_inp_counts * 100.
+                    if batch_idx % print_info_batch_freq == 0:
+                        curr_inp_counts = min(
+                            total_inp_counts, (batch_idx + 1) * phase_batch_size
+                        )
+                        progress_perc = curr_inp_counts / total_inp_counts * 100.0
                         tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}%)"
 
-                        epoch_msg  = f"{phase: <8} -- {epoch}/{end_epoch} -- "
+                        epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
                         epoch_msg += f"{tmp_str: >20} -- "
 
                         if phase.lower() in valid_phase_names:
@@ -631,7 +683,7 @@ class classifier:
                         self.save(self.tmp_save_filename, force=True)
 
         time_elapsed = time.time() - since
-        print(f'Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        print(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -650,8 +702,10 @@ class classifier:
                     f"[INFO] Save model epoch: {self.best_epoch} with least valid loss: {self.best_loss:.4f}"
                 )
                 print(f"[INFO] Path: {save_model_path}")
-    
-    def calculate_add_metrics(self, y_true, y_pred, y_score, phase, epoch=-1, tboard_writer=None):
+
+    def calculate_add_metrics(
+        self, y_true, y_pred, y_score, phase, epoch=-1, tboard_writer=None
+    ):
         """Calculate various evaluation metrics (e.g., precision, recall and F1) and add to self.metrics
 
         Parameters
@@ -673,57 +727,85 @@ class classifier:
         y_score = np.array(y_score)
 
         for avrg in ["micro", "macro", "weighted"]:
-            prec, rcall, fscore, supp = precision_recall_fscore_support(y_true, y_pred, average=avrg)
-            self._add_metrics(f"epoch_prec_{avrg}_{phase}", prec*100.)
-            self._add_metrics(f"epoch_recall_{avrg}_{phase}", rcall*100.)
-            self._add_metrics(f"epoch_fscore_{avrg}_{phase}", fscore*100.)
+            prec, rcall, fscore, supp = precision_recall_fscore_support(
+                y_true, y_pred, average=avrg
+            )
+            self._add_metrics(f"epoch_prec_{avrg}_{phase}", prec * 100.0)
+            self._add_metrics(f"epoch_recall_{avrg}_{phase}", rcall * 100.0)
+            self._add_metrics(f"epoch_fscore_{avrg}_{phase}", fscore * 100.0)
             self._add_metrics(f"epoch_supp_{avrg}_{phase}", supp)
 
             if tboard_writer is not None:
-                tboard_writer.add_scalar(f'Precision/{phase}/{avrg}', self.metrics[f"epoch_prec_{avrg}_{phase}"][-1], epoch)
-                tboard_writer.add_scalar(f'Recall/{phase}/{avrg}', self.metrics[f"epoch_recall_{avrg}_{phase}"][-1], epoch)
-                tboard_writer.add_scalar(f'Fscore/{phase}/{avrg}', self.metrics[f"epoch_fscore_{avrg}_{phase}"][-1], epoch)
+                tboard_writer.add_scalar(
+                    f"Precision/{phase}/{avrg}",
+                    self.metrics[f"epoch_prec_{avrg}_{phase}"][-1],
+                    epoch,
+                )
+                tboard_writer.add_scalar(
+                    f"Recall/{phase}/{avrg}",
+                    self.metrics[f"epoch_recall_{avrg}_{phase}"][-1],
+                    epoch,
+                )
+                tboard_writer.add_scalar(
+                    f"Fscore/{phase}/{avrg}",
+                    self.metrics[f"epoch_fscore_{avrg}_{phase}"][-1],
+                    epoch,
+                )
 
             # --- compute ROC AUC
             if y_score.shape[1] == 2:
-                # binary case 
-                # From scikit-learn: 
-                #     The probability estimates correspond to the probability of the class with the greater label, 
+                # binary case
+                # From scikit-learn:
+                #     The probability estimates correspond to the probability of the class with the greater label,
                 #     i.e. estimator.classes_[1] and thus estimator.predict_proba(X, y)[:, 1]
                 roc_auc = roc_auc_score(y_true, y_score[:, 1], average=avrg)
-            elif (y_score.shape[1] != 2) and (avrg in ['macro', 'weighted']):
+            elif (y_score.shape[1] != 2) and (avrg in ["macro", "weighted"]):
                 # multiclass
                 # In the multiclass case, it corresponds to an array of shape (n_samples, n_classes)
                 try:
-                    roc_auc = roc_auc_score(y_true, y_score, average=avrg, multi_class="ovr")
+                    roc_auc = roc_auc_score(
+                        y_true, y_score, average=avrg, multi_class="ovr"
+                    )
                 except:
                     continue
             else:
                 continue
 
-            self._add_metrics(f"epoch_rocauc_{avrg}_{phase}", roc_auc*100.)
+            self._add_metrics(f"epoch_rocauc_{avrg}_{phase}", roc_auc * 100.0)
 
         prfs = precision_recall_fscore_support(y_true, y_pred, average=None)
         for i in range(len(prfs[0])):
-            self._add_metrics(f"epoch_prec_{i}_{phase}", prfs[0][i]*100.)
-            self._add_metrics(f"epoch_recall_{i}_{phase}", prfs[1][i]*100.)
-            self._add_metrics(f"epoch_fscore_{i}_{phase}", prfs[2][i]*100.)
+            self._add_metrics(f"epoch_prec_{i}_{phase}", prfs[0][i] * 100.0)
+            self._add_metrics(f"epoch_recall_{i}_{phase}", prfs[1][i] * 100.0)
+            self._add_metrics(f"epoch_fscore_{i}_{phase}", prfs[2][i] * 100.0)
             self._add_metrics(f"epoch_supp_{i}_{phase}", prfs[3][i])
-            
+
             if tboard_writer is not None:
-                tboard_writer.add_scalar(f'Precision/{phase}/binary_{i}', self.metrics[f"epoch_prec_{i}_{phase}"][-1], epoch)
-                tboard_writer.add_scalar(f'Recall/{phase}/binary_{i}', self.metrics[f"epoch_recall_{i}_{phase}"][-1], epoch)
-                tboard_writer.add_scalar(f'Fscore/{phase}/binary_{i}', self.metrics[f"epoch_fscore_{i}_{phase}"][-1], epoch)
-    
+                tboard_writer.add_scalar(
+                    f"Precision/{phase}/binary_{i}",
+                    self.metrics[f"epoch_prec_{i}_{phase}"][-1],
+                    epoch,
+                )
+                tboard_writer.add_scalar(
+                    f"Recall/{phase}/binary_{i}",
+                    self.metrics[f"epoch_recall_{i}_{phase}"][-1],
+                    epoch,
+                )
+                tboard_writer.add_scalar(
+                    f"Fscore/{phase}/binary_{i}",
+                    self.metrics[f"epoch_fscore_{i}_{phase}"][-1],
+                    epoch,
+                )
+
     def gen_epoch_msg(self, phase, epoch_msg):
         tmp_loss = self.metrics[f"epoch_loss_{phase}"][-1]
         epoch_msg += f"Loss: {tmp_loss:.3f}; "
-        tmp_fscore = self.metrics[f'epoch_fscore_macro_{phase}'][-1]
+        tmp_fscore = self.metrics[f"epoch_fscore_macro_{phase}"][-1]
         epoch_msg += f"F_macro: {tmp_fscore:.2f}; "
-        tmp_recall = self.metrics[f'epoch_recall_macro_{phase}'][-1]
+        tmp_recall = self.metrics[f"epoch_recall_macro_{phase}"][-1]
         epoch_msg += f"R_macro: {tmp_recall:.2f}"
         return epoch_msg
-    
+
     def _add_metrics(self, k, v):
         """Add metric k with value v to self.metrics"""
         if not k in self.metrics.keys():
@@ -731,13 +813,20 @@ class classifier:
         else:
             self.metrics[k].append(v)
 
-    def plot_metric(self, y_axis, y_label, legends,
-                    x_axis="epoch", x_label="epoch",
-                    colors=5*["k", "tab:red"], 
-                    styles=10*["-"],
-                    markers=10*["o"],
-                    figsize=(10, 5),
-                    plt_yrange=None, plt_xrange=None):
+    def plot_metric(
+        self,
+        y_axis,
+        y_label,
+        legends,
+        x_axis="epoch",
+        x_label="epoch",
+        colors=5 * ["k", "tab:red"],
+        styles=10 * ["-"],
+        markers=10 * ["o"],
+        figsize=(10, 5),
+        plt_yrange=None,
+        plt_xrange=None,
+    ):
         """Plot content of self.metrics
 
         Parameters
@@ -761,32 +850,36 @@ class classifier:
         """
 
         # Font sizes
-        plt_size = {"xlabel": 24, "ylabel": 24,
-                    "xtick": 18,  "ytick": 18,
-                    "legend": 18}
+        plt_size = {"xlabel": 24, "ylabel": 24, "xtick": 18, "ytick": 18, "legend": 18}
 
         fig = plt.figure(figsize=figsize)
         if x_axis == "epoch":
             from matplotlib.ticker import MaxNLocator
+
             # make x ticks integer
             fig.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 
         for i, one_item in enumerate(y_axis):
             if one_item not in self.metrics.keys():
-                print(f"[WARNING] requested item: {one_item} not in keys: {self.metrics.keys}")
+                print(
+                    f"[WARNING] requested item: {one_item} not in keys: {self.metrics.keys}"
+                )
                 continue
-            
+
             if x_axis == "epoch":
-                x_axis_plt = range(1, len(self.metrics[one_item])+1)
+                x_axis_plt = range(1, len(self.metrics[one_item]) + 1)
             else:
                 x_axis_plt = self.metrics[x_axis]
 
-            plt.plot(x_axis_plt, self.metrics[one_item],
-                     label=legends[i], 
-                     color=colors[i],
-                     ls=styles[i],
-                     marker=markers[i],
-                     lw=3)
+            plt.plot(
+                x_axis_plt,
+                self.metrics[one_item],
+                label=legends[i],
+                color=colors[i],
+                ls=styles[i],
+                marker=markers[i],
+                lw=3,
+            )
 
         # --- labels and ticks
         plt.xlabel(x_label, size=plt_size["xlabel"])
@@ -794,10 +887,13 @@ class classifier:
         plt.xticks(size=plt_size["xtick"])
         plt.yticks(size=plt_size["ytick"])
         # --- legend
-        plt.legend(fontsize=plt_size["legend"],
-                   bbox_to_anchor=(0, 1.02, 1, 0.2), 
-                   ncol=2, borderaxespad=0, 
-                   loc="lower center")
+        plt.legend(
+            fontsize=plt_size["legend"],
+            bbox_to_anchor=(0, 1.02, 1, 0.2),
+            ncol=2,
+            borderaxespad=0,
+            loc="lower center",
+        )
         # --- x/y range
         if plt_xrange is not None:
             plt.xlim(plt_xrange[0], plt_xrange[1])
@@ -807,10 +903,16 @@ class classifier:
         plt.grid()
         plt.show()
 
-    def initialize_model(self, model_name, pretrained=True, last_layer_num_classes="default", add_model=True):
+    def initialize_model(
+        self,
+        model_name,
+        pretrained=True,
+        last_layer_num_classes="default",
+        add_model=True,
+    ):
         """Initialize a PyTorch model
         This method changes the number of classes in the last layer (see last_layer_num_classes)
-   
+
         NOTES
         -----
         inception_v3 requires the input size to be (299,299), whereas all of the other models expect (224,224).
@@ -827,7 +929,7 @@ class classifier:
             Number of elements in the last layer, by default "default"
         """
 
-        # Initialize these variables which will be set in this if statement. 
+        # Initialize these variables which will be set in this if statement.
         # Each of these variables is model specific.
         model_dw = models.__getattribute__(model_name)
         model_dw = model_dw(pretrained)
@@ -853,7 +955,9 @@ class classifier:
             model_dw.classifier[6] = nn.Linear(num_ftrs, last_layer_num_classes)
 
         elif "squeezenet" in model_name:
-            model_dw.classifier[1] = nn.Conv2d(512, last_layer_num_classes, kernel_size=(1,1), stride=(1,1))
+            model_dw.classifier[1] = nn.Conv2d(
+                512, last_layer_num_classes, kernel_size=(1, 1), stride=(1, 1)
+            )
             model_dw.num_classes = last_layer_num_classes
 
         elif "densenet" in model_name:
@@ -880,8 +984,10 @@ class classifier:
             self.add_model(model_dw, input_size=input_size, is_inception=is_inception)
         else:
             return model_dw, input_size, is_inception
-    
-    def show_sample(self, set_name="train", batch_number=1, print_batch_info=True, figsize=(15, 10)):
+
+    def show_sample(
+        self, set_name="train", batch_number=1, print_batch_info=True, figsize=(15, 10)
+    ):
         """Show samples from specified dataset
 
         Parameters
@@ -907,7 +1013,7 @@ class classifier:
         self._imshow(
             out, title=str([self.class_names[int(x)] for x in classes]), figsize=figsize
         )
-    
+
     def batch_info(self, set_name="train"):
         """Print info about samples/batch-size/...
 
@@ -952,13 +1058,15 @@ class classifier:
         plt.pause(0.001)  # pause a bit so that plots are updated
         plt.show()
 
-    def inference_sample_results(self, 
-                                 num_samples: int = 6, 
-                                 class_index: int = 0, 
-                                 set_name: str = "train", 
-                                 min_conf: Union[None, float] = None, 
-                                 max_conf: Union[None, float] = None,
-                                 figsize: tuple = (15, 15)):
+    def inference_sample_results(
+        self,
+        num_samples: int = 6,
+        class_index: int = 0,
+        set_name: str = "train",
+        min_conf: Union[None, float] = None,
+        max_conf: Union[None, float] = None,
+        figsize: tuple = (15, 15),
+    ):
         """Plot some samples (specified by num_samples) for inference outputs
 
         Parameters
@@ -985,9 +1093,9 @@ class classifier:
             for inputs, labels in iter(self.dataloader[set_name]):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
-    
+
                 outputs = self.model(inputs)
-                pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.
+                pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
 
                 # go through images in batch
@@ -1001,9 +1109,11 @@ class classifier:
                         continue
 
                     counter += 1
-                    ax = plt.subplot(int(num_samples/2.), 3, counter)
-                    ax.axis('off')
-                    ax.set_title(f'{self.class_names[pred_ind]} | {pred_conf[j][pred_ind]:.3f}')
+                    ax = plt.subplot(int(num_samples / 2.0), 3, counter)
+                    ax.axis("off")
+                    ax.set_title(
+                        f"{self.class_names[pred_ind]} | {pred_conf[j][pred_ind]:.3f}"
+                    )
 
                     inp = inputs.cpu().data[j].numpy().transpose((1, 2, 0))
                     inp = np.clip(inp, 0, 1)
@@ -1015,7 +1125,7 @@ class classifier:
                         return
             self.model.train(mode=was_training)
             plt.show()
-    
+
     def save(self, save_path="default.obj", force=False):
         """Save object"""
         if os.path.isfile(save_path):
@@ -1025,7 +1135,7 @@ class classifier:
                 raise FileExistsError(f"file already exists: {save_path}")
 
         # parent/base-names
-        par_name = os.path.dirname(os.path.abspath(save_path)) 
+        par_name = os.path.dirname(os.path.abspath(save_path))
         base_name = os.path.basename(os.path.abspath(save_path))
 
         # Extract model, write it separately using torch.save
@@ -1034,8 +1144,8 @@ class classifier:
         del obj2write["model"]
 
         os.makedirs(par_name, exist_ok=True)
-        with open(save_path, 'wb') as myfile:
-            #pickle.dump(self.__dict__, myfile)
+        with open(save_path, "wb") as myfile:
+            # pickle.dump(self.__dict__, myfile)
             joblib.dump(obj2write, myfile)
 
         torch.save(mymodel, os.path.join(par_name, f"model_{base_name}"))
@@ -1043,26 +1153,25 @@ class classifier:
     def load(self, load_path, remove_after_load=False, force_device=False):
         """load class"""
 
-
-        load_path = os.path.abspath(load_path)        
+        load_path = os.path.abspath(load_path)
         mydevice = self.device
-        
+
         if not os.path.isfile(load_path):
             raise FileNotFoundError(f"file not found: {load_path}")
 
-        with open(load_path, 'rb') as myfile:
-            #objPickle = pickle.load(myfile)
+        with open(load_path, "rb") as myfile:
+            # objPickle = pickle.load(myfile)
             objPickle = joblib.load(myfile)
 
         if remove_after_load:
             os.remove(load_path)
 
-        self.__dict__ = objPickle 
+        self.__dict__ = objPickle
 
         if force_device:
             if not isinstance(force_device, str):
                 force_device = str(force_device)
-            os.environ['CUDA_VISIBLE_DEVICES'] = force_device
+            os.environ["CUDA_VISIBLE_DEVICES"] = force_device
 
         par_name = os.path.dirname(load_path)
         base_name = os.path.basename(load_path)
@@ -1077,50 +1186,52 @@ class classifier:
 
     def _print_colors(self):
         # color
-        self.color_lgrey = '\033[1;90m'
-        self.color_grey = '\033[90m'           # broing information
-        self.color_yellow = '\033[93m'         # FYI
-        self.color_orange = '\033[0;33m'       # Warning
+        self.color_lgrey = "\033[1;90m"
+        self.color_grey = "\033[90m"  # broing information
+        self.color_yellow = "\033[93m"  # FYI
+        self.color_orange = "\033[0;33m"  # Warning
 
-        self.color_lred = '\033[1;31m'         # there is smoke
-        self.color_red = '\033[91m'            # fire!
-        self.color_dred = '\033[2;31m'         # Everything is on fire
+        self.color_lred = "\033[1;31m"  # there is smoke
+        self.color_red = "\033[91m"  # fire!
+        self.color_dred = "\033[2;31m"  # Everything is on fire
 
-        self.color_lblue = '\033[1;34m'
-        self.color_blue = '\033[94m'
-        self.color_dblue = '\033[2;34m'
+        self.color_lblue = "\033[1;34m"
+        self.color_blue = "\033[94m"
+        self.color_dblue = "\033[2;34m"
 
-        self.color_lgreen = '\033[1;32m'       # all is normal
-        self.color_green = '\033[92m'          # something else
-        self.color_dgreen = '\033[2;32m'       # even more interesting
+        self.color_lgreen = "\033[1;32m"  # all is normal
+        self.color_green = "\033[92m"  # something else
+        self.color_dgreen = "\033[2;32m"  # even more interesting
 
-        self.color_lmagenta = '\033[1;35m'
-        self.color_magenta = '\033[95m'        # for title
-        self.color_dmagenta = '\033[2;35m'
+        self.color_lmagenta = "\033[1;35m"
+        self.color_magenta = "\033[95m"  # for title
+        self.color_dmagenta = "\033[2;35m"
 
-        self.color_cyan = '\033[96m'           # system time
-        self.color_white = '\033[97m'          # final time
+        self.color_cyan = "\033[96m"  # system time
+        self.color_white = "\033[97m"  # final time
 
-        self.color_black = '\033[0;30m'
+        self.color_black = "\033[0;30m"
 
-        self.color_reset = '\033[0m'
-        self.color_bold = '\033[1m'
-        self.color_under = '\033[4m'
+        self.color_reset = "\033[0m"
+        self.color_bold = "\033[1m"
+        self.color_under = "\033[4m"
 
     def get_time(self):
-        time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        time = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
         return time
 
     def cprint(self, type_info, bc_color, text):
         """
         simple print function used for colored logging
         """
-        ho_nam = socket.gethostname().split('.')[0][:10]
-    
-        print(self.color_green                  + self.get_time() + self.color_reset,
-              self.color_magenta                + ho_nam          + self.color_reset,
-              self.color_bold + self.color_grey + type_info       + self.color_reset,
-              bc_color                          + text            + self.color_reset)
+        ho_nam = socket.gethostname().split(".")[0][:10]
+
+        print(
+            self.color_green + self.get_time() + self.color_reset,
+            self.color_magenta + ho_nam + self.color_reset,
+            self.color_bold + self.color_grey + type_info + self.color_reset,
+            bc_color + text + self.color_reset,
+        )
 
     def update_progress(self, progress, text="", barLength=30):
         status = ""
@@ -1135,7 +1246,7 @@ class classifier:
         if progress >= 1:
             progress = 1
             status = "Done...\r\n"
-        block = int(round(barLength*progress))
+        block = int(round(barLength * progress))
         text = f"\r[{'#'*block + '-'*(barLength-block)}] {progress*100:.1f}% {status} {text}"
         sys.stdout.write(text)
         sys.stdout.flush()

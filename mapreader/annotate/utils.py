@@ -22,7 +22,7 @@ from ipyannotate.annotation import Annotation
 from ipyannotate.buttons import (
     ValueButton as Button,
     NextButton as Next,
-    BackButton as Back
+    BackButton as Back,
 )
 
 # -------- display_record
@@ -30,13 +30,11 @@ def display_record(record):
     """Display patches for annotation
 
     NOTE: This function should be called from prepare_annotation,
-          there are several global variables that are being set in the function. 
+          there are several global variables that are being set in the function.
 
     Refer to ipyannotate for more info.
     """
 
-    parent_path = os.path.dirname(annotation_tasks["paths"][record[3]]["parent_paths"])
-    
     # setup the images
     gridsize = (5, 1)
     plt.clf()
@@ -51,21 +49,29 @@ def display_record(record):
     plt.title(f"{record[0]}", size=20)
 
     if treelevel == "child" and contextimage:
+        parent_path = os.path.dirname(
+            annotation_tasks["paths"][record[3]]["parent_paths"]
+        )
         # Here, we assume that min_x, min_y, max_x and max_y are in the patch name
         split_path = record[0].split("-")
-        min_x, min_y, max_x, max_y = int(split_path[1]), int(split_path[2]), int(split_path[3]), int(split_path[4])
+        min_x, min_y, max_x, max_y = (
+            int(split_path[1]),
+            int(split_path[2]),
+            int(split_path[3]),
+            int(split_path[4]),
+        )
 
         # context image
         plt.subplot2grid(gridsize, (0, 0), rowspan=2)
 
         # ---
         par_img = PIL_image.open(os.path.join(parent_path, record[2])).convert("RGB")
-        min_y_par = max(0, min_y-y_offset)
-        min_x_par = max(0, min_x-x_offset)
-        max_x_par = min(max_x+x_offset, np.shape(par_img)[1])
-        max_y_par = min(max_y+y_offset, np.shape(par_img)[0])
+        min_y_par = max(0, min_y - y_offset)
+        min_x_par = max(0, min_x - x_offset)
+        max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
+        max_y_par = min(max_y + y_offset, np.shape(par_img)[0])
 
-        #par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
+        # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
         par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
 
         plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
@@ -75,18 +81,10 @@ def display_record(record):
         plt.yticks([])
 
         # plot the patch border on the context image
-        plt.plot([min_x, min_x], 
-                 [min_y, max_y], 
-                 lw=2, zorder=10, color="r")
-        plt.plot([min_x, max_x], 
-                 [min_y, min_y], 
-                 lw=2, zorder=10, color="r")
-        plt.plot([max_x, max_x], 
-                 [max_y, min_y], 
-                 lw=2, zorder=10, color="r")
-        plt.plot([max_x, min_x], 
-                 [max_y, max_y], 
-                 lw=2, zorder=10, color="r")
+        plt.plot([min_x, min_x], [min_y, max_y], lw=2, zorder=10, color="r")
+        plt.plot([min_x, max_x], [min_y, min_y], lw=2, zorder=10, color="r")
+        plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
+        plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
 
         ## # context image
         ## plt.subplot2grid(gridsize, (3, 0), rowspan=2)
@@ -113,23 +111,23 @@ def display_record(record):
         ## plt.yticks([])
 
         ## # plot the patch border on the context image
-        ## plt.plot([min_x, min_x], 
-        ##          [min_y, max_y], 
+        ## plt.plot([min_x, min_x],
+        ##          [min_y, max_y],
         ##          lw=2, zorder=10, color="r")
-        ## plt.plot([min_x, max_x], 
-        ##          [min_y, min_y], 
+        ## plt.plot([min_x, max_x],
+        ##          [min_y, min_y],
         ##          lw=2, zorder=10, color="r")
-        ## plt.plot([max_x, max_x], 
-        ##          [max_y, min_y], 
+        ## plt.plot([max_x, max_x],
+        ##          [max_y, min_y],
         ##          lw=2, zorder=10, color="r")
-        ## plt.plot([max_x, min_x], 
-        ##          [max_y, max_y], 
+        ## plt.plot([max_x, min_x],
+        ##          [max_y, max_y],
         ##          lw=2, zorder=10, color="r")
 
     plt.tight_layout()
     plt.show()
 
-    print(20*"-")
+    print(20 * "-")
     print("Additional info:")
     print(f"Counter: {record[-1]}")
     if url_main:
@@ -145,14 +143,17 @@ def display_record(record):
             url = False
             pass
 
+
 # -------- prepare_data
-def prepare_data(df, 
-                 col_names=["image_path", "parent_id"], 
-                 annotation_set="001", 
-                 label_col_name="label", 
-                 redo=False,
-                 random_state="random",
-                 num_samples=100):
+def prepare_data(
+    df,
+    col_names=["image_path", "parent_id"],
+    annotation_set="001",
+    label_col_name="label",
+    redo=False,
+    random_state="random",
+    num_samples=100,
+):
     """prepare data for annotations
 
     Args:
@@ -164,7 +165,9 @@ def prepare_data(df,
     """
 
     if (label_col_name in list(df.columns)) and (not redo):
-        print(f"Number of already annotated images: {len(df[~df[label_col_name].isnull()])}")
+        print(
+            f"Number of already annotated images: {len(df[~df[label_col_name].isnull()])}"
+        )
         # only annotate those patches that have not been already annotated
         df = df[df[label_col_name].isnull()]
         print(f"Number of images to be annotated (total): {len(df)}")
@@ -172,14 +175,18 @@ def prepare_data(df,
         # if redo = True or "label" column does not exist
         # annotate all patches in the pandas dataframe
         pass
-    
+
     tar_param = "mean_pixel_RGB"
     if tar_param in df.columns:
         try:
             pd.options.mode.chained_assignment = None
-            df["pixel_groups"] = pd.qcut(df[tar_param], q=10, precision=2, labels=False).values
+            df["pixel_groups"] = pd.qcut(
+                df[tar_param], q=10, precision=2, labels=False
+            ).values
             if random_state in ["random"]:
-                df = df.groupby("pixel_groups").sample(n=10, random_state=random.randint(0, 1e6))
+                df = df.groupby("pixel_groups").sample(
+                    n=10, random_state=random.randint(0, 1e6)
+                )
             else:
                 df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
         except Exception:
@@ -203,9 +210,16 @@ def prepare_data(df,
     print(f"Number of images to annotate (current batch): {len(data)}")
     return data
 
+
 # -------- annotation_interface
-def annotation_interface(data, list_labels, list_colors=["red", "green", "blue", "green"], 
-                         annotation_set="001", method="ipyannotate"):
+def annotation_interface(
+    data,
+    list_labels,
+    list_colors=["red", "green", "blue", "green"],
+    annotation_set="001",
+    method="ipyannotate",
+    list_shortcuts=None,
+):
     """Setup the annotation interface
 
     Args:
@@ -217,43 +231,88 @@ def annotation_interface(data, list_labels, list_colors=["red", "green", "blue",
     """
 
     if method == "ipyannotate":
-        list_shortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 
-                          'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                          'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
-                          'u', 'v', 'w', 'x', 'y', 'z']
+        if not list_shortcuts:
+            list_shortcuts = [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h",
+                "i",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v",
+                "w",
+                "x",
+                "y",
+                "z",
+            ]
         list_colors *= 10
         canvas = OutputCanvas(display=display_record)
         # Collect all tasks
         tasks = Tasks(Task(_) for _ in data)
         buttons = []
         for i, one_label in enumerate(list_labels):
-            buttons.append(Button(i+1, label=one_label, color=list_colors[i], shortcut=list_shortcuts[i]))
+            buttons.append(
+                Button(
+                    i + 1,
+                    label=one_label,
+                    color=list_colors[i],
+                    shortcut=list_shortcuts[i],
+                )
+            )
         controls = [Back(shortcut="j"), Next(shortcut="k")]
         toolbar = Toolbar(buttons + controls)
         annotation = Annotation(toolbar, tasks, canvas=canvas)
         return annotation
     else:
-        sys.exit(f"method: {method} is not implemented. Currently, we support: ipyannotate")
+        sys.exit(
+            f"method: {method} is not implemented. Currently, we support: ipyannotate"
+        )
+
 
 # -------- prepare_annotation
-def prepare_annotation(userID, 
-                       task, 
-                       annotation_tasks_file,
-                       custom_labels=[],
-                       annotation_set="001",
-                       redo_annotation=False,
-                       patch_paths=False, 
-                       parent_paths=False,
-                       tree_level="child",
-                       sortby=None,
-                       min_alpha_channel=None,
-                       min_mean_pixel=None,
-                       max_mean_pixel=None,
-                       context_image=False,
-                       xoffset=500,
-                       yoffset=500,
-                       urlmain="https://maps.nls.uk/view/",
-                       random_state="random"):
+def prepare_annotation(
+    userID,
+    task,
+    annotation_tasks_file,
+    custom_labels=[],
+    annotation_set="001",
+    redo_annotation=False,
+    patch_paths=False,
+    parent_paths=False,
+    tree_level="child",
+    sortby=None,
+    min_alpha_channel=None,
+    min_mean_pixel=None,
+    max_mean_pixel=None,
+    context_image=False,
+    xoffset=500,
+    yoffset=500,
+    urlmain="https://maps.nls.uk/view/",
+    random_state="random",
+    list_shortcuts=None,
+):
     """Prepare annotations
 
     Args:
@@ -271,9 +330,9 @@ def prepare_annotation(userID,
         context_image (bool): add a context image or not
         xoffset (int, optional): x-offset for the borders of the context image. Defaults to 500.
         yoffset (int, optional): y-offset for the borders of the context image. Defaults to 500.
-        urlmain (str, None, optional): when annotating, the URL in form of url_main/{map_id} will be shown as well. 
+        urlmain (str, None, optional): when annotating, the URL in form of url_main/{map_id} will be shown as well.
     """
-    
+
     # Specify global variables so they can be used in display_record function
     global annotation_tasks
     global x_offset
@@ -295,29 +354,44 @@ def prepare_annotation(userID,
         annotation_tasks = yaml.load(annot_file_fio, Loader=yaml.FullLoader)
 
     if not annotation_set in annotation_tasks["paths"].keys():
-        raise ValueError(f"{annotation_set} could not be found in {annotation_tasks_file}")
+        raise ValueError(
+            f"{annotation_set} could not be found in {annotation_tasks_file}"
+        )
     else:
-        patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"] 
-        parent_paths = os.path.join(annotation_tasks["paths"][annotation_set]["parent_paths"])
-        annot_file = os.path.join(annotation_tasks["paths"][annotation_set]["annot_dir"],
-                                 f"{task}_#{userID}#.csv")
-    
+        if tree_level == "child":
+            patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"]
+        parent_paths = os.path.join(
+            annotation_tasks["paths"][annotation_set]["parent_paths"]
+        )
+        annot_file = os.path.join(
+            annotation_tasks["paths"][annotation_set]["annot_dir"],
+            f"{task}_#{userID}#.csv",
+        )
+
     if not task in annotation_tasks["tasks"].keys():
         if custom_labels == []:
-            raise ValueError(f"Task: {task} could not be found and custom_labels == [].")
+            raise ValueError(
+                f"Task: {task} could not be found and custom_labels == []."
+            )
         list_labels = custom_labels
     else:
         list_labels = annotation_tasks["tasks"][task]["labels"]
 
     if tree_level == "child":
         # specify the path of patches and the parent images
-        mymaps = load_patches(patch_paths=patch_paths, 
-                              parent_paths=parent_paths)
+        mymaps = load_patches(patch_paths=patch_paths, parent_paths=parent_paths)
         if os.path.isfile(annot_file):
-            mymaps.add_metadata(metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level)
+            mymaps.add_metadata(
+                metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
+            )
 
         # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
-        if sortby == "mean" or isinstance(min_alpha_channel, float) or isinstance(min_mean_pixel, float) or isinstance(max_mean_pixel, float):
+        if (
+            sortby == "mean"
+            or isinstance(min_alpha_channel, float)
+            or isinstance(min_mean_pixel, float)
+            or isinstance(max_mean_pixel, float)
+        ):
             mymaps.calc_pixel_stats(calc_std=False)
 
         # convert images to dataframe
@@ -333,33 +407,42 @@ def prepare_annotation(userID,
         if isinstance(min_mean_pixel, float):
             if "mean_pixel_RGB" in sliced_df.columns:
                 sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] >= min_mean_pixel]
-        
+
         if isinstance(max_mean_pixel, float):
             if "mean_pixel_RGB" in sliced_df.columns:
                 sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] <= max_mean_pixel]
-        
+
         col_names = ["image_path", "parent_id"]
     else:
         mymaps = loader(path_images=parent_paths)
-        mymaps.add_metadata(metadata_path=annot_file, index_col=-1, delimiter=",", tree_level=tree_level)
+        if os.path.isfile(annot_file):
+            mymaps.add_metadata(
+                metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
+            )
         # convert images to dataframe
         sliced_df, _ = mymaps.convertImages(fmt="dataframe")
         col_names = ["image_path"]
 
     # prepare data for annotation
-    data2annotate = prepare_data(sliced_df, 
-                                 col_names=col_names, 
-                                 annotation_set=annotation_set, 
-                                 redo=redo_annotation,
-                                 random_state=random_state)
+    data2annotate = prepare_data(
+        sliced_df,
+        col_names=col_names,
+        annotation_set=annotation_set,
+        redo=redo_annotation,
+        random_state=random_state,
+    )
 
     if len(data2annotate) == 0:
         print("No image to annotate!")
     else:
-        annotation = annotation_interface(data2annotate, 
-                                          list_labels=list_labels, 
-                                          annotation_set=annotation_set)
+        annotation = annotation_interface(
+            data2annotate,
+            list_labels=list_labels,
+            annotation_set=annotation_set,
+            list_shortcuts=list_shortcuts,
+        )
         return annotation
+
 
 # -------- save_annotation
 def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set):
@@ -380,8 +463,10 @@ def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_
     if not annotation_set in annotation_tasks["paths"].keys():
         print(f"{annotation_set} could not be found in {annotation_tasks_file}")
     else:
-        annot_file = os.path.join(annotation_tasks["paths"][annotation_set]["annot_dir"],
-                                 f"{task}_#{userID}#.csv")
+        annot_file = os.path.join(
+            annotation_tasks["paths"][annotation_set]["annot_dir"],
+            f"{task}_#{userID}#.csv",
+        )
 
     annot_file_par = os.path.dirname(os.path.abspath(annot_file))
     if not os.path.isdir(annot_file_par):
@@ -398,10 +483,17 @@ def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_
     for i in range(len(annotation.tasks)):
         if annotation.tasks[i].value != None:
             newly_annotated += 1
-            if not annotation.tasks[i].output[0] in image_df["image_id"].values.tolist():
-                image_df = image_df.append({"image_id": annotation.tasks[i].output[0], 
-                                            "label": annotation.tasks[i].value},
-                                            ignore_index=True)
+            if (
+                not annotation.tasks[i].output[0]
+                in image_df["image_id"].values.tolist()
+            ):
+                image_df = image_df.append(
+                    {
+                        "image_id": annotation.tasks[i].output[0],
+                        "label": annotation.tasks[i].value,
+                    },
+                    ignore_index=True,
+                )
                 new_labels += 1
 
     if len(image_df) > 0:
@@ -412,4 +504,3 @@ def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_
         print(f"[INFO] Total number of annotations: {len(image_df)}")
     else:
         print("[INFO] No annotations to save!")
-        

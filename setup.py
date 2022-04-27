@@ -11,7 +11,7 @@ EXTRAS_REQUIRE = {
 
 setuptools.setup(
     name="mapreader",
-    version="0.1.2",
+    version="0.3.0",
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
     author=u"kasra-hosseini",
     #author_email="",
