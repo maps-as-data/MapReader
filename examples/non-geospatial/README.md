@@ -16,5 +16,5 @@
   * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
   * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
   * **Data access:** locally stored
-  * **Annotations** are done on MNIST (NOT patches/slices of MNIST images).
+  * **Annotations** are done on whole MNIST images, **not** on patches/slices of those images.
   * **Classifier:** train/fine-tuned PyTorch CV models.
