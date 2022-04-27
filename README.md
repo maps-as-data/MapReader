@@ -171,9 +171,7 @@ python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py3
 
 ## Use cases
 
-[Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks as follows.
-
-Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to read guidance specific to those image types. 
+[Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks. Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to read guidance specific to those image types. 
 
   - [Non-Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial):
       - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype)
