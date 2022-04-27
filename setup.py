@@ -1,7 +1,7 @@
 import setuptools
 
 EXTRAS_REQUIRE = {
-        'maps': [
+        'geo': [
             "geopy==2.1.0",
             "rasterio>=1.2.10,<2.0.0",
             "keplergl>=0.3.2,<0.4.0",

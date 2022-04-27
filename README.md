@@ -107,7 +107,7 @@ pip install git+https://github.com/Living-with-machines/MapReader.git
 To work with geospatial images (e.g., maps):
 
 ```bash
-pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[maps]'
+pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[geo]'
 ```
 
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
@@ -158,7 +158,7 @@ To work with geospatial images (e.g., maps):
 
 ```bash
 cd /path/to/MapReader
-pip install -e ."[maps]"
+pip install -e ."[geo]"
 ```
 
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
