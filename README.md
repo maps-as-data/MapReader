@@ -30,7 +30,7 @@
 **MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="figs/mapreader_paper.png" alt="MapReader's paper" style="width:300px;"> </a> 
 </div>
 
-# What is MapReader?
+## What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
@@ -55,7 +55,7 @@ Refer to each tutorial/example in the [use cases](#use-cases) section for more d
   - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](https://github.com/Living-with-machines/MapReader/tree/main/mapreader/persistent_data). Read the re-use terms in this section.
   - [Acknowledgements](#acknowledgements)
 
-# Overview
+## Overview
 
 MapReader is a groundbreaking interdisciplinary tool that emerged from a specific set of geospatial historical research questions. It was inspired by methods in biomedical imaging and geographic information science, which were adapted for annotation and use by historians, for example in this [paper](https://doi.org/10.1093/jvcult/vcab009). The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets, and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
 
