@@ -7,6 +7,9 @@
 </div>
  
 <p align="center">
+    <a href="https://pypi.org/project/mapreader/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/MapReader">
+    </a>
     <a href="https://mybinder.org/v2/gh/Living-with-machines/MapReader/main?labpath=examples%2Fquick_start%2Fquick_start.ipynb">
         <img alt="Binder" src="https://mybinder.org/badge_logo.svg">
     </a>
@@ -101,13 +104,13 @@ conda activate mr_py38
 * Install `mapreader`:
 
 ```bash
-pip install git+https://github.com/Living-with-machines/MapReader.git
+pip install mapreader 
 ```
 
 To work with geospatial images (e.g., maps):
 
 ```bash
-pip install 'git+https://github.com/Living-with-machines/MapReader.git#egg=MapReader[geo]'
+pip install "mapreader[geo]" 
 ```
 
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
