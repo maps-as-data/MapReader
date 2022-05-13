@@ -104,13 +104,13 @@ conda activate mr_py38
 * Install `mapreader`:
 
 ```bash
-pip install mapreader 
+pip3 install mapreader 
 ```
 
 To work with geospatial images (e.g., maps):
 
 ```bash
-pip install "mapreader[geo]" 
+pip3 install "mapreader[geo]" 
 ```
 
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
@@ -135,7 +135,7 @@ conda install -c conda-forge fiona=1.8.20
 conda install git
 
 # install MapReader
-pip install git+https://github.com/Living-with-machines/MapReader.git
+pip3 install git+https://github.com/Living-with-machines/MapReader.git
 
 # open Jupyter Notebook (if you want to test/work with the notebooks in "examples" directory)
 cd /path/to/MapReader 
@@ -154,14 +154,14 @@ git clone https://github.com/Living-with-machines/MapReader.git
 
 ```bash
 cd /path/to/MapReader
-pip install -v -e .
+pip3 install -v -e .
 ```
 
 To work with geospatial images (e.g., maps):
 
 ```bash
 cd /path/to/MapReader
-pip install -e ."[geo]"
+pip3 install -e ."[geo]"
 ```
 
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
