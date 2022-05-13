@@ -10,11 +10,11 @@ def create_hf(geom):
     """Create header and footer for different types of geometries
 
     Args:
-        geom (str): geometry type, e.g., polygone 
+        geom (str): geometry type, e.g., polygone
     """
-    
+
     if geom == "polygone":
-        header = '''
+        header = """
         {
         "type": "FeatureCollection",
         "features": [
@@ -23,24 +23,27 @@ def create_hf(geom):
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
-        '''
+        """
 
-        footer = '''
+        footer = """
                 ]
             }
         }
         ]
-        }'''
+        }"""
     else:
         raise ValueError(f"{geom} is not implemented.")
 
     return header, footer
 
+
 # -------
 class input_class:
     """initialize input class"""
+
     def __init__(self, name):
         self.name = name
+
 
 # -------
 def latlon2tile(lat, lon, zoom):
@@ -53,8 +56,11 @@ def latlon2tile(lat, lon, zoom):
     n = 1 << zoom
     return (
         n * ((lon + 180.0) / 360.0),
-        n * (1 - (math.log(math.tan(lat_radians) + 1 / math.cos(lat_radians)) / math.pi)) / 2.0
+        n
+        * (1 - (math.log(math.tan(lat_radians) + 1 / math.cos(lat_radians)) / math.pi))
+        / 2.0,
     )
+
 
 # -------
 def tile2latlon(x, y, zoom):
@@ -68,6 +74,7 @@ def tile2latlon(x, y, zoom):
     lon = 360 * x / n - 180.0
     return (lat, lon)
 
+
 # -------
 def collect_coord_info(list_files):
     """Collect min/max lat/lon from a list of tiles
@@ -76,9 +83,11 @@ def collect_coord_info(list_files):
         list_files (list): list of files to be read
     """
     # initialize lat/lon
-    min_lat = None; max_lat = None
-    min_lon = None; max_lon = None
-                          
+    min_lat = None
+    max_lat = None
+    min_lon = None
+    max_lon = None
+
     for one_file in list_files:
         z, x, y = os.path.basename(one_file).split("_")
         y = y.split(".")[0]
@@ -94,6 +103,7 @@ def collect_coord_info(list_files):
             max_lat = max(max_lat, lat)
             max_lon = max(max_lon, lon)
     return min_lon, max_lon, min_lat, max_lat
+
 
 # -------
 def check_par_jobs(jobs, sleep_time=1):
@@ -113,7 +123,6 @@ def check_par_jobs(jobs, sleep_time=1):
             else:
                 pp_flag = False
     if not pp_flag:
-        print('\n\n================================')
-        print('All %s processes are finished...' % len(jobs))
-        print('================================')
-
+        print("\n\n================================")
+        print("All %s processes are finished..." % len(jobs))
+        print("================================")

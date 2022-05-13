@@ -7,23 +7,26 @@ import numpy as np
 import os
 import time
 import torchvision
+
 # from tqdm.autonotebook import tqdm
 from typing import Union
 
 import torch
 from .classifier import classifier
 
-class classifierContext(classifier):
 
-    def train(self,
-              phases: list=["train", "val"],
-              num_epochs: int=25,
-              save_model_dir: Union[None, str]="models",
-              verbosity_level: int=1,
-              tensorboard_path: Union[None, str]=None,
-              tmp_file_save_freq: int=2,
-              remove_after_load: bool=True,
-              print_info_batch_freq: int=5):
+class classifierContext(classifier):
+    def train(
+        self,
+        phases: list = ["train", "val"],
+        num_epochs: int = 25,
+        save_model_dir: Union[None, str] = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: Union[None, str] = None,
+        tmp_file_save_freq: int = 2,
+        remove_after_load: bool = True,
+        print_info_batch_freq: int = 5,
+    ):
         """Wrapper function for train_core method to capture exceptions. Supported exceptions so far:
         - KeyboardInterrupt
 
@@ -31,13 +34,15 @@ class classifierContext(classifier):
         """
 
         try:
-            self.train_core(phases, 
-                            num_epochs, 
-                            save_model_dir, 
-                            verbosity_level, 
-                            tensorboard_path,
-                            tmp_file_save_freq,
-                            print_info_batch_freq=print_info_batch_freq)
+            self.train_core(
+                phases,
+                num_epochs,
+                save_model_dir,
+                verbosity_level,
+                tensorboard_path,
+                tmp_file_save_freq,
+                print_info_batch_freq=print_info_batch_freq,
+            )
         except KeyboardInterrupt:
             print("KeyboardInterrupted...Exiting...")
             if os.path.isfile(self.tmp_save_filename):
@@ -46,14 +51,16 @@ class classifierContext(classifier):
             else:
                 print(f"No temporary file was found.")
 
-    def train_core(self,
-                   phases: list = ["train", "val"],
-                   num_epochs: int = 25,
-                   save_model_dir: Union[None, str] = "models",
-                   verbosity_level: int = 1,
-                   tensorboard_path: Union[None, str] = None,
-                   tmp_file_save_freq: int = 2,
-                   print_info_batch_freq: int=5):
+    def train_core(
+        self,
+        phases: list = ["train", "val"],
+        num_epochs: int = 25,
+        save_model_dir: Union[None, str] = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: Union[None, str] = None,
+        tmp_file_save_freq: int = 2,
+        print_info_batch_freq: int = 5,
+    ):
         """Train/fine-tune a classifier
 
         Parameters
@@ -101,6 +108,7 @@ class classifierContext(classifier):
         if tensorboard_path is not None:
             try:
                 from torch.utils.tensorboard import SummaryWriter
+
                 tboard_writer = SummaryWriter(tensorboard_path)
             except ImportError:
                 print(
@@ -129,14 +137,16 @@ class classifierContext(classifier):
 
                 # TQDM
                 # batch_loop = tqdm(iter(self.dataloader[phase]), total=len(self.dataloader[phase]), leave=False)
-                # if phase.lower() in train_phase_names+valid_phase_names: 
+                # if phase.lower() in train_phase_names+valid_phase_names:
                 #     batch_loop.set_description(f"Epoch {epoch}/{end_epoch}")
 
                 phase_batch_size = self.dataloader[phase].batch_size
                 total_inp_counts = len(self.dataloader[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs1, inputs2, labels) in enumerate(self.dataloader[phase]):
+                for batch_idx, (inputs1, inputs2, labels) in enumerate(
+                    self.dataloader[phase]
+                ):
                     inputs1 = inputs1.to(self.device)
                     inputs2 = inputs2.to(self.device)
                     labels = labels.to(self.device)
@@ -192,12 +202,14 @@ class classifierContext(classifier):
                     running_pred_label.extend(pred_label.cpu().tolist())
                     running_orig_label.extend(labels.cpu().tolist())
 
-                    if batch_idx % print_info_batch_freq == 0: 
-                        curr_inp_counts = min(total_inp_counts, (batch_idx+1) * phase_batch_size)
-                        progress_perc = curr_inp_counts / total_inp_counts * 100.
+                    if batch_idx % print_info_batch_freq == 0:
+                        curr_inp_counts = min(
+                            total_inp_counts, (batch_idx + 1) * phase_batch_size
+                        )
+                        progress_perc = curr_inp_counts / total_inp_counts * 100.0
                         tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}%)"
 
-                        epoch_msg  = f"{phase: <8} -- {epoch}/{end_epoch} -- "
+                        epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
                         epoch_msg += f"{tmp_str: >20} -- "
 
                         if phase.lower() in valid_phase_names:
@@ -266,7 +278,7 @@ class classifierContext(classifier):
                         self.save(self.tmp_save_filename, force=True)
 
         time_elapsed = time.time() - since
-        print(f'Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        print(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -286,7 +298,9 @@ class classifierContext(classifier):
                 )
                 print(f"[INFO] Path: {save_model_path}")
 
-    def show_sample(self, set_name="train", batch_number=1, print_batch_info=True, figsize=(15, 10)):
+    def show_sample(
+        self, set_name="train", batch_number=1, print_batch_info=True, figsize=(15, 10)
+    ):
         """Show samples from specified dataset
 
         Parameters
@@ -318,7 +332,13 @@ class classifierContext(classifier):
             out, title=str([self.class_names[int(x)] for x in classes]), figsize=figsize
         )
 
-    def layerwise_lr(self, min_lr: float, max_lr: float, ltype: str="linspace", sep_group_names=["features1", "features2"]):
+    def layerwise_lr(
+        self,
+        min_lr: float,
+        max_lr: float,
+        ltype: str = "linspace",
+        sep_group_names=["features1", "features2"],
+    ):
         """Define layer-wise learning rates
 
         linspace: use evenly spaced learning rates over a specified interval
@@ -333,7 +353,7 @@ class classifierContext(classifier):
         ltype : str, optional
             how to space the specified interval, by default "linspace"
         """
-                
+
         list2optim = []
         for one_grp in range(len(sep_group_names)):
 
@@ -349,16 +369,18 @@ class classifierContext(classifier):
             elif ltype.lower() in ["log", "geomspace"]:
                 list_lrs = np.geomspace(min_lr, max_lr, num_grp_layers)
             else:
-                raise NotImplementedError(f"Implemented methods are: linspace and geomspace")
+                raise NotImplementedError(
+                    f"Implemented methods are: linspace and geomspace"
+                )
 
             # assign learning rates
             i_count = 0
             for i, (name, params) in enumerate(self.model.named_parameters()):
                 if not sep_group_names[one_grp] in name:
                     continue
-                list2optim.append({'params': params, 'lr': list_lrs[i_count]})
+                list2optim.append({"params": params, "lr": list_lrs[i_count]})
                 i_count += 1
-           
+
         return list2optim
 
     def inference_sample_results(
@@ -368,7 +390,7 @@ class classifierContext(classifier):
         set_name: str = "train",
         min_conf: Union[None, float] = None,
         max_conf: Union[None, float] = None,
-        figsize: tuple = (15, 15)
+        figsize: tuple = (15, 15),
     ):
         """Plot some samples (specified by num_samples) for inference outputs
 

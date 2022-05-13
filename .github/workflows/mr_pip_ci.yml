@@ -1,7 +1,10 @@
 ---
 name: Integration Tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
 
@@ -30,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install . 
+          python -m pip install mapreader
 
       - name: Install Tools
         run: |
