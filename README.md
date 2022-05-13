@@ -119,6 +119,8 @@ pip3 install "mapreader[geo]"
 python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 ```
 
+* ⚠️ You need to download/clone the `mapreader` repository to access the example notebooks.
+
 * Continue with the examples in [Use cases](#use-cases)!
 
 * ⚠️ On *Windows* and for *geospatial images* (e.g., maps), you might need to do:
