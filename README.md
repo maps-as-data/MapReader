@@ -177,18 +177,24 @@ python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py3
 [Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks. Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to read guidance specific to those image types. 
 
   - [Non-Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial):
-      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype)
-        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
-        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
-        * **Data access:** locally stored
-        * **Annotations** are done on plant patches (i.e., slices of each plant image).
-        * **Classifier:** train/fine-tuned PyTorch CV models.
       - [classification_mnist](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist)
         * **Goal:** train/fine-tune PyTorch CV classifiers on MNIST.
         * **Dataset:** Example images taken from http://yann.lecun.com/exdb/mnist/. 
         * **Data access:** locally stored
         * **Annotations** are done on whole MNIST images, **not** on patches/slices of those images.
         * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_plant_phenotype](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
+        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
+        * **Data access:** locally stored
+        * **Annotations** are done on plant patches (i.e., slices of each plant image).
+        * **Classifier:** train/fine-tuned PyTorch CV models.
+      - [classification_plant_phenotype_context](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype_context)
+        * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example). Here, we use **model ensembles** in which both a patch and its context image are encoded and used in the classification task.
+        * **Dataset:** Example images taken from the openly accessible `CVPPP2014_LSV_training_data` dataset available from https://www.plant-phenotyping.org/datasets-download. 
+        * **Data access:** locally stored
+        * **Annotations** are done on plant patches (i.e., slices of each plant image).
+        * **Classifier:** train/fine-tuned *two* PyTorch CV classifiers used in model ensemble.
   - [Geospatial](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial):
       - Maps:
         - [classification_one_inch_maps_001](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001)
