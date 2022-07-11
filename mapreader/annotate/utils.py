@@ -306,6 +306,8 @@ def prepare_annotation(
     min_alpha_channel=None,
     min_mean_pixel=None,
     max_mean_pixel=None,
+    min_std_pixel=None,
+    max_std_pixel=None,
     context_image=False,
     xoffset=500,
     yoffset=500,
@@ -385,6 +387,7 @@ def prepare_annotation(
                 metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
             )
 
+        calc_mean = calc_std = False
         # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
         if (
             sortby == "mean"
@@ -392,7 +395,16 @@ def prepare_annotation(
             or isinstance(min_mean_pixel, float)
             or isinstance(max_mean_pixel, float)
         ):
-            mymaps.calc_pixel_stats(calc_std=False)
+            calc_mean = True
+        
+        if (
+            isinstance(min_std_pixel, float)
+            or isinstance(max_std_pixel, float)
+        ):
+            calc_std = True
+
+        if calc_mean or calc_std:
+            mymaps.calc_pixel_stats(calc_mean=calc_mean, calc_std=calc_std)
 
         # convert images to dataframe
         parents_df, sliced_df = mymaps.convertImages(fmt="dataframe")
@@ -411,6 +423,14 @@ def prepare_annotation(
         if isinstance(max_mean_pixel, float):
             if "mean_pixel_RGB" in sliced_df.columns:
                 sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] <= max_mean_pixel]
+
+        if isinstance(min_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] >= min_std_pixel]
+
+        if isinstance(max_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] <= max_std_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:
