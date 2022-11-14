@@ -31,7 +31,7 @@
 | **classification_one_inch_maps_001**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial/classification_one_inch_maps_001"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_one_inch_maps_001.png" alt="tutorial for classification_one_inch_maps_001" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>historical maps</ins> (Fig: rail infrastructure around London as predicted by a MapReader model).</sup> | **classification_plant_phenotype**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_plant_phenotype"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_plant_phenotype.png" alt="tutorial for classification_plant_phenotype" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on <ins>plant patches</ins> in images (plant phenotyping example).</sup> |
 | **classification_mnist**<br><a href="https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial/classification_mnist"><img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/tutorial_classification_mnist.png" alt="tutorial for classification_mnist" width="300" height="150"></a><br><sup>**Tutorial:** train/fine-tune PyTorch CV classifiers on whole <ins>MNIST</ins> images (not on patches/slices of those images).</sup> | |
 | | |
-**MapReader paper**<br><a href="https://arxiv.org/abs/2111.15592"> <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/mapreader_paper.png" alt="MapReader's paper" width="300"> </a> 
+**MapReader paper**<br><a href="https://dl.acm.org/doi/10.1145/3557919.3565812"> <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/mapreader_paper.png" alt="MapReader's paper" width="300"> </a> 
 </div>
 
 ## What is MapReader?
@@ -206,22 +206,30 @@ We welcome contributions related to new applications, both with <ins>geospatial<
 
 Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing:
 
-Link: https://arxiv.org/abs/2111.15592
+Link: https://dl.acm.org/doi/10.1145/3557919.3565812
 
 ```text
-Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen and Katherine McDonough (2021), MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale, arXiv:2111.15592.
+Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
 ```
 
 and in BibTeX:
 
 ```bibtex
-@misc{hosseini2021mapreader,
-      title={MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale}, 
-      author={Kasra Hosseini and Daniel C. S. Wilson and Kaspar Beelen and Katherine McDonough},
-      year={2021},
-      eprint={2111.15592},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@inproceedings{10.1145/3557919.3565812,
+author = {Hosseini, Kasra and Wilson, Daniel C. S. and Beelen, Kaspar and McDonough, Katherine},
+title = {MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale},
+year = {2022},
+isbn = {9781450395335},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3557919.3565812},
+doi = {10.1145/3557919.3565812},
+booktitle = {Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities},
+pages = {8–19},
+numpages = {12},
+keywords = {supervised learning, historical maps, deep learning, digital libraries and archives, computer vision, classification},
+location = {Seattle, Washington},
+series = {GeoHumanities '22}
 }
 ```
 
