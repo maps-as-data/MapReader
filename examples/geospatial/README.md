@@ -19,7 +19,7 @@
 MapReader enables quick, flexible research with large map corpora. It is based on the patchwork method, e.g. scanned map sheets are preprocessed to divide up the content of the map into a grid of squares. Using image classificaion at the level of each patch allows users to define classes (labels) of features on maps related to their research questions. 
 
 #### You might be interested in using MapReader if:
-- you have access to a large corpora of georeferenced maps
+- you have access to a large corpus of georeferenced maps
 - you want to quickly test different labels to help refine your research question before/without committing to manual vector data creation
 - your maps were created before surveying accuracy reached modern standards, and therefore you do not want to create overly precise geolocated data based on the content of those maps
 
