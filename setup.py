@@ -48,6 +48,7 @@ setuptools.setup(
         "PyYAML>=6.0,<7.0",
         "tensorboard>=2.7.0,<3.0.0",
         "parhugin>=0.0.3,<0.0.4"
+	
     ],
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
@@ -67,7 +68,7 @@ setuptools.setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        ],
+        "Sphinx~=6.1.3"],
 
     entry_points={
         'console_scripts': [
