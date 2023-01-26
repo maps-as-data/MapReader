@@ -1,6 +1,2 @@
-sphinx.ext.autodoc
-sphinx.ext.autosummary
-sphinx.ext.autosectionlabel
-spinx.ext.doctest
 sphinx_rtd_theme
 myst-parser
