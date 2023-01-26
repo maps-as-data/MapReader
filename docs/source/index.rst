@@ -7,7 +7,8 @@ Welcome to MapReader's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :numbered: 
 
    Usage
    Geospacial examples
