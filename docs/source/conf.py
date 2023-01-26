@@ -15,6 +15,10 @@ release = '0.3.3'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.doctest',
     'sphinx_rtd_theme',
     'myst_parser',
 ]

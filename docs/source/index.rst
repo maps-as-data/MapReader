@@ -6,15 +6,17 @@
 Welcome to MapReader's documentation!
 =====================================
 
-.. include:: ../../README.md
-   :parser: myst_parser.sphinx_
-
-
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    Usage
+   Geospacial examples
+   Non-geospacial examples
+   MapReader Paper <https://dl.acm.org/doi/10.1145/3557919.3565812>
+
+.. include:: ../../readme.md
+   :parser: myst_parser.sphinx_
+
 
 Indices and tables
 ==================

@@ -1,0 +1,2 @@
+.. include:: ../../examples/non-geospacial/README.md
+   :parser: myst_parser.sphinx_
