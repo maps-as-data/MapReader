@@ -7,12 +7,11 @@ Welcome to MapReader's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 1
-   :numbered: 
+   :maxdepth: 2
 
-   Usage
-   Geospacial examples
-   Non-geospacial examples
+   Install
+   User-guide
+   api/index
    MapReader Paper <https://dl.acm.org/doi/10.1145/3557919.3565812>
 
 .. include:: ../../readme.md
