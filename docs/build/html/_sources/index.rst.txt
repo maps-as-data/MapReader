@@ -15,7 +15,7 @@ Welcome to MapReader's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    Install
    User-guide

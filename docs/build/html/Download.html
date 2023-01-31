@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Download &mdash; MapReader 0.3.3 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Load" href="Load.html" />
+    <link rel="prev" title="User Guide" href="User-guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> MapReader
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Install.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="User-guide.html">User Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Load.html">Load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Process.html">Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Patchify.html">Patchify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Annotate.html">Annotate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Train.html">Train</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Post-process.html">Post-process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Worked-examples.html">Worked examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dl.acm.org/doi/10.1145/3557919.3565812">MapReader Paper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MapReader</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="User-guide.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Download</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Download.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="download">
+<h1>Download<a class="headerlink" href="#download" title="Permalink to this heading"></a></h1>
+<p><a class="reference external" href="http://tileserver.org/">TileServer</a> provides an easy way to download maps.
+E.g.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html">OS one-inch 2nd edition layer</a></p></li>
+<li><p><a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html">OS six-inch 1st edition layer for Scotland</a></p></li>
+</ul>
+</div></blockquote>
+<p>MapReader’s TileServer class is used to read in and query map metadata and download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>.</p>
+<p>The user needs to provide metadata, containing information about maps stored on TileServer to initialise this class. This metadata is then stored in <code class="docutils literal notranslate"><span class="pre">TileServer.metadata</span></code>.
+Some example metadata files, corresponding to the one-inch and six-inch OS maps detailed above, are provided in <code class="docutils literal notranslate"><span class="pre">MapReader/mapreader/persistent_data</span></code>.</p>
+<p>By default, MapReader’s TileServer class uses the <code class="docutils literal notranslate"><span class="pre">download_url</span></code> of OS one-inch 2nd edition layer: <code class="docutils literal notranslate"><span class="pre">https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png</span></code>.
+This can easily be changed by specifying <code class="docutils literal notranslate"><span class="pre">download_url</span></code>.</p>
+<p><strong>To access other map series, please contact NLS</strong>.</p>
+<p>To load in metadata using MapReader, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">TileServer</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;path/to/metadata.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>e.g. to download metadata corresponding to the one-inch OS maps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json&quot;</span><span class="p">,</span> <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To visualise the boundaries of these maps from metadata, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">plot_metadata_on_map</span><span class="p">(</span><span class="n">add_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And, to plot a histogram of the publication dates of these maps from metadata, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">hist_published_dates</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It can be useful to know the minimum and maximum of latitudes and longitudes of these maps for querying.
+To find these, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">minmax_latlong</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then, to query maps from metadata, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">])</span>
+<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([[</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon1</span><span class="p">],[</span><span class="n">lat2</span><span class="p">,</span><span class="n">lon2</span><span class="p">],</span><span class="o">...</span><span class="p">])</span>
+<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>By default, only the most recent query will be stored in memory.
+However, specifying <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">=</span> <span class="pre">True</span></code> allows multiple query results to be stored and accessed:</p>
+<p>e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">55.9</span><span class="p">,</span><span class="o">-</span><span class="mf">4.2</span><span class="p">])</span>
+<span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">57.1</span><span class="p">,</span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">56.4</span><span class="p">,</span><span class="o">-</span><span class="mf">3.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, to download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>By default, this downloads only queried maps (i.e. those returned by <code class="docutils literal notranslate"><span class="pre">ts.print_found_queries()</span></code>), but can be set to download all maps from the metadata using <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">=</span> <span class="pre">&quot;all&quot;</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running the <code class="docutils literal notranslate"><span class="pre">download_tileserver</span></code> command downloads maps as <code class="docutils literal notranslate"><span class="pre">.png</span></code> files to a newly created <code class="docutils literal notranslate"><span class="pre">./maps</span></code> directory.
+Metadata is also stored here as a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file named <code class="docutils literal notranslate"><span class="pre">metadata.csv</span></code>.
+Both the default output directory name and metadata file name can be changed by specifying <code class="docutils literal notranslate"><span class="pre">output_maps_dirname</span></code> and <code class="docutils literal notranslate"><span class="pre">output_metadata_filename</span></code> respectively:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">output_maps_dirname</span><span class="o">=</span><span class="s2">&quot;./path/to/directory&quot;</span><span class="p">,</span> <span class="n">output_metadata_filename</span><span class="o">=</span><span class="s2">&quot;filename.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Other important arguments for the <code class="docutils literal notranslate"><span class="pre">download_tileserver</span></code> function which you may want to specify include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>zoom_level: im a bit confused of what these do</p></li>
+<li><p>pixel closest: but would be good to explain in the tutorial</p></li>
+</ul>
+</div></blockquote>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="User-guide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Load.html" class="btn btn-neutral float-right" title="Load" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, RW.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
