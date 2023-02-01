@@ -84,6 +84,27 @@
              
   <section id="annotate">
 <h1>Annotate<a class="headerlink" href="#annotate" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">MapReader</span></code> provides a flexible way to set up a new annotation task in three simple steps:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>Edit the <code class="docutils literal notranslate"><span class="pre">./annotation_tasks.yaml</span></code> file.</p>
+<p>This file contains two sections - <code class="docutils literal notranslate"><span class="pre">tasks</span></code> and <code class="docutils literal notranslate"><span class="pre">paths</span></code>. The <code class="docutils literal notranslate"><span class="pre">tasks</span></code> section is used to specify a task and its labels. e.g. :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------</span>
+<span class="c1"># Define an annotation task</span>
+<span class="c1"># This includes:</span>
+<span class="c1"># 1. a name (e.g., building_simple or rail_space, see below)</span>
+<span class="c1"># 2. a list of labels to be used for this task</span>
+<span class="c1"># ---------------------------------------</span>
+<span class="nt">tasks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">building_simple</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;No&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;building&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">rail_space</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;No&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;rail</span><span class="nv"> </span><span class="s">space&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
 </section>
 
 

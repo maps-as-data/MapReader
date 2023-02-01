@@ -61,7 +61,7 @@ To view a random sample of your images, use:
 
     my_files.show_sample(num_samples=3)
 
-.. image:: python show_sample_parent.png
+.. image:: show_sample_parent.png
     :width: 400px
 
 By default, this will show you a random sample of your parent images.
@@ -71,7 +71,7 @@ To see a random sample of your patches (child images) specify ``tree_level = "ch
 
     my_files.show_sample(num_samples=3, tree_level="child")
 
-.. image:: python show_sample_child.png
+.. image:: ./show_sample_child.png
     :width: 400px
 
 You may also want to see all the patches created from one of your parent images.
@@ -81,7 +81,7 @@ This can be done using:
 
     my_files.show_par(parent_list[0])
 
-.. image:: python show_par.png
+.. image:: ./show_par.png
     :width: 400px
 
 .. Load package also contains some analysis bits, should these be on this page?

@@ -51,7 +51,7 @@ MapReader is an end-to-end computer vision (CV) pipeline for exploring and analy
 
 MapReader was developed in the `Living with Machines <https://livingwithmachines.ac.uk/>`__ project to analyze large collections of historical maps but is a **generalisable** computer vision pipeline which can be applied to **any images** in a wide variety of domains. See `Gallery <#gallery>`__ for some examples.
 
-Refer to each tutorial/example in the `use cases <#use-cases>`__ section for more details on MapReader’s relevant functionalities for `non-geospatial <https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial>`__ and `geospatial <https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial>`__ images.
+Refer to the `User guide <#User-guide>`__ section for more details on MapReader’s relevant functionalities for both `non-geospatial <https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial>`__ and `geospatial <https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial>`__ images.
 
 Overview
 --------
