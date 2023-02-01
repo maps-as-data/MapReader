@@ -84,8 +84,7 @@
              
   <section id="download">
 <h1>Download<a class="headerlink" href="#download" title="Permalink to this heading"></a></h1>
-<p><a class="reference external" href="http://tileserver.org/">TileServer</a> provides an easy way to download maps.
-E.g.</p>
+<p><a class="reference external" href="http://tileserver.org/">TileServer</a> provides an easy way to download maps, e.g.</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html">OS one-inch 2nd edition layer</a></p></li>
@@ -95,9 +94,6 @@ E.g.</p>
 <p>MapReader’s TileServer class is used to read in and query map metadata and download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>.</p>
 <p>The user needs to provide metadata, containing information about maps stored on TileServer to initialise this class. This metadata is then stored in <code class="docutils literal notranslate"><span class="pre">TileServer.metadata</span></code>.
 Some example metadata files, corresponding to the one-inch and six-inch OS maps detailed above, are provided in <code class="docutils literal notranslate"><span class="pre">MapReader/mapreader/persistent_data</span></code>.</p>
-<p>By default, MapReader’s TileServer class uses the <code class="docutils literal notranslate"><span class="pre">download_url</span></code> of OS one-inch 2nd edition layer: <code class="docutils literal notranslate"><span class="pre">https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png</span></code>.
-This can easily be changed by specifying <code class="docutils literal notranslate"><span class="pre">download_url</span></code>.</p>
-<p><strong>To access other map series, please contact NLS</strong>.</p>
 <p>To load in metadata using MapReader, use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">TileServer</span>
 <span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;path/to/metadata.json&quot;</span><span class="p">)</span>
@@ -107,16 +103,20 @@ This can easily be changed by specifying <code class="docutils literal notransla
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json&quot;</span><span class="p">,</span> <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To visualise the boundaries of these maps from metadata, use:</p>
+<p>By default, MapReader’s TileServer class uses the <code class="docutils literal notranslate"><span class="pre">download_url</span></code> of OS one-inch 2nd edition layer (shown above), but this can easily be changed by specifying <code class="docutils literal notranslate"><span class="pre">download_url</span></code>.
+<strong>To access other map series, please contact NLS</strong>.</p>
+<p>To visualise the boundaries of your maps from metadata, use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">plot_metadata_on_map</span><span class="p">(</span><span class="n">add_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And, to plot a histogram of the publication dates of these maps from metadata, use:</p>
+<a class="reference internal image-reference" href="_images/plot_metadata_on_map.png"><img alt="_images/plot_metadata_on_map.png" src="_images/plot_metadata_on_map.png" style="width: 400px;" /></a>
+<p>And, to plot a histogram of the publication dates of your maps from metadata, use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">hist_published_dates</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>It can be useful to know the minimum and maximum of latitudes and longitudes of these maps for querying.
-To find these, use:</p>
+<a class="reference internal image-reference" href="_images/hist_published_dates.png"><img alt="_images/hist_published_dates.png" src="_images/hist_published_dates.png" style="width: 400px;" /></a>
+<p>It can also be useful to find the minimum and maximum of latitudes and longitudes of your maps for querying.
+This can be done using:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">minmax_latlong</span><span class="p">()</span>
 </pre></div>
 </div>
