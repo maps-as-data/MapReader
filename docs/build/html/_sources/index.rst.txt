@@ -18,7 +18,8 @@ Welcome to MapReader's documentation!
    :maxdepth: 2
 
    Install
-   User-guide
+   Input-guidance
+   User-guide/User-guide
    api/index
    MapReader Paper <https://dl.acm.org/doi/10.1145/3557919.3565812>
 

@@ -33,7 +33,7 @@ To visualise the boundaries of your maps from metadata, use:
 
      ts.plot_metadata_on_map(add_text=True)
 
-.. image:: ./plot_metadata_on_map.png
+.. image:: ../figures/plot_metadata_on_map.png
      :width: 400px
      :align: center
 
@@ -43,7 +43,7 @@ And, to plot a histogram of the publication dates of your maps from metadata, us
 
      ts.hist_published_dates()
 
-.. image:: ./hist_published_dates.png
+.. image:: ../figures/hist_published_dates.png
      :width: 400px
      :align: center
 

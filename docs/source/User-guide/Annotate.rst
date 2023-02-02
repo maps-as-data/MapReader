@@ -4,7 +4,7 @@ Annotate
 .. contents:: ``MapReader`` provides a flexible way to set up a new annotation task in three simple steps:
 	:local:
 
-1. Edit the annotation_tasks file.
+1. Edit the annotation tasks file.
 -------------------------------------------
 	
 	The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
@@ -69,7 +69,7 @@ Annotate
 
 		annotation
 
-	.. image:: ./annotate.png
+	.. image:: ../figures/annotate.png
 		:width: 400px
 
 	To help with annotating, you can set the annotation interface to show a context image using ``context_image = True``. This creates a second panel in the annotation interface, showing your patch in the context of a larger region whose size, in pixels, is set by ``xoffset`` and ``yoffset``.
@@ -81,7 +81,7 @@ Annotate
 
 		annotation 
 
-	.. image:: ./annotate_context.png
+	.. image:: ../figures/annotate_context.png
 		:width: 400px
 
 	By default, your patches will be shown to you in a random order, but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby = "mean"``.
@@ -95,3 +95,4 @@ Annotate
 
 		save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set)
 
+	This saves your annotations as a ``.csv`` file in the ``annot_dir`` specified in your annotation tasks file.

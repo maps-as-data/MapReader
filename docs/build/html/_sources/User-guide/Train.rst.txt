@@ -36,7 +36,7 @@ You can then view a sample of your annotated images using:
 
     annotated_images.show_image_labels(tar_label=1)
 
-.. image:: ./show_image_labels_10.png
+.. image:: ../figures/show_image_labels_10.png
     :width: 400px
 
 By default, this will show you 10 images but this can be changed by specifying ``num_sample``. 
@@ -47,7 +47,7 @@ You can also view specific images from their indices using:
 
     annotated_images.show_image(indx=14)
 
-.. image:: ./show_image.png
+.. image:: ../figures/show_image.png
     :width: 400px
 
 Before training your CV classifier, you first need to split your annotated images into a 'train', 'test' and 'validate' sets.
