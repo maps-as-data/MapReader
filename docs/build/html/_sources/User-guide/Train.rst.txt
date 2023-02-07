@@ -1,14 +1,13 @@
 Train
-=====
+=======
 
 .. contents:: 
     :local:
 
-
 Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.
 
 Load data
-------------
+---------------
 
 First, load in your annotations using:
 
@@ -53,6 +52,7 @@ You can then view a sample of your annotated images using:
 .. image:: ../figures/show_image_labels_10.png
     :width: 400px
 
+
 By default, this will show you 10 images but this can be changed by specifying ``num_sample``. 
 
 You can also view specific images from their indices using:
@@ -63,6 +63,7 @@ You can also view specific images from their indices using:
 
 .. image:: ../figures/show_image.png
     :width: 400px
+
 
 Before training your CV classifier, you first need to split your annotated images into a 'train', 'validate' and 'test' sets.
 MapReader uses a stratified method to do this, such that each set contains approximately the same percentage of samples of each target label as the original set.
@@ -96,7 +97,7 @@ You can then check how many annotated images are in each set by checking the val
     annotated_images.test["label"].value_counts()
 
 Prepare datasets
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
 This can be done using the ``patchTorchDataset`` class. 
@@ -125,7 +126,7 @@ This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_data
     your_dataset.patchframe
 
 Define a sampler
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
@@ -146,8 +147,8 @@ To do this, use:
     val_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[val_label_count], num_samples=len(val_dataset.patchframe))
 
 
-Create batches (DataLoader)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create batches (Add to DataLoader)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``MapReader``'s ``classifier`` class is xxxxx.
 
@@ -240,8 +241,14 @@ The ``batch_number`` and ``set_name``  arguments can be used to show different b
 .. image:: ../figures/show_sample_val_8.png
     :width: 400px
 
+
+Option 1 - Fine-tune a pretrained model
+-------------------------------------------
+
+.. warning:: if you are using your own model, skip to Option 2
+
 Load a PyTorch model
------------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 The `torchvision.models <https://pytorch.org/vision/stable/models.html>`__ subpackage contains a number of pre-trained models which can be loaded into your classifier.
 These can be added in one of two ways:
@@ -272,7 +279,7 @@ These can be added in one of two ways:
         By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above). 
 
 Define learning rates and initialise optimiser and scheduler
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning:: not done yet - mostly copy & pasted from tutorials
 
@@ -298,7 +305,7 @@ By default,
 
 
 Train/fine-tune your model
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To begin training/fine-tuning your model, use your classifiers ``.train`` method:
 
@@ -320,7 +327,7 @@ Other arguments you may want to specify when training your model include:
 - verbosity_level: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
 
 Plot metrics
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` method. To list these, use:
 
@@ -329,7 +336,19 @@ Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` m
     list(myclassifier.metrics.keys())
 
 
-To visualise the progress of your training, metrics can be plotted using ``.plot_metric``: 
+To view metrics from training/validating, use:
+
+.. code :: python
+
+    my_classifier.metrics["metric_to_view"]
+
+e.g. :
+
+.. code :: python
+
+    my_classifier.metrics["epoch_fscore_micro_train"]
+
+Or, to visualise the progress of your training, metrics can be plotted using ``.plot_metric``: 
 
 .. code :: python
 
@@ -338,14 +357,27 @@ To visualise the progress of your training, metrics can be plotted using ``.plot
 .. image:: ../figures/loss.png
     :width: 400px
 
+
+Option 2 - Load your own fine-tuned model 
+--------------------------------------------
+
+Load your model
+~~~~~~~~~~~~~~~~~~
+
+If you are using your own model, you can simply load it into your classifier using the ``.load()`` function:
+
+.. code :: python
+
+    my_classifier.load("./path/to/model.pkl")
+
 Inference 
------------
+---------------
 
 Finally, to use your model for inference use:
 
 .. code :: python
 
-    my_classifier.inference(set_name="your_set_name")
+    my_classifier.inference(set_name="your_dataset_name")
 
 e.g. to run the trained model on the test dataset, use:
 
@@ -353,3 +385,27 @@ e.g. to run the trained model on the test dataset, use:
 
     my_classifier.inference(set_name="test")
 
+To view metrics from this inference, use the ``.metrics`` method (as above). e.g. :
+
+.. code :: python
+
+    my_classifier.metrics["epoch_fscore_micro_test"]
+
+And, to see a sample of your inference results, use: 
+
+.. code :: python
+
+    my_classifier.inference_sample_results(set_name="your_dataset_name")
+
+By default, this will show you 6 samples of your first class (label). 
+The ``num_samples`` and ``class_index`` arguments can be specified to change this.
+
+You may also want specify the minimum (and maximum) prediction confidence for your samples. This can be done using ``min_conf`` and ``max_conf``.
+
+e.g. :
+
+.. code :: python
+
+    my_classifier.inference_sample_results(set_name="test", num_samples=3, class_index=1, min_conf=80)
+
+.. disqus::

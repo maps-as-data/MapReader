@@ -18,6 +18,7 @@
         <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script src="../_static/disqus.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,15 +54,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#load-data">Load data</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#prepare-datasets">Prepare datasets</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#define-a-sampler">Define a sampler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#create-batches-dataloader">Create batches (DataLoader)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-batches-add-to-dataloader">Create batches (Add to DataLoader)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#load-a-pytorch-model">Load a PyTorch model</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#define-learning-rates-and-initialise-optimiser-and-scheduler">Define learning rates and initialise optimiser and scheduler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-fine-tune-a-pretrained-model">Option 1 - Fine-tune a pretrained model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#load-a-pytorch-model">Load a PyTorch model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-fine-tune-your-model">Train/fine-tune your model</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#train-fine-tune-your-model">Train/fine-tune your model</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#plot-metrics">Plot metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-load-your-own-fine-tuned-model">Option 2 - Load your own fine-tuned model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#load-your-model">Load your model</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#inference">Inference</a></li>
@@ -108,20 +110,29 @@
 <ul>
 <li><p><a class="reference internal" href="#prepare-datasets" id="id2">Prepare datasets</a></p></li>
 <li><p><a class="reference internal" href="#define-a-sampler" id="id3">Define a sampler</a></p></li>
-<li><p><a class="reference internal" href="#create-batches-dataloader" id="id4">Create batches (DataLoader)</a></p></li>
+<li><p><a class="reference internal" href="#create-batches-add-to-dataloader" id="id4">Create batches (Add to DataLoader)</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#load-a-pytorch-model" id="id5">Load a PyTorch model</a></p>
+<li><p><a class="reference internal" href="#option-1-fine-tune-a-pretrained-model" id="id5">Option 1 - Fine-tune a pretrained model</a></p>
 <ul>
-<li><p><a class="reference internal" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" id="id6">Define learning rates and initialise optimiser and scheduler</a></p></li>
-</ul>
-</li>
-<li><p><a class="reference internal" href="#train-fine-tune-your-model" id="id7">Train/fine-tune your model</a></p>
+<li><p><a class="reference internal" href="#load-a-pytorch-model" id="id6">Load a PyTorch model</a></p>
 <ul>
-<li><p><a class="reference internal" href="#plot-metrics" id="id8">Plot metrics</a></p></li>
+<li><p><a class="reference internal" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" id="id7">Define learning rates and initialise optimiser and scheduler</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#inference" id="id9">Inference</a></p></li>
+<li><p><a class="reference internal" href="#train-fine-tune-your-model" id="id8">Train/fine-tune your model</a></p>
+<ul>
+<li><p><a class="reference internal" href="#plot-metrics" id="id9">Plot metrics</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#option-2-load-your-own-fine-tuned-model" id="id10">Option 2 - Load your own fine-tuned model</a></p>
+<ul>
+<li><p><a class="reference internal" href="#load-your-model" id="id11">Load your model</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#inference" id="id12">Inference</a></p></li>
 </ul>
 </nav>
 <p>Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.</p>
@@ -228,8 +239,8 @@ To do this, use:</p>
 </pre></div>
 </div>
 </section>
-<section id="create-batches-dataloader">
-<h3><a class="toc-backref" href="#id4" role="doc-backlink">Create batches (DataLoader)</a><a class="headerlink" href="#create-batches-dataloader" title="Permalink to this heading"></a></h3>
+<section id="create-batches-add-to-dataloader">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Create batches (Add to DataLoader)</a><a class="headerlink" href="#create-batches-add-to-dataloader" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">MapReader</span></code>’s <code class="docutils literal notranslate"><span class="pre">classifier</span></code> class is xxxxx.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">classifier</span>
 
@@ -297,8 +308,14 @@ The <code class="docutils literal notranslate"><span class="pre">batch_number</s
 <a class="reference internal image-reference" href="../_images/show_sample_val_8.png"><img alt="../_images/show_sample_val_8.png" src="../_images/show_sample_val_8.png" style="width: 400px;" /></a>
 </section>
 </section>
+<section id="option-1-fine-tune-a-pretrained-model">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Option 1 - Fine-tune a pretrained model</a><a class="headerlink" href="#option-1-fine-tune-a-pretrained-model" title="Permalink to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>if you are using your own model, skip to Option 2</p>
+</div>
 <section id="load-a-pytorch-model">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Load a PyTorch model</a><a class="headerlink" href="#load-a-pytorch-model" title="Permalink to this heading"></a></h2>
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Load a PyTorch model</a><a class="headerlink" href="#load-a-pytorch-model" title="Permalink to this heading"></a></h3>
 <p>The <a class="reference external" href="https://pytorch.org/vision/stable/models.html">torchvision.models</a> subpackage contains a number of pre-trained models which can be loaded into your classifier.
 These can be added in one of two ways:</p>
 <blockquote>
@@ -327,7 +344,7 @@ These can be added in one of two ways:</p>
 </ol>
 </div></blockquote>
 <section id="define-learning-rates-and-initialise-optimiser-and-scheduler">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">Define learning rates and initialise optimiser and scheduler</a><a class="headerlink" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" title="Permalink to this heading"></a></h3>
+<h4><a class="toc-backref" href="#id7" role="doc-backlink">Define learning rates and initialise optimiser and scheduler</a><a class="headerlink" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" title="Permalink to this heading"></a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>not done yet - mostly copy &amp; pasted from tutorials</p>
@@ -348,7 +365,7 @@ This can be changed to a logarithmic function by specifying <code class="docutil
 </section>
 </section>
 <section id="train-fine-tune-your-model">
-<h2><a class="toc-backref" href="#id7" role="doc-backlink">Train/fine-tune your model</a><a class="headerlink" href="#train-fine-tune-your-model" title="Permalink to this heading"></a></h2>
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Train/fine-tune your model</a><a class="headerlink" href="#train-fine-tune-your-model" title="Permalink to this heading"></a></h3>
 <p>To begin training/fine-tuning your model, use your classifiers <code class="docutils literal notranslate"><span class="pre">.train</span></code> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 </pre></div>
@@ -365,29 +382,63 @@ The <code class="docutils literal notranslate"><span class="pre">num_epochs</spa
 <li><p>verbosity_level: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)</p></li>
 </ul>
 <section id="plot-metrics">
-<h3><a class="toc-backref" href="#id8" role="doc-backlink">Plot metrics</a><a class="headerlink" href="#plot-metrics" title="Permalink to this heading"></a></h3>
+<h4><a class="toc-backref" href="#id9" role="doc-backlink">Plot metrics</a><a class="headerlink" href="#plot-metrics" title="Permalink to this heading"></a></h4>
 <p>Metrics are stored in a dictionary accesible via your classifiers <code class="docutils literal notranslate"><span class="pre">.metrics</span></code> method. To list these, use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">myclassifier</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>To visualise the progress of your training, metrics can be plotted using <code class="docutils literal notranslate"><span class="pre">.plot_metric</span></code>:</p>
+<p>To view metrics from training/validating, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;metric_to_view&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;epoch_fscore_micro_train&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Or, to visualise the progress of your training, metrics can be plotted using <code class="docutils literal notranslate"><span class="pre">.plot_metric</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">plot_metric</span><span class="p">(</span><span class="n">y_axis</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch_loss_train&quot;</span><span class="p">,</span> <span class="s2">&quot;epoch_loss_val&quot;</span><span class="p">],</span> <span class="n">y_label</span><span class="o">=</span><span class="s2">&quot;Loss&quot;</span><span class="p">,</span> <span class="n">legends</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Train&quot;</span><span class="p">,</span> <span class="s2">&quot;Valid&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/loss.png"><img alt="../_images/loss.png" src="../_images/loss.png" style="width: 400px;" /></a>
 </section>
 </section>
+</section>
+<section id="option-2-load-your-own-fine-tuned-model">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Option 2 - Load your own fine-tuned model</a><a class="headerlink" href="#option-2-load-your-own-fine-tuned-model" title="Permalink to this heading"></a></h2>
+<section id="load-your-model">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Load your model</a><a class="headerlink" href="#load-your-model" title="Permalink to this heading"></a></h3>
+<p>If you are using your own model, you can simply load it into your classifier using the <code class="docutils literal notranslate"><span class="pre">.load()</span></code> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./path/to/model.pkl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
 <section id="inference">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Inference</a><a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Inference</a><a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
 <p>Finally, to use your model for inference use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;your_set_name&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;your_dataset_name&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>e.g. to run the trained model on the test dataset, use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
+<p>To view metrics from this inference, use the <code class="docutils literal notranslate"><span class="pre">.metrics</span></code> method (as above). e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;epoch_fscore_micro_test&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>And, to see a sample of your inference results, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference_sample_results</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;your_dataset_name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, this will show you 6 samples of your first class (label).
+The <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">class_index</span></code> arguments can be specified to change this.</p>
+<p>You may also want specify the minimum (and maximum) prediction confidence for your samples. This can be done using <code class="docutils literal notranslate"><span class="pre">min_conf</span></code> and <code class="docutils literal notranslate"><span class="pre">max_conf</span></code>.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference_sample_results</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">class_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_conf</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+</pre></div>
+</div>
+<div data-disqus-identifier="Train" data-disqus-shortname="mapreader" id="disqus_thread"></div></section>
 </section>
 
 
