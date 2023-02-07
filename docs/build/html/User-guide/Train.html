@@ -43,13 +43,22 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Install.html">Installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html">Input guidance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="User-guide.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Load.html">Load</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Process.html">Process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Patchify.html">Patchify</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Annotate.html">Annotate</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Train</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Train</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#read-annotations">Read annotations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-and-prepare-datasets">Load and prepare datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-a-sampler">Define a sampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-batches-dataloader">Create batches (DataLoader)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-a-pytorch-model">Load a PyTorch model</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Post-process.html">Post-process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Worked-examples.html">Worked examples</a></li>
 </ul>
@@ -85,15 +94,31 @@
              
   <section id="train">
 <h1>Train<a class="headerlink" href="#train" title="Permalink to this heading"></a></h1>
-<p>Once you have annotated images, you can then use these to train/fine-tune a CV (xxx) classifier.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#read-annotations" id="id1">Read annotations</a></p></li>
+<li><p><a class="reference internal" href="#load-and-prepare-datasets" id="id2">Load and prepare datasets</a></p></li>
+<li><p><a class="reference internal" href="#define-a-sampler" id="id3">Define a sampler</a></p></li>
+<li><p><a class="reference internal" href="#create-batches-dataloader" id="id4">Create batches (DataLoader)</a></p></li>
+<li><p><a class="reference internal" href="#load-a-pytorch-model" id="id5">Load a PyTorch model</a></p></li>
+</ul>
+</div>
+<section id="read-annotations">
+<h2><a class="toc-backref" href="#id1">Read annotations</a><a class="headerlink" href="#read-annotations" title="Permalink to this heading"></a></h2>
+<p>Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.</p>
 <p>First, load in your annotations using:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">loadAnnotations</span>
 
 <span class="n">annotated_images</span><span class="o">=</span><span class="n">loadAnnotations</span><span class="p">()</span>
-<span class="n">annotated_images</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./path/to/annotations.csv&quot;</span><span class="p">,</span> <span class="n">path2dir</span><span class="o">=</span><span class="s1">&#39;./maps/slice_50_50&#39;</span><span class="p">)</span>
+<span class="n">annotated_images</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./path/to/annotations.csv&quot;</span><span class="p">,</span> <span class="n">path2dir</span><span class="o">=</span><span class="s1">&#39;./path/to/images/&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To view the data contained in your <code class="docutils literal notranslate"><span class="pre">.csv</span></code>, use:</p>
+<p>e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_images</span><span class="o">=</span><span class="n">loadAnnotations</span><span class="p">()</span>
+<span class="n">annotated_images</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./annotations_one_inch/rail_space_#rw#.csv&quot;</span><span class="p">,</span> <span class="n">path2dir</span><span class="o">=</span><span class="s1">&#39;./maps/slice_50_50&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To view the data loaded in from your <code class="docutils literal notranslate"><span class="pre">.csv</span></code>, use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_images</span><span class="o">.</span><span class="n">annotations</span>
 </pre></div>
 </div>
@@ -116,7 +141,169 @@
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/show_image.png"><img alt="../_images/show_image.png" src="../_images/show_image.png" style="width: 400px;" /></a>
-<p>Before training your CV classifier, you first need to split your annotated images into a ‘train’, ‘test’ and ‘validate’ sets.</p>
+<p>Before training your CV classifier, you first need to split your annotated images into a ‘train’, ‘validate’ and ‘test’ sets.
+MapReader uses a stratified method to do this, such that each set contains approximately the same percentage of samples of each target label as the original set.</p>
+<p>To split your annotated images into dataframes, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_images</span><span class="o">.</span><span class="n">split_annotations</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>By default, your annotated images will be split as follows:</p>
+<blockquote>
+<div><p>70% train
+15% validate
+15% test</p>
+</div></blockquote>
+<p>However, these ratios can be changed by specifying <code class="docutils literal notranslate"><span class="pre">frac_train</span></code>, <code class="docutils literal notranslate"><span class="pre">frac_val</span></code> and <code class="docutils literal notranslate"><span class="pre">fract_test</span></code>.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_images</span><span class="o">.</span><span class="n">split_annotations</span><span class="p">(</span><span class="n">frac_train</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">frac_val</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">frac_test</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can then check how many annotated images are in each set by checking the value counts of your dataframes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_images</span><span class="o">.</span><span class="n">train</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">annotated_images</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">annotated_images</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="load-and-prepare-datasets">
+<h2><a class="toc-backref" href="#id2">Load and prepare datasets</a><a class="headerlink" href="#load-and-prepare-datasets" title="Permalink to this heading"></a></h2>
+<p>Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
+This can be done using the <code class="docutils literal notranslate"><span class="pre">patchTorchDataset</span></code> class.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">patchTorchDataset</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
+
+<span class="n">resize</span><span class="o">=</span><span class="mi">224</span>
+<span class="n">normalize_mean</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">]</span> <span class="c1"># ImageNet means</span>
+<span class="n">normalize_std</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]</span> <span class="c1"># ImageNet stds</span>
+
+<span class="n">data_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="n">resize</span><span class="p">),</span> <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">normalize_mean</span><span class="p">,</span><span class="n">normalize_std</span><span class="p">)])</span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">patchTorchDataset</span><span class="p">(</span><span class="n">annotated_images</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">data_transforms</span><span class="p">)</span>
+<span class="n">val_dataset</span> <span class="o">=</span> <span class="n">patchTorchDataset</span><span class="p">(</span><span class="n">annotated_images</span><span class="o">.</span><span class="n">val</span><span class="p">,</span> <span class="n">data_transforms</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">patchTorchDataset</span><span class="p">(</span><span class="n">annotated_images</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="n">data_transforms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This produces three datasets (<code class="docutils literal notranslate"><span class="pre">train_dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">val_dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">test_dataset</span></code>), ready for use, which can be viewed as dataframes using the <code class="docutils literal notranslate"><span class="pre">patchframe</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">your_dataset</span><span class="o">.</span><span class="n">patchframe</span>
+</pre></div>
+</div>
+</section>
+<section id="define-a-sampler">
+<h2><a class="toc-backref" href="#id3">Define a sampler</a><a class="headerlink" href="#define-a-sampler" title="Permalink to this heading"></a></h2>
+<p>To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set.
+This ensures, when training and validating your model, each batch is ~ representative of the whole set.
+To do this, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">train_label_count</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="o">.</span><span class="n">patchframe</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="n">val_label_count</span> <span class="o">=</span> <span class="n">val_dataset</span><span class="o">.</span><span class="n">patchframe</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+
+<span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">sample_count</span><span class="p">))</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
+
+<span class="n">train_sampler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">WeightedRandomSampler</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">train_label_count</span><span class="p">],</span> <span class="n">num_samples</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="o">.</span><span class="n">patchframe</span><span class="p">))</span>
+<span class="n">val_sampler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">WeightedRandomSampler</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">val_label_count</span><span class="p">],</span> <span class="n">num_samples</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">val_dataset</span><span class="o">.</span><span class="n">patchframe</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="create-batches-dataloader">
+<h2><a class="toc-backref" href="#id4">Create batches (DataLoader)</a><a class="headerlink" href="#create-batches-dataloader" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MapReader</span></code>’s <code class="docutils literal notranslate"><span class="pre">classifier</span></code> class is xxxxx.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">classifier</span>
+
+<span class="n">my_classifier</span> <span class="o">=</span> <span class="n">classifier</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To prepare your data for training, <a class="reference external" href="https://pytorch.org/">PyTorch</a> uses a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> to create shuffled batches of data from each set.
+To load datasetsto your classifer, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">your_dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, your batch sizes will be set to 16 and no sampler will be used when creating them.
+This can be changed by specifying <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> and <code class="docutils literal notranslate"><span class="pre">sampler</span></code>.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span>
+
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">train_sampler</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also name your set using the <code class="docutils literal notranslate"><span class="pre">set_name</span></code> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span> <span class="p">::</span> <span class="n">python</span>
+
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span>
+
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">sest_name</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">train_sampler</span><span class="p">)</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">val_sampler</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To see information about your datasets, batches and classes (labelled groups), use :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">dataset_sizes</span>
+</pre></div>
+</div>
+<p>and</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">batch_info</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This only works if you have specified <code class="docutils literal notranslate"><span class="pre">set_name</span></code> when adding your datasets to the dataloader</p>
+</div>
+<p>You may also want to set <code class="docutils literal notranslate"><span class="pre">class_names</span></code> to help with human-readability. This is done by defining a dictionary mapping each label to a new name.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">class_names</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;No&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;railspace&quot;</span><span class="p">}</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">set_classnames</span><span class="p">(</span><span class="n">class_names</span><span class="p">)</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To see a sample batch, use the <code class="docutils literal notranslate"><span class="pre">show_sample</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">show_sample</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/show_sample_train_8.png"><img alt="../_images/show_sample_train_8.png" src="../_images/show_sample_train_8.png" style="width: 400px;" /></a>
+<p>By default, this will show you the first batch created from your training datasest, along with corresponding batch information (<code class="docutils literal notranslate"><span class="pre">batch_info()</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">batch_number</span></code> and <code class="docutils literal notranslate"><span class="pre">set_name</span></code>  arguments can be used to show different batches and datasets, respectively:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">show_sample</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">,</span> <span class="n">batch_number</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/show_sample_val_8.png"><img alt="../_images/show_sample_val_8.png" src="../_images/show_sample_val_8.png" style="width: 400px;" /></a>
+</section>
+<section id="load-a-pytorch-model">
+<h2><a class="toc-backref" href="#id5">Load a PyTorch model</a><a class="headerlink" href="#load-a-pytorch-model" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference external" href="https://pytorch.org/vision/stable/models.html">torchvision.models</a> subpackage contains a number of pre-trained models which can be loaded into your classifier.
+These can be added in one of two ways:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Import a model directly from <code class="docutils literal notranslate"><span class="pre">torchvision.models</span></code> and add to your classifier using your classifiers <code class="docutils literal notranslate"><span class="pre">.add_model</span></code> method:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="n">my_model</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">resnet18</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># reshape the final layer (FC layer) of the neural network to output the same number of nodes as classes as in your dataset</span>
+<span class="n">num_input_features</span><span class="o">=</span><span class="n">my_model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">in_features</span>
+<span class="n">my_model</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_input_features</span><span class="p">,</span> <span class="n">my_classifier</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
+
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">my_model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html">See this tutorial for further details on fine-tuning torchvision models</a></p>
+<ol class="arabic simple" start="2">
+<li><p>Using your classifiers <code class="docutils literal notranslate"><span class="pre">.initialize_model</span></code> method:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">initialize_model</span><span class="p">(</span><span class="s2">&quot;resnet18&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above).</p>
+</div></blockquote>
+</section>
 </section>
 
 
