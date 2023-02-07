@@ -9,8 +9,6 @@ User Guide
 
    Download
    Load
-   Process
-   Patchify
    Annotate
    Train
    Post-process

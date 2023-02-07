@@ -20,7 +20,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx_rtd_theme',
     'myst_parser',
-    'autoapi.extension'
+    'autoapi.extension',
+    'sphinx_disqus.disqus'
 ]
 
 templates_path = ['_templates']
@@ -30,6 +31,10 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
+
+# -- sphinx disqus config ----
+
+disqus_shortname = "mapreader"
 
 # -- autoapi configuration -----
 

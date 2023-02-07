@@ -279,9 +279,8 @@ The <code class="docutils literal notranslate"><span class="pre">batch_number</s
 <p>The <a class="reference external" href="https://pytorch.org/vision/stable/models.html">torchvision.models</a> subpackage contains a number of pre-trained models which can be loaded into your classifier.
 These can be added in one of two ways:</p>
 <blockquote>
-<div><ol class="arabic simple">
-<li><p>Import a model directly from <code class="docutils literal notranslate"><span class="pre">torchvision.models</span></code> and add to your classifier using your classifiers <code class="docutils literal notranslate"><span class="pre">.add_model</span></code> method:</p></li>
-</ol>
+<div><ol class="arabic">
+<li><p>Import a model directly from <code class="docutils literal notranslate"><span class="pre">torchvision.models</span></code> and add to your classifier using your classifiers <code class="docutils literal notranslate"><span class="pre">.add_model</span></code> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
 
@@ -295,13 +294,14 @@ These can be added in one of two ways:</p>
 </pre></div>
 </div>
 <p><a class="reference external" href="https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html">See this tutorial for further details on fine-tuning torchvision models</a></p>
-<ol class="arabic simple" start="2">
-<li><p>Using your classifiers <code class="docutils literal notranslate"><span class="pre">.initialize_model</span></code> method:</p></li>
-</ol>
+</li>
+<li><p>Using your classifiers <code class="docutils literal notranslate"><span class="pre">.initialize_model</span></code> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">initialize_model</span><span class="p">(</span><span class="s2">&quot;resnet18&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above).</p>
+</li>
+</ol>
 </div></blockquote>
 </section>
 </section>

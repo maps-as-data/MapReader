@@ -244,26 +244,26 @@ These can be added in one of two ways:
 
     1.  Import a model directly from ``torchvision.models`` and add to your classifier using your classifiers ``.add_model`` method:
 
-    .. code :: python
+        .. code :: python
 
-        from torchvision import models
-        from torch import nn
+            from torchvision import models
+            from torch import nn
 
-        my_model=models.resnet18(pretrained=True)
+            my_model=models.resnet18(pretrained=True)
 
-        # reshape the final layer (FC layer) of the neural network to output the same number of nodes as classes as in your dataset
-        num_input_features=my_model.fc.in_features
-        my_model.fc = nn.Linear(num_input_features, my_classifier.num_classes)
+            # reshape the final layer (FC layer) of the neural network to output the same number of nodes as classes as in your dataset
+            num_input_features=my_model.fc.in_features
+            my_model.fc = nn.Linear(num_input_features, my_classifier.num_classes)
 
-        my_classifier.add_model(my_model)
+            my_classifier.add_model(my_model)
 
-    `See this tutorial for further details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__
+        `See this tutorial for further details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__
 
     2.  Using your classifiers ``.initialize_model`` method:
 
-    .. code :: python
-
-        my_classifier.initialize_model("resnet18")
-
-    By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above). 
-
+        .. code :: python
+        
+            my_classifier.initialize_model("resnet18")
+    
+        By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above). 
+    
