@@ -1,13 +1,14 @@
 Train
 =====
 
-.. contents::
+.. contents:: 
     :local:
 
-Read annotations
------------------
 
 Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.
+
+Load data
+------------
 
 First, load in your annotations using:
 
@@ -94,8 +95,8 @@ You can then check how many annotated images are in each set by checking the val
     annotated_images.val["label"].value_counts()
     annotated_images.test["label"].value_counts()
 
-Load and prepare datasets
----------------------------
+Prepare datasets
+~~~~~~~~~~~~~~~~~~
 
 Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
 This can be done using the ``patchTorchDataset`` class. 
@@ -124,7 +125,7 @@ This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_data
     your_dataset.patchframe
 
 Define a sampler
-------------------
+~~~~~~~~~~~~~~~~~
 
 To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
@@ -146,7 +147,7 @@ To do this, use:
 
 
 Create batches (DataLoader)
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``MapReader``'s ``classifier`` class is xxxxx.
 
@@ -185,8 +186,10 @@ You can also name your set using the ``set_name`` argument:
 
     my_classifier.add2dataloader(train_dataset, sest_name="train", batch_size=batch_size, sampler=train_sampler)
     my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler)
+    my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size)
+    
 
-To see information about your datasets, batches and classes (labelled groups), use :
+To see information about your datasets, batches and classes (labelled groups), use:
 
 .. code :: python
 
@@ -204,6 +207,7 @@ and
     
     my_classifier.print_classes_dl(set_name="train")
     my_classifier.print_classes_dl(set_name="val")
+    my_classifier.print_classes_dl(set_name="test")
 
 .. warning :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
 
@@ -266,4 +270,86 @@ These can be added in one of two ways:
             my_classifier.initialize_model("resnet18")
     
         By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above). 
+
+Define learning rates and initialise optimiser and scheduler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning:: not done yet - mostly copy & pasted from tutorials
+
+When training your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
+Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers.
+
+To define layerwise learning rates, use your classifiers ``.layerwise_lr`` method:
+
+.. code :: python 
     
+    parameters_to_optimise = my_classifier.layerwise_lr(min_lr=1e-4, max_lr=1e-3)
+
+By default, a linear function is used to distribute the learning rates (using min_lr for the first layer and max_lr for the last layer). 
+This can be changed to a logarithmic function by specifying ``ltype="geomspace"``.
+
+You should then initialise an optimiser that will optimise your desired parameters. This is done using your classifiers ``.initialize_optimizer`` method:
+
+.. code :: python
+
+    my_classifier.initialise_optimizer(params2optim=parameters_to_optimise)
+
+By default, 
+
+
+Train/fine-tune your model
+-----------------------------
+
+To begin training/fine-tuning your model, use your classifiers ``.train`` method:
+
+.. code :: python
+
+    my_classifier.train()
+
+By default, this will run 25 epochs of training and validating your model and save your model in a newly created ``./models`` directory. 
+The ``num_epochs`` and ``save_model_dir`` arguments can be specified to change these:
+
+.. code :: python
+
+        my_classifier.train(num_epochs=10, save_model_dir='./path/to/models')
+
+Other arguments you may want to specify when training your model include:
+
+- phases: phases to perform at each epoch
+- tensorboard_path: directory to save tensorboard files
+- verbosity_level: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
+
+Plot metrics
+~~~~~~~~~~~~~~
+
+Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` method. To list these, use:
+
+.. code :: python
+
+    list(myclassifier.metrics.keys())
+
+
+To visualise the progress of your training, metrics can be plotted using ``.plot_metric``: 
+
+.. code :: python
+
+    my_classifier.plot_metric(y_axis=["epoch_loss_train", "epoch_loss_val"], y_label="Loss", legends=["Train", "Valid"])
+
+.. image:: ../figures/loss.png
+    :width: 400px
+
+Inference 
+-----------
+
+Finally, to use your model for inference use:
+
+.. code :: python
+
+    my_classifier.inference(set_name="your_set_name")
+
+e.g. to run the trained model on the test dataset, use:
+
+.. code :: python
+
+    my_classifier.inference(set_name="test")
+

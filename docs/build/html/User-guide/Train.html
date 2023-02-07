@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Train &mdash; MapReader 0.3.3 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -48,15 +48,23 @@
 <li class="toctree-l1 current"><a class="reference internal" href="User-guide.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Load.html">Load</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Process.html">Process</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Patchify.html">Patchify</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Annotate.html">Annotate</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Train</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#read-annotations">Read annotations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#load-and-prepare-datasets">Load and prepare datasets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#define-a-sampler">Define a sampler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#create-batches-dataloader">Create batches (DataLoader)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#load-a-pytorch-model">Load a PyTorch model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-data">Load data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prepare-datasets">Prepare datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#define-a-sampler">Define a sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-batches-dataloader">Create batches (DataLoader)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#load-a-pytorch-model">Load a PyTorch model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#define-learning-rates-and-initialise-optimiser-and-scheduler">Define learning rates and initialise optimiser and scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#train-fine-tune-your-model">Train/fine-tune your model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#plot-metrics">Plot metrics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#inference">Inference</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Post-process.html">Post-process</a></li>
@@ -94,18 +102,31 @@
              
   <section id="train">
 <h1>Train<a class="headerlink" href="#train" title="Permalink to this heading"></a></h1>
-<div class="contents local topic" id="contents">
+<nav class="contents local" id="contents">
 <ul class="simple">
-<li><p><a class="reference internal" href="#read-annotations" id="id1">Read annotations</a></p></li>
-<li><p><a class="reference internal" href="#load-and-prepare-datasets" id="id2">Load and prepare datasets</a></p></li>
+<li><p><a class="reference internal" href="#load-data" id="id1">Load data</a></p>
+<ul>
+<li><p><a class="reference internal" href="#prepare-datasets" id="id2">Prepare datasets</a></p></li>
 <li><p><a class="reference internal" href="#define-a-sampler" id="id3">Define a sampler</a></p></li>
 <li><p><a class="reference internal" href="#create-batches-dataloader" id="id4">Create batches (DataLoader)</a></p></li>
-<li><p><a class="reference internal" href="#load-a-pytorch-model" id="id5">Load a PyTorch model</a></p></li>
 </ul>
-</div>
-<section id="read-annotations">
-<h2><a class="toc-backref" href="#id1">Read annotations</a><a class="headerlink" href="#read-annotations" title="Permalink to this heading"></a></h2>
+</li>
+<li><p><a class="reference internal" href="#load-a-pytorch-model" id="id5">Load a PyTorch model</a></p>
+<ul>
+<li><p><a class="reference internal" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" id="id6">Define learning rates and initialise optimiser and scheduler</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#train-fine-tune-your-model" id="id7">Train/fine-tune your model</a></p>
+<ul>
+<li><p><a class="reference internal" href="#plot-metrics" id="id8">Plot metrics</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#inference" id="id9">Inference</a></p></li>
+</ul>
+</nav>
 <p>Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.</p>
+<section id="load-data">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Load data</a><a class="headerlink" href="#load-data" title="Permalink to this heading"></a></h2>
 <p>First, load in your annotations using:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">loadAnnotations</span>
 
@@ -164,9 +185,8 @@ MapReader uses a stratified method to do this, such that each set contains appro
 <span class="n">annotated_images</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
-<section id="load-and-prepare-datasets">
-<h2><a class="toc-backref" href="#id2">Load and prepare datasets</a><a class="headerlink" href="#load-and-prepare-datasets" title="Permalink to this heading"></a></h2>
+<section id="prepare-datasets">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Prepare datasets</a><a class="headerlink" href="#prepare-datasets" title="Permalink to this heading"></a></h3>
 <p>Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
 This can be done using the <code class="docutils literal notranslate"><span class="pre">patchTorchDataset</span></code> class.</p>
 <p>e.g. :</p>
@@ -190,7 +210,7 @@ This can be done using the <code class="docutils literal notranslate"><span clas
 </div>
 </section>
 <section id="define-a-sampler">
-<h2><a class="toc-backref" href="#id3">Define a sampler</a><a class="headerlink" href="#define-a-sampler" title="Permalink to this heading"></a></h2>
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Define a sampler</a><a class="headerlink" href="#define-a-sampler" title="Permalink to this heading"></a></h3>
 <p>To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set.
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
 To do this, use:</p>
@@ -209,7 +229,7 @@ To do this, use:</p>
 </div>
 </section>
 <section id="create-batches-dataloader">
-<h2><a class="toc-backref" href="#id4">Create batches (DataLoader)</a><a class="headerlink" href="#create-batches-dataloader" title="Permalink to this heading"></a></h2>
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Create batches (DataLoader)</a><a class="headerlink" href="#create-batches-dataloader" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">MapReader</span></code>’s <code class="docutils literal notranslate"><span class="pre">classifier</span></code> class is xxxxx.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">classifier</span>
 
@@ -236,9 +256,10 @@ This can be changed by specifying <code class="docutils literal notranslate"><sp
 
 <span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">sest_name</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">train_sampler</span><span class="p">)</span>
 <span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">val_sampler</span><span class="p">)</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">add2dataloader</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To see information about your datasets, batches and classes (labelled groups), use :</p>
+<p>To see information about your datasets, batches and classes (labelled groups), use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">dataset_sizes</span>
 </pre></div>
 </div>
@@ -249,6 +270,7 @@ This can be changed by specifying <code class="docutils literal notranslate"><sp
 <p>and</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
 <span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">)</span>
+<span class="n">my_classifier</span><span class="o">.</span><span class="n">print_classes_dl</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -274,8 +296,9 @@ The <code class="docutils literal notranslate"><span class="pre">batch_number</s
 </div>
 <a class="reference internal image-reference" href="../_images/show_sample_val_8.png"><img alt="../_images/show_sample_val_8.png" src="../_images/show_sample_val_8.png" style="width: 400px;" /></a>
 </section>
+</section>
 <section id="load-a-pytorch-model">
-<h2><a class="toc-backref" href="#id5">Load a PyTorch model</a><a class="headerlink" href="#load-a-pytorch-model" title="Permalink to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Load a PyTorch model</a><a class="headerlink" href="#load-a-pytorch-model" title="Permalink to this heading"></a></h2>
 <p>The <a class="reference external" href="https://pytorch.org/vision/stable/models.html">torchvision.models</a> subpackage contains a number of pre-trained models which can be loaded into your classifier.
 These can be added in one of two ways:</p>
 <blockquote>
@@ -303,6 +326,67 @@ These can be added in one of two ways:</p>
 </li>
 </ol>
 </div></blockquote>
+<section id="define-learning-rates-and-initialise-optimiser-and-scheduler">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Define learning rates and initialise optimiser and scheduler</a><a class="headerlink" href="#define-learning-rates-and-initialise-optimiser-and-scheduler" title="Permalink to this heading"></a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>not done yet - mostly copy &amp; pasted from tutorials</p>
+</div>
+<p>When training your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network).
+Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers.</p>
+<p>To define layerwise learning rates, use your classifiers <code class="docutils literal notranslate"><span class="pre">.layerwise_lr</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters_to_optimise</span> <span class="o">=</span> <span class="n">my_classifier</span><span class="o">.</span><span class="n">layerwise_lr</span><span class="p">(</span><span class="n">min_lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">max_lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, a linear function is used to distribute the learning rates (using min_lr for the first layer and max_lr for the last layer).
+This can be changed to a logarithmic function by specifying <code class="docutils literal notranslate"><span class="pre">ltype=&quot;geomspace&quot;</span></code>.</p>
+<p>You should then initialise an optimiser that will optimise your desired parameters. This is done using your classifiers <code class="docutils literal notranslate"><span class="pre">.initialize_optimizer</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">initialise_optimizer</span><span class="p">(</span><span class="n">params2optim</span><span class="o">=</span><span class="n">parameters_to_optimise</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default,</p>
+</section>
+</section>
+<section id="train-fine-tune-your-model">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Train/fine-tune your model</a><a class="headerlink" href="#train-fine-tune-your-model" title="Permalink to this heading"></a></h2>
+<p>To begin training/fine-tuning your model, use your classifiers <code class="docutils literal notranslate"><span class="pre">.train</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>By default, this will run 25 epochs of training and validating your model and save your model in a newly created <code class="docutils literal notranslate"><span class="pre">./models</span></code> directory.
+The <code class="docutils literal notranslate"><span class="pre">num_epochs</span></code> and <code class="docutils literal notranslate"><span class="pre">save_model_dir</span></code> arguments can be specified to change these:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">save_model_dir</span><span class="o">=</span><span class="s1">&#39;./path/to/models&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Other arguments you may want to specify when training your model include:</p>
+<ul class="simple">
+<li><p>phases: phases to perform at each epoch</p></li>
+<li><p>tensorboard_path: directory to save tensorboard files</p></li>
+<li><p>verbosity_level: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)</p></li>
+</ul>
+<section id="plot-metrics">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Plot metrics</a><a class="headerlink" href="#plot-metrics" title="Permalink to this heading"></a></h3>
+<p>Metrics are stored in a dictionary accesible via your classifiers <code class="docutils literal notranslate"><span class="pre">.metrics</span></code> method. To list these, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">myclassifier</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>To visualise the progress of your training, metrics can be plotted using <code class="docutils literal notranslate"><span class="pre">.plot_metric</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">plot_metric</span><span class="p">(</span><span class="n">y_axis</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch_loss_train&quot;</span><span class="p">,</span> <span class="s2">&quot;epoch_loss_val&quot;</span><span class="p">],</span> <span class="n">y_label</span><span class="o">=</span><span class="s2">&quot;Loss&quot;</span><span class="p">,</span> <span class="n">legends</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Train&quot;</span><span class="p">,</span> <span class="s2">&quot;Valid&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/loss.png"><img alt="../_images/loss.png" src="../_images/loss.png" style="width: 400px;" /></a>
+</section>
+</section>
+<section id="inference">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Inference</a><a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
+<p>Finally, to use your model for inference use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;your_set_name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>e.g. to run the trained model on the test dataset, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_classifier</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">set_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 

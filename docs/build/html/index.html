@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MapReader &mdash; MapReader 0.3.3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
         <script src="_static/disqus.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -94,8 +94,6 @@
 <li class="toctree-l1"><a class="reference internal" href="User-guide/User-guide.html">User Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="User-guide/Download.html">Download</a></li>
 <li class="toctree-l2"><a class="reference internal" href="User-guide/Load.html">Load</a></li>
-<li class="toctree-l2"><a class="reference internal" href="User-guide/Process.html">Process</a></li>
-<li class="toctree-l2"><a class="reference internal" href="User-guide/Patchify.html">Patchify</a></li>
 <li class="toctree-l2"><a class="reference internal" href="User-guide/Annotate.html">Annotate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="User-guide/Train.html">Train</a></li>
 <li class="toctree-l2"><a class="reference internal" href="User-guide/Post-process.html">Post-process</a></li>
@@ -111,10 +109,10 @@
 </div>
 <section id="gallery">
 <h4>Gallery<a class="headerlink" href="#gallery" title="Permalink to this heading"></a></h4>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><dl>
@@ -201,7 +199,7 @@
 <h5>Digitized maps<a class="headerlink" href="#digitized-maps" title="Permalink to this heading"></a></h5>
 <p>MapReader can retrieve maps from NLS (National Library of Scotland) via webservers. For all the digitized maps (retrieved or locally stored), please note the re-use terms:</p>
 <dl class="field-list simple">
-<dt class="field-odd">warning</dt>
+<dt class="field-odd">warning<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Use of the digitised maps for commercial purposes is currently restricted by contract. Use of these digitised maps for non-commercial purposes is permitted under the <a class="reference external" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a> (CC-BY-NC-SA) licence. Please refer to <a class="reference external" href="https://maps.nls.uk/copyright.html#exceptions-os">https://maps.nls.uk/copyright.html#exceptions-os</a> for details on copyright and re-use license.</p>
 </dd>
 </dl>
@@ -211,7 +209,7 @@
 <p>We have provided some metadata files in <code class="docutils literal notranslate"><span class="pre">mapreader/persistent_data</span></code>.
 For all these file, please note the re-use terms:</p>
 <dl class="field-list simple">
-<dt class="field-odd">warning</dt>
+<dt class="field-odd">warning<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Use of the metadata for commercial purposes is currently restricted by contract. Use of this metadata for non-commercial purposes is permitted under the <a class="reference external" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a> (CC-BY-NC-SA) licence. Please refer to <a class="reference external" href="https://maps.nls.uk/copyright.html#exceptions-os">https://maps.nls.uk/copyright.html#exceptions-os</a> for details on copyright and re-use license.</p>
 </dd>
 </dl>
