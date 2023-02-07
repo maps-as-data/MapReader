@@ -21,7 +21,8 @@ extensions = [
     'sphinx_rtd_theme',
     'myst_parser',
     'autoapi.extension',
-    'sphinx_disqus.disqus'
+    'sphinx_disqus.disqus',
+    'sphinx_copybutton'
 ]
 
 templates_path = ['_templates']
