@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mapreader.annotate.load_annotate &mdash; MapReader 0.3.3 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="mapreader.annotate.utils" href="../utils/index.html" />
+    <link rel="prev" title="mapreader.annotate" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> MapReader
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../Install.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html">Input guidance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../User-guide/User-guide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.annotate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../download/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.download</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../loader/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.loader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../process/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.process</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../slicers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.slicers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../train/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.train</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.utils</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://dl.acm.org/doi/10.1145/3557919.3565812">MapReader Paper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MapReader</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader</span></code></a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.annotate</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.annotate.load_annotate</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/api/mapreader/annotate/load_annotate/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mapreader.annotate.load_annotate">
+<span id="mapreader-annotate-load-annotate"></span><h1><a class="reference internal" href="#module-mapreader.annotate.load_annotate" title="mapreader.annotate.load_annotate"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.annotate.load_annotate</span></code></a><a class="headerlink" href="#module-mapreader.annotate.load_annotate" title="Permalink to this heading"></a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mapreader.annotate.load_annotate.loadAnnotations" title="mapreader.annotate.load_annotate.loadAnnotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadAnnotations</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mapreader.annotate.load_annotate.</span></span><span class="sig-name descname"><span class="pre">loadAnnotations</span></span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.load_all">
+<span class="sig-name descname"><span class="pre">load_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_paths</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.load_all" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path2dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'image_id'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_these_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'label'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1234</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.load" title="Permalink to this definition"></a></dt>
+<dd><p>Read/append annotation file(s)</p>
+<section id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>csv_path<span class="classifier">str</span></dt><dd><p>path to an annotation file in CSV format</p>
+</dd>
+<dt>path2dir<span class="classifier">str, optional</span></dt><dd><p>update col_path by adding path2dir/col_path, by default None</p>
+</dd>
+<dt>col_path<span class="classifier">str, optional</span></dt><dd><p>column that contains image paths, by default “image_id”</p>
+</dd>
+<dt>keep_these_cols<span class="classifier">bool, optional</span></dt><dd><p>only keep these columns, if False (default), all columns will be kept</p>
+</dd>
+<dt>append<span class="classifier">bool, optional</span></dt><dd><p>append a newly read csv file to self.annotations, by default True</p>
+</dd>
+<dt>col_label<span class="classifier">str</span></dt><dd><p>Name of the column that contains labels</p>
+</dd>
+<dt>shuffle_rows<span class="classifier">bool</span></dt><dd><p>Shuffle rows after reading annotations</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.set_col_label">
+<span class="sig-name descname"><span class="pre">set_col_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'label'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.set_col_label" title="Permalink to this definition"></a></dt>
+<dd><p>Set the name of the column that contains labels</p>
+<section id="id1">
+<h4>Parameters<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>new_label<span class="classifier">str, optional</span></dt><dd><p>Name of the column that contains labels, by default “label”</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.show_image">
+<span class="sig-name descname"><span class="pre">show_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.show_image" title="Permalink to this definition"></a></dt>
+<dd><p>Show an image by its index (i.e., iloc in pandas)</p>
+<section id="id2">
+<h4>Parameters<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>indx<span class="classifier">int</span></dt><dd><p>Index of the image to be plotted</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.adjust_labels">
+<span class="sig-name descname"><span class="pre">adjust_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shiftby</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.adjust_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Shift labels by the specified value (shiftby)</p>
+<section id="id3">
+<h4>Parameters<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>shiftby<span class="classifier">int, optional</span></dt><dd><p>shift values of self.col_label by shiftby, i.e., self.annotations[self.col_label] + shiftby, by default -1</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.review_labels">
+<span class="sig-name descname"><span class="pre">review_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tar_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_indx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span> <span class="pre">*</span> <span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(8</span> <span class="pre">*</span> <span class="pre">3,</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deduplicate_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'image_id'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.review_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Review/edit labels</p>
+<section id="id4">
+<h4>Parameters<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<p>tar_label : Union[None, int], optional
+start_indx : int, optional
+chunks : int, optional
+num_cols : int, optional
+figsize : Union[list, tuple], optional</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.show_image_labels">
+<span class="sig-name descname"><span class="pre">show_image_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.show_image_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Show sample images for the specified label</p>
+<section id="id5">
+<h4>Parameters<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>tar_label<span class="classifier">int, optional</span></dt><dd><p>target label to be used in plotting, by default 1</p>
+</dd>
+<dt>num_sample<span class="classifier">int, optional</span></dt><dd><p>number of samples to plot, by default 10</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.split_annotations">
+<span class="sig-name descname"><span class="pre">split_annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stratify_colname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'label'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1364</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.split_annotations" title="Permalink to this definition"></a></dt>
+<dd><p>Split pandas dataframe into three subsets.</p>
+<p>CREDIT: <a class="reference external" href="https://stackoverflow.com/a/60804119">https://stackoverflow.com/a/60804119</a> (with minor changes)</p>
+<p>Following fractional ratios provided by the user, where each subset is
+stratified by the values in a specific column (that is, each subset has
+the same relative frequency of the values in the column). It performs this
+splitting by running train_test_split() twice.</p>
+<section id="id6">
+<h4>Parameters<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>stratify_colname<span class="classifier">str</span></dt><dd><p>The name of the column that will be used for stratification.</p>
+</dd>
+</dl>
+<p>frac_train : float
+frac_val   : float
+frac_test  : float</p>
+<blockquote>
+<div><p>The ratios with which the dataframe will be split into train, val, and
+test data. The values should be expressed as float fractions and should
+sum to 1.0.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>random_state<span class="classifier">int, None, or RandomStateInstance</span></dt><dd><p>Value to be passed to train_test_split().</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h4>Returns<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>df_train, df_val, df_test :</dt><dd><p>Dataframes containing the three splits.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mapreader.annotate.load_annotate.loadAnnotations.sample_labels">
+<span class="sig-name descname"><span class="pre">sample_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tar_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12345</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.annotate.load_annotate.loadAnnotations.sample_labels" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="mapreader.annotate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../utils/index.html" class="btn btn-neutral float-right" title="mapreader.annotate.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, RW.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

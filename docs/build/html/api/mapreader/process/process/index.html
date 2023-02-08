@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mapreader.process.process &mdash; MapReader 0.3.3 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="mapreader.slicers" href="../../slicers/index.html" />
+    <link rel="prev" title="mapreader.process" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> MapReader
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../Install.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html">Input guidance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../User-guide/User-guide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../annotate/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.annotate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../download/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.download</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../loader/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.loader</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.process</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../slicers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.slicers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../train/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.train</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.utils</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://dl.acm.org/doi/10.1145/3557919.3565812">MapReader Paper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MapReader</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader</span></code></a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.process</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.process.process</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/api/mapreader/process/process/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mapreader.process.process">
+<span id="mapreader-process-process"></span><h1><a class="reference internal" href="#module-mapreader.process.process" title="mapreader.process.process"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader.process.process</span></code></a><a class="headerlink" href="#module-mapreader.process.process" title="Permalink to this heading"></a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mapreader.process.process.preprocess_all" title="mapreader.process.process.preprocess_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_all</span></code></a>(image_paths, save_preproc_dir, **kwds)</p></td>
+<td><p>Preprocess a list of images</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mapreader.process.process.preprocess" title="mapreader.process.process.preprocess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess</span></code></a>(image_path, save_preproc_dir[, dst_crs, ...])</p></td>
+<td><p>preprocess an image</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="mapreader.process.process.preprocess_all">
+<span class="sig-prename descclassname"><span class="pre">mapreader.process.process.</span></span><span class="sig-name descname"><span class="pre">preprocess_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_preproc_dir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.process.process.preprocess_all" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocess a list of images</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>image_paths (list or path): a path (wildcard accepted) or a list of paths to images to be preprocessed
+save_preproc_dir (str, path): path to save preprocessed images</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mapreader.process.process.preprocess">
+<span class="sig-prename descclassname"><span class="pre">mapreader.process.process.</span></span><span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_preproc_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EPSG:3857'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'preproc_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reproj_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'preproc_tmp_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'preproc_resample_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_reproj_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.process.process.preprocess" title="Permalink to this definition"></a></dt>
+<dd><p>preprocess an image</p>
+<p>Preprocessing has three steps:
+- reproject maps to dst_crs
+- crop images by removing the white borders
+- resanme using resize_percent</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>image_path (str, path): path to an image to be preprocessed
+save_preproc_dir (str, path): path to save preprocessed image
+dst_crs (str, optional): target map projection. Defaults to ‘EPSG:3857’.
+crop_prefix (str, optional): prefix to cropped image filename. Defaults to “<a href="#id1"><span class="problematic" id="id2">preproc_</span></a>”.
+reproj_prefix (str, optional): prefix to reprojected image filename. Defaults to “<a href="#id3"><span class="problematic" id="id4">preproc_tmp_</span></a>”.
+resample_prefix (str, optional): prefix to resnamed image filename. Defaults to “<a href="#id5"><span class="problematic" id="id6">preproc_resample_</span></a>”.
+resize_percent (int, optional): resize images by to this. Defaults to 40.
+remove_reproj_file (bool, optional): after preprocessing is finished, cleanup the files. Defaults to True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="mapreader.process" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../slicers/index.html" class="btn btn-neutral float-right" title="mapreader.slicers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, RW.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
