@@ -9,6 +9,9 @@ Once you have annotated images, you can then use these to train/fine-tune a CV (
 Load data
 ---------------
 
+Load annotations
+~~~~~~~~~~~~~~~~~~
+
 First, load in your annotations using:
 
 .. code :: python
@@ -16,7 +19,7 @@ First, load in your annotations using:
     from mapreader import loadAnnotations
     
     annotated_images=loadAnnotations()
-    annotated_images.load("./path/to/annotations.csv", path2dir='./path/to/images/')
+    annotated_images.load("./path/to/annotations.csv", path2dir='./path/to/patches/')
     
 e.g. 
 
@@ -25,7 +28,7 @@ e.g.
     annotated_images=loadAnnotations()
     annotated_images.load("./annotations_one_inch/rail_space_#rw#.csv", path2dir='./maps/slice_50_50')
 
-To view the data loaded in from your ``.csv``, use:
+To view the data loaded in from your ``.csv`` as a dataframe, use:
 
 .. code :: python
 
@@ -65,7 +68,17 @@ You can also view specific images from their indices using:
     :width: 400px
 
 
-Before training your CV classifier, you first need to split your annotated images into a 'train', 'validate' and 'test' sets.
+You may also notice, that when viewing a sample of your annotations, you have mislabelled one of your images.
+The ``.review_labels()`` method provides an easy way to fix this:
+
+.. code :: python
+
+    annotated_images.review_labels()
+
+Split annotations
+~~~~~~~~~~~~~~~~~~
+
+Before training your CV classifier, you first need to split your annotated images into a 'train', 'validate' and, optionally, 'test' sets.
 MapReader uses a stratified method to do this, such that each set contains approximately the same percentage of samples of each target label as the original set.
 
 To split your annotated images into dataframes, use: 
@@ -92,9 +105,13 @@ You can then check how many annotated images are in each set by checking the val
 
 .. code :: python
 
-    annotated_images.train["label"].value_counts()
-    annotated_images.val["label"].value_counts()
-    annotated_images.test["label"].value_counts()
+    train_count=annotated_images.train["label"].value_counts()
+    val_count=annotated_images.val["label"].value_counts()
+    test_count=annotated_images.test["label"].value_counts()
+    
+    print(train_count)
+    print(val_count)
+    print(test_count)
 
 Prepare datasets
 ~~~~~~~~~~~~~~~~~~~~~
@@ -119,7 +136,7 @@ e.g. :
     val_dataset = patchTorchDataset(annotated_images.val, data_transforms)
     test_dataset = patchTorchDataset(annotated_images.test, data_transforms)
 
-This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``patchframe`` method:
+This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``.patchframe`` attribute:
 
 .. code :: python
 
@@ -137,14 +154,14 @@ To do this, use:
     import numpy as np
     import torch
 
-    train_label_count = train_dataset.patchframe["label"].value_counts().to_list()
-    val_label_count = val_dataset.patchframe["label"].value_counts().to_list()
+    train_count_list=train_dataset.patchframe["label"].value_counts().to_list()
+    val_count_list=val_dataset.patchframe["label"].value_counts().to_list()
 
-    weights = np.reciprocal(torch.Tensor(sample_count))
+    weights = np.reciprocal(torch.Tensor(train_count_list))
     weights = weights.double()
 
-    train_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[train_label_count], num_samples=len(train_dataset.patchframe))
-    val_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[val_label_count], num_samples=len(val_dataset.patchframe))
+    train_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[train_dataset.patchframe["label"].to_list()], num_samples=sum(train_count_list))
+    val_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[val_dataset.patchframe["label"].to_list()], num_samples=sum(val_count_list))
 
 
 Create batches (Add to DataLoader)
@@ -175,32 +192,32 @@ e.g. :
 
     batch_size=8
 
-    my_classifier.add2dataloader(train_dataset, batch_size=batch_size, sampler=train_sampler)
+    my_classifier.add2dataloader(train_dataset, batch_size=batch_size, sampler=train_sampler, shuffle=False)
 
-You can also name your set using the ``set_name`` argument:
+You should also name your set using the ``set_name`` argument:
 
 .. code :: python
 
-    .. code :: python
-
     batch_size=8
 
-    my_classifier.add2dataloader(train_dataset, sest_name="train", batch_size=batch_size, sampler=train_sampler)
-    my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler)
-    my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size)
+    my_classifier.add2dataloader(train_dataset, sest_name="train", batch_size=batch_size, sampler=train_sampler, shuffle=False)
+    my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler, shuffle=False)
+    my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size, shuffle=False)
     
 
-To see information about your datasets, batches and classes (labelled groups), use:
+To see information about your datasets use:
 
 .. code :: python
 
     my_classifier.dataset_sizes
 
-and 
+And, to see information about each set individually, use:
 
 .. code :: python 
 
-    my_classifier.batch_info()
+    my_classifier.batch_info(set_name="train")
+    my_classifier.batch_info(set_name="val")
+    my_classifier.batch_info(set_name="test")
 
 and 
 
@@ -210,9 +227,11 @@ and
     my_classifier.print_classes_dl(set_name="val")
     my_classifier.print_classes_dl(set_name="test")
 
-.. warning :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
+These return information about the batches and labels (classes) within each dataset, respectively. 
 
-You may also want to set ``class_names`` to help with human-readability. This is done by defining a dictionary mapping each label to a new name. 
+.. note :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
+
+You should also set ``class_names`` to help with human-readability. This is done by defining a dictionary mapping each label to a new name. 
 
 e.g. :
 
@@ -222,7 +241,7 @@ e.g. :
     my_classifier.set_classnames(class_names)
     my_classifier.print_classes_dl()
 
-To see a sample batch, use the ``show_sample`` method:
+Then, to see a sample batch, use the ``.show_sample()`` method:
 
 .. code :: python
 
@@ -231,7 +250,7 @@ To see a sample batch, use the ``show_sample`` method:
 .. image:: ../figures/show_sample_train_8.png
     :width: 400px
 
-By default, this will show you the first batch created from your training datasest, along with corresponding batch information (``batch_info()``).
+By default, this will show you the first batch created from your training datasest, along with corresponding batch information (``.batch_info()``).
 The ``batch_number`` and ``set_name``  arguments can be used to show different batches and datasets, respectively:
 
 .. code :: python
@@ -253,7 +272,7 @@ Load a PyTorch model
 The `torchvision.models <https://pytorch.org/vision/stable/models.html>`__ subpackage contains a number of pre-trained models which can be loaded into your classifier.
 These can be added in one of two ways:
 
-    1.  Import a model directly from ``torchvision.models`` and add to your classifier using your classifiers ``.add_model`` method:
+    1.  Import a model directly from ``torchvision.models`` and add to your classifier using your classifiers ``.add_model()`` method:
 
         .. code :: python
 
@@ -270,7 +289,7 @@ These can be added in one of two ways:
 
         `See this tutorial for further details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__
 
-    2.  Using your classifiers ``.initialize_model`` method:
+    2.  Using your classifiers ``.initialize_model()`` method:
 
         .. code :: python
         
@@ -281,12 +300,10 @@ These can be added in one of two ways:
 Define learning rates and initialise optimiser and scheduler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. warning:: not done yet - mostly copy & pasted from tutorials
-
 When training your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
 Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers.
 
-To define layerwise learning rates, use your classifiers ``.layerwise_lr`` method:
+To define layerwise learning rates, use your classifiers ``.layerwise_lr()`` method:
 
 .. code :: python 
     
@@ -295,19 +312,33 @@ To define layerwise learning rates, use your classifiers ``.layerwise_lr`` metho
 By default, a linear function is used to distribute the learning rates (using min_lr for the first layer and max_lr for the last layer). 
 This can be changed to a logarithmic function by specifying ``ltype="geomspace"``.
 
-You should then initialise an optimiser that will optimise your desired parameters. This is done using your classifiers ``.initialize_optimizer`` method:
+You should then initialise an optimiser that will optimise your desired parameters. This is done using your classifiers ``.initialize_optimizer()`` method:
 
 .. code :: python
 
-    my_classifier.initialise_optimizer(params2optim=parameters_to_optimise)
+    my_classifier.initialize_optimizer(params2optim=parameters_to_optimise)
 
-By default, 
+
+.. warning:: 
+    No idea waht this bit does: (RW)
+
+.. code :: python
+    
+    scheduler_param_dict = {"step_size": 10, "gamma": 0.1, "last_epoch": -1, "verbose": False}
+    
+    my_classifier.initialize_scheduler(scheduler_type="steplr", scheduler_param_dict=scheduler_param_dict, add_scheduler=True)
+
+    from torch import nn
+
+    # Add criterion
+    criterion = nn.CrossEntropyLoss()
+    my_classifier.add_criterion(criterion)
 
 
 Train/fine-tune your model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To begin training/fine-tuning your model, use your classifiers ``.train`` method:
+To begin training/fine-tuning your model, use your classifiers ``.train()`` method:
 
 .. code :: python
 
@@ -318,25 +349,24 @@ The ``num_epochs`` and ``save_model_dir`` arguments can be specified to change t
 
 .. code :: python
 
-        my_classifier.train(num_epochs=10, save_model_dir='./path/to/models')
+    my_classifier.train(num_epochs=10, save_model_dir='./path/to/models')
 
 Other arguments you may want to specify when training your model include:
 
-- phases: phases to perform at each epoch
-- tensorboard_path: directory to save tensorboard files
-- verbosity_level: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
+- ``phases``: phases to perform at each epoch
+- ``tensorboard_path``: directory to save tensorboard files
+- ``verbosity_level``: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
 
 Plot metrics
 ^^^^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` method. To list these, use:
+Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` attribute. To list these, use:
 
 .. code :: python
 
     list(myclassifier.metrics.keys())
 
-
-To view metrics from training/validating, use:
+To view specific metrics from training/validating, use:
 
 .. code :: python
 
@@ -348,7 +378,7 @@ e.g. :
 
     my_classifier.metrics["epoch_fscore_micro_train"]
 
-Or, to visualise the progress of your training, metrics can be plotted using ``.plot_metric``: 
+Or, to help visualise the progress of your training, metrics can be plotted using ``.plot_metric()``: 
 
 .. code :: python
 
@@ -371,7 +401,7 @@ If you are using your own model, you can simply load it into your classifier usi
     my_classifier.load("./path/to/model.pkl")
 
 Inference 
----------------
+-------------
 
 Finally, to use your model for inference use:
 
@@ -384,6 +414,13 @@ e.g. to run the trained model on the test dataset, use:
 .. code :: python
 
     my_classifier.inference(set_name="test")
+
+By default, metrics will not be calculated after inference.
+To add metrics to your classifier, use the ``.calculate_add_metrics()`` method: 
+
+.. code :: python
+
+    my_classifier.calculate_add_metrics(y_true=my_classifier.orig_label, y_pred=my_classifier.pred_label, y_score=my_classifier.pred_conf, phase="test")
 
 To view metrics from this inference, use the ``.metrics`` method (as above). e.g. :
 

@@ -61,7 +61,7 @@ To view an iterable list of these, you can use the ``.list_parents()`` and ``.li
     child_list=my_files.list_children()
 
     print(parent_list)
-    print(child_list)
+    print(child_list[0:5]) # too many to print them all!
 
 Or, to view these in a dataframe, use:
 
@@ -133,11 +133,12 @@ This can be done using:
 Calculate pixel intensities
 ------------------------------
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensiites of each patch (child image) and parent image:
+The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each patch (child image) and parent image:
 
 .. code :: python
 
     my_files.calc_pixel_stats()
+
 
 This is useful for xxx.
 
