@@ -57,11 +57,11 @@ Annotate
 		from mapreader.annotate.utils import prepare_annotation
 			
 		userID="your_name"
-		annotation_tasks_file="./annotation_task.yaml"
+		annotation_tasks_file="./annotation_tasks.yaml"
 		task="rail_space"
 		annotation_set="test_one_inch_maps_001"
 
-		annotation=prepare_annotation(userID, annotation_tasks_file, task, annotation_set=annotation_set)
+		annotation=prepare_annotation(userID=userID, annotation_tasks_file=annotation_tasks_file, task=task, annotation_set=annotation_set)
 
 	You can then interactively annotate a sample of your images using:
 
@@ -92,6 +92,8 @@ Annotate
 	Once you have annotated your sample, you should then save your annotations using:
 
 	.. code :: python
+
+		from mapreader.annotate.utils import save_annotation
 
 		save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set)
 

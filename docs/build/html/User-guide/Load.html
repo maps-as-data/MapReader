@@ -131,7 +131,7 @@ To view an iterable list of these, you can use the <code class="docutils literal
 <span class="n">child_list</span><span class="o">=</span><span class="n">my_files</span><span class="o">.</span><span class="n">list_children</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">parent_list</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">child_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">child_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span> <span class="c1"># too many to print them all!</span>
 </pre></div>
 </div>
 <p>Or, to view these in a dataframe, use:</p>
@@ -175,7 +175,7 @@ This can be done using:</p>
 </section>
 <section id="calculate-pixel-intensities">
 <h2>Calculate pixel intensities<a class="headerlink" href="#calculate-pixel-intensities" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">.calc_pixel_stats()</span></code> method can be used to calculate means and standard deviations of pixel intensiites of each patch (child image) and parent image:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">.calc_pixel_stats()</span></code> method can be used to calculate means and standard deviations of pixel intensites of each patch (child image) and parent image:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">calc_pixel_stats</span><span class="p">()</span>
 </pre></div>
 </div>

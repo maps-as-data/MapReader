@@ -19,7 +19,7 @@ First, load in your annotations using:
     from mapreader import loadAnnotations
     
     annotated_images=loadAnnotations()
-    annotated_images.load("./path/to/annotations.csv", path2dir='./path/to/images/')
+    annotated_images.load("./path/to/annotations.csv", path2dir='./path/to/patches/')
     
 e.g. 
 
@@ -28,7 +28,7 @@ e.g.
     annotated_images=loadAnnotations()
     annotated_images.load("./annotations_one_inch/rail_space_#rw#.csv", path2dir='./maps/slice_50_50')
 
-To view the data loaded in from your ``.csv``, use:
+To view the data loaded in from your ``.csv`` as a dataframe, use:
 
 .. code :: python
 
@@ -192,19 +192,17 @@ e.g. :
 
     batch_size=8
 
-    my_classifier.add2dataloader(train_dataset, batch_size=batch_size, sampler=train_sampler)
+    my_classifier.add2dataloader(train_dataset, batch_size=batch_size, sampler=train_sampler, shuffle=False)
 
-You can also name your set using the ``set_name`` argument:
+You should also name your set using the ``set_name`` argument:
 
 .. code :: python
 
-    .. code :: python
-
     batch_size=8
 
-    my_classifier.add2dataloader(train_dataset, sest_name="train", batch_size=batch_size, sampler=train_sampler)
-    my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler)
-    my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size)
+    my_classifier.add2dataloader(train_dataset, sest_name="train", batch_size=batch_size, sampler=train_sampler, shuffle=False)
+    my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler, shuffle=False)
+    my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size, shuffle=False)
     
 
 To see information about your datasets use:
@@ -231,7 +229,7 @@ and
 
 These return information about the batches and labels (classes) within each dataset, respectively. 
 
-.. warning :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
+.. note :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
 
 You should also set ``class_names`` to help with human-readability. This is done by defining a dictionary mapping each label to a new name. 
 
@@ -302,8 +300,6 @@ These can be added in one of two ways:
 Define learning rates and initialise optimiser and scheduler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. warning:: not done yet - mostly copy & pasted from tutorials
-
 When training your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
 Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers.
 
@@ -320,9 +316,23 @@ You should then initialise an optimiser that will optimise your desired paramete
 
 .. code :: python
 
-    my_classifier.initialise_optimizer(params2optim=parameters_to_optimise)
+    my_classifier.initialize_optimizer(params2optim=parameters_to_optimise)
 
-By default, 
+
+.. warning:: 
+    No idea waht this bit does: (RW)
+
+.. code :: python
+    
+    scheduler_param_dict = {"step_size": 10, "gamma": 0.1, "last_epoch": -1, "verbose": False}
+    
+    my_classifier.initialize_scheduler(scheduler_type="steplr", scheduler_param_dict=scheduler_param_dict, add_scheduler=True)
+
+    from torch import nn
+
+    # Add criterion
+    criterion = nn.CrossEntropyLoss()
+    my_classifier.add_criterion(criterion)
 
 
 Train/fine-tune your model
@@ -404,6 +414,13 @@ e.g. to run the trained model on the test dataset, use:
 .. code :: python
 
     my_classifier.inference(set_name="test")
+
+By default, metrics will not be calculated after inference.
+To add metrics to your classifier, use the ``.calculate_add_metrics()`` method: 
+
+.. code :: python
+
+    my_classifier.calculate_add_metrics(y_true=my_classifier.orig_label, y_pred=my_classifier.pred_label, y_score=my_classifier.pred_conf, phase="test")
 
 To view metrics from this inference, use the ``.metrics`` method (as above). e.g. :
 
