@@ -52,7 +52,7 @@ This can be done using:
 
 .. code :: python
 
-     ts.minmax_latlong()
+     ts.minmax_latlon()
 
 Then, to query maps from metadata, use: 
 
