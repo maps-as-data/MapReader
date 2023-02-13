@@ -27,9 +27,6 @@ Install via pip
 
    pip install mapreader 
 
-.. warning::
-   If this fails when installing cartopy, check you have `GEOS <https://libgeos.org/>`__ and `PROJ <https://proj.org/index.html>`__ installed on your machine. As these are not PyPI packages, they cannot be installed via `pip`.
-
 To allow the newly created ``mr_py38`` environment to show up in the notebooks:
 
 .. code :: bash
@@ -52,9 +49,6 @@ Install from source
 
    cd /path/to/MapReader
    pip install -v -e .
-
-.. warning::
-   As above, if this fails when installing cartopy, check you have `GEOS <https://libgeos.org/>`__ and `PROJ <https://proj.org/index.html>`__ installed on your machine. As these are not PyPI packages, they cannot be installed via `pip`.
 
 To allow the newly created ``mr_py38`` environment to show up in the
    notebooks:
