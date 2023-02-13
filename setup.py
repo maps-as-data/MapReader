@@ -38,7 +38,6 @@ setuptools.setup(
         "PyYAML>=6.0,<7.0",
         "tensorboard>=2.7.0,<3.0.0",
         "parhugin>=0.0.3,<0.0.4",
-        "cartopy",
         "geopy==2.1.0",
         "rasterio>=1.2.10,<2.0.0",
         "keplergl>=0.3.2,<0.4.0",
