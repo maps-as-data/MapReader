@@ -26,7 +26,7 @@ setuptools.setup(
         "aiohttp>=3.8.1,<4.0.0",
         "Shapely>=1.8.0,<2.0.0",
         "nest-asyncio>=1.5.1,<2.0.0",
-        "scikit-image>=0.18.3,<0.19.0",
+        "scikit-image>=0.18.3",
         "scikit-learn>=1.0.1,<2.0.0",
         "torch>=1.10.0,<2.0.0",
         "torchvision>=0.11.1,<0.12.1",
