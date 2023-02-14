@@ -16,3 +16,6 @@ from mapreader.train import custom_models
 from mapreader.process import process
 
 from mapreader.utils import utils
+
+from . import _version
+__version__ = _version.get_versions()['version']
