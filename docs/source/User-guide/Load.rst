@@ -28,6 +28,12 @@ You can also load in additional information, such as metadata, using:
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
+or 
+
+.. code :: python
+
+    my_files.add_metadata(metadata=metadata_df)
+
 Once you've loaded in all your data, you'll then need to patchify your images.
 This can be done using: 
 
