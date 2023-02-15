@@ -34,7 +34,6 @@ setuptools.setup(
         "ipykernel>=6.5.1,<7.0.0",
         "ipyannotate==0.1.0-beta.0",
         "Cython>=0.29.24,<0.30.0",
-        "proj>=0.2.0,<0.3.0",
         "PyYAML>=6.0,<7.0",
         "tensorboard>=2.7.0,<3.0.0",
         "parhugin>=0.0.3,<0.0.4",
