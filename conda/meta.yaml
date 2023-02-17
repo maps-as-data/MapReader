@@ -44,6 +44,9 @@ requirements:
     # - torch to pytorch
     {% if dep.startswith('torch') and not dep.startswith('torchvision') %}
     - {{ "py{}".format(dep.lower()) }}
+    # {% elif dep.startswith('parhugin') or dep.startswith('ipyannotate') %}
+    # Skip parhugin and ipyannotate
+    # TEMP FIX: parhugin is not on conda-forge
     {% else %}
     - {{ dep.lower() }}
     {% endif %}
@@ -51,7 +54,7 @@ requirements:
 
 test:
   imports:
-    - click
+    - mapreader
   # source_files:
   #   - tests
   # requires:
