@@ -12,26 +12,40 @@ import PIL.Image as PIL_image
 def sliceByPixel(
     image_path,
     slice_size,
-    path_save="test",
-    square_cuts=True,
+    path_save="sliced_images",
+    square_cuts=False,
     resize_factor=False,
-    output_format="PNG",
+    output_format="png",
     rewrite=False,
-    verbose=True,
+    verbose=False,
 ):
     """Slice an image by pixels
 
-    Arguments:
-        image_path {str} -- Path to the image to be sliced
-        slice_size {int} -- Number of pixels in both x and y directions
+    Parameters
+    ----------
+    image_path : str
+        Path to image
+    slice_size : int
+        Number of pixels/meters in both x and y to use for slicing
+    path_save : str, optional
+        Directory to save the sliced image, by default "sliced_images"
+    square_cuts : bool, optional
+        If True, all sliced images will have the same number of pixels in x and y, by default False
+    resize_factor : bool, optional
+        If True, resize the images before slicing, by default False
+    output_format : str, optional
+        Format to use when writing image files, by default "png"
+    rewrite : bool, optional
+        If True, existing slices will be rewritten, by default False
+    verbose : bool, optional
+        If True, progress updates will be printed throughout, by default False
 
-    Keyword Arguments:
-        path_save {str} -- Directory to save the sliced images (default: {"test"})
-        square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
-        resize_factor {bool} -- Resize image before slicing (default: {False})
-        output_format {str} -- Output format (default: {"PNG"})
-        verbose {bool} -- Print the progress (default: {True})
+    Returns
+    -------
+    list
+        sliced_images_info
     """
+
     # read image using PIL
     im = PIL_image.open(image_path)
     # resize the figure?

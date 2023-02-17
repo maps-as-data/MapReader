@@ -1,45 +1,50 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-try:
-    from geopy.distance import geodesic, great_circle
-    import rasterio
-except ImportError:
-    pass
-from glob import glob
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+from geopy.distance import geodesic, great_circle
+import rasterio
 import numpy as np
-import os
-import pandas as pd
-from pylab import cm as pltcm
 import pyproj
 
 
 def extractGeoInfo(
-    image_path, proj1="epsg:3857", proj2="epsg:4326", calc_size_in_m=False
+    image_path, proj2="epsg:4326", calc_size_in_m=False
 ):
     """Extract geographic information (coordinates, size in meters) from GeoTiff files
 
-    Args:
-        image_path (str) -- Path to image (GeoTiff format)
-        proj1 (str) -- Projection from proj1 ---> proj2, here, specify proj1. Defaults to 'epsg:3857'.
-        proj2 (str) -- Projection from proj1 ---> proj2, here, specify proj2. Defaults to 'epsg:4326'.
-        calc_size_in_m (bool, optional) -- Calculate size of the image (in meters).
-            Options: 'geodesic'; 'gc' or 'great-circle'; False ; Defaults to False.
+    Parameters
+    ----------
+    image_path : str
+        Path to image
+    proj2 : str, optional
+        Projection to convert coordinates into, by default "epsg:4326"
+    calc_size_in_m : str or bool, optional
+        Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle", by default False
 
-    Returns:
-        xmin, xmax, ymin, ymax, tiff_shape, size_in_m
+    Returns
+    -------
+    list
+        coords, tiff_shape, size_in_m
     """
     # read the image using rasterio
     tiff_src = rasterio.open(image_path)
-    tiff_shape = tiff_src.read().shape
+    h, w = tiff_src.shape
+    c = tiff_src.count
+    tiff_shape = (h,w,c)
+    
+    # check coordinates are present
+    if tiff_src.crs != None:
+        tiff_proj = tiff_src.crs.to_proj4()
+    else:
+        raise ValueError(f"No coordinates found in {image_path}")
 
     # Coordinate transformation: proj1 ---> proj2
-    P1 = pyproj.Proj(proj1)
+    P1 = pyproj.Proj(tiff_proj)
     P2 = pyproj.Proj(proj2)
     ymax, xmin = pyproj.transform(P1, P2, tiff_src.bounds.left, tiff_src.bounds.top)
     ymin, xmax = pyproj.transform(P1, P2, tiff_src.bounds.right, tiff_src.bounds.bottom)
+    coords = (xmin, xmax, ymin, ymax)
+
     print(f"[INFO] Use the following coordinates to compute width/height:")
     print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
     print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
@@ -87,4 +92,4 @@ def extractGeoInfo(
     else:
         size_in_m = False
 
-    return xmin, xmax, ymin, ymax, tiff_shape, size_in_m
+    return coords, tiff_shape, size_in_m
