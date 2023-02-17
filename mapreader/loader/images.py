@@ -6,6 +6,7 @@ try:
 except ImportError:
     pass
 
+import rasterio
 from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -16,7 +17,6 @@ from PIL import Image
 from pylab import cm as pltcm
 import pyproj
 import random
-import sys
 
 from mapreader.slicers.slicers import sliceByPixel
 from ..utils import utils
@@ -31,13 +31,19 @@ class mapImages:
     """mapImages class"""
 
     def __init__(
-        self, path_images=False, tree_level="parent", parent_path=None, **kwds
-    ):
+        self, path_images=False, tree_level="parent", parent_path=None, **kwds):
         """Instantiate mapImages class,
 
-        Keyword Arguments:
-            path_images {str or None} -- Path to image(s), accepts wildcard (default: {False})
+        Parameters
+        ----------
+        path_images : str or None, optional
+            Path to images (accepts wildcards), by default False
+        tree_level : str, optional
+            Tree level, choices between "parent" and "child", by default "parent"
+        parent_path : str or None, optional
+            Path to parent images (if applicable), by default None
         """
+
         if path_images:
             # List with all paths
             self.path_images = glob(os.path.abspath(path_images))
@@ -60,14 +66,16 @@ class mapImages:
     def imagesConstructor(
         self, image_path, parent_path=None, tree_level="child", **kwds
     ):
-        """Construct images instance variable,
+        """Construct images instance variable
 
-        Arguments:
-            image_path {str or None} -- Path to the image
-
-        Keyword Arguments:
-            parent_path {str or None} -- Path to the parent of image (default: {None})
-            tree_level {str} -- Tree level, choices between parent and child (default: {"child"})
+        Parameters
+        ----------
+        image_path : str or None
+            Path to image
+        parent_path : str or None, optional
+            Path to parent image (if applicable), by default None
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child", by default "child"
         """
 
         if tree_level not in ["parent", "child"]:
@@ -116,7 +124,7 @@ class mapImages:
 
     @staticmethod
     def splitImagePath(inp_path):
-        """split image path into basename and dirname,"""
+        """Split 'inp_path' into basename and dirname"""
         inp_path = os.path.abspath(inp_path)
         path_basename = os.path.basename(inp_path)
         path_dirname = os.path.dirname(inp_path)
@@ -146,13 +154,20 @@ class mapImages:
     def add_metadata(
         self, metadata, columns=None, tree_level="parent", index_col=0, delimiter="|"
     ):
-        """Add metadata to images at tree_level,
+        """Add metadata to images at tree_level
 
-        Args:
-            metadata_path (path): path to a csv file, normally created from a pandas dataframe
-            columns (list, optional): list of columns to be used. If None (default), all columns are used.
-            tree_level (str, optional): parent/child tree level. Defaults to "parent".
-            index_col (int, optional): index column
+        Parameters
+        ----------
+        metadata : str or DataFrame
+            Path to csv file (normally created from a pd.DataFrame) or pd.DataFrame containing metadata
+        columns : list, optional
+            List of columns to be added, by default None
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child", by default "parent"
+        index_col : int, optional
+            Column in csv file to use as 'index' when creating pd.DataFrame, by default 0
+        delimiter : str, optional
+            Delimiter to use when creating pd.DataFrame, by default "|"
         """
 
         if isinstance(metadata, pd.DataFrame):
@@ -193,7 +208,7 @@ class mapImages:
                 continue
             for one_col in columns:
                 if one_col in ["coord", "polygone"]:
-                    # Make sure coord is interpreted as a tuple
+                    # Make sure coords is interpreted as a tuple
                     self.images[tree_level][one_row[image_id_col]][one_col] = eval(
                         one_row[one_col]
                     )
@@ -203,15 +218,18 @@ class mapImages:
                     ]
 
     def show_sample(self, num_samples, tree_level="parent", random_seed=65, **kwds):
-        """Show sample images,
+        """Show sample images
 
-        Arguments:
-            num_samples {int} -- Number of samples to be plotted
-
-        Keyword Arguments:
-            tree_level {str} -- XXX (default: {"child"})
-            random_seed {int} -- Random seed for reproducibility (default: {65})
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to be plotted
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child", by default "parent"
+        random_seed : int, optional
+            Random seed to use for reproducibility, by default 65
         """
+
         # set random seed for reproducibility
         random.seed(random_seed)
 
@@ -249,119 +267,189 @@ class mapImages:
         for one_item in list_items:
             self.add_shape_id(image_id=one_item, tree_level=tree_level)
 
-    def add_coord_increments(self, tree_level="parent"):
-        """Run add_coord_increments_id for all tree_level items"""
+    def add_coord_increments(self, tree_level="parent", verbose=False):
+        """Run `add_coord_increments_id` for each image at "tree_level"
+
+        Parameters
+        ----------
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child, by default "parent"
+        verbose : bool, optional
+            If true, print verbose outputs, by default False
+        """
+        
         list_items = list(self.images[tree_level].keys())
         print(f"[INFO] Add coord-increments, tree level: {tree_level}")
         for one_item in list_items:
-            self.add_coord_increments_id(image_id=one_item, tree_level=tree_level)
+            
+            if not "coord" in self.images[tree_level][one_item].keys():
+                if verbose:
+                    print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                continue
 
-    def add_center_coord(self, tree_level="child"):
-        """Run add_center_coord_id for all tree_level items"""
+            self.add_coord_increments_id(image_id=one_item, tree_level=tree_level, verbose=verbose)
+
+    def add_center_coord(self, tree_level="child", verbose=False):
+        """Run `add_center_coord_id` for each image at "tree_level"
+
+        Parameters
+        ----------
+        tree_level : str, optional
+            Tree level, choices of "parent" or "child, by default "child"
+        verbose : bool, optional
+            If True, print verbose outputs, by default False
+        """
         list_items = list(self.images[tree_level].keys())
+        
         print(f"[INFO] Add center coordinates, tree level: {tree_level}")
+        
         for one_item in list_items:
-            self.add_center_coord_id(image_id=one_item, tree_level=tree_level)
+            
+            if tree_level == "parent":
+                if not "coord" in self.images[tree_level][one_item].keys():
+                    if verbose:
+                        print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                    continue
+            
+            if tree_level == "child":
+                par_id = self.images[tree_level][one_item]["parent_id"]
+                
+                if not "coord" in self.images["parent"][par_id].keys():
+                    if verbose:
+                        print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                    continue
+            
+            self.add_center_coord_id(image_id=one_item, tree_level=tree_level, verbose=verbose)
 
     def add_shape_id(self, image_id, tree_level="parent"):
-        """Add an image/array shape to self.images[tree_level][image_id]
+        """Add an image/array shape to image
 
         Parameters
         ----------
         image_id : str
-            image ID
+            Image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices of "parent" or "child, by default "parent"
         """
         myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
+        #shape = (hwc)
         myimg_shape = myimg.shape
         self.images[tree_level][image_id]["shape"] = myimg_shape
 
-    def add_coord_increments_id(self, image_id, tree_level="parent"):
-        """Add pixel-wise dlon and dlat to self.images[tree_level][image_id]
+    def add_coord_increments_id(self, image_id, tree_level="parent", verbose=False):
+        """Add pixel-wise dlon and dlat to image
 
         Parameters
         ----------
         image_id : str
-            image ID
+            Image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices between "parent" or "child, by default "parent"
+        verbose : bool, optional
+            If True, print verbose outputs, by default False
         """
+
         if not "shape" in self.images[tree_level][image_id].keys():
             self.add_shape(tree_level=tree_level)
 
         if not "coord" in self.images[tree_level][image_id].keys():
-            raise ValueError(
-                f"'coord' could not be found in: self.images[tree_level][image_id].keys(). Suggestion: run add_metadata"
-            )
+            if verbose:
+                print(f"'coord' could not be found in {image_id}.Suggestion: run add_metadata or addGeoInfo")
+                return
+        
+        else:
+            # Extract height/width/chan from shape
+            h,w,c = self.images[tree_level][image_id]["shape"]
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id]["coord"]
+            self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / w
+            self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / h
 
-        # Extract height/width/chan from shape
-        hwc = self.images[tree_level][image_id]["shape"]
-        lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id]["coord"]
-        self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / hwc[1]
-        self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / hwc[0]
-
-    def add_center_coord_id(self, image_id, tree_level="child"):
-        """Add center_lon and center_lat to self.images[tree_level][image_id]
+    def add_center_coord_id(self, image_id, tree_level="child", verbose=False):
+        """Add center_lon and center_lat to image
 
         Parameters
         ----------
-        image_id : str
-            image ID
+        image_id :str
+            Image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices between "parent" or "child, by default "child"
+        verbose : bool, optional
+            If True, print verbose outputs, by default False
         """
 
         par_id = self.images[tree_level][image_id]["parent_id"]
 
+        #i.e. for children
         if par_id is not None:
-            if (not "dlon" in self.images["parent"][par_id].keys()) or (
-                not "dlat" in self.images["parent"][par_id].keys()
-            ):
-                self.add_coord_increments(tree_level="parent")
+            if (not "dlon" in self.images["parent"][par_id].keys()) or (not "dlat" in self.images["parent"][par_id].keys()):
+                
+                if not "coord" in self.images["parent"][par_id].keys():
+                    if verbose:
+                        print(f"No coordinates found in {par_id}")
+                    return
+            
+                else:
+                    self.add_coord_increments(tree_level="parent")
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
             lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id]["coord"]
-
             min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
             max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
             max_abs_y = self.images[tree_level][image_id]["max_y"] * dlat
-
+            
             self.images[tree_level][image_id]["center_lon"] = (
                 lon_min + (min_abs_x + max_abs_x) / 2.0
             )
             self.images[tree_level][image_id]["center_lat"] = (
                 lat_max - (min_abs_y + max_abs_y) / 2.0
             )
-        else:
+
+        # i.e. for parents or orphaned children
+        elif "coord" in self.images[tree_level][image_id].keys():
             print(
-                f"[INFO] parent_id is None. Read 'coord' from the specified tree_level and image_id."
+                f"[INFO] parent_id is None. Reading 'coord' from the specified tree_level and image_id."
             )
             lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
                 "coord"
             ]
-
             self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
             self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
 
-    def calc_pixel_width_height(self, parent_id, calc_size_in_m="great-circle"):
+    def calc_pixel_width_height(self, parent_id, calc_size_in_m="great-circle", verbose=False):
         """Calculate width and height of pixels
 
-        Args:
-            parent_id (str): ID of the parent image
-            calc_size_in_m (str, optional): How to compute the width/heigh, options: geodesic and great-circle (default).
+        Parameters
+        ----------
+        parent_id : str
+            ID of the parent image
+        calc_size_in_m : str, optional
+            Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
+        verbose : bool, optional
+            If true, print verbose outputs, by default False
+
+        Returns
+        -------
+        tuple
+            size_in_m (bottom, top, left, right)
+
         """
-        myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
-        myimg_shape = myimg.shape
+
         if not "coord" in self.images["parent"][parent_id].keys():
-            raise ValueError(f"[ERROR] could not find coordinate info for: {parent_id}")
+            print(f"No coordinates found in {parent_id}. Suggestion: run add_metadata or addGeoInfo")
+            return
+
+        myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
+        h, w, c = myimg_shape = myimg.shape
+
+        
         (xmin, xmax, ymin, ymax) = self.images["parent"][parent_id]["coord"]
-        print(f"[INFO] Use the following coordinates to compute width/height:")
-        print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
-        print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
-        print(f"[INFO] shape: {myimg_shape}")
+        if verbose:
+            print(f"[INFO] Using the following coordinates to compute width/height:")
+            print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
+            print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
+            print(f"[INFO] shape (hwc): {myimg_shape}")
 
         # Calculate the size of image in meters
         if calc_size_in_m == "geodesic":
@@ -375,10 +463,10 @@ class mapImages:
             )
 
             mean_width = np.mean(
-                [size_in_m[0] / myimg_shape[1], size_in_m[1] / myimg_shape[1]]
+                [size_in_m[0]/w, size_in_m[1]/w]
             )
             mean_height = np.mean(
-                [size_in_m[2] / myimg_shape[0], size_in_m[3] / myimg_shape[0]]
+                [size_in_m[2]/h, size_in_m[3]/h]
             )
             print(
                 f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
@@ -395,25 +483,25 @@ class mapImages:
             )
 
             mean_width = np.mean(
-                [size_in_m[0] / myimg_shape[1], size_in_m[1] / myimg_shape[1]]
+                [size_in_m[0]/w, size_in_m[1]/w]
             )
             mean_height = np.mean(
-                [size_in_m[2] / myimg_shape[0], size_in_m[3] / myimg_shape[0]]
+                [size_in_m[2]/h, size_in_m[3]/h]
             )
             print(
                 f"\nEach pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
             )
 
-        return xmin, xmax, ymin, ymax, myimg_shape, size_in_m
+        return size_in_m
 
     def sliceAll(
         self,
         method="pixel",
         slice_size=100,
-        path_save="test",
+        path_save="sliced_images",
         square_cuts=False,
         resize_factor=False,
-        output_format="PNG",
+        output_format="png",
         rewrite=False,
         verbose=False,
         tree_level="parent",
@@ -421,17 +509,34 @@ class mapImages:
         id1=0,
         id2=-1,
     ):
-        """Slice all images in the object (the list can be accessed via .images variable)
+        """Slice all images at the specified 'tree_level'
 
-        Keyword Arguments:
-            method {str} -- method to slice an image (default: {"pixel"})
-            slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the sliced images (default: {"test"})
-            square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
-            resize_factor {bool} -- Resize image before slicing (default: {False})
-            output_format {str} -- Output format (default: {"PNG"})
-            tree_level {str} -- image group to be sliced (default: {"parent"})
-            verbose {bool} -- Print the progress (default: {False})
+        Parameters
+        ----------
+        method : str, optional
+            Method used to slice images, choices between "pixel" and "meters" or "meter", by default "pixel"
+        slice_size : int, optional
+            Number of pixels/meters in both x and y to use for slicing, by default 100
+        path_save : str, optional
+            Directory to save the sliced images, by default "sliced_images"
+        square_cuts : bool, optional
+            If True, all sliced images will have the same number of pixels in x and y, by default False
+        resize_factor : bool, optional
+            If True, resize the images before slicing, by default False
+        output_format : str, optional
+            Format to use when writing image files, by default "png"
+        rewrite : bool, optional
+            If True, existing slices will be rewritten, by default False
+        verbose : bool, optional
+            If True, progress updates will be printed throughout, by default False
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child, by default "parent"
+        add2child : bool, optional
+            If True, sliced images will be added to `self.images` dictionary, by default True
+        id1 : int, optional
+            First image to slice, by default 0
+        id2 : int, optional
+            Last image to slice, by default -1
         """
 
         if id2 < 0:
@@ -474,10 +579,10 @@ class mapImages:
 
     def _slice(
         self,
-        image_path=False,
+        image_path,
         method="pixel",
         slice_size=100,
-        path_save="test",
+        path_save="sliced_images",
         square_cuts=False,
         resize_factor=False,
         output_format="PNG",
@@ -486,20 +591,37 @@ class mapImages:
         image_id=None,
         tree_level=None,
     ):
-        """Slice one image stored at image_path
+        """Slice one image
 
-        Keyword Arguments:
-            image_path {str} -- Path to the image to be sliced (default: {False})
-            method {str} -- method to slice an image (default: {"pixel"})
-            slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the sliced images (default: {"test"})
-            square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
-            resize_factor {bool} -- Resize image before slicing (default: {False})
-            output_format {str} -- Output format (default: {"PNG"})
-            verbose {bool} -- Print the progress (default: {True})
-            image_id {str} -- image ID
-            tree_level {str} -- image group to be sliced (default: {"parent"})
+        Parameters
+        ----------
+        image_path : str
+            Path to image
+        method : str, optional
+            Method used to slice images, choices between "pixel" and "meters" or "meter", by default "pixel"
+        slice_size : int, optional
+            Number of pixels/meters in both x and y to use for slicing, by default 100
+        path_save : str, optional
+            Directory to save the sliced images, by default "sliced_images"
+        square_cuts : bool, optional
+            If True, all sliced images will have the same number of pixels in x and y, by default False
+        resize_factor : bool, optional
+            If True, resize the images before slicing, by default False
+        output_format : str, optional
+            Format to use when writing image files, by default "png"
+        rewrite : bool, optional
+            If True, existing slices will be rewritten, by default False
+        verbose : bool, optional
+            If True, progress updates will be printed throughout, by default False
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child, by default "parent"
+        
+        Returns
+        -------
+        list
+            sliced_images_info
         """
+        
         print(40 * "=")
         print(f"Slicing {os.path.relpath(image_path)}")
         print(40 * "-")
@@ -523,15 +645,23 @@ class mapImages:
             )
 
         elif method in ["meters", "meter"]:
-            if "tiff" in image_path:
-                xmin, xmax, ymin, ymax, tiff_shape, size_in_m = utils.extractGeoInfo(
-                    image_path=image_path, calc_size_in_m="great-circle"
-                )
-                print(f"[DEBUG] tiff_shape: {tiff_shape}")
-                pixel_height = size_in_m[2] / tiff_shape[1]
-                number_pixels4slice = int(slice_size / pixel_height)
 
-                sliced_images_info = sliceByPixel(
+            if (not "coord" in self.images[tree_level][image_id].keys()):
+                raise ValueError ("Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo")
+            
+            if not "shape" in self.images[tree_level][image_id].keys():
+                self.add_shape_id(image_id=image_id, tree_level=tree_level)
+
+            h, w, c = self.images[tree_level][image_id]["shape"]
+            
+            # size in meter contains: (bottom, top, left, right)
+            size_in_m = self.calc_pixel_width_height(image_id)
+            
+            #pixel height in m per pixel
+            pixel_height = size_in_m[2] / h
+            number_pixels4slice = int(slice_size / pixel_height)
+
+            sliced_images_info = sliceByPixel(
                     image_path=image_path,
                     slice_size=number_pixels4slice,
                     path_save=path_save,
@@ -541,30 +671,7 @@ class mapImages:
                     rewrite=rewrite,
                     verbose=verbose,
                 )
-            elif "png" in image_path.lower():
-                (
-                    xmin,
-                    xmax,
-                    ymin,
-                    ymax,
-                    img_shape,
-                    size_in_m,
-                ) = self.calc_pixel_width_height(image_id)
-                # size in meter contains: (bottom, top, left, right)
-                # img_shape = (rows, columns)
-                pixel_height = size_in_m[2] / img_shape[0]
-                number_pixels4slice = int(slice_size / pixel_height)
-
-                sliced_images_info = sliceByPixel(
-                    image_path=image_path,
-                    slice_size=number_pixels4slice,
-                    path_save=path_save,
-                    square_cuts=square_cuts,
-                    resize_factor=resize_factor,
-                    output_format=output_format,
-                    rewrite=rewrite,
-                    verbose=verbose,
-                )
+        
         return sliced_images_info
 
     def addChildren(self):
@@ -582,12 +689,19 @@ class mapImages:
         os.makedirs(path_make, exist_ok=exists_ok)
 
     def calc_pixel_stats(self, parent_id=None, calc_mean=True, calc_std=True):
-        """Calculate stats of each child in a parent_id and
-           store the results
+        """Calculate pixel stats (R, G, B, RGB and, if present, Alpha) of each child in a parent_id and store the results
 
-        Arguments:
-            parent_id {str, None} -- ID of the parent image. If None, all parents will be used.
+        Parameters
+        ----------
+        parent_id : str, list or None, optional
+            ID of the parent image(s). 
+            If None, all parents will be used, by default None
+        calc_mean : bool, optional
+            Calculate mean values, by default True
+        calc_std : bool, optional
+            Calculate standard deviations, by default True
         """
+        
         if parent_id is None:
             parent_id = self.list_parents()
         else:
@@ -596,71 +710,69 @@ class mapImages:
         for one_par_id in parent_id:
             print(10 * "-")
             print(f"[INFO] calculate pixel stats for image: {one_par_id}")
+            
             if not "children" in self.images["parent"][one_par_id]:
                 print(f"[WARNING] No child found for: {one_par_id}")
                 continue
+            
             list_children = self.images["parent"][one_par_id]["children"]
+            
             for one_child in list_children:
-                if ("mean_pixel_A" in self.images["child"][one_child].keys()) and (
-                    "std_pixel_A" in self.images["child"][one_child].keys()
+                if ("mean_pixel_RGB" in self.images["child"][one_child].keys()) and (
+                    "std_pixel_RGB" in self.images["child"][one_child].keys()
                 ):
                     continue
+                
                 child_img = mpimg.imread(self.images["child"][one_child]["image_path"])
+                
                 if calc_mean:
-                    self.images["child"][one_child]["mean_pixel_R"] = np.mean(
-                        child_img[:, :, 0]
-                    )
-                    self.images["child"][one_child]["mean_pixel_G"] = np.mean(
-                        child_img[:, :, 1]
-                    )
-                    self.images["child"][one_child]["mean_pixel_B"] = np.mean(
-                        child_img[:, :, 2]
-                    )
-                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(
-                        child_img[:, :, 0:3]
-                    )
-                    self.images["child"][one_child]["mean_pixel_A"] = np.mean(
-                        child_img[:, :, 3]
-                    )
+                    self.images["child"][one_child]["mean_pixel_R"] = np.mean(child_img[:, :, 0])
+                    self.images["child"][one_child]["mean_pixel_G"] = np.mean(child_img[:, :, 1])
+                    self.images["child"][one_child]["mean_pixel_B"] = np.mean(child_img[:, :, 2])
+                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(child_img[:, :, 0:3])
+                    #check alpha is present
+                    if child_img.shape[2] > 3:
+                        self.images["child"][one_child]["mean_pixel_A"] = np.mean(child_img[:, :, 3])
                 if calc_std:
                     self.images["child"][one_child]["std_pixel_R"] = np.std(
-                        child_img[:, :, 0]
-                    )
+                        child_img[:, :, 0])
                     self.images["child"][one_child]["std_pixel_G"] = np.std(
-                        child_img[:, :, 1]
-                    )
+                        child_img[:, :, 1])
                     self.images["child"][one_child]["std_pixel_B"] = np.std(
-                        child_img[:, :, 2]
-                    )
+                        child_img[:, :, 2])
                     self.images["child"][one_child]["std_pixel_RGB"] = np.std(
-                        child_img[:, :, 0:3]
-                    )
-                    self.images["child"][one_child]["std_pixel_A"] = np.std(
-                        child_img[:, :, 3]
-                    )
+                        child_img[:, :, 0:3])
+                    #check alpha is present
+                    if child_img.shape[2] > 3:
+                        self.images["child"][one_child]["std_pixel_A"] = np.std(
+                        child_img[:, :, 3])
 
-    def convertImages(self, fmt="dataframe"):
-        """Convert images to a specified format (fmt)
+    def convertImages(self):
+        """Convert images dictionary into a pd.DataFrame
 
-        Keyword Arguments:
-            fmt {str} -- convert images variable to this format (default: {"dataframe"})
+        Returns
+        -------
+        list
+            list of dataframes containing information about parents and children.
         """
-        if fmt in ["pandas", "dataframe"]:
-            children = pd.DataFrame.from_dict(self.images["child"], orient="index")
-            parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
-            return parents, children
-        else:
-            raise ValueError(f"Format {fmt} is not supported!")
+        parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
+        children = pd.DataFrame.from_dict(self.images["child"], orient="index")
+        
+        return parents, children
+
 
     def show_par(self, parent_id, value=False, **kwds):
-        """A wrapper function for show,
-
-        Arguments:
-            parent_id {str} -- ID of the parent image to be plotted
-
-        Keyword Arguments:
-            value {bool, const, random, ...} -- Values to be plotted on the parent image (default: {False})
+        """A wrapper function for `.show()` which plots all children of a specified parent
+    
+        Parameters
+        ----------
+        parent_id : str
+            ID of the parent image to be plotted
+        value : list or bool, optional
+            Value to be plotted on each child image, by default False
+            See `.show()` for more detail.
         """
+
         image_ids = self.images["parent"][parent_id]["children"]
         self.show(image_ids, value=value, **kwds)
 
@@ -673,7 +785,7 @@ class mapImages:
         border_color="r",
         vmin=0.5,
         vmax=2.5,
-        colorbar="jet",
+        colorbar="viridis",
         alpha=1.0,
         discrete_colorbar=256,
         tree_level="child",
@@ -684,32 +796,45 @@ class mapImages:
         kml_dpi_image=None,
         **kwds,
     ):
-        """Plot a list of image ids,
+        """Plot images from a list of image ids
 
-        Arguments:
-            image_ids {list} -- List of image ids to be plotted
-
-        Keyword Arguments:
-            value {False or list} -- Value to be plotted on child images
-            plot_parent {bool} -- Plot parent image in the background (default: {True})
-            border {bool} -- Plot a border for each image id (default: {True})
-            border_color {str} -- color of patch borders (default: {r})
-            vmin {float or list} -- min. value for the colorbar (default: {0.5})
-            vmax {float or list} -- max. value for the colorbar (default: {2.5})
-            colorbar {str or list} -- colorbar to visualize "value" on maps (default: {jet})
-            alpha {float or list} -- set transparency level for plotting "value" on maps (default: {1.})
-            discrete_colorbar {int or list} -- number of discrete colors to be used (default: {256})
-            tree_level {str} -- Tree level for the plot XXX (default: {"child"})
-            grid_plot {list or tuple} -- Number of rows and columns in the image.
-                                         This will later adjusted to the true min/max of all subplots.
-                                         (default: (10000, 10000))
-            plot_histogram {bool} -- Plot a histogram of 'value' (default: {True})
-            save_kml_dir {False or str} -- Directory to save a KML files out of images or False
-                                           (default: {False})
-            image_width_resolution {None, int} -- pixel width to be used for plotting, only when tree_level="parent"
-                                                  pixel height will be adjusted according to the width/height ratio
-            kml_dpi_image {None, int} -- The resolution in dots per inch for images created when save_kml_dir is specified
+        Parameters
+        ----------
+        image_ids : str or list
+            Image or list of images to be plotted
+        value : str, list or bool, optional
+            Value to plot on child images, by default False
+        plot_parent : bool, optional
+            If true, parent image will be plotted in background, by default True
+        border : bool, optional
+            If true, border will be placed around each child image, by default True
+        border_color : str, optional
+            Border colour, by default "r"
+        vmin : float, optional
+            Minimum value for the colorbar, by default 0.5
+        vmax : float, optional
+            Maximum value for the colorbar, by default 2.5
+        colorbar : str, optional
+            Colorbar used to visualise chosen `value`, by default "viridis"
+        alpha : float, optional
+            Transparancy level for plotting `value` (0 = transparent, 1 = opaque), by default 1.0
+        discrete_colorbar : int, optional
+            Number of discrete colurs to use in colorbar, by default 256
+        grid_plot : tuple, optional
+            Number of rows and columns to use in the image, later adjusted to the true min/max of all subplots, by default (20000, 20000)
+        plot_histogram : bool, optional
+            Plot a histogram of `value`, by default True
+        save_kml_dir : str or bool, optional
+            Directory to save KML files
+            If False, no files are saved, by default False
+        image_width_resolution : int or None, optional
+            Pixel width to be used for plotting, only when tree_level="parent"
+            If None,  by default None
+        kml_dpi_image : int or None, optional
+            The resolution, in dots per inch, to create KML images when `save_kml_dir` is specified, by default None
         """
+
+        
         # create list, if not already a list
         if not (isinstance(image_ids, list) or isinstance(image_ids, tuple)):
             image_ids = [image_ids]
@@ -932,11 +1057,19 @@ class mapImages:
 
     def _createKML(self, path2kml, value, coords, counter=-1):
         """Create a KML file,
+        
+        Parameters
+        ----------
+        path2kml : str
+            Directory to save KML file
+        value : _type_
+            Value to be plotted on the underlying image 
+            See `.show()` for detail
+        coords : list or tuple
+            Coordinates of the bounding box
+        counter : int, optional
+            Counter to be used for HREF, by default -1
 
-        Args:
-            path2kml (str) -- Path to save a KML file
-            value (str) -- Value plotted on the underlying image (refer to "show" function)
-            coords (list, tuple) -- coordinates of the bounding box
         """
 
         try:
@@ -1027,15 +1160,21 @@ class mapImages:
     def loadPatches(
         self, patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
     ):
-        """load patches from files (patch_paths) and add parents if parent_paths is provided
+        """Load patches from path and, if parent_paths specified, add parents
 
-        Arguments:
-            patch_paths {str, wildcard accepted} -- path to patches
-            parent_paths {False or str, wildcard accepted} -- path to parents
-
-        Keyword Arguments:
-            clear_images {bool} -- clear images variable before loading patches (default: {False})
+        Parameters
+        ----------
+        patch_paths : str
+            Path to patches, accepts wildcards
+        parent_paths : str or bool, optional
+            Path to parents, accepts wildcards
+            If False, no parents are loaded, by default False
+        add_geo_par : bool, optional
+            Add geographical info to parents, by default False
+        clear_images : bool, optional
+            Clear images variable before loading, by default False
         """
+
         patch_paths = glob(os.path.abspath(patch_paths))
 
         if clear_images:
@@ -1076,19 +1215,41 @@ class mapImages:
 
     @staticmethod
     def detectParIDfromPath(image_id, parent_delimiter="#"):
-        """
-        Detect parent ID from path using parent_delimiter
-        NOTE: Currently, only one parent can be detected.
+        """Detect parent IDs from image ID
+
+        Parameters
+        ----------
+        image_id : str
+            ID of child image
+        parent_delimiter : str, optional
+            Delimiter used to separate parent ID when naming child image, by default "#"
+
+        Returns
+        -------
+        str
+            Parent ID
         """
         return image_id.split(parent_delimiter)[1]
 
     @staticmethod
     def detectBorderFromPath(image_id, border_delimiter="-"):
         """
-        Detect borders from the path using border_delimiter.
-        Here, the assumption is that the child image is named:
-        NOTE: STRING-min_x-min_y-max_x-max_y-STRING
+        Detects borders from the path assuming child image is named using the following format:
+        str-min_x-min_y-max_x-max_y-str
+
+        Parameters
+        ----------
+        image_id : str
+            ID of image
+        border_delimiter : str, optional
+            Delimiter used to separate border values when naming child image, by default "-"
+
+        Returns
+        -------
+        tuple
+            Border (min_x, min_y, max_x, max_y) of image
         """
+
         split_path = image_id.split("-")
         return (
             int(split_path[1]),
@@ -1100,14 +1261,20 @@ class mapImages:
     def loadParents(
         self, parent_paths=False, parent_ids=False, update=False, add_geo=False
     ):
-        """load parent images from files (parent_paths)
-           if only parent_ids is specified, self.images["parent"] will be filled with no image_path.
-           NOTE: if parent_paths is given, parent_ids will be omitted as ids will be
-                 detected from the basename
+        """Load parent images from file paths.
+        If no path is given, only `parent_ids`, no image_path will be added to the images.
 
-        Keyword Arguments:
-            parent_paths {False or str, wildcard accepted} -- path to parents (default: {False})
-            parent_ids {False or list/tuple} -- list of parent ids (default: {False})
+        Parameters
+        ----------
+        parent_paths : str or bool, optional
+            Path to parent images, by default False
+        parent_ids : list, str or bool, optional
+            ID(s) of parent images
+            Ignored if parent_paths are specified, by default False
+        update : bool, optional
+            If true, current parents will be overwritten, by default False
+        add_geo : bool, optional
+            If true, geographical info will be added to parents, by default False
         """
 
         if parent_paths:
@@ -1125,23 +1292,9 @@ class mapImages:
                     )
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
-                if add_geo and ("tiff" in ppath):
-                    (
-                        lon_min,
-                        lon_max,
-                        lat_min,
-                        lat_max,
-                        tiff_shape,
-                        size_in_m,
-                    ) = utils.extractGeoInfo(ppath, calc_size_in_m="great-circle")
-                    self.images["parent"][parent_id]["coord"] = (
-                        lon_min,
-                        lon_max,
-                        lat_min,
-                        lat_max,
-                    )
-                    self.images["parent"][parent_id]["shape"] = tiff_shape
-                    self.images["parent"][parent_id]["size_in_m"] = size_in_m
+                
+                if add_geo:
+                    self.addGeoInfo()
 
         elif parent_ids:
             if not isinstance(parent_ids, list):
@@ -1151,13 +1304,18 @@ class mapImages:
                 self.images["parent"][parent_id]["image_path"] = None
 
     def loadDataframe(self, parents=None, children_df=None, clear_images=True):
-        """Read dataframes and form images variable
+        """Form images variable from dataframe(s)
 
-        Keyword Arguments:
-            parents_df {dataframe or path} -- Parents dataframe or path to parents (default: {None})
-            children_df {dataframe} -- Children/slices dataframe (default: {None})
-            clear_images {bool} -- clear images before reading dataframes (default: {True})
+        Parameters
+        ----------
+        parents : DataFrame, str or None, optional
+            DataFrame containing parents or path to parents, by default None
+        children_df : DataFrame or None, optional
+            DataFrame containing children (patches), by default None
+        clear_images : bool, optional
+            If true, clear images before reading the dataframes, by default True
         """
+
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
@@ -1182,9 +1340,7 @@ class mapImages:
                 k2change = "coord"
                 if k2change in self.images["parent"][one_par]:
                     try:
-                        self.images["parent"][one_par][k2change] = self.images[
-                            "parent"
-                        ][one_par][k2change]
+                        self.images["parent"][one_par][k2change] = self.images["parent"][one_par][k2change]
                     except Exception as err:
                         print(err)
 
@@ -1198,7 +1354,21 @@ class mapImages:
         index_col_child=0,
         index_col_parent=0,
     ):
-        """Read parent and child from CSV files"""
+        """Form images variable from csv file(s)
+
+        Parameters
+        ----------
+        parent_path : _type_, optional
+            Path to parent csv file, by default None
+        child_path : _type_, optional
+            Path to child csv file, by default None
+        clear_images : bool, optional
+            If true, clear images before reading the csv files, by default False
+        index_col_child : int, optional
+            Column in child csv file to use as index, by default 0
+        index_col_parent : int, optional
+            Column in parent csv file to use as index, by default 0
+        """
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
@@ -1228,6 +1398,55 @@ class mapImages:
                     self.images["parent"][one_par][k2change] = eval(
                         self.images["parent"][one_par][k2change]
                     )
+
+    def addGeoInfo(
+        self, proj2convert="epsg:4326", calc_method="great-circle"):
+        """Add geographic information (shape, coords, size in m) to images from image metadata
+
+        Parameters
+        ----------
+        proj2convert : str, optional
+            Projection to convert coordinates into, by default "epsg:4326"
+        calc_method : str, optional
+            Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
+        """
+    
+        image_ids=list(self.images["parent"].keys())
+        
+        for image_id in image_ids:
+            
+            image_path = self.images["parent"][image_id]["image_path"]
+        
+            # read the image using rasterio
+            tiff_src = rasterio.open(image_path)
+            h,w=tiff_src.shape
+            c=tiff_src.count
+            shape=(h,w,c)
+            self.images["parent"][image_id]["shape"]=shape
+
+            # check coordinates are present
+            if isinstance(tiff_src.crs, type(None)):
+                print(f"No coordinates found in {image_id}. Try add_metadata instead")
+                continue
+            
+            else:
+                tiff_proj = tiff_src.crs.to_proj4()
+                            
+                # Coordinate transformation: proj1 ---> proj2
+                P1 = pyproj.Proj(tiff_proj)
+                P2 = pyproj.Proj(proj2convert)
+                ymax, xmin = pyproj.transform(P1, P2, tiff_src.bounds.left, tiff_src.bounds.top)
+                ymin, xmax = pyproj.transform(P1, P2, tiff_src.bounds.right, tiff_src.bounds.bottom)
+                coords = (xmin, xmax, ymin, ymax)
+                self.images["parent"][image_id]["coord"]=coords
+
+                size_in_m = self.calc_pixel_width_height(parent_id=image_id, calc_size_in_m=calc_method)
+                self.images["parent"][image_id]["size_in_m"] =size_in_m
+
+
+            
+
+
 
     ### def readPatches(self,
     ###               patch_paths,
