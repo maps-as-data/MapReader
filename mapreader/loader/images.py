@@ -458,7 +458,8 @@ class mapImages:
             top = geodesic((ymax, xmax), (ymax, xmin)).meters
             left = geodesic((ymax, xmin), (ymin, xmin)).meters
             size_in_m = (bottom, top, left, right)
-            print(
+            if verbose:
+                print(
                 f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
             )
 
@@ -468,7 +469,8 @@ class mapImages:
             mean_height = np.mean(
                 [size_in_m[2]/h, size_in_m[3]/h]
             )
-            print(
+            if verbose:
+                print(
                 f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
             )
 
@@ -1400,7 +1402,7 @@ class mapImages:
                     )
 
     def addGeoInfo(
-        self, proj2convert="epsg:4326", calc_method="great-circle"):
+        self, proj2convert="epsg:4326", calc_method="great-circle", verbose=False):
         """Add geographic information (shape, coords, size in m) to images from image metadata
 
         Parameters
@@ -1409,6 +1411,8 @@ class mapImages:
             Projection to convert coordinates into, by default "epsg:4326"
         calc_method : str, optional
             Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
+        verbose : bool, optional
+            If True, print verbose outputs, by default False
         """
     
         image_ids=list(self.images["parent"].keys())
@@ -1440,7 +1444,7 @@ class mapImages:
                 coords = (xmin, xmax, ymin, ymax)
                 self.images["parent"][image_id]["coord"]=coords
 
-                size_in_m = self.calc_pixel_width_height(parent_id=image_id, calc_size_in_m=calc_method)
+                size_in_m = self.calc_pixel_width_height(parent_id=image_id, calc_size_in_m=calc_method, verbose=verbose)
                 self.images["parent"][image_id]["size_in_m"] =size_in_m
 
 
