@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from mapreader.loader.images import mapImages
-
+from .images import mapImages
 
 def loader(path_images=False, tree_level="parent", parent_path=None, **kwds):
-    """Construct mapImages object by passing the image path,
+    """Construct mapImages object by passing image path
 
-    Keyword Arguments:
-        path_images {str or False} -- path to one or many images
+    Parameters
+    ----------
+    path_images : str or False, optional
+        Path to images, by default False
+    tree_level : str, optional
+        Tree level, choices between "parent" or "child", by default "parent"
+    parent_path : str or None, optional
+        Path to parent images, by default None
 
-    Returns:
-        [mapImages object] -- mapImages object contains various methods to work with images
+    Returns
+    -------
+    [mapImages object]
+        mapImages object containing various methods to work with images
     """
+
     img = mapImages(
         path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwds
     )
@@ -22,6 +30,25 @@ def loader(path_images=False, tree_level="parent", parent_path=None, **kwds):
 def load_patches(
     patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
 ):
+    """Load patches from path and, if parent_paths specified, add parents
+
+    Parameters
+    ----------
+    patch_paths : str
+        Path to patches, accepts wildcards
+    parent_paths : str or False, optional
+        Path to parents, accepts wildcards
+        If False, no parents are loaded, by default False
+    add_geo_par : bool, optional
+        Add geographical info to parents, by default False
+    clear_images : bool, optional
+        Clear images variable before loading, by default False
+
+    Returns
+    -------
+    [mapImages object]
+        mapImages object containing various methods to work with images
+    """
 
     img = mapImages()
     img.loadPatches(

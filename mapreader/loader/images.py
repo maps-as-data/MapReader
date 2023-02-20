@@ -18,8 +18,7 @@ import pyproj
 import random
 import sys
 
-from mapreader.slicers.slicers import sliceByPixel
-from ..utils import utils
+from .slicer import sliceByPixel
 
 # Ignore warnings
 import warnings
@@ -102,16 +101,16 @@ class mapImages:
         if tree_level == "child" and parent_basename:
             # three possible scenarios
             # 1. parent_basename is not in the parent dictionary
-            if not parent_basename in self.images["parent"].keys():
+            if parent_basename not in self.images["parent"].keys():
                 self.images["parent"][parent_basename] = {
                     "parent_id": None,
                     "image_path": parent_path,
                 }
             # 2. parent_basename exists but parent_id is not defined
-            if not "parent_id" in self.images["parent"][parent_basename].keys():
+            if "parent_id" not in self.images["parent"][parent_basename].keys():
                 self.images["parent"][parent_basename]["parent_id"] = None
             # 3. parent_basename exists but image_path is not defined
-            if not "image_path" in self.images["parent"][parent_basename].keys():
+            if "image_path" not in self.images["parent"][parent_basename].keys():
                 self.images["parent"][parent_basename]["image_path"] = parent_path
 
     @staticmethod
@@ -188,7 +187,7 @@ class mapImages:
         metadata_df.drop_duplicates(subset=[image_id_col])
 
         for i, one_row in metadata_df.iterrows():
-            if not one_row[image_id_col] in self.images[tree_level].keys():
+            if one_row[image_id_col] not in self.images[tree_level].keys():
                 # print(f"[WARNING] {one_row[image_id_col]} does not exist in images, skip!")
                 continue
             for one_col in columns:
@@ -390,7 +389,8 @@ class mapImages:
             top = great_circle((ymax, xmax), (ymax, xmin)).meters
             left = great_circle((ymax, xmin), (ymin, xmin)).meters
             size_in_m = (bottom, top, left, right)
-            print(
+            if verbose:
+                print(
                 f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
             )
 
@@ -400,7 +400,8 @@ class mapImages:
             mean_height = np.mean(
                 [size_in_m[2] / myimg_shape[0], size_in_m[3] / myimg_shape[0]]
             )
-            print(
+            if verbose:
+                print(
                 f"\nEach pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
             )
 
@@ -574,7 +575,7 @@ class mapImages:
             if not self.images["parent"][my_parent].get("children", False):
                 self.images["parent"][my_parent]["children"] = [child]
             else:
-                if not child in self.images["parent"][my_parent]["children"]:
+                if child not in self.images["parent"][my_parent]["children"]:
                     self.images["parent"][my_parent]["children"].append(child)
 
     def _makeDir(self, path_make, exists_ok=True):
@@ -753,7 +754,7 @@ class mapImages:
                 )
 
                 if save_kml_dir:
-                    if not "coord" in self.images["parent"][one_image_id].keys():
+                    if "coord" not in self.images["parent"][one_image_id].keys():
                         print(
                             f"[WARNING] 'coord' could not be found. This is needed when save_kml_dir is set...continue"
                         )
@@ -791,7 +792,7 @@ class mapImages:
                 except Exception as err:
                     print(err)
                     continue
-                if not parent_id in parents:
+                if parent_id not in parents:
                     parents[parent_id] = {
                         "path": self.images["parent"][parent_id]["image_path"],
                         "child": [],
