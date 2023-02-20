@@ -31,9 +31,9 @@ def test_slice():
     assert len(all_imgs) == 2, "Expected 2 parents"
 
     # `method` can also be set to meters
-    myimgs.sliceAll(
+    myimgs.patchifyAll(
         path_save="./dataset/eg_slice_50_50",
-        slice_size=50,  # in pixels
+        patch_size=50,  # in pixels
         square_cuts=False,
         verbose=False,
         method="pixel",
