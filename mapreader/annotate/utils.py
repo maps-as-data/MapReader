@@ -29,7 +29,7 @@ from ipyannotate.buttons import (
 def display_record(record):
     """Display patches for annotation
 
-    NOTE: This function should be called from prepare_annotation,
+    NOTE: This function should only be called from prepare_annotation,
           there are several global variables that are being set in the function.
 
     Refer to ipyannotate for more info.
@@ -151,17 +151,32 @@ def prepare_data(
     annotation_set="001",
     label_col_name="label",
     redo=False,
-    random_state="random",
+    random_state=None,
     num_samples=100,
 ):
-    """prepare data for annotations
+    """Prepare data for annotations
 
-    Args:
-        df (pandas dataframe): dataframe which contains information about patches to be annotated
-        col_names (list, optional): column names of the dataframe to be used in annotations. Defaults to ["image_path", "parent_id"].
-        annotation_set (str, optional): as the suggest. Defaults to "001".
-        label_col_name (str, optional): column name related to labels. Defaults to "label".
-        redo (bool, optional): redo the annotations. Defaults to False.
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe which contains information about the patches to be annotated.
+    col_names : list, optional
+        Column names to be used in annotations, by default ["image_path", "parent_id"]
+    annotation_set : str, optional
+        Annotation set to be used, by default "001"
+    label_col_name : str, optional
+        Column name in which labels are stored, by default "label"
+    redo : bool, optional
+        If True, redo the annotations, by default False
+    random_state : int or None, optional
+        Random state to be used for sampling dataframe and selecting images to annotate, by default None
+    num_samples : int, optional
+        Number of samples to annotate, by default 100
+
+    Returns
+    -------
+    list
+        Data - for each image: [image ID, image path, parent ID, annotation set, row]
     """
 
     if (label_col_name in list(df.columns)) and (not redo):
@@ -170,7 +185,7 @@ def prepare_data(
         )
         # only annotate those patches that have not been already annotated
         df = df[df[label_col_name].isnull()]
-        print(f"Number of images to be annotated (total): {len(df)}")
+        print(f"Number of un-annotated images: {len(df)}")
     else:
         # if redo = True or "label" column does not exist
         # annotate all patches in the pandas dataframe
@@ -183,12 +198,10 @@ def prepare_data(
             df["pixel_groups"] = pd.qcut(
                 df[tar_param], q=10, precision=2, labels=False
             ).values
-            if random_state in ["random"]:
-                df = df.groupby("pixel_groups").sample(
-                    n=10, random_state=random.randint(0, 1e6)
-                )
-            else:
-                df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
+            if random_state is None:
+                random_state=random.randint(0, 1e6)
+
+            df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
         except Exception:
             print(f"[INFO] len(df) = {len(df)}, .sample method is deactivated.")
             df = df.iloc[:num_samples]
@@ -222,12 +235,26 @@ def annotation_interface(
 ):
     """Setup the annotation interface
 
-    Args:
-        data (list): list of patches to be annotated
-        list_labels (list): list of labels
-        list_colors (list, optional): list of colors. Defaults to ["green", "blue", "red"].
-        annotation_set (str, optional): annotation set, specified in the yaml file or via function argument. Defaults to "001".
-        method (str, optional): method to annotate patches. Defaults to "ipyannotate".
+    Parameters
+    ----------
+    data : list
+        List of patches to be annotated
+    list_labels : list
+       List of labels
+    list_colors : list, optional
+        List of colours, by default ["red", "green", "blue", "green"]
+    annotation_set : str, optional
+        Annotation set, specified in the yaml file, by default "001"
+    method : str, optional
+        Method to annotate the patches.
+        Currently only ipyannotate is supported, by default "ipyannotate"
+    list_shortcuts : list or None, optional
+        List of shortcuts, by default None
+
+    Returns
+    -------
+   ipyannotate.annotation.Annotation
+        Annotation, output from annotation tool
     """
 
     if method == "ipyannotate":
@@ -294,8 +321,8 @@ def annotation_interface(
 # -------- prepare_annotation
 def prepare_annotation(
     userID,
-    task,
     annotation_tasks_file,
+    task,
     custom_labels=[],
     annotation_set="001",
     redo_annotation=False,
@@ -310,27 +337,59 @@ def prepare_annotation(
     xoffset=500,
     yoffset=500,
     urlmain="https://maps.nls.uk/view/",
-    random_state="random",
+    random_state=None,
     list_shortcuts=None,
 ):
     """Prepare annotations
 
-    Args:
-        userID (str): unique user-ID. This is used in the name of the output file.
-        task (str): name of the task. This task should be defined in the yaml file (annotation_tasks_file), if not,
-                    custom_labels will be used instead
-        annotation_tasks_file (str, path to yaml file): yaml file describing the tasks/paths/etc
-        custom_labels (list, optional): If task is not found in the yaml file, use custom labels. Defaults to [].
-        annotation_set (str, optional): Name of the annotation set defined in annotation_tasks_file. Defaults to "001".
-        redo_annotation (bool, optional): redo annotations. Defaults to False.
-        patch_paths (bool, str, optional): if custom_labels, specify path to patches. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-        parent_paths (bool, str, optional): if custom_labels, specify path to parent images. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-        tree_level (str, optional): parent/child tree level. Defaults to "child".
-        sortby (None, mean, optional): sort patches to be annotated. Defaults to None.
-        context_image (bool): add a context image or not
-        xoffset (int, optional): x-offset for the borders of the context image. Defaults to 500.
-        yoffset (int, optional): y-offset for the borders of the context image. Defaults to 500.
-        urlmain (str, None, optional): when annotating, the URL in form of url_main/{map_id} will be shown as well.
+    Parameters
+    ----------
+    userID : str
+        Unique user ID, used in naming of output file
+    annotation_tasks_file : str
+        Path to the yaml file which contains tasks/paths/etc. information
+    task : str
+        Name of the task as defined in the yaml file (annotation_tasks_file)
+    custom_labels : list, optional
+        Custom labels to be used, by default []
+    annotation_set : str
+        Name of the annotation set as defined in the yaml file (annotation_tasks_file), by default "001"
+    redo_annotation : bool, optional
+        If True, redo annotations, by default False
+    patch_paths : str or False, optional
+        Path to patches when using custom labels (custom_labels).
+        If False, information is read from the yaml file (annotation_tasks_file), by default False
+    parent_paths : str or False, optional
+        Path to parent images when using custom labels (custom_labels).
+        If False, information is read from the yaml file (annotation_tasks_file), by default False
+    tree_level : str, optional
+        Tree level, choices between "parent" or "child", by default "child"
+    sortby : str or None, optional
+        Method to sort patches, choices between "mean" or None, by default None
+    min_alpha_channel : float or None, optional
+        If specified, only annotate images with mean alpha values greater than this value, by default None
+    min_mean_pixel : float or None, optional
+        If specified, only annotate images with mean RGB values greater than this value, by default None
+    max_mean_pixel : float or None, optional
+        If specified, only annotate images with mean alpha values less than this value, by default None
+    context_image : bool, optional
+        If True, show a context image behind patch to be annotated, by default False
+    xoffset : int, optional
+        x offset for context image, by default 500
+    yoffset : int, optional
+        y offset for context image, by default 500
+    urlmain : str or None, optional
+        The URL (in the form: urlmain/{map_id}) of the parent image to be shown when annotating, by default "https://maps.nls.uk/view/"
+        If None, no URL will be shown
+    random_state : int or None, optional
+        Random state to be used for sampling dataframe and selecting images to annotate, by default None
+    list_shortcuts : list or None, optional
+        List of shortcuts, by default None
+
+    Returns
+    -------
+    ipyannotate.annotation.Annotation
+        Annotation, output from annotation tool
     """
 
     # Specify global variables so they can be used in display_record function
@@ -395,22 +454,22 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_std=False)
 
         # convert images to dataframe
-        parents_df, sliced_df = mymaps.convertImages(fmt="dataframe")
+        parents_df, patch_df = mymaps.convertImages(fmt="dataframe")
 
         if sortby == "mean":
-            sliced_df.sort_values("mean_pixel_RGB", inplace=True)
+            patch_df.sort_values("mean_pixel_RGB", inplace=True)
 
         if isinstance(min_alpha_channel, float):
-            if "mean_pixel_A" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_A"] >= min_alpha_channel]
+            if "mean_pixel_A" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_A"] >= min_alpha_channel]
 
         if isinstance(min_mean_pixel, float):
-            if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] >= min_mean_pixel]
+            if "mean_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] >= min_mean_pixel]
 
         if isinstance(max_mean_pixel, float):
-            if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] <= max_mean_pixel]
+            if "mean_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] <= max_mean_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:
@@ -420,12 +479,12 @@ def prepare_annotation(
                 metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
             )
         # convert images to dataframe
-        sliced_df, _ = mymaps.convertImages(fmt="dataframe")
+        patch_df, _ = mymaps.convertImages(fmt="dataframe")
         col_names = ["image_path"]
 
     # prepare data for annotation
     data2annotate = prepare_data(
-        sliced_df,
+        patch_df,
         col_names=col_names,
         annotation_set=annotation_set,
         redo=redo_annotation,
@@ -445,16 +504,21 @@ def prepare_annotation(
 
 
 # -------- save_annotation
-def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set):
+def save_annotation(annotation, userID, annotation_tasks_file, task, annotation_set):
     """Save annotation results
 
-    Args:
-        annotation: output from the annotation tool
-        userID (str): unique user-ID. This is used in the name of the output file.
-        task (str): name of the task. This task should be defined in the yaml file (annotation_tasks_file), if not,
-                    custom_labels will be used instead
-        annotation_tasks_file (str, path to yaml file): yaml file describing the tasks/paths/etc
-        annotation_set (str, optional): Name of the annotation set defined in annotation_tasks_file. Defaults to "001".
+    Parameters
+    ----------
+    annotation : ipyannotate.annotation.Annotation
+        Annotation output from annotation tool
+    userID : str
+        Unique user ID, used in naming of output file
+    annotation_tasks_file : str
+        Path to the yaml file which contains tasks/paths/etc. information
+    task : str
+        Name of the task as defined in the yaml file (annotation_tasks_file)
+    annotation_set : str
+        Name of the annotation set as defined in the yaml file (annotation_tasks_file)
     """
 
     with open(annotation_tasks_file) as annot_file_fio:
