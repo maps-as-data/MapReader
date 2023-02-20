@@ -22,6 +22,8 @@ Welcome to MapReader's documentation!
    api/index
    MapReader Paper <https://dl.acm.org/doi/10.1145/3557919.3565812>
 
+..KM: let's remove the Gallery from the docs home page? We could set up something separate for it (but for now we can leave it in the README).
+
 Gallery
 -------
 
@@ -43,6 +45,8 @@ Gallery
          .. image:: https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/mapreader_paper.png
             :width: 200px
 
+
+..KM: I'd like to chat about what in the content below makes sense to have in the README vs on the docs home page. Links to all below need to be updated.
 
 What is MapReader?
 ------------------
@@ -73,13 +77,18 @@ It provides a set of tools to:
    -  various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and `kepler.gl <https://kepler.gl/>`__.
    -  compute mean/standard-deviation **pixel intensity** of image patches.
 
+
 How to contribute
 -----------------
+
+..KM: need to add link to contribution guide here. Also just add contact info and guidance on opening a ticket without people needing to click through to contribution guide.
 
 We welcome contributions related to new applications, both with geospatial images (other maps, remote sensing data, aerial photography) and non-geospatial images (for example, other scientific image datasets).
 
 How to cite MapReader
 ---------------------
+
+..KM: I'd like to slightly tweak the language below (it's somethign that will make sense to scientists, but not humanties-oriented folks).
 
 Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing `MapReader: a computer vision pipeline for the semantic exploration of maps at scale: <https://dl.acm.org/doi/10.1145/3557919.3565812>`__
 
@@ -110,6 +119,8 @@ and in BibTeX:
 
 Credits and re-use terms
 ------------------------
+
+..KM: we also need to move the OS specific credits to the worked examples that use this data.
 
 Digitized maps
 ~~~~~~~~~~~~~~
