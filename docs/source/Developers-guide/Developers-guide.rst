@@ -39,6 +39,6 @@ The build process is as follows:
   conda-build ./conda/parhugin/conda
   conda-build ./conda/ipyannotate/conda
   conda index /path/to/conda/channel
-  conda build -c file:///path/to/conda/channel ./conda
+  conda-build -c file:///path/to/conda/channel ./conda
 
 

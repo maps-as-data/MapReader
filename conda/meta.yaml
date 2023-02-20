@@ -37,7 +37,7 @@ requirements:
     - python
     - setuptools
   run:
-    - python
+    - python >=3.8,<3.9.0a0
     # - "proj[version='>=0.2.0,<0.3.0']" # ?
     # - ipyannotate==0.1.0-beta.0
     # - "torch[version='>=1.10.0,<2.0.0']"
