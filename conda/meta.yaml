@@ -7,12 +7,16 @@ package:
 source:
   path: ..
 
-# build:
-#   # If the installation is complex, or different between Unix and Windows, use
-#   # separate bld.bat and build.sh files instead of this key.  Add the line
-#   # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
-#   # "skip: True  # [not win]" to limit to Windows.
-#   script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
+build:
+  # If the installation is complex, or different between Unix and Windows, use
+  # separate bld.bat and build.sh files instead of this key.  Add the line
+  # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
+  # "skip: True  # [not win]" to limit to Windows.
+  script: 
+  # First create a local index of the dependencies that aren't on conda-forge
+  - echo "do conda-index stuff here"
+  # Now build the package itself
+  - {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
   
 #   entry_points:
 #     {% for entry in data['entry_points']['console_scripts'] %}
