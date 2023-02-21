@@ -65,8 +65,14 @@ jobs:
       - name: Build MapReader package
         run: |
           conda-build -c conda-forge -c anothersmith ./conda/ --output-folder ./conda-mr
-          cph transmute --out-folder ./conda-mr/linux-64/ ./conda-mr/linux-64/mapreader-*.tar.bz2 .conda
+
+      - name: Convert MapReader package
+        run: |
+          # Convert the package to all platforms
+          conda convert ./conda-mr/linux-64/mapreader-*.tar.bz2 -p all -v --output-dir ./conda-mr
+          # Transmute all the tar.bz2 files to .conda files
+          find ./conda-mr -name '*.tar.bz2' \( -execdir cph transmute --out-folder . {} .conda \; \)
 
       - name: Upload MapReader package
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-mr/noarch/*.conda
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload ./conda-mr/**/*.conda
