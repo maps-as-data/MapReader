@@ -395,7 +395,7 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_std=False)
 
         # convert images to dataframe
-        parents_df, sliced_df = mymaps.convertImages(fmt="dataframe")
+        parents_df, sliced_df = mymaps.convertImages()
 
         if sortby == "mean":
             sliced_df.sort_values("mean_pixel_RGB", inplace=True)
@@ -420,7 +420,7 @@ def prepare_annotation(
                 metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
             )
         # convert images to dataframe
-        sliced_df, _ = mymaps.convertImages(fmt="dataframe")
+        sliced_df, _ = mymaps.convertImages()
         col_names = ["image_path"]
 
     # prepare data for annotation
