@@ -587,7 +587,7 @@ class mapImages:
         path_save="sliced_images",
         square_cuts=False,
         resize_factor=False,
-        output_format="PNG",
+        output_format="png",
         rewrite=False,
         verbose=True,
         image_id=None,
