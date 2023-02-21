@@ -35,6 +35,7 @@ jobs:
         run: |
           conda install conda-build
           conda install conda-verify
+          conda install anaconda-client
           conda install conda-package-handling
 
       - name: Create local Conda channel
