@@ -35,10 +35,10 @@ All MapReader project members commit to:
 
 ## Communication
 
-You can reach out to all members by tagging them on GitHub issues or Pull Requests
+You can reach out to any member by tagging them on GitHub issues or Pull Requests
 
 You can reach the lead investigators of the project through their preferred way of communication:
-xxx
+- You can mention Katie McDonough [@kmcdono2](https://github.com/kmcdono2) on a Github issue. You can also contact Katie by emailing [kmcdonough@lancaster.ac.uk](kmcdonough@lancaster.ac.uk)
 
 ## Project management
 
