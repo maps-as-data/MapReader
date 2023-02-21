@@ -11,7 +11,7 @@ def test_import():
         loader,
         mapImages,
         patchTorchDataset,
-        read,
-        read_patches,
+        # read,
+        # read_patches,
     )
     from mapreader.annotate.utils import prepare_annotation, save_annotation

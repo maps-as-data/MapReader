@@ -46,4 +46,4 @@ jobs:
 
       - name: Build package
         run: |
-          conda-build -c ./conda-bld ./conda/meta.yaml
+          conda-build -c conda-forge -c ./conda-bld ./conda/
