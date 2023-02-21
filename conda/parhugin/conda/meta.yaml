@@ -30,6 +30,7 @@ test:
     - parhugin
   commands:
     - pip check
+    - pytest -k test_import
   requires:
     - pip
 

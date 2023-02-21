@@ -1,0 +1,49 @@
+
+name: Publish to Conda Forge
+
+on: [push]
+
+jobs:
+
+  build_conda:
+    strategy:
+      matrix:
+        # os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-22.04]
+        python-version: [3.8]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Taken from https://github.com/actions/starter-workflows/blob/28a47a7bc4497d7b0c039030a1eba04556bf9a64/ci/python-package-conda.yml#L17
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+
+      - name: Install conda-build
+        run: |
+          conda install conda-build
+
+      - name: Create local Conda channel
+        run: |
+          mkdir -p ./conda-bld
+          conda index ./conda-bld
+
+      - name: Build dependencies
+        run: |
+          conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-bld
+          conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-bld
+
+      - name: Build package
+        run: |
+          conda-build -c ./conda-bld ./conda/meta.yaml
