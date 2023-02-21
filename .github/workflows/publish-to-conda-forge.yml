@@ -75,4 +75,4 @@ jobs:
 
       - name: Upload MapReader package
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload ./conda-mr/**/*.conda
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-mr/**/*.conda
