@@ -40,19 +40,21 @@ jobs:
 
       - name: Create local Conda channel
         run: |
-          mkdir -p ./conda-bld
-          conda index ./conda-bld
+          mkdir -p ./conda-deps
+          conda index ./conda-deps
+          mkdir -p ./conda-mr
+          conda index ./conda-mr
 
       - name: Build dependencies
         run: |
-          conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-bld
-          cph transmute  --out-folder ./conda-bld/noarch/ ./conda-bld/noarch/parhugin-*.tar.bz2 .conda
-          conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-bld
-          cph transmute  --out-folder ./conda-bld/noarch/ ./conda-bld/noarch/ipyannotate-*.tar.bz2 .conda
+          conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-deps
+          cph transmute  --out-folder ./conda-deps/noarch/ ./conda-deps/noarch/parhugin-*.tar.bz2 .conda
+          conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-deps
+          cph transmute  --out-folder ./conda-deps/noarch/ ./conda-deps/noarch/ipyannotate-*.tar.bz2 .conda
 
       - name: Upload dependencies
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-bld/noarch/*.conda
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-deps/noarch/*.conda
 
       - name: Check conda config
         run: |
@@ -60,6 +62,11 @@ jobs:
           conda info
           conda list --show-channel-urls
 
-      - name: Build package
+      - name: Build MapReader package
         run: |
-          conda-build -c conda-forge -c anothersmith ./conda/
+          conda-build -c conda-forge -c anothersmith ./conda/mapreader/ --output-folder ./conda-mr
+          cph transmute --out-folder ./conda-mr/linux-64/ ./conda-mr/linux-64/mapreader-*.tar.bz2 .conda
+
+      - name: Upload MapReader package
+        run: |
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-mr/noarch/*.conda
