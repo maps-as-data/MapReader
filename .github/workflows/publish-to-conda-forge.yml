@@ -46,9 +46,9 @@ jobs:
       - name: Build dependencies
         run: |
           conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-bld
-          cph transmute  --output-folder ./conda-bld ./conda-bld/noarch/parhugin-*.tar.bz2 .conda
+          cph transmute  --out-folder ./conda-bld ./conda-bld/noarch/parhugin-*.tar.bz2 .conda
           conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-bld
-          cph transmute  --output-folder ./conda-bld ./conda-bld/noarch/ipyannotate-*.tar.bz2 .conda
+          cph transmute  --out-folder ./conda-bld ./conda-bld/noarch/ipyannotate-*.tar.bz2 .conda
 
 
       - name: Upload dependencies
