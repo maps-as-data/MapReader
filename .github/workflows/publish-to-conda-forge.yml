@@ -17,7 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          # Fetch all history so that versioneer can determine the version number
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -33,6 +34,7 @@ jobs:
       - name: Install conda-build
         run: |
           conda install conda-build
+          conda install conda-verify
 
       - name: Create local Conda channel
         run: |
