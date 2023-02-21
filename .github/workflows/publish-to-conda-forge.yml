@@ -31,21 +31,31 @@ jobs:
           # $CONDA is an environment variable pointing to the root of the miniconda directory
           echo $CONDA/bin >> $GITHUB_PATH
 
-      - name: Install conda-build
+      - name: Install conda-build tools
         run: |
           conda install conda-build
           conda install conda-verify
+          conda install conda-package-handling
 
       - name: Create local Conda channel
         run: |
           mkdir -p ./conda-bld
+          mkdir -p ./conda_tar_gz_bld
           conda index ./conda-bld
 
       - name: Build dependencies
         run: |
           conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-bld
+          cph transmute  --output-folder ./conda-bld ./conda-bld/noarch/parhugin-*.tar.bz2 .conda
           conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-bld
+          cph transmute  --output-folder ./conda-bld ./conda-bld/noarch/ipyannotate-*.tar.bz2 .conda
 
-      - name: Build package
+
+      - name: Upload dependencies
         run: |
-          conda-build -c conda-forge -c ./conda-bld ./conda/
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload ./conda-bld/noarch/*.conda
+
+
+      # - name: Build package
+      #   run: |
+      #     conda-build -c conda-forge -c ./conda-bld ./conda/
