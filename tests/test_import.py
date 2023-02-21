@@ -14,4 +14,5 @@ def test_import():
         # read,
         # read_patches,
     )
+    import mapreader.download.azure_access as azure_access
     from mapreader.annotate.utils import prepare_annotation, save_annotation

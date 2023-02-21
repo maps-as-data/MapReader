@@ -30,7 +30,6 @@ test:
     - parhugin
   commands:
     - pip check
-  
   requires:
     - pip
 
