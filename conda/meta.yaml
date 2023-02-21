@@ -25,11 +25,6 @@ build:
   
 
 requirements:
-  # if you need compilers, uncomment these
-  #    read more at https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html
-  # build:
-  #   - {{ compilers('c') }}
-  
   # host:
   #   - python
   #   - pip
@@ -38,22 +33,17 @@ requirements:
     - setuptools
   run:
     - python >=3.8,<3.9.0a0
-    # - "proj[version='>=0.2.0,<0.3.0']" # ?
-    # - ipyannotate==0.1.0-beta.0
-    # - "torch[version='>=1.10.0,<2.0.0']"
-    # - "parhugin[version='>=0.0.3,<0.0.4']"
-    # dependencies are defined in setup.py
+    # Dependencies are defined in setup.py. Copy them here, handling any special cases.
     {% for dep in data['install_requires'] %}
     # Map PyPI names to conda-forge names. EG:
     # - torch to pytorch
     {% if dep.startswith('torch') and not dep.startswith('torchvision') %}
     - {{ "py{}".format(dep.lower()) }}
+    # Replace ipyannotate version label with a PEP440 compatible one
     {% elif dep.startswith('ipyannotate==0.1.0-beta.0') %}
     - ipyannotate==0.1.0b0
-    # {% elif dep.startswith('parhugin') or dep.startswith('ipyannotate') %}
-    # Skip parhugin and ipyannotate
-    # TEMP FIX: parhugin is not on conda-forge
     {% else %}
+    # All other dependencies are the same
     - {{ dep.lower() }}
     {% endif %}
     {% endfor %}
@@ -70,7 +60,7 @@ test:
     - pytest -k test_import
 
 about:
-  home: https://github.com/Living-with-machines/MapReader
-  summary: MapReader
+  home: {{ data['url'] }}
+  summary: {{ data['description'] }}
   license: {{ data.get('license') }}
   license_file: LICENSE
