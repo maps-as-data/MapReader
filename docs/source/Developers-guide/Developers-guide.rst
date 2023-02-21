@@ -32,13 +32,14 @@ The solution is to create and build Conda packages that wrap each of the package
             └── setup.py     # <-- setup script for ipyannotate (needed because the source on PyPI does not include setup.py)
 
 
-The build process is as follows:
+The minimal build process is as follows:
 
 .. code-block:: bash
 
-  conda-build ./conda/parhugin/conda
-  conda-build ./conda/ipyannotate/conda
-  conda index /path/to/conda/channel
-  conda-build -c file:///path/to/conda/channel ./conda
+  mkdir /path/to/local/conda/channel
+  conda index /path/to/local/conda/channel
+  conda-build ./conda/parhugin/conda --output-folder /path/to/local/conda/channel
+  conda-build ./conda/ipyannotate/conda --output-folder /path/to/local/conda/channel
+  conda-build -c file:///path/to/local/conda/channel ./conda
 
 

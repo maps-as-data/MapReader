@@ -64,7 +64,7 @@ jobs:
 
       - name: Build MapReader package
         run: |
-          conda-build -c conda-forge -c anothersmith ./conda/mapreader/ --output-folder ./conda-mr
+          conda-build -c conda-forge -c anothersmith ./conda/ --output-folder ./conda-mr
           cph transmute --out-folder ./conda-mr/linux-64/ ./conda-mr/linux-64/mapreader-*.tar.bz2 .conda
 
       - name: Upload MapReader package
