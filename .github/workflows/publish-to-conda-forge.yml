@@ -50,10 +50,9 @@ jobs:
           conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-bld
           cph transmute  --out-folder ./conda-bld/noarch/ ./conda-bld/noarch/ipyannotate-*.tar.bz2 .conda
 
-
       - name: Upload dependencies
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload ./conda-bld/noarch/*.conda
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-bld/noarch/*.conda
 
       - name: Check conda config
         run: |
