@@ -61,13 +61,13 @@ requirements:
 test:
   imports:
     - mapreader
-  # source_files:
-  #   - tests
-  # requires:
-  #   - pytest
-  #   - pytest-cov
-  # commands:
-  #   - pytest
+  source_files:
+    - tests
+  requires:
+    - pytest
+    - pytest-cov
+  commands:
+    - pytest -k test_import
 
 about:
   home: https://github.com/Living-with-machines/MapReader
