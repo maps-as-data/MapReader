@@ -14,6 +14,11 @@ jobs:
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
+    # Do not ignore bash profile files. From:
+    # https://github.com/marketplace/actions/setup-miniconda
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v3
         with:
