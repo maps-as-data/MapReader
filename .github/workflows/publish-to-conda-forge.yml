@@ -33,6 +33,8 @@ jobs:
 
       - name: Install conda-build tools
         run: |
+          conda create -n mr_py38 python=3.8
+          conda activate mr_py38
           conda install conda-build
           conda install conda-verify
           conda install anaconda-client
