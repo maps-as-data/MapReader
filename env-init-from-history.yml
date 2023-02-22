@@ -1,0 +1,5 @@
+name: mr_py38
+channels:
+  - defaults
+dependencies:
+  - python=3.8
