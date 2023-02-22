@@ -11,9 +11,6 @@ It further outlines expectations and responsibilities with regard to working on 
 | Add others here | - | - | Earliest to latest start date order? | - |
 | Rosie Wood<br>([@rwood-97](https://github.com/rwood-97)) | The Alan Turing Institute | xx | Jan 2023 - Present | - |
 
-
-
-
 ## Previous Project Members
 
 The following people are no longer paid to work on the project (although they remain very valuable members of the community!)
@@ -21,11 +18,12 @@ You can request contact information through the project members above, or tag th
 
 | Name | Affiliation | Community Role | Dates |
 |---|---|---|---|
-| Katherine McDonough<br>([@kmcdono2](https://github.com/kmcdono2)) | The Alan Turing Institute xxx| xx - xx | xx|
+| Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Formerly The Alan Turing Institute | 2019 - 2022 | Research Data Scientist |
 
 ## Commitments
 
 All MapReader project members commit to:
+
 - making the implicit explicit by clearly documenting their work
 - following the contribution guidelines and ensuring they are kept up to date
 - recording any new updates, exceptions or useful knowledge in project management and core documents needed to facilitate collaboration
@@ -35,9 +33,10 @@ All MapReader project members commit to:
 
 ## Communication
 
-You can reach out to any member by tagging them on GitHub issues or Pull Requests
+You can reach out to any member by tagging them on GitHub issues or Pull Requests.
 
 You can reach the lead investigators of the project through their preferred way of communication:
+
 - You can mention Katie McDonough [@kmcdono2](https://github.com/kmcdono2) on a Github issue. You can also contact Katie by emailing [kmcdonough@lancaster.ac.uk](kmcdonough@lancaster.ac.uk)
 
 ## Project management
@@ -48,6 +47,7 @@ As most members do not work full time on _MapReader_, it might take some time un
 ### Issues & Pull Requests
 
 Project members will:
+
 - monitor open issues and Pull Requests on the project's GitHub repository to identify if feedback, comment or connections can help address any concern or build on any suggested ideas/features.
 - whenever possible, post about the issues and Pull Requests in public forums (newsletter, Slack, Twitter) to facilitate participation from new members in the community.
 - review or assign a reviewer to open Pull Requests for review. This should be taken as an opportunity to connect contributors with specific interests, availability or technical skills that could be useful for the ongoing work.
@@ -56,3 +56,6 @@ Project members will:
 - when reviewing a pull request or commenting on issues, be specific, describe your ideas clearly, comment to request changes or make a pull request to the file that should be merged (please do not use the "request changes" option when reviewing Pull Requests).
 - use your interactions on GitHub or other community spaces to provide support, mentorship and acknowledgement to our community of contributors.
 
+### Acknowledgments
+
+We have used [_The Turing Way_](https://github.com/alan-turing-institute/the-turing-way)'s [ways of working document](https://github.com/alan-turing-institute/the-turing-way/blob/main/ways_of_working.md) as a template for this document.
