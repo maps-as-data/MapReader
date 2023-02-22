@@ -4,11 +4,11 @@
 from geopy.distance import geodesic, great_circle
 import rasterio
 import numpy as np
-import pyproj
+from pyproj import Transformer
 
 
 def extractGeoInfo(
-    image_path, proj2="epsg:4326", calc_size_in_m=False
+    image_path, proj2convert="EPSG:4326", calc_size_in_m=False
 ):
     """Extract geographic information (coordinates, size in meters) from GeoTiff files
 
@@ -16,8 +16,8 @@ def extractGeoInfo(
     ----------
     image_path : str
         Path to image
-    proj2 : str, optional
-        Projection to convert coordinates into, by default "epsg:4326"
+    proj2convert : str, optional
+        Projection to convert coordinates into, by default "EPSG:4326"
     calc_size_in_m : str or bool, optional
         Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle", by default False
 
@@ -34,15 +34,14 @@ def extractGeoInfo(
     
     # check coordinates are present
     if tiff_src.crs != None:
-        tiff_proj = tiff_src.crs.to_proj4()
+        tiff_proj = tiff_src.crs.to_string()
     else:
         raise ValueError(f"No coordinates found in {image_path}")
 
     # Coordinate transformation: proj1 ---> proj2
-    P1 = pyproj.Proj(tiff_proj)
-    P2 = pyproj.Proj(proj2)
-    ymax, xmin = pyproj.transform(P1, P2, tiff_src.bounds.left, tiff_src.bounds.top)
-    ymin, xmax = pyproj.transform(P1, P2, tiff_src.bounds.right, tiff_src.bounds.bottom)
+    transformer = Transformer.from_crs(tiff_proj, proj2convert)
+    ymax, xmin = transformer.transform(tiff_src.bounds.left, tiff_src.bounds.top)
+    ymin, xmax = transformer.transform(tiff_src.bounds.right, tiff_src.bounds.bottom)
     coords = (xmin, xmax, ymin, ymax)
 
     print(f"[INFO] Use the following coordinates to compute width/height:")

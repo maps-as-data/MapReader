@@ -15,7 +15,7 @@ import os
 import pandas as pd
 from PIL import Image
 from pylab import cm as pltcm
-import pyproj
+from pyproj import Transformer
 import random
 
 from mapreader.slicers.slicers import sliceByPixel
@@ -1402,13 +1402,13 @@ class mapImages:
                     )
 
     def addGeoInfo(
-        self, proj2convert="epsg:4326", calc_method="great-circle", verbose=False):
+        self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False):
         """Add geographic information (shape, coords, size in m) to images from image metadata
 
         Parameters
         ----------
         proj2convert : str, optional
-            Projection to convert coordinates into, by default "epsg:4326"
+            Projection to convert coordinates into, by default "EPSG:4326"
         calc_method : str, optional
             Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
         verbose : bool, optional
@@ -1434,13 +1434,12 @@ class mapImages:
                 continue
             
             else:
-                tiff_proj = tiff_src.crs.to_proj4()
+                tiff_proj = tiff_src.crs.to_string()
                             
                 # Coordinate transformation: proj1 ---> proj2
-                P1 = pyproj.Proj(tiff_proj)
-                P2 = pyproj.Proj(proj2convert)
-                ymax, xmin = pyproj.transform(P1, P2, tiff_src.bounds.left, tiff_src.bounds.top)
-                ymin, xmax = pyproj.transform(P1, P2, tiff_src.bounds.right, tiff_src.bounds.bottom)
+                transformer = Transformer.from_crs(tiff_proj, proj2convert)
+                ymax, xmin = transformer.transform(tiff_src.bounds.left, tiff_src.bounds.top)
+                ymin, xmax = transformer.transform(tiff_src.bounds.right, tiff_src.bounds.bottom)
                 coords = (xmin, xmax, ymin, ymax)
                 self.images["parent"][image_id]["coord"]=coords
 
