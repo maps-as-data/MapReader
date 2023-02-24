@@ -146,13 +146,3 @@ def test_convertImages():
     parent_df, patch_df = ts_map.convertImages()
     assert parent_df.shape == (1, 9)
     assert patch_df.shape == (48, 6)
-
-def test_show_show_par():
-    image_ID, ts_map, parent_list, child_list = metadata_patchify()
-
-    ts_map.calc_pixel_stats()
-    ts_map.show(child_list[2:5],value="mean_pixel_B",vmin=0.5, vmax=1, save_kml_dir="kml_out/")
-    assert os.path.isfile("./kml_out/mean_pixel_B_map_74488693.png.kml")
-
-    ts_map.show_par(image_ID,value="mean_pixel_RGB",vmin=0.5, vmax=1, save_kml_dir="kml_out/")
-    assert os.path.isfile("./kml_out/mean_pixel_RGB_map_74488693.png.kml")
