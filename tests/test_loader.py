@@ -1,3 +1,4 @@
+from pytest import approx
 from mapreader import loader
 from mapreader.loader.images import mapImages
 import os
@@ -38,7 +39,7 @@ def test_add_metadata():
     ts_map = loader(f"./tests/sample_files/{image_ID}")
     ts_map.add_metadata("./tests/sample_files/ts_downloaded_maps.csv")
     assert "coord" in ts_map.images["parent"][image_ID].keys()
-    assert ts_map.images["parent"][image_ID]["coord"] == (-4.21875, -3.603515625, 55.80128097118045, 56.05976947910657)
+    assert ts_map.images["parent"][image_ID]["coord"] == approx((-4.21875, -3.603515625, 55.80128097118045, 56.05976947910657))
 
 # tiff tests (no geo info)
 def test_tiff_loader():
@@ -61,7 +62,7 @@ def test_addGeoInfo():
     geotiff.addGeoInfo()
     assert "shape" in geotiff.images["parent"][image_ID].keys()
     assert "coord" in geotiff.images["parent"][image_ID].keys()
-    assert geotiff.images["parent"][image_ID]["coord"] == (-0.0647098645122072, -0.048517079515831535, 51.60808397538513, 51.61590041438284)
+    assert geotiff.images["parent"][image_ID]["coord"] == approx((-0.0647098645122072, -0.048517079515831535, 51.60808397538513, 51.61590041438284))
 
     #check nothing happens for png/tiff (no metadata)
     image_ID = "map_74488693.png"
