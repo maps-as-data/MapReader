@@ -43,8 +43,6 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../../Install.html">Installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html">Input guidance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../User-guide/User-guide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mapreader</span></code></a><ul class="current">
@@ -108,19 +106,36 @@
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="mapreader.slicers.slicers.sliceByPixel">
-<span class="sig-prename descclassname"><span class="pre">mapreader.slicers.slicers.</span></span><span class="sig-name descname"><span class="pre">sliceByPixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PNG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.slicers.slicers.sliceByPixel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">mapreader.slicers.slicers.</span></span><span class="sig-name descname"><span class="pre">sliceByPixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sliced_images'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mapreader.slicers.slicers.sliceByPixel" title="Permalink to this definition"></a></dt>
 <dd><p>Slice an image by pixels</p>
+<section id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h4>
 <dl class="simple">
-<dt>Arguments:</dt><dd><p>image_path {str} – Path to the image to be sliced
-slice_size {int} – Number of pixels in both x and y directions</p>
+<dt>image_path<span class="classifier">str</span></dt><dd><p>Path to image</p>
 </dd>
-<dt>Keyword Arguments:</dt><dd><p>path_save {str} – Directory to save the sliced images (default: {“test”})
-square_cuts {bool} – All sliced images will have the same number of pixels in x and y (default: {True})
-resize_factor {bool} – Resize image before slicing (default: {False})
-output_format {str} – Output format (default: {“PNG”})
-verbose {bool} – Print the progress (default: {True})</p>
+<dt>slice_size<span class="classifier">int</span></dt><dd><p>Number of pixels/meters in both x and y to use for slicing</p>
+</dd>
+<dt>path_save<span class="classifier">str, optional</span></dt><dd><p>Directory to save the sliced image, by default “sliced_images”</p>
+</dd>
+<dt>square_cuts<span class="classifier">bool, optional</span></dt><dd><p>If True, all sliced images will have the same number of pixels in x and y, by default False</p>
+</dd>
+<dt>resize_factor<span class="classifier">bool, optional</span></dt><dd><p>If True, resize the images before slicing, by default False</p>
+</dd>
+<dt>output_format<span class="classifier">str, optional</span></dt><dd><p>Format to use when writing image files, by default “png”</p>
+</dd>
+<dt>rewrite<span class="classifier">bool, optional</span></dt><dd><p>If True, existing slices will be rewritten, by default False</p>
+</dd>
+<dt>verbose<span class="classifier">bool, optional</span></dt><dd><p>If True, progress updates will be printed throughout, by default False</p>
 </dd>
 </dl>
+</section>
+<section id="returns">
+<h4>Returns<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h4>
+<dl class="simple">
+<dt>list</dt><dd><p>sliced_images_info</p>
+</dd>
+</dl>
+</section>
 </dd></dl>
 
 </section>

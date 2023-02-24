@@ -53,43 +53,54 @@ Functions
 
    .. py:method:: imagesConstructor(image_path, parent_path=None, tree_level='child', **kwds)
 
-      Construct images instance variable,
+      Construct images instance variable
 
-      Arguments:
-          image_path {str or None} -- Path to the image
-
-      Keyword Arguments:
-          parent_path {str or None} -- Path to the parent of image (default: {None})
-          tree_level {str} -- Tree level, choices between parent and child (default: {"child"})
+      Parameters
+      ----------
+      image_path : str or None
+          Path to image
+      parent_path : str or None, optional
+          Path to parent image (if applicable), by default None
+      tree_level : str, optional
+          Tree level, choices between "parent" or "child", by default "child"
 
 
    .. py:method:: splitImagePath(inp_path)
       :staticmethod:
 
-      split image path into basename and dirname,
+      Split 'inp_path' into basename and dirname
 
 
    .. py:method:: add_metadata(metadata, columns=None, tree_level='parent', index_col=0, delimiter='|')
 
-      Add metadata to images at tree_level,
+      Add metadata to images at tree_level
 
-      Args:
-          metadata_path (path): path to a csv file, normally created from a pandas dataframe
-          columns (list, optional): list of columns to be used. If None (default), all columns are used.
-          tree_level (str, optional): parent/child tree level. Defaults to "parent".
-          index_col (int, optional): index column
+      Parameters
+      ----------
+      metadata : str or DataFrame
+          Path to csv file (normally created from a pd.DataFrame) or pd.DataFrame containing metadata
+      columns : list, optional
+          List of columns to be added, by default None
+      tree_level : str, optional
+          Tree level, choices between "parent" or "child", by default "parent"
+      index_col : int, optional
+          Column in csv file to use as 'index' when creating pd.DataFrame, by default 0
+      delimiter : str, optional
+          Delimiter to use when creating pd.DataFrame, by default "|"
 
 
    .. py:method:: show_sample(num_samples, tree_level='parent', random_seed=65, **kwds)
 
-      Show sample images,
+      Show sample images
 
-      Arguments:
-          num_samples {int} -- Number of samples to be plotted
-
-      Keyword Arguments:
-          tree_level {str} -- XXX (default: {"child"})
-          random_seed {int} -- Random seed for reproducibility (default: {65})
+      Parameters
+      ----------
+      num_samples : int
+          Number of samples to be plotted
+      tree_level : str, optional
+          Tree level, choices between "parent" or "child", by default "parent"
+      random_seed : int, optional
+          Random seed to use for reproducibility, by default 65
 
 
    .. py:method:: list_parents()
@@ -107,74 +118,120 @@ Functions
       Run add_shape_id for all tree_level items
 
 
-   .. py:method:: add_coord_increments(tree_level='parent')
+   .. py:method:: add_coord_increments(tree_level='parent', verbose=False)
 
-      Run add_coord_increments_id for all tree_level items
+      Run `add_coord_increments_id` for each image at "tree_level"
+
+      Parameters
+      ----------
+      tree_level : str, optional
+          Tree level, choices between "parent" or "child, by default "parent"
+      verbose : bool, optional
+          If true, print verbose outputs, by default False
 
 
-   .. py:method:: add_center_coord(tree_level='child')
+   .. py:method:: add_center_coord(tree_level='child', verbose=False)
 
-      Run add_center_coord_id for all tree_level items
+      Run `add_center_coord_id` for each image at "tree_level"
+
+      Parameters
+      ----------
+      tree_level : str, optional
+          Tree level, choices of "parent" or "child, by default "child"
+      verbose : bool, optional
+          If True, print verbose outputs, by default False
 
 
    .. py:method:: add_shape_id(image_id, tree_level='parent')
 
-      Add an image/array shape to self.images[tree_level][image_id]
+      Add an image/array shape to image
 
       Parameters
       ----------
       image_id : str
-          image ID
+          Image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices of "parent" or "child, by default "parent"
 
 
-   .. py:method:: add_coord_increments_id(image_id, tree_level='parent')
+   .. py:method:: add_coord_increments_id(image_id, tree_level='parent', verbose=False)
 
-      Add pixel-wise dlon and dlat to self.images[tree_level][image_id]
+      Add pixel-wise dlon and dlat to image
 
       Parameters
       ----------
       image_id : str
-          image ID
+          Image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices between "parent" or "child, by default "parent"
+      verbose : bool, optional
+          If True, print verbose outputs, by default False
 
 
-   .. py:method:: add_center_coord_id(image_id, tree_level='child')
+   .. py:method:: add_center_coord_id(image_id, tree_level='child', verbose=False)
 
-      Add center_lon and center_lat to self.images[tree_level][image_id]
+      Add center_lon and center_lat to image
 
       Parameters
       ----------
-      image_id : str
-          image ID
+      image_id :str
+          Image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices between "parent" or "child, by default "child"
+      verbose : bool, optional
+          If True, print verbose outputs, by default False
 
 
-   .. py:method:: calc_pixel_width_height(parent_id, calc_size_in_m='great-circle')
+   .. py:method:: calc_pixel_width_height(parent_id, calc_size_in_m='great-circle', verbose=False)
 
       Calculate width and height of pixels
 
-      Args:
-          parent_id (str): ID of the parent image
-          calc_size_in_m (str, optional): How to compute the width/heigh, options: geodesic and great-circle (default).
+      Parameters
+      ----------
+      parent_id : str
+          ID of the parent image
+      calc_size_in_m : str, optional
+          Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
+      verbose : bool, optional
+          If true, print verbose outputs, by default False
+
+      Returns
+      -------
+      tuple
+          size_in_m (bottom, top, left, right)
 
 
-   .. py:method:: sliceAll(method='pixel', slice_size=100, path_save='test', square_cuts=False, resize_factor=False, output_format='PNG', rewrite=False, verbose=False, tree_level='parent', add2child=True, id1=0, id2=-1)
 
-      Slice all images in the object (the list can be accessed via .images variable)
+   .. py:method:: sliceAll(method='pixel', slice_size=100, path_save='sliced_images', square_cuts=False, resize_factor=False, output_format='png', rewrite=False, verbose=False, tree_level='parent', add2child=True, id1=0, id2=-1)
 
-      Keyword Arguments:
-          method {str} -- method to slice an image (default: {"pixel"})
-          slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-          path_save {str} -- Directory to save the sliced images (default: {"test"})
-          square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
-          resize_factor {bool} -- Resize image before slicing (default: {False})
-          output_format {str} -- Output format (default: {"PNG"})
-          tree_level {str} -- image group to be sliced (default: {"parent"})
-          verbose {bool} -- Print the progress (default: {False})
+      Slice all images at the specified 'tree_level'
+
+      Parameters
+      ----------
+      method : str, optional
+          Method used to slice images, choices between "pixel" and "meters" or "meter", by default "pixel"
+      slice_size : int, optional
+          Number of pixels/meters in both x and y to use for slicing, by default 100
+      path_save : str, optional
+          Directory to save the sliced images, by default "sliced_images"
+      square_cuts : bool, optional
+          If True, all sliced images will have the same number of pixels in x and y, by default False
+      resize_factor : bool, optional
+          If True, resize the images before slicing, by default False
+      output_format : str, optional
+          Format to use when writing image files, by default "png"
+      rewrite : bool, optional
+          If True, existing slices will be rewritten, by default False
+      verbose : bool, optional
+          If True, progress updates will be printed throughout, by default False
+      tree_level : str, optional
+          Tree level, choices between "parent" or "child, by default "parent"
+      add2child : bool, optional
+          If True, sliced images will be added to `self.images` dictionary, by default True
+      id1 : int, optional
+          First image to slice, by default 0
+      id2 : int, optional
+          Last image to slice, by default -1
 
 
    .. py:method:: addChildren()
@@ -184,113 +241,198 @@ Functions
 
    .. py:method:: calc_pixel_stats(parent_id=None, calc_mean=True, calc_std=True)
 
-      Calculate stats of each child in a parent_id and
-         store the results
+      Calculate pixel stats (R, G, B, RGB and, if present, Alpha) of each child in a parent_id and store the results
 
-      Arguments:
-          parent_id {str, None} -- ID of the parent image. If None, all parents will be used.
+      Parameters
+      ----------
+      parent_id : str, list or None, optional
+          ID of the parent image(s). 
+          If None, all parents will be used, by default None
+      calc_mean : bool, optional
+          Calculate mean values, by default True
+      calc_std : bool, optional
+          Calculate standard deviations, by default True
 
 
-   .. py:method:: convertImages(fmt='dataframe')
+   .. py:method:: convertImages()
 
-      Convert images to a specified format (fmt)
+      Convert images dictionary into a pd.DataFrame
 
-      Keyword Arguments:
-          fmt {str} -- convert images variable to this format (default: {"dataframe"})
+      Returns
+      -------
+      list
+          list of dataframes containing information about parents and children.
 
 
    .. py:method:: show_par(parent_id, value=False, **kwds)
 
-      A wrapper function for show,
+      A wrapper function for `.show()` which plots all children of a specified parent
 
-      Arguments:
-          parent_id {str} -- ID of the parent image to be plotted
+      Parameters
+      ----------
+      parent_id : str
+          ID of the parent image to be plotted
+      value : list or bool, optional
+          Value to be plotted on each child image, by default False
+          See `.show()` for more detail.
 
-      Keyword Arguments:
-          value {bool, const, random, ...} -- Values to be plotted on the parent image (default: {False})
 
+   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='viridis', alpha=1.0, discrete_colorbar=256, tree_level='child', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
 
-   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='jet', alpha=1.0, discrete_colorbar=256, tree_level='child', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
+      Plot images from a list of image ids
 
-      Plot a list of image ids,
-
-      Arguments:
-          image_ids {list} -- List of image ids to be plotted
-
-      Keyword Arguments:
-          value {False or list} -- Value to be plotted on child images
-          plot_parent {bool} -- Plot parent image in the background (default: {True})
-          border {bool} -- Plot a border for each image id (default: {True})
-          border_color {str} -- color of patch borders (default: {r})
-          vmin {float or list} -- min. value for the colorbar (default: {0.5})
-          vmax {float or list} -- max. value for the colorbar (default: {2.5})
-          colorbar {str or list} -- colorbar to visualize "value" on maps (default: {jet})
-          alpha {float or list} -- set transparency level for plotting "value" on maps (default: {1.})
-          discrete_colorbar {int or list} -- number of discrete colors to be used (default: {256})
-          tree_level {str} -- Tree level for the plot XXX (default: {"child"})
-          grid_plot {list or tuple} -- Number of rows and columns in the image.
-                                       This will later adjusted to the true min/max of all subplots.
-                                       (default: (10000, 10000))
-          plot_histogram {bool} -- Plot a histogram of 'value' (default: {True})
-          save_kml_dir {False or str} -- Directory to save a KML files out of images or False
-                                         (default: {False})
-          image_width_resolution {None, int} -- pixel width to be used for plotting, only when tree_level="parent"
-                                                pixel height will be adjusted according to the width/height ratio
-          kml_dpi_image {None, int} -- The resolution in dots per inch for images created when save_kml_dir is specified
+      Parameters
+      ----------
+      image_ids : str or list
+          Image or list of images to be plotted
+      value : str, list or bool, optional
+          Value to plot on child images, by default False
+      plot_parent : bool, optional
+          If true, parent image will be plotted in background, by default True
+      border : bool, optional
+          If true, border will be placed around each child image, by default True
+      border_color : str, optional
+          Border colour, by default "r"
+      vmin : float, optional
+          Minimum value for the colorbar, by default 0.5
+      vmax : float, optional
+          Maximum value for the colorbar, by default 2.5
+      colorbar : str, optional
+          Colorbar used to visualise chosen `value`, by default "viridis"
+      alpha : float, optional
+          Transparancy level for plotting `value` (0 = transparent, 1 = opaque), by default 1.0
+      discrete_colorbar : int, optional
+          Number of discrete colurs to use in colorbar, by default 256
+      grid_plot : tuple, optional
+          Number of rows and columns to use in the image, later adjusted to the true min/max of all subplots, by default (20000, 20000)
+      plot_histogram : bool, optional
+          Plot a histogram of `value`, by default True
+      save_kml_dir : str or bool, optional
+          Directory to save KML files
+          If False, no files are saved, by default False
+      image_width_resolution : int or None, optional
+          Pixel width to be used for plotting, only when tree_level="parent"
+          If None,  by default None
+      kml_dpi_image : int or None, optional
+          The resolution, in dots per inch, to create KML images when `save_kml_dir` is specified, by default None
 
 
    .. py:method:: loadPatches(patch_paths, parent_paths=False, add_geo_par=False, clear_images=False)
 
-      load patches from files (patch_paths) and add parents if parent_paths is provided
+      Load patches from path and, if parent_paths specified, add parents
 
-      Arguments:
-          patch_paths {str, wildcard accepted} -- path to patches
-          parent_paths {False or str, wildcard accepted} -- path to parents
-
-      Keyword Arguments:
-          clear_images {bool} -- clear images variable before loading patches (default: {False})
+      Parameters
+      ----------
+      patch_paths : str
+          Path to patches, accepts wildcards
+      parent_paths : str or bool, optional
+          Path to parents, accepts wildcards
+          If False, no parents are loaded, by default False
+      add_geo_par : bool, optional
+          Add geographical info to parents, by default False
+      clear_images : bool, optional
+          Clear images variable before loading, by default False
 
 
    .. py:method:: detectParIDfromPath(image_id, parent_delimiter='#')
       :staticmethod:
 
-      Detect parent ID from path using parent_delimiter
-      NOTE: Currently, only one parent can be detected.
+      Detect parent IDs from image ID
+
+      Parameters
+      ----------
+      image_id : str
+          ID of child image
+      parent_delimiter : str, optional
+          Delimiter used to separate parent ID when naming child image, by default "#"
+
+      Returns
+      -------
+      str
+          Parent ID
 
 
    .. py:method:: detectBorderFromPath(image_id, border_delimiter='-')
       :staticmethod:
 
-      Detect borders from the path using border_delimiter.
-      Here, the assumption is that the child image is named:
-      NOTE: STRING-min_x-min_y-max_x-max_y-STRING
+      Detects borders from the path assuming child image is named using the following format:
+      str-min_x-min_y-max_x-max_y-str
+
+      Parameters
+      ----------
+      image_id : str
+          ID of image
+      border_delimiter : str, optional
+          Delimiter used to separate border values when naming child image, by default "-"
+
+      Returns
+      -------
+      tuple
+          Border (min_x, min_y, max_x, max_y) of image
 
 
    .. py:method:: loadParents(parent_paths=False, parent_ids=False, update=False, add_geo=False)
 
-      load parent images from files (parent_paths)
-         if only parent_ids is specified, self.images["parent"] will be filled with no image_path.
-         NOTE: if parent_paths is given, parent_ids will be omitted as ids will be
-               detected from the basename
+      Load parent images from file paths.
+      If no path is given, only `parent_ids`, no image_path will be added to the images.
 
-      Keyword Arguments:
-          parent_paths {False or str, wildcard accepted} -- path to parents (default: {False})
-          parent_ids {False or list/tuple} -- list of parent ids (default: {False})
+      Parameters
+      ----------
+      parent_paths : str or bool, optional
+          Path to parent images, by default False
+      parent_ids : list, str or bool, optional
+          ID(s) of parent images
+          Ignored if parent_paths are specified, by default False
+      update : bool, optional
+          If true, current parents will be overwritten, by default False
+      add_geo : bool, optional
+          If true, geographical info will be added to parents, by default False
 
 
    .. py:method:: loadDataframe(parents=None, children_df=None, clear_images=True)
 
-      Read dataframes and form images variable
+      Form images variable from dataframe(s)
 
-      Keyword Arguments:
-          parents_df {dataframe or path} -- Parents dataframe or path to parents (default: {None})
-          children_df {dataframe} -- Children/slices dataframe (default: {None})
-          clear_images {bool} -- clear images before reading dataframes (default: {True})
+      Parameters
+      ----------
+      parents : DataFrame, str or None, optional
+          DataFrame containing parents or path to parents, by default None
+      children_df : DataFrame or None, optional
+          DataFrame containing children (patches), by default None
+      clear_images : bool, optional
+          If true, clear images before reading the dataframes, by default True
 
 
    .. py:method:: load_csv_file(parent_path=None, child_path=None, clear_images=False, index_col_child=0, index_col_parent=0)
 
-      Read parent and child from CSV files
+      Form images variable from csv file(s)
+
+      Parameters
+      ----------
+      parent_path : _type_, optional
+          Path to parent csv file, by default None
+      child_path : _type_, optional
+          Path to child csv file, by default None
+      clear_images : bool, optional
+          If true, clear images before reading the csv files, by default False
+      index_col_child : int, optional
+          Column in child csv file to use as index, by default 0
+      index_col_parent : int, optional
+          Column in parent csv file to use as index, by default 0
+
+
+   .. py:method:: addGeoInfo(proj2convert='EPSG:4326', calc_method='great-circle', verbose=False)
+
+      Add geographic information (shape, coords, size in m) to images from image metadata
+
+      Parameters
+      ----------
+      proj2convert : str, optional
+          Projection to convert coordinates into, by default "EPSG:4326"
+      calc_method : str, optional
+          Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle"
+      verbose : bool, optional
+          If True, print verbose outputs, by default False
 
 
 

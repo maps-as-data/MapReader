@@ -43,14 +43,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Install.html">Installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html">Input guidance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="User-guide.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Load</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Load</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#patchify">Patchify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#visualise">Visualise</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#calculate-pixel-intensities">Calculate pixel intensities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-analysis-visualisation">Further analysis/visualisation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Annotate.html">Annotate</a></li>
@@ -90,39 +89,45 @@
              
   <section id="load">
 <h1>Load<a class="headerlink" href="#load" title="Permalink to this heading"></a></h1>
-<section id="patchify">
-<h2>Patchify<a class="headerlink" href="#patchify" title="Permalink to this heading"></a></h2>
-<p>MapReader’s loader package is used to load, visualise and slice images (e.g. maps).
-Images can be loaded in using:</p>
+<section id="id1">
+<h2>Load<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>MapReader’s loader package is used to load, visualise and patchify images (e.g. maps).
+Images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">loader</span>
-<span class="n">my_files</span> <span class="o">=</span> <span class="n">loader</span><span class="p">(</span><span class="s2">&quot;./maps/*png&quot;</span><span class="p">)</span>
+<span class="n">my_files</span> <span class="o">=</span> <span class="n">loader</span><span class="p">(</span><span class="s2">&quot;./path/to/files&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This creates a mapImages object (<code class="docutils literal notranslate"><span class="pre">my_files</span></code>) which contains information about your images.
-To see which images this contains, use:</p>
+To see the contents of this object, use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">my_files</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You will see that your images are labelled as either parents or children.
-This naming structure allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.</p>
-<p>You can also load in additional information, such as metadata, using:</p>
+This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.</p>
+<p>If your images contain metadata (e.g. if you have loaded geotiff files), you can add this into your mapImages object using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">addGeoInfo</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Or, if you have a separate metadata (e.g. in the form of a pd.DataFrame or a .csv file), use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="s2">&quot;./path/to/metadata.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="patchify">
+<h2>Patchify<a class="headerlink" href="#patchify" title="Permalink to this heading"></a></h2>
 <p>Once you’ve loaded in all your data, you’ll then need to patchify your images.
 This can be done using:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">sliceAll</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>By default, this slices images into 100 x 100 pixel patches.
-To change this, you can specify <code class="docutils literal notranslate"><span class="pre">method</span></code> and <code class="docutils literal notranslate"><span class="pre">slice_size</span></code>.</p>
-<p>e.g :</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">sliceAll</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;meters&quot;</span><span class="p">,</span> <span class="n">slice_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>By default, patches are saved in a newly created directory called <code class="docutils literal notranslate"><span class="pre">./tests</span></code>. This can be changed by specifying <code class="docutils literal notranslate"><span class="pre">path_save</span></code>.</p>
+<p>By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called <code class="docutils literal notranslate"><span class="pre">./tests</span></code>. This save directory can be changed by specifying <code class="docutils literal notranslate"><span class="pre">path_save</span></code>.</p>
 <p>e.g. :</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">sliceAll</span><span class="p">(</span><span class="n">path_save</span><span class="o">=</span><span class="s2">&quot;./path/to/directory&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you have loaded geographic coordinates into your mapImages object, you can specify <code class="docutils literal notranslate"><span class="pre">method</span></code> and <code class="docutils literal notranslate"><span class="pre">slice_size</span></code> to slice your images by meters instead of pixels.</p>
+<p>e.g. :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">sliceAll</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;meters&quot;</span><span class="p">,</span> <span class="n">slice_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>After patchifying, you’ll see that <code class="docutils literal notranslate"><span class="pre">print(my_files)</span></code> shows you have both parents and children (patches).
@@ -136,8 +141,12 @@ To view an iterable list of these, you can use the <code class="docutils literal
 </div>
 <p>Or, to view these in a dataframe, use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parent_df</span><span class="p">,</span> <span class="n">patch_df</span> <span class="o">=</span> <span class="n">my_files</span><span class="o">.</span><span class="n">convertImages</span><span class="p">()</span>
-<span class="n">patch_df</span>
+<span class="n">patch_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>parent and patch dataframes will not automatically update so you may want to run this command again if you add new information into your mapImages object.</p>
 </div>
 </section>
 <section id="visualise">
@@ -153,19 +162,19 @@ To see a random sample of your patches (child images) use the <code class="docut
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/show_sample_child.png"><img alt="../_images/show_sample_child.png" src="../_images/show_sample_child.png" style="width: 400px;" /></a>
-<p>It can be helpful to see your patches (child images) in the context of their parent image. To do this use the <code class="docutils literal notranslate"><span class="pre">.show()</span></code> method.</p>
+<p>It can also be helpful to see your patches (child images) in the context of their parent image. To do this use the <code class="docutils literal notranslate"><span class="pre">.show()</span></code> method.</p>
 <p>e.g. :</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">child_list</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">child_list</span><span class="p">[</span><span class="mi">250</span><span class="p">:</span><span class="mi">300</span><span class="p">])</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="User-guide/xxx"><img alt="User-guide/xxx" src="User-guide/xxx" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="../_images/show.png"><img alt="../_images/show.png" src="../_images/show.png" style="width: 400px;" /></a>
 <p>or</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">files_to_show</span><span class="o">=</span><span class="p">[</span><span class="n">child_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">child_list</span><span class="p">[</span><span class="mi">30</span><span class="p">],</span> <span class="n">child_list</span><span class="p">[</span><span class="mi">34</span><span class="p">]]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">files_to_show</span><span class="o">=</span><span class="p">[</span><span class="n">child_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">child_list</span><span class="p">[</span><span class="mi">350</span><span class="p">],</span> <span class="n">child_list</span><span class="p">[</span><span class="mi">400</span><span class="p">]]</span>
 <span class="n">my_files</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">files_to_show</span><span class="p">)</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="User-guide/xxx"><img alt="User-guide/xxx" src="User-guide/xxx" style="width: 400px;" /></a>
-<p>This will show you your chosen patches, by default highlighted in red, in the context of their parent image.</p>
+<a class="reference internal image-reference" href="../_images/show_list.png"><img alt="../_images/show_list.png" src="../_images/show_list.png" style="width: 400px;" /></a>
+<p>This will show you your chosen patches, by default highlighted with red borders, in the context of their parent image.</p>
 <p>You may also want to see all the patches created from one of your parent images.
 This can be done using:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">show_par</span><span class="p">(</span><span class="n">parent_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -173,15 +182,17 @@ This can be done using:</p>
 </div>
 <a class="reference internal image-reference" href="../_images/show_par.png"><img alt="../_images/show_par.png" src="../_images/show_par.png" style="width: 400px;" /></a>
 </section>
-<section id="calculate-pixel-intensities">
-<h2>Calculate pixel intensities<a class="headerlink" href="#calculate-pixel-intensities" title="Permalink to this heading"></a></h2>
+<section id="further-analysis-visualisation">
+<h2>Further analysis/visualisation<a class="headerlink" href="#further-analysis-visualisation" title="Permalink to this heading"></a></h2>
+<p>If you have loaded geographic coordinates into your mapImages object, you may want to calculate the coordinates of your patches. The <code class="docutils literal notranslate"><span class="pre">.add_center_coord()</span></code> method can used to do this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">add_center_coord</span><span class="p">()</span>
+</pre></div>
+</div>
 <p>The <code class="docutils literal notranslate"><span class="pre">.calc_pixel_stats()</span></code> method can be used to calculate means and standard deviations of pixel intensites of each patch (child image) and parent image:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">calc_pixel_stats</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>This is useful for xxx.</p>
-<p>To view your results in a dataframe, use the <code class="docutils literal notranslate"><span class="pre">.convertImages()</span></code> method (as above).
-Or, to visualise them, use the <code class="docutils literal notranslate"><span class="pre">.show_par()</span></code> method and specify the <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> arguments.</p>
+<p>Specific values (e.g. ‘mean_pixel_RGB’) can be visualised using the <code class="docutils literal notranslate"><span class="pre">.show()</span></code> and <code class="docutils literal notranslate"><span class="pre">.show_par()</span></code> methods by specifying the <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> arguments.</p>
 <p>e.g. :</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">value</span><span class="o">=</span><span class="s1">&#39;mean_pixel_RGB&#39;</span>
 <span class="n">vmin</span><span class="o">=</span><span class="n">patch_df</span><span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
@@ -191,8 +202,7 @@ Or, to visualise them, use the <code class="docutils literal notranslate"><span 
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/show_par_RGB.png"><img alt="../_images/show_par_RGB.png" src="../_images/show_par_RGB.png" style="width: 400px;" /></a>
-<p>You may also want to specify the <code class="docutils literal notranslate"><span class="pre">alpha</span></code> argument, which sets the transparency of your plots and is by default set to 1.
-Lower <code class="docutils literal notranslate"><span class="pre">alpha</span></code> values allow you to see the parent image underneath:</p>
+<p>You may also want to specify the <code class="docutils literal notranslate"><span class="pre">alpha</span></code> argument, which sets the transparency of your plotted values. Lower <code class="docutils literal notranslate"><span class="pre">alpha</span></code> values allow you to see the parent image underneath:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_files</span><span class="o">.</span><span class="n">show_par</span><span class="p">(</span><span class="n">parent_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
