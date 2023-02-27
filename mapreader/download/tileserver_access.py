@@ -88,7 +88,7 @@ class TileServer:
             # Collect boundaries for fast queries
             metadata_coord_arr.append([min_lon, max_lon, min_lat, max_lat])
         self.metadata_info_list = metadata_info_list
-        self.metadata_coord_arr = np.array(metadata_coord_arr).astype(np.float)
+        self.metadata_coord_arr = np.array(metadata_coord_arr).astype(float)
         self.detected_rect_boundary = True
 
     def modify_metadata(self, remove_image_ids=[], only_keep_image_ids=[]):
