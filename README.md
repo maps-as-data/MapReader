@@ -45,7 +45,7 @@ The MapReader pipeline consists of two main components (See [Figure 2](#figure-2
         width="70%">
 </p>
 
-<figcaption align="center">
+<figcaption style="text-align: center;">
   <b>Figure 2</b> - MapReader pipeline
 </figcaption>
 <br>
