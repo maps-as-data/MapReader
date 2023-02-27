@@ -8,7 +8,7 @@ c. layers from tileservers
 d. non-georeferenced map scans (e.g. jpegs, png, tiff with no metadata to locate the sheet on the earth)
 
 Preparing your map corpus
-=========================
+-------------------------
 
 1. How many maps?
 
@@ -18,7 +18,7 @@ Preparing your map corpus
 
 
 Preparing your metadata
-=======================
+-----------------------
 
 [insert requirements for metadata structure]
 
