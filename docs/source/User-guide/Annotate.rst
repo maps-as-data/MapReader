@@ -58,7 +58,7 @@ Edit the annotation tasks file.
 Annotate your images.
 ------------------------------
 
-	To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``./annotation_task.yaml`` made in step 1), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
+	To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``./annotation_task.yaml``), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
 
 	To do this, use: 
 
@@ -71,7 +71,7 @@ Annotate your images.
 		task="rail_space"
 		annotation_set="test_one_inch_maps_001"
 
-		annotation=prepare_annotation(userID=userID, annotation_tasks_file=annotation_tasks_file, task=task, annotation_set=annotation_set)
+		annotation=prepare_annotation(userID, annotation_tasks_file, task, annotation_set)
 
 	You can then interactively annotate a sample of your images using:
 
@@ -94,12 +94,14 @@ Annotate your images.
 	.. image:: ../figures/annotate_context.png
 		:width: 400px
 
-	By default, your patches will be shown to you in a random order, but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``.
+	By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``. 
+	
+	You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. This is particularly useful if your images (e.g. maps) have borders or sleeves that you would like to ignore.
 
 Save your annotations.
 ---------------------------
 	
-	Once you have annotated your sample, you should then save your annotations using:
+	Once you have annotated your images, you should save your annotations using:
 
 	.. code :: python
 
