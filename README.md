@@ -40,14 +40,15 @@ The MapReader pipeline consists of two main components (See [Figure 2](#figure-2
 2. training/inference
 
 <p align="center">
+  <figure>
   <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/MapReader_pipeline.png"
         alt="MapReader pipeline"
         width="70%">
+  <figcaption> <b>Figure 2</b> - MapReader pipeline </figcaption>
+  </figure>
 </p>
 
-<figcaption style="text-align: center;">
-  <b>Figure 2</b> - MapReader pipeline
-</figcaption>
+
 <br>
 
 ### What is included?
