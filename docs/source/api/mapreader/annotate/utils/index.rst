@@ -55,7 +55,7 @@ Functions
        method (str, optional): method to annotate patches. Defaults to "ipyannotate".
 
 
-.. py:function:: prepare_annotation(userID, task, annotation_tasks_file, custom_labels=[], annotation_set='001', redo_annotation=False, patch_paths=False, parent_paths=False, tree_level='child', sortby=None, min_alpha_channel=None, min_mean_pixel=None, max_mean_pixel=None, context_image=False, xoffset=500, yoffset=500, urlmain='https://maps.nls.uk/view/', random_state='random', list_shortcuts=None)
+.. py:function:: prepare_annotation(userID, task, annotation_tasks_file, custom_labels=[], annotation_set='001', redo_annotation=False, patch_paths=False, parent_paths=False, tree_level='child', sortby=None, min_alpha_channel=None, min_mean_pixel=None, max_mean_pixel=None, min_std_pixel=None, max_std_pixel=None, context_image=False, xoffset=500, yoffset=500, urlmain='https://maps.nls.uk/view/', random_state='random', list_shortcuts=None)
 
    Prepare annotations
 

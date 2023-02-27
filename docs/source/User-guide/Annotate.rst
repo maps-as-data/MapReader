@@ -1,15 +1,23 @@
 Annotate
 ========
 
-.. contents:: ``MapReader`` provides a flexible way to set up a new annotation task in three simple steps:
-	:local:
+MapReader's ``annotate`` subpackage is used to interactively annotate images (e.g. maps).
 
-1. Edit the annotation tasks file.
--------------------------------------------
+This is done in three simple steps: 
+
+1. :ref:`Edit the annotation tasks file.`
+2. :ref:`Annotate your images.`
+3. :ref:`Save your annotations.`
+ 
+
+Edit the annotation tasks file.
+------------------------------------
 	
 	The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
 	
-	The ``tasks`` section is used to specify tasks and their labels. e.g. : 
+	The ``tasks`` section is used to specify annotation tasks and their labels. 
+	
+	e.g. : 
 	   
 	.. code :: yaml
 
@@ -26,7 +34,9 @@ Annotate
 				  rail_space:
 					labels: ["No", "rail space"]
 
-	The ``paths`` section is used to specify file paths to sets of images you would like to annotate. e.g. :
+	The ``paths`` section is used to specify file paths to sets of images  you would like to annotate (annotation sets). 
+	
+	e.g. :
 
 	.. code :: yaml
 
@@ -45,10 +55,10 @@ Annotate
 			parent_paths: "./maps/*png"
 			annot_dir: "./annotations_one_inch"
 		
-2.	Annotate your images.
+Annotate your images.
 ------------------------------
 
-	To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``./annotation_task.yaml`` made in step 1), tell ``MapReader`` which ``task`` you'd like to run and which  ``annotation set`` you would like to run on. 
+	To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``./annotation_task.yaml`` made in step 1), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
 
 	To do this, use: 
 
@@ -72,7 +82,7 @@ Annotate
 	.. image:: ../figures/annotate.png
 		:width: 400px
 
-	To help with annotating, you can set the annotation interface to show a context image using ``context_image = True``. This creates a second panel in the annotation interface, showing your patch in the context of a larger region whose size, in pixels, is set by ``xoffset`` and ``yoffset``.
+	To help with annotating, you can set the annotation interface to show a context image using ``context_image=True``. This creates a second panel in the annotation interface, showing your patch in the context of a larger region whose size, in pixels, is set by ``xoffset`` and ``yoffset``.
 		
 	.. code :: python
 		
@@ -84,10 +94,10 @@ Annotate
 	.. image:: ../figures/annotate_context.png
 		:width: 400px
 
-	By default, your patches will be shown to you in a random order, but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby = "mean"``.
+	By default, your patches will be shown to you in a random order, but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``.
 
-3.	Save your annotations.
-------------------------------
+Save your annotations.
+---------------------------
 	
 	Once you have annotated your sample, you should then save your annotations using:
 
