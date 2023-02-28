@@ -35,7 +35,7 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 
 ### MapReader pipeline 
 
-The MapReader pipeline consists of two main components (See [Figure 2](#figure-2)):
+The MapReader pipeline consists of two main components:
 1. preprocessing/annotation 
 2. training/inference
 
@@ -44,16 +44,13 @@ The MapReader pipeline consists of two main components (See [Figure 2](#figure-2
   <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/MapReader_pipeline.png"
         alt="MapReader pipeline"
         width="70%">
-  <figcaption> <b>Figure 2</b> - MapReader pipeline </figcaption>
   </figure>
 </p>
 
 
-<br>
-
 ### What is included?
 
-The MapReader package provides a set of tools to (See [Figure 1](#figure-1)):
+The MapReader package provides a set of tools to:
 
 - **download** images/maps and metadata stored on web-servers (e.g. tileserves which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere).
 - **load** images/maps and metadata stored locally.
