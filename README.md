@@ -22,7 +22,7 @@
     <br/>
 </p>
 
-## Gallery
+# Gallery
 
 <div align="center">
 
@@ -34,7 +34,7 @@
 **MapReader paper**<br><a href="https://dl.acm.org/doi/10.1145/3557919.3565812"> <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/mapreader_paper.png" alt="MapReader's paper" width="300"> </a> 
 </div>
 
-## What is MapReader?
+# What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
@@ -42,24 +42,27 @@ MapReader was developed in the [Living with Machines](https://livingwithmachines
 
 Refer to each tutorial/example in the [use cases](#use-cases) section for more details on MapReader's relevant functionalities for [<ins>non-geospatial</ins>](https://github.com/Living-with-machines/MapReader/tree/main/examples/non-geospatial) and [<ins>geospatial</ins>](https://github.com/Living-with-machines/MapReader/tree/main/examples/geospatial) images.
 
-## Contents
+# Contents
 
 - [Gallery](#gallery)
 - [What is MapReader?](#what-is-mapreader)
+- [Contents](#contents)
 - [Overview](#overview)
-- [Installation and setup](#installation)
+- [Installation](#installation)
   - [Set up a conda environment](#set-up-a-conda-environment)
-  - [Method 1: pip](#method-1)
-  - [Method 2: source code (for developers)](#method-2)
+  - [Method 1 (User Install)](#method-1-user-install)
+  - [Method 2 (Development Install)](#method-2-development-install)
+  - [Method 3 (conada install - EXPERIMENTAL)](#method-3-conada-install---experimental)
+  - [Setup MapReader for use in Jupyter Notebooks](#setup-mapreader-for-use-in-jupyter-notebooks)
 - [Use cases](#use-cases)
 - [How to contribute](#how-to-contribute)
 - [How to cite MapReader](#how-to-cite-mapreader)
 - [Credits and re-use terms](#credits-and-re-use-terms)
-  - [Digitized maps](#digitized-maps): MapReader can retrieve maps from NLS via tileserver. Read the re-use terms in this section.
-  - [Metadata](#metadata): the metadata files are stored at [mapreader/persistent_data](https://github.com/Living-with-machines/MapReader/tree/main/mapreader/persistent_data). Read the re-use terms in this section.
+  - [Digitized maps](#digitized-maps)
+  - [Metadata](#metadata)
   - [Acknowledgements](#acknowledgements)
 
-## Overview
+# Overview
 
 MapReader is a groundbreaking interdisciplinary tool that emerged from a specific set of geospatial historical research questions. It was inspired by methods in biomedical imaging and geographic information science, which were adapted for annotation and use by historians, for example in [JVC](https://doi.org/10.1093/jvcult/vcab009) and [MapReader](https://arxiv.org/abs/2111.15592) papers. The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets, and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
 
@@ -81,9 +84,9 @@ It provides a set of tools to:
     - various **plotting tools** using, e.g., *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/).
     - compute mean/standard-deviation **pixel intensity** of image patches.
 
-## Installation
+# Installation
 
-### Set up a conda environment
+## Set up a conda environment
 
 We recommend installation via Anaconda (refer to [Anaconda website and follow the instructions](https://docs.anaconda.com/anaconda/install/)).
 
@@ -99,7 +102,7 @@ conda create -n mr_py38 python=3.8
 conda activate mr_py38
 ```
 
-### Method 1
+## Method 1 (User Install)
 
 * Install `mapreader`:
 
@@ -142,7 +145,7 @@ cd /path/to/MapReader
 jupyter notebook
 ```
 
-### Method 2
+## Method 2 (Development Install)
 
 * Clone `mapreader` source code:
 
@@ -164,6 +167,25 @@ cd /path/to/MapReader
 pip install -e ."[geo]"
 ```
 
+## Method 3 (conada install - EXPERIMENTAL)
+
+Create and activate the conda environment:
+
+```bash
+conda create -n mr_py38 python=3.8
+conda activate mr_py38
+```
+
+Install MapReader directly from the conda package:
+
+```bash
+conda install -c anothersmith -c conda-forge -c defaults --override-channels --strict-channel-priority mapreader
+```
+
+(Note: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".)
+
+## Setup MapReader for use in Jupyter Notebooks
+
 * We have provided some [Jupyter Notebooks to showcase MapReader's functionalities](https://github.com/Living-with-machines/MapReader/tree/main/examples). To allow the newly created `mr_py38` environment to show up in the notebooks:
 
 ```bash
@@ -172,7 +194,7 @@ python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py3
 
 * Continue with the examples in [Use cases](#use-cases)!
 
-## Use cases
+# Use cases
 
 [Tutorials](https://github.com/Living-with-machines/MapReader/tree/main/examples) are organized in Jupyter Notebooks. Follow the hyperlinks on input type names ("Non-Geospatial" or "Geospatial") to read guidance specific to those image types. 
 
@@ -198,11 +220,11 @@ python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py3
           * **Annotations** are done on map patches (i.e., slices of each map).
           * **Classifier:** train/fine-tuned PyTorch CV models.
 
-## How to contribute
+# How to contribute
 
 We welcome contributions related to new applications, both with <ins>geospatial</ins> images (other maps, remote sensing data, aerial photography) and <ins>non-geospatial</ins> images (for example, other scientific image datasets).
 
-## How to cite MapReader
+# How to cite MapReader
 
 Please consider acknowledging MapReader if it helps you to obtain results and figures for publications or presentations, by citing:
 
@@ -233,21 +255,21 @@ series = {GeoHumanities '22}
 }
 ```
 
-## Credits and re-use terms 
+# Credits and re-use terms 
 
-### Digitized maps
+## Digitized maps
 
 MapReader can retrieve maps from NLS (National Library of Scotland) via webservers. For all the digitized maps (retrieved or locally stored), please note the re-use terms:
 
 :warning: Use of the digitised maps for commercial purposes is currently restricted by contract. Use of these digitised maps for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
 
-### Metadata
+## Metadata
 
 We have provided some metadata files in `mapreader/persistent_data`. For all these file, please note the re-use terms:
 
 :warning: Use of the metadata for commercial purposes is currently restricted by contract. Use of this metadata for non-commercial purposes is permitted under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC-BY-NC-SA) licence. Please refer to https://maps.nls.uk/copyright.html#exceptions-os for details on copyright and re-use license.
 
-### Acknowledgements
+## Acknowledgements
 
 This work was supported by Living with Machines (AHRC grant AH/S01179X/1) and The Alan Turing Institute (EPSRC grant EP/N510129/1). 
 Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.

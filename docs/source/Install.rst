@@ -18,8 +18,8 @@ We recommend installation via Anaconda (refer to `Anaconda website and follow th
 
    conda activate mr_py38
 
-Method 1
---------
+Method 1 (User Install)
+-----------------------
 
 -  Install ``mapreader``:
 
@@ -64,8 +64,8 @@ To work with geospatial images (e.g., maps):
    cd /path/to/MapReader 
    jupyter notebook
 
-Method 2
---------
+Method 2 (Developer Install)
+----------------------------
 
 -  Clone ``mapreader`` source code:
 
@@ -97,3 +97,23 @@ To work with geospatial images (e.g., maps):
    python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 
 -  Continue with the examples in `Use cases <#use-cases>`__!
+
+
+Method 3 (conada install - EXPERIMENTAL)
+----------------------------------------
+
+- Create and activate the conda environment:
+
+.. code:: bash
+
+   conda create -n mr_py38 python=3.8
+   conda activate mr_py38
+
+- Install MapReader directly from the conda package:
+
+.. code:: bash
+
+   conda install -c anothersmith -c conda-forge -c defaults --override-channels --strict-channel-priority mapreader
+
+(Note: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".)
+
