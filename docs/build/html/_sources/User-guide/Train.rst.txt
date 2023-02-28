@@ -4,7 +4,7 @@ Learn
 MapReader's ``learn`` subpackage is used to train or fine-tune a CV (Computer Vision) classifier and use it for inference.
 
 Load data
-------------
+-----------
 
 Load annotations
 ~~~~~~~~~~~~~~~~~~
@@ -133,7 +133,7 @@ This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_data
     your_dataset.patchframe
 
 Define a sampler
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
@@ -155,7 +155,7 @@ To do this, use:
 
 
 Create batches (Add to DataLoader)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``MapReader``'s ``classifier`` class is xxxxx.
 

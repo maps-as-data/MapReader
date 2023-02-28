@@ -96,7 +96,7 @@ Annotate your images.
 
 	By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``. 
 	
-	You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. This is particularly useful if your images (e.g. maps) have margins or borders that you would like to avoid.
+	You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. This is particularly useful if your images (e.g. maps) have collars or margins that you would like to avoid.
 
 Save your annotations.
 ---------------------------

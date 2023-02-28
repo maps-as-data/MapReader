@@ -3,8 +3,8 @@ Load
 
 MapReader's ``load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
 
-Load
------
+Load images (and metadata)
+----------------------------
 
 First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using: 
 
