@@ -16,7 +16,7 @@ Pre-requisites
 In order to contribute to MapReader, please make sure you fullfill the following requirements:
 
 1. Make sure you have set up a `GitHub account <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_.
-2. Set up a virtual python environment and install MapReader (as per `Installation instuctions <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_).
+2. Set up a virtual python environment and install MapReader (as per `Installation instuctions <https://mapreader.readthedocs.io/en/rw_docs/Install.html>`_).
 3. Read this guide.
 
 For more information about the origins of MapReader, check out our `paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_ about the pipeline design and early experiments.
@@ -64,8 +64,8 @@ Before you open a new issue, please check if any of our open issues cover your i
 If you do need to open a new issue, please follow our basic guidelines laid out in our issue templates. 
 There are two issue templates to choose from:
 
-- **Bug report (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`_):** This template should be used to report bugs in the MapReader code and for reporting errors like typos and broken links (e.g. within the documentation).
-- **Feature request (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`_):** This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code and suggesting updates to documentation/tutorials/etc. 
+- **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`_): This template should be used to report bugs in the MapReader code and for reporting errors like typos and broken links (e.g. within the documentation).
+- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`_): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code and suggesting updates to documentation/tutorials/etc. 
 
 If you feel your issue does not fit either of these templates, please open a blank issue and provide as much information as possible to help the MapReader team work resolve the issue.
 
