@@ -41,7 +41,7 @@ setuptools.setup(
         "rasterio>=1.2.10,<2.0.0",
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
-        "Sphinx=6.1.3",
+        "Sphinx==6.1.3",
     ],
     
     classifiers=[
