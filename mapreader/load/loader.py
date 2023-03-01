@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from mapreader.loader.images import mapImages
+from mapreader.load.images import mapImages
 
 
 def loader(path_images=False, tree_level="parent", parent_path=None, **kwds):

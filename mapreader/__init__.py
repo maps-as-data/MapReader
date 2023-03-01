@@ -1,6 +1,6 @@
-from mapreader.loader.images import mapImages
-from mapreader.loader.loader import loader
-from mapreader.loader.loader import load_patches
+from mapreader.load.images import mapImages
+from mapreader.load.loader import loader
+from mapreader.load.loader import load_patches
 
 from mapreader.download import azure_access
 from mapreader.download.tileserver_access import TileServer
