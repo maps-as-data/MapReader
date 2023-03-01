@@ -1,110 +1,113 @@
 Download
 =========
 
-TileServer_ provides an easy way to download maps, e.g. 
+MapReader's ``download`` subpackage is primarily used to download files (e.g. map images and metadata) stored remotely and contains two methods of downloading these files:
 
-    - `OS one-inch 2nd edition layer <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`__
-    - `OS six-inch 1st edition layer for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`__
+- :ref:`Via TileServer_` - an open-source map server
+- :ref:`Via Azure-Blob-Storage_` - Microsoft's cloud storage
 
-MapReader's TileServer class is used to read in and query map metadata and download maps from TileServer_.
+Via TileServer_
+----------------
 
-The user needs to provide metadata, containing information about maps stored on TileServer to initialise this class. This metadata is then stored in ``TileServer.metadata``. 
-Some example metadata files, corresponding to the one-inch and six-inch OS maps detailed above, are provided in ``MapReader/mapreader/persistent_data``.
+To download maps from TileServer_, you will need to tell MapReader which maps to download.This is done by providing MapReader with a metadata file (usually a ``.json``), which contains information about the maps/map series you would like to download and a download URL.
 
-To load in metadata using MapReader, use: 
+Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`__ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`__, are provided in ``MapReader/mapreader/persistent_data``.
+
+To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your metadata file) and ``download_url`` (the base URL for the maps/map series): 
 
 .. code :: python
 
      from mapreader import TileServer
-     ts = TileServer(metadata_path="path/to/metadata.json")
+     my_ts = TileServer(metadata_path="path/to/metadata.json", download_url="mapseries-tilesets.your_URL_here/{z}/{x}/{y}.png")
 
-e.g. to download metadata corresponding to the one-inch OS maps: 
-
-.. code :: python
-
-     ts = TileServer(metadata_path="~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json", download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png")
-
-By default, MapReader's TileServer class uses the ``download_url`` of OS one-inch 2nd edition layer (shown above), but this can easily be changed by specifying ``download_url``. 
-**To access other map series, please contact NLS**.
-
-To visualise the boundaries of your maps from metadata, use: 
+e.g. for the OS one-inch maps (detailed above):
 
 .. code :: python
 
-     ts.plot_metadata_on_map(add_text=True)
+     my_ts = TileServer(metadata_path="~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json", download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png")
 
-.. image:: ../figures/plot_metadata_on_map.png
-     :width: 400px
-     :align: center
 
-And, to plot a histogram of the publication dates of your maps from metadata, use: 
+This creates a TileServer object (``my_ts``) which contains information about the maps/map series you'd like to download. Its ``.metadata`` attribute is a dictionary containing the information loaded from your metadata file (geometry, coordinates, etc.). This metadata can be used to understand your maps/map series and decide which to download.
+
+For example, to plot a histogram of the publication dates of all maps included in your metadata, use: 
 
 .. code :: python
 
-     ts.hist_published_dates()
+     my_ts.hist_published_dates()
 
 .. image:: ../figures/hist_published_dates.png
      :width: 400px
      :align: center
 
-It can also be useful to find the minimum and maximum of latitudes and longitudes of your maps for querying. 
-This can be done using: 
+
+Or, to visualise the boundaries of all maps included in your metadata, use: 
 
 .. code :: python
 
-     ts.minmax_latlon()
+     my_ts.plot_metadata_on_map(add_text=True)
 
-Then, to query maps from metadata, use: 
+.. image:: ../figures/plot_metadata_on_map.png
+     :width: 400px
+     :align: center
+
+To find valid ranges of latitudes and longitudes to use for querying, you can find the minimum and maximum of latitudes and longitudes of all maps included in your metadata using:
 
 .. code :: python
 
-     ts.query_point([lat,lon])
-     ts.print_found_queries()
+     my_ts.minmax_latlon()
+
+And finally, to query maps using latitudes and longitudes, use: 
+
+.. code :: python
+
+     my_ts.query_point([lat,lon])
+     my_ts.print_found_queries()
 
 or: 
 
 .. code :: python
 
-     ts.query_point([[lat1,lon1],[lat2,lon2],...])
-     ts.print_found_queries()
+     my_ts.query_point([[lat1,lon1],[lat2,lon2],...])
+     my_ts.print_found_queries()
 
 By default, only the most recent query will be stored in memory. 
-However, specifying ``append = True`` allows multiple query results to be stored and accessed: 
+This can be changed, by pecifying ``append = True``, thereby allowing multiple query results to be stored and accessed.
 
 e.g.: 
 
 .. code :: python
 
-     ts.query_point([55.9,-4.2])
-     ts.query_point([57.1,-2.5], append=True)
-     ts.query_point([56.4,-3.5], append=True)
-     ts.print_found_queries()
+     my_ts.query_point([55.9,-4.2])
+     my_ts.query_point([57.1,-2.5], append=True)
+     my_ts.query_point([56.4,-3.5], append=True)
+     my_ts.print_found_queries()
 
 Finally, to download maps from TileServer_, use: 
 
 .. code :: python
   
-    ts.download_tileserver()
+    my_ts.download_tileserver()
 
 By default, this downloads only queried maps (i.e. those returned by ``ts.print_found_queries()``), but can be set to download all maps from the metadata using ``mode = "all"``: 
 
 .. code :: python
 
-     ts.download_tileserver(mode="all")
+     my_ts.download_tileserver(mode="all")
 
 Running the ``download_tileserver`` command downloads maps as ``.png`` files to a newly created ``./maps`` directory.
-Metadata is also stored here as a ``.csv`` file named ``metadata.csv``.
+Metadata is also stored there as a ``.csv`` file named ``metadata.csv``.
 Both the default output directory name and metadata file name can be changed by specifying ``output_maps_dirname`` and ``output_metadata_filename`` respectively: 
 
 .. code :: python
   
-     ts.download_tileserver(output_maps_dirname="./path/to/directory", output_metadata_filename="filename.csv")
+     my_ts.download_tileserver(output_maps_dirname="./path/to/directory", output_metadata_filename="filename.csv")
 
-Other important arguments for the ``download_tileserver`` function which you may want to specify include:
 
-    - zoom_level: 
-    - pixel closest: 
+Via Azure-Blob-Storage_
+-------------------------
 
-.. unsure exactly what these two arguments do. Maybe someone more familiar with MR can add - RW
+TBC
+
 
 .. _TileServer: http://tileserver.org/
+.. _Azure-Blob-Storage: https://azure.microsoft.com/en-gb/products/storage/blobs/ 

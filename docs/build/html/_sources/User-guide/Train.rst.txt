@@ -1,18 +1,15 @@
-Train
+Learn
 =======
 
-.. contents:: 
-    :local:
-
-Once you have annotated images, you can then use these to train/fine-tune a CV (Computer Vision) classifier.
+MapReader's ``learn`` subpackage is used to train or fine-tune a CV (Computer Vision) classifier and use it for inference.
 
 Load data
----------------
+-----------
 
 Load annotations
 ~~~~~~~~~~~~~~~~~~
 
-First, load in your annotations using:
+First, load in your annotations and images using:
 
 .. code :: python
 
@@ -20,13 +17,6 @@ First, load in your annotations using:
     
     annotated_images=loadAnnotations()
     annotated_images.load("./path/to/annotations.csv", path2dir='./path/to/patches/')
-    
-e.g. 
-
-.. code :: python 
-
-    annotated_images=loadAnnotations()
-    annotated_images.load("./annotations_one_inch/rail_space_#rw#.csv", path2dir='./maps/slice_50_50')
 
 To view the data loaded in from your ``.csv`` as a dataframe, use:
 
@@ -143,7 +133,7 @@ This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_data
     your_dataset.patchframe
 
 Define a sampler
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
@@ -165,7 +155,7 @@ To do this, use:
 
 
 Create batches (Add to DataLoader)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``MapReader``'s ``classifier`` class is xxxxx.
 
@@ -444,5 +434,3 @@ e.g. :
 .. code :: python
 
     my_classifier.inference_sample_results(set_name="test", num_samples=3, class_index=1, min_conf=80)
-
-.. disqus::

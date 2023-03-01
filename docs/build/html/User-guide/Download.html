@@ -43,19 +43,21 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Install.html">Installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html">Input guidance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="User-guide.html">User Guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#via-tileserver">Via TileServer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#via-azure-blob-storage">Via Azure-Blob-Storage</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Load.html">Load</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Annotate.html">Annotate</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Train.html">Train</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Train.html">Learn</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Post-process.html">Post-process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Worked-examples.html">Worked examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="User-guide.html#gallery">Gallery</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://dl.acm.org/doi/10.1145/3557919.3565812">MapReader Paper</a></li>
 </ul>
 
         </div>
@@ -85,82 +87,77 @@
              
   <section id="download">
 <h1>Download<a class="headerlink" href="#download" title="Permalink to this heading"></a></h1>
-<p><a class="reference external" href="http://tileserver.org/">TileServer</a> provides an easy way to download maps, e.g.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html">OS one-inch 2nd edition layer</a></p></li>
-<li><p><a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html">OS six-inch 1st edition layer for Scotland</a></p></li>
+<p>MapReader’s <code class="docutils literal notranslate"><span class="pre">download</span></code> subpackage is primarily used to download files (e.g. map images and metadata) stored remotely and contains two methods of downloading these files:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#via-tileserver"><span class="std std-ref">Via TileServer</span></a> - an open-source map server</p></li>
+<li><p><a class="reference internal" href="#via-azure-blob-storage"><span class="std std-ref">Via Azure-Blob-Storage</span></a> - Microsoft’s cloud storage</p></li>
 </ul>
-</div></blockquote>
-<p>MapReader’s TileServer class is used to read in and query map metadata and download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>.</p>
-<p>The user needs to provide metadata, containing information about maps stored on TileServer to initialise this class. This metadata is then stored in <code class="docutils literal notranslate"><span class="pre">TileServer.metadata</span></code>.
-Some example metadata files, corresponding to the one-inch and six-inch OS maps detailed above, are provided in <code class="docutils literal notranslate"><span class="pre">MapReader/mapreader/persistent_data</span></code>.</p>
-<p>To load in metadata using MapReader, use:</p>
+<section id="via-tileserver">
+<h2>Via <a class="reference external" href="http://tileserver.org/">TileServer</a><a class="headerlink" href="#via-tileserver" title="Permalink to this heading"></a></h2>
+<p>To download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>, you will need to tell MapReader which maps to download.This is done by providing MapReader with a metadata file (usually a <code class="docutils literal notranslate"><span class="pre">.json</span></code>), which contains information about the maps/map series you would like to download and a download URL.</p>
+<p>Some example metadata files, corresponding to the <a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html">OS one-inch 2nd edition maps</a> and <a class="reference external" href="https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html">OS six-inch 1st edition maps for Scotland</a>, are provided in <code class="docutils literal notranslate"><span class="pre">MapReader/mapreader/persistent_data</span></code>.</p>
+<p>To set up your download, create a <code class="docutils literal notranslate"><span class="pre">TileServer</span></code> object and specify <code class="docutils literal notranslate"><span class="pre">metadata_path</span></code> (the path to your metadata file) and <code class="docutils literal notranslate"><span class="pre">download_url</span></code> (the base URL for the maps/map series):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mapreader</span> <span class="kn">import</span> <span class="n">TileServer</span>
-<span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;path/to/metadata.json&quot;</span><span class="p">)</span>
+<span class="n">my_ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;path/to/metadata.json&quot;</span><span class="p">,</span> <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;mapseries-tilesets.your_URL_here/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>e.g. to download metadata corresponding to the one-inch OS maps:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json&quot;</span><span class="p">,</span> <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+<p>e.g. for the OS one-inch maps (detailed above):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span> <span class="o">=</span> <span class="n">TileServer</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">=</span><span class="s2">&quot;~/MapReader/mapreader/persistent_data/metadata_OS_One_Inch_GB_WFS_light.json&quot;</span><span class="p">,</span> <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>By default, MapReader’s TileServer class uses the <code class="docutils literal notranslate"><span class="pre">download_url</span></code> of OS one-inch 2nd edition layer (shown above), but this can easily be changed by specifying <code class="docutils literal notranslate"><span class="pre">download_url</span></code>.
-<strong>To access other map series, please contact NLS</strong>.</p>
-<p>To visualise the boundaries of your maps from metadata, use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">plot_metadata_on_map</span><span class="p">(</span><span class="n">add_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<a class="reference internal image-reference" href="../_images/plot_metadata_on_map.png"><img alt="../_images/plot_metadata_on_map.png" class="align-center" src="../_images/plot_metadata_on_map.png" style="width: 400px;" /></a>
-<p>And, to plot a histogram of the publication dates of your maps from metadata, use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">hist_published_dates</span><span class="p">()</span>
+<p>This creates a TileServer object (<code class="docutils literal notranslate"><span class="pre">my_ts</span></code>) which contains information about the maps/map series you’d like to download. Its <code class="docutils literal notranslate"><span class="pre">.metadata</span></code> attribute is a dictionary containing the information loaded from your metadata file (geometry, coordinates, etc.). This metadata can be used to understand your maps/map series and decide which to download.</p>
+<p>For example, to plot a histogram of the publication dates of all maps included in your metadata, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">hist_published_dates</span><span class="p">()</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/hist_published_dates.png"><img alt="../_images/hist_published_dates.png" class="align-center" src="../_images/hist_published_dates.png" style="width: 400px;" /></a>
-<p>It can also be useful to find the minimum and maximum of latitudes and longitudes of your maps for querying.
-This can be done using:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">minmax_latlon</span><span class="p">()</span>
+<p>Or, to visualise the boundaries of all maps included in your metadata, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">plot_metadata_on_map</span><span class="p">(</span><span class="n">add_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Then, to query maps from metadata, use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">])</span>
-<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+<a class="reference internal image-reference" href="../_images/plot_metadata_on_map.png"><img alt="../_images/plot_metadata_on_map.png" class="align-center" src="../_images/plot_metadata_on_map.png" style="width: 400px;" /></a>
+<p>To find valid ranges of latitudes and longitudes to use for querying, you can find the minimum and maximum of latitudes and longitudes of all maps included in your metadata using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">minmax_latlon</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>And finally, to query maps using latitudes and longitudes, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">])</span>
+<span class="n">my_ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>or:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([[</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon1</span><span class="p">],[</span><span class="n">lat2</span><span class="p">,</span><span class="n">lon2</span><span class="p">],</span><span class="o">...</span><span class="p">])</span>
-<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([[</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon1</span><span class="p">],[</span><span class="n">lat2</span><span class="p">,</span><span class="n">lon2</span><span class="p">],</span><span class="o">...</span><span class="p">])</span>
+<span class="n">my_ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>By default, only the most recent query will be stored in memory.
-However, specifying <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">=</span> <span class="pre">True</span></code> allows multiple query results to be stored and accessed:</p>
+This can be changed, by pecifying <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">=</span> <span class="pre">True</span></code>, thereby allowing multiple query results to be stored and accessed.</p>
 <p>e.g.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">55.9</span><span class="p">,</span><span class="o">-</span><span class="mf">4.2</span><span class="p">])</span>
-<span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">57.1</span><span class="p">,</span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">56.4</span><span class="p">,</span><span class="o">-</span><span class="mf">3.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">55.9</span><span class="p">,</span><span class="o">-</span><span class="mf">4.2</span><span class="p">])</span>
+<span class="n">my_ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">57.1</span><span class="p">,</span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">my_ts</span><span class="o">.</span><span class="n">query_point</span><span class="p">([</span><span class="mf">56.4</span><span class="p">,</span><span class="o">-</span><span class="mf">3.5</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">my_ts</span><span class="o">.</span><span class="n">print_found_queries</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Finally, to download maps from <a class="reference external" href="http://tileserver.org/">TileServer</a>, use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>By default, this downloads only queried maps (i.e. those returned by <code class="docutils literal notranslate"><span class="pre">ts.print_found_queries()</span></code>), but can be set to download all maps from the metadata using <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">=</span> <span class="pre">&quot;all&quot;</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Running the <code class="docutils literal notranslate"><span class="pre">download_tileserver</span></code> command downloads maps as <code class="docutils literal notranslate"><span class="pre">.png</span></code> files to a newly created <code class="docutils literal notranslate"><span class="pre">./maps</span></code> directory.
-Metadata is also stored here as a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file named <code class="docutils literal notranslate"><span class="pre">metadata.csv</span></code>.
+Metadata is also stored there as a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file named <code class="docutils literal notranslate"><span class="pre">metadata.csv</span></code>.
 Both the default output directory name and metadata file name can be changed by specifying <code class="docutils literal notranslate"><span class="pre">output_maps_dirname</span></code> and <code class="docutils literal notranslate"><span class="pre">output_metadata_filename</span></code> respectively:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">output_maps_dirname</span><span class="o">=</span><span class="s2">&quot;./path/to/directory&quot;</span><span class="p">,</span> <span class="n">output_metadata_filename</span><span class="o">=</span><span class="s2">&quot;filename.csv&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_ts</span><span class="o">.</span><span class="n">download_tileserver</span><span class="p">(</span><span class="n">output_maps_dirname</span><span class="o">=</span><span class="s2">&quot;./path/to/directory&quot;</span><span class="p">,</span> <span class="n">output_metadata_filename</span><span class="o">=</span><span class="s2">&quot;filename.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Other important arguments for the <code class="docutils literal notranslate"><span class="pre">download_tileserver</span></code> function which you may want to specify include:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>zoom_level:</p></li>
-<li><p>pixel closest:</p></li>
-</ul>
-</div></blockquote>
+</section>
+<section id="via-azure-blob-storage">
+<h2>Via <a class="reference external" href="https://azure.microsoft.com/en-gb/products/storage/blobs/">Azure-Blob-Storage</a><a class="headerlink" href="#via-azure-blob-storage" title="Permalink to this heading"></a></h2>
+<p>TBC</p>
+</section>
 </section>
 
 

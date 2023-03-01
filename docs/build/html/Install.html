@@ -43,16 +43,13 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation instructions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#set-up-a-conda-environment">Set up a conda environment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#method-1">Method 1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#method-2">Method 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-via-pip">Install via pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-from-source">Install from source</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Input-guidance.html">Input guidance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Input-guidance.html#preparing-your-map-corpus">Preparing your map corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Input-guidance.html#preparing-your-metadata">Preparing your metadata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="User-guide/User-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://dl.acm.org/doi/10.1145/3557919.3565812">MapReader Paper</a></li>
 </ul>
 
         </div>
@@ -97,52 +94,21 @@
 </pre></div>
 </div>
 </section>
-<section id="method-1">
-<h2>Method 1<a class="headerlink" href="#method-1" title="Permalink to this heading"></a></h2>
+<section id="install-via-pip">
+<h2>Install via pip<a class="headerlink" href="#install-via-pip" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Install <code class="docutils literal notranslate"><span class="pre">mapreader</span></code>:</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>mapreader
 </pre></div>
 </div>
-<p>To work with geospatial images (e.g., maps):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;mapreader[geo]&quot;</span>
-</pre></div>
-</div>
-<ul>
-<li><p>We have provided some <a class="reference external" href="https://github.com/Living-with-machines/MapReader/tree/main/examples">Jupyter Notebooks to showcase MapReader’s functionalities</a>.</p>
-<p>To allow the newly created <code class="docutils literal notranslate"><span class="pre">mr_py38</span></code> environment to show up in the
-notebooks:</p>
-</li>
-</ul>
+<p>To allow the newly created <code class="docutils literal notranslate"><span class="pre">mr_py38</span></code> environment to show up in the notebooks:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="w"> </span>mr_py38<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;Python (mr_py38)&quot;</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>⚠️ On <em>Windows</em> and for <em>geospatial images</em> (e.g., maps), you might
-need to do:</p></li>
-</ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># activate the environment</span>
-conda<span class="w"> </span>activate<span class="w"> </span>mr_py38
-
-<span class="c1"># install rasterio and fiona manually</span>
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">rasterio</span><span class="o">=</span><span class="m">1</span>.2.10
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">fiona</span><span class="o">=</span><span class="m">1</span>.8.20
-
-<span class="c1"># install git</span>
-conda<span class="w"> </span>install<span class="w"> </span>git
-
-<span class="c1"># install MapReader</span>
-pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/Living-with-machines/MapReader.git
-
-<span class="c1"># open Jupyter Notebook (if you want to test/work with the notebooks in &quot;examples&quot; directory)</span>
-<span class="nb">cd</span><span class="w"> </span>/path/to/MapReader
-jupyter<span class="w"> </span>notebook
-</pre></div>
-</div>
 </section>
-<section id="method-2">
-<h2>Method 2<a class="headerlink" href="#method-2" title="Permalink to this heading"></a></h2>
+<section id="install-from-source">
+<h2>Install from source<a class="headerlink" href="#install-from-source" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Clone <code class="docutils literal notranslate"><span class="pre">mapreader</span></code> source code:</p></li>
 </ul>
@@ -156,23 +122,13 @@ jupyter<span class="w"> </span>notebook
 pip<span class="w"> </span>install<span class="w"> </span>-v<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
-<p>To work with geospatial images (e.g., maps):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/path/to/MapReader
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="s2">&quot;[geo]&quot;</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>We have provided some <a class="reference external" href="https://github.com/Living-with-machines/MapReader/tree/main/examples">Jupyter Notebooks to showcase MapReader’s
-functionalities</a>.
-To allow the newly created <code class="docutils literal notranslate"><span class="pre">mr_py38</span></code> environment to show up in the
-notebooks:</p></li>
-</ul>
+<dl class="simple">
+<dt>To allow the newly created <code class="docutils literal notranslate"><span class="pre">mr_py38</span></code> environment to show up in the</dt><dd><p>notebooks:</p>
+</dd>
+</dl>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="w"> </span>mr_py38<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;Python (mr_py38)&quot;</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>Continue with the examples in <a class="reference external" href="#use-cases">Use cases</a>!</p></li>
-</ul>
 </section>
 </section>
 
