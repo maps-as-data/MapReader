@@ -262,7 +262,14 @@ class mapImages:
         return list(self.images["child"].keys())
 
     def add_shape(self, tree_level="parent"):
-        """Run add_shape_id for all tree_level items"""
+        """For each image present at `tree_level`, run `add_shape_id` to add shape.
+
+        Parameters
+        ----------
+        tree_level : str, optional
+            Tree level, choices between "parent" or "child, by default "parent"
+        """
+
         list_items = list(self.images[tree_level].keys())
         print(f"[INFO] Add shape, tree level: {tree_level}")
         for one_item in list_items:
@@ -285,7 +292,7 @@ class mapImages:
             if not "coord" in self.images[tree_level][one_item].keys():
                 if verbose:
                     print(
-                        f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                        f"[WARNING] No coordinates found for {one_item}. Suggestion: run add_metadata or addGeoInfo"
                     )
                 continue
 
@@ -306,28 +313,30 @@ class mapImages:
         list_items = list(self.images[tree_level].keys())
 
         print(f"[INFO] Add center coordinates, tree level: {tree_level}")
+        par_id_list = []
 
         for one_item in list_items:
             if tree_level == "parent":
                 if not "coord" in self.images[tree_level][one_item].keys():
                     if verbose:
-                        print(
-                            f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                    print(
+                        f"[WARNING] 'coord' could not be found in {one_item}. Suggestion: run add_metadata or addGeoInfo"
                         )
-                    continue
+                continue
 
             if tree_level == "child":
                 par_id = self.images[tree_level][one_item]["parent_id"]
 
                 if not "coord" in self.images["parent"][par_id].keys():
-                    if verbose:
+                    if par_id not in par_id_list:
                         print(
-                            f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                            f"[WARNING] 'coord' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo"
                         )
+                        par_id_list.append(par_id)
                     continue
 
             self.add_center_coord_id(
-                image_id=one_item, tree_level=tree_level, verbose=verbose
+                image_id=one_item, tree_level=tree_level
             )
 
     def add_shape_id(self, image_id, tree_level="parent"):
@@ -454,7 +463,7 @@ class mapImages:
 
         if not "coord" in self.images["parent"][parent_id].keys():
             print(
-                f"No coordinates found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"
+                f"[WARNING] 'coord' could not be found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"
             )
             return
 
