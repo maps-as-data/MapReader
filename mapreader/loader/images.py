@@ -209,7 +209,7 @@ class mapImages:
                 continue
             for one_col in columns:
                 if one_col in ["coord", "polygone"]:
-                    # Make sure coords is interpreted as a tuple
+                    # Make sure "coord" is interpreted as a tuple
                     self.images[tree_level][one_row[image_id_col]][one_col] = eval(
                         one_row[one_col]
                     )
@@ -370,12 +370,12 @@ class mapImages:
 
         else:
             # Extract height/width/chan from shape
-            h, w, c = self.images[tree_level][image_id]["shape"]
+            image_height, image_width, _ = self.images[tree_level][image_id]["shape"]
             lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
                 "coord"
             ]
-            self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / w
-            self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / h
+            self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / image_width
+            self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / image_height
 
     def add_center_coord_id(self, image_id, tree_level="child", verbose=False):
         """Add center_lon and center_lat to image
@@ -459,7 +459,7 @@ class mapImages:
             return
 
         myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
-        h, w, c = myimg_shape = myimg.shape
+        image_height, image_width, _ = myimg_shape = myimg.shape
 
         (xmin, xmax, ymin, ymax) = self.images["parent"][parent_id]["coord"]
         if verbose:
@@ -480,8 +480,8 @@ class mapImages:
                     f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
                 )
 
-            mean_width = np.mean([size_in_m[0] / w, size_in_m[1] / w])
-            mean_height = np.mean([size_in_m[2] / h, size_in_m[3] / h])
+            mean_width = np.mean([size_in_m[0] / image_width, size_in_m[1] / image_width])
+            mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
             if verbose:
                 print(
                     f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
@@ -497,8 +497,8 @@ class mapImages:
                 f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
             )
 
-            mean_width = np.mean([size_in_m[0] / w, size_in_m[1] / w])
-            mean_height = np.mean([size_in_m[2] / h, size_in_m[3] / h])
+            mean_width = np.mean([size_in_m[0] / image_width, size_in_m[1] / image_width])
+            mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
             print(
                 f"\nEach pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
             )
@@ -664,13 +664,13 @@ class mapImages:
             if not "shape" in self.images[tree_level][image_id].keys():
                 self.add_shape_id(image_id=image_id, tree_level=tree_level)
 
-            h, w, c = self.images[tree_level][image_id]["shape"]
+            image_height, _, _ = self.images[tree_level][image_id]["shape"]
 
             # size in meter contains: (bottom, top, left, right)
             size_in_m = self.calc_pixel_width_height(image_id)
 
             # pixel height in m per pixel
-            pixel_height = size_in_m[2] / h
+            pixel_height = size_in_m[2] / image_height
             number_pixels4slice = int(slice_size / pixel_height)
 
             sliced_images_info = sliceByPixel(
@@ -1446,9 +1446,9 @@ class mapImages:
 
             # read the image using rasterio
             tiff_src = rasterio.open(image_path)
-            h, w = tiff_src.shape
-            c = tiff_src.count
-            shape = (h, w, c)
+            image_height, image_width = tiff_src.shape
+            image_channels = tiff_src.count
+            shape = (image_height, image_width, image_channels)
             self.images["parent"][image_id]["shape"] = shape
 
             # check coordinates are present
