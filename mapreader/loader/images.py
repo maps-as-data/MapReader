@@ -33,7 +33,7 @@ class mapImages:
     def __init__(
         self, path_images=False, tree_level="parent", parent_path=None, **kwds
     ):
-        """Instantiate mapImages class,
+        """Instantiate mapImages class
 
         Parameters
         ----------
@@ -155,7 +155,7 @@ class mapImages:
     def add_metadata(
         self, metadata, columns=None, tree_level="parent", index_col=0, delimiter="|"
     ):
-        """Add metadata to images at tree_level
+        """Add metadata to each image present at `tree_level`
 
         Parameters
         ----------
@@ -219,7 +219,7 @@ class mapImages:
                     ]
 
     def show_sample(self, num_samples, tree_level="parent", random_seed=65, **kwds):
-        """Show sample images
+        """Show a sample of images present at `tree_level`
 
         Parameters
         ----------
@@ -269,7 +269,7 @@ class mapImages:
             self.add_shape_id(image_id=one_item, tree_level=tree_level)
 
     def add_coord_increments(self, tree_level="parent", verbose=False):
-        """Run `add_coord_increments_id` for each image at "tree_level"
+        """For each image present at `tree_level`, run `add_coord_increments_id` to calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
 
         Parameters
         ----------
@@ -294,7 +294,7 @@ class mapImages:
             )
 
     def add_center_coord(self, tree_level="child", verbose=False):
-        """Run `add_center_coord_id` for each image at "tree_level"
+        """For each image at `tree_level, run `add_center_coord_id` to calculate central longitude and latitude (center_lon and center_lat) and add to image.
 
         Parameters
         ----------
@@ -331,7 +331,7 @@ class mapImages:
             )
 
     def add_shape_id(self, image_id, tree_level="parent"):
-        """Add an image/array shape to image
+        """Calculate shape (image_height, image_width, image_channels) and add to image
 
         Parameters
         ----------
@@ -346,7 +346,7 @@ class mapImages:
         self.images[tree_level][image_id]["shape"] = myimg_shape
 
     def add_coord_increments_id(self, image_id, tree_level="parent", verbose=False):
-        """Add pixel-wise dlon and dlat to image
+        """Calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
 
         Parameters
         ----------
@@ -378,7 +378,7 @@ class mapImages:
             self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / image_height
 
     def add_center_coord_id(self, image_id, tree_level="child", verbose=False):
-        """Add center_lon and center_lat to image
+        """Calculate central longitude and latitude (center_lon and center_lat) and add to image
 
         Parameters
         ----------
@@ -701,7 +701,7 @@ class mapImages:
         os.makedirs(path_make, exist_ok=exists_ok)
 
     def calc_pixel_stats(self, parent_id=None, calc_mean=True, calc_std=True):
-        """Calculate pixel stats (R, G, B, RGB and, if present, Alpha) of each child in a parent_id and store the results
+        """Calculate pixel stats (R, G, B, RGB and, if present, Alpha) of each `child` of `parent_id` and store the results
 
         Parameters
         ----------
@@ -788,7 +788,7 @@ class mapImages:
         return parents, children
 
     def show_par(self, parent_id, value=False, **kwds):
-        """A wrapper function for `.show()` which plots all children of a specified parent
+        """A wrapper function for `.show()` which plots all children of a specified parent (`parent_id`)
 
         Parameters
         ----------
@@ -822,7 +822,7 @@ class mapImages:
         kml_dpi_image=None,
         **kwds,
     ):
-        """Plot images from a list of image ids
+        """Plot images from a list of `image_ids`
 
         Parameters
         ----------
@@ -1185,7 +1185,7 @@ class mapImages:
     def loadPatches(
         self, patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
     ):
-        """Load patches from path and, if parent_paths specified, add parents
+        """Load patches from `patch_paths` and, if `parent_paths` specified, add parents
 
         Parameters
         ----------
@@ -1239,7 +1239,7 @@ class mapImages:
 
     @staticmethod
     def detectParIDfromPath(image_id, parent_delimiter="#"):
-        """Detect parent IDs from image ID
+        """Detect parent IDs from `image_id`
 
         Parameters
         ----------
@@ -1285,8 +1285,8 @@ class mapImages:
     def loadParents(
         self, parent_paths=False, parent_ids=False, update=False, add_geo=False
     ):
-        """Load parent images from file paths.
-        If no path is given, only `parent_ids`, no image_path will be added to the images.
+        """Load parent images from file paths (`parent_paths`).
+        If `parent_paths` is not given, only `parent_ids`, no image path will be added to the images.
 
         Parameters
         ----------
