@@ -48,7 +48,7 @@ class mapImages:
         # New methods (e.g., reading/loading) should construct images this way
         self.images = {}
         self.images["parent"] = {}
-        self.images["child"] = {}
+        self.images["patch"] = {}
         for one_image_path in self.path_images:
             self.imagesConstructor(
                 image_path=one_image_path,
@@ -58,7 +58,7 @@ class mapImages:
             )
 
     def imagesConstructor(
-        self, image_path, parent_path=None, tree_level="child", **kwds
+        self, image_path, parent_path=None, tree_level="patch", **kwds
     ):
         """Construct images instance variable,
 
@@ -67,12 +67,12 @@ class mapImages:
 
         Keyword Arguments:
             parent_path {str or None} -- Path to the parent of image (default: {None})
-            tree_level {str} -- Tree level, choices between parent and child (default: {"child"})
+            tree_level {str} -- Tree level, choices between parent and patch (default: {"patch"})
         """
 
-        if tree_level not in ["parent", "child"]:
+        if tree_level not in ["parent", "patch"]:
             raise ValueError(
-                f"[ERROR] tree_level should be set to parent or child, current value: {tree_level}"
+                f"[ERROR] tree_level should be set to parent or patch, current value: {tree_level}"
             )
         if (parent_path is not None) and (tree_level == "parent"):
             raise ValueError(
@@ -99,7 +99,7 @@ class mapImages:
             self.images[tree_level][image_id][k] = v
 
         # --- Make sure parent exists in images["parent"]
-        if tree_level == "child" and parent_basename:
+        if tree_level == "patch" and parent_basename:
             # three possible scenarios
             # 1. parent_basename is not in the parent dictionary
             if not parent_basename in self.images["parent"].keys():
@@ -123,7 +123,7 @@ class mapImages:
         return path_basename, path_dirname
 
     def __len__(self):
-        return int(len(self.images["parent"]) + len(self.images["child"]))
+        return int(len(self.images["parent"]) + len(self.images["patch"]))
 
     def __str__(self):
         print(f"#images: {self.__len__()}")
@@ -135,8 +135,8 @@ class mapImages:
                 print("...")
                 break
 
-        print(f"\n#children: {len(self.images['child'])}")
-        for i, img in enumerate(self.images["child"]):
+        print(f"\n#patches: {len(self.images['patch'])}")
+        for i, img in enumerate(self.images["patch"]):
             print(os.path.relpath(img))
             if i >= 10:
                 print("...")
@@ -151,7 +151,7 @@ class mapImages:
         Args:
             metadata_path (path): path to a csv file, normally created from a pandas dataframe
             columns (list, optional): list of columns to be used. If None (default), all columns are used.
-            tree_level (str, optional): parent/child tree level. Defaults to "parent".
+            tree_level (str, optional): parent/patch tree level. Defaults to "parent".
             index_col (int, optional): index column
         """
 
@@ -209,7 +209,7 @@ class mapImages:
             num_samples {int} -- Number of samples to be plotted
 
         Keyword Arguments:
-            tree_level {str} -- XXX (default: {"child"})
+            tree_level {str} -- XXX (default: {"patch"})
             random_seed {int} -- Random seed for reproducibility (default: {65})
         """
         # set random seed for reproducibility
@@ -238,9 +238,9 @@ class mapImages:
         """Return list of all parents"""
         return list(self.images["parent"].keys())
 
-    def list_children(self):
-        """Return list of all children"""
-        return list(self.images["child"].keys())
+    def list_patches(self):
+        """Return list of all patches"""
+        return list(self.images["patch"].keys())
 
     def add_shape(self, tree_level="parent"):
         """Run add_shape_id for all tree_level items"""
@@ -256,7 +256,7 @@ class mapImages:
         for one_item in list_items:
             self.add_coord_increments_id(image_id=one_item, tree_level=tree_level)
 
-    def add_center_coord(self, tree_level="child"):
+    def add_center_coord(self, tree_level="patch"):
         """Run add_center_coord_id for all tree_level items"""
         list_items = list(self.images[tree_level].keys())
         print(f"[INFO] Add center coordinates, tree level: {tree_level}")
@@ -271,7 +271,7 @@ class mapImages:
         image_id : str
             image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices between parent and patch (default: {"patch"})
         """
         myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
         myimg_shape = myimg.shape
@@ -285,7 +285,7 @@ class mapImages:
         image_id : str
             image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices between parent and patch (default: {"patch"})
         """
         if not "shape" in self.images[tree_level][image_id].keys():
             self.add_shape(tree_level=tree_level)
@@ -301,7 +301,7 @@ class mapImages:
         self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / hwc[1]
         self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / hwc[0]
 
-    def add_center_coord_id(self, image_id, tree_level="child"):
+    def add_center_coord_id(self, image_id, tree_level="patch"):
         """Add center_lon and center_lat to self.images[tree_level][image_id]
 
         Parameters
@@ -309,7 +309,7 @@ class mapImages:
         image_id : str
             image ID
         tree_level : str, optional
-            Tree level, choices between parent and child (default: {"child"})
+            Tree level, choices between parent and patch (default: {"patch"})
         """
 
         par_id = self.images[tree_level][image_id]["parent_id"]
@@ -417,7 +417,7 @@ class mapImages:
         rewrite=False,
         verbose=False,
         tree_level="parent",
-        add2child=True,
+        add2par=True,
         id1=0,
         id2=-1,
     ):
@@ -456,21 +456,21 @@ class mapImages:
                 tree_level=tree_level,
             )
 
-            if add2child:
+            if add2par:
                 for i in range(len(sliced_images_info)):
-                    # Add sliced images to the .images["child"]
+                    # Add sliced images to the .images["patch"]
                     self.imagesConstructor(
                         image_path=sliced_images_info[i][0],
                         parent_path=self.images[tree_level][one_image]["image_path"],
-                        tree_level="child",
+                        tree_level="patch",
                         min_x=sliced_images_info[i][1][0],
                         min_y=sliced_images_info[i][1][1],
                         max_x=sliced_images_info[i][1][2],
                         max_y=sliced_images_info[i][1][3],
                     )
-        if add2child:
-            # add children to the parent dictionary
-            self.addChildren()
+        if add2par:
+            # add patches to the parent dictionary
+            self.addPatches()
 
     def _slice(
         self,
@@ -567,22 +567,22 @@ class mapImages:
                 )
         return sliced_images_info
 
-    def addChildren(self):
-        """Add children to parent"""
-        for child in self.images["child"].keys():
-            my_parent = self.images["child"][child]["parent_id"]
-            if not self.images["parent"][my_parent].get("children", False):
-                self.images["parent"][my_parent]["children"] = [child]
+    def addPatches(self):
+        """Add patches to parent"""
+        for patch in self.images["patch"].keys():
+            my_parent = self.images["patch"][patch]["parent_id"]
+            if not self.images["parent"][my_parent].get("patches", False):
+                self.images["parent"][my_parent]["patches"] = [patch]
             else:
-                if not child in self.images["parent"][my_parent]["children"]:
-                    self.images["parent"][my_parent]["children"].append(child)
+                if not patch in self.images["parent"][my_parent]["patches"]:
+                    self.images["parent"][my_parent]["patches"].append(patch)
 
     def _makeDir(self, path_make, exists_ok=True):
         """helper function to make directories"""
         os.makedirs(path_make, exist_ok=exists_ok)
 
     def calc_pixel_stats(self, parent_id=None, calc_mean=True, calc_std=True):
-        """Calculate stats of each child in a parent_id and
+        """Calculate stats of each patch in a parent_id and
            store the results
 
         Arguments:
@@ -596,47 +596,47 @@ class mapImages:
         for one_par_id in parent_id:
             print(10 * "-")
             print(f"[INFO] calculate pixel stats for image: {one_par_id}")
-            if not "children" in self.images["parent"][one_par_id]:
-                print(f"[WARNING] No child found for: {one_par_id}")
+            if not "patches" in self.images["parent"][one_par_id]:
+                print(f"[WARNING] No patches found for: {one_par_id}")
                 continue
-            list_children = self.images["parent"][one_par_id]["children"]
-            for one_child in list_children:
-                if ("mean_pixel_A" in self.images["child"][one_child].keys()) and (
-                    "std_pixel_A" in self.images["child"][one_child].keys()
+            list_patches = self.images["parent"][one_par_id]["patches"]
+            for one_patch in list_patches:
+                if ("mean_pixel_A" in self.images["patch"][one_patch].keys()) and (
+                    "std_pixel_A" in self.images["patch"][one_patch].keys()
                 ):
                     continue
-                child_img = mpimg.imread(self.images["child"][one_child]["image_path"])
+                patch_img = mpimg.imread(self.images["patch"][one_patch]["image_path"])
                 if calc_mean:
-                    self.images["child"][one_child]["mean_pixel_R"] = np.mean(
-                        child_img[:, :, 0]
+                    self.images["patch"][one_patch]["mean_pixel_R"] = np.mean(
+                        patch_img[:, :, 0]
                     )
-                    self.images["child"][one_child]["mean_pixel_G"] = np.mean(
-                        child_img[:, :, 1]
+                    self.images["patch"][one_patch]["mean_pixel_G"] = np.mean(
+                        patch_img[:, :, 1]
                     )
-                    self.images["child"][one_child]["mean_pixel_B"] = np.mean(
-                        child_img[:, :, 2]
+                    self.images["patch"][one_patch]["mean_pixel_B"] = np.mean(
+                        patch_img[:, :, 2]
                     )
-                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(
-                        child_img[:, :, 0:3]
+                    self.images["patch"][one_patch]["mean_pixel_RGB"] = np.mean(
+                        patch_img[:, :, 0:3]
                     )
-                    self.images["child"][one_child]["mean_pixel_A"] = np.mean(
-                        child_img[:, :, 3]
+                    self.images["patch"][one_patch]["mean_pixel_A"] = np.mean(
+                        patch_img[:, :, 3]
                     )
                 if calc_std:
-                    self.images["child"][one_child]["std_pixel_R"] = np.std(
-                        child_img[:, :, 0]
+                    self.images["patch"][one_patch]["std_pixel_R"] = np.std(
+                        patch_img[:, :, 0]
                     )
-                    self.images["child"][one_child]["std_pixel_G"] = np.std(
-                        child_img[:, :, 1]
+                    self.images["patch"][one_patch]["std_pixel_G"] = np.std(
+                        patch_img[:, :, 1]
                     )
-                    self.images["child"][one_child]["std_pixel_B"] = np.std(
-                        child_img[:, :, 2]
+                    self.images["patch"][one_patch]["std_pixel_B"] = np.std(
+                        patch_img[:, :, 2]
                     )
-                    self.images["child"][one_child]["std_pixel_RGB"] = np.std(
-                        child_img[:, :, 0:3]
+                    self.images["patch"][one_patch]["std_pixel_RGB"] = np.std(
+                        patch_img[:, :, 0:3]
                     )
-                    self.images["child"][one_child]["std_pixel_A"] = np.std(
-                        child_img[:, :, 3]
+                    self.images["patch"][one_patch]["std_pixel_A"] = np.std(
+                        patch_img[:, :, 3]
                     )
 
     def convertImages(self, fmt="dataframe"):
@@ -646,9 +646,9 @@ class mapImages:
             fmt {str} -- convert images variable to this format (default: {"dataframe"})
         """
         if fmt in ["pandas", "dataframe"]:
-            children = pd.DataFrame.from_dict(self.images["child"], orient="index")
+            patches = pd.DataFrame.from_dict(self.images["patch"], orient="index")
             parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
-            return parents, children
+            return parents, patches
         else:
             raise ValueError(f"Format {fmt} is not supported!")
 
@@ -661,7 +661,7 @@ class mapImages:
         Keyword Arguments:
             value {bool, const, random, ...} -- Values to be plotted on the parent image (default: {False})
         """
-        image_ids = self.images["parent"][parent_id]["children"]
+        image_ids = self.images["parent"][parent_id]["patches"]
         self.show(image_ids, value=value, **kwds)
 
     def show(
@@ -676,7 +676,7 @@ class mapImages:
         colorbar="jet",
         alpha=1.0,
         discrete_colorbar=256,
-        tree_level="child",
+        tree_level="patch",
         grid_plot=(20000, 20000),
         plot_histogram=True,
         save_kml_dir=False,
@@ -690,7 +690,7 @@ class mapImages:
             image_ids {list} -- List of image ids to be plotted
 
         Keyword Arguments:
-            value {False or list} -- Value to be plotted on child images
+            value {False or list} -- Value to be plotted on patch images
             plot_parent {bool} -- Plot parent image in the background (default: {True})
             border {bool} -- Plot a border for each image id (default: {True})
             border_color {str} -- color of patch borders (default: {r})
@@ -699,7 +699,7 @@ class mapImages:
             colorbar {str or list} -- colorbar to visualize "value" on maps (default: {jet})
             alpha {float or list} -- set transparency level for plotting "value" on maps (default: {1.})
             discrete_colorbar {int or list} -- number of discrete colors to be used (default: {256})
-            tree_level {str} -- Tree level for the plot XXX (default: {"child"})
+            tree_level {str} -- Tree level for the plot XXX (default: {"patch"})
             grid_plot {list or tuple} -- Number of rows and columns in the image.
                                          This will later adjusted to the true min/max of all subplots.
                                          (default: (10000, 10000))
@@ -782,7 +782,7 @@ class mapImages:
                     plt.title(one_image_id)
                     plt.show()
 
-        elif tree_level == "child":
+        elif tree_level == "patch":
             # Collect parents information
             parents = {}
             for i in range(len(image_ids)):
@@ -794,9 +794,9 @@ class mapImages:
                 if not parent_id in parents:
                     parents[parent_id] = {
                         "path": self.images["parent"][parent_id]["image_path"],
-                        "child": [],
+                        "patch": [],
                     }
-                parents[parent_id]["child"].append(image_ids[i])
+                parents[parent_id]["patch"].append(image_ids[i])
 
             for i in parents.keys():
                 figsize = self._get_kwds(kwds, "figsize")
@@ -808,10 +808,10 @@ class mapImages:
                     image2plot = np.empty(grid_plot)
                     image2plot[:] = np.nan
                     min_x, min_y, max_x, max_y = grid_plot[1], grid_plot[0], 0, 0
-                    for child_id in parents[i]["child"]:
-                        one_image = self.images[tree_level][child_id]
+                    for patch_id in parents[i]["patch"]:
+                        one_image = self.images[tree_level][patch_id]
 
-                        # Set the values for each child
+                        # Set the values for each patch
                         if not value:
                             pass
 
@@ -968,7 +968,7 @@ class mapImages:
         """Plot border for an image
 
         Arguments:
-            image_dict {dict} -- image dictionary, e.g., one item in self.images["child"]
+            image_dict {dict} -- image dictionary, e.g., one item in self.images["patch"]
             plt {matplotlib.pyplot object} -- a matplotlib.pyplot object
 
         Keyword Arguments:
@@ -1041,7 +1041,7 @@ class mapImages:
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
-            self.images["child"] = {}
+            self.images["patch"] = {}
 
         for tpath in patch_paths:
 
@@ -1056,23 +1056,23 @@ class mapImages:
             parent_id = self.detectParIDfromPath(patch_id)
             min_x, min_y, max_x, max_y = self.detectBorderFromPath(patch_id)
 
-            # Add child
-            if not self.images["child"].get(patch_id, False):
-                self.images["child"][patch_id] = {}
-            self.images["child"][patch_id]["parent_id"] = parent_id
-            self.images["child"][patch_id]["image_path"] = tpath
-            self.images["child"][patch_id]["min_x"] = min_x
-            self.images["child"][patch_id]["min_y"] = min_y
-            self.images["child"][patch_id]["max_x"] = max_x
-            self.images["child"][patch_id]["max_y"] = max_y
+            # Add patch
+            if not self.images["patch"].get(patch_id, False):
+                self.images["patch"][patch_id] = {}
+            self.images["patch"][patch_id]["parent_id"] = parent_id
+            self.images["patch"][patch_id]["image_path"] = tpath
+            self.images["patch"][patch_id]["min_x"] = min_x
+            self.images["patch"][patch_id]["min_y"] = min_y
+            self.images["patch"][patch_id]["max_x"] = max_x
+            self.images["patch"][patch_id]["max_y"] = max_y
 
         if parent_paths:
             # Add parents
             self.loadParents(
                 parent_paths=parent_paths, update=False, add_geo=add_geo_par
             )
-            # Add children to the parent
-            self.addChildren()
+            # Add patches to the parent
+            self.addPatches()
 
     @staticmethod
     def detectParIDfromPath(image_id, parent_delimiter="#"):
@@ -1086,7 +1086,7 @@ class mapImages:
     def detectBorderFromPath(image_id, border_delimiter="-"):
         """
         Detect borders from the path using border_delimiter.
-        Here, the assumption is that the child image is named:
+        Here, the assumption is that the patch image is named:
         NOTE: STRING-min_x-min_y-max_x-max_y-STRING
         """
         split_path = image_id.split("-")
@@ -1150,20 +1150,20 @@ class mapImages:
                 self.images["parent"][parent_id] = {"parent_id": None}
                 self.images["parent"][parent_id]["image_path"] = None
 
-    def loadDataframe(self, parents=None, children_df=None, clear_images=True):
+    def loadDataframe(self, parents=None, patch_df=None, clear_images=True):
         """Read dataframes and form images variable
 
         Keyword Arguments:
             parents_df {dataframe or path} -- Parents dataframe or path to parents (default: {None})
-            children_df {dataframe} -- Children/slices dataframe (default: {None})
+            patch_df {dataframe} -- patches/slices dataframe (default: {None})
             clear_images {bool} -- clear images before reading dataframes (default: {True})
         """
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
-            self.images["child"] = {}
-        if not isinstance(children_df, type(None)):
-            self.images["child"] = children_df.to_dict(orient="index")
+            self.images["patch"] = {}
+        if not isinstance(patch_df, type(None)):
+            self.images["patch"] = patch_df.to_dict(orient="index")
         if not isinstance(parents, type(None)):
             if isinstance(parents, str):
                 self.loadParents(parents)
@@ -1172,7 +1172,7 @@ class mapImages:
             for one_par in self.images["parent"].keys():
 
                 # Do we need this?
-                # k2change = "children"
+                # k2change = "patches"
                 # if k2change in self.images["parent"][one_par]:
                 #    try:
                 #        self.images["parent"][one_par][k2change] = self.images["parent"][one_par][k2change]
@@ -1188,24 +1188,24 @@ class mapImages:
                     except Exception as err:
                         print(err)
 
-            self.addChildren()
+            self.addPatches()
 
     def load_csv_file(
         self,
         parent_path=None,
-        child_path=None,
+        patch_path=None,
         clear_images=False,
-        index_col_child=0,
+        index_col_patch=0,
         index_col_parent=0,
     ):
-        """Read parent and child from CSV files"""
+        """Read parent and patch from CSV files"""
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
-            self.images["child"] = {}
-        if isinstance(child_path, str) and os.path.isfile(child_path):
-            self.images["child"].update(
-                pd.read_csv(child_path, index_col=index_col_child).to_dict(
+            self.images["patch"] = {}
+        if isinstance(patch_path, str) and os.path.isfile(patch_path):
+            self.images["patch"].update(
+                pd.read_csv(patch_path, index_col=index_col_patch).to_dict(
                     orient="index"
                 )
             )
@@ -1215,9 +1215,9 @@ class mapImages:
                     orient="index"
                 )
             )
-            self.addChildren()
+            self.addPatches()
             for one_par in self.images["parent"].keys():
-                k2change = "children"
+                k2change = "patches"
                 if k2change in self.images["parent"][one_par]:
                     self.images["parent"][one_par][k2change] = eval(
                         self.images["parent"][one_par][k2change]
@@ -1251,7 +1251,7 @@ class mapImages:
     ###     if clear_images:
     ###         self.images = {}
     ###         self.images["parent"] = {}
-    ###         self.images["child"] = {}
+    ###         self.images["patch"] = {}
     ###
     ###     # XXX check
     ###     if not isinstance(metadata, type(None)):
@@ -1284,35 +1284,35 @@ class mapImages:
     ###         parent_id = self.detectParIDfromPath(patch_id)
     ###         min_x, min_y, max_x, max_y = self.detectBorderFromPath(patch_id)
 
-    ###         # Add child
-    ###         if not self.images["child"].get(patch_id, False):
-    ###             self.images["child"][patch_id] = {}
-    ###         self.images["child"][patch_id]["parent_id"] = parent_id
-    ###         self.images["child"][patch_id]["image_path"] = tpath
-    ###         self.images["child"][patch_id]["min_x"] = min_x
-    ###         self.images["child"][patch_id]["min_y"] = min_y
-    ###         self.images["child"][patch_id]["max_x"] = max_x
-    ###         self.images["child"][patch_id]["max_y"] = max_y
+    ###         # Add patch
+    ###         if not self.images["patch"].get(patch_id, False):
+    ###             self.images["patch"][patch_id] = {}
+    ###         self.images["patch"][patch_id]["parent_id"] = parent_id
+    ###         self.images["patch"][patch_id]["image_path"] = tpath
+    ###         self.images["patch"][patch_id]["min_x"] = min_x
+    ###         self.images["patch"][patch_id]["min_y"] = min_y
+    ###         self.images["patch"][patch_id]["max_x"] = max_x
+    ###         self.images["patch"][patch_id]["max_y"] = max_y
 
     ###     # XXX check
     ###     if include_metadata:
     ###         # metadata_cols = set(metadata_df.columns) - set(['rd_index_id'])
     ###         for one_row in metadata_df.iterrows():
     ###             for one_col in list(metadata_cols2add):
-    ###                 self.images["child"][one_row[1]['rd_index_id']][one_col] = one_row[1][one_col]
+    ###                 self.images["patch"][one_row[1]['rd_index_id']][one_col] = one_row[1][one_col]
 
     ###     if parent_paths:
     ###         # Add parents
     ###         self.readParents(parent_paths=parent_paths)
-    ###         # Add children to the parent
-    ###         self.addChildren()
+    ###         # Add patches to the parent
+    ###         self.addPatches()
 
     ### def process(self, tree_level="parent", update_paths=True,
     ###             save_preproc_dir="./test_preproc"):
     ###     """Process images using process.py module
 
     ###     Args:
-    ###         tree_level (str, optional): "parent" or "child" paths will be used. Defaults to "parent".
+    ###         tree_level (str, optional): "parent" or "patch" paths will be used. Defaults to "parent".
     ###         update_paths (bool, optional): XXX. Defaults to True.
     ###         save_preproc_dir (str, optional): Path to store preprocessed images. Defaults to "./test_preproc".
     ###     """
@@ -1330,7 +1330,7 @@ class mapImages:
     ###     """Create a list of paths to be processed
 
     ###     Args:
-    ###         tree_level (str, optional): "parent" or "child" paths will be used. Defaults to "parent".
+    ###         tree_level (str, optional): "parent" or "patch" paths will be used. Defaults to "parent".
     ###     """
     ###     process_paths = []
     ###     for one_img in self.images[tree_level].keys():
@@ -1346,12 +1346,12 @@ class mapImages:
     ###         fmt {str} -- convert images variable to this format (default: {"dataframe"})
     ###     """
     ###     if fmt in ["pandas", "dataframe"]:
-    ###         children = pd.DataFrame.from_dict(self.images["child"], orient="index")
-    ###         children.reset_index(inplace=True)
-    ###         if len(children) > 0:
-    ###             children.rename(columns={"image_path": "image_id"}, inplace=True)
-    ###             children.drop(columns=["index", "parent_id"], inplace=True)
-    ###             children["label"] = -1
+    ###         patches = pd.DataFrame.from_dict(self.images["patch"], orient="index")
+    ###         patches.reset_index(inplace=True)
+    ###         if len(patches) > 0:
+    ###             patches.rename(columns={"image_path": "image_id"}, inplace=True)
+    ###             patches.drop(columns=["index", "parent_id"], inplace=True)
+    ###             patches["label"] = -1
 
     ###         parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
     ###         parents.reset_index(inplace=True)
@@ -1360,6 +1360,6 @@ class mapImages:
     ###             parents.drop(columns=["index", "parent_id"], inplace=True)
     ###             parents["label"] = -1
 
-    ###         return parents, children
+    ###         return parents, patches
     ###     else:
     ###         raise ValueError(f"Format {fmt} is not supported!")

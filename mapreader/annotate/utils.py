@@ -39,7 +39,7 @@ def display_record(record):
     gridsize = (5, 1)
     plt.clf()
     plt.figure(figsize=(12, 12))
-    if treelevel == "child" and contextimage:
+    if treelevel == "patch" and contextimage:
         plt.subplot2grid(gridsize, (2, 0))
     else:
         plt.subplot2grid(gridsize, (0, 0), rowspan=2)
@@ -48,7 +48,7 @@ def display_record(record):
     plt.yticks([])
     plt.title(f"{record[0]}", size=20)
 
-    if treelevel == "child" and contextimage:
+    if treelevel == "patch" and contextimage:
         parent_path = os.path.dirname(
             annotation_tasks["paths"][record[3]]["parent_paths"]
         )
@@ -301,7 +301,7 @@ def prepare_annotation(
     redo_annotation=False,
     patch_paths=False,
     parent_paths=False,
-    tree_level="child",
+    tree_level="patch",
     sortby=None,
     min_alpha_channel=None,
     min_mean_pixel=None,
@@ -327,7 +327,7 @@ def prepare_annotation(
         redo_annotation (bool, optional): redo annotations. Defaults to False.
         patch_paths (bool, str, optional): if custom_labels, specify path to patches. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
         parent_paths (bool, str, optional): if custom_labels, specify path to parent images. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-        tree_level (str, optional): parent/child tree level. Defaults to "child".
+        tree_level (str, optional): parent/patch tree level. Defaults to "patch".
         sortby (None, mean, optional): sort patches to be annotated. Defaults to None.
         context_image (bool): add a context image or not
         xoffset (int, optional): x-offset for the borders of the context image. Defaults to 500.
@@ -360,7 +360,7 @@ def prepare_annotation(
             f"{annotation_set} could not be found in {annotation_tasks_file}"
         )
     else:
-        if tree_level == "child":
+        if tree_level == "patch":
             patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"]
         parent_paths = os.path.join(
             annotation_tasks["paths"][annotation_set]["parent_paths"]
@@ -379,7 +379,7 @@ def prepare_annotation(
     else:
         list_labels = annotation_tasks["tasks"][task]["labels"]
 
-    if tree_level == "child":
+    if tree_level == "patch":
         # specify the path of patches and the parent images
         mymaps = load_patches(patch_paths=patch_paths, parent_paths=parent_paths)
         if os.path.isfile(annot_file):

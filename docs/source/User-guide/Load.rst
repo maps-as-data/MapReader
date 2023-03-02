@@ -6,22 +6,20 @@ MapReader's ``load`` subpackage is used to load, visualise and patchify images (
 Load images (and metadata)
 ----------------------------
 
-First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using: 
+First, your image files (e.g. png, jpeg, tiff or geotiff files) should be loaded in using: 
 
 .. code :: python
 
     from mapreader import loader
     my_files = loader("./path/to/files")
 
-This creates a mapImages object (``my_files``) which contains information about your images. 
-To see the contents of this object, use: 
+This creates a mapImages object (``my_files``), the contents of which can be viewed using: 
 
 .. code :: python
 
     print(my_files)
 
-You will see that your images are labelled as either parents or children.
-This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.
+You will see that your mapImages object contains the files you have loaded and that these are labelled as 'parents'. 
 
 If your image files contain metadata (e.g. if you have loaded geotiff files), you can add this into your mapImages object using:
 
@@ -61,16 +59,16 @@ e.g. :
 
     my_files.sliceAll(method="meters", slice_size=1)
 
-After patchifying, you'll see that ``print(my_files)`` shows you have both parents and children (patches).
-To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_children()`` methods: 
+After patchifying, you'll see that ``print(my_files)`` shows you have both parents and patches.
+To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
 
 .. code :: python
 
     parent_list=my_files.list_parents()
-    child_list=my_files.list_children()
+    patch_list=my_files.list_patches()
 
     print(parent_list)
-    print(child_list[0:5]) # too many to print them all!
+    print(patch_list[0:5]) # too many to print them all!
 
 Or, to view these in a dataframe, use:
 
@@ -95,23 +93,23 @@ To view a random sample of your images, use:
 
 
 By default, this will show you a random sample of your parent images.
-To see a random sample of your patches (child images) use the ``tree_level="child"`` argument: 
+To see a random sample of your patches use the ``tree_level="patch"`` argument: 
 
 .. code :: python
 
-    my_files.show_sample(num_samples=3, tree_level="child")
+    my_files.show_sample(num_samples=3, tree_level="patch")
 
 .. image:: ../figures/show_sample_child.png
     :width: 400px
 
 
-It can also be helpful to see your patches (child images) in the context of their parent image. To do this use the ``.show()`` method. 
+It can also be helpful to see your patches in the context of their parent image. To do this use the ``.show()`` method. 
 
 e.g. :
 
 .. code :: python
 
-    my_files.show(child_list[250:300])
+    my_files.show(patch_list[250:300])
 
 .. image:: ../figures/show.png
     :width: 400px
@@ -121,7 +119,7 @@ or
 
 .. code :: python
 
-    files_to_show=[child_list[0], child_list[350], child_list[400]]
+    files_to_show=[patch_list[0], patch_list[350], patch_list[400]]
     my_files.show(files_to_show)
 
 .. image:: ../figures/show_list.png
@@ -150,7 +148,7 @@ If you have loaded geographic coordinates into your mapImages object, you may wa
 
     my_files.add_center_coord()
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each patch (child image) and parent image:
+The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of patch and parent image:
 
 .. code :: python
 
