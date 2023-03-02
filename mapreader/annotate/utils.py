@@ -25,6 +25,7 @@ from ipyannotate.buttons import (
     BackButton as Back,
 )
 
+
 # -------- display_record
 def display_record(record):
     """Display patches for annotation

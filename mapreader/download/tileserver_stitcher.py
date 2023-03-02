@@ -19,9 +19,9 @@ from PIL import Image
 
 from .tileserver_helpers import input_class
 
+
 # -------
 def runner(opts):
-
     search_path = os.path.join(opts.dir, "*_*_*.png")
 
     filepaths = glob.glob(search_path)

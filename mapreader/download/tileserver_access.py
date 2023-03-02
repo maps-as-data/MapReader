@@ -317,7 +317,6 @@ class TileServer:
                 )
 
                 if saved_metadata is not None:
-
                     try_cond1 = (
                         str(one_item["geometry"]["coordinates"][0][0])
                         in saved_metadata["polygone"].to_list()
@@ -666,7 +665,6 @@ class TileServer:
             # only save an image if no error was raised
             not_saved = True
             while not_saved:
-
                 # failed_urls_path is created by scraper.py
                 # remove the file and check if it will be created by scraper
                 if os.path.isfile(failed_urls_path):

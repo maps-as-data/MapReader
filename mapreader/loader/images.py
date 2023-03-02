@@ -31,7 +31,8 @@ class mapImages:
     """mapImages class"""
 
     def __init__(
-        self, path_images=False, tree_level="parent", parent_path=None, **kwds):
+        self, path_images=False, tree_level="parent", parent_path=None, **kwds
+    ):
         """Instantiate mapImages class,
 
         Parameters
@@ -277,17 +278,20 @@ class mapImages:
         verbose : bool, optional
             If true, print verbose outputs, by default False
         """
-        
+
         list_items = list(self.images[tree_level].keys())
         print(f"[INFO] Add coord-increments, tree level: {tree_level}")
         for one_item in list_items:
-            
             if not "coord" in self.images[tree_level][one_item].keys():
                 if verbose:
-                    print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                    print(
+                        f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                    )
                 continue
 
-            self.add_coord_increments_id(image_id=one_item, tree_level=tree_level, verbose=verbose)
+            self.add_coord_increments_id(
+                image_id=one_item, tree_level=tree_level, verbose=verbose
+            )
 
     def add_center_coord(self, tree_level="child", verbose=False):
         """Run `add_center_coord_id` for each image at "tree_level"
@@ -300,26 +304,31 @@ class mapImages:
             If True, print verbose outputs, by default False
         """
         list_items = list(self.images[tree_level].keys())
-        
+
         print(f"[INFO] Add center coordinates, tree level: {tree_level}")
-        
+
         for one_item in list_items:
-            
             if tree_level == "parent":
                 if not "coord" in self.images[tree_level][one_item].keys():
                     if verbose:
-                        print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                        print(
+                            f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                        )
                     continue
-            
+
             if tree_level == "child":
                 par_id = self.images[tree_level][one_item]["parent_id"]
-                
+
                 if not "coord" in self.images["parent"][par_id].keys():
                     if verbose:
-                        print(f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo")
+                        print(
+                            f"'coord' could not be found in {one_item}.Suggestion: run add_metadata or addGeoInfo"
+                        )
                     continue
-            
-            self.add_center_coord_id(image_id=one_item, tree_level=tree_level, verbose=verbose)
+
+            self.add_center_coord_id(
+                image_id=one_item, tree_level=tree_level, verbose=verbose
+            )
 
     def add_shape_id(self, image_id, tree_level="parent"):
         """Add an image/array shape to image
@@ -332,7 +341,7 @@ class mapImages:
             Tree level, choices of "parent" or "child, by default "parent"
         """
         myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
-        #shape = (hwc)
+        # shape = (hwc)
         myimg_shape = myimg.shape
         self.images[tree_level][image_id]["shape"] = myimg_shape
 
@@ -354,13 +363,17 @@ class mapImages:
 
         if not "coord" in self.images[tree_level][image_id].keys():
             if verbose:
-                print(f"'coord' could not be found in {image_id}.Suggestion: run add_metadata or addGeoInfo")
+                print(
+                    f"'coord' could not be found in {image_id}.Suggestion: run add_metadata or addGeoInfo"
+                )
                 return
-        
+
         else:
             # Extract height/width/chan from shape
-            h,w,c = self.images[tree_level][image_id]["shape"]
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id]["coord"]
+            h, w, c = self.images[tree_level][image_id]["shape"]
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
+                "coord"
+            ]
             self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / w
             self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / h
 
@@ -379,15 +392,16 @@ class mapImages:
 
         par_id = self.images[tree_level][image_id]["parent_id"]
 
-        #i.e. for children
+        # i.e. for children
         if par_id is not None:
-            if (not "dlon" in self.images["parent"][par_id].keys()) or (not "dlat" in self.images["parent"][par_id].keys()):
-                
+            if (not "dlon" in self.images["parent"][par_id].keys()) or (
+                not "dlat" in self.images["parent"][par_id].keys()
+            ):
                 if not "coord" in self.images["parent"][par_id].keys():
                     if verbose:
                         print(f"No coordinates found in {par_id}")
                     return
-            
+
                 else:
                     self.add_coord_increments(tree_level="parent")
 
@@ -398,7 +412,7 @@ class mapImages:
             max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
             max_abs_y = self.images[tree_level][image_id]["max_y"] * dlat
-            
+
             self.images[tree_level][image_id]["center_lon"] = (
                 lon_min + (min_abs_x + max_abs_x) / 2.0
             )
@@ -417,7 +431,9 @@ class mapImages:
             self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
             self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
 
-    def calc_pixel_width_height(self, parent_id, calc_size_in_m="great-circle", verbose=False):
+    def calc_pixel_width_height(
+        self, parent_id, calc_size_in_m="great-circle", verbose=False
+    ):
         """Calculate width and height of pixels
 
         Parameters
@@ -437,13 +453,14 @@ class mapImages:
         """
 
         if not "coord" in self.images["parent"][parent_id].keys():
-            print(f"No coordinates found in {parent_id}. Suggestion: run add_metadata or addGeoInfo")
+            print(
+                f"No coordinates found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"
+            )
             return
 
         myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
         h, w, c = myimg_shape = myimg.shape
 
-        
         (xmin, xmax, ymin, ymax) = self.images["parent"][parent_id]["coord"]
         if verbose:
             print(f"[INFO] Using the following coordinates to compute width/height:")
@@ -460,19 +477,15 @@ class mapImages:
             size_in_m = (bottom, top, left, right)
             if verbose:
                 print(
-                f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
-            )
+                    f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
+                )
 
-            mean_width = np.mean(
-                [size_in_m[0]/w, size_in_m[1]/w]
-            )
-            mean_height = np.mean(
-                [size_in_m[2]/h, size_in_m[3]/h]
-            )
+            mean_width = np.mean([size_in_m[0] / w, size_in_m[1] / w])
+            mean_height = np.mean([size_in_m[2] / h, size_in_m[3] / h])
             if verbose:
                 print(
-                f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
-            )
+                    f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
+                )
 
         elif calc_size_in_m in ["gc", "great-circle"]:
             bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
@@ -484,12 +497,8 @@ class mapImages:
                 f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
             )
 
-            mean_width = np.mean(
-                [size_in_m[0]/w, size_in_m[1]/w]
-            )
-            mean_height = np.mean(
-                [size_in_m[2]/h, size_in_m[3]/h]
-            )
+            mean_width = np.mean([size_in_m[0] / w, size_in_m[1] / w])
+            mean_height = np.mean([size_in_m[2] / h, size_in_m[3] / h])
             print(
                 f"\nEach pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
             )
@@ -617,13 +626,13 @@ class mapImages:
             If True, progress updates will be printed throughout, by default False
         tree_level : str, optional
             Tree level, choices between "parent" or "child, by default "parent"
-        
+
         Returns
         -------
         list
             sliced_images_info
         """
-        
+
         print(40 * "=")
         print(f"Slicing {os.path.relpath(image_path)}")
         print(40 * "-")
@@ -647,33 +656,34 @@ class mapImages:
             )
 
         elif method in ["meters", "meter"]:
+            if not "coord" in self.images[tree_level][image_id].keys():
+                raise ValueError(
+                    "Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo"
+                )
 
-            if (not "coord" in self.images[tree_level][image_id].keys()):
-                raise ValueError ("Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo")
-            
             if not "shape" in self.images[tree_level][image_id].keys():
                 self.add_shape_id(image_id=image_id, tree_level=tree_level)
 
             h, w, c = self.images[tree_level][image_id]["shape"]
-            
+
             # size in meter contains: (bottom, top, left, right)
             size_in_m = self.calc_pixel_width_height(image_id)
-            
-            #pixel height in m per pixel
+
+            # pixel height in m per pixel
             pixel_height = size_in_m[2] / h
             number_pixels4slice = int(slice_size / pixel_height)
 
             sliced_images_info = sliceByPixel(
-                    image_path=image_path,
-                    slice_size=number_pixels4slice,
-                    path_save=path_save,
-                    square_cuts=square_cuts,
-                    resize_factor=resize_factor,
-                    output_format=output_format,
-                    rewrite=rewrite,
-                    verbose=verbose,
-                )
-        
+                image_path=image_path,
+                slice_size=number_pixels4slice,
+                path_save=path_save,
+                square_cuts=square_cuts,
+                resize_factor=resize_factor,
+                output_format=output_format,
+                rewrite=rewrite,
+                verbose=verbose,
+            )
+
         return sliced_images_info
 
     def addChildren(self):
@@ -696,14 +706,14 @@ class mapImages:
         Parameters
         ----------
         parent_id : str, list or None, optional
-            ID of the parent image(s). 
+            ID of the parent image(s).
             If None, all parents will be used, by default None
         calc_mean : bool, optional
             Calculate mean values, by default True
         calc_std : bool, optional
             Calculate standard deviations, by default True
         """
-        
+
         if parent_id is None:
             parent_id = self.list_parents()
         else:
@@ -712,42 +722,57 @@ class mapImages:
         for one_par_id in parent_id:
             print(10 * "-")
             print(f"[INFO] calculate pixel stats for image: {one_par_id}")
-            
+
             if not "children" in self.images["parent"][one_par_id]:
                 print(f"[WARNING] No child found for: {one_par_id}")
                 continue
-            
+
             list_children = self.images["parent"][one_par_id]["children"]
-            
+
             for one_child in list_children:
                 if ("mean_pixel_RGB" in self.images["child"][one_child].keys()) and (
                     "std_pixel_RGB" in self.images["child"][one_child].keys()
                 ):
                     continue
-                
+
                 child_img = mpimg.imread(self.images["child"][one_child]["image_path"])
-                
+
                 if calc_mean:
-                    self.images["child"][one_child]["mean_pixel_R"] = np.mean(child_img[:, :, 0])
-                    self.images["child"][one_child]["mean_pixel_G"] = np.mean(child_img[:, :, 1])
-                    self.images["child"][one_child]["mean_pixel_B"] = np.mean(child_img[:, :, 2])
-                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(child_img[:, :, 0:3])
-                    #check alpha is present
+                    self.images["child"][one_child]["mean_pixel_R"] = np.mean(
+                        child_img[:, :, 0]
+                    )
+                    self.images["child"][one_child]["mean_pixel_G"] = np.mean(
+                        child_img[:, :, 1]
+                    )
+                    self.images["child"][one_child]["mean_pixel_B"] = np.mean(
+                        child_img[:, :, 2]
+                    )
+                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(
+                        child_img[:, :, 0:3]
+                    )
+                    # check alpha is present
                     if child_img.shape[2] > 3:
-                        self.images["child"][one_child]["mean_pixel_A"] = np.mean(child_img[:, :, 3])
+                        self.images["child"][one_child]["mean_pixel_A"] = np.mean(
+                            child_img[:, :, 3]
+                        )
                 if calc_std:
                     self.images["child"][one_child]["std_pixel_R"] = np.std(
-                        child_img[:, :, 0])
+                        child_img[:, :, 0]
+                    )
                     self.images["child"][one_child]["std_pixel_G"] = np.std(
-                        child_img[:, :, 1])
+                        child_img[:, :, 1]
+                    )
                     self.images["child"][one_child]["std_pixel_B"] = np.std(
-                        child_img[:, :, 2])
+                        child_img[:, :, 2]
+                    )
                     self.images["child"][one_child]["std_pixel_RGB"] = np.std(
-                        child_img[:, :, 0:3])
-                    #check alpha is present
+                        child_img[:, :, 0:3]
+                    )
+                    # check alpha is present
                     if child_img.shape[2] > 3:
                         self.images["child"][one_child]["std_pixel_A"] = np.std(
-                        child_img[:, :, 3])
+                            child_img[:, :, 3]
+                        )
 
     def convertImages(self):
         """Convert images dictionary into a pd.DataFrame
@@ -759,13 +784,12 @@ class mapImages:
         """
         parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
         children = pd.DataFrame.from_dict(self.images["child"], orient="index")
-        
-        return parents, children
 
+        return parents, children
 
     def show_par(self, parent_id, value=False, **kwds):
         """A wrapper function for `.show()` which plots all children of a specified parent
-    
+
         Parameters
         ----------
         parent_id : str
@@ -836,7 +860,6 @@ class mapImages:
             The resolution, in dots per inch, to create KML images when `save_kml_dir` is specified, by default None
         """
 
-        
         # create list, if not already a list
         if not (isinstance(image_ids, list) or isinstance(image_ids, tuple)):
             image_ids = [image_ids]
@@ -1059,13 +1082,13 @@ class mapImages:
 
     def _createKML(self, path2kml, value, coords, counter=-1):
         """Create a KML file,
-        
+
         Parameters
         ----------
         path2kml : str
             Directory to save KML file
         value : _type_
-            Value to be plotted on the underlying image 
+            Value to be plotted on the underlying image
             See `.show()` for detail
         coords : list or tuple
             Coordinates of the bounding box
@@ -1185,7 +1208,6 @@ class mapImages:
             self.images["child"] = {}
 
         for tpath in patch_paths:
-
             if not os.path.isfile(tpath):
                 print(f"[WARNING] file does not exist: {tpath}")
                 continue
@@ -1294,7 +1316,7 @@ class mapImages:
                     )
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
-                
+
                 if add_geo:
                     self.addGeoInfo()
 
@@ -1330,7 +1352,6 @@ class mapImages:
             else:
                 self.images["parent"] = parents.to_dict(orient="index")
             for one_par in self.images["parent"].keys():
-
                 # Do we need this?
                 # k2change = "children"
                 # if k2change in self.images["parent"][one_par]:
@@ -1342,7 +1363,9 @@ class mapImages:
                 k2change = "coord"
                 if k2change in self.images["parent"][one_par]:
                     try:
-                        self.images["parent"][one_par][k2change] = self.images["parent"][one_par][k2change]
+                        self.images["parent"][one_par][k2change] = self.images[
+                            "parent"
+                        ][one_par][k2change]
                     except Exception as err:
                         print(err)
 
@@ -1402,7 +1425,8 @@ class mapImages:
                     )
 
     def addGeoInfo(
-        self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False):
+        self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False
+    ):
         """Add geographic information (shape, coords, size in m) to images from image metadata
 
         Parameters
@@ -1414,42 +1438,42 @@ class mapImages:
         verbose : bool, optional
             If True, print verbose outputs, by default False
         """
-    
-        image_ids=list(self.images["parent"].keys())
-        
+
+        image_ids = list(self.images["parent"].keys())
+
         for image_id in image_ids:
-            
             image_path = self.images["parent"][image_id]["image_path"]
-        
+
             # read the image using rasterio
             tiff_src = rasterio.open(image_path)
-            h,w=tiff_src.shape
-            c=tiff_src.count
-            shape=(h,w,c)
-            self.images["parent"][image_id]["shape"]=shape
+            h, w = tiff_src.shape
+            c = tiff_src.count
+            shape = (h, w, c)
+            self.images["parent"][image_id]["shape"] = shape
 
             # check coordinates are present
             if isinstance(tiff_src.crs, type(None)):
                 print(f"No coordinates found in {image_id}. Try add_metadata instead")
                 continue
-            
+
             else:
                 tiff_proj = tiff_src.crs.to_string()
-                            
+
                 # Coordinate transformation: proj1 ---> proj2
                 transformer = Transformer.from_crs(tiff_proj, proj2convert)
-                ymax, xmin = transformer.transform(tiff_src.bounds.left, tiff_src.bounds.top)
-                ymin, xmax = transformer.transform(tiff_src.bounds.right, tiff_src.bounds.bottom)
+                ymax, xmin = transformer.transform(
+                    tiff_src.bounds.left, tiff_src.bounds.top
+                )
+                ymin, xmax = transformer.transform(
+                    tiff_src.bounds.right, tiff_src.bounds.bottom
+                )
                 coords = (xmin, xmax, ymin, ymax)
-                self.images["parent"][image_id]["coord"]=coords
+                self.images["parent"][image_id]["coord"] = coords
 
-                size_in_m = self.calc_pixel_width_height(parent_id=image_id, calc_size_in_m=calc_method, verbose=verbose)
-                self.images["parent"][image_id]["size_in_m"] =size_in_m
-
-
-            
-
-
+                size_in_m = self.calc_pixel_width_height(
+                    parent_id=image_id, calc_size_in_m=calc_method, verbose=verbose
+                )
+                self.images["parent"][image_id]["size_in_m"] = size_in_m
 
     ### def readPatches(self,
     ###               patch_paths,

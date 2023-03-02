@@ -22,7 +22,6 @@ def loader(path_images=False, tree_level="parent", parent_path=None, **kwds):
 def load_patches(
     patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
 ):
-
     img = mapImages()
     img.loadPatches(
         patch_paths=patch_paths,

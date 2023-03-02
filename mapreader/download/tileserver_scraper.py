@@ -31,6 +31,7 @@ nest_asyncio.apply()
 # global variable
 BASE_WAIT = 0.5
 
+
 # -------
 def tile_idxs_in_poly(poly: shapely.geometry.Polygon, zoom: int):
     min_lon, min_lat, max_lon, max_lat = poly.bounds
@@ -97,7 +98,7 @@ async def runner(opts):
             urls = []
             for x, y in tile_idxs_in_poly(poly, opts.zoom):
                 url = opts.url.format(z=opts.zoom, x=x, y=y)
-                with (await semaphore):
+                with await semaphore:
                     filepath = os.path.join(
                         opts.out_dir, "{}_{}_{}.png".format(opts.zoom, x, y)
                     )

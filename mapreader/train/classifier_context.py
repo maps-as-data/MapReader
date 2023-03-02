@@ -121,7 +121,6 @@ class classifierContext(classifier):
         end_epoch = self.last_epoch + num_epochs
         # --- Main train loop
         for epoch in range(start_epoch, end_epoch + 1):
-
             # --- loop, phases
             for phase in phases:
                 if phase.lower() in train_phase_names:
@@ -356,7 +355,6 @@ class classifierContext(classifier):
 
         list2optim = []
         for one_grp in range(len(sep_group_names)):
-
             # count number of layers in this group
             num_grp_layers = 0
             for i, (name, params) in enumerate(self.model.named_parameters()):

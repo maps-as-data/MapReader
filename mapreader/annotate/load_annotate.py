@@ -360,7 +360,6 @@ class loadAnnotations:
         print("---------------------")
 
     def sample_labels(self, tar_label, num_samples, random_state=12345):
-
         if (self.col_path == None) or (len(self.annotations) == 0):
             print(f"[ERROR] length: {len(self.annotations)}")
             return

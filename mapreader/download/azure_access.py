@@ -15,6 +15,7 @@ except ImportError:
 # Keep this outside of the function so it is easier to change/maintain
 LINK_SETUP_AZURE = "https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#configure-your-storage-connection-string"
 
+
 # -------- initBlobServiceClient
 def initBlobServiceClient(env_variable="AZURE_STORAGE_CONNECTION_STRING"):
     """Instantiate BlobServiceClient

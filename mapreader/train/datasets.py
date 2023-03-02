@@ -187,7 +187,6 @@ class patchContextDataset(Dataset):
         loc_split="-",
         overwrite=False,
     ):
-
         if parhugin_installed and use_parhugin:
             myproc = multiFunc(num_req_p=num_req_p, sleep_time=sleep_time)
             list_jobs = []
@@ -207,7 +206,6 @@ class patchContextDataset(Dataset):
     def save_parents_idx(
         self, idx, par_split="#", loc_split="-", overwrite=False, return_image=False
     ):
-
         img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
         img_rd = Image.open(img_path).convert(self.convert2)
 
@@ -306,7 +304,6 @@ class patchContextDataset(Dataset):
         plt.show()
 
     def __getitem__(self, idx):
-
         if torch.is_tensor(idx):
             idx = idx.tolist()
 

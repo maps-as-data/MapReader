@@ -14,6 +14,7 @@ import os
 import subprocess
 import distutils.spawn
 
+
 # ------- preprocess_all
 def preprocess_all(image_paths, save_preproc_dir, **kwds):
     """Preprocess a list of images

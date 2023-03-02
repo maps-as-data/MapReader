@@ -7,9 +7,7 @@ import numpy as np
 from pyproj import Transformer
 
 
-def extractGeoInfo(
-    image_path, proj2convert="EPSG:4326", calc_size_in_m=False
-):
+def extractGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
     """Extract geographic information (coordinates, size in meters) from GeoTiff files
 
     Parameters
@@ -30,8 +28,8 @@ def extractGeoInfo(
     tiff_src = rasterio.open(image_path)
     h, w = tiff_src.shape
     c = tiff_src.count
-    tiff_shape = (h,w,c)
-    
+    tiff_shape = (h, w, c)
+
     # check coordinates are present
     if tiff_src.crs != None:
         tiff_proj = tiff_src.crs.to_string()

@@ -315,7 +315,6 @@ class classifier:
         total_params = 0
         total_trainable_params = 0
         for name, parameter in self.model.named_parameters():
-
             if (not parameter.requires_grad) and only_trainable:
                 continue
             elif not parameter.requires_grad:
@@ -529,7 +528,6 @@ class classifier:
         end_epoch = self.last_epoch + num_epochs
         # --- Main train loop
         for epoch in range(start_epoch, end_epoch + 1):
-
             # --- loop, phases
             for phase in phases:
                 if phase.lower() in train_phase_names:
