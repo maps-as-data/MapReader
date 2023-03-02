@@ -275,40 +275,28 @@ class mapImages:
         for one_item in list_items:
             self.add_shape_id(image_id=one_item, tree_level=tree_level)
 
-    def add_coord_increments(self, tree_level="parent", verbose=False):
-        """For each image present at `tree_level`, run `add_coord_increments_id` to calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
-
-        Parameters
-        ----------
-        tree_level : str, optional
-            Tree level, choices between "parent" or "child, by default "parent"
-        verbose : bool, optional
-            If true, print verbose outputs, by default False
+    def add_coord_increments(self):
+        """For each parent image, run `add_coord_increments_id` to calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
         """
 
-        list_items = list(self.images[tree_level].keys())
-        print(f"[INFO] Add coord-increments, tree level: {tree_level}")
-        for one_item in list_items:
-            if not "coord" in self.images[tree_level][one_item].keys():
-                if verbose:
-                    print(
-                        f"[WARNING] No coordinates found for {one_item}. Suggestion: run add_metadata or addGeoInfo"
-                    )
+        parent_list = self.list_parents()
+        print(f"[INFO] Add coord-increments, tree level: parent")
+        for par_id in parent_list:
+            if not "coord" in self.images["parent"][par_id].keys():
+                print(
+                    f"[WARNING] No coordinates found for {par_id}. Suggestion: run add_metadata or addGeoInfo"
+                )
                 continue
 
-            self.add_coord_increments_id(
-                image_id=one_item, tree_level=tree_level, verbose=verbose
-            )
+            self.add_coord_increments_id(image_id=par_id)
 
-    def add_center_coord(self, tree_level="child", verbose=False):
+    def add_center_coord(self, tree_level="child"):
         """For each image at `tree_level, run `add_center_coord_id` to calculate central longitude and latitude (center_lon and center_lat) and add to image.
 
         Parameters
         ----------
         tree_level : str, optional
             Tree level, choices of "parent" or "child, by default "child"
-        verbose : bool, optional
-            If True, print verbose outputs, by default False
         """
         list_items = list(self.images[tree_level].keys())
 
@@ -318,7 +306,6 @@ class mapImages:
         for one_item in list_items:
             if tree_level == "parent":
                 if not "coord" in self.images[tree_level][one_item].keys():
-                    if verbose:
                     print(
                         f"[WARNING] 'coord' could not be found in {one_item}. Suggestion: run add_metadata or addGeoInfo"
                         )
@@ -354,37 +341,32 @@ class mapImages:
         myimg_shape = myimg.shape
         self.images[tree_level][image_id]["shape"] = myimg_shape
 
-    def add_coord_increments_id(self, image_id, tree_level="parent", verbose=False):
+    def add_coord_increments_id(self, image_id, verbose=False):
         """Calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
 
         Parameters
         ----------
         image_id : str
             Image ID
-        tree_level : str, optional
-            Tree level, choices between "parent" or "child, by default "parent"
         verbose : bool, optional
             If True, print verbose outputs, by default False
         """
 
-        if not "shape" in self.images[tree_level][image_id].keys():
-            self.add_shape(tree_level=tree_level)
-
-        if not "coord" in self.images[tree_level][image_id].keys():
+        if not "coord" in self.images["parent"][image_id].keys():
             if verbose:
                 print(
-                    f"'coord' could not be found in {image_id}.Suggestion: run add_metadata or addGeoInfo"
+                    f"[WARNING]'coord' could not be found in {image_id}. Suggestion: run add_metadata or addGeoInfo"
                 )
-                return
+            return
+        
+        if not "shape" in self.images["parent"][image_id].keys():
+            self.add_shape_id(image_id)
 
-        else:
-            # Extract height/width/chan from shape
-            image_height, image_width, _ = self.images[tree_level][image_id]["shape"]
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
-                "coord"
-            ]
-            self.images[tree_level][image_id]["dlon"] = abs(lon_max - lon_min) / image_width
-            self.images[tree_level][image_id]["dlat"] = abs(lat_max - lat_min) / image_height
+        # Extract height/width/chan from shape
+        image_height, image_width, _ = self.images["parent"][image_id]["shape"]
+        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id]["coord"]
+        self.images["parent"][image_id]["dlon"] = abs(lon_max - lon_min) / image_width
+        self.images["parent"][image_id]["dlat"] = abs(lat_max - lat_min) / image_height
 
     def add_center_coord_id(self, image_id, tree_level="child", verbose=False):
         """Calculate central longitude and latitude (center_lon and center_lat) and add to image
@@ -399,20 +381,19 @@ class mapImages:
             If True, print verbose outputs, by default False
         """
 
-        par_id = self.images[tree_level][image_id]["parent_id"]
+        if tree_level == "child":
+            par_id = self.images[tree_level][image_id]["parent_id"]
 
-        # i.e. for children
-        if par_id is not None:
-            if (not "dlon" in self.images["parent"][par_id].keys()) or (
-                not "dlat" in self.images["parent"][par_id].keys()
+            if ("dlon" not in self.images["parent"][par_id].keys()) or (
+                "dlat" not in self.images["parent"][par_id].keys()
             ):
-                if not "coord" in self.images["parent"][par_id].keys():
+                if "coord" not in self.images["parent"][par_id].keys():
                     if verbose:
-                        print(f"No coordinates found in {par_id}")
+                        print(f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo")
                     return
 
                 else:
-                    self.add_coord_increments(tree_level="parent")
+                    self.add_coord_increments_id(par_id)
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
@@ -429,14 +410,15 @@ class mapImages:
                 lat_max - (min_abs_y + max_abs_y) / 2.0
             )
 
-        # i.e. for parents or orphaned children
-        elif "coord" in self.images[tree_level][image_id].keys():
-            print(
-                f"[INFO] parent_id is None. Reading 'coord' from the specified tree_level and image_id."
+        elif tree_level == "parent":
+            if "coord" not in self.images[tree_level][image_id].keys():
+                if verbose:
+                    print(f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo")
+                return
+                
+            print(f"[INFO] Reading 'coord' from {image_id}"
             )
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
-                "coord"
-            ]
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id]["coord"]
             self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
             self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
 
