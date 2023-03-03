@@ -17,6 +17,8 @@ Some example metadata files, corresponding to the `OS one-inch 2nd edition maps 
 
 To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your metadata file) and ``download_url`` (the base URL for the maps/map series): 
 
+.. TODO: need comment about checking path for command below based on where you are in notebook etc.
+
 .. code :: python
 
      from mapreader import TileServer
