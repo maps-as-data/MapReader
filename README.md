@@ -23,6 +23,13 @@
 ## What is MapReader?
 
 <!--- picture here? --->
+<p align="center">
+  <figure>
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/river_banner_8bit.png"
+        alt="Annotated Map with Prediction Outputs"
+        width="70%">
+  </figure>
+</p>
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
@@ -90,3 +97,5 @@ If you use MapReader in your work, please consider acknowledging us by citing [o
 This work was supported by Living with Machines (AHRC grant AH/S01179X/1) and The Alan Turing Institute (EPSRC grant EP/N510129/1). 
 
 Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
+
+Maps above reproduced with the permission of the National Library of Scotland https://maps.nls.uk/index.html
