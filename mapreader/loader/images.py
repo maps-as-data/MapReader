@@ -19,7 +19,7 @@ from pyproj import Transformer
 import random
 
 from mapreader.slicers.slicers import sliceByPixel
-from ..utils import utils
+from ..utils import geo_utils
 
 # Ignore warnings
 import warnings
