@@ -309,7 +309,7 @@ class mapImages:
                     print(
                         f"[WARNING] 'coord' could not be found in {one_item}. Suggestion: run add_metadata or addGeoInfo"
                         )
-                continue
+                    continue
 
             if tree_level == "child":
                 par_id = self.images[tree_level][one_item]["parent_id"]
