@@ -7,8 +7,39 @@ import numpy as np
 from pyproj import Transformer
 
 
-def extractGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
-    """Extract geographic information (coordinates, size in meters) from GeoTiff files
+def extractGeoInfo(image_path):
+    """Extract geographic information (shape, CRS and coordinates) from GeoTiff files
+
+    Parameters
+    ----------
+    image_path : str
+        Path to image
+
+    Returns
+    -------
+    list
+        shape, CRS, coord
+    """
+    # read the image using rasterio
+    tiff_src = rasterio.open(image_path)
+    image_height, image_width = tiff_src.shape
+    image_channels = tiff_src.count
+    tiff_shape = (image_height, image_width, image_channels)
+
+    # check coordinates are present
+    if isinstance(tiff_src.crs, type(None)):
+        raise ValueError(f"No coordinates found in {image_path}")
+    else:
+        tiff_proj = tiff_src.crs.to_string()
+        tiff_coord = tuple(tiff_src.bounds)
+
+    print(f"[INFO] Shape: {tiff_shape}. \n[INFO] CRS: {tiff_proj}.")
+    print("[INFO] Coordinates: %.4f %.4f %.4f %.4f" % tiff_coord)
+
+    return tiff_shape, tiff_proj, tiff_coord
+
+def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
+    """Extract geographic information from GeoTiff files and reproject to specified CRS (`proj2convert`).
 
     Parameters
     ----------
@@ -22,30 +53,18 @@ def extractGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
     Returns
     -------
     list
-        coords, tiff_shape, size_in_m
+        shape, old CRS, new CRS, reprojected coord, size in meters
     """
-    # read the image using rasterio
-    tiff_src = rasterio.open(image_path)
-    h, w = tiff_src.shape
-    c = tiff_src.count
-    tiff_shape = (h, w, c)
-
-    # check coordinates are present
-    if tiff_src.crs != None:
-        tiff_proj = tiff_src.crs.to_string()
-    else:
-        raise ValueError(f"No coordinates found in {image_path}")
+    tiff_shape, tiff_proj, tiff_coord = extractGeoInfo(image_path)
 
     # Coordinate transformation: proj1 ---> proj2
     transformer = Transformer.from_crs(tiff_proj, proj2convert)
-    ymax, xmin = transformer.transform(tiff_src.bounds.left, tiff_src.bounds.top)
-    ymin, xmax = transformer.transform(tiff_src.bounds.right, tiff_src.bounds.bottom)
-    coords = (xmin, xmax, ymin, ymax)
+    ymax, xmin = transformer.transform(tiff_coord[0], tiff_coord[3])
+    ymin, xmax = transformer.transform(tiff_coord[2], tiff_coord[1])
+    coord = (xmin, xmax, ymin, ymax)
 
-    print(f"[INFO] Use the following coordinates to compute width/height:")
-    print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
-    print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
-    print(f"[INFO] shape: {tiff_shape}")
+    print(f"[INFO] New CRS: {proj2convert}")
+    print("[INFO] Reprojected coordinates: %.4f %.4f %.4f %.4f" % coord)
 
     # Calculate the size of image in meters
     if calc_size_in_m == "geodesic":
@@ -89,4 +108,4 @@ def extractGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
     else:
         size_in_m = False
 
-    return coords, tiff_shape, size_in_m
+    return tiff_shape, tiff_proj, proj2convert, coord, size_in_m

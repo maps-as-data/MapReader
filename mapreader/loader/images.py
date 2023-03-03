@@ -475,7 +475,7 @@ class mapImages:
             mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
             if verbose:
                 print(
-                    f"\nEach pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
+                    f"Each pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
                 )
 
         elif calc_size_in_m in ["gc", "great-circle"]:
@@ -484,15 +484,15 @@ class mapImages:
             top = great_circle((ymax, xmax), (ymax, xmin)).meters
             left = great_circle((ymax, xmin), (ymin, xmin)).meters
             size_in_m = (bottom, top, left, right)
-            print(
-                f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
-            )
+            if verbose:
+                print(f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
+                )
 
             mean_width = np.mean([size_in_m[0] / image_width, size_in_m[1] / image_width])
             mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
-            print(
-                f"\nEach pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
-            )
+            if verbose:
+                print(f"Each pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
+                )
 
         return size_in_m
 
@@ -1418,7 +1418,7 @@ class mapImages:
     def addGeoInfo(
         self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False
     ):
-        """Add geographic information (shape, coords, size in m) to images from image metadata
+        """Add geographic information (shape, coords (reprjected to EPSG:4326) and size in meters) to images from image metadata. 
 
         Parameters
         ----------
