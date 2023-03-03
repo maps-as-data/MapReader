@@ -5,3 +5,5 @@ __pycache__
 .history
 .vscode
 mapreader.egg-info
+docs/build/
+docs/source/api/
