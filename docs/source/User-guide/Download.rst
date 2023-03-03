@@ -1,3 +1,5 @@
+.. reminder: add note about running commands in IDE or jupyter notebook etc.
+
 Download
 =========
 
@@ -19,6 +21,8 @@ To set up your download, create a ``TileServer`` object and specify ``metadata_p
 
      from mapreader import TileServer
      my_ts = TileServer(metadata_path="path/to/metadata.json", download_url="mapseries-tilesets.your_URL_here/{z}/{x}/{y}.png")
+
+.. TODO: add link to info about OS 1-inch maps in statement below/edit statement to clarify what these maps are for as examples.
 
 e.g. for the OS one-inch maps (detailed above):
 
