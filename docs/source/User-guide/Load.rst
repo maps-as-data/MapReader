@@ -37,7 +37,7 @@ Or, if you have a separate metadata (e.g. in the form of a pd.DataFrame or a .cs
 Patchify 
 ----------
 
-Once you've loaded in all your data, you'll then need to patchify your images.
+Once you've loaded in all your data, you'll then need to patchify your images (i.e. slice them into a grid of smaller patches).
 This can be done using: 
 
 .. code :: python
