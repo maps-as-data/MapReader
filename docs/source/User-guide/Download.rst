@@ -1,3 +1,5 @@
+.. reminder: add note about running commands in IDE or jupyter notebook etc.
+
 Download
 =========
 
@@ -15,10 +17,14 @@ Some example metadata files, corresponding to the `OS one-inch 2nd edition maps 
 
 To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your metadata file) and ``download_url`` (the base URL for the maps/map series): 
 
+.. TODO: need comment about checking path for command below based on where you are in notebook etc.
+
 .. code :: python
 
      from mapreader import TileServer
      my_ts = TileServer(metadata_path="path/to/metadata.json", download_url="mapseries-tilesets.your_URL_here/{z}/{x}/{y}.png")
+
+.. TODO: add link to info about OS 1-inch maps in statement below/edit statement to clarify what these maps are for as examples.
 
 e.g. for the OS one-inch maps (detailed above):
 

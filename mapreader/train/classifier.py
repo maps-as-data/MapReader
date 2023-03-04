@@ -1001,7 +1001,7 @@ class classifier:
         """
         if print_batch_info:
             # print info about batch size
-            self.batch_info()
+            self.batch_info(set_name)
 
         dl_iter = iter(self.dataloader[set_name])
         for _ in range(batch_number):
