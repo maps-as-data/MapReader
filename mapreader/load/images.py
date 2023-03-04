@@ -18,7 +18,6 @@ import pyproj
 import random
 import sys
 
-from mapreader.slicers.slicers import sliceByPixel
 from ..utils import utils
 
 # Ignore warnings
@@ -406,10 +405,10 @@ class mapImages:
 
         return xmin, xmax, ymin, ymax, myimg_shape, size_in_m
 
-    def sliceAll(
+    def patchifyAll(
         self,
         method="pixel",
-        slice_size=100,
+        patch_size=100,
         path_save="test",
         square_cuts=False,
         resize_factor=False,
@@ -421,13 +420,13 @@ class mapImages:
         id1=0,
         id2=-1,
     ):
-        """Slice all images in the object (the list can be accessed via .images variable)
+        """Patchify all images in the object (the list can be accessed via .images variable)
 
         Keyword Arguments:
             method {str} -- method to slice an image (default: {"pixel"})
-            slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the sliced images (default: {"test"})
-            square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
+            patch_size {int} -- Number of pixels in both x and y directions (default: {100})
+            path_save {str} -- Directory to save the patches (default: {"test"})
+            square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
             resize_factor {bool} -- Resize image before slicing (default: {False})
             output_format {str} -- Output format (default: {"PNG"})
             tree_level {str} -- image group to be sliced (default: {"parent"})
@@ -442,10 +441,10 @@ class mapImages:
             img_keys = list(self.images[tree_level].keys())[id1:id2]
 
         for one_image in img_keys:
-            sliced_images_info = self._slice(
+            patches_info = self._patchify(
                 image_path=self.images[tree_level][one_image]["image_path"],
                 method=method,
-                slice_size=slice_size,
+                patch_size=patch_size,
                 path_save=path_save,
                 square_cuts=square_cuts,
                 resize_factor=resize_factor,
@@ -457,26 +456,26 @@ class mapImages:
             )
 
             if add2par:
-                for i in range(len(sliced_images_info)):
-                    # Add sliced images to the .images["patch"]
+                for i in range(len(patches_info)):
+                    # Add patches to the .images["patch"]
                     self.imagesConstructor(
-                        image_path=sliced_images_info[i][0],
+                        image_path=patches_info[i][0],
                         parent_path=self.images[tree_level][one_image]["image_path"],
                         tree_level="patch",
-                        min_x=sliced_images_info[i][1][0],
-                        min_y=sliced_images_info[i][1][1],
-                        max_x=sliced_images_info[i][1][2],
-                        max_y=sliced_images_info[i][1][3],
+                        min_x=patches_info[i][1][0],
+                        min_y=patches_info[i][1][1],
+                        max_x=patches_info[i][1][2],
+                        max_y=patches_info[i][1][3],
                     )
         if add2par:
             # add patches to the parent dictionary
             self.addPatches()
 
-    def _slice(
+    def _patchify(
         self,
         image_path=False,
         method="pixel",
-        slice_size=100,
+        patch_size=100,
         path_save="test",
         square_cuts=False,
         resize_factor=False,
@@ -486,14 +485,14 @@ class mapImages:
         image_id=None,
         tree_level=None,
     ):
-        """Slice one image stored at image_path
+        """Patchify one image stored at image_path
 
         Keyword Arguments:
             image_path {str} -- Path to the image to be sliced (default: {False})
             method {str} -- method to slice an image (default: {"pixel"})
-            slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the sliced images (default: {"test"})
-            square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
+            patch_size {int} -- Number of pixels in both x and y directions (default: {100})
+            path_save {str} -- Directory to save the patches (default: {"test"})
+            square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
             resize_factor {bool} -- Resize image before slicing (default: {False})
             output_format {str} -- Output format (default: {"PNG"})
             verbose {bool} -- Print the progress (default: {True})
@@ -509,11 +508,11 @@ class mapImages:
 
         # which image should be sliced
         image_path = os.path.abspath(image_path)
-        sliced_images_info = None
+        patches_info = None
         if method == "pixel":
-            sliced_images_info = sliceByPixel(
+            patches_info = patchifyByPixel(
                 image_path=image_path,
-                slice_size=slice_size,
+                patch_size=patch_size,
                 path_save=path_save,
                 square_cuts=square_cuts,
                 resize_factor=resize_factor,
@@ -529,11 +528,11 @@ class mapImages:
                 )
                 print(f"[DEBUG] tiff_shape: {tiff_shape}")
                 pixel_height = size_in_m[2] / tiff_shape[1]
-                number_pixels4slice = int(slice_size / pixel_height)
+                number_pixels4slice = int(patch_size / pixel_height)
 
-                sliced_images_info = sliceByPixel(
+                patches_info = patchifyByPixel(
                     image_path=image_path,
-                    slice_size=number_pixels4slice,
+                    patch_size=number_pixels4slice,
                     path_save=path_save,
                     square_cuts=square_cuts,
                     resize_factor=resize_factor,
@@ -553,11 +552,11 @@ class mapImages:
                 # size in meter contains: (bottom, top, left, right)
                 # img_shape = (rows, columns)
                 pixel_height = size_in_m[2] / img_shape[0]
-                number_pixels4slice = int(slice_size / pixel_height)
+                number_pixels4slice = int(patch_size / pixel_height)
 
-                sliced_images_info = sliceByPixel(
+                patches_info = patchifyByPixel(
                     image_path=image_path,
-                    slice_size=number_pixels4slice,
+                    patch_size=number_pixels4slice,
                     path_save=path_save,
                     square_cuts=square_cuts,
                     resize_factor=resize_factor,
@@ -565,7 +564,7 @@ class mapImages:
                     rewrite=rewrite,
                     verbose=verbose,
                 )
-        return sliced_images_info
+        return patches_info
 
     def addPatches(self):
         """Add patches to parent"""

@@ -407,30 +407,30 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_mean=calc_mean, calc_std=calc_std)
 
         # convert images to dataframe
-        parents_df, sliced_df = mymaps.convertImages(fmt="dataframe")
+        parents_df, patch_df = mymaps.convertImages(fmt="dataframe")
 
         if sortby == "mean":
-            sliced_df.sort_values("mean_pixel_RGB", inplace=True)
+            patch_df.sort_values("mean_pixel_RGB", inplace=True)
 
         if isinstance(min_alpha_channel, float):
-            if "mean_pixel_A" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_A"] >= min_alpha_channel]
+            if "mean_pixel_A" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_A"] >= min_alpha_channel]
 
         if isinstance(min_mean_pixel, float):
-            if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] >= min_mean_pixel]
+            if "mean_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] >= min_mean_pixel]
 
         if isinstance(max_mean_pixel, float):
-            if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] <= max_mean_pixel]
+            if "mean_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] <= max_mean_pixel]
 
         if isinstance(min_std_pixel, float):
-            if "std_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] >= min_std_pixel]
+            if "std_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_RGB"] >= min_std_pixel]
 
         if isinstance(max_std_pixel, float):
-            if "std_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] <= max_std_pixel]
+            if "std_pixel_RGB" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_RGB"] <= max_std_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:
@@ -440,12 +440,12 @@ def prepare_annotation(
                 metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
             )
         # convert images to dataframe
-        sliced_df, _ = mymaps.convertImages(fmt="dataframe")
+        patch_df, _ = mymaps.convertImages(fmt="dataframe")
         col_names = ["image_path"]
 
     # prepare data for annotation
     data2annotate = prepare_data(
-        sliced_df,
+        patch_df,
         col_names=col_names,
         annotation_set=annotation_set,
         redo=redo_annotation,
