@@ -38,6 +38,7 @@ def extractGeoInfo(image_path):
 
     return tiff_shape, tiff_proj, tiff_coord
 
+
 def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
     """Extract geographic information from GeoTiff files and reproject to specified CRS (`proj2convert`).
 

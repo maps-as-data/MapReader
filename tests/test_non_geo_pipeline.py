@@ -46,7 +46,6 @@ def test_slice():
 
 
 def test_load_annotation():
-
     annotated_images = loadAnnotations()
 
     annotated_images.load(PATH2ANNOTS, path2dir="./dataset/eg_slice_50_50")
@@ -68,7 +67,6 @@ def test_load_annotation():
 
 
 def test_classifier():
-
     annotated_images = test_load_annotation()
     # # Classifier
     # ## Dataset

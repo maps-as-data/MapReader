@@ -276,8 +276,7 @@ class mapImages:
             self.add_shape_id(image_id=one_item, tree_level=tree_level)
 
     def add_coord_increments(self):
-        """For each parent image, run `add_coord_increments_id` to calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image
-        """
+        """For each parent image, run `add_coord_increments_id` to calculate pixel-wise delta longitute (dlon) and delta latititude (dlat) and add to image"""
 
         parent_list = self.list_parents()
         print(f"[INFO] Add coord-increments, tree level: parent")
@@ -308,7 +307,7 @@ class mapImages:
                 if not "coord" in self.images[tree_level][one_item].keys():
                     print(
                         f"[WARNING] 'coord' could not be found in {one_item}. Suggestion: run add_metadata or addGeoInfo"
-                        )
+                    )
                     continue
 
             if tree_level == "child":
@@ -322,9 +321,7 @@ class mapImages:
                         par_id_list.append(par_id)
                     continue
 
-            self.add_center_coord_id(
-                image_id=one_item, tree_level=tree_level
-            )
+            self.add_center_coord_id(image_id=one_item, tree_level=tree_level)
 
     def add_shape_id(self, image_id, tree_level="parent"):
         """Calculate shape (image_height, image_width, image_channels) and add to image
@@ -358,7 +355,7 @@ class mapImages:
                     f"[WARNING]'coord' could not be found in {image_id}. Suggestion: run add_metadata or addGeoInfo"
                 )
             return
-        
+
         if not "shape" in self.images["parent"][image_id].keys():
             self.add_shape_id(image_id)
 
@@ -389,7 +386,9 @@ class mapImages:
             ):
                 if "coord" not in self.images["parent"][par_id].keys():
                     if verbose:
-                        print(f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo")
+                        print(
+                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"
+                        )
                     return
 
                 else:
@@ -413,12 +412,15 @@ class mapImages:
         elif tree_level == "parent":
             if "coord" not in self.images[tree_level][image_id].keys():
                 if verbose:
-                    print(f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo")
+                    print(
+                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"
+                    )
                 return
-                
-            print(f"[INFO] Reading 'coord' from {image_id}"
-            )
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id]["coord"]
+
+            print(f"[INFO] Reading 'coord' from {image_id}")
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
+                "coord"
+            ]
             self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
             self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
 
@@ -471,8 +473,12 @@ class mapImages:
                     f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
                 )
 
-            mean_width = np.mean([size_in_m[0] / image_width, size_in_m[1] / image_width])
-            mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
+            mean_width = np.mean(
+                [size_in_m[0] / image_width, size_in_m[1] / image_width]
+            )
+            mean_height = np.mean(
+                [size_in_m[2] / image_height, size_in_m[3] / image_height]
+            )
             if verbose:
                 print(
                     f"Each pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
@@ -485,13 +491,19 @@ class mapImages:
             left = great_circle((ymax, xmin), (ymin, xmin)).meters
             size_in_m = (bottom, top, left, right)
             if verbose:
-                print(f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
+                print(
+                    f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
                 )
 
-            mean_width = np.mean([size_in_m[0] / image_width, size_in_m[1] / image_width])
-            mean_height = np.mean([size_in_m[2] / image_height, size_in_m[3] / image_height])
+            mean_width = np.mean(
+                [size_in_m[0] / image_width, size_in_m[1] / image_width]
+            )
+            mean_height = np.mean(
+                [size_in_m[2] / image_height, size_in_m[3] / image_height]
+            )
             if verbose:
-                print(f"Each pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
+                print(
+                    f"Each pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
                 )
 
         return size_in_m
@@ -1418,7 +1430,7 @@ class mapImages:
     def addGeoInfo(
         self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False
     ):
-        """Add geographic information (shape, coords (reprjected to EPSG:4326) and size in meters) to images from image metadata. 
+        """Add geographic information (shape, coords (reprjected to EPSG:4326) and size in meters) to images from image metadata.
 
         Parameters
         ----------
