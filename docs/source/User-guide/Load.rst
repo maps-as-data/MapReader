@@ -41,7 +41,7 @@ This can be done using:
 
 .. code :: python
 
-    my_files.sliceAll()
+    my_files.patchifyAll()
 
 By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. This save directory can be changed by specifying ``path_save``.
 
@@ -49,15 +49,15 @@ e.g. :
 
 .. code :: python
 
-    my_files.sliceAll(path_save="./path/to/directory")
+    my_files.patchifyAll(path_save="./path/to/directory")
 
-If you have loaded geographic coordinates into your mapImages object, you can specify ``method`` and ``slice_size`` to slice your images by meters instead of pixels.
+If you have loaded geographic coordinates into your mapImages object, you can specify ``method`` and ``patch_size`` to slice your images by meters instead of pixels.
 
 e.g. :
 
 .. code :: python
 
-    my_files.sliceAll(method="meters", slice_size=1)
+    my_files.patchifyAll(method="meters", patch_size=1)
 
 After patchifying, you'll see that ``print(my_files)`` shows you have both parents and patches.
 To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
