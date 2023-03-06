@@ -1,7 +1,7 @@
-:py:mod:`mapreader.loader`
-==========================
+:py:mod:`mapreader.load`
+========================
 
-.. py:module:: mapreader.loader
+.. py:module:: mapreader.load
 
 
 Submodules
@@ -12,6 +12,7 @@ Submodules
 
    images/index.rst
    loader/index.rst
+   slicers/index.rst
 
 
 Package Contents
@@ -22,7 +23,7 @@ Classes
 
 .. autoapisummary::
 
-   mapreader.loader.mapImages
+   mapreader.load.mapImages
 
 
 
@@ -31,8 +32,9 @@ Functions
 
 .. autoapisummary::
 
-   mapreader.loader.loader
-   mapreader.loader.load_patches
+   mapreader.load.loader
+   mapreader.load.load_patches
+   mapreader.load.patchifyByPixel
 
 
 
@@ -40,7 +42,7 @@ Functions
 
    mapImages class
 
-   .. py:method:: imagesConstructor(image_path, parent_path=None, tree_level='child', **kwds)
+   .. py:method:: imagesConstructor(image_path, parent_path=None, tree_level='patch', **kwds)
 
       Construct images instance variable,
 
@@ -49,7 +51,7 @@ Functions
 
       Keyword Arguments:
           parent_path {str or None} -- Path to the parent of image (default: {None})
-          tree_level {str} -- Tree level, choices between parent and child (default: {"child"})
+          tree_level {str} -- Tree level, choices between parent and patch (default: {"patch"})
 
 
    .. py:method:: splitImagePath(inp_path)
@@ -65,7 +67,7 @@ Functions
       Args:
           metadata_path (path): path to a csv file, normally created from a pandas dataframe
           columns (list, optional): list of columns to be used. If None (default), all columns are used.
-          tree_level (str, optional): parent/child tree level. Defaults to "parent".
+          tree_level (str, optional): parent/patch tree level. Defaults to "parent".
           index_col (int, optional): index column
 
 
@@ -77,7 +79,7 @@ Functions
           num_samples {int} -- Number of samples to be plotted
 
       Keyword Arguments:
-          tree_level {str} -- XXX (default: {"child"})
+          tree_level {str} -- XXX (default: {"patch"})
           random_seed {int} -- Random seed for reproducibility (default: {65})
 
 
@@ -86,9 +88,9 @@ Functions
       Return list of all parents
 
 
-   .. py:method:: list_children()
+   .. py:method:: list_patches()
 
-      Return list of all children
+      Return list of all patches
 
 
    .. py:method:: add_shape(tree_level='parent')
@@ -101,7 +103,7 @@ Functions
       Run add_coord_increments_id for all tree_level items
 
 
-   .. py:method:: add_center_coord(tree_level='child')
+   .. py:method:: add_center_coord(tree_level='patch')
 
       Run add_center_coord_id for all tree_level items
 
@@ -115,7 +117,7 @@ Functions
       image_id : str
           image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices between parent and patch (default: {"patch"})
 
 
    .. py:method:: add_coord_increments_id(image_id, tree_level='parent')
@@ -127,10 +129,10 @@ Functions
       image_id : str
           image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices between parent and patch (default: {"patch"})
 
 
-   .. py:method:: add_center_coord_id(image_id, tree_level='child')
+   .. py:method:: add_center_coord_id(image_id, tree_level='patch')
 
       Add center_lon and center_lat to self.images[tree_level][image_id]
 
@@ -139,7 +141,7 @@ Functions
       image_id : str
           image ID
       tree_level : str, optional
-          Tree level, choices between parent and child (default: {"child"})
+          Tree level, choices between parent and patch (default: {"patch"})
 
 
    .. py:method:: calc_pixel_width_height(parent_id, calc_size_in_m='great-circle')
@@ -151,29 +153,29 @@ Functions
           calc_size_in_m (str, optional): How to compute the width/heigh, options: geodesic and great-circle (default).
 
 
-   .. py:method:: sliceAll(method='pixel', slice_size=100, path_save='test', square_cuts=False, resize_factor=False, output_format='PNG', rewrite=False, verbose=False, tree_level='parent', add2child=True, id1=0, id2=-1)
+   .. py:method:: patchifyAll(method='pixel', patch_size=100, path_save='test', square_cuts=False, resize_factor=False, output_format='PNG', rewrite=False, verbose=False, tree_level='parent', add2par=True, id1=0, id2=-1)
 
-      Slice all images in the object (the list can be accessed via .images variable)
+      Patchify all images in the object (the list can be accessed via .images variable)
 
       Keyword Arguments:
           method {str} -- method to slice an image (default: {"pixel"})
-          slice_size {int} -- Number of pixels in both x and y directions (default: {100})
-          path_save {str} -- Directory to save the sliced images (default: {"test"})
-          square_cuts {bool} -- All sliced images will have the same number of pixels in x and y (default: {True})
+          patch_size {int} -- Number of pixels in both x and y directions (default: {100})
+          path_save {str} -- Directory to save the patches (default: {"test"})
+          square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
           resize_factor {bool} -- Resize image before slicing (default: {False})
           output_format {str} -- Output format (default: {"PNG"})
           tree_level {str} -- image group to be sliced (default: {"parent"})
           verbose {bool} -- Print the progress (default: {False})
 
 
-   .. py:method:: addChildren()
+   .. py:method:: addPatches()
 
-      Add children to parent
+      Add patches to parent
 
 
    .. py:method:: calc_pixel_stats(parent_id=None, calc_mean=True, calc_std=True)
 
-      Calculate stats of each child in a parent_id and
+      Calculate stats of each patch in a parent_id and
          store the results
 
       Arguments:
@@ -199,7 +201,7 @@ Functions
           value {bool, const, random, ...} -- Values to be plotted on the parent image (default: {False})
 
 
-   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='jet', alpha=1.0, discrete_colorbar=256, tree_level='child', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
+   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='jet', alpha=1.0, discrete_colorbar=256, tree_level='patch', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
 
       Plot a list of image ids,
 
@@ -207,7 +209,7 @@ Functions
           image_ids {list} -- List of image ids to be plotted
 
       Keyword Arguments:
-          value {False or list} -- Value to be plotted on child images
+          value {False or list} -- Value to be plotted on patch images
           plot_parent {bool} -- Plot parent image in the background (default: {True})
           border {bool} -- Plot a border for each image id (default: {True})
           border_color {str} -- color of patch borders (default: {r})
@@ -216,7 +218,7 @@ Functions
           colorbar {str or list} -- colorbar to visualize "value" on maps (default: {jet})
           alpha {float or list} -- set transparency level for plotting "value" on maps (default: {1.})
           discrete_colorbar {int or list} -- number of discrete colors to be used (default: {256})
-          tree_level {str} -- Tree level for the plot XXX (default: {"child"})
+          tree_level {str} -- Tree level for the plot XXX (default: {"patch"})
           grid_plot {list or tuple} -- Number of rows and columns in the image.
                                        This will later adjusted to the true min/max of all subplots.
                                        (default: (10000, 10000))
@@ -251,7 +253,7 @@ Functions
       :staticmethod:
 
       Detect borders from the path using border_delimiter.
-      Here, the assumption is that the child image is named:
+      Here, the assumption is that the patch image is named:
       NOTE: STRING-min_x-min_y-max_x-max_y-STRING
 
 
@@ -267,19 +269,19 @@ Functions
           parent_ids {False or list/tuple} -- list of parent ids (default: {False})
 
 
-   .. py:method:: loadDataframe(parents=None, children_df=None, clear_images=True)
+   .. py:method:: loadDataframe(parents=None, patch_df=None, clear_images=True)
 
       Read dataframes and form images variable
 
       Keyword Arguments:
           parents_df {dataframe or path} -- Parents dataframe or path to parents (default: {None})
-          children_df {dataframe} -- Children/slices dataframe (default: {None})
+          patch_df {dataframe} -- patches/slices dataframe (default: {None})
           clear_images {bool} -- clear images before reading dataframes (default: {True})
 
 
-   .. py:method:: load_csv_file(parent_path=None, child_path=None, clear_images=False, index_col_child=0, index_col_parent=0)
+   .. py:method:: load_csv_file(parent_path=None, patch_path=None, clear_images=False, index_col_patch=0, index_col_parent=0)
 
-      Read parent and child from CSV files
+      Read parent and patch from CSV files
 
 
 
@@ -295,5 +297,21 @@ Functions
 
 
 .. py:function:: load_patches(patch_paths, parent_paths=False, add_geo_par=False, clear_images=False)
+
+
+.. py:function:: patchifyByPixel(image_path, patch_size, path_save='test', square_cuts=True, resize_factor=False, output_format='PNG', rewrite=False, verbose=True)
+
+   Patchify an image by pixels
+
+   Arguments:
+       image_path {str} -- Path to the image to be sliced
+       patch_size {int} -- Number of pixels in both x and y directions
+
+   Keyword Arguments:
+       path_save {str} -- Directory to save the patches (default: {"test"})
+       square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
+       resize_factor {bool} -- Resize image before slicing (default: {False})
+       output_format {str} -- Output format (default: {"PNG"})
+       verbose {bool} -- Print the progress (default: {True})
 
 

@@ -1,7 +1,7 @@
-:py:mod:`mapreader.loader.loader`
-=================================
+:py:mod:`mapreader.load.loader`
+===============================
 
-.. py:module:: mapreader.loader.loader
+.. py:module:: mapreader.load.loader
 
 
 Module Contents
@@ -13,8 +13,8 @@ Functions
 
 .. autoapisummary::
 
-   mapreader.loader.loader.loader
-   mapreader.loader.loader.load_patches
+   mapreader.load.loader.loader
+   mapreader.load.loader.load_patches
 
 
 

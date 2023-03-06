@@ -55,7 +55,7 @@ Functions
        method (str, optional): method to annotate patches. Defaults to "ipyannotate".
 
 
-.. py:function:: prepare_annotation(userID, task, annotation_tasks_file, custom_labels=[], annotation_set='001', redo_annotation=False, patch_paths=False, parent_paths=False, tree_level='child', sortby=None, min_alpha_channel=None, min_mean_pixel=None, max_mean_pixel=None, min_std_pixel=None, max_std_pixel=None, context_image=False, xoffset=500, yoffset=500, urlmain='https://maps.nls.uk/view/', random_state='random', list_shortcuts=None)
+.. py:function:: prepare_annotation(userID, task, annotation_tasks_file, custom_labels=[], annotation_set='001', redo_annotation=False, patch_paths=False, parent_paths=False, tree_level='patch', sortby=None, min_alpha_channel=None, min_mean_pixel=None, max_mean_pixel=None, min_std_pixel=None, max_std_pixel=None, context_image=False, xoffset=500, yoffset=500, urlmain='https://maps.nls.uk/view/', random_state='random', list_shortcuts=None)
 
    Prepare annotations
 
@@ -69,7 +69,7 @@ Functions
        redo_annotation (bool, optional): redo annotations. Defaults to False.
        patch_paths (bool, str, optional): if custom_labels, specify path to patches. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
        parent_paths (bool, str, optional): if custom_labels, specify path to parent images. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-       tree_level (str, optional): parent/child tree level. Defaults to "child".
+       tree_level (str, optional): parent/patch tree level. Defaults to "patch".
        sortby (None, mean, optional): sort patches to be annotated. Defaults to None.
        context_image (bool): add a context image or not
        xoffset (int, optional): x-offset for the borders of the context image. Defaults to 500.
