@@ -19,6 +19,7 @@ import random
 import sys
 
 from ..utils import utils
+from .slicers import patchifyByPixel
 
 # Ignore warnings
 import warnings
