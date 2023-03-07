@@ -1,6 +1,10 @@
 Load
 =====
 
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
+
+.. note:: You will need to update file paths to reflect your own machines directory structure.
+
 MapReader's ``load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
 
 Load images (and metadata)
