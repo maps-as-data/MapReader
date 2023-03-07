@@ -1,6 +1,8 @@
 Annotate
 ========
 
+.. note:: You will need to update file paths to reflect your own machines directory structure.
+
 MapReader's ``annotate`` subpackage is used to interactively annotate images (e.g. maps).
 
 This is done in three simple steps: 
@@ -56,7 +58,9 @@ Edit the annotation tasks file.
 			annot_dir: "./annotations_one_inch"
 		
 Annotate your images.
---------------------------
+----------------------
+
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
 	To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``./annotation_task.yaml``), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
 

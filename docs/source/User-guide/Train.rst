@@ -1,7 +1,11 @@
-Learn
-=======
+Learn and Predict
+==================
 
-MapReader's ``learn`` subpackage is used to train or fine-tune a CV (Computer Vision) classifier and use it for inference.
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
+
+.. note:: You will need to update file paths to reflect your own machines directory structure.
+
+MapReader's ``train`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
 
 Load data
 -----------
@@ -46,7 +50,7 @@ You can then view a sample of your annotated images using:
     :width: 400px
 
 
-By default, this will show you 10 images but this can be changed by specifying ``num_sample``. 
+By default, this will show you a sample of 10 images, but this can be changed by specifying ``num_sample``. 
 
 You can also view specific images from their indices using:
 
@@ -85,7 +89,7 @@ By default, your annotated images will be split as follows:
 
 However, these ratios can be changed by specifying ``frac_train``, ``frac_val`` and ``fract_test``.
 
-e.g. : 
+e.g. the following command will result in a split of 50% (train), 20% (val) and 30% (test): 
 
 .. code :: python
 
@@ -104,10 +108,10 @@ You can then check how many annotated images are in each set by checking the val
     print(test_count)
 
 Prepare datasets
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
-This can be done using the ``patchTorchDataset`` class. 
+This can be done using the ``patchTorchDataset`` class and `torchvision's transformms module <https://pytorch.org/vision/stable/transforms.html>`_. 
 
 e.g. :
 
@@ -117,8 +121,9 @@ e.g. :
     from torchvision import transforms
     
     resize=224
-    normalize_mean = [0.485, 0.456, 0.406] # ImageNet means
-    normalize_std = [0.229, 0.224, 0.225] # ImageNet stds
+    # we are using ImageNet's mean/std RGB values here - you can change these to reflect those of your own dataset if you like
+    normalize_mean = [0.485, 0.456, 0.406]
+    normalize_std = [0.229, 0.224, 0.225]
 
     data_transforms = transforms.Compose([transforms.Resize(resize), transforms.ToTensor(), transforms.Normalize(normalize_mean,normalize_std)])
 
@@ -126,14 +131,14 @@ e.g. :
     val_dataset = patchTorchDataset(annotated_images.val, data_transforms)
     test_dataset = patchTorchDataset(annotated_images.test, data_transforms)
 
-This produces three datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``.patchframe`` attribute:
+This produces three transformed datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``.patchframe`` attribute:
 
 .. code :: python
 
     your_dataset.patchframe
 
 Define a sampler
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
 This ensures, when training and validating your model, each batch is ~ representative of the whole set.
@@ -153,11 +158,10 @@ To do this, use:
     train_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[train_dataset.patchframe["label"].to_list()], num_samples=sum(train_count_list))
     val_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights[val_dataset.patchframe["label"].to_list()], num_samples=sum(val_count_list))
 
-
 Create batches (Add to DataLoader)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``MapReader``'s ``classifier`` class is xxxxx.
+First, to create a ``classifier()`` object, ``my_classifier``, into which you can load your datasets and set up your model, run:
 
 .. code :: python
 
@@ -165,9 +169,8 @@ Create batches (Add to DataLoader)
 
     my_classifier = classifier()
 
-
-To prepare your data for training, `PyTorch <https://pytorch.org/>`__ uses a ``DataLoader`` to create shuffled batches of data from each set. 
-To load datasetsto your classifer, use: 
+To prepare your data for training, `PyTorch <https://pytorch.org/>`_ uses a ``DataLoader`` to create shuffled batches of data from each set. 
+To load datasetsto your ``classifier()`` object, use: 
 
 .. code :: python
     
@@ -184,7 +187,7 @@ e.g. :
 
     my_classifier.add2dataloader(train_dataset, batch_size=batch_size, sampler=train_sampler, shuffle=False)
 
-You should also name your set using the ``set_name`` argument:
+You should also name your sets using the ``set_name`` argument:
 
 .. code :: python
 
@@ -194,8 +197,7 @@ You should also name your set using the ``set_name`` argument:
     my_classifier.add2dataloader(val_dataset, set_name="val", batch_size=batch_size, sampler=val_sampler, shuffle=False)
     my_classifier.add2dataloader(test_dataset, set_name="test", batch_size=batch_size, shuffle=False)
     
-
-To see information about your datasets use:
+Then, to see information about your datasets use:
 
 .. code :: python
 
@@ -219,15 +221,16 @@ and
 
 These return information about the batches and labels (classes) within each dataset, respectively. 
 
-.. note :: This only works if you have specified ``set_name`` when adding your datasets to the dataloader
+.. note:: This only works if you have specified ``set_name`` when adding your datasets to the dataloader.
 
-You should also set ``class_names`` to help with human-readability. This is done by defining a dictionary mapping each label to a new name. 
+You should also set ``class_names`` to help with human-readability. 
+This is done by defining a dictionary mapping each label to a new name. 
 
-e.g. :
+e.g. using the railspace example from before:
 
 .. code :: python
 
-    class_names={0:"No", 1:"railspace"}
+    class_names={0:"no", 1:"rail_space"}
     my_classifier.set_classnames(class_names)
     my_classifier.print_classes_dl()
 
@@ -239,6 +242,7 @@ Then, to see a sample batch, use the ``.show_sample()`` method:
 
 .. image:: ../figures/show_sample_train_8.png
     :width: 400px
+
 
 By default, this will show you the first batch created from your training datasest, along with corresponding batch information (``.batch_info()``).
 The ``batch_number`` and ``set_name``  arguments can be used to show different batches and datasets, respectively:
@@ -252,17 +256,17 @@ The ``batch_number`` and ``set_name``  arguments can be used to show different b
 
 
 Option 1 - Fine-tune a pretrained model
--------------------------------------------
+-----------------------------------------
 
-.. warning:: if you are using your own model, skip to Option 2
+.. note:: if you are using your own model, skip to Option 2
 
 Load a PyTorch model
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The `torchvision.models <https://pytorch.org/vision/stable/models.html>`__ subpackage contains a number of pre-trained models which can be loaded into your classifier.
+The `torchvision.models <https://pytorch.org/vision/stable/models.html>`__ subpackage contains a number of pre-trained models which can be loaded into your ``classifier()`` object.
 These can be added in one of two ways:
 
-    1.  Import a model directly from ``torchvision.models`` and add to your classifier using your classifiers ``.add_model()`` method:
+    1.  Import a model directly from ``torchvision.models`` and then add to your ``classifier()`` object using ``.add_model()``:
 
         .. code :: python
 
@@ -277,9 +281,9 @@ These can be added in one of two ways:
 
             my_classifier.add_model(my_model)
 
-        `See this tutorial for further details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__
+        `See this tutorial for further details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`_
 
-    2.  Using your classifiers ``.initialize_model()`` method:
+    2.  Add a model directly using ``.initialize_model()``:
 
         .. code :: python
         
@@ -287,48 +291,49 @@ These can be added in one of two ways:
     
         By default, this will initiliase a pretrained model and reshape the last layer to output the same number of nodes as classes in your dataset (as above). 
 
-Define learning rates and initialise optimiser and scheduler
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Initialise optimiser and scheduler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When training your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
-Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers.
+Normally, when fine-tuning pretrained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers and larger learning rates assigned to later layers.
 
-To define layerwise learning rates, use your classifiers ``.layerwise_lr()`` method:
+To define layerwise learning rates, use ``.layerwise_lr()``:
 
 .. code :: python 
     
     parameters_to_optimise = my_classifier.layerwise_lr(min_lr=1e-4, max_lr=1e-3)
 
-By default, a linear function is used to distribute the learning rates (using min_lr for the first layer and max_lr for the last layer). 
+This will return a list of parameters to optimise within each layer, with learning rates defined for each parameter.
+
+By default, a linear function is used to distribute the learning rates (using ``min_lr`` for the first layer and ``max_lr`` for the last layer). 
 This can be changed to a logarithmic function by specifying ``ltype="geomspace"``.
 
-You should then initialise an optimiser that will optimise your desired parameters. This is done using your classifiers ``.initialize_optimizer()`` method:
+You should then tell your ``classifier()`` which parameters to optimise by initialising an optimiser using this ``parameters_to_optimise`` list.
+This is done using ``.initialize_optimizer()``:
 
 .. code :: python
 
     my_classifier.initialize_optimizer(params2optim=parameters_to_optimise)
 
-
-.. warning:: 
-    No idea waht this bit does: (RW)
+As well as an optimiser, you should initialise a scheduler, which defines how often to adjust your learning rates during training, and define a criterion, which works out how well your model is performing and therefore how much to adjust your parameters. 
+This is done using ``.initialize_scheduler()`` and ``.add_criterion()`` respectively:
 
 .. code :: python
     
-    scheduler_param_dict = {"step_size": 10, "gamma": 0.1, "last_epoch": -1, "verbose": False}
-    
-    my_classifier.initialize_scheduler(scheduler_type="steplr", scheduler_param_dict=scheduler_param_dict, add_scheduler=True)
+    my_classifier.initialize_scheduler()
 
-    from torch import nn
-
-    # Add criterion
-    criterion = nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss()
     my_classifier.add_criterion(criterion)
 
+By default, your scheduler will be set up to adjust your learning rates every 10 epochs but can be adjusted by specifying ``scheduler_param_dict``.
+
+We have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`_ as our criterion. 
+You can change this if you would like.
 
 Train/fine-tune your model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To begin training/fine-tuning your model, use your classifiers ``.train()`` method:
+To begin training/fine-tuning your model, use:
 
 .. code :: python
 
@@ -348,9 +353,10 @@ Other arguments you may want to specify when training your model include:
 - ``verbosity_level``: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
 
 Plot metrics
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accesible via your classifiers ``.metrics`` attribute. To list these, use:
+Metrics are stored in a dictionary accesible via your ``.classifiers()`` objects ``.metrics`` attribute. 
+To list these, use:
 
 .. code :: python
 
@@ -384,7 +390,7 @@ Option 2 - Load your own fine-tuned model
 Load your model
 ~~~~~~~~~~~~~~~~~~
 
-If you are using your own model, you can simply load it into your classifier using the ``.load()`` function:
+If you are using your own model, you can simply load it into your ``classifier()`` object using:
 
 .. code :: python
 
@@ -393,7 +399,7 @@ If you are using your own model, you can simply load it into your classifier usi
 Inference 
 -------------
 
-Finally, to use your model for inference use:
+Finally, to use your model for inference, use:
 
 .. code :: python
 
@@ -405,20 +411,16 @@ e.g. to run the trained model on the test dataset, use:
 
     my_classifier.inference(set_name="test")
 
-By default, metrics will not be calculated after inference.
-To add metrics to your classifier, use the ``.calculate_add_metrics()`` method: 
+By default, metrics will not be calculated or added to the ``.metrics`` dictionary during inference.
+So, to add these in so that they can be viewed and plotted, use ``.calculate_add_metrics()``: 
 
 .. code :: python
 
     my_classifier.calculate_add_metrics(y_true=my_classifier.orig_label, y_pred=my_classifier.pred_label, y_score=my_classifier.pred_conf, phase="test")
 
-To view metrics from this inference, use the ``.metrics`` method (as above). e.g. :
+Metrics from this inference can then be viewed as above. 
 
-.. code :: python
-
-    my_classifier.metrics["epoch_fscore_micro_test"]
-
-And, to see a sample of your inference results, use: 
+To see a sample of your inference results, use: 
 
 .. code :: python
 
@@ -427,7 +429,8 @@ And, to see a sample of your inference results, use:
 By default, this will show you 6 samples of your first class (label). 
 The ``num_samples`` and ``class_index`` arguments can be specified to change this.
 
-You may also want specify the minimum (and maximum) prediction confidence for your samples. This can be done using ``min_conf`` and ``max_conf``.
+You may also want specify the minimum (and maximum) prediction confidence for your samples. 
+This can be done using ``min_conf`` and ``max_conf``.
 
 e.g. :
 
