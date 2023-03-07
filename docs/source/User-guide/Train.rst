@@ -437,3 +437,5 @@ e.g. :
 .. code :: python
 
     my_classifier.inference_sample_results(set_name="test", num_samples=3, class_index=1, min_conf=80)
+
+    
