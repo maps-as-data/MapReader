@@ -2,8 +2,8 @@
 Input guidance
 ===============
 
-Table of contents
-.. contents::
+
+.. contents:: Table of contents
 
 
 ******************
