@@ -57,9 +57,19 @@ Image file directory structure
 
 *Work in progress*
 
+.. comment: TODO - Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
+
+Your maps should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
+
 
 ***********************
 Preparing your metadata
 ***********************
 
 *Work in progress*
+
+The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
+
+You may have different kinds of metadata from different sources for your map files (e.g. descriptive or bibliographic metadata from a collection record, or technical metadata about georeferencing). We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
+
+..comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
