@@ -19,6 +19,7 @@ Welcome to MapReader's documentation!
    Install
    Input-guidance
    User-guide/User-guide
+   Worked-examples
    api/index
    Contribution-guide
 
