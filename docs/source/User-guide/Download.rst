@@ -10,7 +10,7 @@ MapReader's ``download`` subpackage is primarily used to download files (e.g. ma
 - :ref:`Via TileServer_` - an open-source map server
 - :ref:`Via Azure-Blob-Storage_` - Microsoft's cloud storage
 
-You can always use maps stored locally: proceed on to the ``Load_`` part of the User Guide.
+You can always use maps stored locally: proceed on to the Load_ part of the User Guide.
 
 If you have maps stored in a different cloud storage service, please refer to documentation for that service.
 
