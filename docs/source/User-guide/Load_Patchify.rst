@@ -1,5 +1,5 @@
-Load
-=====
+Load & Patchify
+===============
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
@@ -24,7 +24,7 @@ To see the contents of this object, use:
 
     print(my_files)
 
-You will see that your images are labelled as either parents or children.
+You will see that your images are labelled as either ``parents`` or ``children``.
 This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.
 
 If your image files contain metadata (e.g. if you have loaded geotiff files), you can add this into your mapImages object using:
@@ -43,13 +43,18 @@ Patchify
 ----------
 
 Once you've loaded in all your data, you'll then need to patchify your images.
-This can be done using: 
+
+Because MapReader was developed initially to implement the 'patchword method' (see `this paper`_), creating patches from the whole map images is a core intellectual and technical task. Choosing the size of your patches (and whether you want to mesure them in pixels or in meters) is an important, question-dependent decision. Smaller patches (50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain) where the feature(s) you want to label are themselves smaller than 50m on any side. Larger patches (500m x 500m) will be better suited to many tasks on slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
+
+Use this code to patchify your maps: 
 
 .. code :: python
 
     my_files.sliceAll()
 
 By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. This save directory can be changed by specifying ``path_save``.
+
+.. TODO: can there be an example of code for how to change the patch size?
 
 e.g. :
 
@@ -185,3 +190,4 @@ You may also want to specify the ``alpha`` argument, which sets the transparency
 .. image:: ../figures/show_par_RGB_0.5.png
     :width: 400px
 
+_this paper: https://academic.oup.com/jvc/article/26/2/284/6232245 
