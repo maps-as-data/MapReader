@@ -14,6 +14,8 @@ This is done in three simple steps:
 
 Edit the annotation tasks file
 ------------------------------------
+
+.. TODO: tell people where this file is :) and what it's structure is. I had to go make a copy from a previous example.
 	
 	The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
 	
