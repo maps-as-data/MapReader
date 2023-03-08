@@ -45,7 +45,7 @@ Edit the annotation tasks file
 				parent_paths: "./path/to/parents_2/"
 				annot_dir: "./path/to/save/annotations_2"
 
-	For example, if you want to annotate 'railspace' (as in `our paper<https://dl.acm.org/doi/10.1145/3557919.3565812>`), use: 
+	For example, if you want to annotate 'railspace' (as in `our paper`_), use: 
 	   
 	.. code :: yaml
 
@@ -116,3 +116,5 @@ Save your annotations
 		save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set)
 
 	This saves your annotations as a ``.csv`` file in the ``annot_dir`` specified in your annotation tasks file.
+
+_our paper: https://dl.acm.org/doi/10.1145/3557919.3565812 
