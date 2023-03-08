@@ -1,7 +1,7 @@
 Annotate
 ========
 
-.. note:: You will need to update file paths to reflect your own machines directory structure.
+.. note:: You will need to update file paths to reflect your own machine's directory structure.
 
 MapReader's ``annotate`` subpackage is used to interactively annotate images (e.g. maps).
 
@@ -12,7 +12,7 @@ This is done in three simple steps:
 3. :ref:`Save your annotations.`
  
 
-Edit the annotation tasks file.
+Edit the annotation tasks file
 ------------------------------------
 	
 	The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
@@ -27,7 +27,7 @@ Edit the annotation tasks file.
 			your_task_name_2: 
 				labels: ["your_label_1", "your_label_2"]
 
-	.. note:: When annotating, for each patch you will only be able to select one label from your label list. So, if you envisage wanting to label something as "x" and "y", you will need to create a separate label "x and y".
+	.. note:: When annotating, for each patch you will only be able to select one label from your label list. So, if you envisage wanting to label something as "x" **and also** "y", you will need to create a separate label combining "x and y".
 	
 	The ``paths`` section is used to specify file paths to sets of images you would like to annotate (annotation sets). This section can contain as many annotation sets as you would like and should be formatted as follows:
 
@@ -43,7 +43,7 @@ Edit the annotation tasks file.
 				parent_paths: "./path/to/parents_2/"
 				annot_dir: "./path/to/save/annotations_2"
 
-	For example, if you want to annotate rail space (as in `our paper<https://dl.acm.org/doi/10.1145/3557919.3565812>`), use: 
+	For example, if you want to annotate 'railspace' (as in `our paper<https://dl.acm.org/doi/10.1145/3557919.3565812>`), use: 
 	   
 	.. code :: yaml
 
@@ -57,7 +57,7 @@ Edit the annotation tasks file.
 			parent_paths: "./maps/*png"
 			annot_dir: "./annotations_one_inch"
 		
-Annotate your images.
+Annotate your images
 ----------------------
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
@@ -102,7 +102,7 @@ Annotate your images.
 	
 	You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. This is particularly useful if your images (e.g. maps) have collars or margins that you would like to avoid.
 
-Save your annotations.
+Save your annotations
 ---------------------------
 	
 	Once you have annotated your images, you should save your annotations using:
