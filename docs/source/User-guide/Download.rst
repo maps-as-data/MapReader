@@ -22,9 +22,8 @@ Some example metadata files, corresponding to the `OS one-inch 2nd edition maps 
 
 .. TODO: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
-Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`__ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`__, are provided in ``MapReader/mapreader/persistent_data``.
-
-Throughout this User Guide, we will use the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`_ as examples. **These are provided for illustratative purposes only.**
+Throughout this User Guide, we will use the `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_ as examples. 
+**These examples are provided for illustratative purposes only.**
 
 To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the XYZ URL for your tileset): 
 
