@@ -45,7 +45,7 @@ Edit the annotation tasks file
 				parent_paths: "./path/to/parents_2/"
 				annot_dir: "./path/to/save/annotations_2"
 
-	For example, if you want to annotate 'railspace' (as in `our paper`), use: 
+	For example, if you want to annotate 'railspace' (as in `our paper`_), use: 
 	   
 	.. code :: yaml
 
