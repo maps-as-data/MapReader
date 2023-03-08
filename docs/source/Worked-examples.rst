@@ -17,7 +17,7 @@ Worked examples
             :width: 200px
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    classification_one_inch_maps/classification_one_inch_maps
    classification_plant_phenotype/classification_plant_phenotype
