@@ -15,6 +15,11 @@ To download maps from TileServer_, you will need to tell MapReader which maps to
 
 Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`__ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`__, are provided in ``MapReader/mapreader/persistent_data``.
 
+.. TODO: include list of requirements of json metadata file, and what form those fields should take (e.g. coordinates) (Rosie)
+
+.. TODO: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
+
+
 To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your metadata file) and ``download_url`` (the base URL for the maps/map series): 
 
 .. TODO: need comment about checking path for command below based on where you are in notebook etc.
@@ -111,6 +116,8 @@ Both the default output directory name and metadata file name can be changed by 
 
 Via Azure-Blob-Storage_
 -------------------------
+
+.. comment: TODO provide example command for pulling data from azure storage container (azure access command)
 
 TBC
 
