@@ -10,6 +10,10 @@ MapReader's ``download`` subpackage is primarily used to download files (e.g. ma
 - :ref:`Via TileServer_` - an open-source map server
 - :ref:`Via Azure-Blob-Storage_` - Microsoft's cloud storage
 
+You can always use maps stored locally: proceed on to the [Load](https://mapreader.readthedocs.io/en/rw_docs/User-guide/Load.html) part of the User Guide.
+
+If you have maps stored in a different cloud storage service, please refer to documentation for that service.
+
 Via TileServer_
 ----------------
 
@@ -21,6 +25,8 @@ Some example metadata files, corresponding to the `OS one-inch 2nd edition maps 
 .. TODO: include list of requirements of json metadata file, and what form those fields should take (e.g. coordinates) (Rosie)
 
 .. TODO: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
+
+.. TODO: review 6-inch v 1-inch!!! See just below.
 
 Throughout this User Guide, we will use the `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_ as examples. 
 **These examples are provided for illustratative purposes only.**
