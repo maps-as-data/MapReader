@@ -1,4 +1,4 @@
-# Project Members
+# MapReader Project Members
 
 This document provides details about the project members and contributors working (or having previously worked) on _MapReader_ in a paid capacity, organisational agreement, in-kind contributions or grant proposal-based collaboration.
 It further outlines expectations and responsibilities with regard to working on the project.
