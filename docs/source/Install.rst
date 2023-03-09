@@ -1,10 +1,12 @@
 Installation instructions
 =========================
 
-Set up a conda environment
----------------------------
+.. note:: Run these commands from your terminal
 
-We recommend installation via Anaconda (refer to `Anaconda website and follow the instructions <https://docs.anaconda.com/anaconda/install/>`__).
+Step 1: Set up a conda environment
+------------------------------------
+
+We recommend installation via Anaconda (refer to `Anaconda website and follow the instructions <https://docs.anaconda.com/anaconda/install/>`_).
 
 -  Create a new environment for ``mapreader`` called ``mr_py38``:
 
@@ -18,8 +20,11 @@ We recommend installation via Anaconda (refer to `Anaconda website and follow th
 
    conda activate mr_py38
 
-Install via pip
-------------------
+Step 2: Install MapReader
+--------------------------
+
+Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Install ``mapreader``:
 
@@ -34,8 +39,8 @@ To allow the newly created ``mr_py38`` environment to show up in the notebooks:
    python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 
 
-Install from source
-----------------------
+Method 2: Install from source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Clone ``mapreader`` source code:
 
@@ -49,6 +54,9 @@ Install from source
 
    cd /path/to/MapReader
    pip install -v -e .
+
+Step 3: Add environment to notebooks
+--------------------------------------
 
 To allow the newly created ``mr_py38`` environment to show up in the
    notebooks:

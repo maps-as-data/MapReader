@@ -72,4 +72,4 @@ The key starting point is to be sure you have metadata for each map, or, "item-l
 
 You may have different kinds of metadata from different sources for your map files (e.g. descriptive or bibliographic metadata from a collection record, or technical metadata about georeferencing). We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
 
-..comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
+.. comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
