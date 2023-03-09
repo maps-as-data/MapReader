@@ -45,7 +45,7 @@ The ``paths`` section is used to specify file paths to sets of images you would 
 			parent_paths: "./path/to/parents_2/"
 			annot_dir: "./path/to/save/annotations_2"
 
-For example, if you want to annotate 'railspace' (as in `our paper`_), use: 
+For example, if you want to annotate 'railspace' (as in our `our paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_), use: 
 	   
 .. code :: yaml
 
@@ -116,5 +116,3 @@ Once you have annotated your images, you should save your annotations using:
 	save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set)
 
 This saves your annotations as a ``.csv`` file in the ``annot_dir`` specified in your annotation tasks file.
-
-.. _our paper: https://dl.acm.org/doi/10.1145/3557919.3565812 
