@@ -15,46 +15,46 @@ This is done in three simple steps:
 Edit the annotation tasks file
 ------------------------------------
 
-.. TODO: tell people where this file is :) and what it's structure is. I had to go make a copy from a previous example.
+.. TODO: let people know they need to create this file from scratch (would be nice to have a template somewhere as the details below get separated out and it's nice to see an example...)
 	
-	The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
+The ``annotation_tasks.yaml`` file is used to set up your annotation tasks. It contains two sections - ``tasks`` and ``paths``.
 	
-	The ``tasks`` section is used to specify annotation tasks and their labels. This section can contain as many tasks/labels as you would like and should be formatted as follows:
+The ``tasks`` section is used to specify annotation tasks and their labels. This section can contain as many tasks/labels as you would like and should be formatted as follows:
 	
-	.. code :: yaml
+.. code :: yaml
 		
-		tasks:
-			your_task_name: 
-				labels: ["your_label_1", "your_label_2", "your_label_3"]
-			your_task_name_2: 
-				labels: ["your_label_1", "your_label_2"]
+	tasks:
+		your_task_name: 
+			labels: ["your_label_1", "your_label_2", "your_label_3"]
+		your_task_name_2: 
+			labels: ["your_label_1", "your_label_2"]
 
-	.. note:: When annotating, for each patch you will only be able to select one label from your label list. So, if you envisage wanting to label something as "x" **and also** "y", you will need to create a separate label combining "x and y".
+.. note:: When annotating, for each patch you will only be able to select one label from your label list. So, if you envisage wanting to label something as "x" **and also** "y", you will need to create a separate label combining "x and y".
 	
-	The ``paths`` section is used to specify file paths to sets of images you would like to annotate (annotation sets). This section can contain as many annotation sets as you would like and should be formatted as follows:
+The ``paths`` section is used to specify file paths to sets of images you would like to annotate (annotation sets). This section can contain as many annotation sets as you would like and should be formatted as follows:
 
-	.. code :: yaml
+.. code :: yaml
 
-		paths:
-		  	your_annotation_set:
-				patch_paths: "./path/to/patches/"
-				parent_paths: "./path/to/parents/"
-				annot_dir: "./path/to/save/annotations"
-			your_annotation_set_2:
-				patch_paths: "./path/to/patches_2/"
-				parent_paths: "./path/to/parents_2/"
-				annot_dir: "./path/to/save/annotations_2"
+	paths:
+		your_annotation_set:
+			patch_paths: "./path/to/patches/"
+			parent_paths: "./path/to/parents/"
+			annot_dir: "./path/to/save/annotations"
+		your_annotation_set_2:
+			patch_paths: "./path/to/patches_2/"
+			parent_paths: "./path/to/parents_2/"
+			annot_dir: "./path/to/save/annotations_2"
 
-	For example, if you want to annotate 'railspace' (as in `our paper`_), use: 
+For example, if you want to annotate 'railspace' (as in `our paper`_), use: 
 	   
-	.. code :: yaml
+.. code :: yaml
 
-		tasks:
-			rail_space:
-				labels: ["no", "rail_space"]
+	tasks:
+		rail_space:
+			labels: ["no", "rail_space"]
 
-		paths:
-		  test_one_inch_maps_001:
+	paths:
+		test_one_inch_maps_001:
 			patch_paths: "./maps/slice_50_50/patch-*PNG"
 			parent_paths: "./maps/*png"
 			annot_dir: "./annotations_one_inch"
