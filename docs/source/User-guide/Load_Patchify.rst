@@ -190,4 +190,4 @@ You may also want to specify the ``alpha`` argument, which sets the transparency
 .. image:: ../figures/show_par_RGB_0.5.png
     :width: 400px
 
-_this paper: https://academic.oup.com/jvc/article/26/2/284/6232245 
+.. _this_paper: https://academic.oup.com/jvc/article/26/2/284/6232245 

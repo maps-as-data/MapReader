@@ -34,7 +34,8 @@ And, to view a summary of your annotations, use:
 
     print(annotated_images)
 
-To align with python indexing, you may want to shift your labels so they start at 0. This can be done using:
+To align with python indexing, you may want to shift your labels so they start at 0. 
+This can be done using:
 
 .. code :: python
 
