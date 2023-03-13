@@ -1,6 +1,6 @@
 ---
 name: Documentation update
-about: Suggest an idea for this project
+about: Suggest edits to or report problems with the documentation
 title: ''
 labels: documentation
 assignees: ''
