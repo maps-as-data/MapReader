@@ -16,9 +16,10 @@ class loadAnnotations:
         self.reviewed = pd.DataFrame()
         self.col_path = None
 
-    def load_all(self, csv_paths, **kwds) -> None:
+    def load_all(self, csv_paths: str, **kwds) -> None:
         """
-        Load multiple CSV files into the class instance using the `load` method.
+        Load multiple CSV files into the class instance using the `load`
+        method.
 
         Parameters
         ----------
@@ -47,26 +48,32 @@ class loadAnnotations:
         random_state: Optional[int] = 1234,
     ) -> None:
         """
-        Read and append an annotation file to the class instance's annotations DataFrame.
+        Read and append an annotation file to the class instance's annotations
+        DataFrame.
 
         Parameters
         ----------
         csv_path : str
             Path to an annotation file in CSV format.
         path2dir : str, optional
-            Update the `col_path` column by adding `path2dir/col_path`, by default None.
+            Update the `col_path` column by adding `path2dir/col_path`, by
+            default None.
         col_path : str, optional
-            Name of the column that contains image paths, by default "image_id".
+            Name of the column that contains image paths, by default
+            "image_id".
         keep_these_cols : bool, optional
-            Only keep these columns. If False (default), all columns will be kept.
+            Only keep these columns. If False (default), all columns will be
+            kept.
         append : bool, optional
-            Append a newly read CSV file to `self.annotations`. By default, True.
+            Append a newly read CSV file to `self.annotations`. By default,
+            True.
         col_label : str, optional
             Name of the column that contains labels.
         shuffle_rows : bool, optional
             Shuffle rows after reading annotations. Default is True.
         reset_index : bool, optional
-            Reset the index of the annotation DataFrame at the end of the method. Default is True.
+            Reset the index of the annotation DataFrame at the end of the
+            method. Default is True.
         random_state : int, optional
             Random seed for row shuffling.
 
@@ -78,12 +85,12 @@ class loadAnnotations:
             print(f"* reading: {csv_path}")
             annots_rd = pd.read_csv(csv_path)
         else:
-            print(f"* reading dataframe")
+            print("* reading dataframe")
             annots_rd = csv_path.copy()
         self.col_label = col_label
         print(f"* #rows: {len(annots_rd)}")
         print(
-            f"* label column name: {self.col_label} (you can change this later by .set_col_label(new_label) )"
+            f"* label column name: {self.col_label} (you can change this later by .set_col_label(new_label) )"  # noqa
         )
         if shuffle_rows:
             annots_rd = annots_rd.sample(frac=1, random_state=random_state)
@@ -92,17 +99,17 @@ class loadAnnotations:
         if keep_these_cols:
             annots_rd = annots_rd[keep_these_cols]
 
-        if self.col_path == None:
+        if self.col_path is None:
             self.col_path = col_path
         elif self.col_path != col_path:
             print(
-                f"[WARNING] previously, the col_path was set to {self.col_path}. Column '{col_path}' will be renamed."
+                f"[WARNING] previously, the col_path was set to {self.col_path}. Column '{col_path}' will be renamed."  # noqa
             )
             annots_rd.rename(columns={col_path: self.col_path}, inplace=True)
 
         if path2dir:
             print(
-                f"* update paths in '{self.col_path}' column by inserting '{path2dir}'"
+                f"* update paths in '{self.col_path}' column by inserting '{path2dir}'"  # noqa
             )
             annots_rd[self.col_path] = (
                 os.path.abspath(path2dir)
@@ -110,7 +117,7 @@ class loadAnnotations:
                 + annots_rd[self.col_path]
             )
 
-        if (len(self.annotations) == 0) or (append == False):
+        if (len(self.annotations) == 0) or (append is False):
             self.annotations = annots_rd.copy()
         else:
             self.annotations = pd.concat(
@@ -123,7 +130,7 @@ class loadAnnotations:
         print()
         print(self)
 
-    def set_col_label(self, new_label: Optional[str] = "label"):
+    def set_col_label(self, new_label: str = "label") -> None:
         """
         Set a new label for the column that contains the labels.
 
@@ -131,6 +138,10 @@ class loadAnnotations:
         ----------
         new_label : str, optional
             Name of the new label column, by default "label"
+
+        Returns
+        -------
+        None
         """
         self.col_label = new_label
 
@@ -144,8 +155,12 @@ class loadAnnotations:
             Index of the image in the annotations DataFrame to display.
         cmap : str, optional
             The colormap to use, by default "viridis".
+
+        Returns
+        -------
+        None
         """
-        if (self.col_path == None) or (len(self.annotations) == 0):
+        if (self.col_path is None) or (len(self.annotations) == 0):
             print(f"[ERROR] length: {len(self.annotations)}")
             return
 
@@ -158,17 +173,26 @@ class loadAnnotations:
         plt.pause(0.001)
         plt.show()
 
-    def adjust_labels(self, shiftby: Optional[int] = -1) -> None:
-        """Shift labels by the specified value (shiftby)
+    def adjust_labels(self, shiftby: int = -1) -> None:
+        """
+        Shift labels in the self.annotations DataFrame by the specified value
+        (`shiftby`).
 
         Parameters
         ----------
         shiftby : int, optional
-            shift values of self.col_label by shiftby, i.e., self.annotations[self.col_label] + shiftby, by default -1
+            The value to shift labels by. Default is -1.
 
         Returns
         -------
         None
+
+        Notes
+        -----
+        This function updates the `self.annotations` DataFrame by adding the
+        value of `shiftby` to the values of the `self.col_label` column. It
+        also prints the value counts of the `self.col_label` column before and
+        after the shift.
         """
         print(20 * "-")
         print("[INFO] value counts before shift:")
@@ -193,16 +217,14 @@ class loadAnnotations:
         deduplicate_col: Optional[str] = "image_id",
     ) -> None:
         """
-        The review_labels() method is used to review and update labels of the
-        images in the dataset. It displays the images with their current
-        labels, and allows the user to modify the labels of any image.
-        The updated labels are stored in both self.annotations and
-        self.reviewed.
+        Perform image review on annotations and update labels for a given
+        label or all labels.
 
         Parameters
         ----------
         tar_label : int, optional
-            The label to review. If not provided, all labels will be reviewed, by default None.
+            The target label to review. If not provided, all labels will be
+            reviewed, by default None.
         start_indx : int, optional
             The index of the first image to review, by default 1.
         chunks : int, optional
@@ -216,13 +238,23 @@ class loadAnnotations:
         include_df : pandas DataFrame, optional
             A DataFrame of images to include for review, by default None.
         deduplicate_col : str, optional
-            The column to use for deduplicating reviewed images, by default "image_id".
+            The column to use for deduplicating reviewed images, by default
+            "image_id".
 
         Returns
         -------
         None
-        """
 
+        Notes
+        ------
+        This method reviews images with their corresponding labels and allows
+        the user to change the label for each image. The updated labels are
+        saved in both the annotations and reviewed DataFrames. If `exclude_df`
+        is provided, images with `image_path` in `exclude_df['image_path']` are
+        skipped in the review process. If include_df is provided, only images
+        with `image_path` in `include_df['image_path']` are reviewed. The
+        reviewed DataFrame is deduplicated based on the `deduplicate_col`.
+        """
         if tar_label is not None:
             annot2review = self.annotations[
                 self.annotations[self.col_label] == tar_label
@@ -237,7 +269,7 @@ class loadAnnotations:
             plt.figure(figsize=figsize)
             print("\n" + 30 * "*")
             print(
-                f"[INFO] review {indx+1}-{indx+chunks}, total: {len(annot2review)}"
+                f"[INFO] review {indx+1}-{indx+chunks}, total: {len(annot2review)}"  # noqa
             )
             print(30 * "*")
 
@@ -270,7 +302,7 @@ class loadAnnotations:
                 plt.xticks([])
                 plt.yticks([])
                 plt.title(
-                    f"{annot2review.iloc[indx][self.col_label]} | id: {annot2review.iloc[indx].name}"
+                    f"{annot2review.iloc[indx][self.col_label]} | id: {annot2review.iloc[indx].name}"  # noqa
                 )
                 iter_ids.append(annot2review.iloc[indx].name)
                 # Add to reviewed
@@ -284,9 +316,8 @@ class loadAnnotations:
             plt.show()
 
             print(f"list of IDs: {iter_ids}")
-            user_input_ids = input(
-                "Enter 'ids', comma separated (or press enter to continue)  :  "
-            )
+            q = "Enter 'ids', comma separated (or press enter to continue): "
+            user_input_ids = input(q)
 
             while user_input_ids.strip().lower() not in [
                 "",
@@ -306,9 +337,7 @@ class loadAnnotations:
                     self.reviewed.loc[input_id, self.col_label] = input_label
                     print(f"{input_id} ---> new label: {input_label}")
 
-                user_input_ids = input(
-                    "Enter 'ids', comma separated (or press enter to continue)  :  "
-                )
+                user_input_ids = input(q)
 
             if user_input_ids.lower() in ["exit", "end", "stop"]:
                 break
@@ -332,7 +361,7 @@ class loadAnnotations:
         -------
         None
         """
-        if (self.col_path == None) or (len(self.annotations) == 0):
+        if (self.col_path is None) or (len(self.annotations) == 0):
             print(f"[ERROR] length: {len(self.annotations)}")
             return
 
@@ -340,7 +369,7 @@ class loadAnnotations:
             self.annotations[self.col_label] == tar_label
         ]
 
-        if num_sample == None:
+        if num_sample is None:
             num_sample = len(annot2plot)
 
         plt.figure(figsize=(8, num_sample))
@@ -372,20 +401,25 @@ class loadAnnotations:
         Parameters
         ----------
         stratify_colname : str, optional
-            Name of the column on which to stratify the split. The default is "label".
+            Name of the column on which to stratify the split. The default is
+            "label".
         frac_train : float, optional
-            Fraction of the dataset to be used for training. The default is 0.70.
+            Fraction of the dataset to be used for training. The default is
+            0.70.
         frac_val : float, optional
-            Fraction of the dataset to be used for validation. The default is 0.15.
+            Fraction of the dataset to be used for validation. The default is
+            0.15.
         frac_test : float, optional
-            Fraction of the dataset to be used for testing. The default is 0.15.
+            Fraction of the dataset to be used for testing. The default is
+            0.15.
         random_state : int, optional
             Random seed to ensure reproducibility. The default is 1364.
 
         Raises
         ------
         ValueError
-            If the sum of fractions of training, validation and test sets does not add up to 1.
+            If the sum of fractions of training, validation and test sets does
+            not add up to 1.
 
         ValueError
             If `stratify_colname` is not a column in the dataframe.
@@ -393,15 +427,14 @@ class loadAnnotations:
         Returns
         -------
         None
-
-        Notes
-        -------
-        Credit: https://stackoverflow.com/a/60804119 (with minor changes)
+            Sets properties `df_train`, `df_val`, `df_test` -- three
+            Dataframes containing the three splits on the `loadAnnotations`
+            instance.
         """
 
         if abs(frac_train + frac_val + frac_test - 1.0) > 1e-4:
             raise ValueError(
-                f"fractions {frac_train}, {frac_val}, {frac_test} do not add up to 1.0."
+                f"fractions {frac_train}, {frac_val}, {frac_test} do not add up to 1.0."  # noqa
                 f"Their sum: {frac_train+frac_val+frac_test}"
             )
 
@@ -458,7 +491,8 @@ class loadAnnotations:
         num_samples: int,
         random_state: Optional[int] = 12345,
     ) -> None:
-        """Randomly sample a given number of annotations with a given target
+        """
+        Randomly sample a given number of annotations with a given target
         label and remove all other annotations from the dataframe.
 
         Parameters
@@ -478,9 +512,10 @@ class loadAnnotations:
         Returns
         -------
         None
-            The dataframe with remaining annotations is stored in `self.annotations`.
+            The dataframe with remaining annotations is stored in
+            `self.annotations`.
         """
-        if (self.col_path == None) or (len(self.annotations) == 0):
+        if (self.col_path is None) or (len(self.annotations) == 0):
             print(f"[ERROR] length: {len(self.annotations)}")
             return
         all_annots = self.annotations.copy()

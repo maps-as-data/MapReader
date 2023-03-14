@@ -72,7 +72,8 @@ def display_record(record: tuple) -> None:
         parent_path = os.path.dirname(
             annotation_tasks["paths"][record[3]]["parent_paths"]
         )
-        # Here, we assume that min_x, min_y, max_x and max_y are in the patch name
+        # Here, we assume that min_x, min_y, max_x and max_y are in the patch
+        # name
         split_path = record[0].split("-")
         min_x, min_y, max_x, max_y = (
             int(split_path[1]),
@@ -159,7 +160,8 @@ def display_record(record: tuple) -> None:
         try:
             map_id = record[2].split("_")[-1].split(".")[0]
             url = f"{url_main}/{map_id}"
-            # stream=True so we don't download the whole page, only check if the page exists
+            # stream=True so we don't download the whole page, only check if
+            # the page exists
             response = requests.get(url, stream=True)
             assert response.status_code < 400
             print()
@@ -179,38 +181,42 @@ def prepare_data(
     num_samples: Optional[int] = 100,
 ) -> List[List[Union[str, int]]]:
     """
-    Prepare data for image annotation by selecting a subset of images from a pandas DataFrame.
+    Prepare data for image annotation by selecting a subset of images from a
+    DataFrame.
 
     Parameters
     ----------
     df : pandas DataFrame
         DataFrame containing the image data to be annotated.
     col_names : list of str, optional (default=['image_path', 'parent_id'])
-        List of column names to include in the output. Default columns are 'image_path' and 'parent_id'.
-    annotation_set : str, optional (default='001')
-        String specifying the annotation set.
-    label_col_name : str, optional (default='label')
-        Column name containing the label information for each image.
-    redo : bool, optional (default=False)
-        If True, all images will be annotated even if they already have a label. If False (default),
-        only images without a label will be annotated.
-    random_state : int or str, optional (default='random')
-        Seed for the random number generator used when selecting images to annotate. If set to 'random'
-        (default), a random seed will be used.
-    num_samples : int, optional (default=100)
-        Maximum number of images to annotate.
+        List of column names to include in the output. Default columns are
+        'image_path' and 'parent_id'.
+    annotation_set : str, optional
+        String specifying the annotation set. Default is "001".
+    label_col_name : str, optional
+        Column name containing the label information for each image. Default
+        is "label".
+    redo : bool, optional
+        If True, all images will be annotated even if they already have a
+        label. If False (default), only images without a label will be
+        annotated.
+    random_state : int or str, optional
+        Seed for the random number generator used when selecting images to
+        annotate. If set to 'random' (default), a random seed will be used.
+    num_samples : int, optional
+        Maximum number of images to annotate. Default is 100.
 
     Returns
     -------
     list of list of str/int
-        A list of lists containing the selected image data, with each sublist containing the specified
-        columns plus the annotation set and a row counter.
+        A list of lists containing the selected image data, with each sublist
+        containing the specified columns plus the annotation set and a row
+        counter.
     """
 
     if (label_col_name in list(df.columns)) and (not redo):
-        print(
-            f"Number of already annotated images: {len(df[~df[label_col_name].isnull()])}"
-        )
+        already_annotated = len(df[~df[label_col_name].isnull()])
+        print(f"Number of already annotated images: {already_annotated}")
         # only annotate those patches that have not been already annotated
         df = df[df[label_col_name].isnull()]
         print(f"Number of images to be annotated (total): {len(df)}")
@@ -267,7 +273,8 @@ def annotation_interface(
     list_shortcuts: Optional[List[str]] = None,
 ) -> Annotation:
     """
-    Create an annotation interface for a list of patches with corresponding labels.
+    Create an annotation interface for a list of patches with corresponding
+    labels.
 
     Parameters
     ----------
@@ -291,7 +298,8 @@ def annotation_interface(
     Returns
     -------
     annotation : Annotation
-        The annotation object containing the toolbar, tasks and canvas for the interface.
+        The annotation object containing the toolbar, tasks and canvas for the
+        interface.
 
     Raises
     ------
@@ -300,8 +308,8 @@ def annotation_interface(
 
     Notes
     -----
-    This function creates an annotation interface using the `ipyannotate` library,
-    which is a browser-based tool for annotating data.
+    This function creates an annotation interface using the `ipyannotate`
+    library, which is a browser-based tool for annotating data.
     """
 
     if method == "ipyannotate":
@@ -361,7 +369,7 @@ def annotation_interface(
         return annotation
     else:
         sys.exit(
-            f"method: {method} is not implemented. Currently, we support: ipyannotate"
+            f"method: {method} is not implemented. Currently, we support: ipyannotate"  # noqa
         )
 
 
@@ -457,6 +465,18 @@ def prepare_annotation(
     -------
     annotation : dict
         A dictionary containing the annotation results.
+
+    Raises
+    -------
+    ValueError
+        If a specified annotation_set is not a key in the paths dictionary
+        of the YAML file with the information about the annotation metadata
+        (annotation_tasks_file).
+
+    ValueError
+        If the `task` provided is not a key in tasks dictionary of the YAML
+        file with the information about the annotation metadata
+        (annotation_tasks_file) and `custom_labels` is not provided.
     """
 
     # Specify global variables so they can be used in display_record function
@@ -479,7 +499,7 @@ def prepare_annotation(
     with open(annotation_tasks_file) as annot_file_fio:
         annotation_tasks = yaml.load(annot_file_fio, Loader=yaml.FullLoader)
 
-    if not annotation_set in annotation_tasks["paths"].keys():
+    if annotation_set not in annotation_tasks["paths"].keys():
         raise ValueError(
             f"{annotation_set} could not be found in {annotation_tasks_file}"
         )
@@ -496,7 +516,7 @@ def prepare_annotation(
             f"{task}_#{userID}#.csv",
         )
 
-    if not task in annotation_tasks["tasks"].keys():
+    if task not in annotation_tasks["tasks"].keys():
         if custom_labels == []:
             raise ValueError(
                 f"Task: {task} could not be found and custom_labels == []."
@@ -620,7 +640,7 @@ def save_annotation(
     with open(annotation_tasks_file) as f:
         annotation_tasks = yaml.load(f, Loader=yaml.FullLoader)
 
-    if not annotation_set in annotation_tasks["paths"].keys():
+    if annotation_set not in annotation_tasks["paths"].keys():
         print(
             f"{annotation_set} could not be found in {annotation_tasks_file}"
         )
@@ -643,7 +663,7 @@ def save_annotation(
     new_labels = 0
     newly_annotated = 0
     for i in range(len(annotation.tasks)):
-        if annotation.tasks[i].value != None:
+        if annotation.tasks[i].value is not None:
             newly_annotated += 1
             if (
                 not annotation.tasks[i].output[0]
