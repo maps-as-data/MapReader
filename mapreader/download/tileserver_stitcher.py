@@ -33,8 +33,8 @@ def runner(opts: input_class) -> None:
         following attributes:
             - dir (str): The directory containing the input images.
             - out_file (str): The output file path for the stitched image.
-            - pixel_closest (int, optional): The closest pixel value to round the
-                image size to.
+            - pixel_closest (int, optional): The closest pixel value to round
+                the image size to.
 
     Returns
     ------
@@ -57,7 +57,7 @@ def runner(opts: input_class) -> None:
         y = os.path.splitext(y)[0]
         return int(x), int(y)
 
-    yx = lambda filepath: xy(filepath)[::-1]
+    # yx = lambda filepath: xy(filepath)[::-1]
 
     filepaths = sorted(filepaths, key=xy)
 

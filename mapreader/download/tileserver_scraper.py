@@ -218,7 +218,8 @@ def scraper(
     out_dir : str
         The directory in which to save the downloaded tiles.
     max_connections : int, optional
-        The maximum number of simultaneous connections to use when downloading, by default 20.
+        The maximum number of simultaneous connections to use when
+        downloading, by default 20.
     retries : int, optional
         The maximum number of times to retry a failed download, by default 10.
 
