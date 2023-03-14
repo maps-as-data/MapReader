@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from IPython.display import display
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
-import PIL.Image as PIL_image
-from PIL import ImageOps
 import random
 import requests
 import sys
@@ -25,15 +22,37 @@ from ipyannotate.buttons import (
     BackButton as Back,
 )
 
+from PIL import Image
+from typing import List, Optional, Union, Dict
 
-# -------- display_record
-def display_record(record):
-    """Display patches for annotation
 
-    NOTE: This function should be called from prepare_annotation,
-          there are several global variables that are being set in the function.
+def display_record(record: tuple) -> None:
+    """
+    Displays an image and optionally, a context image with a patch border.
 
-    Refer to ipyannotate for more info.
+    Parameters
+    ----------
+    record : tuple
+        A tuple containing the following elements:
+        - str : The name of the patch.
+        - str : The path to the image to be displayed.
+        - str : The path to the parent image, if any.
+        - int : The index of the task, if any.
+        - int : The number of times this patch has been displayed.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function should be called from `prepare_annotation`, there are several
+    global variables that are being set in the function.
+
+    This function uses matplotlib to display images. If the context image is
+    displayed, the border of the patch is highlighted in red.
+
+    Refer to `ipyannotate` for more info.
     """
 
     # setup the images
@@ -44,7 +63,7 @@ def display_record(record):
         plt.subplot2grid(gridsize, (2, 0))
     else:
         plt.subplot2grid(gridsize, (0, 0), rowspan=2)
-    plt.imshow(PIL_image.open(record[1]))
+    plt.imshow(Image.open(record[1]))
     plt.xticks([])
     plt.yticks([])
     plt.title(f"{record[0]}", size=20)
@@ -66,7 +85,8 @@ def display_record(record):
         plt.subplot2grid(gridsize, (0, 0), rowspan=2)
 
         # ---
-        par_img = PIL_image.open(os.path.join(parent_path, record[2])).convert("RGB")
+        path = os.path.join(parent_path, record[2])
+        par_img = Image.open(path).convert("RGB")
         min_y_par = max(0, min_y - y_offset)
         min_x_par = max(0, min_x - x_offset)
         max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
@@ -75,7 +95,9 @@ def display_record(record):
         # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
         par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
 
-        plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+        plt.imshow(
+            par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par)
+        )
         # ---
 
         plt.xticks([])
@@ -87,43 +109,45 @@ def display_record(record):
         plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
         plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
 
-        ## # context image
-        ## plt.subplot2grid(gridsize, (3, 0), rowspan=2)
-        ## min_y_par = 0
-        ## min_x_par = 0
-        ## max_x_par = par_img.shape[1]
-        ## max_y_par = par_img.shape[0]
-        ## plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
-        ##            extent=(min_x_par, max_x_par, max_y_par, min_y_par))
-        ## #plt.plot([min_x_par, min_x_par],
-        ## #         [min_y_par, max_y_par],
-        ## #         lw=2, zorder=10, color="k")
-        ## #plt.plot([min_x_par, max_x_par],
-        ## #         [min_y_par, min_y_par],
-        ## #         lw=2, zorder=10, color="k")
-        ## #plt.plot([max_x_par, max_x_par],
-        ## #         [max_y_par, min_y_par],
-        ## #         lw=2, zorder=10, color="k")
-        ## #plt.plot([max_x_par, min_x_par],
-        ## #         [max_y_par, max_y_par],
-        ## #         lw=2, zorder=10, color="k")
+        """
+        # context image
+        plt.subplot2grid(gridsize, (3, 0), rowspan=2)
+        min_y_par = 0
+        min_x_par = 0
+        max_x_par = par_img.shape[1]
+        max_y_par = par_img.shape[0]
+        plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
+                    extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+        plt.plot([min_x_par, min_x_par],
+                    [min_y_par, max_y_par],
+                    lw=2, zorder=10, color="k")
+        plt.plot([min_x_par, max_x_par],
+                    [min_y_par, min_y_par],
+                    lw=2, zorder=10, color="k")
+        plt.plot([max_x_par, max_x_par],
+                    [max_y_par, min_y_par],
+                    lw=2, zorder=10, color="k")
+        plt.plot([max_x_par, min_x_par],
+                    [max_y_par, max_y_par],
+                    lw=2, zorder=10, color="k")
 
-        ## plt.xticks([])
-        ## plt.yticks([])
+        plt.xticks([])
+        plt.yticks([])
 
-        ## # plot the patch border on the context image
-        ## plt.plot([min_x, min_x],
-        ##          [min_y, max_y],
-        ##          lw=2, zorder=10, color="r")
-        ## plt.plot([min_x, max_x],
-        ##          [min_y, min_y],
-        ##          lw=2, zorder=10, color="r")
-        ## plt.plot([max_x, max_x],
-        ##          [max_y, min_y],
-        ##          lw=2, zorder=10, color="r")
-        ## plt.plot([max_x, min_x],
-        ##          [max_y, max_y],
-        ##          lw=2, zorder=10, color="r")
+        # plot the patch border on the context image
+        plt.plot([min_x, min_x],
+                    [min_y, max_y],
+                    lw=2, zorder=10, color="r")
+        plt.plot([min_x, max_x],
+                    [min_y, min_y],
+                    lw=2, zorder=10, color="r")
+        plt.plot([max_x, max_x],
+                    [max_y, min_y],
+                    lw=2, zorder=10, color="r")
+        plt.plot([max_x, min_x],
+                    [max_y, max_y],
+                    lw=2, zorder=10, color="r")
+        """
 
     plt.tight_layout()
     plt.show()
@@ -145,24 +169,42 @@ def display_record(record):
             pass
 
 
-# -------- prepare_data
 def prepare_data(
-    df,
-    col_names=["image_path", "parent_id"],
-    annotation_set="001",
-    label_col_name="label",
-    redo=False,
-    random_state="random",
-    num_samples=100,
-):
-    """prepare data for annotations
+    df: pd.DataFrame,
+    col_names: Optional[List[str]] = ["image_path", "parent_id"],
+    annotation_set: Optional[str] = "001",
+    label_col_name: Optional[str] = "label",
+    redo: Optional[bool] = False,
+    random_state: Optional[Union[int, str]] = "random",
+    num_samples: Optional[int] = 100,
+) -> List[List[Union[str, int]]]:
+    """
+    Prepare data for image annotation by selecting a subset of images from a pandas DataFrame.
 
-    Args:
-        df (pandas dataframe): dataframe which contains information about patches to be annotated
-        col_names (list, optional): column names of the dataframe to be used in annotations. Defaults to ["image_path", "parent_id"].
-        annotation_set (str, optional): as the suggest. Defaults to "001".
-        label_col_name (str, optional): column name related to labels. Defaults to "label".
-        redo (bool, optional): redo the annotations. Defaults to False.
+    Parameters
+    ----------
+    df : pandas DataFrame
+        DataFrame containing the image data to be annotated.
+    col_names : list of str, optional (default=['image_path', 'parent_id'])
+        List of column names to include in the output. Default columns are 'image_path' and 'parent_id'.
+    annotation_set : str, optional (default='001')
+        String specifying the annotation set.
+    label_col_name : str, optional (default='label')
+        Column name containing the label information for each image.
+    redo : bool, optional (default=False)
+        If True, all images will be annotated even if they already have a label. If False (default),
+        only images without a label will be annotated.
+    random_state : int or str, optional (default='random')
+        Seed for the random number generator used when selecting images to annotate. If set to 'random'
+        (default), a random seed will be used.
+    num_samples : int, optional (default=100)
+        Maximum number of images to annotate.
+
+    Returns
+    -------
+    list of list of str/int
+        A list of lists containing the selected image data, with each sublist containing the specified
+        columns plus the annotation set and a row counter.
     """
 
     if (label_col_name in list(df.columns)) and (not redo):
@@ -189,9 +231,13 @@ def prepare_data(
                     n=10, random_state=random.randint(0, 1e6)
                 )
             else:
-                df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
+                df = df.groupby("pixel_groups").sample(
+                    n=10, random_state=random_state
+                )
         except Exception:
-            print(f"[INFO] len(df) = {len(df)}, .sample method is deactivated.")
+            print(
+                f"[INFO] len(df) = {len(df)}, .sample method is deactivated."
+            )
             df = df.iloc[:num_samples]
     else:
         print(f"[WARNING] could not find {tar_param} in columns.")
@@ -212,23 +258,50 @@ def prepare_data(
     return data
 
 
-# -------- annotation_interface
 def annotation_interface(
-    data,
-    list_labels,
-    list_colors=["red", "green", "blue", "green"],
-    annotation_set="001",
-    method="ipyannotate",
-    list_shortcuts=None,
-):
-    """Setup the annotation interface
+    data: List,
+    list_labels: List,
+    list_colors: Optional[List[str]] = ["red", "green", "blue", "green"],
+    annotation_set: Optional[str] = "001",
+    method: Optional[str] = "ipyannotate",
+    list_shortcuts: Optional[List[str]] = None,
+) -> Annotation:
+    """
+    Create an annotation interface for a list of patches with corresponding labels.
 
-    Args:
-        data (list): list of patches to be annotated
-        list_labels (list): list of labels
-        list_colors (list, optional): list of colors. Defaults to ["green", "blue", "red"].
-        annotation_set (str, optional): annotation set, specified in the yaml file or via function argument. Defaults to "001".
-        method (str, optional): method to annotate patches. Defaults to "ipyannotate".
+    Parameters
+    ----------
+    data : list
+        List of patches to annotate.
+    list_labels : list
+        List of strings representing the labels for each annotation class.
+    list_colors : list, optional
+        List of strings representing the colors for each annotation class,
+        by default ["red", "green", "blue", "green"].
+    annotation_set : str, optional
+        String representing the annotation set, specified in the yaml file or
+        via function argument, by default "001".
+    method : str, optional
+        String representing the method for annotation, by default
+        "ipyannotate".
+    list_shortcuts : list, optional
+        List of strings representing the keyboard shortcuts for each
+        annotation class, by default None.
+
+    Returns
+    -------
+    annotation : Annotation
+        The annotation object containing the toolbar, tasks and canvas for the interface.
+
+    Raises
+    ------
+    SystemExit
+        If `method` parameter is not "ipyannotate".
+
+    Notes
+    -----
+    This function creates an annotation interface using the `ipyannotate` library,
+    which is a browser-based tool for annotating data.
     """
 
     if method == "ipyannotate":
@@ -292,46 +365,98 @@ def annotation_interface(
         )
 
 
-# -------- prepare_annotation
 def prepare_annotation(
-    userID,
-    task,
-    annotation_tasks_file,
-    custom_labels=[],
-    annotation_set="001",
-    redo_annotation=False,
-    patch_paths=False,
-    parent_paths=False,
-    tree_level="child",
-    sortby=None,
-    min_alpha_channel=None,
-    min_mean_pixel=None,
-    max_mean_pixel=None,
-    context_image=False,
-    xoffset=500,
-    yoffset=500,
-    urlmain="https://maps.nls.uk/view/",
-    random_state="random",
-    list_shortcuts=None,
-):
-    """Prepare annotations
+    userID: str,
+    task: str,
+    annotation_tasks_file: str,
+    custom_labels: List[str] = [],
+    annotation_set: Optional[str] = "001",
+    redo_annotation: Optional[bool] = False,
+    patch_paths: Optional[Union[str, bool]] = False,
+    parent_paths: Optional[str] = False,
+    tree_level: Optional[str] = "child",
+    sortby: Optional[str] = None,
+    min_alpha_channel: Optional[float] = None,
+    min_mean_pixel: Optional[float] = None,
+    max_mean_pixel: Optional[float] = None,
+    context_image: Optional[bool] = False,
+    xoffset: Optional[int] = 500,
+    yoffset: Optional[int] = 500,
+    urlmain: Optional[str] = "https://maps.nls.uk/view/",
+    random_state: Optional[Union[str, int]] = "random",
+    list_shortcuts: Optional[List[tuple]] = None,
+) -> Dict:
+    """Prepare image data for annotation and launch the annotation interface.
 
-    Args:
-        userID (str): unique user-ID. This is used in the name of the output file.
-        task (str): name of the task. This task should be defined in the yaml file (annotation_tasks_file), if not,
-                    custom_labels will be used instead
-        annotation_tasks_file (str, path to yaml file): yaml file describing the tasks/paths/etc
-        custom_labels (list, optional): If task is not found in the yaml file, use custom labels. Defaults to [].
-        annotation_set (str, optional): Name of the annotation set defined in annotation_tasks_file. Defaults to "001".
-        redo_annotation (bool, optional): redo annotations. Defaults to False.
-        patch_paths (bool, str, optional): if custom_labels, specify path to patches. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-        parent_paths (bool, str, optional): if custom_labels, specify path to parent images. Normally, this is set to False and the information is read from the yaml file. Defaults to False.
-        tree_level (str, optional): parent/child tree level. Defaults to "child".
-        sortby (None, mean, optional): sort patches to be annotated. Defaults to None.
-        context_image (bool): add a context image or not
-        xoffset (int, optional): x-offset for the borders of the context image. Defaults to 500.
-        yoffset (int, optional): y-offset for the borders of the context image. Defaults to 500.
-        urlmain (str, None, optional): when annotating, the URL in form of url_main/{map_id} will be shown as well.
+    Parameters
+    ----------
+    userID : str
+        The ID of the user annotating the images. Should be unique as it is
+        used in the name of the output file.
+    task : str
+        The task name that the images are associated with. This task should be
+        defined in the yaml file (annotation_tasks_file), if not,
+        `custom_labels` will be used instead.
+    annotation_tasks_file : str
+        The file path to the YAML file containing information about task, image
+        paths and annotation metadata.
+    custom_labels : list of str, optional
+        A list of custom label names to be used instead of the label names in
+        the annotation_tasks_file. Default is an empty list.
+    annotation_set : str, optional
+        The ID of the annotation set to use in the YAML file
+        (`annotation_tasks_file`). Default is "001".
+    redo_annotation : bool, optional
+        If True, allows the user to redo annotations on previously annotated
+        images. Default is False.
+    patch_paths : str or bool, optional
+        The path to the directory containing image patches for child level
+        annotations, if `custom_labels` are provided. Default is False
+        and the information is read from the yaml file.
+    parent_paths : str, optional
+        The path to parent images, if `custom_labels` are provided. Default is
+        False and the information is read from the yaml file.
+    tree_level : str, optional
+        The level of annotation to be used, either "child" or "parent".
+        Default is "child".
+    sortby : str, optional
+        If "mean", sort images by mean pixel intensity. Default is None.
+    min_alpha_channel : float, optional
+        The minimum alpha channel value for images to be included in the
+        annotation interface. Only applies to child level annotations.
+        Default is None.
+    min_mean_pixel : float, optional
+        The minimum mean pixel intensity value for images to be included in
+        the annotation interface. Only applies to child level annotations.
+        Default is None.
+    max_mean_pixel : float, optional
+        The maximum mean pixel intensity value for images to be included in
+        the annotation interface. Only applies to child level annotations.
+        Default is None.
+    context_image : bool, optional
+        If True, includes a context image with each patch image in the
+        annotation interface. Only applies to child level annotations. Default
+        is False.
+    xoffset : int, optional
+        The x-offset to be used for displaying context images in the annotation
+        interface. Default is 500.
+    yoffset : int, optional
+        The y-offset to be used for displaying context images in the annotation
+        interface. Default is 500.
+    urlmain : str, optional
+        The main URL to be used for displaying images in the annotation
+        interface. Default is "https://maps.nls.uk/view/".
+    random_state : int or str, optional
+        Seed or state value for the random number generator used for shuffling
+        the image order. Default is "random".
+    list_shortcuts : list of tuples, optional
+        A list of tuples containing shortcut key assignments for label names.
+        Default is None.
+
+    Returns
+    -------
+    annotation : dict
+        A dictionary containing the annotation results.
     """
 
     # Specify global variables so they can be used in display_record function
@@ -342,9 +467,9 @@ def prepare_annotation(
     global treelevel
     global contextimage
 
-    # Note: it is not possible to define global variable + args with the same names
-    #       here, we read xoffset and yoffset, assign them to two global variables
-    #       these global variables will then be used in display_record
+    # Note: it is not possible to define global variable + args with the same
+    # names so here, we read xoffset and yoffset, assign them to two global
+    # variables as these global variables will then be used in display_record
     x_offset = xoffset
     y_offset = yoffset
     url_main = urlmain
@@ -360,7 +485,9 @@ def prepare_annotation(
         )
     else:
         if tree_level == "child":
-            patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"]
+            patch_paths = annotation_tasks["paths"][annotation_set][
+                "patch_paths"
+            ]
         parent_paths = os.path.join(
             annotation_tasks["paths"][annotation_set]["parent_paths"]
         )
@@ -380,13 +507,19 @@ def prepare_annotation(
 
     if tree_level == "child":
         # specify the path of patches and the parent images
-        mymaps = load_patches(patch_paths=patch_paths, parent_paths=parent_paths)
+        mymaps = load_patches(
+            patch_paths=patch_paths, parent_paths=parent_paths
+        )
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
-                metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
+                metadata=annot_file,
+                index_col=-1,
+                delimiter=",",
+                tree_level=tree_level,
             )
 
-        # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
+        # Calculate mean before converting to pandas so the dataframe contains
+        # information about mean pixel intensity
         if (
             sortby == "mean"
             or isinstance(min_alpha_channel, float)
@@ -396,29 +529,38 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_std=False)
 
         # convert images to dataframe
-        parents_df, sliced_df = mymaps.convertImages()
+        _, sliced_df = mymaps.convertImages()
 
         if sortby == "mean":
             sliced_df.sort_values("mean_pixel_RGB", inplace=True)
 
         if isinstance(min_alpha_channel, float):
             if "mean_pixel_A" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_A"] >= min_alpha_channel]
+                sliced_df = sliced_df[
+                    sliced_df["mean_pixel_A"] >= min_alpha_channel
+                ]
 
         if isinstance(min_mean_pixel, float):
             if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] >= min_mean_pixel]
+                sliced_df = sliced_df[
+                    sliced_df["mean_pixel_RGB"] >= min_mean_pixel
+                ]
 
         if isinstance(max_mean_pixel, float):
             if "mean_pixel_RGB" in sliced_df.columns:
-                sliced_df = sliced_df[sliced_df["mean_pixel_RGB"] <= max_mean_pixel]
+                sliced_df = sliced_df[
+                    sliced_df["mean_pixel_RGB"] <= max_mean_pixel
+                ]
 
         col_names = ["image_path", "parent_id"]
     else:
         mymaps = loader(path_images=parent_paths)
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
-                metadata=annot_file, index_col=-1, delimiter=",", tree_level=tree_level
+                metadata=annot_file,
+                index_col=-1,
+                delimiter=",",
+                tree_level=tree_level,
             )
         # convert images to dataframe
         sliced_df, _ = mymaps.convertImages()
@@ -445,24 +587,43 @@ def prepare_annotation(
         return annotation
 
 
-# -------- save_annotation
-def save_annotation(annotation, userID, task, annotation_tasks_file, annotation_set):
-    """Save annotation results
-
-    Args:
-        annotation: output from the annotation tool
-        userID (str): unique user-ID. This is used in the name of the output file.
-        task (str): name of the task. This task should be defined in the yaml file (annotation_tasks_file), if not,
-                    custom_labels will be used instead
-        annotation_tasks_file (str, path to yaml file): yaml file describing the tasks/paths/etc
-        annotation_set (str, optional): Name of the annotation set defined in annotation_tasks_file. Defaults to "001".
+def save_annotation(
+    annotation: Annotation,
+    userID: str,
+    task: str,
+    annotation_tasks_file: str,
+    annotation_set: str,
+) -> None:
     """
+    Save annotations for a given task and user to a csv file.
 
-    with open(annotation_tasks_file) as annot_file_fio:
-        annotation_tasks = yaml.load(annot_file_fio, Loader=yaml.FullLoader)
+    Parameters
+    ----------
+    annotation : obj
+        Annotation object containing the annotations to be saved (output from
+        the annotation tool).
+    userID : str
+        User ID of the person performing the annotation. This should be unique
+        as it is used in the name of the output file.
+    task : str
+        Name of the task being annotated.
+    annotation_tasks_file : str
+        Path to the yaml file describing the annotation tasks, paths, etc.
+    annotation_set : str
+        Name of the annotation set to which the annotations belong, defined in
+        the `annotation_tasks_file`.
+
+    Returns
+    -------
+    None
+    """
+    with open(annotation_tasks_file) as f:
+        annotation_tasks = yaml.load(f, Loader=yaml.FullLoader)
 
     if not annotation_set in annotation_tasks["paths"].keys():
-        print(f"{annotation_set} could not be found in {annotation_tasks_file}")
+        print(
+            f"{annotation_set} could not be found in {annotation_tasks_file}"
+        )
     else:
         annot_file = os.path.join(
             annotation_tasks["paths"][annotation_set]["annot_dir"],
