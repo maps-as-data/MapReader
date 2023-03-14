@@ -21,7 +21,7 @@ class TileServer:
     def __init__(
         self,
         metadata_path,
-        geometry="polygone",
+        geometry="polygon",
         download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
     ):
         """Initialize TileServer class and read in metadata
@@ -36,7 +36,7 @@ class TileServer:
             metadata_path: path to a metadata file downloaded from a tileserver.
                            This file contains information about one series of maps stored on the tileserver.
                            Some example metadata files can be found in `MapReader/mapreader/persistent_data`
-            geometry (str, optional): Geometry that defines the boundaries. Defaults to "polygone".
+            geometry (str, optional): Geometry that defines the boundaries. Defaults to "polygon".
             download_url (str, optional): Base URL to download the maps. Defaults to "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png".
         """
         # initialize variables
@@ -187,7 +187,7 @@ class TileServer:
 
     def detect_rectangle_boundary(self, coords):
         """Detect rectangular boundary given a set of coordinates"""
-        if self.geometry == "polygone":
+        if self.geometry == "polygon":
             coord_arr = np.array(coords)
             # if len(coord_arr) != 5:
             #    raise ValueError(f"[ERROR] expected length of coordinate list is 5. coords: {coords}")
@@ -196,7 +196,7 @@ class TileServer:
             min_lat = np.min(coord_arr[:, 1])
             max_lat = np.max(coord_arr[:, 1])
 
-            ### # XXX this method results in smaller rectangles (compared to the original polygone) particularly
+            ### # XXX this method results in smaller rectangles (compared to the original polygon) particularly
             ### #     if the map is strongly tilted
             ### min_lon = np.sort(coord_arr[:-1, 0])[1]
             ### max_lon = np.sort(coord_arr[:-1, 0])[2]
@@ -279,7 +279,7 @@ class TileServer:
             metadata = self.metadata
 
         # Header and Footer for GeoJson
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]
@@ -297,7 +297,7 @@ class TileServer:
         try_cond1 = try_cond2 = False
         if not os.path.isfile(metadata_output_path):
             with open(metadata_output_path, "w") as fio:
-                fio.writelines("|name|url|coord|pub_date|region|polygone\n")
+                fio.writelines("|name|url|coord|pub_date|region|polygon\n")
                 counter = 0
         else:
             with open(metadata_output_path, "r") as fio:
@@ -320,7 +320,7 @@ class TileServer:
 
                     try_cond1 = (
                         str(one_item["geometry"]["coordinates"][0][0])
-                        in saved_metadata["polygone"].to_list()
+                        in saved_metadata["polygon"].to_list()
                     )
                     try_cond2 = (
                         f'map_{one_item["properties"]["IMAGE"]}.png'
@@ -630,7 +630,7 @@ class TileServer:
             metadata = self.metadata
 
         # Header and Footer for GeoJson
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]

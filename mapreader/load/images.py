@@ -192,7 +192,7 @@ class mapImages:
                 # print(f"[WARNING] {one_row[image_id_col]} does not exist in images, skip!")
                 continue
             for one_col in columns:
-                if one_col in ["coord", "polygone"]:
+                if one_col in ["coord", "polygon"]:
                     # Make sure coord is interpreted as a tuple
                     self.images[tree_level][one_row[image_id_col]][one_col] = eval(
                         one_row[one_col]

@@ -10,10 +10,10 @@ def create_hf(geom):
     """Create header and footer for different types of geometries
 
     Args:
-        geom (str): geometry type, e.g., polygone
+        geom (str): geometry type, e.g., polygon
     """
 
-    if geom == "polygone":
+    if geom == "polygon":
         header = """
         {
         "type": "FeatureCollection",
