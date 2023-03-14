@@ -75,7 +75,12 @@ class TileServer:
         metadata_info_list = []
         metadata_coord_arr = []
         for one_item in self.metadata:
-            min_lon, max_lon, min_lat, max_lat = self.detect_rectangle_boundary(
+            (
+                min_lon,
+                max_lon,
+                min_lat,
+                max_lat,
+            ) = self.detect_rectangle_boundary(
                 one_item["geometry"]["coordinates"][0][0]
             )
             # XXX hardcoded: the file path is hardcoded to map_<IMAGE>.png
@@ -106,14 +111,21 @@ class TileServer:
         if len(remove_image_ids) != 0:
             for i in range(len(self.metadata) - 1, -1, -1):
                 if self.metadata[i]["properties"]["IMAGE"] in remove_image_ids:
-                    print(f'Removing {self.metadata[i]["properties"]["IMAGE"]}')
+                    print(
+                        f'Removing {self.metadata[i]["properties"]["IMAGE"]}'
+                    )
                     del self.metadata[i]
                     one_edit = True
 
         if len(only_keep_image_ids) != 0:
             for i in range(len(self.metadata) - 1, -1, -1):
-                if self.metadata[i]["properties"]["IMAGE"] not in only_keep_image_ids:
-                    print(f'Removing {self.metadata[i]["properties"]["IMAGE"]}')
+                if (
+                    self.metadata[i]["properties"]["IMAGE"]
+                    not in only_keep_image_ids
+                ):
+                    print(
+                        f'Removing {self.metadata[i]["properties"]["IMAGE"]}'
+                    )
                     del self.metadata[i]
                     one_edit = True
 
@@ -136,7 +148,7 @@ class TileServer:
         if not type(latlon_list[0]) == list:
             latlon_list = [latlon_list]
 
-        if append and (self.found_queries != None):
+        if append and (self.found_queries is not None):
             found_queries = copy.deepcopy(self.found_queries)
         else:
             found_queries = []
@@ -159,12 +171,19 @@ class TileServer:
             # Check if the query is already in the list
             if len(found_queries) > 0:
                 for one_in_candidates in found_queries:
-                    if self.metadata_info_list[indx_q][0] == one_in_candidates[0]:
+                    if (
+                        self.metadata_info_list[indx_q][0]
+                        == one_in_candidates[0]
+                    ):
                         already_in_candidates = True
-                        print(f"Already in the query list: {one_in_candidates[0]}")
+                        print(
+                            f"Already in the query list: {one_in_candidates[0]}"
+                        )
                         break
             if not already_in_candidates:
-                found_queries.append(copy.deepcopy(self.metadata_info_list[indx_q]))
+                found_queries.append(
+                    copy.deepcopy(self.metadata_info_list[indx_q])
+                )
                 found_queries[-1].extend(
                     [copy.deepcopy(self.metadata_coord_arr[indx_q]), indx_q]
                 )
@@ -173,7 +192,7 @@ class TileServer:
     def print_found_queries(self):
         """Print found queries"""
         print(12 * "-")
-        print(f"Found items:")
+        print("Found items:")
         print(12 * "-")
         if not self.found_queries:
             print("[]")
@@ -196,12 +215,13 @@ class TileServer:
             min_lat = np.min(coord_arr[:, 1])
             max_lat = np.max(coord_arr[:, 1])
 
-            ### # XXX this method results in smaller rectangles (compared to the original polygone) particularly
-            ### #     if the map is strongly tilted
-            ### min_lon = np.sort(coord_arr[:-1, 0])[1]
-            ### max_lon = np.sort(coord_arr[:-1, 0])[2]
-            ### min_lat = np.sort(coord_arr[:-1, 1])[1]
-            ### max_lat = np.sort(coord_arr[:-1, 1])[2]
+            """
+            # this method results in smaller rectangles (compared to the original polygone) particularly if the map is strongly tilted
+            min_lon = np.sort(coord_arr[:-1, 0])[1]
+            max_lon = np.sort(coord_arr[:-1, 0])[2]
+            min_lat = np.sort(coord_arr[:-1, 1])[1]
+            max_lat = np.sort(coord_arr[:-1, 1])[2]
+            """
         return min_lon, max_lon, min_lat, max_lat
 
     def create_metadata_query(self):
@@ -211,7 +231,9 @@ class TileServer:
         """
         self.metadata_query = []
         for one_item in self.found_queries:
-            self.metadata_query.append(copy.deepcopy(self.metadata[one_item[3]]))
+            self.metadata_query.append(
+                copy.deepcopy(self.metadata[one_item[3]])
+            )
 
     def minmax_latlon(self):
         """Method to return min/max of lats/lons"""
@@ -284,7 +306,7 @@ class TileServer:
         if id2 < 0:
             metadata = metadata[id1:]
         elif id2 < id1:
-            raise ValueError(f"id2 should be > id1.")
+            raise ValueError("id2 should be > id1.")
         else:
             metadata = metadata[id1:id2]
 
@@ -377,13 +399,19 @@ class TileServer:
                     with open(failed_urls_path, "r") as fp:
                         errors = fp.readlines()
                         if len(errors) > max_num_errors:
-                            print(f"[WARNING] Could not retrieve {len(errors)} tiles.")
+                            print(
+                                f"[WARNING] Could not retrieve {len(errors)} tiles."
+                            )
                             with open(error_path, "a+") as fio:
                                 line2write = f"{counter}|"
                                 line2write += f"{poly_filename}|"
                                 line2write += f"{len(errors)}|"
-                                line2write += f"{os.path.basename(output_stitcher)}|"
-                                line2write += f"{one_item['properties']['IMAGEURL']}|"
+                                line2write += (
+                                    f"{os.path.basename(output_stitcher)}|"
+                                )
+                                line2write += (
+                                    f"{one_item['properties']['IMAGEURL']}|"
+                                )
                                 line2write += f"{values}\n"
                                 fio.writelines(line2write)
                             continue
@@ -395,9 +423,12 @@ class TileServer:
                 list_files = glob(os.path.join(tile_tmp_dir, "*png"))
                 coord_info = collect_coord_info(list_files)
 
-                name_region, _, _, published_date = self.extract_region_dates_metadata(
-                    one_item
-                )
+                (
+                    name_region,
+                    _,
+                    _,
+                    published_date,
+                ) = self.extract_region_dates_metadata(one_item)
 
                 with open(metadata_output_path, "a+") as fio:
                     line2write = f"{counter}|"
@@ -413,7 +444,7 @@ class TileServer:
                 with open(error_path, "a+") as fio:
                     line2write = f"{counter}|"
                     line2write += f"{poly_filename}|"
-                    line2write += f"EXCEPTION|"
+                    line2write += "EXCEPTION|"
                     line2write += f"{os.path.basename(output_stitcher)}|"
                     line2write += f"{one_item['properties']['IMAGEURL']}|"
                     line2write += f"{values}\n"
@@ -442,11 +473,17 @@ class TileServer:
             name_region = one_item_split[0].strip()
             for ois in one_item_split[1:]:
                 if "surveyed" in ois.lower():
-                    surveyed_date = self.find_and_clean_date(ois, ois_key="surveyed")
+                    surveyed_date = self.find_and_clean_date(
+                        ois, ois_key="surveyed"
+                    )
                 if "revised" in ois.lower():
-                    revised_date = self.find_and_clean_date(ois, ois_key="revised")
+                    revised_date = self.find_and_clean_date(
+                        ois, ois_key="revised"
+                    )
                 if "published" in ois.lower():
-                    published_date = self.find_and_clean_date(ois, ois_key="published")
+                    published_date = self.find_and_clean_date(
+                        ois, ois_key="published"
+                    )
         except:
             pass
 
@@ -469,7 +506,9 @@ class TileServer:
                 found_date = found_date.split(strip_token)[1].strip()
         return found_date
 
-    def plot_metadata_on_map(self, list2remove=[], map_extent=None, add_text=False):
+    def plot_metadata_on_map(
+        self, list2remove=[], map_extent=None, add_text=False
+    ):
         """Plot the map boundaries specified in metadata
 
         Args:
@@ -484,7 +523,7 @@ class TileServer:
 
             cartopy_installed = True
         except ImportError:
-            print(f"[WARNING] cartopy is not installed!")
+            print("[WARNING] cartopy is not installed!")
 
         # setup the figure/map
         plt.figure(figsize=(15, 15))
@@ -506,7 +545,9 @@ class TileServer:
             if text_id in list2remove:
                 continue
 
-            coords = np.array(self.metadata[i]["geometry"]["coordinates"][0][0])
+            coords = np.array(
+                self.metadata[i]["geometry"]["coordinates"][0][0]
+            )
             if cartopy_installed:
                 plt.plot(
                     coords[:, 0],
@@ -542,16 +583,18 @@ class TileServer:
         """
         all_published_date = []
         for one_item in self.metadata:
-            _, _, _, published_date = self.extract_region_dates_metadata(one_item)
+            _, _, _, published_date = self.extract_region_dates_metadata(
+                one_item
+            )
             all_published_date.append(int(published_date))
 
         plt.figure(figsize=(10, 5))
         print(
             f"Min/Max published dates: {min(all_published_date)}, {max(all_published_date)}"
         )
-        if min_date == None:
+        if min_date is None:
             min_date = min(all_published_date)
-        if max_date == None:
+        if max_date is None:
             max_date = max(all_published_date)
         plt.hist(
             all_published_date,
@@ -634,12 +677,14 @@ class TileServer:
         if id2 < 0:
             metadata = metadata[id1:]
         elif id2 < id1:
-            raise ValueError(f"id2 should be > id1.")
+            raise ValueError("id2 should be > id1.")
         else:
             metadata = metadata[id1:id2]
 
         # Dataframe to collect some information about results
-        pd_info = pd.DataFrame(columns=["name", "url", "coord", "pub_date", "region"])
+        pd_info = pd.DataFrame(
+            columns=["name", "url", "coord", "pub_date", "region"]
+        )
         counter = 0
         for one_item in metadata:
             # only for testing
@@ -648,7 +693,8 @@ class TileServer:
 
             print("-------------------")
             output_stitcher = os.path.join(
-                output_maps_dirname, "map_" + one_item["properties"]["IMAGE"] + ".png"
+                output_maps_dirname,
+                "map_" + one_item["properties"]["IMAGE"] + ".png",
             )
             if os.path.isfile(output_stitcher) and (not redownload):
                 print(f"File already exists: {output_stitcher}")
@@ -658,7 +704,12 @@ class TileServer:
             # print(one_item["geometry"]["coordinates"])
 
             # Change the request to a rectangular one by finding min/max of lats/lons
-            min_lon, max_lon, min_lat, max_lat = self.detect_rectangle_boundary(
+            (
+                min_lon,
+                max_lon,
+                min_lat,
+                max_lat,
+            ) = self.detect_rectangle_boundary(
                 one_item["geometry"]["coordinates"][0][0]
             )
 
@@ -690,9 +741,9 @@ class TileServer:
                 )
                 str2write = header + values + footer
 
-                poly_filename = one_item["properties"]["IMAGE"] + "_{}.geojson".format(
-                    counter
-                )
+                poly_filename = one_item["properties"][
+                    "IMAGE"
+                ] + "_{}.geojson".format(counter)
                 fio = open(os.path.join("geojson", poly_filename), "w")
                 fio.writelines(str2write)
                 fio.close()
@@ -721,7 +772,9 @@ class TileServer:
                             )
                             lat_len = abs(max_lat - min_lat)
                             lon_len = abs(max_lon - min_lon)
-                            if (lat_len <= min_lat_len) or (lon_len <= min_lon_len):
+                            if (lat_len <= min_lat_len) or (
+                                lon_len <= min_lon_len
+                            ):
                                 not_saved = True
                                 break
                             min_lat += adjust_mult * lat_len
@@ -744,9 +797,12 @@ class TileServer:
             list_files = glob(os.path.join(tile_tmp_dir, "*png"))
             coord_info = collect_coord_info(list_files)
 
-            name_region, _, _, published_date = self.extract_region_dates_metadata(
-                one_item
-            )
+            (
+                name_region,
+                _,
+                _,
+                published_date,
+            ) = self.extract_region_dates_metadata(one_item)
 
             pd_info.loc[counter] = [
                 os.path.basename(output_stitcher),
@@ -761,7 +817,9 @@ class TileServer:
         if os.path.isdir(tile_tmp_dir):
             shutil.rmtree(tile_tmp_dir)
 
-        pd_output_file = os.path.join(output_maps_dirname, output_metadata_filename)
+        pd_output_file = os.path.join(
+            output_maps_dirname, output_metadata_filename
+        )
         if (not redownload) and (os.path.isfile(pd_output_file)):
             pd_info.to_csv(pd_output_file, mode="a+", header=False)
         else:
