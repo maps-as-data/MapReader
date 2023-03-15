@@ -30,42 +30,49 @@ class classifierContext(classifier):
     ) -> None:
         """
         Train the model on the specified phases for a given number of epochs.
-        Wrapper function for `train_core` method to capture exceptions (with
-        supported exceptions so far: `KeyboardInterrupt`). Refer to
-        `train_core` for more information.
+        Wrapper function for ``train_core`` method to capture exceptions (with
+        supported exceptions so far: ``KeyboardInterrupt``). Refer to
+        ``train_core`` for more information.
 
         Parameters
         ----------
         phases : list of str, optional
             The phases to train the model on for each epoch. Default is
-            ["train", "val"].
+            ``["train", "val"]``.
         num_epochs : int, optional
-            The number of epochs to train the model for. Default is 25.
+            The number of epochs to train the model for. Default is ``25``.
         save_model_dir : str or None, optional
-            The directory to save the model in. Default is "models". If set to
-            None, the model is not saved.
+            The directory to save the model in. Default is ``"models"``. If
+            set to ``None``, the model is not saved.
         verbosity_level : int, optional
-            The level of verbosity during training. 0 is silent, 1 is progress
-            bar and metrics, 2 is detailed information. Default is 1.
+            The level of verbosity during training:
+
+            - ``0`` is silent,
+            - ``1`` is progress bar and metrics,
+            - ``2`` is detailed information.
+
+            Default is ``1``.
         tensorboard_path : str or None, optional
-            The path to the directory to save TensorBoard logs in. Default is
-            None. If set to None, no TensorBoard logs are saved.
+            The path to the directory to save TensorBoard logs in. If set to
+            ``None``, no TensorBoard logs are saved. Default is ``None``.
         tmp_file_save_freq : int, optional
             The frequency (in epochs) to save a temporary file of the model.
-            Default is 2. If set to 0 or None, no temporary file is saved.
+            Default is ``2``. If set to ``0`` or ``None``, no temporary file
+            is saved.
         remove_after_load : bool, optional
             Whether to remove the temporary file after loading it. Default is
-            True.
+            ``True``.
         print_info_batch_freq : int, optional
             The frequency (in batches) to print training information. Default
-            is 5. If set to 0 or None, no training information is printed.
+            is ``5``. If set to ``0`` or ``None``, no training information is
+            printed.
 
         Returns
         -------
         None
-            The function saves the model to the `save_model_dir` directory,
+            The function saves the model to the ``save_model_dir`` directory,
             and optionally to a temporary file. If interrupted with a
-            `KeyboardInterrupt`, the function tries to load the temporary
+            ``KeyboardInterrupt``, the function tries to load the temporary
             file. If no temporary file is found, it continues without loading.
         """
 
@@ -107,33 +114,40 @@ class classifierContext(classifier):
         ----------
         phases : list of str, optional
             The phases to train the model on for each epoch. Default is
-            ["train", "val"].
+            ``["train", "val"]``.
         num_epochs : int, optional
-            The number of epochs to train the model for. Default is 25.
-        save_model_dir : str, optional
-            The directory to save the model in. Default is "models". If set to
-            None, the model is not saved.
+            The number of epochs to train the model for. Default is ``25``.
+        save_model_dir : str or None, optional
+            The directory to save the model in. Default is ``"models"``. If
+            set to ``None``, the model is not saved.
         verbosity_level : int, optional
-            The level of verbosity during training. 0 is silent, 1 is progress
-            bar and metrics, 2 is detailed information. Default is 1.
-        tensorboard_path : str, optional
-            The path to save the TensorBoard logs. Default is None. If set to
-            None, no TensorBoard logs are saved.
+            The level of verbosity during training:
+
+            - ``0`` is silent,
+            - ``1`` is progress bar and metrics,
+            - ``2`` is detailed information.
+
+            Default is ``1``.
+        tensorboard_path : str or None, optional
+            The path to the directory to save TensorBoard logs in. If set to
+            ``None``, no TensorBoard logs are saved. Default is ``None``.
         tmp_file_save_freq : int, optional
             The frequency (in epochs) to save a temporary file of the model.
-            Default is 2. If set to 0 or None, no temporary file is saved.
+            Default is ``2``. If set to ``0`` or ``None``, no temporary file
+            is saved.
         print_info_batch_freq : int, optional
             The frequency (in batches) to print training information. Default
-            is 5. If set to 0 or None, no training information is printed.
+            is ``5``. If set to ``0`` or ``None``, no training information is
+            printed.
 
         Raises
         ------
         ValueError
-            If the criterion is not set. Use the `add_criterion` method to set
-            the criterion.
+            If the criterion is not set. Use the ``add_criterion`` method to
+            set the criterion.
 
             If the optimizer is not set and the phase is "train". Use the
-            `initialize_optimizer` or `add_optimizer` method to set the
+            ``initialize_optimizer`` or ``add_optimizer`` method to set the
             optimizer.
 
         KeyError
@@ -402,14 +416,15 @@ class classifierContext(classifier):
         Parameters
         ----------
         set_name : str, optional
-            Name of the dataset (train/validation) to display the sample from,
-            by default "train".
+            Name of the dataset (``train``/``validation``) to display the
+            sample from, by default ``"train"``.
         batch_number : int, optional
-            Number of batches to display, by default 1.
+            Number of batches to display, by default ``1``.
         print_batch_info : bool, optional
-            Whether to print information about the batch size, by default True.
+            Whether to print information about the batch size, by default
+            ``True``.
         figsize : tuple, optional
-            Figure size (width, height) in inches, by default (15, 10).
+            Figure size (width, height) in inches, by default ``(15, 10)``.
 
         Returns
         -------
@@ -424,10 +439,10 @@ class classifierContext(classifier):
 
         Notes
         -----
-        This method uses the dataloader of the `ImageClassifierData` class and
-        the `make_grid` function from the `torchvision.utils` module to
-        display the sample data in a grid format. It also calls the `_imshow`
-        method of the `ImageClassifierData` class to show the sample data.
+        This method uses the dataloader of the ``ImageClassifierData`` class
+        and the ``torchvision.utils.make_grid`` function to display the sample
+        data in a grid format. It also calls the ``_imshow`` method of the
+        ``ImageClassifierData`` class to show the sample data.
         """
         if print_batch_info:
             # print info about batch size
@@ -472,14 +487,15 @@ class classifierContext(classifier):
             The maximum learning rate to be used.
         ltype : str, optional
             The type of sequence to use for spacing the specified interval
-            learning rates. Can be either 'linspace' or 'geomspace', where
-            'linspace' uses evenly spaced learning rates over a specified
-            interval and 'geomspace' uses learning rates spaced evenly on a
-            log scale (a geometric progression). Defaults to 'linspace'.
+            learning rates. Can be either ``"linspace"`` or ``"geomspace"``,
+            where `"linspace"` uses evenly spaced learning rates over a
+            specified interval and `"geomspace"` uses learning rates spaced
+            evenly on a log scale (a geometric progression). Defaults to
+            ``"linspace"``.
         sep_group_names : list, optional
             A list of strings containing the names of parameter groups. Layers
             belonging to each group will be assigned the same learning rate.
-            Defaults to ["features1", "features2"].
+            Defaults to ``["features1", "features2"]``.
 
         Returns
         -------
@@ -531,23 +547,24 @@ class classifierContext(classifier):
         Parameters
         ----------
         num_samples : int, optional
-            The number of sample results to display. Defaults to 6.
+            The number of sample results to display. Defaults to ``6``.
         class_index : int, optional
-            The index of the class for which to display results. Defaults to 0.
+            The index of the class for which to display results. Defaults to
+            ``0``.
         set_name : str, optional
             The name of the dataset split to use for inference. Defaults to
-            "train".
+            ``"train"``.
         min_conf : float, optional
             The minimum confidence score for a sample result to be displayed.
             Samples with lower confidence scores will be skipped. Defaults to
-            None.
+            ``None``.
         max_conf : float, optional
             The maximum confidence score for a sample result to be displayed.
             Samples with higher confidence scores will be skipped. Defaults to
-            None.
+            ``None``.
         figsize : tuple[int, int], optional
             Figure size (width, height) in inches, displaying the sample
-            results. Defaults to (15, 15).
+            results. Defaults to ``(15, 15)``.
 
         Returns
         -------

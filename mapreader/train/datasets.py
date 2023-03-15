@@ -39,23 +39,23 @@ class patchTorchDataset(torch.utils.data.Dataset):
 
         Parameters
         ----------
-        patchframe : pd.DataFrame
+        patchframe : pandas.DataFrame
             DataFrame containing the paths to image patches and their labels.
         transform : callable, optional
             A callable object (a torchvision transform) that takes in an image
             and performs image transformations. Default is None.
         label_col : str, optional
             The name of the column containing the image labels. Default is
-            'label'.
+            "label".
         convert2 : str, optional
-            The color format to convert the image to. Default is 'RGB'.
+            The color format to convert the image to. Default is "RGB".
         input_col : int, optional
             The index of the column in the DataFrame containing the image
             paths. Default is 0.
 
         Attributes
         ----------
-        patchframe : pd.DataFrame
+        patchframe : pandas.DataFrame
             DataFrame containing the paths to image patches and their labels.
         label_col : str
             The name of the column containing the image labels.
@@ -161,10 +161,11 @@ class patchTorchDataset(torch.utils.data.Dataset):
         Notes
         -----
         This method returns the original image associated with the given index
-        by loading the image file using the file path stored in the `input_col`
-        column of the `patchframe` DataFrame at the given index. The loaded
-        image is then converted to the format specified by the `convert2`
-        attribute of the object. The resulting PIL Image object is returned.
+        by loading the image file using the file path stored in the
+        ``input_col`` column of the ``patchframe`` DataFrame at the given
+        index. The loaded image is then converted to the format specified by
+        the ``convert2`` attribute of the object. The resulting
+        ``PIL.Image.Image`` object is returned.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -263,12 +264,12 @@ class patchContextDataset(Dataset):
             Optional Torchvision transform to be applied to target images.
             Either "train" or "val". Default is None.
         label_col : str, optional
-            The name of the column in `patchframe` that contains the label
+            The name of the column in ``patchframe`` that contains the label
             information. Default is "label".
         convert2 : str, optional
             The color space of the images. Default is "RGB".
         input_col : int, optional
-            The index of the column in `patchframe` that contains the input
+            The index of the column in ``patchframe`` that contains the input
             image paths. Default is 0.
         context_save_path : str, optional
             The path to save context maps to. Default is "./maps/maps_context".
@@ -293,12 +294,12 @@ class patchContextDataset(Dataset):
             A pandas DataFrame with columns representing image paths, labels,
             and object bounding boxes.
         label_col : str
-            The name of the column in `patchframe` that contains the label
+            The name of the column in ``patchframe`` that contains the label
             information.
         convert2 : str
             The color space of the images.
         input_col : int
-            The index of the column in `patchframe` that contains the input
+            The index of the column in ``patchframe`` that contains the input
             image paths.
         par_path : str
             The path to the directory containing parent images.
@@ -315,8 +316,8 @@ class patchContextDataset(Dataset):
         context_save_path : str
             The path to save context maps to.
         uniq_labels : list or str
-            The unique labels in `label_col`, or "NS" if `label_col` not in
-            `patchframe`.
+            The unique labels in ``label_col``, or "NS" if ``label_col`` not in
+            ``patchframe``.
 
         Methods
         ----------
@@ -328,7 +329,7 @@ class patchContextDataset(Dataset):
         save_parents()
             Saves parent images.
         save_parents_idx(idx)
-            Saves parent image at index `idx`.
+            Saves parent image at index ``idx``.
         return_orig_image(idx)
             Return the original image associated with the given index.
         """
@@ -406,9 +407,9 @@ class patchContextDataset(Dataset):
         Parhugin is a Python package for parallelizing computations across
         multiple CPU cores. The method uses Parhugin to parallelize the
         computation of saving parent patches to disk. When Parhugin is
-        installed and `use_parhugin` is set to True, the method parallelizes
-        the calling of the `save_parents_idx` method and its corresponding
-        arguments. If Parhugin is not installed or `use_parhugin` is set to
+        installed and ``use_parhugin`` is set to True, the method parallelizes
+        the calling of the ``save_parents_idx`` method and its corresponding
+        arguments. If Parhugin is not installed or ``use_parhugin`` is set to
         False, the method executes the loop over patch indices sequentially
         instead.
         """
@@ -448,10 +449,10 @@ class patchContextDataset(Dataset):
                 Index of the patch in the dataset.
             par_split : str, optional
                 Delimiter to split the parent names in the file path. Default
-                is '#'.
+                is "#".
             loc_split : str, optional
                 Delimiter to split the location of the patch in the file path.
-                Default is '-'.
+                Default is "-".
             overwrite : bool, optional
                 Whether to overwrite the existing parent files. Default is
                 False.
@@ -567,10 +568,11 @@ class patchContextDataset(Dataset):
         Notes
         -----
         This method returns the original image associated with the given index
-        by loading the image file using the file path stored in the `input_col`
-        column of the `patchframe` DataFrame at the given index. The loaded
-        image is then converted to the format specified by the `convert2`
-        attribute of the object. The resulting PIL Image object is returned.
+        by loading the image file using the file path stored in the
+        ``input_col`` column of the ``patchframe`` DataFrame at the given
+        index. The loaded image is then converted to the format specified by
+        the ``convert2`` attribute of the object. The resulting
+        ``PIL.Image.Image`` object is returned.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -602,7 +604,7 @@ class patchContextDataset(Dataset):
         side in a single figure with two subplots. The figure size is set to
         10in x 5in, and the titles of the subplots are set to "Patch" and
         "Context", respectively. The resulting figure is displayed using
-        the matplotlib library (required).
+        the ``matplotlib`` library (required).
         """
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
@@ -622,7 +624,7 @@ class patchContextDataset(Dataset):
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor, Any]:
         """
         Retrieves the patch image, the context image and the label at the
-        given index in the dataset (`idx`).
+        given index in the dataset (``idx``).
 
         Parameters
         ----------

@@ -23,10 +23,10 @@ from ipyannotate.buttons import (
 )
 
 from PIL import Image
-from typing import List, Optional, Union, Dict
+from typing import List, Optional, Union, Dict, Tuple
 
 
-def display_record(record: tuple) -> None:
+def display_record(record: Tuple[str, str, str, int, int]) -> None:
     """
     Displays an image and optionally, a context image with a patch border.
 
@@ -34,11 +34,11 @@ def display_record(record: tuple) -> None:
     ----------
     record : tuple
         A tuple containing the following elements:
-        - str : The name of the patch.
-        - str : The path to the image to be displayed.
-        - str : The path to the parent image, if any.
-        - int : The index of the task, if any.
-        - int : The number of times this patch has been displayed.
+            - str : The name of the patch.
+            - str : The path to the image to be displayed.
+            - str : The path to the parent image, if any.
+            - int : The index of the task, if any.
+            - int : The number of times this patch has been displayed.
 
     Returns
     -------
@@ -46,13 +46,13 @@ def display_record(record: tuple) -> None:
 
     Notes
     -----
-    This function should be called from `prepare_annotation`, there are several
-    global variables that are being set in the function.
+    This function should be called from ``prepare_annotation``, there are
+    several global variables that are being set in the function.
 
-    This function uses matplotlib to display images. If the context image is
-    displayed, the border of the patch is highlighted in red.
+    This function uses ``matplotlib`` to display images. If the context image
+    is displayed, the border of the patch is highlighted in red.
 
-    Refer to `ipyannotate` for more info.
+    Refer to ``ipyannotate`` and ``matplotlib`` for more info.
     """
 
     # setup the images
@@ -186,25 +186,25 @@ def prepare_data(
 
     Parameters
     ----------
-    df : pandas DataFrame
+    df : pandas.DataFrame
         DataFrame containing the image data to be annotated.
-    col_names : list of str, optional (default=['image_path', 'parent_id'])
+    col_names : list of str, optional
         List of column names to include in the output. Default columns are
-        'image_path' and 'parent_id'.
+        ``["image_path", "parent_id"]``.
     annotation_set : str, optional
-        String specifying the annotation set. Default is "001".
+        String specifying the annotation set. Default is ``"001"``.
     label_col_name : str, optional
         Column name containing the label information for each image. Default
-        is "label".
+        is ``"label"``.
     redo : bool, optional
-        If True, all images will be annotated even if they already have a
-        label. If False (default), only images without a label will be
+        If ``True``, all images will be annotated even if they already have a
+        label. If ``False`` (default), only images without a label will be
         annotated.
     random_state : int or str, optional
         Seed for the random number generator used when selecting images to
-        annotate. If set to 'random' (default), a random seed will be used.
+        annotate. If set to ``"random"`` (default), a random seed will be used.
     num_samples : int, optional
-        Maximum number of images to annotate. Default is 100.
+        Maximum number of images to annotate. Default is ``100``.
 
     Returns
     -------
@@ -284,16 +284,16 @@ def annotation_interface(
         List of strings representing the labels for each annotation class.
     list_colors : list, optional
         List of strings representing the colors for each annotation class,
-        by default ["red", "green", "blue", "green"].
+        by default ``["red", "green", "blue", "green"]``.
     annotation_set : str, optional
         String representing the annotation set, specified in the yaml file or
-        via function argument, by default "001".
+        via function argument, by default ``"001"``.
     method : str, optional
         String representing the method for annotation, by default
-        "ipyannotate".
+        ``"ipyannotate"``.
     list_shortcuts : list, optional
         List of strings representing the keyboard shortcuts for each
-        annotation class, by default None.
+        annotation class, by default ``None``.
 
     Returns
     -------
@@ -304,11 +304,11 @@ def annotation_interface(
     Raises
     ------
     SystemExit
-        If `method` parameter is not "ipyannotate".
+        If ``method`` parameter is not ``"ipyannotate"``.
 
     Notes
     -----
-    This function creates an annotation interface using the `ipyannotate`
+    This function creates an annotation interface using the ``ipyannotate``
     library, which is a browser-based tool for annotating data.
     """
 
@@ -367,10 +367,10 @@ def annotation_interface(
         toolbar = Toolbar(buttons + controls)
         annotation = Annotation(toolbar, tasks, canvas=canvas)
         return annotation
-    else:
-        sys.exit(
-            f"method: {method} is not implemented. Currently, we support: ipyannotate"  # noqa
-        )
+
+    sys.exit(
+        f"method: {method} is not implemented. Currently, we support: ipyannotate"  # noqa
+    )
 
 
 def prepare_annotation(
@@ -403,63 +403,64 @@ def prepare_annotation(
         used in the name of the output file.
     task : str
         The task name that the images are associated with. This task should be
-        defined in the yaml file (annotation_tasks_file), if not,
-        `custom_labels` will be used instead.
+        defined in the yaml file (``annotation_tasks_file``), if not,
+        ``custom_labels`` will be used instead.
     annotation_tasks_file : str
         The file path to the YAML file containing information about task, image
         paths and annotation metadata.
     custom_labels : list of str, optional
         A list of custom label names to be used instead of the label names in
-        the annotation_tasks_file. Default is an empty list.
+        the ``annotation_tasks_file``. Default is ``[]``.
     annotation_set : str, optional
         The ID of the annotation set to use in the YAML file
-        (`annotation_tasks_file`). Default is "001".
+        (``annotation_tasks_file``). Default is ``"001"``.
     redo_annotation : bool, optional
-        If True, allows the user to redo annotations on previously annotated
-        images. Default is False.
+        If ``True``, allows the user to redo annotations on previously
+        annotated images. Default is ``False``.
     patch_paths : str or bool, optional
         The path to the directory containing image patches for child level
-        annotations, if `custom_labels` are provided. Default is False
+        annotations, if ``custom_labels`` are provided. Default is ``False``
         and the information is read from the yaml file.
     parent_paths : str, optional
-        The path to parent images, if `custom_labels` are provided. Default is
-        False and the information is read from the yaml file.
+        The path to parent images, if ``custom_labels`` are provided. Default
+        is ``False`` and the information is read from the yaml file.
     tree_level : str, optional
-        The level of annotation to be used, either "child" or "parent".
-        Default is "child".
+        The level of annotation to be used, either ``"child"`` or ``"parent"``.
+        Default is ``"child"``.
     sortby : str, optional
-        If "mean", sort images by mean pixel intensity. Default is None.
+        If ``"mean"``, sort images by mean pixel intensity. Default is
+        ``None``.
     min_alpha_channel : float, optional
         The minimum alpha channel value for images to be included in the
         annotation interface. Only applies to child level annotations.
-        Default is None.
+        Default is ``None``.
     min_mean_pixel : float, optional
         The minimum mean pixel intensity value for images to be included in
         the annotation interface. Only applies to child level annotations.
-        Default is None.
+        Default is ``None``.
     max_mean_pixel : float, optional
         The maximum mean pixel intensity value for images to be included in
         the annotation interface. Only applies to child level annotations.
-        Default is None.
+        Default is ``None``.
     context_image : bool, optional
-        If True, includes a context image with each patch image in the
+        If ``True``, includes a context image with each patch image in the
         annotation interface. Only applies to child level annotations. Default
-        is False.
+        is ``False``.
     xoffset : int, optional
-        The x-offset to be used for displaying context images in the annotation
-        interface. Default is 500.
+        The x-offset in pixels to be used for displaying context images in the
+        annotation interface. Default is ``500``.
     yoffset : int, optional
-        The y-offset to be used for displaying context images in the annotation
-        interface. Default is 500.
+        The y-offset in pixels to be used for displaying context images in the
+        annotation interface. Default is ``500``.
     urlmain : str, optional
         The main URL to be used for displaying images in the annotation
-        interface. Default is "https://maps.nls.uk/view/".
+        interface. Default is ``"https://maps.nls.uk/view/"``.
     random_state : int or str, optional
         Seed or state value for the random number generator used for shuffling
-        the image order. Default is "random".
+        the image order. Default is ``"random"``.
     list_shortcuts : list of tuples, optional
         A list of tuples containing shortcut key assignments for label names.
-        Default is None.
+        Default is ``None``.
 
     Returns
     -------
@@ -471,12 +472,12 @@ def prepare_annotation(
     ValueError
         If a specified annotation_set is not a key in the paths dictionary
         of the YAML file with the information about the annotation metadata
-        (annotation_tasks_file).
+        (``annotation_tasks_file``).
 
     ValueError
-        If the `task` provided is not a key in tasks dictionary of the YAML
-        file with the information about the annotation metadata
-        (annotation_tasks_file) and `custom_labels` is not provided.
+        If the ``task`` provided is not a key in the tasks dictionary of the
+        YAML file with the information about the annotation metadata
+        (``annotation_tasks_file``) and ``custom_labels`` is not provided.
     """
 
     # Specify global variables so they can be used in display_record function
@@ -619,7 +620,7 @@ def save_annotation(
 
     Parameters
     ----------
-    annotation : obj
+    annotation : ipyannotate.annotation.Annotation
         Annotation object containing the annotations to be saved (output from
         the annotation tool).
     userID : str
@@ -631,7 +632,7 @@ def save_annotation(
         Path to the yaml file describing the annotation tasks, paths, etc.
     annotation_set : str
         Name of the annotation set to which the annotations belong, defined in
-        the `annotation_tasks_file`.
+        the ``annotation_tasks_file``.
 
     Returns
     -------

@@ -16,7 +16,7 @@ def create_hf(geom: str) -> Tuple[str, str]:
     Parameters
     ----------
     geom : str
-        The geometry type for the GeoJSON file. Currently only "polygon" is
+        The geometry type for the GeoJSON file. Currently only ``"polygon"`` is
         implemented.
 
     Returns
@@ -56,9 +56,22 @@ def create_hf(geom: str) -> Tuple[str, str]:
 
 
 class input_class:
-    """initialize input class"""
+    """
+    A simple class with one property, ``name``, used by MapReader's TileServer
+    scraper's and stitcher's ``runner`` and ``scraper`` functions respectively.
 
-    def __init__(self, name):
+    Parameters
+    ----------
+    name : str
+        The name of the input.
+
+    Attributes
+    ----------
+    name : str
+        The name of the input.
+    """
+
+    def __init__(self, name: str):
         self.name = name
 
 
@@ -79,13 +92,14 @@ def latlon2tile(lat: float, lon: float, zoom: int) -> Tuple[int, int]:
     Returns
     -------
     Tuple[int, int]
-        The x and y tile indices corresponding to the input latitude and
-        longitude coordinates.
+        The x and y tile indices corresponding to the input ``latitude`` and
+        ``longitude`` coordinates at the provided ``zoom`` (zoom level).
 
     Notes
     -----
-    from OSM Slippy Tile definitions & https://github.com/Caged/tile-stitch.
-    Reference: https://github.com/stamen/the-ultimate-tile-stitcher
+    From OSM Slippy Tile definitions & https://github.com/Caged/tile-stitch.
+
+    Reference: https://github.com/stamen/the-ultimate-tile-stitcher.
     """
 
     lat_radians = lat * math.pi / 180.0
@@ -107,8 +121,8 @@ def latlon2tile(lat: float, lon: float, zoom: int) -> Tuple[int, int]:
 
 def tile2latlon(x: int, y: int, zoom: int) -> Tuple[float, float]:
     """
-    Convert tile coordinates (x, y) and zoom level to latitude and longitude
-    coordinates.
+    Convert tile coordinates (``x``, ``y``) and ``zoom`` (zoom level) to
+    latitude and longitude coordinates.
 
     Parameters
     ----------
@@ -126,7 +140,7 @@ def tile2latlon(x: int, y: int, zoom: int) -> Tuple[float, float]:
 
     Notes
     -----
-    Reference: https://github.com/stamen/the-ultimate-tile-stitcher
+    Reference: https://github.com/stamen/the-ultimate-tile-stitcher.
     """
     n = 1 << zoom
     lat_radians = math.atan(math.sinh(math.pi * (1.0 - 2.0 * y / n)))
@@ -159,8 +173,8 @@ def collect_coord_info(
     min_lon = None
     max_lon = None
 
-    for one_file in list_files:
-        z, x, y = os.path.basename(one_file).split("_")
+    for file in list_files:
+        z, x, y = os.path.basename(file).split("_")
         y = y.split(".")[0]
         lat, lon = tile2latlon(int(x), int(y), int(z))
         if min_lat is None:
@@ -186,11 +200,16 @@ def check_par_jobs(jobs: List, sleep_time: Optional[int] = 1) -> None:
     jobs : list
         A list of processes.
     sleep_time : float, optional
-        Time to wait before checking the status of processes. Defaults to 1.
+        Time to wait before checking the status of processes. Defaults to
+        ``1``.
 
     Returns
     -------
     None
+
+    ..
+        TODO: This function's documentation needs a type for the List[...]
+        type provided for the jobs parameter above. What is it?
     """
     pp_flag = True
     while pp_flag:
@@ -202,6 +221,7 @@ def check_par_jobs(jobs: List, sleep_time: Optional[int] = 1) -> None:
             else:
                 pp_flag = False
     if not pp_flag:
-        print("\n\n================================")
+        sep = "================================"
+        print("\n\n{sep}")
         print("All %s processes are finished..." % len(jobs))
-        print("================================")
+        print(sep)

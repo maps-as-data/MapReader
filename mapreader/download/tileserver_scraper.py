@@ -3,14 +3,11 @@
 
 """
 Scraper for tileserver
-
-The main-part/most of these codes are from the following repo:
-
-https://github.com/stamen/the-ultimate-tile-stitcher
-
-(released under MIT license)
-
-Here, we adapted the functions to run them via Python modules
+=======================
+The main code for the scraper was sourced from a repository located at
+https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under
+the MIT license. The adapted functions were then used to run the scraper via
+Python modules.
 """
 
 from .tileserver_helpers import tile2latlon, latlon2tile, input_class
@@ -30,15 +27,15 @@ from typing import Tuple, List, Optional
 nest_asyncio.apply()
 
 # global variable
-BASE_WAIT = 0.5
+_BASE_WAIT = 0.5
 
 
 def tile_idxs_in_poly(
     poly: shapely.geometry.Polygon, zoom: int
 ) -> Tuple[int, int]:
     """
-    Given a Shapely Polygon object and a zoom level, generate a sequence of
-    (x, y) tile indices that intersect with the Polygon.
+    Given a ``shapely.geometry.Polygon`` and a ``zoom`` (zoom level), generate
+    a sequence of ``(x, y)`` tile indices that intersect with the Polygon.
 
     Parameters
     ----------
@@ -47,35 +44,30 @@ def tile_idxs_in_poly(
     zoom : int
         The zoom level of the map.
 
-    Yields
-    ------
-    Tuple[int, int]
-        A tuple of tile indices (x, y) that intersect with the Polygon.
-
     Raises
     ------
     TypeError
-        If the poly parameter is not a Shapely Polygon object.
+        If the ``poly`` parameter is not a ``shapely.geometry.Polygon`` object.
+
+    Yields
+    ------
+    Tuple[int, int]
+        A tuple of tile indices ``(x, y)`` that intersect with the Polygon
+        object.
     """
     min_lon, min_lat, max_lon, max_lat = poly.bounds
-    (min_x, max_y), (max_x, min_y) = latlon2tile(
-        min_lat, min_lon, zoom
-    ), latlon2tile(max_lat, max_lon, zoom)
+
+    min_x, max_y = latlon2tile(min_lat, min_lon, zoom)
+    max_x, min_y = latlon2tile(max_lat, max_lon, zoom)
 
     for x in range(int(min_x), int(max_x) + 1):
         for y in range(int(min_y), int(max_y) + 1):
-            nw_pt = tile2latlon(x, y, zoom)[
-                ::-1
-            ]  # poly is defined in geojson form
-            ne_pt = tile2latlon(x + 1, y, zoom)[
-                ::-1
-            ]  # poly is defined in geojson form
-            sw_pt = tile2latlon(x, y + 1, zoom)[
-                ::-1
-            ]  # poly is defined in geojson form
-            se_pt = tile2latlon(x + 1, y + 1, zoom)[
-                ::-1
-            ]  # poly is defined in geojson form
+            # poly is defined in geojson form
+            nw_pt = tile2latlon(x, y, zoom)[::-1]
+            ne_pt = tile2latlon(x + 1, y, zoom)[::-1]
+            sw_pt = tile2latlon(x, y + 1, zoom)[::-1]
+            se_pt = tile2latlon(x + 1, y + 1, zoom)[::-1]
+
             if any(
                 map(
                     lambda pt: shapely.geometry.Point(pt).within(poly),
@@ -92,19 +84,19 @@ async def fetch_and_save(
     url: str,
     retries: int,
     filepath: str,
-    **kwargs
+    **kwargs,
 ) -> bool:
     """
-    Fetch an image from the specified URL using the specified aiohttp session,
-    and save it to a file. The image is saved to the specified file path. The
-    function retries fetching the image for the specified number of times. If
-    the image is fetched successfully, the function returns True; otherwise,
-    it returns False.
+    Fetch an image from the specified URL using the specified ``aiohttp``
+    session, and save it to a file (``filepath``). The function retries
+    fetching the image for the specified number of times (``retries``).
+    If the image is fetched successfully, the function returns ``True``;
+    otherwise, it returns ``False``.
 
     Parameters
     ----------
     session : aiohttp.ClientSession
-        The aiohttp session used to fetch the image.
+        The ``aiohttp`` session used to fetch the image.
     url : str
         The URL of the image to fetch.
     retries : int
@@ -112,21 +104,22 @@ async def fetch_and_save(
     filepath : str
         The file path where the image will be saved.
     **kwargs
-        Optional keyword arguments that will be passed to the `session.get()`
+        Optional keyword arguments that will be passed to the ``session.get()``
         method.
-
-    Returns
-    -------
-    bool
-        True if the image is fetched successfully and saved to the specified
-        file path, False otherwise.
 
     Raises
     ------
     aiohttp.ClientError
-        If any aiohttp client error occurs during the image fetching process.
+        If any ``aiohttp`` client error occurs during the image fetching
+        process.
+
+    Returns
+    -------
+    bool
+        ``True`` if the image is fetched successfully and saved to the
+        specified file path, ``False`` otherwise.
     """
-    wait_for = BASE_WAIT
+    wait_for = _BASE_WAIT
     for _ in range(retries):
         try:
             response = await session.get(url, params=kwargs)
@@ -135,12 +128,14 @@ async def fetch_and_save(
             img = Image.open(BytesIO(img))
             img.save(filepath, compress_level=9)
             return True
+
         except aiohttp.client_exceptions.ClientResponseError:
-            # print('err')
             await asyncio.sleep(wait_for)
             wait_for = wait_for * (1.0 * random() + 1.0)
+
         except asyncio.TimeoutError:
             pass
+
     return False
 
 
@@ -152,12 +147,29 @@ async def runner(opts: input_class) -> List[str]:
     Parameters
     ----------
     opts : input_class
-        The options to use for downloading the tiles, of the input_class type.
+        The options for downloading the tiles, of the ``input_class`` type
+        that contains the following attributes:
+            - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON
+              format).
+            - ``zoom`` (int): The zoom level.
+            - ``url`` (str): The URL string (formatted with ``"{x}"``,
+              ``"{y}"`` and ``"{z}"``)
+            - ``out_dir`` (str): The output file directory for resulting files.
+            - ``retries`` (int): The number of retries to attempt to download
+              the image.
+            - ``max_connections`` (int): The number of maximum connections to
+              pass onto Semaphore.
 
     Returns
     -------
     List[str]
         A list of URLs that failed to download.
+
+    Notes
+    -----
+    This function is usually called through the
+    :func:`mapreader.download.tileserver_scraper.scraper` function. Refer to
+    the documentation of that method for a simpler implementation.
     """
     failed_urls = []
 
@@ -169,14 +181,12 @@ async def runner(opts: input_class) -> List[str]:
         poly = shapely.geometry.shape(feat["geometry"])
 
         async with aiohttp.ClientSession() as session:
-            tasks = []
-            urls = []
+            tasks, urls = [], []
             for x, y in tile_idxs_in_poly(poly, opts.zoom):
                 url = opts.url.format(z=opts.zoom, x=x, y=y)
                 with await semaphore:
-                    filepath = os.path.join(
-                        opts.out_dir, "{}_{}_{}.png".format(opts.zoom, x, y)
-                    )
+                    filename = "{}_{}_{}.png".format(opts.zoom, x, y)
+                    filepath = os.path.join(opts.out_dir, filename)
                     if os.path.isfile(filepath):
                         continue
                     ret = fetch_and_save(session, url, opts.retries, filepath)
@@ -190,7 +200,10 @@ async def runner(opts: input_class) -> List[str]:
                 if res[i] is False:
                     failed_urls.append(url)
 
-    print("Downloaded {}/{}".format(len(tasks) - n_failed, len(tasks)))
+    successful = len(tasks) - n_failed
+    total = len(tasks)
+    print(f"Downloaded {successful}/{total}")
+
     return failed_urls
 
 
@@ -219,9 +232,10 @@ def scraper(
         The directory in which to save the downloaded tiles.
     max_connections : int, optional
         The maximum number of simultaneous connections to use when
-        downloading, by default 20.
+        downloading, by default ``20``.
     retries : int, optional
-        The maximum number of times to retry a failed download, by default 10.
+        The maximum number of times to retry a failed download, by default
+        ``10``.
 
     Returns
     -------

@@ -117,11 +117,19 @@ class mapImages:
                     "image_path": parent_path,
                 }
             # 2. parent_basename exists but parent_id is not defined
-            if not "parent_id" in self.images["parent"][parent_basename].keys():
+            if (
+                not "parent_id"
+                in self.images["parent"][parent_basename].keys()
+            ):
                 self.images["parent"][parent_basename]["parent_id"] = None
             # 3. parent_basename exists but image_path is not defined
-            if not "image_path" in self.images["parent"][parent_basename].keys():
-                self.images["parent"][parent_basename]["image_path"] = parent_path
+            if (
+                not "image_path"
+                in self.images["parent"][parent_basename].keys()
+            ):
+                self.images["parent"][parent_basename][
+                    "image_path"
+                ] = parent_path
 
     @staticmethod
     def splitImagePath(inp_path):
@@ -153,7 +161,12 @@ class mapImages:
         return ""
 
     def add_metadata(
-        self, metadata, columns=None, tree_level="parent", index_col=0, delimiter="|"
+        self,
+        metadata,
+        columns=None,
+        tree_level="parent",
+        index_col=0,
+        delimiter="|",
     ):
         """Add metadata to each image present at `tree_level`
 
@@ -193,14 +206,18 @@ class mapImages:
             columns = list(metadata_df.columns)
 
         if ("name" in columns) and ("image_id" in columns):
-            print(f"Both 'name' and 'image_id' columns exist! Use 'name' to index.")
+            print(
+                f"Both 'name' and 'image_id' columns exist! Use 'name' to index."
+            )
             image_id_col = "name"
         if "name" in columns:
             image_id_col = "name"
         elif "image_id" in columns:
             image_id_col = "image_id"
         else:
-            raise ValueError("'name' or 'image_id' should be one of the columns.")
+            raise ValueError(
+                "'name' or 'image_id' should be one of the columns."
+            )
         metadata_df.drop_duplicates(subset=[image_id_col])
 
         for i, one_row in metadata_df.iterrows():
@@ -210,15 +227,17 @@ class mapImages:
             for one_col in columns:
                 if one_col in ["coord", "polygone"]:
                     # Make sure "coord" is interpreted as a tuple
-                    self.images[tree_level][one_row[image_id_col]][one_col] = eval(
-                        one_row[one_col]
-                    )
-                else:
-                    self.images[tree_level][one_row[image_id_col]][one_col] = one_row[
+                    self.images[tree_level][one_row[image_id_col]][
                         one_col
-                    ]
+                    ] = eval(one_row[one_col])
+                else:
+                    self.images[tree_level][one_row[image_id_col]][
+                        one_col
+                    ] = one_row[one_col]
 
-    def show_sample(self, num_samples, tree_level="parent", random_seed=65, **kwds):
+    def show_sample(
+        self, num_samples, tree_level="parent", random_seed=65, **kwds
+    ):
         """Show a sample of images present at `tree_level`
 
         Parameters
@@ -361,9 +380,15 @@ class mapImages:
 
         # Extract height/width/chan from shape
         image_height, image_width, _ = self.images["parent"][image_id]["shape"]
-        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id]["coord"]
-        self.images["parent"][image_id]["dlon"] = abs(lon_max - lon_min) / image_width
-        self.images["parent"][image_id]["dlat"] = abs(lat_max - lat_min) / image_height
+        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id][
+            "coord"
+        ]
+        self.images["parent"][image_id]["dlon"] = (
+            abs(lon_max - lon_min) / image_width
+        )
+        self.images["parent"][image_id]["dlat"] = (
+            abs(lat_max - lat_min) / image_height
+        )
 
     def add_center_coord_id(self, image_id, tree_level="child", verbose=False):
         """Calculate central longitude and latitude (center_lon and center_lat) and add to image
@@ -396,7 +421,9 @@ class mapImages:
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
-            lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id]["coord"]
+            lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id][
+                "coord"
+            ]
             min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
             max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
@@ -418,11 +445,15 @@ class mapImages:
                 return
 
             print(f"[INFO] Reading 'coord' from {image_id}")
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
-                "coord"
-            ]
-            self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
-            self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][
+                image_id
+            ]["coord"]
+            self.images[tree_level][image_id]["center_lon"] = (
+                lon_min + lon_max
+            ) / 2.0
+            self.images[tree_level][image_id]["center_lat"] = (
+                lat_min + lat_max
+            ) / 2.0
 
     def calc_pixel_width_height(
         self, parent_id, calc_size_in_m="great-circle", verbose=False
@@ -456,7 +487,9 @@ class mapImages:
 
         (xmin, xmax, ymin, ymax) = self.images["parent"][parent_id]["coord"]
         if verbose:
-            print(f"[INFO] Using the following coordinates to compute width/height:")
+            print(
+                f"[INFO] Using the following coordinates to compute width/height:"
+            )
             print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
             print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
             print(f"[INFO] shape (hwc): {myimg_shape}")
@@ -580,7 +613,9 @@ class mapImages:
                     # Add sliced images to the .images["child"]
                     self.imagesConstructor(
                         image_path=sliced_images_info[i][0],
-                        parent_path=self.images[tree_level][one_image]["image_path"],
+                        parent_path=self.images[tree_level][one_image][
+                            "image_path"
+                        ],
                         tree_level="child",
                         min_x=sliced_images_info[i][1][0],
                         min_y=sliced_images_info[i][1][1],
@@ -733,12 +768,16 @@ class mapImages:
             list_children = self.images["parent"][one_par_id]["children"]
 
             for one_child in list_children:
-                if ("mean_pixel_RGB" in self.images["child"][one_child].keys()) and (
+                if (
+                    "mean_pixel_RGB" in self.images["child"][one_child].keys()
+                ) and (
                     "std_pixel_RGB" in self.images["child"][one_child].keys()
                 ):
                     continue
 
-                child_img = mpimg.imread(self.images["child"][one_child]["image_path"])
+                child_img = mpimg.imread(
+                    self.images["child"][one_child]["image_path"]
+                )
 
                 if calc_mean:
                     self.images["child"][one_child]["mean_pixel_R"] = np.mean(
@@ -750,14 +789,14 @@ class mapImages:
                     self.images["child"][one_child]["mean_pixel_B"] = np.mean(
                         child_img[:, :, 2]
                     )
-                    self.images["child"][one_child]["mean_pixel_RGB"] = np.mean(
-                        child_img[:, :, 0:3]
-                    )
+                    self.images["child"][one_child][
+                        "mean_pixel_RGB"
+                    ] = np.mean(child_img[:, :, 0:3])
                     # check alpha is present
                     if child_img.shape[2] > 3:
-                        self.images["child"][one_child]["mean_pixel_A"] = np.mean(
-                            child_img[:, :, 3]
-                        )
+                        self.images["child"][one_child][
+                            "mean_pixel_A"
+                        ] = np.mean(child_img[:, :, 3])
                 if calc_std:
                     self.images["child"][one_child]["std_pixel_R"] = np.std(
                         child_img[:, :, 0]
@@ -773,9 +812,9 @@ class mapImages:
                     )
                     # check alpha is present
                     if child_img.shape[2] > 3:
-                        self.images["child"][one_child]["std_pixel_A"] = np.std(
-                            child_img[:, :, 3]
-                        )
+                        self.images["child"][one_child][
+                            "std_pixel_A"
+                        ] = np.std(child_img[:, :, 3])
 
     def convertImages(self):
         """Convert images dictionary into a pd.DataFrame
@@ -869,7 +908,9 @@ class mapImages:
         values = [value] if not (isinstance(value, list)) else value[:]
         vmins = [vmin] if not (isinstance(vmin, list)) else vmin[:]
         vmaxs = [vmax] if not (isinstance(vmax, list)) else vmax[:]
-        colorbars = [colorbar] if not (isinstance(colorbar, list)) else colorbar[:]
+        colorbars = (
+            [colorbar] if not (isinstance(colorbar, list)) else colorbar[:]
+        )
         alphas = [alpha] if not (isinstance(alpha, list)) else alpha[:]
         discrete_colorbars = (
             [discrete_colorbar]
@@ -890,7 +931,9 @@ class mapImages:
                     basewidth = int(image_width_resolution)
                     wpercent = basewidth / float(par_image.size[0])
                     hsize = int((float(par_image.size[1]) * float(wpercent)))
-                    par_image = par_image.resize((basewidth, hsize), Image.ANTIALIAS)
+                    par_image = par_image.resize(
+                        (basewidth, hsize), Image.ANTIALIAS
+                    )
 
                 # remove the borders
                 plt.gca().set_axis_off()
@@ -906,7 +949,10 @@ class mapImages:
                 )
 
                 if save_kml_dir:
-                    if not "coord" in self.images["parent"][one_image_id].keys():
+                    if (
+                        not "coord"
+                        in self.images["parent"][one_image_id].keys()
+                    ):
                         print(
                             f"[WARNING] 'coord' could not be found. This is needed when save_kml_dir is set...continue"
                         )
@@ -940,7 +986,9 @@ class mapImages:
             parents = {}
             for i in range(len(image_ids)):
                 try:
-                    parent_id = self.images[tree_level][image_ids[i]]["parent_id"]
+                    parent_id = self.images[tree_level][image_ids[i]][
+                        "parent_id"
+                    ]
                 except Exception as err:
                     print(err)
                     continue
@@ -960,7 +1008,12 @@ class mapImages:
                     # will be filled with values of 'value'
                     image2plot = np.empty(grid_plot)
                     image2plot[:] = np.nan
-                    min_x, min_y, max_x, max_y = grid_plot[1], grid_plot[0], 0, 0
+                    min_x, min_y, max_x, max_y = (
+                        grid_plot[1],
+                        grid_plot[0],
+                        0,
+                        0,
+                    )
                     for child_id in parents[i]["child"]:
                         one_image = self.images[tree_level][child_id]
 
@@ -1002,7 +1055,9 @@ class mapImages:
                         max_y = max(max_y, one_image["max_y"])
 
                         if border:
-                            self._plotBorder(one_image, plt, color=border_color)
+                            self._plotBorder(
+                                one_image, plt, color=border_color
+                            )
 
                     if value:
                         vmin = vmins[i_value]
@@ -1125,7 +1180,9 @@ class mapImages:
 
         kml.save(f"{path2kml}.kml")
 
-    def _plotBorder(self, image_dict, plt, linewidth=0.5, zorder=20, color="r"):
+    def _plotBorder(
+        self, image_dict, plt, linewidth=0.5, zorder=20, color="r"
+    ):
         """Plot border for an image
 
         Arguments:
@@ -1186,7 +1243,11 @@ class mapImages:
                 return 100
 
     def loadPatches(
-        self, patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
+        self,
+        patch_paths,
+        parent_paths=False,
+        add_geo_par=False,
+        clear_images=False,
     ):
         """Load patches from `patch_paths` and, if `parent_paths` specified, add parents
 
@@ -1314,9 +1375,9 @@ class mapImages:
                 parent_id = os.path.basename(ppath)
                 self.images["parent"][parent_id] = {"parent_id": None}
                 if os.path.isfile(ppath):
-                    self.images["parent"][parent_id]["image_path"] = os.path.abspath(
-                        ppath
-                    )
+                    self.images["parent"][parent_id][
+                        "image_path"
+                    ] = os.path.abspath(ppath)
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
 
@@ -1428,7 +1489,10 @@ class mapImages:
                     )
 
     def addGeoInfo(
-        self, proj2convert="EPSG:4326", calc_method="great-circle", verbose=False
+        self,
+        proj2convert="EPSG:4326",
+        calc_method="great-circle",
+        verbose=False,
     ):
         """Add geographic information (shape, coords (reprjected to EPSG:4326) and size in meters) to images from image metadata.
 
@@ -1456,7 +1520,9 @@ class mapImages:
 
             # check coordinates are present
             if isinstance(tiff_src.crs, type(None)):
-                print(f"No coordinates found in {image_id}. Try add_metadata instead")
+                print(
+                    f"No coordinates found in {image_id}. Try add_metadata instead"
+                )
                 continue
 
             else:
@@ -1474,7 +1540,9 @@ class mapImages:
                 self.images["parent"][image_id]["coord"] = coords
 
                 size_in_m = self.calc_pixel_width_height(
-                    parent_id=image_id, calc_size_in_m=calc_method, verbose=verbose
+                    parent_id=image_id,
+                    calc_size_in_m=calc_method,
+                    verbose=verbose,
                 )
                 self.images["parent"][image_id]["size_in_m"] = size_in_m
 

@@ -25,7 +25,7 @@ def preprocess_all(
 ) -> List[str]:
     """
     Preprocess all images in a list of file paths or a directory using the
-    `preprocess` function and save them to the specified directory.
+    ``preprocess`` function and save them to the specified directory.
 
     Parameters
     ----------
@@ -36,7 +36,8 @@ def preprocess_all(
     save_preproc_dir : str
         The path to the directory where preprocessed images will be saved.
     **kwds : keyword arguments
-        Additional keyword arguments to be passed to the `preprocess` function.
+        Additional keyword arguments to be passed to the ``preprocess``
+        function.
 
     Returns
     -------
@@ -80,26 +81,27 @@ def preprocess(
         The directory to save the preprocessed image files.
     dst_crs : str, optional
         The coordinate reference system to reproject the image to, by default
-        "EPSG:3857".
+        ``"EPSG:3857"``.
     crop_prefix : str, optional
-        The prefix to use for the cropped image file, by default "preproc_".
+        The prefix to use for the cropped image file, by default
+        ``"preproc_"``.
     reproj_prefix : str, optional
         The prefix to use for the reprojected image file, by default
-        "preproc_tmp_".
+        ``"preproc_tmp_"``.
     resample_prefix : str, optional
         The prefix to use for the resampled image file, by default
-        "preproc_resample_".
+        ``"preproc_resample_"``.
     resize_percent : int, optional
-        The percentage to resize the cropped image by, by default 40.
+        The percentage to resize the cropped image by, by default ``40``.
     remove_reproj_file : bool, optional
         Whether to remove the reprojected image file after preprocessing, by
-        default True.
+        default ``True``.
 
     Returns
     -------
     str
         The path to the resampled image file if preprocessing was successful,
-        otherwise the path to the cropped image file, or "False" if
+        otherwise the path to the cropped image file, or ``"False"`` if
         preprocessing failed.
     """
 

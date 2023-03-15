@@ -15,10 +15,10 @@ except ImportError:
         "Link: https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#install-the-package"  # noqa
     )
 
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, Any
 
 # Keep this outside of the function so it is easier to change/maintain
-LINK_SETUP_AZURE = "https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#configure-your-storage-connection-string"  # noqa
+_LINK_SETUP_AZURE = "https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#configure-your-storage-connection-string"  # noqa
 
 
 def initBlobServiceClient(
@@ -32,29 +32,30 @@ def initBlobServiceClient(
     ----------
     env_variable : str, optional
         The name of the environment variable that contains the Azure Storage
-        connection string. Default is "AZURE_STORAGE_CONNECTION_STRING".
+        connection string. Default is ``"AZURE_STORAGE_CONNECTION_STRING"``.
 
     Returns
     -------
-    blob_service_client : BlobServiceClient
-        An instance of the BlobServiceClient class.
+    blob_service_client : azure.storage.blob.BlobServiceClient
+        An instance of the ``BlobServiceClient`` class.
 
     Raises
     ------
     ValueError
-        If the environment variable AZURE_STORAGE_CONNECTION_STRING is not
+        If the environment variable ``AZURE_STORAGE_CONNECTION_STRING`` is not
         found or empty.
 
     Notes
     ------
-    $AZURE_STORAGE_CONNECTION_STRING needs to be set.
+    The environment variable ``AZURE_STORAGE_CONNECTION_STRING`` needs to be
+    set before running this function.
     """
 
     connect_str = os.getenv(env_variable)
     if connect_str is None or connect_str in [""]:
         print(
             f"{env_variable} environment variable is not created!\n"
-            f"Pleases follow this link: {LINK_SETUP_AZURE}\n"
+            f"Pleases follow this link: {_LINK_SETUP_AZURE}\n"
             f"Check the environment variable by (from terminal): 'echo ${env_variable}'"  # noqa
         )
         return
@@ -75,29 +76,33 @@ def initContainerClient(
     blob_client: BlobClient, container: str
 ) -> Tuple[ContainerClient, List]:
     """
-    Initialize a ContainerClient object for a specified container and list all
-    blobs in that container.
+    Initialize a ``ContainerClient`` object for a specified container and list
+    all blobs in that container.
 
     Parameters
     ----------
-    blob_client : BlobClient
-        An instance of the BlobClient class.
+    blob_client : azure.storage.blob.BlobClient
+        An instance of the ``BlobClient`` class.
     container : str
         The name of the container.
 
     Returns
     -------
-    container_client : ContainerClient
-        An instance of the ContainerClient class for the specified container.
+    container_client : azure.storage.blob.ContainerClient
+        An instance of the ``ContainerClient`` class for the specified container.
     list_containers : list
-        A list of BlobProperties objects representing the blobs in the
-        container.
+        A list of ``azure.storage.blob.BlobProperties`` objects representing
+        the blobs in the container.
     """
+
     # Get the container client
     container_client = blob_client.get_container_client(container)
+
     # List all blobs in that container
     list_containers = list(container_client.list_blobs())
+
     print(f"Container initialized. Number of blobs: {len(list_containers)}")
+
     return container_client, list_containers
 
 
@@ -117,33 +122,34 @@ def downloadClient(
 
     Parameters
     ----------
-    container_client : ContainerClient
-        An instance of the ContainerClient class for the specified container,
-        initialised by `initContainerClient` function.
+    container_client : azure.storage.blob.ContainerClient
+        An instance of the ``ContainerClient`` class for the specified
+        container, initialised by ``initContainerClient`` function.
     list_containers : list
-        A list of BlobProperties objects representing the blobs in the
-        container, also initialised by `initContainerClient` function.
+        A list of ``azure.storage.blob.BlobProperties`` objects representing
+        the blobs in the container, also initialised by ``initContainerClient``
+        function.
     download_dir : str
         The directory to which downloaded files will be saved.
     include_dirnames : str or list of str, optional
-        A list of directory names to include in the download. Default is None
-        (all directories are included). The dirnames can be printed by the
-        `dirnamesBlobs` function.
+        A list of directory names to include in the download. Default is
+        ``None`` (all directories are included). The dirnames can be printed
+        by the :func:`mapreader.download.azure_access.dirnamesBlobs` function.
     nls_names : str or list of str, optional
         A list of file names (without extensions) from the
         https://maps.nls.uk/geo/ website to include in the download. Default
-        is None (all files are included).
+        is ``None`` (all files are included).
     max_download : int, optional
-        The maximum number of files to download. Default is None (download all
-        files).
+        The maximum number of files to download. Default is ``None`` (download
+        all files).
     index1 : int, optional
-        The index of the first file to download. Default is 0.
+        The index of the first file to download. Default is ``0``.
     index2 : int, optional
-        The index of the last file to download. Default is None (download
+        The index of the last file to download. Default is ``None`` (download
         until the end of the list).
     force_download : bool, optional
-        If True, force download even if the file already exists in the
-        download directory. Default is False.
+        If ``True``, force download even if the file already exists in the
+        download directory. Default is ``False``.
 
     Returns
     -------
@@ -153,7 +159,7 @@ def downloadClient(
     if not os.path.isdir(download_dir):
         os.makedirs(download_dir)
 
-    # make sure that dirnames and nls_names are of type list
+    # Make sure that dirnames and nls_names are of type list
     if include_dirnames and type(include_dirnames) == str:
         include_dirnames = [include_dirnames]
     if nls_names and type(nls_names) == str:
@@ -163,6 +169,7 @@ def downloadClient(
     if index2 is None:
         index2 = len(list_containers)
 
+    divider = 10 * "==="
     counter = 0
     for idx in range(index1, index2):
         blob_filename = list_containers[idx]["name"]
@@ -182,7 +189,7 @@ def downloadClient(
             print(f"{path2save} already exists, skip!")
             continue
 
-        print(10 * "===")
+        print(divider)
         print(
             f"Download {os.path.basename(list_containers[idx]['name'])} and save it in {path2save}"  # noqa
         )
@@ -195,11 +202,11 @@ def downloadClient(
         if counter >= max_download:
             break
 
-    print(10 * "===")
+    print(divider)
     print(f"Download finished. Number of new files: {counter}")
 
 
-def dirnamesBlobs(list_containers: List) -> List[str]:
+def dirnamesBlobs(list_containers: List[Any]) -> List[str]:
     """
     Given a list of blob containers, return a list of unique directory names
     containing the blobs.
@@ -213,11 +220,17 @@ def dirnamesBlobs(list_containers: List) -> List[str]:
     -------
     all_dirs : list
         A list of unique directory names containing the blobs.
+
+    ..
+        TODO: The documentation here needs to have a different type for the
+        List[Any] above. What would it be?
     """
     all_dirs = []
     print("List of directories detected from the path:")
+
     for one_container in list_containers:
         dir_name = os.path.dirname(one_container["name"])
+
         if dir_name not in all_dirs:
             print(f"---> {dir_name}")
             all_dirs.append(dir_name)

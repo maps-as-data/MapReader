@@ -18,7 +18,7 @@ class loadAnnotations:
 
     def load_all(self, csv_paths: str, **kwds) -> None:
         """
-        Load multiple CSV files into the class instance using the `load`
+        Load multiple CSV files into the class instance using the ``load``
         method.
 
         Parameters
@@ -26,7 +26,7 @@ class loadAnnotations:
         csv_paths : str
             The file path pattern to match CSV files to load.
         **kwds : dict
-            Additional keyword arguments to pass to the `load` method.
+            Additional keyword arguments to pass to the ``load`` method.
 
         Returns
         -------
@@ -56,26 +56,26 @@ class loadAnnotations:
         csv_path : str
             Path to an annotation file in CSV format.
         path2dir : str, optional
-            Update the `col_path` column by adding `path2dir/col_path`, by
-            default None.
+            Update the ``col_path`` column by adding ``path2dir/col_path``, by
+            default ``None``.
         col_path : str, optional
             Name of the column that contains image paths, by default
-            "image_id".
+            ``"image_id"``.
         keep_these_cols : bool, optional
-            Only keep these columns. If False (default), all columns will be
-            kept.
+            Only keep these columns. If ``False`` (default), all columns will
+            be kept.
         append : bool, optional
-            Append a newly read CSV file to `self.annotations`. By default,
-            True.
+            Append a newly read CSV file to the ``annotations`` property if
+            set to ``True``. By default, ``True``.
         col_label : str, optional
-            Name of the column that contains labels.
+            Name of the column that contains labels. Default is ``"label"``.
         shuffle_rows : bool, optional
-            Shuffle rows after reading annotations. Default is True.
+            Shuffle rows after reading annotations. Default is ``True``.
         reset_index : bool, optional
             Reset the index of the annotation DataFrame at the end of the
-            method. Default is True.
+            method. Default is ``True``.
         random_state : int, optional
-            Random seed for row shuffling.
+            Random seed for row shuffling. Default is ``1234``.
 
         Returns
         -------
@@ -137,7 +137,7 @@ class loadAnnotations:
         Parameters
         ----------
         new_label : str, optional
-            Name of the new label column, by default "label"
+            Name of the new label column, by default ``"label"``.
 
         Returns
         -------
@@ -154,7 +154,10 @@ class loadAnnotations:
         indx : int
             Index of the image in the annotations DataFrame to display.
         cmap : str, optional
-            The colormap to use, by default "viridis".
+            The colormap to use, by default ``"viridis"``.
+
+            To see available colormaps, see
+            https://matplotlib.org/stable/gallery/color/colormap_reference.html.
 
         Returns
         -------
@@ -176,12 +179,12 @@ class loadAnnotations:
     def adjust_labels(self, shiftby: int = -1) -> None:
         """
         Shift labels in the self.annotations DataFrame by the specified value
-        (`shiftby`).
+        (``shiftby``).
 
         Parameters
         ----------
         shiftby : int, optional
-            The value to shift labels by. Default is -1.
+            The value to shift labels by. Default is ``-1``.
 
         Returns
         -------
@@ -189,10 +192,10 @@ class loadAnnotations:
 
         Notes
         -----
-        This function updates the `self.annotations` DataFrame by adding the
-        value of `shiftby` to the values of the `self.col_label` column. It
-        also prints the value counts of the `self.col_label` column before and
-        after the shift.
+        This function updates the ``self.annotations`` DataFrame by adding the
+        value of ``shiftby`` to the values of the ``self.col_label`` column. It
+        also prints the value counts of the ``self.col_label`` column before
+        and after the shift.
         """
         print(20 * "-")
         print("[INFO] value counts before shift:")
@@ -224,22 +227,22 @@ class loadAnnotations:
         ----------
         tar_label : int, optional
             The target label to review. If not provided, all labels will be
-            reviewed, by default None.
+            reviewed, by default ``None``.
         start_indx : int, optional
-            The index of the first image to review, by default 1.
+            The index of the first image to review, by default ``1``.
         chunks : int, optional
-            The number of images to display at a time, by default 8*6.
+            The number of images to display at a time, by default ``8 * 6``.
         num_cols : int, optional
-            The number of columns in the display, by default 8.
+            The number of columns in the display, by default ``8``.
         figsize : list or tuple, optional
-            The size of the display window, by default (8*3, 8*2).
-        exclude_df : pandas DataFrame, optional
-            A DataFrame of images to exclude from review, by default None.
-        include_df : pandas DataFrame, optional
-            A DataFrame of images to include for review, by default None.
+            The size of the display window, by default ``(8 * 3, 8 * 2)``.
+        exclude_df : pandas.DataFrame, optional
+            A DataFrame of images to exclude from review, by default ``None``.
+        include_df : pandas.DataFrame, optional
+            A DataFrame of images to include for review, by default ``None``.
         deduplicate_col : str, optional
             The column to use for deduplicating reviewed images, by default
-            "image_id".
+            ``"image_id"``.
 
         Returns
         -------
@@ -249,11 +252,12 @@ class loadAnnotations:
         ------
         This method reviews images with their corresponding labels and allows
         the user to change the label for each image. The updated labels are
-        saved in both the annotations and reviewed DataFrames. If `exclude_df`
-        is provided, images with `image_path` in `exclude_df['image_path']` are
-        skipped in the review process. If include_df is provided, only images
-        with `image_path` in `include_df['image_path']` are reviewed. The
-        reviewed DataFrame is deduplicated based on the `deduplicate_col`.
+        saved in both the annotations and reviewed DataFrames. If
+        ``exclude_df`` is provided, images with ``image_path`` in
+        ``exclude_df["image_path"]`` are skipped in the review process. If
+        ``include_df`` is provided, only images with ``image_path`` in
+        ``include_df["image_path"]`` are reviewed. The reviewed DataFrame is
+        deduplicated based on the ``deduplicate_col``.
         """
         if tar_label is not None:
             annot2review = self.annotations[
@@ -316,7 +320,7 @@ class loadAnnotations:
             plt.show()
 
             print(f"list of IDs: {iter_ids}")
-            q = "Enter 'ids', comma separated (or press enter to continue): "
+            q = "Enter IDs, comma separated (or press enter to continue): "
             user_input_ids = input(q)
 
             while user_input_ids.strip().lower() not in [
@@ -352,10 +356,10 @@ class loadAnnotations:
         Parameters
         ----------
         tar_label : int, optional
-            The label to filter the images by, by default 1.
+            The label to filter the images by. Default is ``1``.
         num_sample : int, optional
-            The number of images to show. If None, all images with the
-            specified label will be shown. Default is 10.
+            The number of images to show. If ``None``, all images with the
+            specified label will be shown. Default is ``10``.
 
         Returns
         -------
@@ -393,27 +397,22 @@ class loadAnnotations:
         Splits the dataset into three subsets: training, validation, and test
         sets (DataFrames).
 
-        Following fractional ratios provided by the user, where each subset is
-        stratified by the values in a specific column (that is, each subset has
-        the same relative frequency of the values in the column). It performs
-        this splitting by running `train_test_split()` twice.
-
         Parameters
         ----------
         stratify_colname : str, optional
             Name of the column on which to stratify the split. The default is
-            "label".
+            ``"label"``.
         frac_train : float, optional
             Fraction of the dataset to be used for training. The default is
-            0.70.
+            ``0.70``.
         frac_val : float, optional
             Fraction of the dataset to be used for validation. The default is
-            0.15.
+            ``0.15``.
         frac_test : float, optional
             Fraction of the dataset to be used for testing. The default is
-            0.15.
+            ``0.15``.
         random_state : int, optional
-            Random seed to ensure reproducibility. The default is 1364.
+            Random seed to ensure reproducibility. The default is ``1364``.
 
         Raises
         ------
@@ -422,14 +421,21 @@ class loadAnnotations:
             not add up to 1.
 
         ValueError
-            If `stratify_colname` is not a column in the dataframe.
+            If ``stratify_colname`` is not a column in the dataframe.
 
         Returns
         -------
         None
-            Sets properties `df_train`, `df_val`, `df_test` -- three
-            Dataframes containing the three splits on the `loadAnnotations`
+            Sets properties ``df_train``, ``df_val``, ``df_test`` -- three
+            Dataframes containing the three splits on the ``loadAnnotations``
             instance.
+
+        Notes
+        -----
+        Following fractional ratios provided by the user, where each subset is
+        stratified by the values in a specific column (that is, each subset has
+        the same relative frequency of the values in the column). It performs
+        this splitting by running ``train_test_split()`` twice.
         """
 
         if abs(frac_train + frac_val + frac_test - 1.0) > 1e-4:
@@ -503,17 +509,18 @@ class loadAnnotations:
             The number of annotations to be sampled.
         random_state : int, optional
             Seed to ensure reproducibility of the random number generator.
+            Default is ``12345``.
 
         Raises
         ------
         ValueError
-            If `tar_label` is not a column in the dataframe.
+            If ``tar_label`` is not a column in the dataframe.
 
         Returns
         -------
         None
             The dataframe with remaining annotations is stored in
-            `self.annotations`.
+            ``self.annotations``.
         """
         if (self.col_path is None) or (len(self.annotations) == 0):
             print(f"[ERROR] length: {len(self.annotations)}")

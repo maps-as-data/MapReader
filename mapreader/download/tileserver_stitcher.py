@@ -3,14 +3,11 @@
 
 """
 Stitcher for tileserver
-
-The main-part/most of these codes are from the following repo:
-
-https://github.com/stamen/the-ultimate-tile-stitcher
-
-(released under MIT license)
-
-Here, we adapted the functions to run them via Python modules
+=======================
+The main code for the stitcher was sourced from a repository located at
+https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under
+the MIT license. The adapted functions were then used to run the scraper via
+Python modules.
 """
 
 from .tileserver_helpers import input_class
@@ -29,12 +26,17 @@ def runner(opts: input_class) -> None:
     Parameters
     -----------
     opts : input_class
-        The options for the runner, of the input_class type that contains the
+        The options for the runner, of the ``input_class`` type that contains the
         following attributes:
-            - dir (str): The directory containing the input images.
-            - out_file (str): The output file path for the stitched image.
-            - pixel_closest (int, optional): The closest pixel value to round
-                the image size to.
+            - ``dir`` (str): The directory containing the input images.
+            - ``out_file`` (str): The output file path for the stitched image.
+            - ``pixel_closest`` (int, optional): The closest pixel value to
+              round the image size to.
+
+    Raises
+    ------
+    SystemExit
+        If no input files are found in the specified directory.
 
     Returns
     ------
@@ -42,10 +44,11 @@ def runner(opts: input_class) -> None:
         The function saves the stitched image to the specified output file
         path.
 
-    Raises
-    ------
-    SystemExit
-        If no input files are found in the specified directory.
+    Notes
+    -----
+    This function is usually called through the
+    :func:`mapreader.download.tileserver_stitcher.stitcher` function. Refer to
+    the documentation of that method for a simpler implementation.
     """
     search_path = os.path.join(opts.dir, "*_*_*.png")
 
@@ -119,18 +122,22 @@ def myround(x: Union[float, int], base: Optional[int] = 100) -> int:
     x : float or int
         The number to be rounded.
     base : int, optional
-        The base to which `x` will be rounded. Default is 100.
+        The base to which ``x`` will be rounded. Default is ``100``.
 
     Returns
     -------
     int
         The rounded number.
+
+    ..
+        TODO: Could we make this function private? It's only used by the
+        runner above.
     """
     return base * round(x / base)
 
 
 def stitcher(
-    dir_name: str, out_file: str, pixel_closest: Optional[int]
+    dir_name: str, out_file: str, pixel_closest: Optional[int] = None
 ) -> None:
     """
     Stitch together multiple images from a directory and save the result to a
@@ -143,7 +150,7 @@ def stitcher(
     out_file : str
         The name of the file to which the stitched image will be saved.
     pixel_closest : int or None
-        The distance between the closest neighboring pixels. If None, the
+        The distance between the closest neighboring pixels. If ``None``, the
         optimal value will be determined automatically.
 
     Returns
