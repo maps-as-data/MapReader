@@ -478,7 +478,7 @@ class classifier:
     def model_summary(
         self,
         only_trainable: Optional[bool] = False,
-        print_space: Optional[List[int, int, int]] = [40, 20, 20],
+        print_space: Optional[List[int]] = [40, 20, 20],
     ):
         """
         Print a summary of the model including the modules, the number of
