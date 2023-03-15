@@ -49,12 +49,12 @@ If you already have your maps saved locally, you can skip the 'Download' task an
 
 If you would like to work with georeferenced maps, you will need either:
 
-a. Your map images saved as standard, non-georeferenced, image files (e.g. JPEG, PNG or TIFF) along with a separate file containing georeferencing metadata you wish to associate to these map images. **OR**
-b. You map images saved as georeferenced image files (e.g. geoTIFF).
+* Your map images saved as standard, non-georeferenced, image files (e.g. JPEG, PNG or TIFF) along with a separate file containing georeferencing metadata you wish to associate to these map images. **OR**
+* You map images saved as georeferenced image files (e.g. geoTIFF).
 
 Alternatively, if you would like to work with non-georeferenced maps/images, you will need:
 
-c. Your images saved as standard image files (e.g. JPEG, PNG or TIFF).
+* Your images saved as standard image files (e.g. JPEG, PNG or TIFF).
 
 Recommended directory structure
 --------------------------------
