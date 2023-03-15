@@ -602,7 +602,7 @@ class patchContextDataset(Dataset):
         side in a single figure with two subplots. The figure size is set to
         10in x 5in, and the titles of the subplots are set to "Patch" and
         "Context", respectively. The resulting figure is displayed using
-        PyPlot.
+        the matplotlib library (required).
         """
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
