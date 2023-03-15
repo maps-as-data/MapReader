@@ -5,7 +5,7 @@ Load & Patchify
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
+MapReader's ``Load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
 
 Load images (and metadata)
 ----------------------------
@@ -15,9 +15,11 @@ First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:
 .. code :: python
 
     from mapreader import loader
-    my_files = loader("./path/to/files")
+    my_files = loader("./path/to/files/*.png")
 
-This creates a mapImages object (``my_files``) which contains information about your images. 
+.. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
+
+This creates a ``mapImages`` object (``my_files``) which contains information about your images. 
 To see the contents of this object, use: 
 
 .. code :: python
@@ -27,48 +29,58 @@ To see the contents of this object, use:
 You will see that your images are labelled as either ``parents`` or ``children``.
 This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.
 
-If your image files contain metadata (e.g. if you have loaded geotiff files), you can add this into your mapImages object using:
+If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``mapImages`` object using:
 
 .. code :: python
 
     my_files.addGeoInfo()
 
-Or, if you have a separate metadata (e.g. in the form of a pd.DataFrame or a .csv file), use: 
+Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 
 .. code :: python
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
+
+.. note:: Specific guidance on preparing your metadata files can be found in our input guidance.
 
 Patchify 
 ----------
 
 Once you've loaded in all your data, you'll then need to patchify your images.
 
-Because MapReader was developed initially to implement the 'patchword method' (see `this paper`_), creating patches from the whole map images is a core intellectual and technical task. Choosing the size of your patches (and whether you want to mesure them in pixels or in meters) is an important, question-dependent decision. Smaller patches (50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain) where the feature(s) you want to label are themselves smaller than 50m on any side. Larger patches (500m x 500m) will be better suited to many tasks on slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
+Because MapReader was developed initially to implement the 'patchword method' (see `this paper <https://academic.oup.com/jvc/article/26/2/284/6232245>`_), creating patches from the whole map images is a core intellectual and technical task. 
+Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important, question-dependent decision. 
+Smaller patches (50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain) where the feature(s) you want to label are themselves smaller than 50m on any side. 
+Larger patches (500m x 500m) will be better suited to many tasks on slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
 
-Use this code to patchify your maps: 
+To patchify your maps, use: 
 
 .. code :: python
 
     my_files.sliceAll()
 
-By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. This save directory can be changed by specifying ``path_save``.
-
-.. TODO: can there be an example of code for how to change the patch size?
-
-e.g. :
+By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
+This save directory can be changed by specifying ``path_save``:
 
 .. code :: python
 
     my_files.sliceAll(path_save="./path/to/directory")
 
-If you have loaded geographic coordinates into your mapImages object, you can specify ``method`` and ``slice_size`` to slice your images by meters instead of pixels.
+If you would like to change the size of your patches, you can specify ``slice_size``.
 
-e.g. :
+e.g. to slice your maps into 500 x 500 pixel patches:
 
 .. code :: python
 
-    my_files.sliceAll(method="meters", slice_size=1)
+    my_files.sliceAll(slice_size=500)
+
+Or, if you have loaded geographic coordinates into your ``mapImages`` object, you can specify ``method = "meters"`` to slice your images by meters instead of pixels.
+
+e.g. to slice your maps into 50 x 50 meter patches:
+
+.. code :: python
+
+    my_files.sliceAll(method="meters", slice_size=50)
 
 After patchifying, you'll see that ``print(my_files)`` shows you have both parents and children (patches).
 To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_children()`` methods: 
@@ -88,7 +100,7 @@ Or, to view these in a dataframe, use:
     parent_df, patch_df = my_files.convertImages()
     patch_df.head()
 
-.. note:: parent and patch dataframes will not automatically update so you may want to run this command again if you add new information into your mapImages object.
+.. note:: Parent and patch dataframes **will not** automatically update so you may want to run this command again if you add new information into your ``mapImages`` object.
 
 Visualise
 ----------
@@ -114,7 +126,8 @@ To see a random sample of your patches (child images) use the ``tree_level="chil
     :width: 400px
 
 
-It can also be helpful to see your patches (child images) in the context of their parent image. To do this use the ``.show()`` method. 
+It can also be helpful to see your patches (child images) in the context of their parent image. 
+To do this use the ``.show()`` method. 
 
 e.g. :
 
@@ -153,17 +166,27 @@ This can be done using:
 Further analysis/visualisation  
 --------------------------------
 
-If you have loaded geographic coordinates into your mapImages object, you may want to calculate the coordinates of your patches. The ``.add_center_coord()`` method can used to do this:
+If you have loaded geographic coordinates into your ``mapImages`` object, you may want to calculate the coordinates of your patches. The ``.add_center_coord()`` method can used to do this:
 
 .. code :: python
 
     my_files.add_center_coord()
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each patch (child image) and parent image:
+    parent_df, patch_df = my_files.convertImages()
+    patch_df.head()
+
+After converting your images into dataframes, you will see that center coordinates have been added to your patch dataframe. 
+
+The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each of your patches:
 
 .. code :: python
 
     my_files.calc_pixel_stats()
+
+    parent_df, patch_df = my_files.convertImages()
+    patch_df.head()
+
+After converting your images into dataframes, you will see that mean and standard pixel intensities (R,G,B and A) have been added to your patch dataframe. 
 
 Specific values (e.g. 'mean_pixel_RGB') can be visualised using the ``.show()`` and ``.show_par()`` methods by specifying the ``value``, ``vmin`` and ``vmax`` arguments.
 
@@ -180,7 +203,6 @@ e.g. :
 .. image:: ../figures/show_par_RGB.png
     :width: 400px
 
-
 You may also want to specify the ``alpha`` argument, which sets the transparency of your plotted values. Lower ``alpha`` values allow you to see the parent image underneath:
 
 .. code :: python
@@ -190,4 +212,5 @@ You may also want to specify the ``alpha`` argument, which sets the transparency
 .. image:: ../figures/show_par_RGB_0.5.png
     :width: 400px
 
-.. _this_paper: https://academic.oup.com/jvc/article/26/2/284/6232245 
+To change the colormap used when plotting these values, you can also specify ``colorbar``.
+This will accept any matplotlib colormap as an argument. 
