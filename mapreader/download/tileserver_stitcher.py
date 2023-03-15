@@ -26,8 +26,8 @@ def runner(opts: input_class) -> None:
     Parameters
     -----------
     opts : input_class
-        The options for the runner, of the ``input_class`` type that contains the
-        following attributes:
+        The options for the runner, of the ``input_class`` type that contains
+        the following attributes:
             - ``dir`` (str): The directory containing the input images.
             - ``out_file`` (str): The output file path for the stitched image.
             - ``pixel_closest`` (int, optional): The closest pixel value to

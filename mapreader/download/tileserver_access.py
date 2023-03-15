@@ -77,7 +77,7 @@ class TileServer:
         geometry: Optional[str] = "polygone",
         download_url: Optional[
             str
-        ] = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
+        ] = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",  # noqa
     ):
         """
         Initializer for the class representing a tile server for a map.
@@ -283,15 +283,10 @@ class TileServer:
             # Check if the query is already in the list
             already_in_candidates = False
             if len(found_queries) > 0:
-                for one_in_candidates in found_queries:
-                    if (
-                        self.metadata_info_list[indx_q][0]
-                        == one_in_candidates[0]
-                    ):
+                for query in found_queries:
+                    if self.metadata_info_list[indx_q][0] == query[0]:
                         already_in_candidates = True
-                        print(
-                            f"Already in the query list: {one_in_candidates[0]}"
-                        )
+                        print(f"Already in the query list: {query[0]}")
                         break
 
             if not already_in_candidates:
@@ -370,14 +365,15 @@ class TileServer:
         if self.geometry == "polygone":
             coord_arr = np.array(coords)
             # if len(coord_arr) != 5:
-            #    raise ValueError(f"[ERROR] expected length of coordinate list is 5. coords: {coords}")
+            #    raise ValueError(f"[ERROR] expected length of coordinate list is 5. coords: {coords}") # noqa
             min_lon = np.min(coord_arr[:, 0])
             max_lon = np.max(coord_arr[:, 0])
             min_lat = np.min(coord_arr[:, 1])
             max_lat = np.max(coord_arr[:, 1])
 
             """
-            # this method results in smaller rectangles (compared to the original polygone) particularly if the map is strongly tilted
+            # this method results in smaller rectangles (compared to the
+            # original polygone) particularly if the map is strongly tilted
             min_lon = np.sort(coord_arr[:-1, 0])[1]
             max_lon = np.sort(coord_arr[:-1, 0])[2]
             min_lat = np.sort(coord_arr[:-1, 1])[1]
@@ -486,8 +482,8 @@ class TileServer:
         output_metadata_filename : str, optional
             Name of the output metadata file, by default ``"metadata.csv"``.
 
-            `Note: This file will be saved in the path equivalent to
-            ``output_maps_dirname``/``output_metadata_filename``.`
+            *Note: This file will be saved in the path equivalent to
+            output_maps_dirname/output_metadata_filename.*
         pixel_closest : int, optional
             Adjust the number of pixels in both directions (width and height)
             after downloading a map. For example, if ``pixel_closest = 100``,
@@ -985,8 +981,8 @@ class TileServer:
         output_metadata_filename : str, optional
             Name of the output metadata file, by default ``"metadata.csv"``.
 
-            `Note: This file will be saved in the path equivalent to
-            ``output_maps_dirname``/``output_metadata_filename``.`
+            *Note: This file will be saved in the path equivalent to
+            output_maps_dirname/output_metadata_filename.*
         pixel_closest : int, optional
             Adjust the number of pixels in both directions (width and height)
             after downloading a map. For example, if ``pixel_closest = 100``,
@@ -1203,6 +1199,9 @@ def download_tileserver_parallel(
     """
     Downloads map tiles from a tileserver in parallel using multiprocessing.
 
+    .. warning::
+        This function does currently not work.
+
     Parameters
     ----------
     metadata : list of dictionaries
@@ -1213,7 +1212,8 @@ def download_tileserver_parallel(
         ``"coordinates"``), and ``"properties"`` (with two values for the keys
         ``"IMAGEURL"`` AND ``"IMAGE"``).
     start : int
-        The index of the first element in the ``metadata`` property to download.
+        The index of the first element in the ``metadata`` property to
+        download.
     end : int
         The index of the last element in ``metadata`` property to download.
     process_np : int, optional
@@ -1246,7 +1246,7 @@ def download_tileserver_parallel(
 
         metadata_one_node = metadata[starti:endi]
         p = multiprocessing.Process(
-            target=download_tileserver,
+            target=download_tileserver,  # TODO: Bug
             args=(
                 metadata_one_node,
                 kwds["geometry"],

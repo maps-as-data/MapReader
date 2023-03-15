@@ -89,7 +89,8 @@ def initContainerClient(
     Returns
     -------
     container_client : azure.storage.blob.ContainerClient
-        An instance of the ``ContainerClient`` class for the specified container.
+        An instance of the ``ContainerClient`` class for the specified
+        container.
     list_containers : list
         A list of ``azure.storage.blob.BlobProperties`` objects representing
         the blobs in the container.
