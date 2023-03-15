@@ -12,9 +12,10 @@ Load images (and metadata)
 
 First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using: 
 
-.. code :: python
+.. code-block:: python
 
     from mapreader import loader
+
     my_files = loader("./path/to/files/*.png")
 
 .. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
@@ -22,7 +23,7 @@ First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:
 This creates a ``mapImages`` object (``my_files``) which contains information about your images. 
 To see the contents of this object, use: 
 
-.. code :: python
+.. code-block:: python
 
     print(my_files)
 
@@ -31,13 +32,13 @@ This naming structure is useful later on in the MapReader pipeline as it allows 
 
 If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``mapImages`` object using:
 
-.. code :: python
+.. code-block:: python
 
     my_files.addGeoInfo()
 
 Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 
-.. code :: python
+.. code-block:: python
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
@@ -55,14 +56,14 @@ Larger patches (500m x 500m) will be better suited to many tasks on slightly sma
 
 To patchify your maps, use: 
 
-.. code :: python
+.. code-block:: python
 
     my_files.sliceAll()
 
 By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
 This save directory can be changed by specifying ``path_save``:
 
-.. code :: python
+.. code-block:: python
 
     my_files.sliceAll(path_save="./path/to/directory")
 
@@ -70,7 +71,7 @@ If you would like to change the size of your patches, you can specify ``slice_si
 
 e.g. to slice your maps into 500 x 500 pixel patches:
 
-.. code :: python
+.. code-block:: python
 
     my_files.sliceAll(slice_size=500)
 
@@ -78,24 +79,24 @@ Or, if you have loaded geographic coordinates into your ``mapImages`` object, yo
 
 e.g. to slice your maps into 50 x 50 meter patches:
 
-.. code :: python
+.. code-block:: python
 
     my_files.sliceAll(method="meters", slice_size=50)
 
 After patchifying, you'll see that ``print(my_files)`` shows you have both parents and children (patches).
 To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_children()`` methods: 
 
-.. code :: python
+.. code-block:: python
 
-    parent_list=my_files.list_parents()
-    child_list=my_files.list_children()
+    parent_list = my_files.list_parents()
+    child_list = my_files.list_children()
 
     print(parent_list)
-    print(child_list[0:5]) # too many to print them all!
+    print(child_list[0:5])  # too many to print them all!
 
 Or, to view these in a dataframe, use:
 
-.. code :: python
+.. code-block:: python
 
     parent_df, patch_df = my_files.convertImages()
     patch_df.head()
@@ -107,7 +108,7 @@ Visualise
 
 To view a random sample of your images, use: 
 
-.. code :: python
+.. code-block:: python
 
     my_files.show_sample(num_samples=3)
 
@@ -118,7 +119,7 @@ To view a random sample of your images, use:
 By default, this will show you a random sample of your parent images.
 To see a random sample of your patches (child images) use the ``tree_level="child"`` argument: 
 
-.. code :: python
+.. code-block:: python
 
     my_files.show_sample(num_samples=3, tree_level="child")
 
@@ -131,7 +132,7 @@ To do this use the ``.show()`` method.
 
 e.g. :
 
-.. code :: python
+.. code-block:: python
 
     my_files.show(child_list[250:300])
 
@@ -141,9 +142,9 @@ e.g. :
 
 or 
 
-.. code :: python
+.. code-block:: python
 
-    files_to_show=[child_list[0], child_list[350], child_list[400]]
+    files_to_show = [child_list[0], child_list[350], child_list[400]]
     my_files.show(files_to_show)
 
 .. image:: ../figures/show_list.png
@@ -155,7 +156,7 @@ This will show you your chosen patches, by default highlighted with red borders,
 You may also want to see all the patches created from one of your parent images.
 This can be done using: 
 
-.. code :: python
+.. code-block:: python
 
     my_files.show_par(parent_list[0])
 
@@ -168,7 +169,7 @@ Further analysis/visualisation
 
 If you have loaded geographic coordinates into your ``mapImages`` object, you may want to calculate the coordinates of your patches. The ``.add_center_coord()`` method can used to do this:
 
-.. code :: python
+.. code-block:: python
 
     my_files.add_center_coord()
 
@@ -179,7 +180,7 @@ After converting your images into dataframes, you will see that center coordinat
 
 The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each of your patches:
 
-.. code :: python
+.. code-block:: python
 
     my_files.calc_pixel_stats()
 
@@ -192,12 +193,12 @@ Specific values (e.g. 'mean_pixel_RGB') can be visualised using the ``.show()`` 
 
 e.g. :
 
-.. code :: python
+.. code-block:: python
 
-    value='mean_pixel_RGB'
-    vmin=patch_df[value].min()
-    vmax=patch_df[value].max()
-    
+    value = "mean_pixel_RGB"
+    vmin = patch_df[value].min()
+    vmax = patch_df[value].max()
+
     my_files.show_par(parent_list[0], value=value, vmin=vmin, vmax=vmax)
 
 .. image:: ../figures/show_par_RGB.png
@@ -205,7 +206,7 @@ e.g. :
 
 You may also want to specify the ``alpha`` argument, which sets the transparency of your plotted values. Lower ``alpha`` values allow you to see the parent image underneath:
 
-.. code :: python
+.. code-block:: python
 
     my_files.show_par(parent_list[0], value=value, vmin=vmin, vmax=vmax, alpha=0.5)
 

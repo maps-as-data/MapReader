@@ -25,7 +25,7 @@ The ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and 
 The ``tasks`` section is used to specify annotation tasks and their labels. 
 This section can contain as many tasks/labels as you would like and should be formatted as follows:
 	
-.. code :: yaml
+.. code-block:: yaml
 		
 	tasks:
 		your_task_name: 
@@ -38,7 +38,7 @@ This section can contain as many tasks/labels as you would like and should be fo
 The ``paths`` section is used to specify file paths to sets of images you would like to annotate (annotation sets). 
 This section can contain as many annotation sets as you would like and should be formatted as follows:
 
-.. code :: yaml
+.. code-block:: yaml
 
 	paths:
 		your_annotation_set:
@@ -52,7 +52,7 @@ This section can contain as many annotation sets as you would like and should be
 
 For example, if you want to annotate 'rail_space' (as in our `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_), your ``annotation_tasks.yaml`` should look like this: 
 	   
-.. code :: yaml
+.. code-block:: yaml
 
 	tasks:
 		rail_space:
@@ -73,17 +73,22 @@ To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_f
 
 e.g. following our 'rail_space' example from earlier:
 
-.. code :: python
+.. code-block:: python
 
-	from mapreader.annotate.utils import prepare_annotation
+    from mapreader.annotate.utils import prepare_annotation
 
-	annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001")
+    annotation = prepare_annotation(
+        userID="your_name",
+        annotation_tasks_file="annotation_tasks.yaml",
+        task="rail_space",
+        annotation_set="set_001",
+    )
 
 You can then interactively annotate a sample of your images using:
 
-.. code :: python
+.. code-block:: python
 
-	annotation
+    annotation
 
 .. image:: ../figures/annotate.png
 	:width: 400px
@@ -93,12 +98,11 @@ This creates a second panel in the annotation interface, showing your patch in t
 
 e.g. :
 		
-.. code :: python
+.. code-block:: python
 		
-	annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001",
-					 				context_image=True, xoffset=100, yoffset=100)
+    annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100)
 
-	annotation 
+    annotation 
 
 .. image:: ../figures/annotate_context.png
 	:width: 400px
@@ -110,22 +114,27 @@ This is particularly useful if your images (e.g. maps) have collars or margins t
 
 e.g. :
 
-.. code :: python
+.. code-block:: python
 		
-	annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001",
-					 				context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
+    annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
 
-	annotation 
+    annotation 
 
 Save your annotations
 ----------------------
 	
 Once you have annotated your images, you should save your annotations using:
 
-.. code :: python
+.. code-block:: python
 
-	from mapreader.annotate.utils import save_annotation
+    from mapreader.annotate.utils import save_annotation
 
-	save_annotation(annotation, userID="your_name", task="rail_space", annotation_tasks_file="annotation_tasks.yaml", annotation_set="set_001")
+    save_annotation(
+        annotation,
+        userID="your_name",
+        task="rail_space",
+        annotation_tasks_file="annotation_tasks.yaml",
+        annotation_set="set_001",
+    )
 
 This saves your annotations as a ``.csv`` file in the ``annot_dir`` specified in your annotation tasks file.
