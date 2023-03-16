@@ -46,7 +46,7 @@ Get in touch
 
 There are many ways to get in touch with the MapReader team:
 
-- Github issues and pull requests (find our Github handles `here <https://github.com/Living-with-machines/MapReader/blob/main/ways_of_working.md>`_).
+- Github issues and pull requests (find our Github handles `here <https://github.com/Living-with-machines/MapReader/blob/main/ways_of_working.md>`__).
 - Contact Katie McDonough by via email (k.mcdonough@lancaster.ac.uk).
 
 Contributing through GitHub
@@ -64,9 +64,9 @@ Before you open a new issue, please check if any of our open issues cover your i
 If you do need to open a new issue, please follow our basic guidelines laid out in our issue templates. 
 There are two issue templates to choose from:
 
-- **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`_): This template should be used to report bugs in the MapReader code.
-- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`_): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code.
-- **Documentation update** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/documentation_update.md>`_): This template should be used for reporting errors, like typos and broken links, and suggesting updates to documentation/tutorials/etc. 
+- **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`__): This template should be used to report bugs in the MapReader code.
+- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`__): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code.
+- **Documentation update** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/documentation_update.md>`__): This template should be used for reporting errors, like typos and broken links, and suggesting updates to documentation/tutorials/etc. 
 
 If you feel your issue does not fit either of these templates, please open a blank issue and provide as much information as possible to help the MapReader team work resolve the issue.
 
@@ -84,7 +84,7 @@ To do this:
 4. Submit a pull request.
 
 Please ensure your pull request contains as much information as possible and links to the issue(s) you are resolving. 
-Our pull request template (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`_) should automatically help you with this.
+Our pull request template (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`__) should automatically help you with this.
 
 Once created, your pull request will be reviewed by a member of the MapReader team and, once approved, your changes will be merged into the MapReader repository.
 To make this review process as easy as possible, please try to work on only one issue/problem per pull request.
@@ -116,7 +116,7 @@ Writing in reStructuredText
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 reStructuredText (rst) is the default plaintext markup language used by `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and is the language used throughout our documentation.
-If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`_ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`_) available online, so have a google.
+If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`__ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__) available online, so have a google.
 
 To help make your rst files easier to read and review, please start each new sentence on a new line. 
 This will make no difference to how the text is displayed, but will make it much easier to read when reviewing changes in a pull request.
