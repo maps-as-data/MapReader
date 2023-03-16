@@ -108,7 +108,8 @@ e.g.:
 Finally, to download map tiles from TileServer_, use: 
 
 .. code-block:: python
-  my_ts.download_tileserver()
+
+     my_ts.download_tileserver()
 
 By default, this downloads map tiles as ``.png`` files and saves them to a newly created ``./maps`` directory.
 Metadata is also saved there as a ``.csv`` file named ``metadata.csv``.
@@ -116,10 +117,11 @@ Metadata is also saved there as a ``.csv`` file named ``metadata.csv``.
 These output paths/names can be changed by specifying ``output_maps_dirname`` and ``output_metadata_filename``: 
 
 .. code-block:: python
-  my_ts.download_tileserver(
-      output_maps_dirname="./path/to/directory",
-      output_metadata_filename="my_filename.csv",
-  )
+
+     my_ts.download_tileserver(
+         output_maps_dirname="./path/to/directory",
+         output_metadata_filename="my_filename.csv",
+     )
 
 When downloading your maps, you can also set the zoom level (default = 14) by specifying ``zoom_level`` and adjust the numbers of pixels in your tiles by specifying ``pixel_closest``.
 

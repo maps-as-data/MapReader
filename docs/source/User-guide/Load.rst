@@ -42,7 +42,7 @@ Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataf
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
-.. note:: Specific guidance on preparing your metadata files can be found in our input guidance.
+.. note:: Specific guidance on preparing your metadata files can be found on our input guidance page.
 
 Patchify 
 ----------

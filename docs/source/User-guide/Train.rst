@@ -185,6 +185,7 @@ To prepare your data for training, `PyTorch <https://pytorch.org/>`_ uses a ``Da
 To load datasetsto your ``classifier()`` object, use: 
 
 .. code-block:: python
+
     my_classifier.add2dataloader(your_dataset)
 
 By default, your batch sizes will be set to 16 and no sampler will be used when creating them. 
@@ -223,6 +224,7 @@ You should also name your sets using the ``set_name`` argument:
     my_classifier.add2dataloader(
         test_dataset, set_name="test", batch_size=batch_size, shuffle=False
     )
+
 Then, to see information about your datasets use:
 
 .. code-block:: python
@@ -240,6 +242,7 @@ And, to see information about each set individually, use:
 and 
 
 .. code-block:: python
+
     my_classifier.print_classes_dl(set_name="train")
     my_classifier.print_classes_dl(set_name="val")
     my_classifier.print_classes_dl(set_name="test")
@@ -344,6 +347,7 @@ As well as an optimiser, you should initialise a scheduler, which defines how of
 This is done using ``.initialize_scheduler()`` and ``.add_criterion()`` respectively:
 
 .. code-block:: python
+
     my_classifier.initialize_scheduler()
 
     criterion = torch.nn.CrossEntropyLoss()
