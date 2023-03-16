@@ -10,7 +10,7 @@ How many maps?
 ~~~~~~~~~~~~~~~~
 
 MapReader was designed to help researchers work with large collections of series maps. 
-Deciding to use MapReader, which uses deep learning computer vision models to predict the class of content on patches across many sheets, means weighing the pros and cons of working with the data output that is inferred by the model. 
+Deciding to use MapReader, which uses deep learning computer vision (CV) models to predict the class of content on patches across many sheets, means weighing the pros and cons of working with the data output that is inferred by the model. 
 Inferred data can be evaluated against expert-annotated data to understand its general quality (are all instances of a feature of interest identified by the model? does the model apply the correct label to that feature?), but in the full dataset there *will necessarily be* some percentage of error. 
 
 So, MapReader is useful when the number of maps you wish to analyze exceeds the number which you (or a team) might be willing and able to annotate manually, using tools like ArcGIS, QGIS, or web-based annotation interfaces like Recogito. 
@@ -19,19 +19,20 @@ This number will vary depending on the size of your maps, the features you want 
 Input options
 --------------
 
-The MapReader pipeline is structured as follows:
-
-.. image:: figures/pipeline.png
+The MapReader pipeline is explained in detail `here <https://mapreader.readthedocs.io/en/latest/About.html>`__.
 
 The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
 Option 1 - If you want to download maps from a TileServer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you want to download maps from a TileServer using MapReaders `Download` subpackage, you will need:
+If you want to download maps from a TileServer using MapReaders ``Download`` subpackage, you will need to begin with the 'Download' task. 
+For this, you will need:
 
-* A `json` file containing metadata for each map you would like to query/download. 
+* A ``json`` file containing metadata for each map you would like to query/download. 
 * The base URL of the map layer which you would like to access.
+
+.. TODO: RW - Unsure if the below is true so will need to check. Leaving for now.
 
 The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. 
 This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
@@ -72,23 +73,65 @@ We reccomend setting up your files in the following directory structure:
        ├── ...
        └── metadata.csv
     
-This is the directory structure created when using the default file paths set up within MapReader.
+This is the directory structure created by default when downloading maps using MapReader's ``Download`` subpackage.
 
-.. comment: TODO - Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
+Alternatively, if you are using geoTIFFs, your will not need a metadata file, and so your files can be set up as follows: 
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+       ├── map1.tif
+       ├── map2.tif
+       ├── map3.tif
+       └── ...
+
 
 .. note:: Your map images should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
+
+.. comment: TODO - Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
 
 Preparing your metadata
 ------------------------
 
-MapReader uses file names as unique identifiers (`imageID`s) for your map images.
-If you would like to associate metadata (e.g. georeferencing information, publication dates or any other information about your images) to these map images, then MapReader must be able to identify which image to associate each peice of metadata information.
-This  means that, at minimum, your metadata must contain a column/header named `imageID` whose contents is the file names of your map images.
+MapReader uses the file names of your map images as a unique identifier (`image_id`s).
+Therefore, if you would like to associate metadata to your map images, then, at minimum, your metadata must contain a column/header named `image_id` whose contents is the file names of your map images.
 
-To load metadata into MapReader, your metadata must be in the form of either:
+To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `pandas <https://pandas.pydata.org/>`_ readable file format.
 
-* A csv file **OR**
-* A pandas dataframe
 
-The simplest option is to save your metadata as a csv file (this can be created from an excel spreadsheet) and load it directly into MapReader.
-However, `Pandas is able to read a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_ so, if your metadata is saved in a different file format, you can use pandas to read your file, create a dataframe from it, and pass that dataframe to MapReader instead.
+Option 1 - Using a ``csv`` file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The simplest option is to save your metadata as a ``csv`` file (this can be created from an excel spreadsheet using ``File > Save As...``) and load it directly into MapReader.
+
+If you are loading metadata from a ``csv`` file, your file should be structures as follows:
+
+
++-----------+--------------------------+---------------------+-----------+
+| image_id  | col1 (e.g. coords)       | col2 (e.g. region)  | col3      |
++===========+==========================+=====================+===========+
+| map1.png  | (-4.8, -4.2, 55.8, 56.4) | Glasgow             | ...       |
++-----------+--------------------------+---------------------+-----------+
+| map2.png  | (-2.2, -1.6, 53.2, 53.8) | Manchester          | ...       |
++-----------+--------------------------+---------------------+-----------+
+| map3.png  | (-3.6, -3.0, 50.1, 50.8) | Dorset              | ...       |
++-----------+--------------------------+---------------------+-----------+
+| ...       | ...                      | ...                 | ...       |
++-----------+--------------------------+---------------------+-----------+
+
+Your file can contain as many columns/rows as you like, so long as it contains the ``image_id`` column.
+
+Option 2 - Loading metadata from other file formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`Pandas is able to read a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_ so, if your metadata is saved in a different file format, you may still be able to use it. 
+
+To do this, you will need to:
+
+1. Read your file using one of pandas ``read_xxx`` methods and create a dataframe from it.
+2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
+3. Pass your dataframe to MapReader.
+
+Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not reccomended.
