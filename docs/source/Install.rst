@@ -8,15 +8,15 @@ Step 1: Set up a virtual python environment
 
 MapReader requires python version 3.7+. 
 
-If using conda (recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Method 1: Using conda (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We recommend installing MapReader using either Anaconda (`installation instructions here <https://docs.anaconda.com/anaconda/install/>`__) or miniconda (`installation instructions here <https://docs.conda.io/en/latest/miniconda.html>`__.
 A discussion of which of these to choose can be found `here <https://docs.conda.io/projects/conda/en/stable/user-guide/install/download.html>`__.
 
 Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual python environment:
 
-1. Create a new conda environment for ``mapreader`` (you can call this what you like, we use ``mr_pyXX`` where ``XX`` is your python version):
+-  Create a new conda environment for ``mapreader`` (you can call this what you like, we use ``mr_pyXX`` where ``XX`` is your python version):
 
    .. code-block:: bash
 
@@ -24,14 +24,14 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    This will create a conda enviroment which uses python version 3.8. 
 
-2. Activate your conda environment:
+-  Activate your conda environment:
 
    .. code-block:: bash
 
       conda activate mr_py38
 
-If using venv or other
-~~~~~~~~~~~~~~~~~~~~~~~
+Method 2: Using venv or other
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you would like not to use conda, you are more than welcome to set up a virtual python environment using other methods.
 
@@ -89,8 +89,7 @@ Method 2: Install from source
 Step 3 (Optional): Add virtual python environment to notebooks
 ----------------------------------------------------------------
 
-- To allow the newly created python virtual environment to show up in jupyter 
-   notebooks, run the following command:
+- To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
    .. code-block:: bash
    
@@ -106,7 +105,7 @@ M1 mac
 
 If you are using an M1 mac and are having issues installing MapReader due to an error when installing numpy or scikit-image:
 
-1. Try separately installing the problem packages (edit as needed) and then installing MapReader:
+-  Try separately installing the problem packages (edit as needed) and then installing MapReader:
    
    .. code-block:: bash
 
@@ -114,7 +113,7 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
       pip install scikit-image==0.18.3
       pip install mapreader
 
-2. Try using conda to install the problem packages (edit as needed) and then pip to install MapReader:
+-  Try using conda to install the problem packages (edit as needed) and then pip to install MapReader:
 
    .. code-block:: bash
 
@@ -122,7 +121,7 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
       conda install scikit-image==0.18.3
       pip install mapreader
 
-3. Alternatively, you can try using a different version of openBLAS when installing:
+-  Alternatively, you can try using a different version of openBLAS when installing:
 
    .. code-block:: bash
 
