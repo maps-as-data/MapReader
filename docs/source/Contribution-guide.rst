@@ -116,7 +116,7 @@ There are a number of ways you can contribute to our documentation, these includ
 Requirements
 ~~~~~~~~~~~~~
 
-If you would like to edit or add to the MapReader documentation, you will need to install the packages detailed in `MapReader/docs/requirements.txt`.
+If you would like to edit or add to the MapReader documentation, you will need to install the packages detailed in ``MapReader/docs/requirements.txt``.
 
 To do this (assuming you have installed MapReader as per the installation instructions), use:
 
