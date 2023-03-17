@@ -6,54 +6,59 @@ What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale.
 
-The 'pipeline'
-~~~~~~~~~~~~~~~
+What is unique about MapReader?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The MapReader pipeline consists of a linear sequence of tasks which can be used to:
+MapReader is based on the 'patchwork method' in which whole map images are sliced into a grid of squares or 'patches':
 
-1. **Download** images/maps and metadata stored on web-servers (e.g. tileserves which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere).
-2. **Load** images/maps and metadata stored locally and **pre-process** these:
-   - 'patchify' images/maps (i.e. slice a whole image/map into smaller patches for analysis),
-   - resample images/maps (use image transformations to alter pixel-dimensions/resolution/orientation/etc.),
-   - remove borders outside the neatline,
-   - reproject maps between coordinate reference systems (CRS).
-3. **Annotate** (i.e. add labels to) images/maps or their patches using an interactive annotation tool.
-4. **Train or fine-tune** a computer vision (CV) classifier to recognise image features associated with these labels.
-5. Use inference to **predict labels** on large sets of images/maps or their patches. 
-6. **Post-process**, analyse and visualise outputs.
+.. image:: figures/patchify.png
+
+This unique way of pre-processing map images enables the use of image classification to identify visual features within maps, in order to answer important research questions.
+
+What is 'the MapReader pipeline'?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The MapReader pipeline consists of a linear sequence of tasks:
 
 .. image:: figures/pipeline_explained.png
+
+Together, these tasks can be used to train a computer vision (CV) classifier to recognise visual features within maps and identify patches containing these features across entire map collections.
+
+What kind of visual features can MapReader help me identify?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to train a CV classifier to recognise visual features within your maps, your features must have a homogeneous visual signal across your map collection (i.e. always be represented in the same way).
 
 Why use MapReader?
 -------------------
 
-**Do you want to search the visual contents of a large set of maps to answer a question about the past?**
-MapReader can help you find instances of spatial phenomena in a collection of maps that is too large for you to 'close read/view'.
+MapReader becomes useful when the number of maps you wish to analyse exceeds the number which you (or your team) are willing/capable of annotating manually.
 
-MapReader enables quick, flexible research with large map corpora. 
-It is based on the patchwork method, e.g. scanned map sheets are preprocessed to divide up the content of the map into a grid of squares, or "patches". 
+This exact number will vary depending on:
 
-Using image classificaion at the level of each patch allows users to define classes (labels) of features on maps related to their research questions.
+- the size of your maps, 
+- the features you want to find,
+- the skills you (or your team) have,
+- the amount of time at your disposal.
+ 
+Deciding to use MapReader, which uses deep learning computer vision (CV) models to predict the class of content on patches across many sheets, means weighing the pros and cons of working with the data output that is inferred by the model. 
+Inferred data can be evaluated against expert-annotated data to understand its general quality (are all instances of a feature of interest identified by the model? does the model apply the correct label to that feature?), but in the full dataset there *will necessarily be* some percentage of error. 
 
 MapReader creates output that you can link and analyze in relation to other geospatial datasets (e.g. census, gazetteers, toponyms in text corpora).
 
-You might be interested in using MapReader if...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Who might be interested in using MapReader?
+--------------------------------------------
 
-* you have access to a large corpus of georeferenced maps (MapReader can still provide results for non-georeferenced maps)
-* you want to quickly test different labels to help refine a research question that depends on finding content on maps before/without committing to manual vector data creation
-* your maps were created before surveying accuracy reached modern standards, and therefore you do not want to create overly precise geolocated data based on the content of those maps 
+MapReader might be useful to you if:
 
-MapReader is well-suited for finding spatial phenomena that...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- You have access to a large collection of maps and want to identify visual features within them without having to manually annotating each map.
+- You want to quickly test different labels to help refine a research question that depends on identifying visual features within maps before/without committing to manual vector data creation.
+* Your maps were created before surveying accuracy reached modern standards, and therefore you do not want to create overly precise geolocated data based on the content of those maps.
 
-* have a homogeneous visual signal across many maps in the same style
-* may not correspond to typical categories of map features that are traditionally digitized as vector data in a GIS
-* you then want to combine with other geospatial datasets 
+What skills/knowledge will I need to use MapReader?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Skills/knowledge you will need to use MapReader
--------------------------------------------------
-
+* Understanding of your map collection and knowledge of visual features you would like to identify within your maps
 * Basic understanding of how to use your terminal
 * Basic python
-* Basic understanding of machine learning and computer vision methodology
+* Basic understanding of machine learning and computer vision (CV) methodology
