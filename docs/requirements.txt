@@ -3,3 +3,4 @@ myst-parser
 sphinx-autoapi
 sphinx-copybutton
 nbsphinx
+pandoc
