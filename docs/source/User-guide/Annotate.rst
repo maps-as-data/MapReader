@@ -10,28 +10,25 @@ This is done in three simple steps:
 1. :ref:`Create an annotation tasks file`
 2. :ref:`Annotate your images`
 3. :ref:`Save your annotations`
- 
 
 Create an annotation tasks file
 -----------------------------------
 
-.. TODO: let people know they need to create this file from scratch (would be nice to have a template somewhere as the details below get separated out and it's nice to see an example...)
-
 To set up your annotation tasks, you will need to create a separate ``annotation_tasks.yaml`` file.
-An example file which can be used as a template can be found in `MapReader/worked_examples/`.
+An example file which can be used as a template can be found in ``MapReader/worked_examples/``.
 
-The ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and ``paths``.
+Your ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and ``paths``.
 	
 The ``tasks`` section is used to specify annotation tasks and their labels. 
 This section can contain as many tasks/labels as you would like and should be formatted as follows:
 	
 .. code-block:: yaml
-		
+	
 	tasks:
-		your_task_name: 
-			labels: ["your_label_1", "your_label_2", "your_label_3"]
-		your_task_name_2: 
-			labels: ["your_label_1", "your_label_2"]
+	  your_task_name: 
+	    labels: ["your_label_1", "your_label_2", "your_label_3"]
+	  your_task_name_2: 
+		labels: ["your_label_1", "your_label_2"]
 
 .. note:: When annotating, for each patch you will only be able to select one label from your label list. So, if you envisage wanting to label something as "label_1" **and also** "label_2", you will need to create a separate label combining "label_1 and label_2". 
 	
@@ -41,28 +38,29 @@ This section can contain as many annotation sets as you would like and should be
 .. code-block:: yaml
 
 	paths:
-		your_annotation_set:
-			patch_paths: "./path/to/patches/"
-			parent_paths: "./path/to/parents/"
-			annot_dir: "./path/to/save/annotations"
-		your_annotation_set_2:
-			patch_paths: "./path/to/patches_2/"
-			parent_paths: "./path/to/parents_2/"
-			annot_dir: "./path/to/save/annotations_2"
+	  your_annotation_set:
+		patch_paths: "./path/to/patches/"
+		parent_paths: "./path/to/parents/"
+		annot_dir: "./path/to/save/annotations"
+	  your_annotation_set_2:
+		patch_paths: "./path/to/patches_2/"
+		parent_paths: "./path/to/parents_2/"
+		annot_dir: "./path/to/save/annotations_2"
 
-For example, if you want to annotate 'rail_space' (as in our `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_), your ``annotation_tasks.yaml`` should look like this: 
+For example, if you want to annotate 'rail_space' (as in our `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
 	   
 .. code-block:: yaml
 
+	#EXAMPLE
 	tasks:
-		rail_space:
-			labels: ["no_rail_space", "rail_space"]
+	  rail_space:
+		labels: ["no_rail_space", "rail_space"]
 
 	paths:
-		set_001:
-			patch_paths: "./maps/slice_50_50/patch-*png"
-			parent_paths: "./maps/*png"
-			annot_dir: "./annotations_one_inch"
+	  set_001:
+		patch_paths: "./tests/patch-*png"
+		parent_paths: "./maps/*png"
+		annot_dir: "./annotations_one_inch"
 		
 Annotate your images
 ----------------------
@@ -75,10 +73,11 @@ e.g. following our 'rail_space' example from earlier:
 
 .. code-block:: python
 
+	#EXAMPLE
     from mapreader.annotate.utils import prepare_annotation
 
     annotation = prepare_annotation(
-        userID="your_name",
+        userID="rosie",
         annotation_tasks_file="annotation_tasks.yaml",
         task="rail_space",
         annotation_set="set_001",
@@ -99,8 +98,9 @@ This creates a second panel in the annotation interface, showing your patch in t
 e.g. :
 		
 .. code-block:: python
-		
-    annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100)
+
+	#EXAMPLE	
+    annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100)
 
     annotation 
 
@@ -116,7 +116,7 @@ e.g. :
 
 .. code-block:: python
 		
-    annotation=prepare_annotation(userID="your_name", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
+    annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
 
     annotation 
 
@@ -127,14 +127,37 @@ Once you have annotated your images, you should save your annotations using:
 
 .. code-block:: python
 
+	#EXAMPLE
     from mapreader.annotate.utils import save_annotation
 
     save_annotation(
         annotation,
-        userID="your_name",
+        userID="rosie",
         task="rail_space",
         annotation_tasks_file="annotation_tasks.yaml",
         annotation_set="set_001",
     )
 
-This saves your annotations as a ``.csv`` file in the ``annot_dir`` specified in your annotation tasks file.
+This saves your annotations as a ``csv`` file in the ``annot_dir`` specified in your annotation tasks file.
+
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ and saved your patches using the default settings:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+    │   ├── map1.png
+    │   ├── map2.png
+    │   ├── map3.png
+    │   ├── ...
+    │   └── metadata.csv
+    └──tests
+    │   ├── patch-0-100-#map1.png#.png
+    │   ├── patch-100-200-#map1.png#.png
+    │   ├── patch-200-300-#map1.png#.png
+    │   └── ...
+    └──annotations_one_inch
+	    └──rail_space_#rosie#.csv
+
+

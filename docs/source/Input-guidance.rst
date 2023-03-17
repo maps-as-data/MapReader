@@ -51,11 +51,11 @@ If you are using non-georeferenced image files (e.g. PNG files) plus a separate 
     project
     ├──your_notebook.ipynb
     └──maps        
-       ├── map1.png
-       ├── map2.png
-       ├── map3.png
-       ├── ...
-       └── metadata.csv
+        ├── map1.png
+        ├── map2.png
+        ├── map3.png
+        ├── ...
+        └── metadata.csv
     
 This is the directory structure created by default when downloading maps using MapReader's ``Download`` subpackage.
 
@@ -66,10 +66,10 @@ Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), 
     project
     ├──your_notebook.ipynb
     └──maps        
-       ├── map1.tif
-       ├── map2.tif
-       ├── map3.tif
-       └── ...
+        ├── map1.tif
+        ├── map2.tif
+        ├── map3.tif
+        └── ...
 
 
 .. note:: Your map images should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).

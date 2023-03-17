@@ -20,7 +20,14 @@ First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:
 
 .. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
 
-This creates a ``mapImages`` object (``my_files``) which contains information about your images. 
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_files = loader("./maps/*.png")
+
+The ``loader`` method creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
 To see the contents of this object, use: 
 
 .. code-block:: python
@@ -42,17 +49,29 @@ Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataf
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
-.. note:: Specific guidance on preparing your metadata files can be found on our input guidance page.
+.. note:: Specific guidance on preparing your metadata files can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
+
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_files.add_metadata(metadata="./maps/metadata.csv")
+
 
 Patchify 
 ----------
 
-Once you've loaded in all your data, you'll then need to patchify your images.
+Once you've loaded in all your data, you'll then need to `'patchify' <https://mapreader.readthedocs.io/en/latest/About.html>`__ your images.
 
-Because MapReader was developed initially to implement the 'patchword method' (see `this paper <https://academic.oup.com/jvc/article/26/2/284/6232245>`_), creating patches from the whole map images is a core intellectual and technical task. 
-Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important, question-dependent decision. 
-Smaller patches (50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain) where the feature(s) you want to label are themselves smaller than 50m on any side. 
-Larger patches (500m x 500m) will be better suited to many tasks on slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
+Creating patches from your parent images is a core intellectual and technical task within MapReader. 
+Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important decision and will depend upon the research question you are trying to answer:
+
+- Smaller patches (e.g. 50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain).
+- Larger patches (500m x 500m) will be better suited to slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
+
+In any case, the patch size you choose should roughly match the size of the visual feature(s) you want to label. 
+Ideally your features should be smaller (in any dimension) than your patch size and therefore fully contained within a patch. 
 
 To patchify your maps, use: 
 
@@ -61,11 +80,51 @@ To patchify your maps, use:
     my_files.sliceAll()
 
 By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
+If you are following our reccommended directory structure, after patchifying, your directory should look like this:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+    │   ├── map1.png
+    │   ├── map2.png
+    │   ├── map3.png
+    │   ├── ...
+    │   └── metadata.csv
+    └──tests
+        ├── patch-0-100-#map1.png#.png
+        ├── patch-100-200-#map1.png#.png
+        ├── patch-200-300-#map1.png#.png
+        └── ...
+
+.. TODO: change default save name!
+
 This save directory can be changed by specifying ``path_save``:
 
 .. code-block:: python
 
-    my_files.sliceAll(path_save="./path/to/directory")
+    #EXAMPLE
+    my_files.sliceAll(path_save="./maps/patches")
+
+This will create the following directory structure:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+        ├── map1.png
+        ├── map2.png
+        ├── map3.png
+        ├── ...
+        ├── metadata.csv
+        └── patches
+             ├── patch-0-100-#map1.png#.png
+             ├── patch-100-200-#map1.png#.png
+             ├── patch-200-300-#map1.png#.png
+             └── ...
+
 
 If you would like to change the size of your patches, you can specify ``slice_size``.
 
@@ -73,6 +132,7 @@ e.g. to slice your maps into 500 x 500 pixel patches:
 
 .. code-block:: python
 
+    #EXAMPLE
     my_files.sliceAll(slice_size=500)
 
 Or, if you have loaded geographic coordinates into your ``mapImages`` object, you can specify ``method = "meters"`` to slice your images by meters instead of pixels.
@@ -81,6 +141,7 @@ e.g. to slice your maps into 50 x 50 meter patches:
 
 .. code-block:: python
 
+    #EXAMPLE
     my_files.sliceAll(method="meters", slice_size=50)
 
 After patchifying, you'll see that ``print(my_files)`` shows you have both parents and children (patches).
@@ -134,6 +195,7 @@ e.g. :
 
 .. code-block:: python
 
+    #EXAMPLE
     my_files.show(child_list[250:300])
 
 .. image:: ../figures/show.png
@@ -144,6 +206,7 @@ or
 
 .. code-block:: python
 
+    #EXAMPLE
     files_to_show = [child_list[0], child_list[350], child_list[400]]
     my_files.show(files_to_show)
 
@@ -187,7 +250,7 @@ The ``.calc_pixel_stats()`` method can be used to calculate means and standard d
     parent_df, patch_df = my_files.convertImages()
     patch_df.head()
 
-After converting your images into dataframes, you will see that mean and standard pixel intensities (R,G,B and A) have been added to your patch dataframe. 
+After converting your images into dataframes, you will see that mean and standard pixel intensities (R,G,B and, if present, Alpha) have been added to your patch dataframe. 
 
 Specific values (e.g. 'mean_pixel_RGB') can be visualised using the ``.show()`` and ``.show_par()`` methods by specifying the ``value``, ``vmin`` and ``vmax`` arguments.
 
@@ -195,6 +258,7 @@ e.g. :
 
 .. code-block:: python
 
+    #EXAMPLE
     value = "mean_pixel_RGB"
     vmin = patch_df[value].min()
     vmax = patch_df[value].max()
@@ -204,10 +268,13 @@ e.g. :
 .. image:: ../figures/show_par_RGB.png
     :width: 400px
 
-You may also want to specify the ``alpha`` argument, which sets the transparency of your plotted values. Lower ``alpha`` values allow you to see the parent image underneath:
+You may also want to specify the ``alpha`` argument, which sets the transparency of your plotted values. Lower ``alpha`` values allow you to see the parent image underneath.
+
+e.g.:
 
 .. code-block:: python
 
+    #EXAMPLE
     my_files.show_par(parent_list[0], value=value, vmin=vmin, vmax=vmax, alpha=0.5)
 
 .. image:: ../figures/show_par_RGB_0.5.png
