@@ -5,7 +5,7 @@ Learn and Predict
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``train`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
+MapReader's ``Train`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
 
 Load data
 -----------
@@ -20,9 +20,17 @@ First, load in your annotations and images using:
     from mapreader import loadAnnotations
 
     annotated_images = loadAnnotations()
-    annotated_images.load("./path/to/annotations.csv", path2dir="./path/to/patches/")
+    annotated_images.load("./path/to/annotations.csv", path2dir="./path/to/patches/*.png")
 
-To view the data loaded in from your ``.csv`` as a dataframe, use:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
+
+.. code-block:: python
+
+    #EXAMPLE
+    annotated_images = loadAnnotations()
+    annotated_images.load("./annotations_one_inch/rail_space_#rosie#.csv", path2dir="./tests/patch-*png")
+
+To view the data loaded in from your ``csv`` as a dataframe, use:
 
 .. code-block:: python
 
@@ -41,10 +49,14 @@ This can be done using:
 
     annotated_images.adjust_label(shiftby=-1)
 
-You can then view a sample of your annotated images using:
+You can then view a sample of your annotated images using the ``show_image_labels()`` method.
+The ``tar_label`` argument specifies which label you would like to show. 
+
+For example, to show label no. 1 (i.e. "rail_space"):
 
 .. code-block:: python
 
+    #EXAMPLE
     annotated_images.show_image_labels(tar_label=1)
 
 .. image:: ../figures/show_image_labels_10.png
@@ -63,12 +75,15 @@ You can also view specific images from their indices using:
     :width: 400px
 
 
-You may also notice, that when viewing a sample of your annotations, you have mislabelled one of your images.
+You may also notice that, when viewing a sample of your annotations, you have mislabelled one of your images.
 The ``.review_labels()`` method provides an easy way to fix this:
 
 .. code-block:: python
 
     annotated_images.review_labels()
+
+This should return an interactive tool for adjusting your annotations.
+To exit, type "EXIT" into the text box.
 
 Split annotations
 ~~~~~~~~~~~~~~~~~~
@@ -94,6 +109,7 @@ e.g. the following command will result in a split of 50% (train), 20% (val) and 
 
 .. code-block:: python
 
+    #EXAMPLE
     annotated_images.split_annotations(frac_train=0.5, frac_val=0.2, frac_test=0.3)
 
 You can then check how many annotated images are in each set by checking the value counts of your dataframes:
@@ -108,16 +124,17 @@ You can then check how many annotated images are in each set by checking the val
     print(val_count)
     print(test_count)
 
-Prepare datasets
-~~~~~~~~~~~~~~~~~
+Prepare images (transform) and datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before using your images in training, validation or inference, you will first want to define some transformations and prepare your data.
-This can be done using the ``patchTorchDataset`` class and `torchvision's transformms module <https://pytorch.org/vision/stable/transforms.html>`_. 
+Before using your images in training, validation or inference, you will first want to prepare your images using image transformations.
+This can be done by using `torchvision's transformms module <https://pytorch.org/vision/stable/transforms.html>`_. 
 
 e.g. :
 
 .. code-block:: python
 
+    #EXAMPLE
     from mapreader import patchTorchDataset
     from torchvision import transforms
 
@@ -134,22 +151,37 @@ e.g. :
         ]
     )
 
+Then, to apply these transformations to the images within your 'train', 'validate' and 'test' sets, pass your ``data_transforms`` to MapReader's ``patchTorchDataset`` class:    
+
+.. code-block:: python
+
     train_dataset = patchTorchDataset(annotated_images.train, data_transforms)
     val_dataset = patchTorchDataset(annotated_images.val, data_transforms)
     test_dataset = patchTorchDataset(annotated_images.test, data_transforms)
 
-This produces three transformed datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``.patchframe`` attribute:
+This creates three transformed datasets (``train_dataset``, ``val_dataset`` and ``test_dataset``), ready for use, which can be viewed as dataframes using the ``.patchframe`` attribute:
 
 .. code-block:: python
 
     your_dataset.patchframe
 
-Define a sampler
-~~~~~~~~~~~~~~~~~~
+e.g. :
 
-To account for inbalanced datasets, you may also want to define a sampler with weights inversely proportional to the number of instances of each label within a set. 
-This ensures, when training and validating your model, each batch is ~ representative of the whole set.
-To do this, use: 
+.. code-block:: python
+
+    #EXAMPLE
+    train_dataset.patchframe
+
+Define samplers and generate batches
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. TODO: Explain batches
+
+To account for inbalanced datasets (i.e. those which contain different numbers of each label), you should define samplers with weights inversely proportional to the number of instances of each label. 
+This ensures, when training/fine-tuning your classifier, each batch is ~ representative of the whole dataset.
+
+Before defining samplers, you must first find the numbers of instances of each label in each of your datasets. 
+This can be done using: 
 
 .. code-block:: python
 
@@ -158,6 +190,10 @@ To do this, use:
 
     train_count_list = train_dataset.patchframe["label"].value_counts().to_list()
     val_count_list = val_dataset.patchframe["label"].value_counts().to_list()
+
+You can then use the reciprocals of these numbers as weights for your samplers:
+
+.. code-block:: python
 
     weights = np.reciprocal(torch.Tensor(train_count_list))
     weights = weights.double()
@@ -170,10 +206,16 @@ To do this, use:
         weights[val_dataset.patchframe["label"].to_list()], num_samples=sum(val_count_list)
     )
 
-Create batches (Add to DataLoader)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MapReader's ``classifier()`` class is used to:
 
-First, to create a ``classifier()`` object, ``my_classifier``, into which you can load your datasets and set up your model, run:
+- Generate batches from your datasets (create DataLoader).
+- Define models (initialise a pre-existing model or create your own).
+- Define a loss functions, optimisers and schedulers.
+- Train and test models.
+- Predict classes (model inference).
+- Visualise datasets and predictions.
+
+A ``classifier()`` object can be initialised using:
 
 .. code-block:: python
 
@@ -181,30 +223,34 @@ First, to create a ``classifier()`` object, ``my_classifier``, into which you ca
 
     my_classifier = classifier()
 
-To prepare your data for training, `PyTorch <https://pytorch.org/>`_ uses a ``DataLoader`` to create shuffled batches of data from each set. 
-To load datasetsto your ``classifier()`` object, use: 
+To load your datasets into your ``classifier()`` object and create batches from them, use: 
 
 .. code-block:: python
 
     my_classifier.add2dataloader(your_dataset)
 
-By default, your batch sizes will be set to 16 and no sampler will be used when creating them. 
+By default, this will create batch sizes of 16 and no sampler will be used when creating them. 
 This can be changed by specifying ``batch_size`` and ``sampler``.
 
 e.g. :
 
 .. code-block:: python
 
+    #EXAMPLE
     batch_size = 8
 
     my_classifier.add2dataloader(
-        train_dataset, batch_size=batch_size, sampler=train_sampler, shuffle=False
+        train_dataset, 
+        batch_size=batch_size, 
+        sampler=train_sampler, 
+        shuffle=False
     )
 
-You should also name your sets using the ``set_name`` argument:
+You may also want to specify the ``set_name`` argument, which gives each of your datasets a name:
 
 .. code-block:: python
 
+    #EXAMPLE
     batch_size = 8
 
     my_classifier.add2dataloader(
@@ -225,7 +271,7 @@ You should also name your sets using the ``set_name`` argument:
         test_dataset, set_name="test", batch_size=batch_size, shuffle=False
     )
 
-Then, to see information about your datasets use:
+After setting up your datasets, to see information about them, use:
 
 .. code-block:: python
 
@@ -247,7 +293,7 @@ and
     my_classifier.print_classes_dl(set_name="val")
     my_classifier.print_classes_dl(set_name="test")
 
-These return information about the batches and labels (classes) within each dataset, respectively. 
+These return information about the batches and labels within each dataset, respectively. 
 
 .. note:: This only works if you have specified ``set_name`` when adding your datasets to the dataloader.
 

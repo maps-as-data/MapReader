@@ -20,7 +20,7 @@ First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:
 
 .. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
 .. code-block:: python
 
@@ -51,7 +51,7 @@ Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataf
 
 .. note:: Specific guidance on preparing your metadata files can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
 .. code-block:: python
 

@@ -140,7 +140,7 @@ Once you have annotated your images, you should save your annotations using:
 
 This saves your annotations as a ``csv`` file in the ``annot_dir`` specified in your annotation tasks file.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage, or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ and saved your patches using the default settings:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
 
 ::
 
