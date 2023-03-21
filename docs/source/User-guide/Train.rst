@@ -76,14 +76,17 @@ You can also view specific images from their indices using:
 
 
 You may also notice that, when viewing a sample of your annotations, you have mislabelled one of your images.
-The ``.review_labels()`` method provides an easy way to fix this:
+The ``.review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
 
 .. code-block:: python
 
     annotated_images.review_labels()
 
-This should return an interactive tool for adjusting your annotations.
-To exit, type "EXIT" into the text box.
+.. image:: ../figures/review_labels.png
+    :width: 400px
+
+
+.. note:: To exit, type "exit" into the text box.
 
 Split annotations
 ~~~~~~~~~~~~~~~~~~
@@ -240,7 +243,7 @@ You can then use the reciprocals of these as weights for your samplers:
         num_samples=sum(val_count_list)
     )
 
-To create batches from your datasets using your samplers, pass the ``sampler`` argument to the ``add2dataloader()`` method:
+To create batches from your datasets using your samplers, pass the ``sampler`` argument to the ``add2dataloader()`` method.
 
 e.g. :
 
@@ -548,6 +551,10 @@ e.g. :
 
     #EXAMPLE
     my_classifier.inference_sample_results(set_name="test")
+
+.. image:: ../figures/inference_sample_results.png
+    :width: 400px
+
 
 By default, this will show you 6 samples of your first class (label). 
 The ``num_samples`` and ``class_index`` arguments can be specified to change this.
