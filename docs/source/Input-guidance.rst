@@ -1,71 +1,123 @@
 Input guidance
 ===============
 
+Input options
+--------------
 
-.. contents:: Table of contents
+The MapReader pipeline is explained in detail `here <https://mapreader.readthedocs.io/en/latest/About.html>`__.
+The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
+Option 1 - If you want to download maps from a TileServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Why use MapReader?
--------------------
+If you want to download maps from a TileServer using MapReaders ``Download`` subpackage, you will need to begin with the 'Download' task. 
+For this, you will need:
 
-**Do you want to search the visual contents of a large set of maps to answer a question about the past?**
-MapReader can help you find instances of spatial phenomena in a collection of maps that is too large for you to ‘close read/view’.
+* A ``json`` file containing metadata for each map you would like to query/download. 
+* The base URL of the map layer which you would like to access.
 
-MapReader enables quick, flexible research with large map corpora. It is based on the patchwork method, e.g. scanned map sheets are preprocessed to divide up the content of the map into a grid of squares, or "patches". 
+.. TODO: RW - Unsure if the below is true so will need to check. Leaving for now.
 
-Using image classificaion at the level of each patch allows users to define classes (labels) of features on maps related to their research questions.
+The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. 
+This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
 
-MapReader creates output that you can link and analyze in relation to other geospatial datasets (e.g. census, gazetteers, toponyms in text corpora).
-
-You might be interested in using MapReader if...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* you have access to a large corpus of georeferenced maps (For non-georeferenced maps, MapReader can still provide results. Please see below.)
-* you want to quickly test different labels to help refine a research question that depends on finding content on maps before/without committing to manual vector data creation
-* your maps were created before surveying accuracy reached modern standards, and therefore you do not want to create overly precise geolocated data based on the content of those maps 
-
-MapReader is well-suited for finding spatial phenomena that...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* have a homogeneous visual signal across many maps in the same style
-* may not correspond to typical categories of map features that are traditionally digitized as vector data in a GIS
-* you then want to combime with other geospatial datasets 
+You may have different kinds of metadata from different sources for your map files (e.g. descriptive or bibliographic metadata from a collection record, or technical metadata about georeferencing). 
+We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
 
 
-Preparing your map corpus
----------------------------
+.. comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
 
-How many maps?
-~~~~~~~~~~~~~~~~
+Option 2 - If your files are already saved locally
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MapReader was designed to help researchers work with large collections of series maps. Deciding to use MapReader, which uses deep learning computer vision models to predict the class of content on patches across many sheets, means weighing the pros and cons of working with the data output that is inferred by the model. Inferred data can be evaluated against expert-annotated data to understand its general quality (are all instances of a feature of interest identified by the model? does the model apply the correct label to that feature?), but in the full dataset there *will necessarily be* some percentage of error. 
+If you already have your maps saved locally, you can skip the 'Download' task and move straight to 'Load'.
 
-So, MapReader is useful when the number of maps you wish to analyze exceeds the number which you (or a team) might be willing and able to annotate manually, using tools like ArcGIS, QGIS, or web-based annotation interfaces like Recogito. This number will vary depending on the size of your maps, the features you want to find, the skills you and your team have, and the amount of time at your disposal. 
+If you would like to work with georeferenced maps, you will need either:
 
-Image file format, quality, and size
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Your map images saved as standard, non-georeferenced, image files (e.g. JPEG, PNG or TIFF) along with a separate file containing georeferencing metadata you wish to associate to these map images **OR**
+* You map images saved as georeferenced image files (e.g. geoTIFF).
 
-MapReader accepts different formats of digitized maps as input:
-a. jpeg or png files with associated files containing georeferencing metadata for each sheet
-b. geoTIFFs containing georeferencing metadata
-c. layers from tileservers
-d. non-georeferenced map scans (e.g. jpegs, png, tiff with no metadata to locate the sheet on the earth)
+Alternatively, if you would like to work with non-georeferenced maps/images, you will need:
 
-Image file directory structure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Your images saved as standard image files (e.g. JPEG, PNG or TIFF).
 
-*Work in progress*
+Recommended directory structure
+--------------------------------
+
+If you are using non-georeferenced image files (e.g. PNG files) plus a separate metadata file, we reccomend setting these up in the following directory structure:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+        ├── map1.png
+        ├── map2.png
+        ├── map3.png
+        ├── ...
+        └── metadata.csv
+    
+This is the directory structure created by default when downloading maps using MapReader's ``Download`` subpackage.
+
+Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), your will not need a metadata file, and so your files can be set up as follows: 
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps        
+        ├── map1.tif
+        ├── map2.tif
+        ├── map3.tif
+        └── ...
+
+
+.. note:: Your map images should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
 
 .. comment: TODO - Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
 
-Your maps should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
-
-
 Preparing your metadata
-~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
-*Work in progress*
+MapReader uses the file names of your map images as unique identifiers (``image_id``s).
+Therefore, if you would like to associate metadata to your map images, then, **at minimum**, your metadata must contain a column/header named ``image_id`` whose contents is the file names of your map images.
 
-The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
+To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `pandas readable file format <https://pandas.pydata.org/>`_.
 
-You may have different kinds of metadata from different sources for your map files (e.g. descriptive or bibliographic metadata from a collection record, or technical metadata about georeferencing). We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
 
-.. comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
+Option 1 - Using a ``csv`` file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The simplest option is to save your metadata as a ``csv`` file (this can be created from an excel spreadsheet using ``File > Save As...``) and load it directly into MapReader.
+
+If you are loading metadata from a ``csv`` file, your file should be structures as follows:
+
+
++-----------+--------------------------+---------------------+-----------+
+| image_id  | col1 (e.g. coords)       | col2 (e.g. region)  | col3      |
++===========+==========================+=====================+===========+
+| map1.png  | (-4.8, -4.2, 55.8, 56.4) | Glasgow             | ...       |
++-----------+--------------------------+---------------------+-----------+
+| map2.png  | (-2.2, -1.6, 53.2, 53.8) | Manchester          | ...       |
++-----------+--------------------------+---------------------+-----------+
+| map3.png  | (-3.6, -3.0, 50.1, 50.8) | Dorset              | ...       |
++-----------+--------------------------+---------------------+-----------+
+| ...       | ...                      | ...                 | ...       |
++-----------+--------------------------+---------------------+-----------+
+
+Your file can contain as many columns/rows as you like, so long as it contains the ``image_id`` column.
+
+.. note:: If the contents of your file contains commas, you should choose a different delimiter when saving your ``csv`` file. We reccomend using the pipe: ``|``.
+
+Option 2 - Loading metadata from other file formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As `Pandas is able to read a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_, you may still be able to use your metadata even if it is saved in a different file format.
+
+To do this, you will need to use python to:
+
+1. Read your file using one of pandas ``read_xxx`` methods and create a dataframe from it.
+2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
+3. Pass your dataframe to MapReader.
+
+Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not reccomended.

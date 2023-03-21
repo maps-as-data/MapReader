@@ -1,0 +1,26 @@
+# ---------------------------------------
+# Define an annotation task
+# This includes: 
+# 1. a name for your task (e.g., building_simple or rail_space, see below)
+# 2. a list of labels to be used for this task
+# ---------------------------------------
+
+tasks:
+  rail_space:
+    labels: ["no_rail_space", "rail_space"]
+    
+# ---------------------------------------
+# paths 
+# You need to specify:
+# 1. a name for your annotation set (e.g., set_001, see below)
+# 2. patch_paths: path to all the patches to be annotated 
+# 3. parent_paths: path to the original/parent maps/images
+# 4. annot_dir: directory in which the outputs will be stored
+# ---------------------------------------
+
+paths:
+  set_001:
+    patch_paths: "./maps/patches/*png"
+    parent_paths: "./maps/*png"
+    annot_dir: "./annotations"
+
