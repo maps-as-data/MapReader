@@ -4,7 +4,7 @@ setuptools.setup(
     name="mapreader",
     version="0.3.4",
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
-    author=u"kasra-hosseini",
+    author=u"MapReader team",
     #author_email="",
     license="MIT License",
     keywords=["Computer Vision", "Classification", "Deep Learning", "living with machines"],
