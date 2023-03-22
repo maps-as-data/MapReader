@@ -1,58 +1,131 @@
 Installation instructions
 =========================
 
-Set up a conda environment
----------------------------
+.. note:: Run these commands from your terminal
 
-We recommend installation via Anaconda (refer to `Anaconda website and follow the instructions <https://docs.anaconda.com/anaconda/install/>`__).
+Step 1: Set up a virtual python environment
+----------------------------------------------
 
--  Create a new environment for ``mapreader`` called ``mr_py38``:
+MapReader requires python version 3.7+. 
 
-.. code :: bash
+Method 1: Using conda (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   conda create -n mr_py38 python=3.8
+We recommend installing MapReader using either Anaconda (`installation instructions here <https://docs.anaconda.com/anaconda/install/>`__) or miniconda (`installation instructions here <https://docs.conda.io/en/latest/miniconda.html>`__.
+A discussion of which of these to choose can be found `here <https://docs.conda.io/projects/conda/en/stable/user-guide/install/download.html>`__.
 
--  Activate the environment:
+Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual python environment:
 
-.. code :: bash
+-  Create a new conda environment for ``mapreader`` (you can call this what you like, we use ``mr_pyXX`` where ``XX`` is your python version):
 
-   conda activate mr_py38
+   .. code-block:: bash
 
-Install via pip
-------------------
+      conda create -n mr_py38 python=3.8
+
+   This will create a conda enviroment which uses python version 3.8. 
+
+-  Activate your conda environment:
+
+   .. code-block:: bash
+
+      conda activate mr_py38
+
+Method 2: Using venv or other
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like not to use conda, you are more than welcome to set up a virtual python environment using other methods.
+
+For example, if you would like to use venv, open your terminal and use the following commands to set up your virtual python environment:
+
+-  First, importantly, check which version of python your system is using:
+
+   .. code-block:: bash
+
+      python3 --version
+
+   If this returns a version below 3.7, you will need download an updated python version. 
+   You can do this by donwloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
+
+   You should then run the above command again to check your python version has updated.
+
+-  Create a new virtual python environment for ``mapreader`` (you can call this what you like, we recommend ``mr_pyXX`` where ``XX`` is your python version):
+
+   .. code-block:: bash
+      
+      python3 -m venv mr_py38
+
+-  Activate your virtual environment:
+
+      source mr_py38/bin/activate
+
+Step 2: Install MapReader
+--------------------------
+
+Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Install ``mapreader``:
 
-.. code :: bash
+   .. code-block:: bash
 
-   pip install mapreader 
+      pip install mapreader 
 
-To allow the newly created ``mr_py38`` environment to show up in the notebooks:
+Method 2: Install from source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code :: bash
+-  Clone the ``mapreader`` source code from the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_:
 
-   python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+   .. code-block:: bash
 
+      git clone https://github.com/Living-with-machines/MapReader.git 
 
-Install from source
-----------------------
+-  Install ``mapreader``:
 
--  Clone ``mapreader`` source code:
+   .. code-block:: bash
 
-.. code :: bash
+      cd MapReader
+      pip install -v -e .
 
-   git clone https://github.com/Living-with-machines/MapReader.git 
+Step 3 (Optional): Add virtual python environment to notebooks
+----------------------------------------------------------------
 
--  Install:
+- To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
-.. code :: bash
+   .. code-block:: bash
+   
+      python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 
-   cd /path/to/MapReader
-   pip install -v -e .
+.. note:: if you have used a different name for your python virtual environment replace the ``mr_py38`` with whatever name you have used.
 
-To allow the newly created ``mr_py38`` environment to show up in the
-   notebooks:
+Troubleshooting
+----------------
 
-.. code :: bash
+M1 mac
+~~~~~~~
 
-   python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+If you are using an M1 mac and are having issues installing MapReader due to an error when installing numpy or scikit-image:
+
+-  Try separately installing the problem packages (edit as needed) and then installing MapReader:
+   
+   .. code-block:: bash
+
+      pip install numpy==1.21.5
+      pip install scikit-image==0.18.3
+      pip install mapreader
+
+-  Try using conda to install the problem packages (edit as needed) and then pip to install MapReader:
+
+   .. code-block:: bash
+
+      conda install numpy==1.21.5
+      conda install scikit-image==0.18.3
+      pip install mapreader
+
+-  Alternatively, you can try using a different version of openBLAS when installing:
+
+   .. code-block:: bash
+
+      brew install openblas
+      OPENBLAS="$(brew --prefix openblas)" pip install mapreader
+
+We are also working on making MapReader a conda package so you should soon be able to conda install MapReader. 

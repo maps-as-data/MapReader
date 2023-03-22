@@ -34,7 +34,7 @@ Functions
    Create header and footer for different types of geometries
 
    Args:
-       geom (str): geometry type, e.g., polygone
+       geom (str): geometry type, e.g., polygon
 
 
 .. py:class:: input_class(name)

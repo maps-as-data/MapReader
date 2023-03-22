@@ -25,7 +25,7 @@ Functions
 
 
 
-.. py:class:: TileServer(metadata_path, geometry='polygone', download_url='https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png')
+.. py:class:: TileServer(metadata_path, geometry='polygon', download_url='https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png')
 
    .. py:method:: create_info()
 

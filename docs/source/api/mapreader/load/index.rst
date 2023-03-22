@@ -201,7 +201,7 @@ Functions
           value {bool, const, random, ...} -- Values to be plotted on the parent image (default: {False})
 
 
-   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='jet', alpha=1.0, discrete_colorbar=256, tree_level='patch', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
+   .. py:method:: show(image_ids, value=False, plot_parent=True, border=True, border_color='r', vmin=0.5, vmax=2.5, colorbar='viridis', alpha=1.0, discrete_colorbar=256, tree_level='patch', grid_plot=(20000, 20000), plot_histogram=True, save_kml_dir=False, image_width_resolution=None, kml_dpi_image=None, **kwds)
 
       Plot a list of image ids,
 
@@ -215,7 +215,7 @@ Functions
           border_color {str} -- color of patch borders (default: {r})
           vmin {float or list} -- min. value for the colorbar (default: {0.5})
           vmax {float or list} -- max. value for the colorbar (default: {2.5})
-          colorbar {str or list} -- colorbar to visualize "value" on maps (default: {jet})
+          colorbar {str or list} -- colorbar to visualize "value" on maps (default: {viridis})
           alpha {float or list} -- set transparency level for plotting "value" on maps (default: {1.})
           discrete_colorbar {int or list} -- number of discrete colors to be used (default: {256})
           tree_level {str} -- Tree level for the plot XXX (default: {"patch"})

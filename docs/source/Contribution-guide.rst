@@ -1,7 +1,7 @@
-Contributing to MapReader
-==========================
+Contribution guide
+===================
 
-Welcome! We are pleased to know that you’re interested in contributing to MapReader!
+Welcome! We are pleased to know that you're interested in contributing to MapReader!
 
 We welcome all contributions to this project via GitHub issues and pull requests. 
 Please follow these guidelines to make sure your contributions can be easily integrated into the project. 
@@ -46,13 +46,14 @@ Get in touch
 
 There are many ways to get in touch with the MapReader team:
 
-- Github issues and pull requests (find our Github handles `here <https://github.com/Living-with-machines/MapReader/blob/main/ways_of_working.md>`_).
+- Github issues and pull requests (find our Github handles `here <https://github.com/Living-with-machines/MapReader/blob/main/ways_of_working.md>`__).
 - Contact Katie McDonough by via email (k.mcdonough@lancaster.ac.uk).
 
 Contributing through GitHub
 -----------------------------
 
-`Git <https://git-scm.com/>`_ is a really useful tool for version control. GitHub sits on top of Git and supports collaborative and distributed working.
+`Git <https://git-scm.com/>`_ is a really useful tool for version control. 
+GitHub sits on top of Git and supports collaborative and distributed working.
 
 We know that it can be daunting to start using Git and GitHub if you haven't worked with them in the past, but MapReader maintainers are here to help you figure out any of the jargon or confusing instructions you encounter! 
 
@@ -64,10 +65,11 @@ Before you open a new issue, please check if any of our open issues cover your i
 If you do need to open a new issue, please follow our basic guidelines laid out in our issue templates. 
 There are two issue templates to choose from:
 
-- **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`_): This template should be used to report bugs in the MapReader code and for reporting errors like typos and broken links (e.g. within the documentation).
-- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`_): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code and suggesting updates to documentation/tutorials/etc. 
+- **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`__): This template should be used to report bugs in the MapReader code.
+- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`__): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code.
+- **Documentation update** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/documentation_update.md>`__): This template should be used for reporting errors, like typos and broken links, and suggesting updates to documentation/tutorials/etc. 
 
-If you feel your issue does not fit either of these templates, please open a blank issue and provide as much information as possible to help the MapReader team work resolve the issue.
+If you feel your issue does not fit any of these templates, please open a blank issue and provide as much information as possible to help the MapReader team work resolve the issue.
 
 Making your own changes with a pull request
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,7 +85,7 @@ To do this:
 4. Submit a pull request.
 
 Please ensure your pull request contains as much information as possible and links to the issue(s) you are resolving. 
-Our pull request template (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`_) should automatically help you with this.
+Our pull request template (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`__) should help you with this.
 
 Once created, your pull request will be reviewed by a member of the MapReader team and, once approved, your changes will be merged into the MapReader repository.
 To make this review process as easy as possible, please try to work on only one issue/problem per pull request.
@@ -96,26 +98,46 @@ MapReader code
 MapReader's code is written in `Python <https://www.python.org/>`_ and distributed using `PyPI <https://pypi.org/>`_. 
 There are a number of ways in which you can contribute to our code, these include:
 
-- Suggesting code changes.
 - Reviewing part of the code.
-- Creating a new feature request.
-- Reporting a bug and (if possible) suggesting solutions.
+- Adding new features.
+- Fixing bugs.
+- Adding clarity to docstrings.
 
 MapReader documentation 
 -------------------------
 
 MapReader's documentation is generated using `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and hosted on `Read the docs <https://readthedocs.org/>`_. 
 There are a number of ways you can contribute to our documentation, these include:
+.
+- Updating or adding clarity to existing documentation.
+- Fixing errors in existing documentation (e.g. typos or code inconsistencies).
+- Creating new worked examples which showcasing MapReader use cases.
 
-- Suggesting and drafting a tutorial that orients new users to make the most of specific features.
-- Updating or modularising existing tutorials so they better serve a specific community of users needs.
-- Showcasing examples of MapReader use cases.
+Requirements
+~~~~~~~~~~~~~
+
+If you would like to edit or add to the MapReader documentation, you will need to install the packages detailed in ``MapReader/docs/requirements.txt``.
+
+To do this (assuming you have installed MapReader as per the installation instructions), use:
+
+.. code-block:: bash 
+
+    conda activate mr_py38
+    pip install -r MapReader/docs/requirements.txt
+
+At present, these are:
+
+- sphinx_rtd_theme
+- myst-parser
+- sphinx-autoapi
+- sphinx-copybutton
+- nbsphinx
 
 Writing in reStructuredText
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-reStructuredText (rst) is the default plaintext markup language used by `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and is the language used throughout our documentation.
-If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`_ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`_) available online, so have a google.
+reStructuredText (rst) is the default plaintext markup language used by `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and is the primary language used throughout our documentation.
+If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`__ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__) available online, so have a google.
 
 To help make your rst files easier to read and review, please start each new sentence on a new line. 
 This will make no difference to how the text is displayed, but will make it much easier to read when reviewing changes in a pull request.
