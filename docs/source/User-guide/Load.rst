@@ -78,7 +78,7 @@ To patchify your maps, use:
 
     my_files.patchifyAll()
 
-By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
+By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./patches``. 
 If you are following our reccommended directory structure, after patchifying, your directory should look like this:
 
 ::
@@ -91,7 +91,7 @@ If you are following our reccommended directory structure, after patchifying, yo
     │   ├── map3.png
     │   ├── ...
     │   └── metadata.csv
-    └──tests
+    └──patches
         ├── patch-0-100-#map1.png#.png
         ├── patch-100-200-#map1.png#.png
         ├── patch-200-300-#map1.png#.png

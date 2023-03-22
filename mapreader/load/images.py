@@ -410,10 +410,10 @@ class mapImages:
         self,
         method="pixel",
         patch_size=100,
-        path_save="test",
+        path_save="patches",
         square_cuts=False,
         resize_factor=False,
-        output_format="PNG",
+        output_format="png",
         rewrite=False,
         verbose=False,
         tree_level="parent",
@@ -426,10 +426,10 @@ class mapImages:
         Keyword Arguments:
             method {str} -- method to slice an image (default: {"pixel"})
             patch_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the patches (default: {"test"})
+            path_save {str} -- Directory to save the patches (default: {"patches"})
             square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
             resize_factor {bool} -- Resize image before slicing (default: {False})
-            output_format {str} -- Output format (default: {"PNG"})
+            output_format {str} -- Output format (default: {"png"})
             tree_level {str} -- image group to be sliced (default: {"parent"})
             verbose {bool} -- Print the progress (default: {False})
         """
@@ -477,7 +477,7 @@ class mapImages:
         image_path=False,
         method="pixel",
         patch_size=100,
-        path_save="test",
+        path_save="patches",
         square_cuts=False,
         resize_factor=False,
         output_format="PNG",
@@ -492,10 +492,10 @@ class mapImages:
             image_path {str} -- Path to the image to be sliced (default: {False})
             method {str} -- method to slice an image (default: {"pixel"})
             patch_size {int} -- Number of pixels in both x and y directions (default: {100})
-            path_save {str} -- Directory to save the patches (default: {"test"})
+            path_save {str} -- Directory to save the patches (default: {"patches"})
             square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
             resize_factor {bool} -- Resize image before slicing (default: {False})
-            output_format {str} -- Output format (default: {"PNG"})
+            output_format {str} -- Output format (default: {"png"})
             verbose {bool} -- Print the progress (default: {True})
             image_id {str} -- image ID
             tree_level {str} -- image group to be sliced (default: {"parent"})

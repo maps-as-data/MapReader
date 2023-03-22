@@ -58,7 +58,7 @@ For example, if you want to annotate 'rail_space' (as in our `this paper <https:
 
 	paths:
 	  set_001:
-		patch_paths: "./tests/patch-*png"
+		patch_paths: "./patches/patch-*png"
 		parent_paths: "./maps/*png"
 		annot_dir: "./annotations_one_inch"
 		
@@ -152,7 +152,7 @@ For example, if you have downloaded your maps using the default settings of our 
     │   ├── map3.png
     │   ├── ...
     │   └── metadata.csv
-    └──tests
+    └──patches
     │   ├── patch-0-100-#map1.png#.png
     │   ├── patch-100-200-#map1.png#.png
     │   ├── patch-200-300-#map1.png#.png

@@ -28,7 +28,7 @@ For example, if you have downloaded your maps using the default settings of our 
 
     #EXAMPLE
     annotated_images = loadAnnotations()
-    annotated_images.load("./annotations_one_inch/rail_space_#rosie#.csv", path2dir="./tests/patch-*png")
+    annotated_images.load("./annotations_one_inch/rail_space_#rosie#.csv", path2dir="./patches/patch-*png")
 
 To view the data loaded in from your ``csv`` as a dataframe, use:
 
