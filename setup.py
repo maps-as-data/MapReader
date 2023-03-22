@@ -16,7 +16,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
     include_package_data = True,
     platforms="OS Independent",
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
@@ -42,7 +42,6 @@ setuptools.setup(
         "rasterio>=1.2.10,<2.0.0",
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
-        "Sphinx==6.1.3",
     ],
     
     classifiers=[
