@@ -34,8 +34,7 @@ To see the contents of this object, use:
 
     print(my_files)
 
-You will see that your images are labelled as either ``parents`` or ``children``.
-This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.
+You will see that your mapImages object contains the files you have loaded and that these are labelled as 'parents'. 
 
 If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``mapImages`` object using:
 
@@ -77,7 +76,7 @@ To patchify your maps, use:
 
 .. code-block:: python
 
-    my_files.sliceAll()
+    my_files.patchifyAll()
 
 By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
 If you are following our reccommended directory structure, after patchifying, your directory should look like this:
@@ -105,7 +104,7 @@ This save directory can be changed by specifying ``path_save``:
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(path_save="./maps/patches")
+    my_files.patchifyAll(path_save="./maps/patches")
 
 This will create the following directory structure:
 
@@ -126,14 +125,14 @@ This will create the following directory structure:
              └── ...
 
 
-If you would like to change the size of your patches, you can specify ``slice_size``.
+If you would like to change the size of your patches, you can specify ``patch_size``.
 
 e.g. to slice your maps into 500 x 500 pixel patches:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(slice_size=500)
+    my_files.patchifyAll(patch_size=500)
 
 Or, if you have loaded geographic coordinates into your ``mapImages`` object, you can specify ``method = "meters"`` to slice your images by meters instead of pixels.
 
@@ -142,18 +141,18 @@ e.g. to slice your maps into 50 x 50 meter patches:
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(method="meters", slice_size=50)
+    my_files.patchifyAll(method="meters", patch_size=50)
 
-After patchifying, you'll see that ``print(my_files)`` shows you have both parents and patches.
+After patchifying, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
 To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
 
 .. code-block:: python
 
     parent_list = my_files.list_parents()
-    child_list = my_files.list_children()
+    patch_list = my_files.list_patches()
 
     print(parent_list)
-    print(child_list[0:5])  # too many to print them all!
+    print(patch_list[0:5])  # too many to print them all!
 
 Or, to view these in a dataframe, use:
 
@@ -188,7 +187,7 @@ To see a random sample of your patches use the ``tree_level="patch"`` argument:
     :width: 400px
 
 
-It can also be helpful to see your patches (child images) in the context of their parent image. 
+It can also be helpful to see your patches in the context of their parent image. 
 To do this use the ``.show()`` method. 
 
 e.g. :
@@ -196,7 +195,7 @@ e.g. :
 .. code-block:: python
 
     #EXAMPLE
-    my_files.show(child_list[250:300])
+    my_files.show(patch_list[250:300])
 
 .. image:: ../figures/show.png
     :width: 400px
@@ -207,7 +206,7 @@ or
 .. code-block:: python
 
     #EXAMPLE
-    files_to_show = [child_list[0], child_list[350], child_list[400]]
+    files_to_show = [patch_list[0], patch_list[350], patch_list[400]]
     my_files.show(files_to_show)
 
 .. image:: ../figures/show_list.png
