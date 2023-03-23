@@ -31,7 +31,7 @@ class mapImages:
     """mapImages class"""
 
     def __init__(
-        self, path_images=False, tree_level="parent", parent_path=None, **kwds
+        self, path_images=False, file_ext=False, tree_level="parent", parent_path=None, **kwds
     ):
         """Instantiate mapImages class,
 
@@ -39,8 +39,23 @@ class mapImages:
             path_images {str or None} -- Path to image(s), accepts wildcard (default: {False})
         """
         if path_images:
-            # List with all paths
-            self.path_images = glob(os.path.abspath(path_images))
+            #If passing a directory, look for files with extension == `file_ext`
+            if os.path.isdir(path_images):
+                if file_ext:
+                    self.path_images = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
+                else:
+                    raise ValueError("[ERROR] Directory detected - please specificy file extension (`file_ext`) if passing path to direcotry or, pass path to files (wildcards accepted).")  
+            
+            else:
+                files = glob(os.path.abspath(path_images))
+                
+                #For instances of e.g. `path/to/dir/*`, check all file extensions are the same and, if not, filter for files with extension == `file_ext`
+                if not all(file.split(".")[-1] for file in files):
+                    if file_ext:
+                        self.path_images=[file for file in files if file.split(".")[-1]==file_ext]
+                    else:
+                        raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`file_ext`) or, pass path to specific files (wildcards accepted)")
+        
         else:
             self.path_images = []
 
