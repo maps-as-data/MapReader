@@ -46,7 +46,7 @@ class TileServer:
         self.download_url = download_url
 
         if isinstance(metadata_path, str) and os.path.isfile(metadata_path):
-            # Read a metada file
+            # Read a metadata file
             json_fio = open(metadata_path, "r")
             json_f = json_fio.readlines()[0]
             # change metadata to a dictionary:
@@ -257,7 +257,7 @@ class TileServer:
             failed_urls_path (str, optional): File that contains info about failed download attempts. Defaults to "failed_urls.txt".
             tile_tmp_dir (str, optional): Save tmp files in this directory. Defaults to "tiles".
             output_maps_dirname (str, optional): Path to save downloaded maps. Defaults to "maps".
-            output_metadata_filename (str, optional): Path to save metada for downloaded maps. Defaults to "metadata.csv".
+            output_metadata_filename (str, optional): Path to save metadata for downloaded maps. Defaults to "metadata.csv".
                                                       this file will be saved at output_maps_dirname/output_metadata_filename
             pixel_closest (int): adjust the number of pixels in both directions (width and height) after downloading a map
                                  for example, if pixel_closest = 100, number of pixels in both directions will be multiples of 100
@@ -568,7 +568,7 @@ class TileServer:
         plt.show()
 
     def __str__(self):
-        info = f"Metada file has {self.__len__()} items."
+        info = f"Metadata file has {self.__len__()} items."
         info += f"\nDownload URL: {self.download_url}"
         info += f"\nGeometry: {self.geometry}"
         return info
