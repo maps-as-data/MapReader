@@ -1,7 +1,7 @@
-:py:mod:`mapreader.train.classifier`
+:py:mod:`mapreader.learn.classifier`
 ====================================
 
-.. py:module:: mapreader.train.classifier
+.. py:module:: mapreader.learn.classifier
 
 
 Module Contents
@@ -12,7 +12,7 @@ Classes
 
 .. autoapisummary::
 
-   mapreader.train.classifier.classifier
+   mapreader.learn.classifier.classifier
 
 
 

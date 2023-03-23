@@ -1,7 +1,7 @@
-:py:mod:`mapreader.train`
+:py:mod:`mapreader.learn`
 =========================
 
-.. py:module:: mapreader.train
+.. py:module:: mapreader.learn
 
 
 Submodules

@@ -1,7 +1,7 @@
-:py:mod:`mapreader.train.classifier_context`
+:py:mod:`mapreader.learn.classifier_context`
 ============================================
 
-.. py:module:: mapreader.train.classifier_context
+.. py:module:: mapreader.learn.classifier_context
 
 
 Module Contents
@@ -12,14 +12,14 @@ Classes
 
 .. autoapisummary::
 
-   mapreader.train.classifier_context.classifierContext
+   mapreader.learn.classifier_context.classifierContext
 
 
 
 
 .. py:class:: classifierContext(device='default')
 
-   Bases: :py:obj:`mapreader.train.classifier.classifier`
+   Bases: :py:obj:`mapreader.learn.classifier.classifier`
 
    .. py:method:: train(phases: list = ['train', 'val'], num_epochs: int = 25, save_model_dir: Union[None, str] = 'models', verbosity_level: int = 1, tensorboard_path: Union[None, str] = None, tmp_file_save_freq: int = 2, remove_after_load: bool = True, print_info_batch_freq: int = 5)
 

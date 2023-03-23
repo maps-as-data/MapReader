@@ -1,7 +1,7 @@
-:py:mod:`mapreader.train.custom_models`
+:py:mod:`mapreader.learn.custom_models`
 =======================================
 
-.. py:module:: mapreader.train.custom_models
+.. py:module:: mapreader.learn.custom_models
 
 
 Module Contents
@@ -12,7 +12,7 @@ Classes
 
 .. autoapisummary::
 
-   mapreader.train.custom_models.twoParallelModels
+   mapreader.learn.custom_models.twoParallelModels
 
 
 

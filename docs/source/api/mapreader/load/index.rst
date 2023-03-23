@@ -153,17 +153,17 @@ Functions
           calc_size_in_m (str, optional): How to compute the width/heigh, options: geodesic and great-circle (default).
 
 
-   .. py:method:: patchifyAll(method='pixel', patch_size=100, path_save='test', square_cuts=False, resize_factor=False, output_format='PNG', rewrite=False, verbose=False, tree_level='parent', add2par=True, id1=0, id2=-1)
+   .. py:method:: patchifyAll(method='pixel', patch_size=100, path_save='patches', square_cuts=False, resize_factor=False, output_format='png', rewrite=False, verbose=False, tree_level='parent', add2par=True, id1=0, id2=-1)
 
       Patchify all images in the object (the list can be accessed via .images variable)
 
       Keyword Arguments:
           method {str} -- method to slice an image (default: {"pixel"})
           patch_size {int} -- Number of pixels in both x and y directions (default: {100})
-          path_save {str} -- Directory to save the patches (default: {"test"})
+          path_save {str} -- Directory to save the patches (default: {"patches"})
           square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
           resize_factor {bool} -- Resize image before slicing (default: {False})
-          output_format {str} -- Output format (default: {"PNG"})
+          output_format {str} -- Output format (default: {"png"})
           tree_level {str} -- image group to be sliced (default: {"parent"})
           verbose {bool} -- Print the progress (default: {False})
 
@@ -299,7 +299,7 @@ Functions
 .. py:function:: load_patches(patch_paths, parent_paths=False, add_geo_par=False, clear_images=False)
 
 
-.. py:function:: patchifyByPixel(image_path, patch_size, path_save='test', square_cuts=True, resize_factor=False, output_format='PNG', rewrite=False, verbose=True)
+.. py:function:: patchifyByPixel(image_path, patch_size, path_save='patches', square_cuts=True, resize_factor=False, output_format='png', rewrite=False, verbose=True)
 
    Patchify an image by pixels
 
@@ -308,10 +308,10 @@ Functions
        patch_size {int} -- Number of pixels in both x and y directions
 
    Keyword Arguments:
-       path_save {str} -- Directory to save the patches (default: {"test"})
+       path_save {str} -- Directory to save the patches (default: {"patches"})
        square_cuts {bool} -- All patches will have the same number of pixels in x and y (default: {True})
        resize_factor {bool} -- Resize image before slicing (default: {False})
-       output_format {str} -- Output format (default: {"PNG"})
+       output_format {str} -- Output format (default: {"png"})
        verbose {bool} -- Print the progress (default: {True})
 
 

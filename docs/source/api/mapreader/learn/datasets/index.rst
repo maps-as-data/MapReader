@@ -1,7 +1,7 @@
-:py:mod:`mapreader.train.datasets`
+:py:mod:`mapreader.learn.datasets`
 ==================================
 
-.. py:module:: mapreader.train.datasets
+.. py:module:: mapreader.learn.datasets
 
 
 Module Contents
@@ -12,8 +12,8 @@ Classes
 
 .. autoapisummary::
 
-   mapreader.train.datasets.patchTorchDataset
-   mapreader.train.datasets.patchContextDataset
+   mapreader.learn.datasets.patchTorchDataset
+   mapreader.learn.datasets.patchContextDataset
 
 
 
@@ -23,7 +23,7 @@ Attributes
 
 .. autoapisummary::
 
-   mapreader.train.datasets.parhugin_installed
+   mapreader.learn.datasets.parhugin_installed
 
 
 .. py:data:: parhugin_installed

@@ -5,7 +5,7 @@ Learn and Predict
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``Train`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
+MapReader's ``Learn`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
 
 Load data
 -----------
