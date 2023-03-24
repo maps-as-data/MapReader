@@ -39,22 +39,34 @@ class mapImages:
             path_images {str or None} -- Path to image(s), accepts wildcard (default: {False})
         """
         if path_images:
-            #If passing a directory, look for files with extension == `file_ext`
             if os.path.isdir(path_images):
-                if file_ext:
-                    self.path_images = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
+                #If no file_ext passed, get all files in directory
+                if not file_ext:
+                    files = glob(os.path.abspath(f"{path_images}/*.*"))
+                    #check all files extensions are the same
+                    test_ext=files[0].split(".")[-1]
+                    if all(file.split(".")[-1] == test_ext  for file in files):
+                        self.path_images=files
+                    else:
+                        raise ValueError("[ERROR] Directory with multiple file types detected - please specificy file extension (`file_ext`) or, pass path to specific file types(wildcards accepted).")
+                
+                #If file_ext passed, get only these files
                 else:
-                    raise ValueError("[ERROR] Directory detected - please specificy file extension (`file_ext`) if passing path to direcotry or, pass path to files (wildcards accepted).")  
-            
+                    self.path_images = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
+                    
             else:
                 files = glob(os.path.abspath(path_images))
-                
-                #For instances of e.g. `path/to/dir/*`, check all file extensions are the same and, if not, filter for files with extension == `file_ext`
-                if not all(file.split(".")[-1] for file in files):
+                #check all files extensions are the same
+                test_ext=files[0].split(".")[-1]
+                if all(file.split(".")[-1] == test_ext for file in files):
+                    self.path_images=files
+                                
+                #For instances of e.g. `path/to/dir/*`, and multiple file types detected, filter for files with extension == `file_ext` if multiple file types detected    
+                else:
                     if file_ext:
                         self.path_images=[file for file in files if file.split(".")[-1]==file_ext]
                     else:
-                        raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`file_ext`) or, pass path to specific files (wildcards accepted)")
+                        raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`file_ext`) or, pass path to specific file types (wildcards accepted)")
         
         else:
             self.path_images = []
@@ -1052,6 +1064,7 @@ class mapImages:
             clear_images {bool} -- clear images variable before loading patches (default: {False})
         """
         patch_paths = glob(os.path.abspath(patch_paths))
+        
 
         if clear_images:
             self.images = {}
