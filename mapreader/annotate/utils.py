@@ -387,6 +387,8 @@ def prepare_annotation(
     min_alpha_channel: Optional[float] = None,
     min_mean_pixel: Optional[float] = None,
     max_mean_pixel: Optional[float] = None,
+    min_std_pixel: Optional[float] = None,
+    max_std_pixel: Optional[float] = None,
     context_image: Optional[bool] = False,
     xoffset: Optional[int] = 500,
     yoffset: Optional[int] = 500,
@@ -442,6 +444,14 @@ def prepare_annotation(
         The maximum mean pixel intensity value for images to be included in
         the annotation interface. Only applies to child level annotations.
         Default is ``None``.
+    min_std_pixel : float, optional
+        The minimum standard deviation of pixel intensity value for images to be included in
+        the annotation interface. Only applies to child level annotations.
+        Default is ``None``.
+    max_std_pixel : float, optional
+        The maximum standard deviation of pixel intensity value for images to be included in
+        the annotation interface. Only applies to child level annotations.
+        Default is ``None``.
     context_image : bool, optional
         If ``True``, includes a context image with each patch image in the
         annotation interface. Only applies to child level annotations. Default
@@ -473,11 +483,6 @@ def prepare_annotation(
         If a specified annotation_set is not a key in the paths dictionary
         of the YAML file with the information about the annotation metadata
         (``annotation_tasks_file``).
-
-    ValueError
-        If the ``task`` provided is not a key in the tasks dictionary of the
-        YAML file with the information about the annotation metadata
-        (``annotation_tasks_file``) and ``custom_labels`` is not provided.
     """
 
     # Specify global variables so they can be used in display_record function
@@ -539,15 +544,24 @@ def prepare_annotation(
                 tree_level=tree_level,
             )
 
-        # Calculate mean before converting to pandas so the dataframe contains
-        # information about mean pixel intensity
+        calc_mean = calc_std = False
+        # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
         if (
             sortby == "mean"
             or isinstance(min_alpha_channel, float)
             or isinstance(min_mean_pixel, float)
             or isinstance(max_mean_pixel, float)
         ):
-            mymaps.calc_pixel_stats(calc_std=False)
+            calc_mean = True
+        
+        if (
+            isinstance(min_std_pixel, float)
+            or isinstance(max_std_pixel, float)
+        ):
+            calc_std = True
+
+        if calc_mean or calc_std:
+            mymaps.calc_pixel_stats(calc_mean=calc_mean, calc_std=calc_std)
 
         # convert images to dataframe
         _, sliced_df = mymaps.convertImages()
@@ -572,6 +586,22 @@ def prepare_annotation(
                 sliced_df = sliced_df[
                     sliced_df["mean_pixel_RGB"] <= max_mean_pixel
                 ]
+
+        if isinstance(min_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] >= min_std_pixel]
+
+        if isinstance(max_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] <= max_std_pixel]
+
+        if isinstance(min_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] >= min_std_pixel]
+
+        if isinstance(max_std_pixel, float):
+            if "std_pixel_RGB" in sliced_df.columns:
+                sliced_df = sliced_df[sliced_df["std_pixel_RGB"] <= max_std_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:

@@ -4,7 +4,7 @@ setuptools.setup(
     name="mapreader",
     version="0.3.4",
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
-    author=u"kasra-hosseini",
+    author=u"MapReader team",
     #author_email="",
     license="MIT License",
     keywords=["Computer Vision", "Classification", "Deep Learning", "living with machines"],
@@ -32,6 +32,7 @@ setuptools.setup(
         "torchvision>=0.11.1,<0.12.1",
         "jupyter>=1.0.0,<2.0.0",
         "ipykernel>=6.5.1,<7.0.0",
+        "ipywidgets>=7.7.3,<8.0.0",
         "ipyannotate==0.1.0-beta.0",
         "Cython>=0.29.24,<0.30.0",
         "PyYAML>=6.0,<7.0",
@@ -41,7 +42,6 @@ setuptools.setup(
         "rasterio>=1.2.10,<2.0.0",
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
-        "Sphinx==6.1.3",
     ],
     
     classifiers=[

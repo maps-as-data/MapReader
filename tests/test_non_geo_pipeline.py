@@ -10,8 +10,8 @@ from torchvision import transforms
 from torchvision import models
 
 
-PATH2IMAGES = "./examples/non-geospatial/classification_plant_phenotype/dataset/open_access_plant/*.png"
-PATH2ANNOTS = "./examples/non-geospatial/classification_plant_phenotype/annotations_phenotype_open_access/phenotype_test_#kasra#.csv"
+PATH2IMAGES = "./worked_examples/non-geospatial/classification_plant_phenotype/dataset/open_access_plant/*.png"
+PATH2ANNOTS = "./worked_examples/non-geospatial/classification_plant_phenotype/annotations_phenotype_open_access/phenotype_test_#kasra#.csv"
 
 
 def test_slice():
