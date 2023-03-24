@@ -43,6 +43,8 @@ class mapImages:
                 #If no file_ext passed, get all files in directory
                 if not file_ext:
                     files = glob(os.path.abspath(f"{path_images}/*.*"))
+                    if len(files)==0:
+                        raise ValueError("[ERROR] No files found!")
                     #check all files extensions are the same
                     test_ext=files[0].split(".")[-1]
                     if all(file.split(".")[-1] == test_ext  for file in files):
@@ -52,10 +54,16 @@ class mapImages:
                 
                 #If file_ext passed, get only these files
                 else:
-                    self.path_images = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
+                    files = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
+                    if len(files)==0:
+                        raise ValueError("[ERROR] No files found!")
+                    else:
+                        self.path_images=files
                     
             else:
                 files = glob(os.path.abspath(path_images))
+                if len(files)==0:
+                    raise ValueError("[ERROR] No files found!")
                 #check all files extensions are the same
                 test_ext=files[0].split(".")[-1]
                 if all(file.split(".")[-1] == test_ext for file in files):
@@ -64,7 +72,11 @@ class mapImages:
                 #For instances of e.g. `path/to/dir/*`, and multiple file types detected, filter for files with extension == `file_ext` if multiple file types detected    
                 else:
                     if file_ext:
-                        self.path_images=[file for file in files if file.split(".")[-1]==file_ext]
+                        files=[file for file in files if file.split(".")[-1]==file_ext]
+                        if len(files)==0:
+                            raise ValueError("[ERROR] No files found!")
+                        else:
+                            self.path_images=files
                     else:
                         raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`file_ext`) or, pass path to specific file types (wildcards accepted)")
         
@@ -1052,7 +1064,7 @@ class mapImages:
                 return 100
 
     def loadPatches(
-        self, patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
+        self, patch_paths, patch_file_ext=False, parent_paths=False, parent_file_ext=False, add_geo_par=False, clear_images=False
     ):
         """load patches from files (patch_paths) and add parents if parent_paths is provided
 
@@ -1063,22 +1075,48 @@ class mapImages:
         Keyword Arguments:
             clear_images {bool} -- clear images variable before loading patches (default: {False})
         """
-        patch_paths = glob(os.path.abspath(patch_paths))
-        
+        if os.path.isdir(patch_paths):
+            if not patch_file_ext:
+                files = glob(os.path.abspath(f"{patch_paths}/*.*"))
+                if len(files)==0:
+                    raise ValueError("[ERROR] No files found!")    
+                
+                test_ext=files[0].split(".")[-1]
+                if not all(file.split(".")[-1] == test_ext for file in files):
+                    raise ValueError("[ERROR] Directory with multiple file types detected - please specificy file extension (`patch_file_ext`) or, pass path to specific file types(wildcards accepted).")
+                
+            else:
+                files = glob(os.path.abspath(f"{patch_paths}/*.{patch_file_ext}"))
+                if len(files)==0:
+                    raise ValueError("[ERROR] No files found!")
+
+        else:
+            files = glob(os.path.abspath(patch_paths))
+            if len(files)==0:
+                raise ValueError("[ERROR] No files found!")
+
+            test_ext=files[0].split(".")[-1]
+            if not all(file.split(".")[-1] == test_ext for file in files):
+                if patch_file_ext:
+                    files=[file for file in files if file.split(".")[-1]==patch_file_ext]
+                    if len(files)==0:
+                        raise ValueError("[ERROR] No files found!")
+                else:
+                    raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)")
 
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
             self.images["child"] = {}
 
-        for tpath in patch_paths:
+        for file in files:
 
-            if not os.path.isfile(tpath):
-                print(f"[WARNING] file does not exist: {tpath}")
+            if not os.path.isfile(file):
+                print(f"[WARNING] File does not exist: {file}")
                 continue
 
             # patch ID is set to the basename
-            patch_id = os.path.basename(tpath)
+            patch_id = os.path.basename(file)
 
             # Parent ID and border can be detected using patch_id
             parent_id = self.detectParIDfromPath(patch_id)
@@ -1088,7 +1126,7 @@ class mapImages:
             if not self.images["child"].get(patch_id, False):
                 self.images["child"][patch_id] = {}
             self.images["child"][patch_id]["parent_id"] = parent_id
-            self.images["child"][patch_id]["image_path"] = tpath
+            self.images["child"][patch_id]["image_path"] = file
             self.images["child"][patch_id]["min_x"] = min_x
             self.images["child"][patch_id]["min_y"] = min_y
             self.images["child"][patch_id]["max_x"] = max_x
@@ -1097,7 +1135,7 @@ class mapImages:
         if parent_paths:
             # Add parents
             self.loadParents(
-                parent_paths=parent_paths, update=False, add_geo=add_geo_par
+                parent_paths=parent_paths, parent_file_ext=parent_file_ext, update=False, add_geo=add_geo_par
             )
             # Add children to the parent
             self.addChildren()
@@ -1126,7 +1164,7 @@ class mapImages:
         )
 
     def loadParents(
-        self, parent_paths=False, parent_ids=False, update=False, add_geo=False
+        self, parent_paths=False, parent_file_ext=False, parent_ids=False, update=False, add_geo=False
     ):
         """load parent images from files (parent_paths)
            if only parent_ids is specified, self.images["parent"] will be filled with no image_path.
@@ -1139,21 +1177,50 @@ class mapImages:
         """
 
         if parent_paths:
-            if not isinstance(parent_paths, list):
-                parent_paths = glob(os.path.abspath(parent_paths))
+            if os.path.isdir(parent_paths):
+                if not parent_file_ext:
+                    files = glob(os.path.abspath(f"{parent_paths}/*.*"))    
+                    if len(files)==0:
+                        raise ValueError("[ERROR] No files found!")
+                    
+                    test_ext=files[0].split(".")[-1]
+                    if not all(file.split(".")[-1] == test_ext  for file in files):
+                        raise ValueError("[ERROR] Directory with multiple file types detected - please specificy file extension (`parent_file_ext`) or, pass path to specific file types(wildcards accepted).")
+                
+                else:
+                    files = glob(os.path.abspath(f"{parent_paths}/*.{parent_file_ext}"))
+                    if len(files)==0:
+                        raise ValueError("[ERROR] No files found!")
+
+            else:
+                files = glob(os.path.abspath(parent_paths))
+                if len(files)==0:
+                    raise ValueError("[ERROR] No files found!")
+                
+                test_ext=files[0].split(".")[-1]
+                if not all(file.split(".")[-1] == test_ext for file in files):
+                    if parent_file_ext:
+                        files=[file for file in files if file.split(".")[-1]==parent_file_ext]
+                        if len(files)==0:
+                            raise ValueError("[ERROR] No files found!")
+                    else:
+                        raise ValueError("[ERROR] Multiple file types detected - please specify file extension (`parent_file_ext`) or, pass path to specific file types (wildcards accepted)")
+
             if update:
                 self.images["parent"] = {}
 
-            for ppath in parent_paths:
-                parent_id = os.path.basename(ppath)
+            for file in files:
+                parent_id = os.path.basename(file)
                 self.images["parent"][parent_id] = {"parent_id": None}
-                if os.path.isfile(ppath):
+                if os.path.isfile(file):
                     self.images["parent"][parent_id]["image_path"] = os.path.abspath(
-                        ppath
+                        file
                     )
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
-                if add_geo and ("tiff" in ppath):
+                
+                #note: update for 76_geo branch
+                if add_geo and ("tiff" in file):
                     (
                         lon_min,
                         lon_max,
@@ -1161,7 +1228,7 @@ class mapImages:
                         lat_max,
                         tiff_shape,
                         size_in_m,
-                    ) = utils.extractGeoInfo(ppath, calc_size_in_m="great-circle")
+                    ) = utils.extractGeoInfo(file, calc_size_in_m="great-circle")
                     self.images["parent"][parent_id]["coord"] = (
                         lon_min,
                         lon_max,
