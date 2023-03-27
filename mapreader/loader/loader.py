@@ -20,18 +20,19 @@ def loader(path_images=False, tree_level="parent", parent_path=None, **kwds):
 
 
 def load_patches(
-    patch_paths, parent_paths=False, add_geo_par=False, clear_images=False
+    patch_paths, patch_file_ext=False, parent_paths=False, parent_file_ext=False, add_geo_par=False, clear_images=False
 ):
 
     img = mapImages()
     img.loadPatches(
         patch_paths=patch_paths,
+        patch_file_ext=patch_file_ext,
         parent_paths=parent_paths,
+        parent_file_ext=parent_file_ext,
         add_geo_par=add_geo_par,
         clear_images=clear_images,
     )
     return img
-
 
 ### def read_patches(patch_paths, parent_paths, metadata=None,
 ###                metadata_fmt="dataframe", metadata_cols2add=[], metadata_index_column="image_id",
