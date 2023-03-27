@@ -11,7 +11,7 @@ Submodules
    :maxdepth: 1
 
    compute_and_save_stats/index.rst
+   geo_utils/index.rst
    slice_parallel/index.rst
-   utils/index.rst
 
 

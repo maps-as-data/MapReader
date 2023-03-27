@@ -1,5 +1,3 @@
-import pytest
-
 from mapreader import classifier
 from mapreader import loadAnnotations
 from mapreader import patchTorchDataset
@@ -42,13 +40,12 @@ def test_slice():
     # if parent_id="XXX", only compute pixel stats for that parent
     myimgs.calc_pixel_stats()
 
-    imgs_pd, patches_pd = myimgs.convertImages(fmt="dataframe")
+    imgs_pd, patches_pd = myimgs.convertImages()
 
     assert len(imgs_pd) == len(all_imgs), "Expected same number of images"
 
 
 def test_load_annotation():
-
     annotated_images = loadAnnotations()
 
     annotated_images.load(PATH2ANNOTS, path2dir="./dataset/eg_slice_50_50")
@@ -70,7 +67,6 @@ def test_load_annotation():
 
 
 def test_classifier():
-
     annotated_images = test_load_annotation()
     # # Classifier
     # ## Dataset

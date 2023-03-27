@@ -10,7 +10,7 @@ from parhugin import multiFunc
 
 def save_stats(one_dir):
     mymaps = read_patches(
-        os.path.join(one_dir, "slice_50_50", "*PNG"),
+        os.path.join(one_dir, "slice_50_50", "*png"),
         parent_paths=os.path.join(one_dir, "*png"),
     )
 
