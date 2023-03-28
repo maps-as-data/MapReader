@@ -11,8 +11,12 @@ def test_import():
         loader,
         mapImages,
         patchTorchDataset,
-        # read,
-        # read_patches,
     )
     import mapreader.download.azure_access as azure_access
     from mapreader.annotate.utils import prepare_annotation, save_annotation
+
+    # These imports are the various geo packages that previously where a separate subpackage
+    import geopy
+    import rasterio
+    import keplergl
+    import simplekml
