@@ -44,7 +44,7 @@ def get_config():
     cfg = VersioneerConfig()
     cfg.VCS = "git"
     cfg.style = "pep440"
-    cfg.tag_prefix = ""
+    cfg.tag_prefix = "v"
     cfg.parentdir_prefix = "mapreader-"
     cfg.versionfile_source = "mapreader/_version.py"
     cfg.verbose = False
