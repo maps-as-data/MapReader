@@ -8,6 +8,7 @@ import os
 from mapreader import read
 from parhugin import multiFunc
 
+
 # Serial version fo the Func to be run in parallel
 def slice_serial(
     path2images_dir,

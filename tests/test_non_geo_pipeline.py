@@ -1,5 +1,3 @@
-import pytest
-
 from mapreader import classifier
 from mapreader import loadAnnotations
 from mapreader import patchTorchDataset
@@ -12,8 +10,8 @@ from torchvision import transforms
 from torchvision import models
 
 
-PATH2IMAGES = "./examples/non-geospatial/classification_plant_phenotype/dataset/open_access_plant/*.png"
-PATH2ANNOTS = "./examples/non-geospatial/classification_plant_phenotype/annotations_phenotype_open_access/phenotype_test_#kasra#.csv"
+PATH2IMAGES = "./worked_examples/non-geospatial/classification_plant_phenotype/dataset/open_access_plant/*.png"
+PATH2ANNOTS = "./worked_examples/non-geospatial/classification_plant_phenotype/annotations_phenotype_open_access/phenotype_test_#kasra#.csv"
 
 
 def test_slice():
@@ -42,13 +40,12 @@ def test_slice():
     # if parent_id="XXX", only compute pixel stats for that parent
     myimgs.calc_pixel_stats()
 
-    imgs_pd, patches_pd = myimgs.convertImages(fmt="dataframe")
+    imgs_pd, patches_pd = myimgs.convertImages()
 
     assert len(imgs_pd) == len(all_imgs), "Expected same number of images"
 
 
 def test_load_annotation():
-
     annotated_images = loadAnnotations()
 
     annotated_images.load(PATH2ANNOTS, path2dir="./dataset/eg_slice_50_50")
@@ -70,7 +67,6 @@ def test_load_annotation():
 
 
 def test_classifier():
-
     annotated_images = test_load_annotation()
     # # Classifier
     # ## Dataset

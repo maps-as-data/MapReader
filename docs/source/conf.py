@@ -17,12 +17,13 @@ release = '0.3.3'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.autosectionlabel',
     'sphinx.ext.doctest',
     'sphinx_rtd_theme',
     'myst_parser',
     'autoapi.extension',
-    'sphinx_disqus.disqus',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'nbsphinx',
 ]
 
 templates_path = ['_templates']
@@ -32,10 +33,6 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
-
-# -- sphinx disqus config ----
-
-disqus_shortname = "mapreader"
 
 # -- autoapi configuration -----
 

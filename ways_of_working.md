@@ -1,4 +1,4 @@
-# Project Members
+# MapReader Project Members
 
 This document provides details about the project members and contributors working (or having previously worked) on _MapReader_ in a paid capacity, organisational agreement, in-kind contributions or grant proposal-based collaboration.
 It further outlines expectations and responsibilities with regard to working on the project.
@@ -7,9 +7,11 @@ It further outlines expectations and responsibilities with regard to working on 
 
 | Name | Affiliation | Community Role | Start date | Previous roles |
 |---|---|---|---|---|
-| Katherine McDonough<br>([@kmcdono2](https://github.com/kmcdono2)) | The Alan Turing Institute xxx| xxx | xx - Present | xx|
+| Katherine McDonough<br>([@kmcdono2](https://github.com/kmcdono2)) | The Alan Turing Institute & Lancaster University| ? | 2019 - Present | xx|
+| Daniel Wilson<br>([@dcsw2](https://github.com/dcsw2)) | The Alan Turing Institute | Historian/Researcher | 2019 - Present | xx|
 | Add others here | - | - | Earliest to latest start date order? | - |
-| Rosie Wood<br>([@rwood-97](https://github.com/rwood-97)) | The Alan Turing Institute | xx | Jan 2023 - Present | - |
+| Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | The Alan Turing Institute | Research Data Scientist | Jan 2022 - Present | - 
+| Rosie Wood<br>([@rwood-97](https://github.com/rwood-97)) | The Alan Turing Institute | Research Data Scientist | Jan 2023 - Present | - |
 
 ## Previous Project Members
 
@@ -18,7 +20,7 @@ You can request contact information through the project members above, or tag th
 
 | Name | Affiliation | Community Role | Dates |
 |---|---|---|---|
-| Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Formerly The Alan Turing Institute | 2019 - 2022 | Research Data Scientist |
+| Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Formerly The Alan Turing Institute | Research Data Scientist | 2019 - 2022 |
 
 ## Commitments
 
