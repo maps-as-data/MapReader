@@ -7,3 +7,4 @@ __pycache__
 mapreader.egg-info
 conda_debug/
 docs/build/
+docs/source/api/mapreader/

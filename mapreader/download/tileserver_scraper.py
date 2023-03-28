@@ -149,16 +149,17 @@ async def runner(opts: input_class) -> List[str]:
     opts : input_class
         The options for downloading the tiles, of the ``input_class`` type
         that contains the following attributes:
-            - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON
-              format).
-            - ``zoom`` (int): The zoom level.
-            - ``url`` (str): The URL string (formatted with ``"{x}"``,
-              ``"{y}"`` and ``"{z}"``)
-            - ``out_dir`` (str): The output file directory for resulting files.
-            - ``retries`` (int): The number of retries to attempt to download
-              the image.
-            - ``max_connections`` (int): The number of maximum connections to
-              pass onto Semaphore.
+        
+        - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON
+            format).
+        - ``zoom`` (int): The zoom level.
+        - ``url`` (str): The URL string (formatted with ``"{x}"``,
+            ``"{y}"`` and ``"{z}"``)
+        - ``out_dir`` (str): The output file directory for resulting files.
+        - ``retries`` (int): The number of retries to attempt to download
+            the image.
+        - ``max_connections`` (int): The number of maximum connections to
+            pass onto Semaphore.
 
     Returns
     -------

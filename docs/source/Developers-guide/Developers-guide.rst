@@ -40,6 +40,6 @@ The minimal build process is as follows:
   conda index /path/to/local/conda/channel
   conda-build ./conda/parhugin/conda --output-folder /path/to/local/conda/channel
   conda-build ./conda/ipyannotate/conda --output-folder /path/to/local/conda/channel
-  conda-build -c file:///path/to/local/conda/channel ./conda
+  conda-build -c file:///path/to/local/conda/channel -conda-forge ./conda
 
 
