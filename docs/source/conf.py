@@ -9,7 +9,9 @@
 project = 'MapReader'
 copyright = '2023, RW'
 author = 'RW'
-release = '0.3.3'
+
+import mapreader
+release = mapreader.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
