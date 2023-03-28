@@ -1,6 +1,9 @@
 Download
 =========
 
+.. TODO: Add comment saying navigate in your terminal to your working directory and then open a notebook from there. Shift right click on a folder in windows to copy path name.
+.. TODO: Add instruction to create a new notebook.
+
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.

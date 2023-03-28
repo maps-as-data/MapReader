@@ -1,6 +1,8 @@
 Contribution guide
 ===================
 
+.. TODO: Split into different contribution groups (worked exmaples, docs vs code)
+
 Welcome! We are pleased to know that you're interested in contributing to MapReader!
 
 We welcome all contributions to this project via GitHub issues and pull requests. 

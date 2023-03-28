@@ -227,8 +227,10 @@ This can be done using:
     :width: 400px
 
 
-Further analysis/visualisation  
---------------------------------
+.. TODO: Move 'Further analysis/visualisation' to a different page (e.g. as an appendix)
+
+Further analysis/visualisation (optional) 
+-------------------------------------------
 
 If you have loaded geographic coordinates into your ``mapImages`` object, you may want to calculate the coordinates of your patches. The ``.add_center_coord()`` method can used to do this:
 

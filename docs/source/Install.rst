@@ -1,7 +1,9 @@
 Installation instructions
 =========================
 
-.. note:: Run these commands from your terminal
+.. note:: Run these commands from your terminal.
+
+.. TODO: Add comments about how to get to conda in Windows
 
 Step 1: Set up a virtual python environment
 ----------------------------------------------
@@ -11,7 +13,7 @@ MapReader requires python version 3.7+.
 Method 1: Using conda (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We recommend installing MapReader using either Anaconda (`installation instructions here <https://docs.anaconda.com/anaconda/install/>`__) or miniconda (`installation instructions here <https://docs.conda.io/en/latest/miniconda.html>`__.
+We recommend installing MapReader using either Anaconda (`installation instructions here <https://docs.anaconda.com/anaconda/install/>`__) or miniconda (`installation instructions here <https://docs.conda.io/en/latest/miniconda.html>`__).
 A discussion of which of these to choose can be found `here <https://docs.conda.io/projects/conda/en/stable/user-guide/install/download.html>`__.
 
 Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual python environment:
@@ -73,6 +75,8 @@ Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. TODO: You will need to install git on windows (can be done via conda - but need to look for alternatives)
+
 -  Clone the ``mapreader`` source code from the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_:
 
    .. code-block:: bash
@@ -86,8 +90,8 @@ Method 2: Install from source
       cd MapReader
       pip install -v -e .
 
-Step 3 (Optional): Add virtual python environment to notebooks
-----------------------------------------------------------------
+Step 3: Add virtual python environment to notebooks
+------------------------------------------------------
 
 - To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
@@ -95,7 +99,7 @@ Step 3 (Optional): Add virtual python environment to notebooks
    
       python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 
-.. note:: if you have used a different name for your python virtual environment replace the ``mr_py38`` with whatever name you have used.
+.. note:: if you have used a differe nt name for your python virtual environment replace the ``mr_py38`` with whatever name you have used.
 
 Troubleshooting
 ----------------
