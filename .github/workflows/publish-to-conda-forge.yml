@@ -39,11 +39,15 @@ jobs:
       - name: Install conda-build tools
         run: |
           conda create -n mr_py38 python=3.8
-          conda activate mr_py38
-          conda install conda-build
-          conda install conda-verify
-          conda install anaconda-client
-          conda install conda-package-handling
+          # conda activate mr_py38
+          # conda install conda-build
+          # conda install conda-verify
+          # conda install anaconda-client
+          # conda install conda-package-handling
+
+          # Explicitly name the conda environment has `activate` does not work reliably in GitHub Actions
+          conda install -n mr_py38 conda-build conda-verify anaconda-client conda-package-handling
+
 
       - name: Create local Conda channel
         run: |
