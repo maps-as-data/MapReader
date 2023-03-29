@@ -42,7 +42,7 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
     my_files.addGeoInfo()
 
-Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
+Or, if you have a separate metadata file (e.g. a ``.csv`` file), use: 
 
 .. code-block:: python
 

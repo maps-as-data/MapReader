@@ -41,7 +41,7 @@ Functions
        `MapReader/worked_examples/persistent_data <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples/persistent_data>`_.
    geometry : str, optional
        The type of geometry that defines the boundaries in the map. Defaults
-       to ``"polygone"``.
+       to ``"polygon"``.
    download_url : str, optional
        The base URL pattern used to download tiles from the server. This
        should contain placeholders for the x coordinate (``x``), the y

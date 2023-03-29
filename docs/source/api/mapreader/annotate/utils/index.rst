@@ -152,41 +152,39 @@ Functions
        If ``True``, allows the user to redo annotations on previously
        annotated images. Default is ``False``.
    patch_paths : str or bool, optional
-       The path to the directory containing image patches for child level
-       annotations, if ``custom_labels`` are provided. Default is ``False``
-       and the information is read from the yaml file.
+       The path to the directory containing patches, if ``custom_labels`` are provided. Default is ``False`` and the information is read from the yaml file.
    parent_paths : str, optional
        The path to parent images, if ``custom_labels`` are provided. Default
        is ``False`` and the information is read from the yaml file.
    tree_level : str, optional
-       The level of annotation to be used, either ``"child"`` or ``"parent"``.
-       Default is ``"child"``.
+       The level of annotation to be used, either ``"patch"`` or ``"parent"``.
+       Default is ``"patch"``.
    sortby : str, optional
        If ``"mean"``, sort images by mean pixel intensity. Default is
        ``None``.
    min_alpha_channel : float, optional
        The minimum alpha channel value for images to be included in the
-       annotation interface. Only applies to child level annotations.
+       annotation interface. Only applies to patch level annotations.
        Default is ``None``.
    min_mean_pixel : float, optional
        The minimum mean pixel intensity value for images to be included in
-       the annotation interface. Only applies to child level annotations.
+       the annotation interface. Only applies to patch level annotations.
        Default is ``None``.
    max_mean_pixel : float, optional
        The maximum mean pixel intensity value for images to be included in
-       the annotation interface. Only applies to child level annotations.
+       the annotation interface. Only applies to patch level annotations.
        Default is ``None``.
    min_std_pixel : float, optional
        The minimum standard deviation of pixel intensity value for images to be included in
-       the annotation interface. Only applies to child level annotations.
+       the annotation interface. Only applies to patch level annotations.
        Default is ``None``.
    max_std_pixel : float, optional
        The maximum standard deviation of pixel intensity value for images to be included in
-       the annotation interface. Only applies to child level annotations.
+       the annotation interface. Only applies to patch level annotations.
        Default is ``None``.
    context_image : bool, optional
        If ``True``, includes a context image with each patch image in the
-       annotation interface. Only applies to child level annotations. Default
+       annotation interface. Only applies to patch level annotations. Default
        is ``False``.
    xoffset : int, optional
        The x-offset in pixels to be used for displaying context images in the
