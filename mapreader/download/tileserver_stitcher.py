@@ -3,7 +3,7 @@
 
 """
 Stitcher for tileserver
-=======================
+
 The main code for the stitcher was sourced from a repository located at
 https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under
 the MIT license. The adapted functions were then used to run the scraper via
@@ -28,10 +28,10 @@ def runner(opts: input_class) -> None:
     opts : input_class
         The options for the runner, of the ``input_class`` type that contains
         the following attributes:
-            - ``dir`` (str): The directory containing the input images.
-            - ``out_file`` (str): The output file path for the stitched image.
-            - ``pixel_closest`` (int, optional): The closest pixel value to
-              round the image size to.
+        
+        - ``dir`` (str): The directory containing the input images.
+        - ``out_file`` (str): The output file path for the stitched image.
+        - ``pixel_closest`` (int, optional): The closest pixel value to round the image size to.
 
     Raises
     ------
@@ -39,7 +39,7 @@ def runner(opts: input_class) -> None:
         If no input files are found in the specified directory.
 
     Returns
-    ------
+    -------
     None
         The function saves the stitched image to the specified output file
         path.

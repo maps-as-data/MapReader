@@ -3,7 +3,7 @@
 
 """
 Scraper for tileserver
-=======================
+
 The main code for the scraper was sourced from a repository located at
 https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under
 the MIT license. The adapted functions were then used to run the scraper via
@@ -119,6 +119,7 @@ async def fetch_and_save(
         ``True`` if the image is fetched successfully and saved to the
         specified file path, ``False`` otherwise.
     """
+    
     wait_for = _BASE_WAIT
     for _ in range(retries):
         try:
@@ -150,16 +151,12 @@ async def runner(opts: input_class) -> List[str]:
         The options for downloading the tiles, of the ``input_class`` type
         that contains the following attributes:
         
-            - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON
-              format).
-            - ``zoom`` (int): The zoom level.
-            - ``url`` (str): The URL string (formatted with ``"{x}"``,
-              ``"{y}"`` and ``"{z}"``)
-            - ``out_dir`` (str): The output file directory for resulting files.
-            - ``retries`` (int): The number of retries to attempt to download
-              the image.
-            - ``max_connections`` (int): The number of maximum connections to
-              pass onto Semaphore.
+        - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON format).
+        - ``zoom`` (int): The zoom level.
+        - ``url`` (str): The URL string (formatted with ``"{x}"``, ``"{y}"`` and ``"{z}"``)
+        - ``out_dir`` (str): The output file directory for resulting files.
+        - ``retries`` (int): The number of retries to attempt to download the image.
+        - ``max_connections`` (int): The number of maximum connections to pass onto Semaphore.
 
     Returns
     -------
