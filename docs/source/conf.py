@@ -48,7 +48,7 @@ autoapi_options = [
 ]
 
 autoapi_keep_files = True
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autoapi_add_toctree_entry = False
 
 # -- Options for HTML output -------------------------------------------------
