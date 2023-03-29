@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import glob
 import os
 
-from mapreader import read
+from mapreader import loader
 from parhugin import multiFunc
 
 
@@ -21,7 +21,7 @@ def slice_serial(
     """
 
     path2images = os.path.join(path2images_dir, "*png")
-    mymaps = read(path2images)
+    mymaps = loader(path2images)
     path2metadata = os.path.join(path2images_dir, "metadata.csv")
     mymaps.add_metadata(metadata=path2metadata)
 
