@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Scraper for tileserver
+**Scraper for tileserver**
 
-The main code for the scraper was sourced from a repository located at
-https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under
-the MIT license. The adapted functions were then used to run the scraper via
-Python modules.
+The main code for the scraper was sourced from a repository located at https://github.com/stamen/the-ultimate-tile-stitcher, which is licensed under the MIT license. 
+The adapted functions were then used to run the scraper via Python modules.
 """
 
 from .tileserver_helpers import tile2latlon, latlon2tile, input_class
