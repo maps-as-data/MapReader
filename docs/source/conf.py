@@ -17,7 +17,6 @@ release = '0.3.3'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx.ext.autosectionlabel',
     'sphinx.ext.doctest',
     'sphinx_rtd_theme',
     'myst_parser',
