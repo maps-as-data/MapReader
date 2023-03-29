@@ -37,7 +37,7 @@ class TileServer:
         `MapReader/worked_examples/persistent_data <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples/persistent_data>`_.
     geometry : str, optional
         The type of geometry that defines the boundaries in the map. Defaults
-        to ``"polygone"``.
+        to ``"polygon"``.
     download_url : str, optional
         The base URL pattern used to download tiles from the server. This
         should contain placeholders for the x coordinate (``x``), the y
@@ -373,7 +373,7 @@ class TileServer:
 
             """
             # this method results in smaller rectangles (compared to the
-            # original polygone) particularly if the map is strongly tilted
+            # original polygon) particularly if the map is strongly tilted
             min_lon = np.sort(coord_arr[:-1, 0])[1]
             max_lon = np.sort(coord_arr[:-1, 0])[2]
             min_lat = np.sort(coord_arr[:-1, 1])[1]
