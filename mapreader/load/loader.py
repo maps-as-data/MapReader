@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from mapreader.loader.images import mapImages
+from mapreader.load.images import mapImages
 from typing import Optional, Union, Dict
 
 
@@ -38,7 +38,7 @@ def loader(
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.loader.images.mapImages` class for more detail.
+    :class:`mapreader.load.images.mapImages` class for more detail.
     """
     img = mapImages(
         path_images=path_images,
@@ -87,10 +87,10 @@ def load_patches(
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.loader.images.mapImages` class for more detail.
+    :class:`mapreader.load.images.mapImages` class for more detail.
 
     This function in particular, also calls the
-    :meth:`mapreader.loader.images.mapImages.loadPatches` method. Please see
+    :meth:`mapreader.load.images.mapImages.loadPatches` method. Please see
     the documentation for that method for more information as well.
     """
     img = mapImages()

@@ -1,7 +1,7 @@
 import pytest
 from pytest import approx
 from mapreader import loader
-from mapreader.loader.images import mapImages
+from mapreader.load.images import mapImages
 import os
 from pathlib import Path
 
@@ -20,16 +20,16 @@ def metadata_patchify(sample_dir):
     Returns
     -------
     list
-        image_ID (of parent png image), ts_map (mapImages object), parent_list (== image_ID) and child_list (list of patches).
+        image_ID (of parent png image), ts_map (mapImages object), parent_list (== image_ID) and patch_list (list of patches).
     """
     image_ID = "map_74488693.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    ts_map.sliceAll(slice_size=1000)
+    ts_map.patchifyAll(patch_size=1000)
     parent_list = ts_map.list_parents()
-    child_list = ts_map.list_children()
+    patch_list = ts_map.list_patches()
 
-    return image_ID, ts_map, parent_list, child_list
+    return image_ID, ts_map, parent_list, patch_list
 
 
 # tests
@@ -100,15 +100,15 @@ def test_addGeoInfo(sample_dir):
 
 
 # test other functions
-def test_sliceAll(sample_dir):
+def test_patchifyAll(sample_dir):
     image_ID = "map_74488693.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
-    ts_map.sliceAll(slice_size=1000)
+    ts_map.patchifyAll(patch_size=1000)
     parent_list = ts_map.list_parents()
-    child_list = ts_map.list_children()
+    patch_list = ts_map.list_patches()
     assert len(parent_list) == 1
-    assert len(child_list) == 48
-    assert os.path.isfile(f"./sliced_images/patch-0-0-1000-1000-#{image_ID}#.png")
+    assert len(patch_list) == 48
+    assert os.path.isfile(f"./patches/patch-0-0-1000-1000-#{image_ID}#.png")
 
 
 def test_shape(sample_dir):
@@ -121,10 +121,10 @@ def test_shape(sample_dir):
 
 def test_coord_functions(metadata_patchify, sample_dir):
     # test for png with added metadata
-    image_ID, ts_map, _, child_list = metadata_patchify
+    image_ID, ts_map, _, patch_list = metadata_patchify
     ts_map.add_center_coord()
     assert "dlon" in ts_map.images["parent"][image_ID].keys()
-    assert "center_lon" in ts_map.images["child"][child_list[0]].keys()
+    assert "center_lon" in ts_map.images["patch"][patch_list[0]].keys()
 
     # test for geotiff with added geoinfo
     image_ID = "101200740.27_JPEG.tif"
@@ -145,20 +145,20 @@ def test_coord_functions(metadata_patchify, sample_dir):
 
 
 def test_calc_pixel_stats(metadata_patchify, sample_dir):
-    image_ID, ts_map, _, child_list = metadata_patchify
+    image_ID, ts_map, _, patch_list = metadata_patchify
     ts_map.calc_pixel_stats()
     # png images should have alpha channel (i.e. "mean_pixel_A" should exist)
-    assert "mean_pixel_A" in ts_map.images["child"][child_list[0]].keys()
-    assert "std_pixel_A" in ts_map.images["child"][child_list[0]].keys()
+    assert "mean_pixel_A" in ts_map.images["patch"][patch_list[0]].keys()
+    assert "std_pixel_A" in ts_map.images["patch"][patch_list[0]].keys()
 
     # geotiff/tiff will not have alpha channel, so only RGB returned
     image_ID = "101200740.27_JPEG.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
-    geotiff.sliceAll(slice_size=1000)
-    child_list = geotiff.list_children()
+    geotiff.patchifyAll(patch_size=1000)
+    patch_list = geotiff.list_patches()
     geotiff.calc_pixel_stats()
-    assert "mean_pixel_RGB" in geotiff.images["child"][child_list[0]].keys()
-    assert "std_pixel_RGB" in geotiff.images["child"][child_list[0]].keys()
+    assert "mean_pixel_RGB" in geotiff.images["patch"][patch_list[0]].keys()
+    assert "std_pixel_RGB" in geotiff.images["patch"][patch_list[0]].keys()
 
 
 def test_convertImages(metadata_patchify):
