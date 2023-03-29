@@ -149,6 +149,7 @@ async def runner(opts: input_class) -> List[str]:
     opts : input_class
         The options for downloading the tiles, of the ``input_class`` type
         that contains the following attributes:
+        
             - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON
               format).
             - ``zoom`` (int): The zoom level.
