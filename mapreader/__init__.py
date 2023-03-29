@@ -15,4 +15,4 @@ from mapreader.learn import custom_models
 
 from mapreader.process import process
 
-from mapreader.utils import utils
+from mapreader.utils import geo_utils
