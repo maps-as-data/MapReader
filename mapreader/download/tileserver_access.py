@@ -410,8 +410,8 @@ class TileServer:
             None
                 Will print a result like this:
 
-                .. code-block::
-
+                .. code-block:: python
+                
                     Min/Max Lon: <min_longitude>, <max_longitude>
                     Min/Max Lat: <min_latitude>, <max_latitude>
 

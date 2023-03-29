@@ -1006,7 +1006,7 @@ class mapImages:
 
         Returns
         -------
-            None
+        None
 
         Notes
         -----
@@ -1766,6 +1766,7 @@ class mapImages:
         ----------
         image_id : int or str
             ID of image
+
         ..
             border_delimiter : str, optional
                 Delimiter used to separate border values when naming child
