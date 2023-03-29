@@ -361,9 +361,9 @@ class classifier:
 
         Note that the first argument of an optimizer is parameters to optimize,
         e.g. ``params2optimize = model_ft.parameters()``:
-            - ``model_ft.parameters()``: all parameters are being optimized
-            - ``model_ft.fc.parameters()``: only parameters of final layer are
-              being optimized
+
+        - ``model_ft.parameters()``: all parameters are being optimized
+        - ``model_ft.fc.parameters()``: only parameters of final layer are being optimized
 
         Here, we use:
 
