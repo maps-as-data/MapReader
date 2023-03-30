@@ -55,7 +55,7 @@ def load_patches(
     parent_paths: Optional[Union[str, bool]] = False,
     parent_file_ext: Optional[Union[str, bool]] = False,
     add_geo_par: Optional[bool] = False,
-    clear_images: Optional[bool] = False,,
+    clear_images: Optional[bool] = False,
 ) -> mapImages:
     """
     Creates a ``mapImages`` class to manage a collection of image paths and
