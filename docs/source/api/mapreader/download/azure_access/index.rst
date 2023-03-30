@@ -20,56 +20,113 @@ Functions
 
 
 
-Attributes
-~~~~~~~~~~
+.. py:function:: initBlobServiceClient(env_variable = 'AZURE_STORAGE_CONNECTION_STRING')
 
-.. autoapisummary::
+   Initialize a BlobServiceClient object from the Azure Storage connection
+   string.
 
-   mapreader.download.azure_access.LINK_SETUP_AZURE
+   Parameters
+   ----------
+   env_variable : str, optional
+       The name of the environment variable that contains the Azure Storage
+       connection string. Default is ``"AZURE_STORAGE_CONNECTION_STRING"``.
 
+   Returns
+   -------
+   blob_service_client : azure.storage.blob.BlobServiceClient
+       An instance of the ``BlobServiceClient`` class.
 
-.. py:data:: LINK_SETUP_AZURE
-   :value: 'https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#configure-yo...'
+   Raises
+   ------
+   ValueError
+       If the environment variable ``AZURE_STORAGE_CONNECTION_STRING`` is not
+       found or empty.
 
-   
-
-.. py:function:: initBlobServiceClient(env_variable='AZURE_STORAGE_CONNECTION_STRING')
-
-   Instantiate BlobServiceClient
-
-   Note: $AZURE_STORAGE_CONNECTION_STRING needs to be set.
+   Notes
+   ------
+   The environment variable ``AZURE_STORAGE_CONNECTION_STRING`` needs to be
+   set before running this function.
 
 
 .. py:function:: initContainerClient(blob_client, container)
 
-   Instantiate a container client
+   Initialize a ``ContainerClient`` object for a specified container and list
+   all blobs in that container.
 
-   Arguments:
-       blob_client -- Blob Storage Client initialized by initBlobServiceClient function
-       container {str} -- Container to access/download from.
+   Parameters
+   ----------
+   blob_client : azure.storage.blob.BlobClient
+       An instance of the ``BlobClient`` class.
+   container : str
+       The name of the container.
+
+   Returns
+   -------
+   container_client : azure.storage.blob.ContainerClient
+       An instance of the ``ContainerClient`` class for the specified
+       container.
+   list_containers : list
+       A list of ``azure.storage.blob.BlobProperties`` objects representing
+       the blobs in the container.
 
 
-.. py:function:: downloadClient(container_client, list_containers, download_dir, include_dirnames=None, nls_names=None, max_download=None, index1=0, index2=None, force_download=False)
+.. py:function:: downloadClient(container_client, list_containers, download_dir, include_dirnames = None, nls_names = None, max_download = None, index1 = 0, index2 = None, force_download = False)
 
-   Download client using a client container
+   Download blobs from a container and save them in a local directory.
 
-   Arguments:
-       container_client -- Container client initialized by initContainerClient function
-       list_containers {list} -- list of all blobs in the container, also initialized by initContainerClient function
-       download_dir {path} -- path to save downloaded files
+   Parameters
+   ----------
+   container_client : azure.storage.blob.ContainerClient
+       An instance of the ``ContainerClient`` class for the specified
+       container, initialised by ``initContainerClient`` function.
+   list_containers : list
+       A list of ``azure.storage.blob.BlobProperties`` objects representing
+       the blobs in the container, also initialised by ``initContainerClient``
+       function.
+   download_dir : str
+       The directory to which downloaded files will be saved.
+   include_dirnames : str or list of str, optional
+       A list of directory names to include in the download. Default is
+       ``None`` (all directories are included). The dirnames can be printed
+       by the :func:`mapreader.download.azure_access.dirnamesBlobs` function.
+   nls_names : str or list of str, optional
+       A list of file names (without extensions) from the
+       https://maps.nls.uk/geo/ website to include in the download. Default
+       is ``None`` (all files are included).
+   max_download : int, optional
+       The maximum number of files to download. Default is ``None`` (download
+       all files).
+   index1 : int, optional
+       The index of the first file to download. Default is ``0``.
+   index2 : int, optional
+       The index of the last file to download. Default is ``None`` (download
+       until the end of the list).
+   force_download : bool, optional
+       If ``True``, force download even if the file already exists in the
+       download directory. Default is ``False``.
 
-   Keyword Arguments:
-       include_dirnames {list, None} -- only include this list of dirnames. The dirnames can be printed by the dirnamesBlobs function.
-                                        if None, all directories will be considered.
-       nls_names {list, None} -- list of NLS names from https://maps.nls.uk/geo/ website
-       max_download {int, None} -- Max. number of files to be downloaded
-       index1 {int} -- first index to be used to download blobs with indices [index1, index2) (default: {0})
-       index2 {init, None} -- similar to index1 except for the max. bound. If None, download [index1:len(list_containers)) (default: {None})
-       force_download {bool} -- re-download all files as specified by index1 and index2 (default: {False})
+   Returns
+   -------
+   None
 
 
 .. py:function:: dirnamesBlobs(list_containers)
 
-   Print all dirnames in list_containers
+   Given a list of blob containers, return a list of unique directory names
+   containing the blobs.
+
+   Parameters
+   ----------
+   list_containers : list
+       A list of blob containers.
+
+   Returns
+   -------
+   all_dirs : list
+       A list of unique directory names containing the blobs.
+
+   ..
+       TODO: The documentation here needs to have a different type for the
+       List[Any] above. What would it be?
 
 

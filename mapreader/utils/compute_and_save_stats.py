@@ -4,13 +4,13 @@
 from glob import glob
 import os
 
-from mapreader import read_patches
+from mapreader import load_patches
 from parhugin import multiFunc
 
 
 def save_stats(one_dir):
-    mymaps = read_patches(
-        os.path.join(one_dir, "slice_50_50", "*PNG"),
+    mymaps = load_patches(
+        os.path.join(one_dir, "slice_50_50", "*png"),
         parent_paths=os.path.join(one_dir, "*png"),
     )
 
