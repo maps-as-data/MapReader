@@ -6,3 +6,4 @@ __pycache__
 .vscode
 mapreader.egg-info
 docs/build/
+docs/source/api/mapreader/

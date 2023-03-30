@@ -22,14 +22,13 @@
 
 ## What is MapReader?
 
-<!--- picture here? --->
-<p align="center">
-  <figure>
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/river_banner_8bit.png"
+<div align="center">
+    <figure>
+    <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/river_banner_8bit.png"
         alt="Annotated Map with Prediction Outputs"
         width="70%">
-  </figure>
-</p>
+    </figure>
+</div>
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
@@ -46,13 +45,13 @@ The MapReader pipeline consists of two main components:
 1. preprocessing/annotation 
 2. training/inference
 
-<p align="center">
+<div align="center">
   <figure>
   <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/MapReader_pipeline.png"
         alt="MapReader pipeline"
         width="70%">
   </figure>
-</p>
+</div>
 
 
 ### What is included?
