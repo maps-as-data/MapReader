@@ -66,7 +66,7 @@ class mapImages:
         file_ext: Optional[Union[str, bool]] = False,
         tree_level: Optional[str] = "parent",
         parent_path: Optional[str] = None,
-        **kwds,: Dict,
+        **kwds: Dict,
     ):
         """Initializes the mapImages class."""
 
