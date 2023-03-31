@@ -305,7 +305,12 @@ class mapImages:
                     "[ERROR] ``metadata`` should either be the path to a csv file or a pandas DataFrame."  # noqa
                     )
 
-        #identify image_id column        
+        #identify image_id column
+        #what to do if "name" or "image_id" are index col?
+        if index_col in ["name", "image_id"]:
+            metadata_df[index_col]=metadata_df.index
+            columns=list(metadata_df.columns)
+        
         if "name" in columns:
             image_id_col = "name"
             if "image_id" in columns:

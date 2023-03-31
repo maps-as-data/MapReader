@@ -2,15 +2,14 @@ from mapreader import loader
 import pytest
 import os
 import pandas as pd
+import shutil
 
 @pytest.fixture
 def dir_name():
     return "metadata_test_dir"
 
 #if there is extra info in the metadata
-def test_extra_metadata(dir_name):
-    if os.path.exists(dir_name):
-        os.rmdir(dir_name)    
+def test_extra_metadata(dir_name):  
     os.mkdir(dir_name)
     files = ["file1.png", "file2.png"]
     for file in files:
