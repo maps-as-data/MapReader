@@ -1,0 +1,44 @@
+{% set name = "parhugin" %}
+{% set version = "0.0.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  # url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/parhugin-{{ version }}.tar.gz
+  # sha256: edf0e987ceb65826f2ce11b11d9e4aac1a128e6ce2efea48d428ac4202720fcd
+  git_url: https://github.com/kasra-hosseini/parhugin.git
+  # git_rev: 4792203af8c32443ab35771e12782eeaf0cb70b9
+  folder: ./parhugin
+  # path: ../parhugin
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install ./parhugin -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - parhugin
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/kasra-hosseini/parhugin
+  summary: Parallelize Python codes
+  license: MIT
+  license_file: ./parhugin/LICENSE
+
+extra:
+  recipe-maintainers:
+    - termie
