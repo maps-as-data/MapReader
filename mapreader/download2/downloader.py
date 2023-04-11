@@ -58,6 +58,6 @@ Please pass polygon as shapely.geometry.Polygon object.\n\
         end_idx= get_index_from_coordinate(end, zoom_level)
         grid_bb = GridBoundingBox(start_idx, end_idx)
         
-        self._initialise_downloader(download_url)
+        self._initialise_downloader()
         self._initialise_merger(path_save)
         self._download_map(grid_bb)
