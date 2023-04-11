@@ -1,5 +1,6 @@
-class Coordinate:
+# Code taken from https://github.com/baurls/TileStitcher.
 
+class Coordinate:
     def __init__(self, lat: float, lon: float):
         """
         Coordinate object.
@@ -35,8 +36,8 @@ class GridIndex:
             Zoom level
         """
         assert z >= 0
-        assert 0 <= x < 2 ** z
-        assert 0 <= y < 2 ** z
+        assert 0 <= x < 2**z
+        assert 0 <= y < 2**z
         self.x = x
         self.y = y
         self.z = z
@@ -69,7 +70,9 @@ class GridBoundingBox:
 
     @property
     def covered_cells(self):
-        return (self.upper_corner.x - self.lower_corner.x + 1) * (self.upper_corner.y - self.lower_corner.y + 1)
+        return (self.upper_corner.x - self.lower_corner.x + 1) * (
+            self.upper_corner.y - self.lower_corner.y + 1
+        )
 
     @property
     def x_range(self):

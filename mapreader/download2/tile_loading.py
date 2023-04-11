@@ -1,3 +1,5 @@
+# Code adapted from https://github.com/baurls/TileStitcher.
+
 import logging
 import os
 import urllib.request
@@ -12,19 +14,21 @@ from .data_structures import GridIndex, GridBoundingBox
 
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 
+
 class TileDownloader:
-    def __init__(self, 
-                 tile_servers: list = None, 
-                 img_format: Union[str, None] = None, 
-                 show_progress: bool =True
-                 ):
+    def __init__(
+        self,
+        tile_servers: list = None,
+        img_format: Union[str, None] = None,
+        show_progress: bool = True,
+    ):
         """
         TileDownloader object.
 
         Parameters
         ----------
         tile_servers : list
-            Download urls for tileservers. 
+            Download urls for tileservers.
         img_format : Union[str, None], optional
             Image format used when saving tiles.
             If None, ``png`` will be used.
@@ -34,7 +38,9 @@ class TileDownloader:
         """
         self.tile_servers = tile_servers
         self.temp_folder = "_tile_cache/"
-        self.img_format = img_format if img_format is not None else DEFAULT_IMG_DOWNLOAD_FORMAT
+        self.img_format = (
+            img_format if img_format is not None else DEFAULT_IMG_DOWNLOAD_FORMAT
+        )
         self._vis_blocks = 35
         self.show_progress = show_progress
 
@@ -50,7 +56,9 @@ class TileDownloader:
         str
             Tile file name
         """
-        return "{}z={}_x={}_y={}.{}".format(self.temp_folder, index.z, index.x, index.y, self.img_format)
+        return "{}z={}_x={}_y={}.{}".format(
+            self.temp_folder, index.z, index.x, index.y, self.img_format
+        )
 
     def generate_tile_url(self, index: GridIndex, subserver_index: int):
         """Generates tile download urls from GridIndex.
@@ -66,9 +74,13 @@ class TileDownloader:
         str
             Tile download url
         """
-        return self.tile_servers[subserver_index].format(x=index.x, y=index.y, z=index.z)
+        return self.tile_servers[subserver_index].format(
+            x=index.x, y=index.y, z=index.z
+        )
 
-    def download_tiles(self, grid_bb: GridBoundingBox, download_in_parallel: bool=True):
+    def download_tiles(
+        self, grid_bb: GridBoundingBox, download_in_parallel: bool = True
+    ):
         """Downloads tiles contained within GridBoundingBox.
 
         Parameters
@@ -84,16 +96,27 @@ class TileDownloader:
         """
         os.makedirs(self.temp_folder, exist_ok=True)
         if not download_in_parallel:
-            logger.info("Downloading {} tiles sequentially to disk ..".format(grid_bb.covered_cells))
+            logger.info(
+                "Downloading {} tiles sequentially to disk ..".format(
+                    grid_bb.covered_cells
+                )
+            )
             return self._download_tiles_sequentially(grid_bb)
 
         # download in parallel
-        logger.info("Downloading {} tiles to disk (in parallel)..".format(grid_bb.covered_cells))
+        logger.info(
+            "Downloading {} tiles to disk (in parallel)..".format(grid_bb.covered_cells)
+        )
         delayed_downloads = [
             delayed(self._download_tile_in_parallel)(
-                GridIndex(x, y, grid_bb.z), i, len(self.tile_servers), grid_bb.covered_cells
+                GridIndex(x, y, grid_bb.z),
+                i,
+                len(self.tile_servers),
+                grid_bb.covered_cells,
             )
-            for i, (x, y) in enumerate((x, y) for x in grid_bb.x_range for y in grid_bb.y_range)
+            for i, (x, y) in enumerate(
+                (x, y) for x in grid_bb.x_range for y in grid_bb.y_range
+            )
         ]
 
         self._update_progressbar(0.0)
@@ -113,7 +136,9 @@ class TileDownloader:
         file_name = self.generate_tile_name(tile_cell)
         _trigger_download(url, file_name)
 
-    def _download_tile_in_parallel(self, tile_cell: GridIndex, i: int, no_server:int, total_nbr:int):
+    def _download_tile_in_parallel(
+        self, tile_cell: GridIndex, i: int, no_server: int, total_nbr: int
+    ):
         """Downloads a tile in parallel.
 
         Parameters
@@ -133,7 +158,7 @@ class TileDownloader:
         share = (i + 1) / total_nbr
         self._update_progressbar(share)
 
-    def _update_progressbar(self, share:float):
+    def _update_progressbar(self, share: float):
         """Updates progress bar.
 
         Parameters
@@ -146,7 +171,15 @@ class TileDownloader:
         visible = int(share * self._vis_blocks)
         invisible = self._vis_blocks - visible
 
-        print("\r", "{:3.0f}%".format(share * 100) + "|" + "■" * visible + "□" * invisible + "|", end="")
+        print(
+            "\r",
+            "{:3.0f}%".format(share * 100)
+            + "|"
+            + "■" * visible
+            + "□" * invisible
+            + "|",
+            end="",
+        )
 
     def _download_tiles_sequentially(self, grid_bb: GridBoundingBox):
         """Downloads tiles sequentially.
@@ -162,7 +195,7 @@ class TileDownloader:
             self._download_tile(tile_cell)
 
 
-def _trigger_download(url: str, file_path:str):
+def _trigger_download(url: str, file_path: str):
     """Triggers download of tiles.
 
     Parameters
@@ -172,15 +205,15 @@ def _trigger_download(url: str, file_path:str):
     file_path : str
         The path to where the file will be saved
     """
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    headers = {'User-Agent': user_agent}
+    user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+    headers = {"User-Agent": user_agent}
 
     try:
         request = urllib.request.Request(url, None, headers)
         response = urllib.request.urlopen(request)
         data = response.read()
 
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             f.write(data)
 
     except:
