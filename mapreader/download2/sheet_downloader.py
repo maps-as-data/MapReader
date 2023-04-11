@@ -3,10 +3,10 @@ import os
 from typing import Union
 from shapely.geometry import Polygon, Point, shape
 from shapely.ops import unary_union
-from .data_structures import Coordinate, GridBoundingBox
-from .tile_loading import TileDownloader
-from .tile_merging import TileMerger
-from .downloader_utils import get_index_from_coordinate
+from mapreader.download2.data_structures import Coordinate, GridBoundingBox
+from mapreader.download2.tile_loading import TileDownloader
+from mapreader.download2.tile_merging import TileMerger
+from mapreader.download2.downloader_utils import get_index_from_coordinate
 import re
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -29,6 +29,7 @@ class SheetDownloader:
         self.grid_bbs = False
         self.wfs_id_nos = False
         self.published_dates = False
+        self.found_queries = []
 
         assert isinstance(
             metadata_path, str
@@ -235,6 +236,110 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         exists = True if os.path.exists(out_filepath) else False
         metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
 
+    def query_map_sheets_by_wfs_ids(
+        self,
+        wfs_ids: Union[list, int],
+        append: bool = False,
+    ) -> None:
+        
+        if not self.wfs_id_nos:
+            self.extract_wfs_id_nos()
+
+        if isinstance(wfs_ids, list):
+            requested_maps = wfs_ids
+        elif isinstance(wfs_ids, int):
+            requested_maps = [wfs_ids]
+        else:
+            raise ValueError(
+                "[ERROR] Please pass ``wfs_ids`` as int or list of ints. \
+\
+If you would like to donwload all your map sheets try ``.download_all_map_sheets()`` \
+or, if you would like to download map sheets using a polygon try ``.download_map_sheets_by_polygon()``"
+            )
+        
+        if not append:
+            self.found_queries = [] #reset each time
+            
+        for feature in self.features:
+            wfs_id_no = feature["wfs_id_no"]
+            
+            if wfs_id_no in requested_maps:
+                self.found_queries.append(feature)
+        
+    def query_map_sheets_by_polygon(
+        self,
+        polygon: Polygon,
+        mode: str = "within",
+        append: bool = False
+    ) -> None:
+        
+        assert isinstance(
+            polygon, Polygon
+        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+
+        assert mode in [
+            "within",
+            "intersects",
+        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+
+        if not self.polygons:
+            self.get_polygons()
+            
+        if not append:
+            self.found_queries = [] #reset each time
+          
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+            
+            if mode == "within":
+                if map_polygon.within(polygon):
+                    self.found_queries.append(feature)
+            elif mode == "intersects":
+                if map_polygon.intersects(polygon):
+                    self.found_queries.append(feature)
+    
+    def query_map_sheets_by_coordinates(
+        self, 
+        coords: tuple, 
+        append: bool = False
+    ) -> None:
+
+        assert isinstance(
+            coords, tuple
+        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
+
+        coords = Point(coords)
+        
+        if not self.polygons:
+            self.get_polygons()
+        
+        if not append:
+            self.found_queries = [] #reset each time
+            
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if map_polygon.contains(coords):
+                self.found_queries.append(feature)
+                
+    def print_found_queries(self) -> None:
+        
+        if not self.polygons:
+            self.get_polygons()
+        
+        if len(self.found_queries)==0:
+            print("[INFO] No query results found/saved.")
+        else:
+            divider = 14 * "="
+            print(f"{divider}\nQuery results:\n{divider}")
+            for feature in self.found_queries:
+                map_url = feature["properties"]["IMAGEURL"]
+                map_bounds = feature["polygon"].bounds
+                print(f"URL:     \t{map_url}")
+                print(f"coordinates:  \t{map_bounds}")
+                print(20 * "-")
+    
     def download_all_map_sheets(
         self, path_save: str = "./maps/", metadata_path="metadata.csv"
     ) -> None:
@@ -294,7 +399,7 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
-
+   
     def download_map_sheets_by_polygon(
         self,
         polygon: Polygon,
@@ -377,6 +482,3 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
-
-    # queries needed
-    # as in, what maps would I get if I used XX param (where XX is polygon, wfs_ids or coords)
