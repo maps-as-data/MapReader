@@ -3,10 +3,10 @@ import os
 from typing import Union
 from shapely.geometry import Polygon, Point, shape
 from shapely.ops import unary_union
-from mapreader.download2.data_structures import Coordinate, GridBoundingBox
-from mapreader.download2.tile_loading import TileDownloader
-from mapreader.download2.tile_merging import TileMerger
-from mapreader.download2.downloader_utils import get_index_from_coordinate
+from .data_structures import Coordinate, GridBoundingBox
+from .tile_loading import TileDownloader
+from .tile_merging import TileMerger
+from .downloader_utils import get_index_from_coordinate
 import re
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -223,6 +223,10 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
         map_url = str(feature["properties"]["IMAGEURL"])
         coords = feature["geometry"]["coordinates"][0][0]
+        
+        if not self.published_dates:
+            self.extract_published_dates()
+            
         published_date = feature["properties"]["published_date"]
         grid_bb = feature["grid_bb"]
 
@@ -482,3 +486,24 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
+        
+    def download_map_sheets_by_queries(
+        self,
+        path_save: str = "./maps/",
+        metadata_path="metadata.csv",
+    ) -> None:
+        
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+            
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        metadata_to_save = []
+        for feature in self.found_queries:
+            self._download_map(feature)
+            metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_path)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+        
