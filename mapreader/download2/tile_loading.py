@@ -10,13 +10,11 @@ logger = logging.getLogger(__name__)
 
 from .data_structures import GridIndex, GridBoundingBox
 
-DEFAULT_TEMP_FOLDER = "_tile_cache/"
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 
 class TileDownloader:
     def __init__(self, 
                  tile_servers: list = None, 
-                 temp_folder: Union[str, None] = None, 
                  img_format: Union[str, None] = None, 
                  show_progress: bool =True
                  ):
@@ -27,10 +25,6 @@ class TileDownloader:
         ----------
         tile_servers : list
             Download urls for tileservers. 
-        temp_folder : Union[str, None], optional
-            Path to save temporary files.
-            If None, "_tile_cache/" will be used.
-            By default None.
         img_format : Union[str, None], optional
             Image format used when saving tiles.
             If None, ``png`` will be used.
@@ -39,7 +33,7 @@ class TileDownloader:
             Whether or not to show progress bar, by default True.
         """
         self.tile_servers = tile_servers
-        self.temp_folder = temp_folder if temp_folder is not None else DEFAULT_TEMP_FOLDER
+        self.temp_folder = "_tile_cache/"
         self.img_format = img_format if img_format is not None else DEFAULT_IMG_DOWNLOAD_FORMAT
         self._vis_blocks = 35
         self.show_progress = show_progress
@@ -190,4 +184,4 @@ def _trigger_download(url: str, file_path:str):
             f.write(data)
 
     except:
-        print(f"{url} not found")
+        print(f"[WARNING] {url} not found.")

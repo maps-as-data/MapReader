@@ -16,16 +16,12 @@ DEFAULT_IMG_STORE_FORMAT = ("png", "PNG")
 
 
 class TileMerger:
-    def __init__(self, temp_folder: Union[str, None]=None, output_folder: Union[str, None]=None, img_input_format: Union[str, None]=None, img_output_format: Union[str, None]=None,
+    def __init__(self, output_folder: Union[str, None]=None, img_input_format: Union[str, None]=None, img_output_format: Union[str, None]=None,
                  show_progress=True):
         """TileMerger object.
 
         Parameters
         ----------
-        temp_folder : Union[str, None], optional
-            Path to save temporary files.
-            If None, "_tile_cache/" will be used.
-            By default None.
         output_folder : Union[str, None], optional
             Path to save map images.
             If None, "./" will be used (i.e. map images will be saved in current directory).
@@ -44,7 +40,7 @@ class TileMerger:
         self.img_input_format = img_input_format if img_input_format is not None else DEFAULT_IMG_DOWNLOAD_FORMAT
         self.img_output_format = img_output_format if img_output_format is not None else DEFAULT_IMG_STORE_FORMAT
         self.output_folder = output_folder if output_folder is not None else DEFAULT_OUT_FOLDER
-        self.temp_folder = temp_folder if temp_folder is not None else DEFAULT_TEMP_FOLDER
+        self.temp_folder = "_tile_cache/"
         self.show_progress = show_progress
 
     @staticmethod
@@ -138,8 +134,8 @@ class TileMerger:
                 merged_image.paste(current_tile, (tile_size * i, tile_size * j))
             
             except:
-                print(f"cannot find {current_cell}")
-
+                logger.warning(f"Cannot find tile with grid_index = {current_cell}")
+                
         logger.info("Writing file..")
         
         if file_name is None:
