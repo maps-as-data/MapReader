@@ -105,7 +105,7 @@ class SheetDownloader:
     def _download_map(self, feature: dict):
         map_name = str("MAP_"+feature["properties"]["IMAGE"])
         self.downloader.download_tiles(feature["grid_bb"])
-        self.merger.merge(feature["grid_bb"])
+        self.merger.merge(feature["grid_bb"], map_name)
         print(f"[INFO] Downloaded \"{map_name}.png\"")
 
     def download_map_sheets_by_wfs_ids(self, wfs_ids: Union[list, int], path_save: str = "./maps/") -> None:
