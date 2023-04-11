@@ -223,10 +223,10 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
         map_url = str(feature["properties"]["IMAGEURL"])
         coords = feature["geometry"]["coordinates"][0][0]
-        
+
         if not self.published_dates:
             self.extract_published_dates()
-            
+
         published_date = feature["properties"]["published_date"]
         grid_bb = feature["grid_bb"]
 
@@ -245,7 +245,6 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         wfs_ids: Union[list, int],
         append: bool = False,
     ) -> None:
-        
         if not self.wfs_id_nos:
             self.extract_wfs_id_nos()
 
@@ -260,23 +259,19 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
 If you would like to donwload all your map sheets try ``.download_all_map_sheets()`` \
 or, if you would like to download map sheets using a polygon try ``.download_map_sheets_by_polygon()``"
             )
-        
+
         if not append:
-            self.found_queries = [] #reset each time
-            
+            self.found_queries = []  # reset each time
+
         for feature in self.features:
             wfs_id_no = feature["wfs_id_no"]
-            
+
             if wfs_id_no in requested_maps:
                 self.found_queries.append(feature)
-        
+
     def query_map_sheets_by_polygon(
-        self,
-        polygon: Polygon,
-        mode: str = "within",
-        append: bool = False
+        self, polygon: Polygon, mode: str = "within", append: bool = False
     ) -> None:
-        
         assert isinstance(
             polygon, Polygon
         ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
@@ -289,50 +284,46 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         if not self.polygons:
             self.get_polygons()
-            
+
         if not append:
-            self.found_queries = [] #reset each time
-          
+            self.found_queries = []  # reset each time
+
         for feature in self.features:
             map_polygon = feature["polygon"]
-            
+
             if mode == "within":
                 if map_polygon.within(polygon):
                     self.found_queries.append(feature)
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
                     self.found_queries.append(feature)
-    
-    def query_map_sheets_by_coordinates(
-        self, 
-        coords: tuple, 
-        append: bool = False
-    ) -> None:
 
+    def query_map_sheets_by_coordinates(
+        self, coords: tuple, append: bool = False
+    ) -> None:
         assert isinstance(
             coords, tuple
         ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
 
         coords = Point(coords)
-        
+
         if not self.polygons:
             self.get_polygons()
-        
+
         if not append:
-            self.found_queries = [] #reset each time
-            
+            self.found_queries = []  # reset each time
+
         for feature in self.features:
             map_polygon = feature["polygon"]
 
             if map_polygon.contains(coords):
                 self.found_queries.append(feature)
-                
+
     def print_found_queries(self) -> None:
-        
         if not self.polygons:
             self.get_polygons()
-        
-        if len(self.found_queries)==0:
+
+        if len(self.found_queries) == 0:
             print("[INFO] No query results found/saved.")
         else:
             divider = 14 * "="
@@ -343,7 +334,7 @@ or, if you would like to download map sheets using a polygon try ``.download_map
                 print(f"URL:     \t{map_url}")
                 print(f"coordinates:  \t{map_bounds}")
                 print(20 * "-")
-    
+
     def download_all_map_sheets(
         self, path_save: str = "./maps/", metadata_path="metadata.csv"
     ) -> None:
@@ -403,7 +394,7 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
-   
+
     def download_map_sheets_by_polygon(
         self,
         polygon: Polygon,
@@ -486,16 +477,15 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
-        
+
     def download_map_sheets_by_queries(
         self,
         path_save: str = "./maps/",
         metadata_path="metadata.csv",
     ) -> None:
-        
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-            
+
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
@@ -506,4 +496,3 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_path = "{}{}".format(path_save, metadata_path)
         self._create_metadata_df(metadata_to_save, metadata_path)
-        

@@ -1,5 +1,6 @@
 # Code taken from https://github.com/baurls/TileStitcher.
 
+
 class Coordinate:
     def __init__(self, lat: float, lon: float):
         """
