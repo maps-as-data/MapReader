@@ -134,7 +134,7 @@ class TileMerger:
         tile_size = img_size[0]
         return tile_size
 
-    def merge(self, grid_bb: GridBoundingBox, file_name: Union[str, None] = None):
+    def merge(self, grid_bb: GridBoundingBox, file_name: Union[str, None] = None) -> bool:
         """Merges cells contained within GridBoundingBox.
 
         Parameters
@@ -143,6 +143,11 @@ class TileMerger:
             GridBoundingBox containing tiles to merge
         file_name : Union[str, None], optional
             Name to use when saving map
+
+        Returns
+        -------
+        bool
+            True if file has sucessfully downloaded, False if not.
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
@@ -177,6 +182,14 @@ class TileMerger:
             self.output_folder, file_name, self.img_output_format[0]
         )
         merged_image.save(out_path, self.img_output_format[1])
-        logger.info(
+        success = True if os.path.exists(out_path) else False
+        if success:
+            logger.info(
             "Merge successful! The image has been stored at '{}'".format(out_path)
-        )
+            )
+        else:
+            logger.warning(
+            "Merge unsuccessful! '{}' not saved.".format(out_path)
+            )
+        
+        return success

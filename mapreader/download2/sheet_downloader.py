@@ -24,7 +24,19 @@ class SheetDownloader:
         self,
         metadata_path: str,
         download_url: Union[str, list],
-    ):
+    ) -> None:
+        """
+        Iniitalise SheetDownloader class
+
+        Parameters
+        ----------
+        metadata_path : str
+            path to metadata.json
+        download_url : Union[str, list]
+            The base URL pattern used to download tiles from the server. This
+            should contain placeholders for the x coordinate (``x``), the y
+            coordinate (``y``) and the zoom level (``z``).
+        """
         self.polygons = False
         self.grid_bbs = False
         self.wfs_id_nos = False
@@ -62,7 +74,10 @@ class SheetDownloader:
     def __len__(self) -> int:
         return len(self.features)
 
-    def get_polygons(self):
+    def get_polygons(self) -> None:
+        """
+        For each map in metadata, creates a polygon from map geometry and saves to ``features`` dictionary.
+        """
         for i, feature in enumerate(self.features):
             polygon = shape(feature["geometry"])
             map_name = feature["properties"]["IMAGE"]
@@ -73,10 +88,19 @@ class SheetDownloader:
         self.polygons = True
 
     def get_grid_bb(self, zoom_level: int = 14) -> None:
+        """
+        For each map in metadata, creates a grid bounding box from map polygons and saves to ``features`` dictionary.
+
+        Parameters
+        ----------
+        zoom_level : int, optional
+            The zoom level to use when creating the grid bounding box.
+            Later used when downloading maps, by default 14.
+        """
         if not self.polygons:
             self.get_polygons()
 
-        for i, feature in enumerate(self.features):
+        for feature in self.features:
             polygon = feature["polygon"]
             min_x, min_y, max_x, max_y = polygon.bounds
 
@@ -92,7 +116,10 @@ class SheetDownloader:
         self.grid_bbs = True
 
     def extract_wfs_id_nos(self) -> None:
-        for i, feature in enumerate(self.features):
+        """
+        For each map in metadata, extracts WFS ID numbers from WFS information and saves to ``features`` dictionary.
+        """
+        for feature in self.features:
             wfs_id = feature["id"]
             wfs_id_no = wfs_id.split(sep=".")[-1]
 
@@ -101,7 +128,10 @@ class SheetDownloader:
         self.wfs_id_nos = True
 
     def extract_published_dates(self) -> None:
-        for i, feature in enumerate(self.features):
+        """
+        For each map in metadata, extracts publication date from WFS title and saves to ``features`` dictionary.
+        """
+        for feature in self.features:
             wfs_title = feature["properties"]["WFS_TITLE"]
             published_date = re.findall(
                 r"Published.*[\D]([\d]+)", wfs_title, flags=re.IGNORECASE
@@ -120,9 +150,16 @@ class SheetDownloader:
 
         self.published_dates = True
 
-    def get_minmax_latlon(self):
+    def get_minmax_latlon(self) -> None:
+        """
+        Prints minimum and maximum latitudes and longitudes of all maps in metadata.
+        """
+
+        if not self.polygons:
+            self.get_polygons()
+
         polygon_list = []
-        for i, feature in enumerate(self.features):
+        for feature in self.features:
             polygon = feature["polygon"]
             polygon_list.append(polygon)
 
@@ -135,7 +172,21 @@ class SheetDownloader:
 [INFO] Min lon: {min_x}, max lon: {max_x}"
         )
 
-    def hist_published_dates(self):
+    def hist_published_dates(self, **kwargs) -> None:
+        """
+        Plots a histogram of the publication dates of maps in metadata.
+
+        Parameters
+        ----------
+        kwargs : A dictionary containing keyword arguments to pass to plotting function.
+            See matplotlib.pyplot.hist() for acceptable values.
+
+            e.g. ``**dict(fc='c', ec='k')``
+
+        Notes
+        -----
+        bins and range already set when plotting so are invalid kwargs.
+        """
         if not self.published_dates:
             self.extract_published_dates()
 
@@ -147,7 +198,7 @@ class SheetDownloader:
         date_range = max_date - min_date
         print(min_date, max_date, date_range)
 
-        plt.hist(published_dates, bins=date_range, range=(min_date, max_date))
+        plt.hist(published_dates, bins=date_range, range=(min_date, max_date), **kwargs)
         plt.locator_params(integer=True)
         plt.xticks(size=14)
         plt.yticks(size=14)
@@ -158,8 +209,23 @@ class SheetDownloader:
     def plot_metadata_on_map(
         self,
         map_extent: Union[str, list, tuple, None] = None,
-        add_text: bool = True,
-    ):
+        add_id: bool = True,
+    ) -> None:
+        """
+        Plots boundaries of map sheets on a map (using ``cartopy`` library).
+
+        Parameters
+        ----------
+        map_extent : Union[str, list, tuple, None], optional
+            The extent of the underlying map to be plotted.
+            
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+            If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
+            If None, the map extent will be set automatically. 
+            By default None.
+        add_id : bool, optional
+            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+        """
         plt.figure(figsize=[15, 15])
         ax = plt.axes(projection=ccrs.PlateCarree())
         ax.coastlines(resolution="10m", color="black", linewidth=1)
@@ -179,11 +245,11 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         else:
             pass
 
-        if add_text:
+        if add_id:
             if not self.wfs_id_nos:
                 self.extract_wfs_id_nos()
 
-        for i, feature in enumerate(self.features):
+        for feature in self.features:
             text_id = feature["wfs_id_no"]
             coords = np.array(feature["geometry"]["coordinates"][0][0])
 
@@ -196,7 +262,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                 transform=ccrs.Geodetic(),
             )
 
-            if add_text:
+            if add_id:
                 plt.text(
                     np.mean(coords[:, 0]) - 0.15,
                     np.mean(coords[:, 1]) - 0.05,
@@ -207,19 +273,83 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         plt.show()
 
     def _initialise_downloader(self):
+        """
+        Initialise TileDownloader object
+        """
         self.downloader = TileDownloader(self.tile_server)
 
     def _initialise_merger(self, path_save: str):
-        self.merger = TileMerger(output_folder=path_save, show_progress=False)
+        """
+        Initialise TileMerger object.
 
-    def _download_map(self, feature: dict):
+        Parameters
+        ----------
+        path_save : str
+            Path to save merged items (i.e. whole map sheets)
+        """
+        self.merger = TileMerger(output_folder=path_save, show_progress=False)
+    
+    def _check_map_sheet_exists(self, feature: dict) -> bool:
+        """
+        Checks if a map sheet is already saved.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if file exists, False if not.
+        """
+        map_name = str("map_" + feature["properties"]["IMAGE"])        
+        path_save = self.merger.output_folder
+        if os.path.exists(f"{path_save}{map_name}.png"):
+            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+            return True
+        return False
+
+    def _download_map(self, feature: dict) -> bool:
+        """
+        Downloads a single map sheet and saves as png file.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if map was downloaded sucessfully, False if not.
+        """
         map_name = str("map_" + feature["properties"]["IMAGE"])
         self.downloader.download_tiles(feature["grid_bb"])
-        self.merger.merge(feature["grid_bb"], map_name)
-        print(f'[INFO] Downloaded "{map_name}.png"')
+        success = self.merger.merge(feature["grid_bb"], map_name)
+        if success:
+            print(f'[INFO] Downloaded "{map_name}.png"')
+        else:
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+        
         shutil.rmtree("_tile_cache/")
+        return success
 
-    def _save_metadata(self, feature: dict):
+    def _save_metadata(
+        self, 
+        feature: dict
+    ) -> list:
+        """
+        Creates list of selected metadata items.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        list
+            List of selected metadata (to be saved)
+        """
+
         map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
         map_url = str(feature["properties"]["IMAGEURL"])
         coords = feature["geometry"]["coordinates"][0][0]
@@ -232,7 +362,17 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
 
         return [map_name, map_url, coords, published_date, grid_bb]
 
-    def _create_metadata_df(self, metadata_to_save: list, out_filepath):
+    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
+        """
+        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
+
+        Parameters
+        ----------
+        metadata_to_save : list
+            List of metadata to save
+        out_filepath : _type_
+            File path where metadata csv will be saved.
+        """
         metadata_df = pd.DataFrame(
             metadata_to_save,
             columns=["name", "url", "coordinates", "published_date", "grid_bb"],
@@ -245,6 +385,17 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
         wfs_ids: Union[list, int],
         append: bool = False,
     ) -> None:
+        """
+        Find map sheets by WFS ID numbers.
+
+        Parameters
+        ----------
+        wfs_ids : Union[list, int]
+            The WFS ID numbers of the maps to download.
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        """
         if not self.wfs_id_nos:
             self.extract_wfs_id_nos()
 
@@ -267,11 +418,32 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             wfs_id_no = feature["wfs_id_no"]
 
             if wfs_id_no in requested_maps:
-                self.found_queries.append(feature)
+                if wfs_id_no not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
 
     def query_map_sheets_by_polygon(
         self, polygon: Polygon, mode: str = "within", append: bool = False
     ) -> None:
+        """
+        Find map sheets which are found within or intersecting with a defined polygon.
+
+        Parameters
+        ----------
+        polygon : Polygon
+            Polygon
+        mode : str, optional
+            The mode to use when finding maps.
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
+            By default "within".
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+
+        Notes
+        -----
+        Use ``create_polygon_from_latlons()`` to create polygon.
+        """
         assert isinstance(
             polygon, Polygon
         ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
@@ -293,14 +465,28 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
             if mode == "within":
                 if map_polygon.within(polygon):
-                    self.found_queries.append(feature)
+                    if map_polygon not in self.found_queries: #only append if new item
+                        self.found_queries.append(feature)
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
-                    self.found_queries.append(feature)
+                    if map_polygon not in self.found_queries: #only append if new item
+                        self.found_queries.append(feature)
 
     def query_map_sheets_by_coordinates(
         self, coords: tuple, append: bool = False
     ) -> None:
+        """
+        Find maps sheets which contain a defined set of coordinates.
+        Coordinates are (x,y).
+
+        Parameters
+        ----------
+        coords : tuple
+            Coordinates in ``(x,y)`` format.
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        """
         assert isinstance(
             coords, tuple
         ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
@@ -317,9 +503,13 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             map_polygon = feature["polygon"]
 
             if map_polygon.contains(coords):
-                self.found_queries.append(feature)
+                if map_polygon not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
 
     def print_found_queries(self) -> None:
+        """
+        Prints query results.
+        """
         if not self.polygons:
             self.get_polygons()
 
@@ -336,8 +526,18 @@ or, if you would like to download map sheets using a polygon try ``.download_map
                 print(20 * "-")
 
     def download_all_map_sheets(
-        self, path_save: str = "./maps/", metadata_path="metadata.csv"
+        self, path_save: str = "./maps/", metadata_fname="metadata.csv"
     ) -> None:
+        """
+        Downloads all map sheets in metadata.
+
+        Parameters
+        ----------
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
 
@@ -346,22 +546,32 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_to_save = []
         for feature in self.features:
-            self._download_map(feature)
-            metadata_to_save.append(self._save_metadata(feature))
+            exists = self._check_map_sheet_exists(feature)
+            if not exists:
+                success = self._download_map(feature)
+                if success:
+                    metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_path)
+        metadata_path = "{}{}".format(path_save, metadata_fname)
         self._create_metadata_df(metadata_to_save, metadata_path)
 
     def download_map_sheets_by_wfs_ids(
         self,
         wfs_ids: Union[list, int],
         path_save: str = "./maps/",
-        metadata_path="metadata.csv",
+        metadata_fname="metadata.csv",
     ) -> None:
         """
-        Note
-        -----
-        Download by wfs ids as shown on plot_metadata_on_map - not by sheet no.
+        Downloads map sheets by WFS ID numbers.
+
+        Parameters
+        ----------
+        wfs_ids : Union[list, int]
+            The WFS ID numbers of the maps to download.
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
         """
 
         if not self.wfs_id_nos:
@@ -389,28 +599,43 @@ or, if you would like to download map sheets using a polygon try ``.download_map
         for feature in self.features:
             wfs_id_no = feature["wfs_id_no"]
             if wfs_id_no in requested_maps:
-                self._download_map(feature)
-                metadata_to_save.append(self._save_metadata(feature))
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_path)
+        metadata_path = "{}{}".format(path_save, metadata_fname)
         self._create_metadata_df(metadata_to_save, metadata_path)
 
     def download_map_sheets_by_polygon(
         self,
         polygon: Polygon,
         path_save: str = "./maps/",
-        metadata_path="metadata.csv",
+        metadata_fname="metadata.csv",
         mode: str = "within",
     ) -> None:
         """
-        If mode="within" - will get all individual map sheets which are completely with polygon
-        If mode="intersects" - will get all individual map sheets which overlap with polygon
+        Donwloads any map sheets which are found within or intersecting with a defined polygon.
 
-        Note
+        Parameters
+        ----------
+        polygon : Polygon
+            Polygon
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        mode : str, optional
+            The mode to use when finding maps.
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
+            By default "within".
+
+        Notes
         -----
         Use ``create_polygon_from_latlons()`` to create polygon.
         """
-
         assert isinstance(
             polygon, Polygon
         ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
@@ -440,19 +665,30 @@ or, if you would like to download map sheets using a polygon try ``.download_map
                     requested = True
 
             if requested == True:
-                self._download_map(feature)
-                metadata_to_save.append(self._save_metadata(feature))
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_path)
+        metadata_path = "{}{}".format(path_save, metadata_fname)
         self._create_metadata_df(metadata_to_save, metadata_path)
 
     def download_map_sheets_by_coordinates(
-        self, coords: tuple, path_save: str = "./maps/", metadata_path="metadata.csv"
+        self, coords: tuple, path_save: str = "./maps/", metadata_fname="metadata.csv"
     ) -> None:
         """
-        Download any map whose polygon contains with these coordinates.
-        Coordinates are (x,y)
+        Downloads any maps sheets which contain a defined set of coordinates.
+        Coordinates are (x,y).
 
+        Parameters
+        ----------
+        coords : tuple
+            Coordinates in ``(x,y)`` format.
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
         """
 
         assert isinstance(
@@ -472,17 +708,30 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             map_polygon = feature["polygon"]
 
             if map_polygon.contains(coords):
-                self._download_map(feature)
-                metadata_to_save.append(self._save_metadata(feature))
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_path)
+        metadata_path = "{}{}".format(path_save, metadata_fname)
         self._create_metadata_df(metadata_to_save, metadata_path)
 
     def download_map_sheets_by_queries(
         self,
         path_save: str = "./maps/",
-        metadata_path="metadata.csv",
+        metadata_fname="metadata.csv",
     ) -> None:
+        """
+        Downloads map sheets saved as query results.
+
+        Parameters
+        ----------
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
 
@@ -491,8 +740,11 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         metadata_to_save = []
         for feature in self.found_queries:
-            self._download_map(feature)
-            metadata_to_save.append(self._save_metadata(feature))
+            exists = self._check_map_sheet_exists(feature)
+            if not exists:
+                success = self._download_map(feature)
+                if success:
+                    metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_path)
+        metadata_path = "{}{}".format(path_save, metadata_fname)
         self._create_metadata_df(metadata_to_save, metadata_path)
