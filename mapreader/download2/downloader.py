@@ -4,17 +4,27 @@ from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader
 from .tile_merging import TileMerger
 from .downloader_utils import get_index_from_coordinate
-
+import shutil
+import os
 
 class Downloader:
     """
-    A class to download maps (no metadata)
+    A class to download maps (without using metadata)
     """
 
     def __init__(
         self,
         download_url: Union[str, list],
     ):
+        """Initialise Downloader object.
+
+        Parameters
+        ----------
+        download_url : Union[str, list]
+            The base URL pattern used to download tiles from the server. This
+            should contain placeholders for the x coordinate (``x``), the y
+            coordinate (``y``) and the zoom level (``z``).
+        """
         if isinstance(download_url, str):
             my_ts = [download_url]
         elif isinstance(download_url, list):
@@ -31,28 +41,83 @@ class Downloader:
         return info
 
     def _initialise_downloader(self):
-        self.downloader = TileDownloader(tile_servers=self.download_url)
+        """
+        Initialise TileDownloader object.
+        """
+        self.downloader = TileDownloader(self.tile_server)
 
     def _initialise_merger(self, path_save: str):
+        """
+        Initialise TileMerger object.
+
+        Parameters
+        ----------
+        path_save : str
+            Path to save merged items (i.e. whole map sheets)
+        """
         self.merger = TileMerger(output_folder=path_save, show_progress=False)
 
-    def _download_map(self, grid_bb: GridBoundingBox):
-        map_name = str(grid_bb)
+    def _check_map_exists(self, grid_bb: GridBoundingBox) -> bool:
+        """
+        Checks if a map is already saved.
+
+        Parameters
+        ----------
+        grid_bb : GridBoundingBox
+
+        Returns
+        -------
+        bool
+            True if file exists, False if not.
+        """
+        map_name = self.merger._get_output_name(grid_bb)  
+        path_save = self.merger.output_folder
+        if os.path.exists(f"{path_save}{map_name}.png"):
+            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+            return True  
+        return False
+    
+    def _download_map(self, grid_bb: GridBoundingBox) -> bool:
+        """
+        Downloads a map contained within a grid bounding box.
+
+        Parameters
+        ----------
+        grid_bb : GridBoundingBox
+
+        Returns
+        -------
+        bool
+            True if map was successfully downloaded, False if not.
+        """
+        map_name = self.merger._get_output_name(grid_bb)
         self.downloader.download_tiles(grid_bb, download_in_parallel=False)
-        self.merger.merge(grid_bb)
-        print(f"[INFO] Downloaded {map_name}")
+        success = self.merger.merge(grid_bb)
+        if success:
+            print(f'[INFO] Downloaded "{map_name}.png"')
+        else:
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+
+        shutil.rmtree("_tile_cache/")
+        return success
 
     def download_map_by_polygon(
         self,
         polygon: Polygon,
-        download_url: Union[str, list],
         zoom_level: int = 14,
         path_save: str = "./maps/",
     ) -> None:
         """
-        Note
-        -----
-        Use ``create_polygon_from_latlons()`` to create polygon.
+        Downloads a map contained within a polygon.
+
+        Parameters
+        ----------
+        polygon : Polygon
+            A polygon defining the boundaries of the map
+        zoom_level : int, optional
+            The zoom level to use, by default 14
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
         """
 
         assert isinstance(
@@ -72,4 +137,6 @@ Please pass polygon as shapely.geometry.Polygon object.\n\
 
         self._initialise_downloader()
         self._initialise_merger(path_save)
-        self._download_map(grid_bb)
+        exists = self._check_map_exists(grid_bb)
+        if not exists:
+            self._download_map(grid_bb)
