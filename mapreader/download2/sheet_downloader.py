@@ -42,6 +42,7 @@ class SheetDownloader:
         self.wfs_id_nos = False
         self.published_dates = False
         self.found_queries = []
+        self.merged_polygon = None
 
         assert isinstance(
             metadata_path, str
@@ -150,23 +151,27 @@ class SheetDownloader:
 
         self.published_dates = True
 
-    def get_minmax_latlon(self) -> None:
+    def get_merged_polygon(self) -> None:
         """
-        Prints minimum and maximum latitudes and longitudes of all maps in metadata.
+        Creates a multipolygon representing all maps in metadata.
         """
 
         if not self.polygons:
             self.get_polygons()
 
-        polygon_list = []
-        for feature in self.features:
-            polygon = feature["polygon"]
-            polygon_list.append(polygon)
+        polygon_list = [feature["polygon"] for feature in self.features]
 
         merged_polygon = unary_union(polygon_list)
         self.merged_polygon = merged_polygon
 
-        min_x, min_y, max_x, max_y = merged_polygon.bounds
+    def get_minmax_latlon(self) -> None:
+        """
+        Prints minimum and maximum latitudes and longitudes of all maps in metadata.
+        """
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        min_x, min_y, max_x, max_y = self.merged_polygon.bounds
         print(
             f"[INFO] Min lat: {min_y}, max lat: {max_y} \n\
 [INFO] Min lon: {min_x}, max lon: {max_x}"
@@ -405,10 +410,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
             requested_maps = [wfs_ids]
         else:
             raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints. \
-\
-If you would like to donwload all your map sheets try ``.download_all_map_sheets()`` \
-or, if you would like to download map sheets using a polygon try ``.download_map_sheets_by_polygon()``"
+                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
             )
 
         if not append:
@@ -420,6 +422,8 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             if wfs_id_no in requested_maps:
                 if wfs_id_no not in self.found_queries: #only append if new item
                     self.found_queries.append(feature)
+
+        self.print_found_queries()
 
     def query_map_sheets_by_polygon(
         self, polygon: Polygon, mode: str = "within", append: bool = False
@@ -472,6 +476,8 @@ or, if you would like to download map sheets using a polygon try ``.download_map
                     if map_polygon not in self.found_queries: #only append if new item
                         self.found_queries.append(feature)
 
+        self.print_found_queries()
+
     def query_map_sheets_by_coordinates(
         self, coords: tuple, append: bool = False
     ) -> None:
@@ -505,6 +511,8 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             if map_polygon.contains(coords):
                 if map_polygon not in self.found_queries: #only append if new item
                     self.found_queries.append(feature)
+
+        self.print_found_queries()
 
     def print_found_queries(self) -> None:
         """
@@ -583,10 +591,7 @@ or, if you would like to download map sheets using a polygon try ``.download_map
             requested_maps = [wfs_ids]
         else:
             raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints. \
-\
-If you would like to donwload all your map sheets try ``.download_all_map_sheets()`` \
-or, if you would like to download map sheets using a polygon try ``.download_map_sheets_by_polygon()``"
+                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
             )
 
         if not self.grid_bbs:
@@ -594,6 +599,10 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         self._initialise_downloader()
         self._initialise_merger(path_save)
+
+        wfs_id_list = [feature["wfs_id_no"] for feature in self.features]
+        if set(wfs_id_list).isdisjoint(set(requested_maps)):
+            raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
 
         metadata_to_save = []
         for feature in self.features:
@@ -652,6 +661,12 @@ or, if you would like to download map sheets using a polygon try ``.download_map
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        if self.merged_polygon.disjoint(polygon):
+            raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
+
         metadata_to_save = []
         for feature in self.features:
             requested = False
@@ -703,6 +718,12 @@ or, if you would like to download map sheets using a polygon try ``.download_map
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        if not self.merged_polygon.contains(coords):
+            raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
+
         metadata_to_save = []
         for feature in self.features:
             map_polygon = feature["polygon"]
@@ -737,6 +758,8 @@ or, if you would like to download map sheets using a polygon try ``.download_map
 
         self._initialise_downloader()
         self._initialise_merger(path_save)
+
+        assert len(self.found_queries) > 0, "[ERROR] No query results found/saved."
 
         metadata_to_save = []
         for feature in self.found_queries:
