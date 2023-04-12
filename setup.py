@@ -1,8 +1,11 @@
 import setuptools
+import versioneer
+
 
 setuptools.setup(
     name="mapreader",
-    version="0.3.4",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
     author=u"MapReader team",
     #author_email="",
@@ -35,6 +38,7 @@ setuptools.setup(
         "ipywidgets>=7.7.3,<8.0.0",
         "ipyannotate==0.1.0-beta.0",
         "Cython>=0.29.24,<0.30.0",
+        # "proj>=0.2.0,<0.3.0",
         "PyYAML>=6.0,<7.0",
         "tensorboard>=2.7.0,<3.0.0",
         "parhugin>=0.0.3,<0.0.4",
@@ -42,6 +46,7 @@ setuptools.setup(
         "rasterio>=1.2.10,<2.0.0",
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
+        "versioneer>=0.28",
     ],
     
     classifiers=[
