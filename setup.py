@@ -47,6 +47,7 @@ setuptools.setup(
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
         "versioneer>=0.28",
+	"tqdm",
     ],
     
     classifiers=[
