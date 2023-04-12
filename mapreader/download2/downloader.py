@@ -44,7 +44,7 @@ class Downloader:
         """
         Initialise TileDownloader object.
         """
-        self.downloader = TileDownloader(self.tile_server)
+        self.downloader = TileDownloader(self.download_url)
 
     def _initialise_merger(self, path_save: str):
         """
