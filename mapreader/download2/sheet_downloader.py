@@ -9,7 +9,7 @@ from .tile_merging import TileMerger
 from .downloader_utils import get_index_from_coordinate
 import re
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
+# import cartopy.crs as ccrs - would be good to get this fixed (i think by conda package)
 import numpy as np
 import pandas as pd
 import shutil
@@ -211,13 +211,14 @@ class SheetDownloader:
         plt.ylabel("Counts", size=18)
         plt.show()
 
-    def plot_metadata_on_map(
+    def plot_features_on_map(
         self,
+        features: list,
         map_extent: Union[str, list, tuple, None] = None,
         add_id: bool = True,
     ) -> None:
         """
-        Plots boundaries of map sheets on a map (using ``cartopy`` library).
+        Plots boundaries of map sheets on a map using ``cartopy`` library, (if available).
 
         Parameters
         ----------
@@ -232,42 +233,57 @@ class SheetDownloader:
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
         plt.figure(figsize=[15, 15])
-        ax = plt.axes(projection=ccrs.PlateCarree())
-        ax.coastlines(resolution="10m", color="black", linewidth=1)
 
-        if isinstance(map_extent, str):
-            if map_extent in ["uk", "UK", "United Kingdom"]:
-                extent = [-8.08999993, 1.81388127, 49.8338702, 60.95000002]
-                ax.set_extent(extent)
-            else:
-                raise NotImplementedError(
-                    '[ERROR] Currently only "UK" is implemented. \
+        try:
+            import cartopy.crs as ccrs
+            
+            ax = plt.axes(projection=ccrs.PlateCarree())
+            ax.coastlines(resolution="10m", color="black", linewidth=1)
+
+            if isinstance(map_extent, str):
+                if map_extent in ["uk", "UK", "United Kingdom"]:
+                    extent = [-8.08999993, 1.81388127, 49.8338702, 60.95000002]
+                    ax.set_extent(extent)
+                else:
+                    raise NotImplementedError(
+                        '[ERROR] Currently only UK is implemented. \
 Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to auto-set map extent.'
-                )
+                    )
+            elif isinstance(map_extent, (list, tuple)):
+                ax.set_extent(map_extent)
+            else:
+                pass
 
-        elif isinstance(map_extent, (list, tuple)):
-            ax.set_extent(map_extent)
-        else:
-            pass
+            for feature in features:
+                text_id = feature["wfs_id_no"]
+                coords = np.array(feature["geometry"]["coordinates"][0][0])
+
+                # Plot coordinates
+                plt.plot(
+                    coords[:, 0],
+                    coords[:, 1],
+                    c="r",
+                    alpha=0.5,
+                    transform=ccrs.Geodetic(),
+                )
+                
+        except:
+            print("[WARNING] Cartopy is not installed. \
+If you would like to install it, please follow instructions at https://scitools.org.uk/cartopy/docs/latest/installing.html")
+
+            ax = plt.axes()
+
+            for feature in features:
+                text_id = feature["wfs_id_no"]
+                coords = np.array(feature["geometry"]["coordinates"][0][0])
+
+            plt.plot(coords[:, 0], coords[:, 1], c="r", alpha=0.5)
 
         if add_id:
             if not self.wfs_id_nos:
                 self.extract_wfs_id_nos()
-
-        for feature in self.features:
-            text_id = feature["wfs_id_no"]
-            coords = np.array(feature["geometry"]["coordinates"][0][0])
-
-            # Plot coordinates
-            plt.plot(
-                coords[:, 0],
-                coords[:, 1],
-                c="r",
-                alpha=0.5,
-                transform=ccrs.Geodetic(),
-            )
-
-            if add_id:
+            
+            for feature in features:
                 plt.text(
                     np.mean(coords[:, 0]) - 0.15,
                     np.mean(coords[:, 1]) - 0.05,
@@ -276,6 +292,54 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                 )
 
         plt.show()
+
+    def plot_all_metadata_on_map(
+        self,
+        map_extent: Union[str, list, tuple, None] = None,
+        add_id: bool = True,
+    ) -> None:
+        """
+        Plots boundaries of all map sheets in metadata on a map using ``cartopy`` library (if available).
+
+        Parameters
+        ----------
+        map_extent : Union[str, list, tuple, None], optional
+            The extent of the underlying map to be plotted.
+            
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+            If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
+            If None, the map extent will be set automatically. 
+            By default None.
+        add_id : bool, optional
+            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+        """
+
+        features_to_plot=self.features
+        self.plot_features_on_map(features_to_plot, map_extent, add_id)
+
+    def plot_queries_on_map(
+        self,
+        map_extent: Union[str, list, tuple, None] = None,
+        add_id: bool = True,
+    ) -> None:
+        """
+        Plots boundaries of query results on a map using ``cartopy`` library (if available).
+
+        Parameters
+        ----------
+        map_extent : Union[str, list, tuple, None], optional
+            The extent of the underlying map to be plotted.
+            
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+            If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
+            If None, the map extent will be set automatically. 
+            By default None.
+        add_id : bool, optional
+            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+        """
+
+        features_to_plot=self.found_queries
+        self.plot_features_on_map(features_to_plot, map_extent, add_id)
 
     def _initialise_downloader(self):
         """
