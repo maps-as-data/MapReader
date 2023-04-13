@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shutil
+from functools import reduce
 
 
 class SheetDownloader:
@@ -470,6 +471,55 @@ class SheetDownloader:
         if print:
             self.print_found_queries()
 
+    def query_map_sheets_by_string(
+        self,
+        string: str,
+        keys: Union[str, list],
+        append: bool = False,
+        print: bool = False,
+    ) -> None:
+        """
+        Find map sheets by searching for a string in a chosen metadata field.
+
+        Parameters
+        ----------
+        string : str
+            The string to search for. 
+            Can be raw string and use regular expressions.
+        keys : list
+            A key or list of keys used to get the metadata field to search in.
+            
+            Key(s) will be passed to each features dictionary. \
+            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        print: bool, optional
+            Whether to print query results or not.
+            By default False
+
+        Notes
+        -----
+        ``string`` is case insensitive.
+        """
+        if isinstance(keys, str):
+            keys = []
+        assert isinstance(keys, list), "[ERROR] Please pass key(s) as string or list of strings."
+
+        if not append:
+            self.found_queries = []  # reset each time
+
+        for feature in self.features:
+            field_to_search = reduce(lambda d, key: d.get(key), keys, feature) # reduce(function, sequence to go through, initial)
+            match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
+
+            if match:
+                if feature not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
+
+        if print:
+            self.print_found_queries()
+
     def print_found_queries(self) -> None:
         """
         Prints query results.
@@ -743,7 +793,62 @@ class SheetDownloader:
                         metadata_to_save.append(self._save_metadata(feature))
 
         metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)        
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
+    def download_map_sheets_by_string(
+        self,
+        string: str,
+        keys: Union[str, list], 
+        path_save: str = "./maps/", 
+        metadata_fname="metadata.csv",
+    ) -> None:
+        """
+        Download map sheets by searching for a string in a chosen metadata field.
+
+        Parameters
+        ----------
+        string : str
+            The string to search for. 
+            Can be raw string and use regular expressions.
+        keys : list
+            A key or list of keys used to get the metadata field to search in.
+            
+            Key(s) will be passed to each features dictionary. \
+            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+
+        Notes
+        -----
+        ``string`` is case insensitive.
+        """
+
+        if isinstance(keys, str):
+            keys = []
+        assert isinstance(keys, list), "[ERROR] Please pass key(s) as string or list of strings."
+
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        metadata_to_save = []
+        for feature in self.features:
+            field_to_search = reduce(lambda d, key: d.get(key), keys, feature) # reduce(function, sequence to go through, initial)
+            match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
+            
+            if match:
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)    
 
     def download_map_sheets_by_queries(
         self,
