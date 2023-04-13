@@ -232,6 +232,11 @@ class SheetDownloader:
         add_id : bool, optional
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
+        
+        if add_id:
+            if not self.wfs_id_nos:
+                self.extract_wfs_id_nos()
+
         plt.figure(figsize=[15, 15])
 
         try:
@@ -266,6 +271,14 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                     alpha=0.5,
                     transform=ccrs.Geodetic(),
                 )
+
+                if add_id:
+                    plt.text(
+                        np.mean(coords[:, 0]) - 0.15,
+                        np.mean(coords[:, 1]) - 0.05,
+                        f"{text_id}",
+                        color="r",
+                    )
                 
         except:
             print("[WARNING] Cartopy is not installed. \
@@ -279,11 +292,7 @@ If you would like to install it, please follow instructions at https://scitools.
 
             plt.plot(coords[:, 0], coords[:, 1], c="r", alpha=0.5)
 
-        if add_id:
-            if not self.wfs_id_nos:
-                self.extract_wfs_id_nos()
-            
-            for feature in features:
+            if add_id:
                 plt.text(
                     np.mean(coords[:, 0]) - 0.15,
                     np.mean(coords[:, 1]) - 0.05,
