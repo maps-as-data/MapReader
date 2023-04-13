@@ -1,7 +1,7 @@
 from mapreader import SheetDownloader
 import pytest
 from pathlib import Path
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, LineString
 import os
 import shutil
 
@@ -62,6 +62,17 @@ def test_query_by_coords(sheet_downloader):
     assert sd.found_queries[0] == sd.features[1]
     sd.query_map_sheets_by_coordinates((-0.23, 51.5), append = True) # test append
     assert len(sd.found_queries) == 2
+
+def test_query_by_line(sheet_downloader):
+    sd = sheet_downloader
+    line = LineString([(-5.4, 54.5), (-4.8, 54.5)])
+    sd.query_map_sheets_by_line(line)
+    assert sd.polygons == True
+    assert len(sd.found_queries) == 2
+    assert sd.found_queries[0] == sd.features[0]
+    another_line = LineString([(-0.2, 51.5),(-0.21,51.6)])
+    sd.query_map_sheets_by_line(another_line, append = True) # test append
+    assert len(sd.found_queries) == 3
 
 def test_download_all(sheet_downloader):
     sd = sheet_downloader
@@ -136,6 +147,23 @@ def test_download_by_coords(sheet_downloader):
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1] == '0|map_74488550.png|https://maps.nls.uk/view/74488550|[[-4.19999994, 54.49000003], [-4.79999994, 54.48000003], [-4.80999994, 54.75000003], [-4.20999994, 54.75000003], [-4.19999994, 54.49000003]]|1896|[(10, 498, 325)x(10, 500, 326)]\n'
+    shutil.rmtree(maps_path)
+
+def test_download_by_line(sheet_downloader):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path="./test_maps/"
+    metadata_fname="test_metadata.csv"
+    line = LineString([(-5.4, 54.5), (-4.8, 54.5)])
+    sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
+    assert sd.polygons == True
+    assert os.path.exists(f"{maps_path}map_74488550.png")
+    assert os.path.exists(f"{maps_path}{metadata_fname}")
+    with open(f"{maps_path}{metadata_fname}") as f:
+        csv = f.readlines()
+    assert len(csv) == 3   
+    assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
+    assert csv[1] == '0|map_74487492.png|https://maps.nls.uk/view/74487492|[[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]|1896|[(10, 496, 325)x(10, 498, 326)]\n'
     shutil.rmtree(maps_path)
 
 def test_download_by_queries(sheet_downloader):
