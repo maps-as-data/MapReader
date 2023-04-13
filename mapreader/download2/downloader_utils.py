@@ -1,4 +1,4 @@
-from shapely.geometry import Polygon, box
+from shapely.geometry import Polygon, LineString, box
 
 import math
 from typing import Tuple
@@ -7,13 +7,59 @@ from .data_structures import Coordinate, GridIndex
 
 
 def create_polygon_from_latlons(
-    min_lat: float, min_lon: float, max_lat: float, max_lon: float
+    min_lat: float, 
+    min_lon: float, 
+    max_lat: float, 
+    max_lon: float,
 ) -> Polygon:
+    """Creates a polygon from latitudes and longitudes.
+
+    Parameters
+    ----------
+    min_lat : float
+        minimum latitude
+    min_lon : float
+        minimum longitude
+    max_lat : float
+        maximum latitude
+    max_lon : float
+        maximum longitude
+    
+    Returns
+    -------
+    Polygon
+        shapely Polgyon
+    """
     min_y, max_y = min_lat, max_lat  # for clarity - can delete?
     min_x, max_x = min_lon, max_lon  # for clarity - can delete?
 
     polygon = box(min_x, min_y, max_x, max_y)
     return polygon
+
+def create_line_from_latlons(
+    lat1_lon1: tuple,
+    lat2_lon2: tuple,
+) -> LineString:
+    """Creates a line between two points.
+
+    Parameters
+    ----------
+    lat1_lon1 : tuple
+        Tuple defining first point
+    lat2 : tuple
+        Tuple defining second point
+
+    Returns
+    -------
+    LineString
+        shapely LineString
+    """
+    
+    y1,x1 = lat1,lon1 = lat1_lon1 # for clarity - can delete?
+    y2,x2 = lat2,lon2 = lat2_lon2 # for clarity - can delete?
+
+    line = LineString([(x1,y1),(x2,y2)])
+    return line
 
 
 # The code below converts lon-lat requests to the respective tile indices.

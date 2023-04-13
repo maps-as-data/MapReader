@@ -1,7 +1,7 @@
 import json
 import os
 from typing import Union
-from shapely.geometry import Polygon, Point, shape
+from shapely.geometry import Polygon, LineString, Point, shape
 from shapely.ops import unary_union
 from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader
@@ -177,6 +177,595 @@ class SheetDownloader:
 [INFO] Min lon: {min_x}, max lon: {max_x}"
         )
 
+    def _initialise_downloader(self):
+        """
+        Initialise TileDownloader object
+        """
+        self.downloader = TileDownloader(self.tile_server)
+
+    def _initialise_merger(self, path_save: str):
+        """
+        Initialise TileMerger object.
+
+        Parameters
+        ----------
+        path_save : str
+            Path to save merged items (i.e. whole map sheets)
+        """
+        self.merger = TileMerger(output_folder=path_save, show_progress=False)
+    
+    def _check_map_sheet_exists(self, feature: dict) -> bool:
+        """
+        Checks if a map sheet is already saved.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if file exists, False if not.
+        """
+        map_name = str("map_" + feature["properties"]["IMAGE"])        
+        path_save = self.merger.output_folder
+        if os.path.exists(f"{path_save}{map_name}.png"):
+            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+            return True
+        return False
+
+    def _download_map(self, feature: dict) -> bool:
+        """
+        Downloads a single map sheet and saves as png file.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if map was downloaded sucessfully, False if not.
+        """
+        map_name = str("map_" + feature["properties"]["IMAGE"])
+        self.downloader.download_tiles(feature["grid_bb"])
+        success = self.merger.merge(feature["grid_bb"], map_name)
+        if success:
+            print(f'[INFO] Downloaded "{map_name}.png"')
+        else:
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+        
+        shutil.rmtree("_tile_cache/")
+        return success
+
+    def _save_metadata(
+        self, 
+        feature: dict
+    ) -> list:
+        """
+        Creates list of selected metadata items.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        list
+            List of selected metadata (to be saved)
+        """
+
+        map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
+        map_url = str(feature["properties"]["IMAGEURL"])
+        coords = feature["geometry"]["coordinates"][0][0]
+
+        if not self.published_dates:
+            self.extract_published_dates()
+
+        published_date = feature["properties"]["published_date"]
+        grid_bb = feature["grid_bb"]
+
+        return [map_name, map_url, coords, published_date, grid_bb]
+
+    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
+        """
+        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
+
+        Parameters
+        ----------
+        metadata_to_save : list
+            List of metadata to save
+        out_filepath : _type_
+            File path where metadata csv will be saved.
+        """
+        metadata_df = pd.DataFrame(
+            metadata_to_save,
+            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
+        )
+        exists = True if os.path.exists(out_filepath) else False
+        metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
+
+    def query_map_sheets_by_wfs_ids(
+        self,
+        wfs_ids: Union[list, int],
+        append: bool = False,
+    ) -> None:
+        """
+        Find map sheets by WFS ID numbers.
+
+        Parameters
+        ----------
+        wfs_ids : Union[list, int]
+            The WFS ID numbers of the maps to download.
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        """
+        if not self.wfs_id_nos:
+            self.extract_wfs_id_nos()
+
+        if isinstance(wfs_ids, list):
+            requested_maps = wfs_ids
+        elif isinstance(wfs_ids, int):
+            requested_maps = [wfs_ids]
+        else:
+            raise ValueError(
+                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
+            )
+
+        if not append:
+            self.found_queries = []  # reset each time
+
+        for feature in self.features:
+            wfs_id_no = feature["wfs_id_no"]
+
+            if wfs_id_no in requested_maps:
+                if wfs_id_no not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
+
+        if print:
+            self.print_found_queries()
+
+    def query_map_sheets_by_polygon(
+        self, polygon: Polygon, mode: str = "within", append: bool = False
+    ) -> None:
+        """
+        Find map sheets which are found within or intersecting with a defined polygon.
+
+        Parameters
+        ----------
+        polygon : Polygon
+            shapely Polygon
+        mode : str, optional
+            The mode to use when finding maps.
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
+            By default "within".
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+
+        Notes
+        -----
+        Use ``create_polygon_from_latlons()`` to create polygon.
+        """
+        assert isinstance(
+            polygon, Polygon
+        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+
+        assert mode in [
+            "within",
+            "intersects",
+        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+
+        if not self.polygons:
+            self.get_polygons()
+
+        if not append:
+            self.found_queries = []  # reset each time
+
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if mode == "within":
+                if map_polygon.within(polygon):
+                    if map_polygon not in self.found_queries: #only append if new item
+                        self.found_queries.append(feature)
+            elif mode == "intersects":
+                if map_polygon.intersects(polygon):
+                    if map_polygon not in self.found_queries: #only append if new item
+                        self.found_queries.append(feature)
+
+        if print:
+            self.print_found_queries()
+
+    def query_map_sheets_by_coordinates(
+        self, coords: tuple, append: bool = False
+    ) -> None:
+        """
+        Find maps sheets which contain a defined set of coordinates.
+        Coordinates are (x,y).
+
+        Parameters
+        ----------
+        coords : tuple
+            Coordinates in ``(x,y)`` format.
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        """
+        assert isinstance(
+            coords, tuple
+        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
+
+        coords = Point(coords)
+
+        if not self.polygons:
+            self.get_polygons()
+
+        if not append:
+            self.found_queries = []  # reset each time
+
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if map_polygon.contains(coords):
+                if map_polygon not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
+
+        if print:
+            self.print_found_queries()
+
+    def query_map_sheets_by_line(
+        self, line: LineString, append: bool = False
+    ) -> None:
+        """
+        Find maps sheets which intersect with a line.
+
+        Parameters
+        ----------
+        line : LineString
+            shapely LineString
+        append : bool, optional
+            Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        
+        Notes
+        -----
+        Use ``create_line_from_latlons()`` to create line.
+        """
+
+        assert isinstance(
+            line, LineString
+        ), "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line."
+
+        if not self.polygons:
+            self.get_polygons()
+
+        if not append:
+            self.found_queries = []  # reset each time
+
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if map_polygon.intersects(line):
+                if map_polygon not in self.found_queries: #only append if new item
+                    self.found_queries.append(feature)
+
+        if print:
+            self.print_found_queries()
+
+    def print_found_queries(self) -> None:
+        """
+        Prints query results.
+        """
+        if not self.polygons:
+            self.get_polygons()
+
+        if len(self.found_queries) == 0:
+            print("[INFO] No query results found/saved.")
+        else:
+            divider = 14 * "="
+            print(f"{divider}\nQuery results:\n{divider}")
+            for feature in self.found_queries:
+                map_url = feature["properties"]["IMAGEURL"]
+                map_bounds = feature["polygon"].bounds
+                print(f"URL:     \t{map_url}")
+                print(f"coordinates:  \t{map_bounds}")
+                print(20 * "-")
+
+    def download_all_map_sheets(
+        self, path_save: str = "./maps/", metadata_fname="metadata.csv"
+    ) -> None:
+        """
+        Downloads all map sheets in metadata.
+
+        Parameters
+        ----------
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        metadata_to_save = []
+        for feature in self.features:
+            exists = self._check_map_sheet_exists(feature)
+            if not exists:
+                success = self._download_map(feature)
+                if success:
+                    metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
+    def download_map_sheets_by_wfs_ids(
+        self,
+        wfs_ids: Union[list, int],
+        path_save: str = "./maps/",
+        metadata_fname="metadata.csv",
+    ) -> None:
+        """
+        Downloads map sheets by WFS ID numbers.
+
+        Parameters
+        ----------
+        wfs_ids : Union[list, int]
+            The WFS ID numbers of the maps to download.
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
+
+        if not self.wfs_id_nos:
+            self.extract_wfs_id_nos()
+
+        if isinstance(wfs_ids, list):
+            requested_maps = wfs_ids
+        elif isinstance(wfs_ids, int):
+            requested_maps = [wfs_ids]
+        else:
+            raise ValueError(
+                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
+            )
+
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        wfs_id_list = [feature["wfs_id_no"] for feature in self.features]
+        if set(wfs_id_list).isdisjoint(set(requested_maps)):
+            raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
+
+        metadata_to_save = []
+        for feature in self.features:
+            wfs_id_no = feature["wfs_id_no"]
+            if wfs_id_no in requested_maps:
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
+    def download_map_sheets_by_polygon(
+        self,
+        polygon: Polygon,
+        path_save: str = "./maps/",
+        metadata_fname="metadata.csv",
+        mode: str = "within",
+    ) -> None:
+        """
+        Donwloads any map sheets which are found within or intersecting with a defined polygon.
+
+        Parameters
+        ----------
+        polygon : Polygon
+            shapely Polygon
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        mode : str, optional
+            The mode to use when finding maps.
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
+            By default "within".
+
+        Notes
+        -----
+        Use ``create_polygon_from_latlons()`` to create polygon.
+        """
+        assert isinstance(
+            polygon, Polygon
+        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+
+        assert mode in [
+            "within",
+            "intersects",
+        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        if self.merged_polygon.isdisjoint(polygon):
+            raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
+
+        metadata_to_save = []
+        for feature in self.features:
+            requested = False
+            map_polygon = feature["polygon"]
+
+            if mode == "within":
+                if map_polygon.within(polygon):
+                    requested = True
+            elif mode == "intersects":
+                if map_polygon.intersects(polygon):
+                    requested = True
+
+            if requested == True:
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
+    def download_map_sheets_by_coordinates(
+        self, coords: tuple, path_save: str = "./maps/", metadata_fname="metadata.csv"
+    ) -> None:
+        """
+        Downloads any maps sheets which contain a defined set of coordinates.
+        Coordinates are (x,y).
+
+        Parameters
+        ----------
+        coords : tuple
+            Coordinates in ``(x,y)`` format.
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
+
+        assert isinstance(
+            coords, tuple
+        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
+
+        coords = Point(coords)
+
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        if self.merged_polygon.isdisjoint(coords):
+            raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
+
+        metadata_to_save = []
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if map_polygon.contains(coords):
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
+    def download_map_sheets_by_line(
+        self, line: LineString, path_save: str = "./maps/", metadata_fname="metadata.csv"
+    ) -> None:
+        """
+        Downloads any maps sheets which intersect with a line.
+
+        Parameters
+        ----------
+        line : LineString
+            shapely LineString
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+
+        Notes
+        -----
+        Use ``create_line_from_latlons()`` to create line.
+        """
+
+        assert isinstance(
+            line, LineString
+        ), "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line."
+
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        if self.merged_polygon is None:
+            self.get_merged_polygon()
+
+        if self.merged_polygon.isdisjoint(line):
+            raise ValueError(f"[ERROR] Line is out of map metadata bounds.")
+
+        metadata_to_save = []
+        for feature in self.features:
+            map_polygon = feature["polygon"]
+
+            if map_polygon.intersects(line):
+                exists = self._check_map_sheet_exists(feature)
+                if not exists:
+                    success = self._download_map(feature)
+                    if success:
+                        metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)        
+
+    def download_map_sheets_by_queries(
+        self,
+        path_save: str = "./maps/",
+        metadata_fname="metadata.csv",
+    ) -> None:
+        """
+        Downloads map sheets saved as query results.
+
+        Parameters
+        ----------
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
+        if not self.grid_bbs:
+            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
+
+        self._initialise_downloader()
+        self._initialise_merger(path_save)
+
+        assert len(self.found_queries) > 0, "[ERROR] No query results found/saved."
+
+        metadata_to_save = []
+        for feature in self.found_queries:
+            exists = self._check_map_sheet_exists(feature)
+            if not exists:
+                success = self._download_map(feature)
+                if success:
+                    metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
     def hist_published_dates(self, **kwargs) -> None:
         """
         Plots a histogram of the publication dates of maps in metadata.
@@ -350,497 +939,3 @@ If you would like to install it, please follow instructions at https://scitools.
         features_to_plot=self.found_queries
         self.plot_features_on_map(features_to_plot, map_extent, add_id)
 
-    def _initialise_downloader(self):
-        """
-        Initialise TileDownloader object
-        """
-        self.downloader = TileDownloader(self.tile_server)
-
-    def _initialise_merger(self, path_save: str):
-        """
-        Initialise TileMerger object.
-
-        Parameters
-        ----------
-        path_save : str
-            Path to save merged items (i.e. whole map sheets)
-        """
-        self.merger = TileMerger(output_folder=path_save, show_progress=False)
-    
-    def _check_map_sheet_exists(self, feature: dict) -> bool:
-        """
-        Checks if a map sheet is already saved.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        bool
-            True if file exists, False if not.
-        """
-        map_name = str("map_" + feature["properties"]["IMAGE"])        
-        path_save = self.merger.output_folder
-        if os.path.exists(f"{path_save}{map_name}.png"):
-            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
-            return True
-        return False
-
-    def _download_map(self, feature: dict) -> bool:
-        """
-        Downloads a single map sheet and saves as png file.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        bool
-            True if map was downloaded sucessfully, False if not.
-        """
-        map_name = str("map_" + feature["properties"]["IMAGE"])
-        self.downloader.download_tiles(feature["grid_bb"])
-        success = self.merger.merge(feature["grid_bb"], map_name)
-        if success:
-            print(f'[INFO] Downloaded "{map_name}.png"')
-        else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
-        
-        shutil.rmtree("_tile_cache/")
-        return success
-
-    def _save_metadata(
-        self, 
-        feature: dict
-    ) -> list:
-        """
-        Creates list of selected metadata items.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        list
-            List of selected metadata (to be saved)
-        """
-
-        map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
-        map_url = str(feature["properties"]["IMAGEURL"])
-        coords = feature["geometry"]["coordinates"][0][0]
-
-        if not self.published_dates:
-            self.extract_published_dates()
-
-        published_date = feature["properties"]["published_date"]
-        grid_bb = feature["grid_bb"]
-
-        return [map_name, map_url, coords, published_date, grid_bb]
-
-    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
-        """
-        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
-
-        Parameters
-        ----------
-        metadata_to_save : list
-            List of metadata to save
-        out_filepath : _type_
-            File path where metadata csv will be saved.
-        """
-        metadata_df = pd.DataFrame(
-            metadata_to_save,
-            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
-        )
-        exists = True if os.path.exists(out_filepath) else False
-        metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
-
-    def query_map_sheets_by_wfs_ids(
-        self,
-        wfs_ids: Union[list, int],
-        append: bool = False,
-    ) -> None:
-        """
-        Find map sheets by WFS ID numbers.
-
-        Parameters
-        ----------
-        wfs_ids : Union[list, int]
-            The WFS ID numbers of the maps to download.
-        append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
-            By default False
-        """
-        if not self.wfs_id_nos:
-            self.extract_wfs_id_nos()
-
-        if isinstance(wfs_ids, list):
-            requested_maps = wfs_ids
-        elif isinstance(wfs_ids, int):
-            requested_maps = [wfs_ids]
-        else:
-            raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
-            )
-
-        if not append:
-            self.found_queries = []  # reset each time
-
-        for feature in self.features:
-            wfs_id_no = feature["wfs_id_no"]
-
-            if wfs_id_no in requested_maps:
-                if wfs_id_no not in self.found_queries: #only append if new item
-                    self.found_queries.append(feature)
-
-        self.print_found_queries()
-
-    def query_map_sheets_by_polygon(
-        self, polygon: Polygon, mode: str = "within", append: bool = False
-    ) -> None:
-        """
-        Find map sheets which are found within or intersecting with a defined polygon.
-
-        Parameters
-        ----------
-        polygon : Polygon
-            Polygon
-        mode : str, optional
-            The mode to use when finding maps.
-            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
-            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
-            By default "within".
-        append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
-            By default False
-
-        Notes
-        -----
-        Use ``create_polygon_from_latlons()`` to create polygon.
-        """
-        assert isinstance(
-            polygon, Polygon
-        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
-
-        assert mode in [
-            "within",
-            "intersects",
-        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
-
-        if not self.polygons:
-            self.get_polygons()
-
-        if not append:
-            self.found_queries = []  # reset each time
-
-        for feature in self.features:
-            map_polygon = feature["polygon"]
-
-            if mode == "within":
-                if map_polygon.within(polygon):
-                    if map_polygon not in self.found_queries: #only append if new item
-                        self.found_queries.append(feature)
-            elif mode == "intersects":
-                if map_polygon.intersects(polygon):
-                    if map_polygon not in self.found_queries: #only append if new item
-                        self.found_queries.append(feature)
-
-        self.print_found_queries()
-
-    def query_map_sheets_by_coordinates(
-        self, coords: tuple, append: bool = False
-    ) -> None:
-        """
-        Find maps sheets which contain a defined set of coordinates.
-        Coordinates are (x,y).
-
-        Parameters
-        ----------
-        coords : tuple
-            Coordinates in ``(x,y)`` format.
-        append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
-            By default False
-        """
-        assert isinstance(
-            coords, tuple
-        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
-
-        coords = Point(coords)
-
-        if not self.polygons:
-            self.get_polygons()
-
-        if not append:
-            self.found_queries = []  # reset each time
-
-        for feature in self.features:
-            map_polygon = feature["polygon"]
-
-            if map_polygon.contains(coords):
-                if map_polygon not in self.found_queries: #only append if new item
-                    self.found_queries.append(feature)
-
-        self.print_found_queries()
-
-    def print_found_queries(self) -> None:
-        """
-        Prints query results.
-        """
-        if not self.polygons:
-            self.get_polygons()
-
-        if len(self.found_queries) == 0:
-            print("[INFO] No query results found/saved.")
-        else:
-            divider = 14 * "="
-            print(f"{divider}\nQuery results:\n{divider}")
-            for feature in self.found_queries:
-                map_url = feature["properties"]["IMAGEURL"]
-                map_bounds = feature["polygon"].bounds
-                print(f"URL:     \t{map_url}")
-                print(f"coordinates:  \t{map_bounds}")
-                print(20 * "-")
-
-    def download_all_map_sheets(
-        self, path_save: str = "./maps/", metadata_fname="metadata.csv"
-    ) -> None:
-        """
-        Downloads all map sheets in metadata.
-
-        Parameters
-        ----------
-        path_save : str, optional
-            Path to save map sheets, by default "./maps/"
-        metadata_fname : str, optional
-            Name to use for metadata file, by default "metadata.csv"
-        """
-        if not self.grid_bbs:
-            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-
-        self._initialise_downloader()
-        self._initialise_merger(path_save)
-
-        metadata_to_save = []
-        for feature in self.features:
-            exists = self._check_map_sheet_exists(feature)
-            if not exists:
-                success = self._download_map(feature)
-                if success:
-                    metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
-
-    def download_map_sheets_by_wfs_ids(
-        self,
-        wfs_ids: Union[list, int],
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
-    ) -> None:
-        """
-        Downloads map sheets by WFS ID numbers.
-
-        Parameters
-        ----------
-        wfs_ids : Union[list, int]
-            The WFS ID numbers of the maps to download.
-        path_save : str, optional
-            Path to save map sheets, by default "./maps/"
-        metadata_fname : str, optional
-            Name to use for metadata file, by default "metadata.csv"
-        """
-
-        if not self.wfs_id_nos:
-            self.extract_wfs_id_nos()
-
-        if isinstance(wfs_ids, list):
-            requested_maps = wfs_ids
-        elif isinstance(wfs_ids, int):
-            requested_maps = [wfs_ids]
-        else:
-            raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
-            )
-
-        if not self.grid_bbs:
-            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-
-        self._initialise_downloader()
-        self._initialise_merger(path_save)
-
-        wfs_id_list = [feature["wfs_id_no"] for feature in self.features]
-        if set(wfs_id_list).isdisjoint(set(requested_maps)):
-            raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
-
-        metadata_to_save = []
-        for feature in self.features:
-            wfs_id_no = feature["wfs_id_no"]
-            if wfs_id_no in requested_maps:
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
-
-    def download_map_sheets_by_polygon(
-        self,
-        polygon: Polygon,
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
-        mode: str = "within",
-    ) -> None:
-        """
-        Donwloads any map sheets which are found within or intersecting with a defined polygon.
-
-        Parameters
-        ----------
-        polygon : Polygon
-            Polygon
-        path_save : str, optional
-            Path to save map sheets, by default "./maps/"
-        metadata_fname : str, optional
-            Name to use for metadata file, by default "metadata.csv"
-        mode : str, optional
-            The mode to use when finding maps.
-            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
-            and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
-            By default "within".
-
-        Notes
-        -----
-        Use ``create_polygon_from_latlons()`` to create polygon.
-        """
-        assert isinstance(
-            polygon, Polygon
-        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
-
-        assert mode in [
-            "within",
-            "intersects",
-        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
-
-        if not self.grid_bbs:
-            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-
-        self._initialise_downloader()
-        self._initialise_merger(path_save)
-
-        if self.merged_polygon is None:
-            self.get_merged_polygon()
-
-        if self.merged_polygon.disjoint(polygon):
-            raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
-
-        metadata_to_save = []
-        for feature in self.features:
-            requested = False
-            map_polygon = feature["polygon"]
-
-            if mode == "within":
-                if map_polygon.within(polygon):
-                    requested = True
-            elif mode == "intersects":
-                if map_polygon.intersects(polygon):
-                    requested = True
-
-            if requested == True:
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
-
-    def download_map_sheets_by_coordinates(
-        self, coords: tuple, path_save: str = "./maps/", metadata_fname="metadata.csv"
-    ) -> None:
-        """
-        Downloads any maps sheets which contain a defined set of coordinates.
-        Coordinates are (x,y).
-
-        Parameters
-        ----------
-        coords : tuple
-            Coordinates in ``(x,y)`` format.
-        path_save : str, optional
-            Path to save map sheets, by default "./maps/"
-        metadata_fname : str, optional
-            Name to use for metadata file, by default "metadata.csv"
-        """
-
-        assert isinstance(
-            coords, tuple
-        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
-
-        coords = Point(coords)
-
-        if not self.grid_bbs:
-            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-
-        self._initialise_downloader()
-        self._initialise_merger(path_save)
-
-        if self.merged_polygon is None:
-            self.get_merged_polygon()
-
-        if not self.merged_polygon.contains(coords):
-            raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
-
-        metadata_to_save = []
-        for feature in self.features:
-            map_polygon = feature["polygon"]
-
-            if map_polygon.contains(coords):
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
-
-    def download_map_sheets_by_queries(
-        self,
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
-    ) -> None:
-        """
-        Downloads map sheets saved as query results.
-
-        Parameters
-        ----------
-        path_save : str, optional
-            Path to save map sheets, by default "./maps/"
-        metadata_fname : str, optional
-            Name to use for metadata file, by default "metadata.csv"
-        """
-        if not self.grid_bbs:
-            raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
-
-        self._initialise_downloader()
-        self._initialise_merger(path_save)
-
-        assert len(self.found_queries) > 0, "[ERROR] No query results found/saved."
-
-        metadata_to_save = []
-        for feature in self.found_queries:
-            exists = self._check_map_sheet_exists(feature)
-            if not exists:
-                success = self._download_map(feature)
-                if success:
-                    metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
