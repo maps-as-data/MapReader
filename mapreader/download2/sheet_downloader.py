@@ -557,7 +557,7 @@ class SheetDownloader:
         self._initialise_merger(path_save)
 
         wfs_id_list = [feature["wfs_id_no"] for feature in self.features]
-        if set(wfs_id_list).disjoint(set(requested_maps)):
+        if set(wfs_id_list).isdisjoint(set(requested_maps)):
             raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
 
         metadata_to_save = []
