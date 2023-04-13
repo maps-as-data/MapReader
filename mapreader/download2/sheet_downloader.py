@@ -268,7 +268,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                     coords[:, 0],
                     coords[:, 1],
                     c="r",
-                    alpha=0.5,
+                    linewidth=0.5,
                     transform=ccrs.Geodetic(),
                 )
 
@@ -290,15 +290,15 @@ If you would like to install it, please follow instructions at https://scitools.
                 text_id = feature["wfs_id_no"]
                 coords = np.array(feature["geometry"]["coordinates"][0][0])
 
-            plt.plot(coords[:, 0], coords[:, 1], c="r", alpha=0.5)
+                plt.plot(coords[:, 0], coords[:, 1], c="r", alpha=0.5)
 
-            if add_id:
-                plt.text(
-                    np.mean(coords[:, 0]) - 0.15,
-                    np.mean(coords[:, 1]) - 0.05,
-                    f"{text_id}",
-                    color="r",
-                )
+                if add_id:
+                    plt.text(
+                        np.mean(coords[:, 0]) - 0.15,
+                        np.mean(coords[:, 1]) - 0.05,
+                        f"{text_id}",
+                        color="r",
+                    )
 
         plt.show()
 
