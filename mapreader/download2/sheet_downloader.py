@@ -557,7 +557,7 @@ class SheetDownloader:
         self._initialise_merger(path_save)
 
         wfs_id_list = [feature["wfs_id_no"] for feature in self.features]
-        if set(wfs_id_list).isdisjoint(set(requested_maps)):
+        if set(wfs_id_list).disjoint(set(requested_maps)):
             raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
 
         metadata_to_save = []
@@ -620,7 +620,7 @@ class SheetDownloader:
         if self.merged_polygon is None:
             self.get_merged_polygon()
 
-        if self.merged_polygon.isdisjoint(polygon):
+        if self.merged_polygon.disjoint(polygon):
             raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
 
         metadata_to_save = []
@@ -677,7 +677,7 @@ class SheetDownloader:
         if self.merged_polygon is None:
             self.get_merged_polygon()
 
-        if self.merged_polygon.isdisjoint(coords):
+        if self.merged_polygon.disjoint(coords):
             raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
 
         metadata_to_save = []
@@ -728,7 +728,7 @@ class SheetDownloader:
         if self.merged_polygon is None:
             self.get_merged_polygon()
 
-        if self.merged_polygon.isdisjoint(line):
+        if self.merged_polygon.disjoint(line):
             raise ValueError(f"[ERROR] Line is out of map metadata bounds.")
 
         metadata_to_save = []
