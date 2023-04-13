@@ -178,114 +178,7 @@ class SheetDownloader:
 [INFO] Min lon: {min_x}, max lon: {max_x}"
         )
 
-    def _initialise_downloader(self):
-        """
-        Initialise TileDownloader object
-        """
-        self.downloader = TileDownloader(self.tile_server)
-
-    def _initialise_merger(self, path_save: str):
-        """
-        Initialise TileMerger object.
-
-        Parameters
-        ----------
-        path_save : str
-            Path to save merged items (i.e. whole map sheets)
-        """
-        self.merger = TileMerger(output_folder=path_save, show_progress=False)
-    
-    def _check_map_sheet_exists(self, feature: dict) -> bool:
-        """
-        Checks if a map sheet is already saved.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        bool
-            True if file exists, False if not.
-        """
-        map_name = str("map_" + feature["properties"]["IMAGE"])        
-        path_save = self.merger.output_folder
-        if os.path.exists(f"{path_save}{map_name}.png"):
-            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
-            return True
-        return False
-
-    def _download_map(self, feature: dict) -> bool:
-        """
-        Downloads a single map sheet and saves as png file.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        bool
-            True if map was downloaded sucessfully, False if not.
-        """
-        map_name = str("map_" + feature["properties"]["IMAGE"])
-        self.downloader.download_tiles(feature["grid_bb"])
-        success = self.merger.merge(feature["grid_bb"], map_name)
-        if success:
-            print(f'[INFO] Downloaded "{map_name}.png"')
-        else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
-        
-        shutil.rmtree("_tile_cache/")
-        return success
-
-    def _save_metadata(
-        self, 
-        feature: dict
-    ) -> list:
-        """
-        Creates list of selected metadata items.
-
-        Parameters
-        ----------
-        feature : dict
-
-        Returns
-        -------
-        list
-            List of selected metadata (to be saved)
-        """
-
-        map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
-        map_url = str(feature["properties"]["IMAGEURL"])
-        coords = feature["geometry"]["coordinates"][0][0]
-
-        if not self.published_dates:
-            self.extract_published_dates()
-
-        published_date = feature["properties"]["published_date"]
-        grid_bb = feature["grid_bb"]
-
-        return [map_name, map_url, coords, published_date, grid_bb]
-
-    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
-        """
-        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
-
-        Parameters
-        ----------
-        metadata_to_save : list
-            List of metadata to save
-        out_filepath : _type_
-            File path where metadata csv will be saved.
-        """
-        metadata_df = pd.DataFrame(
-            metadata_to_save,
-            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
-        )
-        exists = True if os.path.exists(out_filepath) else False
-        metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
-
+    ## queries
     def query_map_sheets_by_wfs_ids(
         self,
         wfs_ids: Union[list, int],
@@ -539,6 +432,139 @@ class SheetDownloader:
                 print(f"coordinates:  \t{map_bounds}")
                 print(20 * "-")
 
+    ## download
+    def _initialise_downloader(self):
+        """
+        Initialise TileDownloader object
+        """
+        self.downloader = TileDownloader(self.tile_server)
+
+    def _initialise_merger(self, path_save: str):
+        """
+        Initialise TileMerger object.
+
+        Parameters
+        ----------
+        path_save : str
+            Path to save merged items (i.e. whole map sheets)
+        """
+        self.merger = TileMerger(output_folder=path_save, show_progress=False)
+    
+    def _check_map_sheet_exists(self, feature: dict) -> bool:
+        """
+        Checks if a map sheet is already saved.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if file exists, False if not.
+        """
+        map_name = str("map_" + feature["properties"]["IMAGE"])        
+        path_save = self.merger.output_folder
+        if os.path.exists(f"{path_save}{map_name}.png"):
+            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+            return True
+        return False
+
+    def _download_map(self, feature: dict) -> bool:
+        """
+        Downloads a single map sheet and saves as png file.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        bool
+            True if map was downloaded sucessfully, False if not.
+        """
+        map_name = str("map_" + feature["properties"]["IMAGE"])
+        self.downloader.download_tiles(feature["grid_bb"])
+        success = self.merger.merge(feature["grid_bb"], map_name)
+        if success:
+            print(f'[INFO] Downloaded "{map_name}.png"')
+        else:
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+        
+        shutil.rmtree("_tile_cache/")
+        return success
+
+    def _save_metadata(
+        self, 
+        feature: dict
+    ) -> list:
+        """
+        Creates list of selected metadata items.
+
+        Parameters
+        ----------
+        feature : dict
+
+        Returns
+        -------
+        list
+            List of selected metadata (to be saved)
+        """
+
+        map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
+        map_url = str(feature["properties"]["IMAGEURL"])
+        coords = feature["geometry"]["coordinates"][0][0]
+
+        if not self.published_dates:
+            self.extract_published_dates()
+
+        published_date = feature["properties"]["published_date"]
+        grid_bb = feature["grid_bb"]
+
+        return [map_name, map_url, coords, published_date, grid_bb]
+
+    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
+        """
+        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
+
+        Parameters
+        ----------
+        metadata_to_save : list
+            List of metadata to save
+        out_filepath : _type_
+            File path where metadata csv will be saved.
+        """
+        metadata_df = pd.DataFrame(
+            metadata_to_save,
+            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
+        )
+        exists = True if os.path.exists(out_filepath) else False
+        metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
+
+    def _download_map_sheets(self, features: list, path_save: str = "./maps/", metadata_fname="metadata.csv"):
+        """Download map sheets from a list of features.
+
+        Parameters
+        ----------
+        features : list
+            list of features to download
+        path_save : str, optional
+            Path to save map sheets, by default "./maps/"
+        metadata_fname : str, optional
+            Name to use for metadata file, by default "metadata.csv"
+        """
+
+        metadata_to_save = []
+        for feature in features:
+            exists = self._check_map_sheet_exists(feature)
+            if not exists:
+                success = self._download_map(feature)
+                if success:
+                    metadata_to_save.append(self._save_metadata(feature))
+
+        metadata_path = "{}{}".format(path_save, metadata_fname)
+        self._create_metadata_df(metadata_to_save, metadata_path)
+
     def download_all_map_sheets(
         self, path_save: str = "./maps/", metadata_fname="metadata.csv"
     ) -> None:
@@ -558,16 +584,8 @@ class SheetDownloader:
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
-        metadata_to_save = []
-        for feature in self.features:
-            exists = self._check_map_sheet_exists(feature)
-            if not exists:
-                success = self._download_map(feature)
-                if success:
-                    metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+        features = self.features
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def download_map_sheets_by_wfs_ids(
         self,
@@ -610,18 +628,13 @@ class SheetDownloader:
         if set(wfs_id_list).isdisjoint(set(requested_maps)):
             raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
 
-        metadata_to_save = []
+        features=[]
         for feature in self.features:
             wfs_id_no = feature["wfs_id_no"]
             if wfs_id_no in requested_maps:
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
+                features.append(feature)
 
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def download_map_sheets_by_polygon(
         self,
@@ -673,27 +686,18 @@ class SheetDownloader:
         if self.merged_polygon.disjoint(polygon):
             raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
 
-        metadata_to_save = []
+        features = []
         for feature in self.features:
-            requested = False
             map_polygon = feature["polygon"]
 
             if mode == "within":
                 if map_polygon.within(polygon):
-                    requested = True
+                    features.append(feature)
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
-                    requested = True
-
-            if requested == True:
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+                    features.append(feature)
+        
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def download_map_sheets_by_coordinates(
         self, coords: tuple, path_save: str = "./maps/", metadata_fname="metadata.csv"
@@ -730,19 +734,13 @@ class SheetDownloader:
         if self.merged_polygon.disjoint(coords):
             raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
 
-        metadata_to_save = []
+        features = []
         for feature in self.features:
             map_polygon = feature["polygon"]
-
             if map_polygon.contains(coords):
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
+                features.append(feature)
 
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def download_map_sheets_by_line(
         self, line: LineString, path_save: str = "./maps/", metadata_fname="metadata.csv"
@@ -781,19 +779,14 @@ class SheetDownloader:
         if self.merged_polygon.disjoint(line):
             raise ValueError(f"[ERROR] Line is out of map metadata bounds.")
 
-        metadata_to_save = []
+        features = []
         for feature in self.features:
             map_polygon = feature["polygon"]
 
             if map_polygon.intersects(line):
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
+                features.append(feature)
 
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def download_map_sheets_by_string(
         self,
@@ -835,20 +828,15 @@ class SheetDownloader:
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
-        metadata_to_save = []
+        features = []
         for feature in self.features:
             field_to_search = reduce(lambda d, key: d.get(key), keys, feature) # reduce(function, sequence to go through, initial)
             match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
             
             if match:
-                exists = self._check_map_sheet_exists(feature)
-                if not exists:
-                    success = self._download_map(feature)
-                    if success:
-                        metadata_to_save.append(self._save_metadata(feature))
+                features.append(feature)
 
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)    
+        self._download_map_sheets(features, path_save, metadata_fname)   
 
     def download_map_sheets_by_queries(
         self,
@@ -873,16 +861,8 @@ class SheetDownloader:
 
         assert len(self.found_queries) > 0, "[ERROR] No query results found/saved."
 
-        metadata_to_save = []
-        for feature in self.found_queries:
-            exists = self._check_map_sheet_exists(feature)
-            if not exists:
-                success = self._download_map(feature)
-                if success:
-                    metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = "{}{}".format(path_save, metadata_fname)
-        self._create_metadata_df(metadata_to_save, metadata_path)
+        features = self.found_queries
+        self._download_map_sheets(features, path_save, metadata_fname)
 
     def hist_published_dates(self, **kwargs) -> None:
         """
