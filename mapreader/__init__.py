@@ -7,6 +7,7 @@ from mapreader.download.tileserver_access import TileServer
 
 from mapreader.download2.sheet_downloader import SheetDownloader
 from mapreader.download2.downloader import Downloader
+from mapreader.download2.downloader_utils import create_polygon_from_latlons, create_line_from_latlons
 
 from mapreader.annotate.load_annotate import loadAnnotations
 
