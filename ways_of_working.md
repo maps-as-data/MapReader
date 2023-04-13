@@ -11,6 +11,7 @@ It further outlines expectations and responsibilities with regard to working on 
 | Daniel Wilson<br>([@dcsw2](https://github.com/dcsw2)) | The Alan Turing Institute | Historian/Researcher | 2019 - Present | xx|
 | Add others here | - | - | Earliest to latest start date order? | - |
 | Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | The Alan Turing Institute | Research Data Scientist | Jan 2022 - Present | - 
+| Kalle Westerling<br>([@kallewesterling](https://github.com/kallewesterling)) | British Library | Research Software Engineer | Jan 2022 - Present | - |
 | Rosie Wood<br>([@rwood-97](https://github.com/rwood-97)) | The Alan Turing Institute | Research Data Scientist | Jan 2023 - Present | - |
 
 ## Previous Project Members
