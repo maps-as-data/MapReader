@@ -324,7 +324,7 @@ class SheetDownloader:
             wfs_id_no = feature["wfs_id_no"]
 
             if wfs_id_no in requested_maps:
-                if wfs_id_no not in self.found_queries: #only append if new item
+                if feature not in self.found_queries: #only append if new item
                     self.found_queries.append(feature)
 
         if print:
@@ -381,7 +381,7 @@ class SheetDownloader:
                         self.found_queries.append(feature)
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
-                    if map_polygon not in self.found_queries: #only append if new item
+                    if feature not in self.found_queries: #only append if new item
                         self.found_queries.append(feature)
 
         if print:
@@ -421,7 +421,7 @@ class SheetDownloader:
             map_polygon = feature["polygon"]
 
             if map_polygon.contains(coords):
-                if map_polygon not in self.found_queries: #only append if new item
+                if feature not in self.found_queries: #only append if new item
                     self.found_queries.append(feature)
 
         if print:
@@ -464,7 +464,7 @@ class SheetDownloader:
             map_polygon = feature["polygon"]
 
             if map_polygon.intersects(line):
-                if map_polygon not in self.found_queries: #only append if new item
+                if feature not in self.found_queries: #only append if new item
                     self.found_queries.append(feature)
 
         if print:
