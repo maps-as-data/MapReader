@@ -289,6 +289,7 @@ class SheetDownloader:
         self,
         wfs_ids: Union[list, int],
         append: bool = False,
+        print: bool = False,
     ) -> None:
         """
         Find map sheets by WFS ID numbers.
@@ -299,6 +300,9 @@ class SheetDownloader:
             The WFS ID numbers of the maps to download.
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        print: bool, optional
+            Whether to print query results or not.
             By default False
         """
         if not self.wfs_id_nos:
@@ -327,7 +331,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_polygon(
-        self, polygon: Polygon, mode: str = "within", append: bool = False
+        self, polygon: Polygon, mode: str = "within", append: bool = False, print: bool = False,
     ) -> None:
         """
         Find map sheets which are found within or intersecting with a defined polygon.
@@ -343,6 +347,9 @@ class SheetDownloader:
             By default "within".
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        print: bool, optional
+            Whether to print query results or not.
             By default False
 
         Notes
@@ -381,7 +388,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_coordinates(
-        self, coords: tuple, append: bool = False
+        self, coords: tuple, append: bool = False, print: bool = False
     ) -> None:
         """
         Find maps sheets which contain a defined set of coordinates.
@@ -393,6 +400,9 @@ class SheetDownloader:
             Coordinates in ``(x,y)`` format.
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        print: bool, optional
+            Whether to print query results or not.
             By default False
         """
         assert isinstance(
@@ -418,7 +428,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_line(
-        self, line: LineString, append: bool = False
+        self, line: LineString, append: bool = False, print: bool = False
     ) -> None:
         """
         Find maps sheets which intersect with a line.
@@ -429,6 +439,9 @@ class SheetDownloader:
             shapely LineString
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
+            By default False
+        print: bool, optional
+            Whether to print query results or not.
             By default False
         
         Notes
