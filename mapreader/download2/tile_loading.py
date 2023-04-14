@@ -120,7 +120,7 @@ class TileDownloader:
         ]
 
         self._update_progressbar(0.0)
-        parallel_pool = Parallel(n_jobs=-1)
+        parallel_pool = Parallel(n_jobs=-1, timeout=10)
         parallel_pool(delayed_downloads)
         self._update_progressbar(1.0)
 
