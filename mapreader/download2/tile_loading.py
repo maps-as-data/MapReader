@@ -20,7 +20,7 @@ class TileDownloader:
         self,
         tile_servers: list = None,
         img_format: Union[str, None] = None,
-        show_progress: bool = True,
+        show_progress: bool = False,
     ):
         """
         TileDownloader object.
@@ -34,7 +34,7 @@ class TileDownloader:
             If None, ``png`` will be used.
             By default None.
         show_progress : bool, optional
-            Whether or not to show progress bar, by default True.
+            Whether or not to show progress bar, by default False.
         """
         self.tile_servers = tile_servers
         self.temp_folder = "_tile_cache/"
@@ -120,7 +120,7 @@ class TileDownloader:
         ]
 
         self._update_progressbar(0.0)
-        parallel_pool = Parallel(n_jobs=-1, timeout=10)
+        parallel_pool = Parallel(n_jobs=-1)
         parallel_pool(delayed_downloads)
         self._update_progressbar(1.0)
 

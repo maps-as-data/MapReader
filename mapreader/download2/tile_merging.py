@@ -23,7 +23,7 @@ class TileMerger:
         output_folder: Union[str, None] = None,
         img_input_format: Union[str, None] = None,
         img_output_format: Union[str, None] = None,
-        show_progress=True,
+        show_progress=False,
     ):
         """TileMerger object.
 
@@ -42,7 +42,7 @@ class TileMerger:
             If None, ``png`` will be used.
             By default None.
         show_progress : bool, optional
-            Whether or not to show progress bar, by default True.
+            Whether or not to show progress bar, by default False.
         """
         self.img_input_format = (
             img_input_format

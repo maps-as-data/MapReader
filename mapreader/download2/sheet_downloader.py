@@ -448,7 +448,7 @@ class SheetDownloader:
         path_save : str
             Path to save merged items (i.e. whole map sheets)
         """
-        self.merger = TileMerger(output_folder=path_save, show_progress=False)
+        self.merger = TileMerger(output_folder=path_save)
     
     def _check_map_sheet_exists(self, feature: dict) -> bool:
         """
