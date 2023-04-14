@@ -575,7 +575,7 @@ class mapImages:
 
         # Add shapes if non-existent
         if "shape" not in self.images["parent"][image_id].keys():
-            self.add_shape_id(image_id)
+            self._add_shape_id(image_id)
 
         # Extract height/width/chan from shape
         image_height, image_width, _ = self.images["parent"][image_id]["shape"]
