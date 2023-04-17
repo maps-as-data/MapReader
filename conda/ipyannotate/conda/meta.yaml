@@ -1,0 +1,40 @@
+{% set name = "ipyannotate" %}
+{% set version = "0.1.0b0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  - url: https://files.pythonhosted.org/packages/16/b8/83ade3f8be0a15176067ab783f2d16c853b5070fd6589d67255e2494ac3a/ipyannotate-0.1.0b0-py2.py3-none-any.whl
+    sha256: 273daf0b17c3d33b46003bc79ea1b204ca1ac9def3378f9e8f2f083ec94bc99f
+    folder: ./ipyannotate
+  - path: ./setup.py
+    folder: ./ipyannotate/setup.py
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install ./ipyannotate -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - traitlets
+    - ipywidgets
+
+test:
+  imports:
+    - ipyannotate
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/ipyannotate/
+  summary: Jupyter Widget for data annotation
+  license: Unknown
