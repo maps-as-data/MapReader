@@ -172,11 +172,9 @@ class TileServer:
         Parameters
         ----------
         remove_image_ids : list of str, optional
-            List of image IDs to remove from the metadata (default is an empty
-            list, ``[]``).
+            List of image IDs to remove from the metadata (default is an empty list, ``[]``).
         only_keep_image_ids : list of str, optional
-            List of image IDs to keep in the metadata (default is an empty
-            list, ``[]``).
+            List of image IDs to keep in the metadata (default is an empty list, ``[]``).
 
         Returns
         -------

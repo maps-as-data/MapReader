@@ -128,4 +128,21 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
       brew install openblas
       OPENBLAS="$(brew --prefix openblas)" pip install mapreader
 
-We are also working on making MapReader a conda package so you should soon be able to conda install MapReader. 
+
+Method 3 (conada install - EXPERIMENTAL)
+----------------------------------------
+
+- Create and activate the conda environment:
+
+.. code:: bash
+
+   conda create -n mr_py38 python=3.8
+   conda activate mr_py38
+
+- Install MapReader directly from the conda package:
+
+.. code:: bash
+
+   conda install -c anothersmith -c conda-forge -c defaults --override-channels --strict-channel-priority mapreader
+
+.. note:: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".
