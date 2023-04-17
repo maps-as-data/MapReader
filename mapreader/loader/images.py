@@ -311,8 +311,8 @@ class mapImages:
                 # print(f"[WARNING] {one_row[image_id_col]} does not exist in images, skip!")  # noqa
                 continue
             for one_col in columns:
-                if one_col in ["coord", "polygone"]:
-                    # Make sure "coord" is interpreted as a tuple
+                if one_col in ["coordinates", "polygon"]:
+                    # Make sure coordinates are interpreted as a tuple
                     self.images[tree_level][one_row[image_id_col]][
                         one_col
                     ] = eval(one_row[one_col])
@@ -432,7 +432,7 @@ class mapImages:
 
         parent_list = self.list_parents()
         for parent_id in parent_list:
-            if "coord" not in self.images["parent"][parent_id].keys():
+            if "coordinates" not in self.images["parent"][parent_id].keys():
                 print(
                     f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
                 )
@@ -468,19 +468,19 @@ class mapImages:
         par_id_list = []
         for item in list_items:
             if tree_level == "parent":
-                if "coord" not in self.images[tree_level][item].keys():
+                if "coordinates" not in self.images[tree_level][item].keys():
                     print(
-                        f"[WARNING] 'coord' could not be found in {item}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                        f"[WARNING] 'coordinates' could not be found in {item}. Suggestion: run add_metadata or addGeoInfo"  # noqa
                     )
                     continue
 
             if tree_level == "child":
                 par_id = self.images[tree_level][item]["parent_id"]
 
-                if "coord" not in self.images["parent"][par_id].keys():
+                if "coordinates" not in self.images["parent"][par_id].keys():
                     if par_id not in par_id_list:
                         print(
-                            f"[WARNING] 'coord' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo"  # noqa
                         )
                         par_id_list.append(par_id)
                     continue
@@ -566,10 +566,10 @@ class mapImages:
         it.
         """
         # Check for warnings
-        if "coord" not in self.images["parent"][image_id].keys():
+        if "coordinates" not in self.images["parent"][image_id].keys():
             if verbose:
                 print(
-                    f"[WARNING]'coord' could not be found in {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                    f"[WARNING]'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
                 )
             return
 
@@ -580,9 +580,9 @@ class mapImages:
         # Extract height/width/chan from shape
         image_height, image_width, _ = self.images["parent"][image_id]["shape"]
 
-        # Extract coordinates from image
-        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id][
-            "coord"
+        # Extract coordinates from image (xmin, ymin, xmax, ymax)
+        lon_min, lat_min, lon_max, lat_max = self.images["parent"][image_id][
+            "coordinates"
         ]
 
         # Calculate dlon and dlat
@@ -628,7 +628,7 @@ class mapImages:
             if ("dlon" not in self.images["parent"][par_id].keys()) or (
                 "dlat" not in self.images["parent"][par_id].keys()
             ):
-                if "coord" not in self.images["parent"][par_id].keys():
+                if "coordinates" not in self.images["parent"][par_id].keys():
                     if verbose:
                         print(
                             f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
@@ -640,8 +640,8 @@ class mapImages:
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
-            lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id][
-                "coord"
+            lon_min, lat_min, lon_max, lat_max = self.images["parent"][par_id][
+                "coordinates"
             ]
             min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
             max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
@@ -656,17 +656,17 @@ class mapImages:
             )
 
         elif tree_level == "parent":
-            if "coord" not in self.images[tree_level][image_id].keys():
+            if "coordinates" not in self.images[tree_level][image_id].keys():
                 if verbose:
                     print(
                         f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
                     )
                 return
 
-            print(f"[INFO] Reading 'coord' from {image_id}")
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][
+            print(f"[INFO] Reading 'coordinates' from {image_id}")
+            lon_min, lat_min, lon_max, lat_max = self.images[tree_level][
                 image_id
-            ]["coord"]
+            ]["coordinates"]
             self.images[tree_level][image_id]["center_lon"] = (
                 lon_min + lon_max
             ) / 2.0
@@ -720,16 +720,16 @@ class mapImages:
         the ``geopy`` package to be installed.
         """
 
-        if "coord" not in self.images["parent"][parent_id].keys():
+        if "coordinates" not in self.images["parent"][parent_id].keys():
             print(
-                f"[WARNING] 'coord' could not be found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
             )
             return
 
         myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
         image_height, image_width, _ = myimg_shape = myimg.shape
 
-        (xmin, xmax, ymin, ymax) = self.images["parent"][parent_id]["coord"]
+        (xmin, ymin, xmax, ymax) = self.images["parent"][parent_id]["coordinates"]
         if verbose:
             print("[INFO] Using coordinates to compute width/height:")
             print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
@@ -970,7 +970,7 @@ class mapImages:
         elif method in ["meters", "meter"]:
             keys = self.images[tree_level][image_id].keys()
 
-            if "coord" not in keys:
+            if "coordinates" not in keys:
                 raise ValueError(
                     "Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo"  # noqa
                 )
@@ -1333,11 +1333,11 @@ class mapImages:
 
                 if save_kml_dir:
                     if (
-                        "coord"
+                        "coordinates"
                         not in self.images["parent"][one_image_id].keys()
                     ):
                         print(
-                            "[WARNING] 'coord' could not be found. This is needed when save_kml_dir is set...continue"  # noqa
+                            "[WARNING] 'coordinates' could not be found. This is needed when save_kml_dir is set...continue"  # noqa
                         )
                         continue
 
@@ -1357,7 +1357,7 @@ class mapImages:
                     self._createKML(
                         path2kml=path2kml,
                         value=one_image_id,
-                        coords=self.images["parent"][one_image_id]["coord"],
+                        coords=self.images["parent"][one_image_id]["coordinates"],
                         counter=-1,
                     )
                 else:
@@ -1504,7 +1504,7 @@ class mapImages:
                     self._createKML(
                         path2kml=path2kml,
                         value=value,
-                        coords=self.images["parent"][i]["coord"],
+                        coords=self.images["parent"][i]["coordinates"],
                         counter=i,
                     )
 
@@ -1559,7 +1559,7 @@ class mapImages:
                 "[ERROR] simplekml is needed to create KML outputs."
             )
 
-        (lon_min, lon_max, lat_min, lat_max) = coords
+        (lon_min, lat_min, lon_max, lat_max) = coords #(xmin, ymin, xmax, ymax)
 
         # -----> create KML
         kml = simplekml.Kml()
@@ -1890,7 +1890,7 @@ class mapImages:
                 #    except Exception as err:
                 #        print(err)
 
-                k2change = "coord"
+                k2change = "coordinates"
                 if k2change in self.images["parent"][parent_id]:
                     try:
                         self.images["parent"][parent_id][
@@ -1958,7 +1958,7 @@ class mapImages:
                         self.images["parent"][parent_id][k2change]
                     )
 
-                k2change = "coord"
+                k2change = "coordinates"
                 if k2change in self.images["parent"][parent_id]:
                     self.images["parent"][parent_id][k2change] = eval(
                         self.images["parent"][parent_id][k2change]
@@ -1971,7 +1971,7 @@ class mapImages:
         verbose: Optional[bool] = False,
     ) -> None:
         """
-        Add geographic information (shape, coords, reprojected to EPSG:4326,
+        Add geographic information (shape, coordinates, reprojected to EPSG:4326,
         and size in meters) to the ``images`` attribute of the ``mapImages``
         instance from image metadata.
 
@@ -2045,16 +2045,16 @@ class mapImages:
 
                 # Coordinate transformation: proj1 ---> proj2
                 transformer = Transformer.from_crs(tiff_proj, proj2convert)
-                ymax, xmin = transformer.transform(
+                xmin, ymax = transformer.transform(
                     tiff_src.bounds.left, tiff_src.bounds.top
                 )
-                ymin, xmax = transformer.transform(
+                xmax, ymin = transformer.transform(
                     tiff_src.bounds.right, tiff_src.bounds.bottom
                 )
 
                 # New projected coordinates
-                coords = (xmin, xmax, ymin, ymax)
-                self.images["parent"][image_id]["coord"] = coords
+                coords = (xmin, ymin, xmax, ymax)
+                self.images["parent"][image_id]["coordinates"] = coords
 
                 # Calculate pixel size in meters
                 size_in_m = self.calc_pixel_width_height(
