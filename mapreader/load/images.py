@@ -397,14 +397,14 @@ class mapImages:
 
         Notes
         -----
-        The method runs :meth:`mapreader.load.images.mapImages.add_shape_id`
+        The method runs :meth:`mapreader.load.images.mapImages.__add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
         print(f"[INFO] Add shape, tree level: {tree_level}")
 
         list_items = list(self.images[tree_level].keys())
         for item in list_items:
-            self.add_shape_id(image_id=item, tree_level=tree_level)
+            self._add_shape_id(image_id=item, tree_level=tree_level)
 
     def add_coord_increments(self) -> None:
         """
@@ -421,7 +421,7 @@ class mapImages:
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.mapImages.add_coord_increments_id`
+        :meth:`mapreader.load.images.mapImages._add_coord_increments_id`
         for each image present at the parent level, which calculates
         pixel-wise delta longitute (``dlon``) and delta latititude (``dlat``)
         for the image and adds the data to it.
@@ -436,7 +436,7 @@ class mapImages:
                 )
                 continue
 
-            self.add_coord_increments_id(image_id=parent_id)
+            self._add_coord_increments_id(image_id=parent_id)
 
     def add_center_coord(self, tree_level: Optional[str] = "patch") -> None:
         """
@@ -455,7 +455,7 @@ class mapImages:
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.mapImages.add_center_coord_id`
+        :meth:`mapreader.load.images.mapImages._add_center_coord_id`
         for each image present at the ``tree_level`` provided, which calculates
         central longitude and latitude (``center_lon`` and ``center_lat``) for
         the image and adds the data to it.
@@ -483,9 +483,9 @@ class mapImages:
                         par_id_list.append(par_id)
                     continue
 
-            self.add_center_coord_id(image_id=item, tree_level=tree_level)
+            self._add_center_coord_id(image_id=item, tree_level=tree_level)
 
-    def add_shape_id(
+    def _add_shape_id(
         self, image_id: Union[int, str], tree_level: Optional[str] = "parent"
     ) -> None:
         """
@@ -517,7 +517,7 @@ class mapImages:
         myimg_shape = myimg.shape
         self.images[tree_level][image_id]["shape"] = myimg_shape
 
-    def add_coord_increments_id(
+    def _add_coord_increments_id(
         self, image_id: Union[int, str], verbose: Optional[bool] = False
     ) -> None:
         """
@@ -560,7 +560,7 @@ class mapImages:
         printed if ``verbose=True``.
 
         If the shape metadata cannot be found, this method will call the
-        :meth:`mapreader.load.images.mapImages.add_shape_id` method to add
+        :meth:`mapreader.load.images.mapImages._add_shape_id` method to add
         it.
         """
         # Check for warnings
@@ -573,7 +573,7 @@ class mapImages:
 
         # Add shapes if non-existent
         if "shape" not in self.images["parent"][image_id].keys():
-            self.add_shape_id(image_id)
+            self._add_shape_id(image_id)
 
         # Extract height/width/chan from shape
         image_height, image_width, _ = self.images["parent"][image_id]["shape"]
@@ -591,7 +591,7 @@ class mapImages:
         self.images["parent"][image_id]["dlon"] = dlon
         self.images["parent"][image_id]["dlat"] = dlat
 
-    def add_center_coord_id(
+    def _add_center_coord_id(
         self,
         image_id: Union[int, str],
         tree_level: Optional[str] = "patch",
@@ -634,7 +634,7 @@ class mapImages:
                     return
 
                 else:
-                    self.add_coord_increments_id(par_id)
+                    self._add_coord_increments_id(par_id)
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
@@ -973,7 +973,7 @@ class mapImages:
                 )
 
             if "shape" not in keys:
-                self.add_shape_id(image_id=image_id, tree_level=tree_level)
+                self._add_shape_id(image_id=image_id, tree_level=tree_level)
 
             image_height, _, _ = self.images[tree_level][image_id]["shape"]
 
