@@ -2,8 +2,9 @@
 name: Publish to Conda Forge
 
 on:
-  pull_request:
-    types: [review_requested]
+  push:
+    branches:
+      - main
 
 jobs:
 
