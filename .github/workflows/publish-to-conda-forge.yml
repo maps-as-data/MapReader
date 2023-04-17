@@ -1,0 +1,89 @@
+
+name: Publish to Conda Forge
+
+on: [push]
+
+jobs:
+
+  build_conda:
+    strategy:
+      matrix:
+        # os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-22.04]
+        python-version: [3.8]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    # Do not ignore bash profile files. From:
+    # https://github.com/marketplace/actions/setup-miniconda
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Fetch all history so that versioneer can determine the version number
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Taken from https://github.com/actions/starter-workflows/blob/28a47a7bc4497d7b0c039030a1eba04556bf9a64/ci/python-package-conda.yml#L17
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+
+      - name: Install conda-build tools
+        run: |
+          conda create -n mr_py38 python=3.8
+          # conda activate mr_py38
+          # conda install conda-build
+          # conda install conda-verify
+          # conda install anaconda-client
+          # conda install conda-package-handling
+
+          # Explicitly name the conda environment has `activate` does not work reliably in GitHub Actions
+          conda install -n mr_py38 conda-build conda-verify anaconda-client conda-package-handling
+
+
+      - name: Create local Conda channel
+        run: |
+          mkdir -p ./conda-deps
+          conda run -n mr_py38 conda index ./conda-deps
+          mkdir -p ./conda-mr
+          conda run -n mr_py38 conda index ./conda-mr
+
+      - name: Build dependencies
+        run: |
+          conda run -n mr_py38 conda-build ./conda/parhugin/conda/meta.yaml --output-folder ./conda-deps
+          conda run -n mr_py38 cph transmute  --out-folder ./conda-deps/noarch/ ./conda-deps/noarch/parhugin-*.tar.bz2 .conda
+          conda run -n mr_py38 conda-build ./conda/ipyannotate/conda/meta.yaml --output-folder ./conda-deps
+          conda run -n mr_py38 cph transmute  --out-folder ./conda-deps/noarch/ ./conda-deps/noarch/ipyannotate-*.tar.bz2 .conda
+
+      - name: Upload dependencies
+        run: |
+          conda run -n mr_py38 anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-deps/noarch/*.conda
+
+      - name: Check conda config
+        run: |
+          conda run -n mr_py38 conda config --show
+          conda run -n mr_py38 conda info
+          conda run -n mr_py38 conda list --show-channel-urls
+
+      - name: Build MapReader package
+        run: |
+          conda run -n mr_py38 conda-build -c conda-forge -c anothersmith ./conda/ --output-folder ./conda-mr
+
+      - name: Convert MapReader package
+        run: |
+          # Convert the package to all platforms
+          conda run -n mr_py38 conda convert ./conda-mr/linux-64/mapreader-*.tar.bz2 -p all -v --output-dir ./conda-mr
+          # Transmute all the tar.bz2 files to .conda files
+          conda run -n mr_py38 find ./conda-mr -name '*.tar.bz2' \( -execdir cph transmute --out-folder . {} .conda \; \)
+
+      - name: Upload MapReader package
+        run: |
+          conda run -n mr_py38 anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --skip-existing ./conda-mr/**/*.conda

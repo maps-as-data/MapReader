@@ -15,4 +15,7 @@ from mapreader.learn import custom_models
 
 from mapreader.process import process
 
+from . import _version
+__version__ = _version.get_versions()['version']
+
 from mapreader.utils import geo_utils

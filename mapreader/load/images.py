@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 try:
     from geopy.distance import geodesic, great_circle
