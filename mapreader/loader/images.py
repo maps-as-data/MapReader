@@ -165,11 +165,17 @@ class mapImages:
         image_path = os.path.abspath(image_path)
         image_id, _ = self.splitImagePath(image_path)
 
+        img = Image.open(image_path)
+        if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
+            raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
+Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
+See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
+
         if parent_path:
             parent_path = os.path.abspath(parent_path)
             parent_basename, _ = self.splitImagePath(parent_path)
         else:
-            parent_basename, _ = None, None
+            parent_basename = None
 
         # --- Add other info to images
         self.images[tree_level][image_id] = {
