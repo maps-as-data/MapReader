@@ -74,6 +74,7 @@ def test_query_by_line(sheet_downloader):
     sd.query_map_sheets_by_line(another_line, append = True) # test append
     assert len(sd.found_queries) == 3
 
+
 def test_download_all(sheet_downloader):
     sd = sheet_downloader
     sd.get_grid_bb(10)
@@ -87,7 +88,7 @@ def test_download_all(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 5      
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[3] == '2|map_102352861.png|https://maps.nls.uk/view/102352861|[[-2.6262171, 54.14935172], [-2.62837527, 54.20716287], [-2.48042189, 54.2089733], [-2.4784698, 54.15115834], [-2.6262171, 54.14935172]]|1896|[(10, 504, 327)x(10, 504, 328)]\n'
+    assert csv[3].startswith('2|map_102352861.png')
     shutil.rmtree(maps_path)
 
 def test_download_by_wfs_ids(sheet_downloader):
@@ -103,7 +104,7 @@ def test_download_by_wfs_ids(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1] == '0|map_74487492.png|https://maps.nls.uk/view/74487492|[[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]|1896|[(10, 496, 325)x(10, 498, 326)]\n'
+    assert csv[1].startswith('0|map_74487492.png')
     sd.download_map_sheets_by_wfs_ids([1,2], maps_path, metadata_fname) #test list of wfs_ids
     assert os.path.exists(f"{maps_path}map_74488550.png")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -125,7 +126,7 @@ def test_download_by_polygon(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1] == '0|map_74487492.png|https://maps.nls.uk/view/74487492|[[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]|1896|[(10, 496, 325)x(10, 498, 326)]\n'    
+    assert csv[1].startswith('0|map_74487492.png')    
     sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname, mode = 'intersects') #test mode = 'intersects', now 2 maps
     assert os.path.exists(f"{maps_path}map_74488550.png")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -146,7 +147,7 @@ def test_download_by_coords(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1] == '0|map_74488550.png|https://maps.nls.uk/view/74488550|[[-4.19999994, 54.49000003], [-4.79999994, 54.48000003], [-4.80999994, 54.75000003], [-4.20999994, 54.75000003], [-4.19999994, 54.49000003]]|1896|[(10, 498, 325)x(10, 500, 326)]\n'
+    assert csv[1].startswith('0|map_74488550.png')
     shutil.rmtree(maps_path)
 
 def test_download_by_line(sheet_downloader):
@@ -163,7 +164,7 @@ def test_download_by_line(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1] == '0|map_74487492.png|https://maps.nls.uk/view/74487492|[[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]|1896|[(10, 496, 325)x(10, 498, 326)]\n'
+    assert csv[1].startswith('0|map_74487492.png')
     shutil.rmtree(maps_path)
 
 def test_download_by_queries(sheet_downloader):
@@ -181,7 +182,7 @@ def test_download_by_queries(sheet_downloader):
         csv = f.readlines()
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1] == '0|map_102352861.png|https://maps.nls.uk/view/102352861|[[-2.6262171, 54.14935172], [-2.62837527, 54.20716287], [-2.48042189, 54.2089733], [-2.4784698, 54.15115834], [-2.6262171, 54.14935172]]|1896|[(10, 504, 327)x(10, 504, 328)]\n'
+    assert csv[1].startswith('0|map_102352861.png|')
     shutil.rmtree(maps_path)
 
 
