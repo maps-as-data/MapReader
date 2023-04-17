@@ -536,7 +536,7 @@ class SheetDownloader:
         """
         metadata_df = pd.DataFrame(
             metadata_to_save,
-            columns=["name", "url", "coordinates (xmin, ymin, xmax, ymax)", "published_date", "grid_bb"],
+            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
         )
         exists = True if os.path.exists(out_filepath) else False
         metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
