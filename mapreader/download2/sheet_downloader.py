@@ -429,7 +429,7 @@ class SheetDownloader:
                 map_url = feature["properties"]["IMAGEURL"]
                 map_bounds = feature["polygon"].bounds
                 print(f"URL:     \t{map_url}")
-                print(f"coordinates:  \t{map_bounds}")
+                print(f"coordinates (bounds):  \t{map_bounds}")
                 print(20 * "-")
 
     ## download
@@ -513,7 +513,7 @@ class SheetDownloader:
 
         map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
         map_url = str(feature["properties"]["IMAGEURL"])
-        coords = feature["geometry"]["coordinates"][0][0]
+        coords = feature["polygon"].bounds
 
         if not self.published_dates:
             self.extract_published_dates()
@@ -536,7 +536,7 @@ class SheetDownloader:
         """
         metadata_df = pd.DataFrame(
             metadata_to_save,
-            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
+            columns=["name", "url", "coordinates (xmin, ymin, xmax, ymax)", "published_date", "grid_bb"],
         )
         exists = True if os.path.exists(out_filepath) else False
         metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
