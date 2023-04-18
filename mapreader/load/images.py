@@ -738,24 +738,22 @@ class MapImages:
     def calc_pixel_width_height(
         self,
         parent_id: Union[int, str],
-        calc_size_in_m: Optional[str] = "great-circle",
+        method: Optional[str] = "great-circle",
         verbose: Optional[bool] = False,
     ) -> Tuple[float, float, float, float]:
         """
-        Calculate the width and height of each pixel in a given image in
-        meters.
+        Calculate the width and height of each pixel in a given image in meters.
 
         Parameters
         ----------
         parent_id : int or str
             The ID of the parent image to calculate pixel size.
-        calc_size_in_m : str, optional
+        method : str, optional
             Method to use for calculating image size in meters.
-            Possible values: ``"great-circle"`` (default), ``"gc"`` (alias for
-            ``"great-circle"``), ``"geodesic"``. ``"great-circle"`` and
-            ``"gc"`` compute size using the great-circle distance formula,
-            while ``"geodesic"`` computes size using the geodesic distance
-            formula.
+            
+            Possible values: ``"great-circle"`` (default), ``"gc"``, ``"great_circle"``, ``"geodesic"`` or ``"gd"``. 
+            ``"great-circle"``, ``"gc"`` and ``"great_circle"`` compute size using the great-circle distance formula,
+            while ``"geodesic"`` and ``"gd"`` computes size using the geodesic distance formula.
         verbose : bool, optional
             If ``True``, print additional information during the calculation.
             Default is ``False``.
@@ -763,8 +761,7 @@ class MapImages:
         Returns
         -------
         tuple of floats
-            The size of the image in meters as a tuple of bottom, top, left,
-            and right distances (in that order).
+            The size of the image in meters as a tuple of bottom, right, top and left distances (in that order).
 
         Notes
         -----
@@ -779,65 +776,47 @@ class MapImages:
 
         if "coordinates" not in self.images["parent"][parent_id].keys():
             print(
-                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
+                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
             )
             return
 
-        myimg = mpimg.imread(self.images["parent"][parent_id]["image_path"])
-        image_height, image_width, _ = myimg_shape = myimg.shape
+        img = Image.open(self.images["parent"][parent_id]["image_path"])
+        height, width = img.height, img.width
+        channels = len(img.mode)
 
         (xmin, ymin, xmax, ymax) = self.images["parent"][parent_id]["coordinates"]
+        
         if verbose:
             print("[INFO] Using coordinates to compute width/height:")
-            print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
             print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
-            print(f"[INFO] shape (hwc): {myimg_shape}")
+            print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
+            print(f"[INFO] shape (hwc): {(height, width, channels)}")
 
         # Calculate the size of image in meters
-        if calc_size_in_m == "geodesic":
+        if method in ["geodesic", "gd"]:
             bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
             right = geodesic((ymin, xmax), (ymax, xmax)).meters
             top = geodesic((ymax, xmax), (ymax, xmin)).meters
             left = geodesic((ymax, xmin), (ymin, xmin)).meters
-            size_in_m = (bottom, top, left, right)
-            if verbose:
-                print(
-                    f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"  # noqa
-                )
 
-            mean_width = np.mean(
-                [size_in_m[0] / image_width, size_in_m[1] / image_width]
-            )
-            mean_height = np.mean(
-                [size_in_m[2] / image_height, size_in_m[3] / image_height]
-            )
-            if verbose:
-                print(
-                    f"Each pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."  # noqa
-                )
-
-        elif calc_size_in_m in ["gc", "great-circle"]:
+        elif method in ["gc", "great-circle", "great_circle"]:
             bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
             right = great_circle((ymin, xmax), (ymax, xmax)).meters
             top = great_circle((ymax, xmax), (ymax, xmin)).meters
             left = great_circle((ymax, xmin), (ymin, xmin)).meters
-            size_in_m = (bottom, top, left, right)
-            if verbose:
-                print(
-                    f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"  # noqa
-                )
+        
+        else:
+            raise NotImplementedError(f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}')
 
-            mean_width = np.mean(
-                [size_in_m[0] / image_width, size_in_m[1] / image_width]
-            )
-            mean_height = np.mean(
-                [size_in_m[2] / image_height, size_in_m[3] / image_height]
-            )
-            if verbose:
-                print(
-                    f"Each pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."  # noqa
-                )
-
+        size_in_m = (bottom, right, top, left) #anticlockwise order
+        
+        mean_pixel_width = np.mean([size_in_m[0]/width, size_in_m[2]/width])
+        mean_pixel_height = np.mean([size_in_m[1]/height, size_in_m[3]/height])
+        
+        if verbose:
+            print(f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}")  # noqa
+            print(f"Each pixel is ~{mean_pixel_width:.3f} X {mean_pixel_height:.3f} meters (width x height).")  # noqa
+                
         return size_in_m
 
     def patchify_all(
