@@ -31,7 +31,7 @@ def create_hf(geom: str) -> Tuple[str, str]:
         If the specified geometry type is not implemented.
     """
 
-    if geom == "polygone":
+    if geom == "polygon":
         header = """
         {
         "type": "FeatureCollection",

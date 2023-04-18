@@ -5,7 +5,7 @@ Learn and Predict
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``Train`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
+MapReader's ``Learn`` subpackage is used to train or fine-tune a CV (computer vision) classifier and use it for inference.
 
 Load data
 -----------
@@ -28,7 +28,7 @@ For example, if you have downloaded your maps using the default settings of our 
 
     #EXAMPLE
     annotated_images = loadAnnotations()
-    annotated_images.load("./annotations_one_inch/rail_space_#rosie#.csv", path2dir="./tests/patch-*png")
+    annotated_images.load("./annotations_one_inch/rail_space_#rosie#.csv", path2dir="./patches/patch-*png")
 
 To view the data loaded in from your ``csv`` as a dataframe, use:
 

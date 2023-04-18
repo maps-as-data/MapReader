@@ -37,7 +37,7 @@ class TileServer:
         `MapReader/worked_examples/persistent_data <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples/persistent_data>`_.
     geometry : str, optional
         The type of geometry that defines the boundaries in the map. Defaults
-        to ``"polygone"``.
+        to ``"polygon"``.
     download_url : str, optional
         The base URL pattern used to download tiles from the server. This
         should contain placeholders for the x coordinate (``x``), the y
@@ -74,7 +74,7 @@ class TileServer:
     def __init__(
         self,
         metadata_path: Union[str, dict, list],
-        geometry: Optional[str] = "polygone",
+        geometry: Optional[str] = "polygon",
         download_url: Optional[
             str
         ] = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",  # noqa
@@ -89,7 +89,7 @@ class TileServer:
         self.download_url = download_url
 
         if isinstance(metadata_path, str) and os.path.isfile(metadata_path):
-            # Read a metada file
+            # Read a metadata file
             json_fio = open(metadata_path, "r")
             json_f = json_fio.readlines()[0]
             # change metadata to a dictionary:
@@ -360,7 +360,7 @@ class TileServer:
             maximum latitude of the rectangular boundary of the polygon.
 
         """
-        if self.geometry == "polygone":
+        if self.geometry == "polygon":
             coord_arr = np.array(coords)
             # if len(coord_arr) != 5:
             #    raise ValueError(f"[ERROR] expected length of coordinate list is 5. coords: {coords}") # noqa
@@ -371,7 +371,7 @@ class TileServer:
 
             """
             # this method results in smaller rectangles (compared to the
-            # original polygone) particularly if the map is strongly tilted
+            # original polygon) particularly if the map is strongly tilted
             min_lon = np.sort(coord_arr[:-1, 0])[1]
             max_lon = np.sort(coord_arr[:-1, 0])[2]
             min_lat = np.sort(coord_arr[:-1, 1])[1]
@@ -479,7 +479,7 @@ class TileServer:
         output_maps_dirname : str, optional
             Directory to save combined map images, by default ``"maps"``.
         output_metadata_filename : str, optional
-            Name of the output metadata file, by default ``"metadata.csv"``.
+            Name of the output metadatata file, by default ``"metadata.csv"``.
 
             *Note: This file will be saved in the path equivalent to
             output_maps_dirname/output_metadata_filename.*
@@ -527,7 +527,7 @@ class TileServer:
             )
 
         # Header and Footer for GeoJSON
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]
@@ -545,7 +545,7 @@ class TileServer:
         try_cond1 = try_cond2 = False
         if not os.path.isfile(metadata_output_path):
             with open(metadata_output_path, "w") as f:
-                f.writelines("|name|url|coord|pub_date|region|polygone\n")
+                f.writelines("|name|url|coord|pub_date|region|polygon\n")
                 counter = 0
         else:
             with open(metadata_output_path, "r") as f:
@@ -570,7 +570,7 @@ class TileServer:
                 if saved_metadata is not None:
                     try_cond1 = (
                         str(geometry["coordinates"][0][0])
-                        in saved_metadata["polygone"].to_list()
+                        in saved_metadata["polygon"].to_list()
                     )
                     try_cond2 = (
                         f'map_{properties["IMAGE"]}.png'
@@ -933,6 +933,15 @@ class TileServer:
         plt.ylabel("Counts", size=18)
         plt.show()
 
+    def __str__(self):
+        info = f"Metadata file has {self.__len__()} items."
+        info += f"\nDownload URL: {self.download_url}"
+        info += f"\nGeometry: {self.geometry}"
+        return info
+
+    def __len__(self):
+        return len(self.metadata)
+
     def download_tileserver_rect(
         self,
         mode: Optional[str] = "queries",
@@ -1038,7 +1047,7 @@ class TileServer:
             )
 
         # Header and Footer for GeoJSON
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]
