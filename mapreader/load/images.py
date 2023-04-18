@@ -11,7 +11,7 @@ import matplotlib.image as mpimg
 import numpy as np
 import os
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageStat
 from pylab import cm as pltcm
 from pyproj import Transformer
 import random
@@ -1019,7 +1019,7 @@ class MapImages:
             size_in_m = self.calc_pixel_width_height(image_id)
 
             # pixel height in m per pixel
-            pixel_height = size_in_m[2] / image_height
+            pixel_height = size_in_m[1] / image_height
             number_pixels4slice = int(patch_size / pixel_height)
 
             patches_info = patchify_by_pixel(
@@ -1052,12 +1052,12 @@ class MapImages:
         is already in the list. If not, the patch is added to the list.
         """
         for patch in self.images["patch"].keys():
-            my_parent = self.images["patch"][patch]["parent_id"]
-            if not self.images["parent"][my_parent].get("patches", False):
-                self.images["parent"][my_parent]["patches"] = [patch]
+            patch_parent = self.images["patch"][patch]["parent_id"]
+            if "patches" not in self.images["parent"][patch_parent].keys():
+                self.images["parent"][patch_parent]["patches"] = [patch]
             else:
-                if patch not in self.images["parent"][my_parent]["patches"]:
-                    self.images["parent"][my_parent]["patches"].append(patch)
+                if patch not in self.images["parent"][patch_parent]["patches"]:
+                    self.images["parent"][patch_parent]["patches"].append(patch)
 
     def _make_dir(
         self, path_make: str, exists_ok: Optional[bool] = True
@@ -1072,26 +1072,27 @@ class MapImages:
 
     def calc_pixel_stats(
         self,
-        parent_id: Optional[Union[str, int]] = None,
+        parent_id: Optional[str] = None,
         calc_mean: Optional[bool] = True,
         calc_std: Optional[bool] = True,
     ) -> None:
         """
         Calculate the mean and standard deviation of pixel values for all
-        channels (R, G, B, RGB and, if present, Alpha) of all patches of
+        channels of all patches of
         a given parent image. Store the results in the MapImages instance's
         ``images`` dictionary.
 
         Parameters
         ----------
-        parent_id : str, int, or None, optional
-            The ID of the parent image to calculate pixel stats for. If
-            ``None``, calculate pixel stats for all parent images.
+        parent_id : str or None, optional
+            The ID of the parent image to calculate pixel stats for. 
+            If ``None``, calculate pixel stats for all parent images.
+            By default, None
         calc_mean : bool, optional
-            Whether to calculate mean pixel values. Default is ``True``.
+            Whether to calculate mean pixel values. By default, ``True``.
         calc_std : bool, optional
-            Whether to calculate standard deviation of pixel values. Default
-            is ``True``.
+            Whether to calculate standard deviation of pixel values. 
+            By default, ``True``.
 
         Returns
         -------
@@ -1128,58 +1129,30 @@ class MapImages:
 
             for patch in list_patches:
                 patch_data = self.images["patch"][patch]
-
-                # Check whether calculation has already been run
                 patch_keys = patch_data.keys()
-                if all(
-                    [
-                        "mean_pixel_RGB" in patch_keys,
-                        "std_pixel_RGB" in patch_keys,
-                    ]
-                ):
-                    continue
-
-                # Load image
-                patch_img = mpimg.imread(patch_data["image_path"])
-
+                img = Image.open(patch_data["image_path"])
+                bands = img.getbands()
+                
                 if calc_mean:
-                    # Calculate mean pixel values
-                    self.images["patch"][patch]["mean_pixel_R"] = np.mean(
-                        patch_img[:, :, 0]
-                    )
-                    self.images["patch"][patch]["mean_pixel_G"] = np.mean(
-                        patch_img[:, :, 1]
-                    )
-                    self.images["patch"][patch]["mean_pixel_B"] = np.mean(
-                        patch_img[:, :, 2]
-                    )
-                    self.images["patch"][patch]["mean_pixel_RGB"] = np.mean(
-                        patch_img[:, :, 0:3]
-                    )
-                    # check whether alpha is present
-                    if patch_img.shape[2] > 3:
-                        self.images["patch"][patch]["mean_pixel_A"] = np.mean(
-                            patch_img[:, :, 3]
-                        )
+                    if all(f"mean_pixel_{band}" in patch_keys for band in bands):
+                        calc_mean = False
                 if calc_std:
-                    # Calculate standard deviation for pixel values
-                    self.images["patch"][patch]["std_pixel_R"] = np.std(
-                        patch_img[:, :, 0]
-                    )
-                    self.images["patch"][patch]["std_pixel_G"] = np.std(
-                        patch_img[:, :, 1]
-                    )
-                    self.images["patch"][patch]["std_pixel_B"] = np.std(
-                        patch_img[:, :, 2]
-                    )
-                    self.images["patch"][patch]["std_pixel_RGB"] = np.std(
-                        patch_img[:, :, 0:3]
-                    )
-                    # check whether alpha is present
-                    if patch_img.shape[2] > 3:
-                        self.images["patch"][patch]["std_pixel_A"] = np.std(
-                            patch_img[:, :, 3]
-                        )
+                    if all(f"std_pixel_{band}" in patch_keys for band in bands):
+                        calc_std = False
+
+                img_stat = ImageStat.Stat(img)
+                    
+                if calc_mean:
+                    img_mean = img_stat.mean
+                    for i, band in enumerate(bands):
+                        # Calculate mean pixel values
+                        self.images["patch"][patch][f"mean_pixel_{band}"] = img_mean[i]/255
+                if calc_std:
+                    img_std = img_stat.stddev
+                    for i, band in enumerate(bands):
+                        # Calculate std pixel values
+                        self.images["patch"][patch][f"std_pixel_{band}"] = img_std[i]/255
+
 
     def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -2104,8 +2077,7 @@ class MapImages:
             while ``"geodesic"`` computes size using the geodesic distance
             formula.
         verbose : bool, optional
-            Whether to print progress messages or not. The default is
-            ``False``.
+            Whether to print progress messages, by default ``False``.
 
         Returns
         -------
