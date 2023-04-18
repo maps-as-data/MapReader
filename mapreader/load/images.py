@@ -17,7 +17,7 @@ from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
 
-from .slicers import patchifyByPixel
+from .slicers import patchify_by_pixel
 
 # from ..utils import geo_utils
 
@@ -27,7 +27,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class mapImages:
+class MapImages:
     """
     Class to manage a collection of image paths and construct image objects.
 
@@ -42,7 +42,7 @@ class mapImages:
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
     **kwds : dict, optional
-        Additional keyword arguments to be passed to the ``imagesConstructor``
+        Additional keyword arguments to be passed to the ``images_constructor``
         method.
 
     Attributes
@@ -62,7 +62,7 @@ class mapImages:
         parent_path: Optional[str] = None,
         **kwds: Dict,
     ):
-        """Initializes the mapImages class."""
+        """Initializes the MapImages class."""
 
         if path_images:
             # List with all paths
@@ -77,7 +77,7 @@ class mapImages:
             "patch": {},
         }
         for image_path in self.path_images:
-            self.imagesConstructor(
+            self.images_constructor(
                 image_path=image_path,
                 parent_path=parent_path,
                 tree_level=tree_level,
@@ -105,7 +105,7 @@ class mapImages:
                 break
         return ""
 
-    def imagesConstructor(
+    def images_constructor(
         self,
         image_path: str,
         parent_path: Optional[str] = None,
@@ -114,7 +114,7 @@ class mapImages:
     ) -> None:
         """
         Constructs image data from the given image path and parent path and
-        adds it to the ``mapImages`` instance's ``images`` attribute.
+        adds it to the ``MapImages`` instance's ``images`` attribute.
 
         Parameters
         ----------
@@ -144,7 +144,7 @@ class mapImages:
         Notes
         -----
         This method assumes that the ``images`` attribute has been initialized
-        on the mapImages instance as a dictionary with two levels of hierarchy,
+        on the MapImages instance as a dictionary with two levels of hierarchy,
         ``"parent"`` and ``"patch"``. The image data is added to the
         corresponding level based on the value of ``tree_level``.
         """
@@ -161,11 +161,11 @@ class mapImages:
 
         # Convert the image_path to its absolute path
         image_path = os.path.abspath(image_path)
-        image_id, _ = self.splitImagePath(image_path)
+        image_id, _ = self.split_image_path(image_path)
 
         if parent_path:
             parent_path = os.path.abspath(parent_path)
-            parent_basename, _ = self.splitImagePath(parent_path)
+            parent_basename, _ = self.split_image_path(parent_path)
         else:
             parent_basename, _ = None, None
 
@@ -203,7 +203,7 @@ class mapImages:
                 ] = parent_path
 
     @staticmethod
-    def splitImagePath(inp_path: str) -> Tuple[str, str]:
+    def split_image_path(inp_path: str) -> Tuple[str, str]:
         """
         Split the input path into basename and dirname.
 
@@ -393,7 +393,7 @@ class mapImages:
 
         Notes
         -----
-        The method runs :meth:`mapreader.load.images.mapImages.__add_shape_id`
+        The method runs :meth:`mapreader.load.images.MapImages.__add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
         print(f"[INFO] Add shape, tree level: {tree_level}")
@@ -417,7 +417,7 @@ class mapImages:
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.mapImages._add_coord_increments_id`
+        :meth:`mapreader.load.images.MapImages._add_coord_increments_id`
         for each image present at the parent level, which calculates
         pixel-wise delta longitute (``dlon``) and delta latititude (``dlat``)
         for the image and adds the data to it.
@@ -428,7 +428,7 @@ class mapImages:
         for parent_id in parent_list:
             if "coordinates" not in self.images["parent"][parent_id].keys():
                 print(
-                    f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
+                    f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
                 )
                 continue
 
@@ -451,7 +451,7 @@ class mapImages:
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.mapImages._add_center_coord_id`
+        :meth:`mapreader.load.images.MapImages._add_center_coord_id`
         for each image present at the ``tree_level`` provided, which calculates
         central longitude and latitude (``center_lon`` and ``center_lat``) for
         the image and adds the data to it.
@@ -464,7 +464,7 @@ class mapImages:
             if tree_level == "parent":
                 if "coordinates" not in self.images[tree_level][item].keys():
                     print(
-                        f"[WARNING] 'coordinates' could not be found in {item}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                        f"[WARNING] 'coordinates' could not be found in {item}. Suggestion: run add_metadata or add_geo_info"  # noqa
                     )
                     continue
 
@@ -474,7 +474,7 @@ class mapImages:
                 if "coordinates" not in self.images["parent"][par_id].keys():
                     if par_id not in par_id_list:
                         print(
-                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo."  # noqa
+                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or add_geo_info."  # noqa
                         )
                         par_id_list.append(par_id)
                     continue
@@ -556,14 +556,14 @@ class mapImages:
         printed if ``verbose=True``.
 
         If the shape metadata cannot be found, this method will call the
-        :meth:`mapreader.load.images.mapImages._add_shape_id` method to add
+        :meth:`mapreader.load.images.MapImages._add_shape_id` method to add
         it.
         """
         # Check for warnings
         if "coordinates" not in self.images["parent"][image_id].keys():
             if verbose:
                 print(
-                    f"[WARNING]'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                    f"[WARNING]'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
                 )
             return
 
@@ -625,7 +625,7 @@ class mapImages:
                 if "coordinates" not in self.images["parent"][par_id].keys():
                     if verbose:
                         print(
-                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
+                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
                         )
                     return
 
@@ -653,7 +653,7 @@ class mapImages:
             if "coordinates" not in self.images[tree_level][image_id].keys():
                 if verbose:
                     print(
-                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
+                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
                     )
                 return
 
@@ -706,8 +706,8 @@ class mapImages:
         Notes
         -----
         This method requires the parent image to have location metadata added
-        with either the :meth:`mapreader.load.images.mapImages.add_metadata`
-        or :meth:`mapreader.load.images.mapImages.addGeoInfo` methods.
+        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
+        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
 
         The calculations are performed using the ``geopy.distance.geodesic``
         and ``geopy.distance.great_circle`` methods. Thus, the method requires
@@ -716,7 +716,7 @@ class mapImages:
 
         if "coordinates" not in self.images["parent"][parent_id].keys():
             print(
-                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
             )
             return
 
@@ -777,7 +777,7 @@ class mapImages:
 
         return size_in_m
 
-    def patchifyAll(
+    def patchify_all(
         self,
         method: Optional[str] = "pixel",
         patch_size: Optional[int] = 100,
@@ -793,7 +793,7 @@ class mapImages:
         id2: Optional[int] = -1,
     ) -> None:
         """
-        Patchify images in the specified ``tree_level`` and add the patches to the mapImages instance's ``images`` dictionary.
+        Patchify images in the specified ``tree_level`` and add the patches to the MapImages instance's ``images`` dictionary.
 
         Parameters
         ----------
@@ -822,7 +822,7 @@ class mapImages:
             Tree level, choices between ``"parent"`` or ``"patch``, by default
             ``"parent"``.
         add_to_parent : bool, optional
-            If True, patches will be added to the mapImages instance's
+            If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
         id1 : int, optional
             The start index of the images to patchify. Default is ``0``.
@@ -866,7 +866,7 @@ class mapImages:
             if add_to_parent:
                 for i in range(len(patches_info)):
                     # Add patches to the .images["patch"]
-                    self.imagesConstructor(
+                    self.images_constructor(
                         image_path=patches_info[i][0],
                         parent_path=image_path,
                         tree_level="patch",
@@ -878,7 +878,7 @@ class mapImages:
 
         if add_to_parent:
             # add patches to the parent dictionary
-            self.addPatches()
+            self.add_patches()
 
     def _patchify(
         self,
@@ -943,13 +943,13 @@ class mapImages:
         print(40 * "-")
 
         # make sure the dir exists
-        self._makeDir(path_save)
+        self._make_dir(path_save)
 
         # which image should be sliced
         image_path = os.path.abspath(image_path)
         patches_info = None
         if method == "pixel":
-            patches_info = patchifyByPixel(
+            patches_info = patchify_by_pixel(
                 image_path=image_path,
                 patch_size=patch_size,
                 path_save=path_save,
@@ -965,7 +965,7 @@ class mapImages:
 
             if "coordinates" not in keys:
                 raise ValueError(
-                    "Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo."  # noqa
+                    "Please add coordinate information first. Suggestion: Run add_metadata or add_geo_info."  # noqa
                 )
 
             if "shape" not in keys:
@@ -980,7 +980,7 @@ class mapImages:
             pixel_height = size_in_m[2] / image_height
             number_pixels4slice = int(patch_size / pixel_height)
 
-            patches_info = patchifyByPixel(
+            patches_info = patchify_by_pixel(
                 image_path=image_path,
                 patch_size=number_pixels4slice,
                 path_save=path_save,
@@ -993,7 +993,7 @@ class mapImages:
 
         return patches_info
 
-    def addPatches(self) -> None:
+    def add_patches(self) -> None:
         """
         Add patches to parent.
 
@@ -1017,7 +1017,7 @@ class mapImages:
                 if patch not in self.images["parent"][my_parent]["patches"]:
                     self.images["parent"][my_parent]["patches"].append(patch)
 
-    def _makeDir(
+    def _make_dir(
         self, path_make: str, exists_ok: Optional[bool] = True
     ) -> None:
         """
@@ -1037,7 +1037,7 @@ class mapImages:
         """
         Calculate the mean and standard deviation of pixel values for all
         channels (R, G, B, RGB and, if present, Alpha) of all patches of
-        a given parent image. Store the results in the mapImages instance's
+        a given parent image. Store the results in the MapImages instance's
         ``images`` dictionary.
 
         Parameters
@@ -1064,7 +1064,7 @@ class mapImages:
         - If mean or standard deviation of pixel values has already been
           calculated for a patch, the calculation is skipped.
         - Pixel stats are stored in the ``images`` attribute of the
-          ``mapImages`` instance, under the ``patch`` key for each patch.
+          ``MapImages`` instance, under the ``patch`` key for each patch.
         - If no patches are found for a parent image, a warning message is
           displayed and the method moves on to the next parent image.
         """
@@ -1139,9 +1139,9 @@ class mapImages:
                             patch_img[:, :, 3]
                         )
 
-    def convertImages(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Convert the ``mapImages`` instance's ``images`` dictionary into pandas
+        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
         DataFrames for easy manipulation.
 
         Returns
@@ -1184,7 +1184,7 @@ class mapImages:
         Notes
         -----
         This is a wrapper method. See the documentation of the
-        :meth:`mapreader.load.images.mapImages.show` method for more detail.
+        :meth:`mapreader.load.images.MapImages.show` method for more detail.
         """
         image_ids = self.images["parent"][parent_id]["patches"]
         self.show(image_ids, value=value, **kwds)
@@ -1347,7 +1347,7 @@ class mapImages:
                         dpi=kml_dpi_image,
                     )
 
-                    self._createKML(
+                    self._create_kml(
                         path2kml=path2kml,
                         value=one_image_id,
                         coords=self.images["parent"][one_image_id]["coordinates"],
@@ -1436,7 +1436,7 @@ class mapImages:
                         max_y = max(max_y, one_image["max_y"])
 
                         if border:
-                            self._plotBorder(
+                            self._plot_border(
                                 one_image, plt, color=border_color
                             )
 
@@ -1494,7 +1494,7 @@ class mapImages:
                         dpi=kml_dpi_image,
                     )
 
-                    self._createKML(
+                    self._create_kml(
                         path2kml=path2kml,
                         value=value,
                         coords=self.images["parent"][i]["coordinates"],
@@ -1520,7 +1520,7 @@ class mapImages:
                     plt.grid()
                     plt.show()
 
-    def _createKML(
+    def _create_kml(
         self,
         path2kml: str,
         value: str,
@@ -1570,7 +1570,7 @@ class mapImages:
 
         kml.save(f"{path2kml}.kml")
 
-    def _plotBorder(
+    def _plot_border(
         self,
         image_dict: Dict,
         plt: plt,
@@ -1653,16 +1653,16 @@ class mapImages:
             elif key in ["discrete_colorbar"]:
                 return 100
 
-    def loadPatches(
+    def load_patches(
         self,
         patch_paths: str,
         parent_paths: Optional[Union[str, bool]] = False,
-        add_geo_par: Optional[bool] = False,
+        add_geo_info: Optional[bool] = False,
         clear_images: Optional[bool] = False,
     ) -> None:
         """
         Loads patch images from the given paths and adds them to the ``images``
-        dictionary in the ``mapImages`` instance.
+        dictionary in the ``MapImages`` instance.
 
         Parameters
         ----------
@@ -1675,7 +1675,7 @@ class mapImages:
             ``False``, no parents are loaded. Default is ``False``.
 
             *Note: The ``parent_paths`` parameter accepts wildcards.*
-        add_geo_par : bool, optional
+        add_geo_info : bool, optional
             If ``True``, adds geographic information to the parent image.
             Default is ``False``.
         clear_images : bool, optional
@@ -1703,8 +1703,8 @@ class mapImages:
             patch_id = os.path.basename(file_path)
 
             # Parent ID and border can be detected using patch_id
-            parent_id = self.detectParIDfromPath(patch_id)
-            min_x, min_y, max_x, max_y = self.detectBorderFromPath(patch_id)
+            parent_id = self.detect_par_id_from_path(patch_id)
+            min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
 
             # Add patch
             if not self.images["patch"].get(patch_id, False):
@@ -1718,14 +1718,14 @@ class mapImages:
 
         if parent_paths:
             # Add parents
-            self.loadParents(
-                parent_paths=parent_paths, update=False, add_geo=add_geo_par
+            self.load_parents(
+                parent_paths=parent_paths, update=False, add_geo_info=add_geo_info
             )
             # Add patches to the parent
-            self.addPatches()
+            self.add_patches()
 
     @staticmethod
-    def detectParIDfromPath(
+    def detect_par_id_from_path(
         image_id: Union[int, str], parent_delimiter: Optional[str] = "#"
     ) -> str:
         """
@@ -1747,7 +1747,7 @@ class mapImages:
         return image_id.split(parent_delimiter)[1]
 
     @staticmethod
-    def detectBorderFromPath(
+    def detect_border_from_path(
         image_id: Union[int, str],
         # border_delimiter="-" # <-- not in use in this method
     ) -> Tuple[int, int, int, int]:
@@ -1779,12 +1779,12 @@ class mapImages:
             int(split_path[4]),
         )
 
-    def loadParents(
+    def load_parents(
         self,
         parent_paths: Optional[Union[str, bool]] = False,
         parent_ids: Optional[Union[List[str], str, bool]] = False,
         update: Optional[bool] = False,
-        add_geo: Optional[bool] = False,
+        add_geo_info: Optional[bool] = False,
     ) -> None:
         """
         Load parent images from file paths (``parent_paths``).
@@ -1802,7 +1802,7 @@ class mapImages:
         update : bool, optional
             If ``True``, current parents will be overwritten, by default
             ``False``.
-        add_geo : bool, optional
+        add_geo_info : bool, optional
             If ``True``, geographical info will be added to parents, by
             default ``False``.
 
@@ -1827,8 +1827,8 @@ class mapImages:
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
 
-                if add_geo:
-                    self.addGeoInfo()
+                if add_geo_info:
+                    self.add_geo_info()
 
         elif parent_ids:
             if not isinstance(parent_ids, list):
@@ -1837,7 +1837,7 @@ class mapImages:
                 self.images["parent"][parent_id] = {"parent_id": None}
                 self.images["parent"][parent_id]["image_path"] = None
 
-    def loadDataframe(
+    def load_df(
         self,
         parents: Optional[Union[pd.DataFrame, str]] = None,
         patch_df: Optional[Union[pd.DataFrame, str]] = None,
@@ -1870,7 +1870,7 @@ class mapImages:
 
         if not isinstance(parents, type(None)):
             if isinstance(parents, str):
-                self.loadParents(parents)
+                self.load_parents(parents)
             else:
                 self.images["parent"] = parents.to_dict(orient="index")
 
@@ -1892,7 +1892,7 @@ class mapImages:
                     except Exception as err:
                         print(err)
 
-            self.addPatches()
+            self.add_patches()
 
     def load_csv_file(
         self,
@@ -1904,7 +1904,7 @@ class mapImages:
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
-        and update the ``images`` attribute of the ``mapImages`` instance with
+        and update the ``images`` attribute of the ``MapImages`` instance with
         the loaded data.
 
         Parameters
@@ -1942,7 +1942,7 @@ class mapImages:
                 )
             )
 
-            self.addPatches()
+            self.add_patches()
 
             for parent_id in self.images["parent"].keys():
                 k2change = "patches"
@@ -1957,7 +1957,7 @@ class mapImages:
                         self.images["parent"][parent_id][k2change]
                     )
 
-    def addGeoInfo(
+    def add_geo_info(
         self,
         proj2convert: Optional[str] = "EPSG:4326",
         calc_method: Optional[str] = "great-circle",
@@ -1965,7 +1965,7 @@ class mapImages:
     ) -> None:
         """
         Add geographic information (shape, coordinates, reprojected to EPSG:4326,
-        and size in meters) to the ``images`` attribute of the ``mapImages``
+        and size in meters) to the ``images`` attribute of the ``MapImages``
         instance from image metadata.
 
         Parameters
@@ -2109,8 +2109,8 @@ class mapImages:
             if include_metadata and (not patch_id in list(metadata['rd_index_id'])):
                 continue
             # Parent ID and border can be detected using patch_id
-            parent_id = self.detectParIDfromPath(patch_id)
-            min_x, min_y, max_x, max_y = self.detectBorderFromPath(patch_id)
+            parent_id = self.detect_par_id_from_path(patch_id)
+            min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
 
             # Add patch
             if not self.images["patch"].get(patch_id, False):
@@ -2133,7 +2133,7 @@ class mapImages:
             # Add parents
             self.readParents(parent_paths=parent_paths)
             # Add patches to the parent
-            self.addPatches()
+            self.add_patches()
 
     def process(self, tree_level="parent", update_paths=True,
                 save_preproc_dir="./test_preproc"):

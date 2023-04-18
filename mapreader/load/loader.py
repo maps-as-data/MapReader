@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from mapreader.load.images import mapImages
+from mapreader.load.images import MapImages
 from typing import Optional, Union, Dict
 
 
@@ -10,9 +10,9 @@ def loader(
     tree_level: Optional[str] = "parent",
     parent_path: Optional[str] = None,
     **kwds: Dict
-) -> mapImages:
+) -> MapImages:
     """
-    Creates a ``mapImages`` class to manage a collection of image paths and
+    Creates a ``MapImages`` class to manage a collection of image paths and
     construct image objects.
 
     Parameters
@@ -31,16 +31,16 @@ def loader(
 
     Returns
     -------
-    mapImages
-        The ``mapImages`` class which can manage a collection of image paths
+    MapImages
+        The ``MapImages`` class which can manage a collection of image paths
         and construct image objects.
 
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.load.images.mapImages` class for more detail.
+    :class:`mapreader.load.images.MapImages` class for more detail.
     """
-    img = mapImages(
+    img = MapImages(
         path_images=path_images,
         tree_level=tree_level,
         parent_path=parent_path,
@@ -52,13 +52,13 @@ def loader(
 def load_patches(
     patch_paths: str,
     parent_paths: Optional[Union[str, bool]] = False,
-    add_geo_par: Optional[bool] = False,
+    add_geo_info: Optional[bool] = False,
     clear_images: Optional[bool] = False,
-) -> mapImages:
+) -> MapImages:
     """
-    Creates a ``mapImages`` class to manage a collection of image paths and
+    Creates a ``MapImages`` class to manage a collection of image paths and
     construct image objects. Then loads patch images from the given paths and
-    adds them to the ``images`` dictionary in the ``mapImages`` instance.
+    adds them to the ``images`` dictionary in the ``MapImages`` instance.
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ def load_patches(
         ``False``, no parents are loaded. Default is ``False``.
 
         *Note: The ``parent_paths`` parameter accepts wildcards.*
-    add_geo_par : bool, optional
+    add_geo_info : bool, optional
         If ``True``, adds geographic information to the parent image.
         Default is ``False``.
     clear_images : bool, optional
@@ -80,24 +80,24 @@ def load_patches(
 
     Returns
     -------
-    mapImages
-        The ``mapImages`` class which can manage a collection of image paths
+    MapImages
+        The ``MapImages`` class which can manage a collection of image paths
         and construct image objects.
 
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.load.images.mapImages` class for more detail.
+    :class:`mapreader.load.images.MapImages` class for more detail.
 
     This function in particular, also calls the
-    :meth:`mapreader.load.images.mapImages.loadPatches` method. Please see
+    :meth:`mapreader.load.images.MapImages.loadPatches` method. Please see
     the documentation for that method for more information as well.
     """
-    img = mapImages()
-    img.loadPatches(
+    img = MapImages()
+    img.load_patches(
         patch_paths=patch_paths,
         parent_paths=parent_paths,
-        add_geo_par=add_geo_par,
+        add_geo_info=add_geo_info,
         clear_images=clear_images,
     )
     return img
@@ -107,7 +107,7 @@ def load_patches(
 def read_patches(patch_paths, parent_paths, metadata=None,
                metadata_fmt="dataframe", metadata_cols2add=[], metadata_index_column="image_id",  # noqa
                clear_images=False):
-    """Construct mapImages object by calling readPatches method
+    """Construct MapImages object by calling readPatches method
        This method reads patches from files (patch_paths) and add parents if parent_paths is provided  # noqa
 
     Arguments:
@@ -118,7 +118,7 @@ def read_patches(patch_paths, parent_paths, metadata=None,
         metadata_index_column -- column to be used as index
         clear_images {bool} -- clear images variable before reading patches (default: {False})  # noqa
     """
-    img = mapImages()
+    img = MapImages()
     img.readPatches(patch_paths, parent_paths, metadata, metadata_fmt, metadata_cols2add, metadata_index_column, clear_images)  # noqa
     return img
 '''

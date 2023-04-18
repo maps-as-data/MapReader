@@ -8,8 +8,8 @@ PIL.Image.MAX_IMAGE_PIXELS = 800000000
 
 import PIL.Image as PIL_image
 
-# -------- patchifyByPixel
-def patchifyByPixel(
+# -------- patchify_by_pixel
+def patchify_by_pixel(
     image_path,
     patch_size,
     path_save="patches",
