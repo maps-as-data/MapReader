@@ -203,58 +203,38 @@ class MapImages:
                 f"[ERROR] tree_level can only be set to parent or patch, not: {tree_level}"  # noqa
             )
 
-        if (parent_path is not None) and (tree_level == "parent"):
-            raise ValueError(
-                "[ERROR] if tree_level=parent, parent_path should be None."
-            )
+        if tree_level == "parent":
+            print("[WARNING] Ignoring `parent_path` as `tree_level`  is set to 'parent'.")
+            parent_path = None
+            parent_id = None
 
-        # Convert the image_path to its absolute path
-        image_path = os.path.abspath(image_path)
-        image_id, _ = self.split_image_path(image_path)
+        abs_image_path, image_id, _ = self._convert_image_path(image_path)
 
-        if parent_path:
-            parent_path = os.path.abspath(parent_path)
-            parent_basename, _ = self.split_image_path(parent_path)
-        else:
-            parent_basename, _ = None, None
+        # if parent_path is defined get absolute parent path and parent id
+        if parent_id: 
+            abs_parent_path, parent_id, _ = self._convert_image_path(parent_path)
 
-        # --- Add other info to images
-        self.images[tree_level][image_id] = {
-            "parent_id": parent_basename,
-            "image_path": image_path,
-        }
-
+        # add image (and kwds) to dictionary 
+        self.images[tree_level][image_id] = {"parent_id": parent_id,"image_path": abs_image_path,}
+        
         for k, v in kwds.items():
             self.images[tree_level][image_id][k] = v
 
-        # --- Make sure parent exists in images["parent"]
-        if tree_level == "patch" and parent_basename:
-            # three possible scenarios
-            # 1. parent_basename is not in the parent dictionary
-            if parent_basename not in self.images["parent"].keys():
-                self.images["parent"][parent_basename] = {
-                    "parent_id": None,
-                    "image_path": parent_path,
-                }
-            # 2. parent_basename exists but parent_id is not defined
-            if (
-                "parent_id"
-                not in self.images["parent"][parent_basename].keys()
-            ):
-                self.images["parent"][parent_basename]["parent_id"] = None
-            # 3. parent_basename exists but image_path is not defined
-            if (
-                "image_path"
-                not in self.images["parent"][parent_basename].keys()
-            ):
-                self.images["parent"][parent_basename][
-                    "image_path"
-                ] = parent_path
+        if parent_id: # tree_level = 'patch' is implied
+            # ensure parent exists in parents dict
+            if parent_id not in self.images["parent"].keys(): 
+                self.images["parent"][parent_id] = {"parent_id": None, "image_path": abs_parent_path}
+            # ensure all parent info is present
+            else: 
+                if "parent_id" not in self.images["parent"][parent_id].keys():
+                    self.images["parent"][parent_id]["parent_id"] = None
+                if "image_path" not in self.images["parent"][parent_id].keys():
+                    self.images["parent"][parent_id]["image_path"] = abs_parent_path
 
     @staticmethod
-    def split_image_path(inp_path: str) -> Tuple[str, str]:
+    def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
         """
-        Split the input path into basename and dirname.
+        Convert an image path into an absolute path and find basename and directory name.
 
         Parameters
         ----------
@@ -264,12 +244,12 @@ class MapImages:
         Returns
         -------
         tuple
-            A tuple containing the basename and dirname of the input path.
+            A tuple containing the absolute path, basename and directory name.
         """
-        inp_path = os.path.abspath(inp_path)
-        path_basename = os.path.basename(inp_path)
-        path_dirname = os.path.dirname(inp_path)
-        return path_basename, path_dirname
+        abs_path = os.path.abspath(inp_path)
+        path_basename = os.path.basename(abs_path)
+        path_dirname = os.path.dirname(abs_path)
+        return abs_path, path_basename, path_dirname
 
     def add_metadata(
         self,
