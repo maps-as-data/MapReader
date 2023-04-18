@@ -158,7 +158,7 @@ class MapImages:
         self,
         image_path: str,
         parent_path: Optional[str] = None,
-        tree_level: Optional[str] = "patch",
+        tree_level: Optional[str] = "parent",
         **kwds: Dict,
     ) -> None:
         """
@@ -172,7 +172,7 @@ class MapImages:
         parent_path : str, optional
             Path to the parent image (if applicable), by default ``None``.
         tree_level : str, optional
-            Level of the image hierarchy to construct, either ``"patch"``
+            Level of the image hierarchy to construct, either ``"parent"``
             (default) or ``"parent"``.
         **kwds : dict, optional
             Additional keyword arguments to be included in the constructed
@@ -186,9 +186,6 @@ class MapImages:
         ------
         ValueError
             If ``tree_level`` is not set to ``"parent"`` or ``"patch"``.
-
-            If ``tree_level`` is set to ``"parent"`` and ``parent_path`` is
-            not ``None``.
 
         Notes
         -----
@@ -214,8 +211,9 @@ class MapImages:
         if parent_id: 
             abs_parent_path, parent_id, _ = self._convert_image_path(parent_path)
 
-        # add image (and kwds) to dictionary 
+        # add image, shape and other kwds to dictionary 
         self.images[tree_level][image_id] = {"parent_id": parent_id,"image_path": abs_image_path,}
+        self._add_shape_id(image_id, tree_level)
         
         for k, v in kwds.items():
             self.images[tree_level][image_id][k] = v
@@ -224,7 +222,7 @@ class MapImages:
             # ensure parent exists in parents dict
             if parent_id not in self.images["parent"].keys(): 
                 self.images["parent"][parent_id] = {"parent_id": None, "image_path": abs_parent_path}
-            # ensure all parent info is present
+            
             else: 
                 if "parent_id" not in self.images["parent"][parent_id].keys():
                     self.images["parent"][parent_id]["parent_id"] = None
