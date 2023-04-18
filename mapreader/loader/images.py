@@ -434,7 +434,7 @@ class mapImages:
         for parent_id in parent_list:
             if "coordinates" not in self.images["parent"][parent_id].keys():
                 print(
-                    f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                    f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
                 )
                 continue
 
@@ -480,7 +480,7 @@ class mapImages:
                 if "coordinates" not in self.images["parent"][par_id].keys():
                     if par_id not in par_id_list:
                         print(
-                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or addGeoInfo."  # noqa
                         )
                         par_id_list.append(par_id)
                     continue
@@ -631,7 +631,7 @@ class mapImages:
                 if "coordinates" not in self.images["parent"][par_id].keys():
                     if verbose:
                         print(
-                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
                         )
                     return
 
@@ -644,8 +644,8 @@ class mapImages:
                 "coordinates"
             ]
             min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
-            max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
+            max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             max_abs_y = self.images[tree_level][image_id]["max_y"] * dlat
 
             self.images[tree_level][image_id]["center_lon"] = (
@@ -659,7 +659,7 @@ class mapImages:
             if "coordinates" not in self.images[tree_level][image_id].keys():
                 if verbose:
                     print(
-                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo"  # noqa
+                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or addGeoInfo."  # noqa
                     )
                 return
 
@@ -972,7 +972,7 @@ class mapImages:
 
             if "coordinates" not in keys:
                 raise ValueError(
-                    "Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo"  # noqa
+                    "Please add coordinate information first. Suggestion: Run add_metadata or addGeoInfo."  # noqa
                 )
 
             if "shape" not in keys:
@@ -2035,7 +2035,7 @@ class mapImages:
             # Check whether coordinates are present
             if isinstance(tiff_src.crs, type(None)):
                 print(
-                    f"No coordinates found in {image_id}. Try add_metadata instead"  # noqa
+                    f"No coordinates found in {image_id}. Try add_metadata instead."  # noqa
                 )
                 continue
 
@@ -2044,12 +2044,13 @@ class mapImages:
                 tiff_proj = tiff_src.crs.to_string()
 
                 # Coordinate transformation: proj1 ---> proj2
+                # tiff is "lat, lon" instead of "x, y"
                 transformer = Transformer.from_crs(tiff_proj, proj2convert)
-                xmin, ymax = transformer.transform(
-                    tiff_src.bounds.left, tiff_src.bounds.top
+                ymin, xmin = transformer.transform(
+                    tiff_src.bounds.left, tiff_src.bounds.bottom
                 )
-                xmax, ymin = transformer.transform(
-                    tiff_src.bounds.right, tiff_src.bounds.bottom
+                ymax, xmax = transformer.transform(
+                    tiff_src.bounds.right, tiff_src.bounds.top
                 )
 
                 # New projected coordinates
