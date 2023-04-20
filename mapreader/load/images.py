@@ -843,19 +843,17 @@ class MapImages:
         self,
         method: Optional[str] = "pixel",
         patch_size: Optional[int] = 100,
-        path_save: Optional[str] = "patches",
+        tree_level: Optional[str] = "parent",
+        path_save: Optional[str] = None,
+        add_to_parents: Optional[bool] = True,
         square_cuts: Optional[bool] = False,
         resize_factor: Optional[bool] = False,
         output_format: Optional[str] = "png",
         rewrite: Optional[bool] = False,
         verbose: Optional[bool] = False,
-        tree_level: Optional[str] = "parent",
-        add_to_parent: Optional[bool] = True,
-        id1: Optional[int] = 0,
-        id2: Optional[int] = -1,
     ) -> None:
         """
-        Patchify images in the specified ``tree_level`` and add the patches to the MapImages instance's ``images`` dictionary.
+        Patchify all images in the specified ``tree_level`` and (if ``add_to_parents=True``) add the patches to the MapImages instance's ``images`` dictionary.
 
         Parameters
         ----------
@@ -865,9 +863,16 @@ class MapImages:
         patch_size : int, optional
             Number of pixels/meters in both x and y to use for slicing, by
             default ``100``.
+        tree_level : str, optional
+            Tree level, choices between ``"parent"`` or ``"patch``, by default
+            ``"parent"``.
         path_save : str, optional
-            Directory to save the patches, by default
-            ``"patches"``.
+            Directory to save the patches.
+            If None, will be set as f"patches_{patch_size}_{method}" (e.g. "patches_100_pixel").
+            By default None.
+        add_to_parents : bool, optional
+            If True, patches will be added to the MapImages instance's
+            ``images`` dictionary, by default ``True``.
         square_cuts : bool, optional
             If True, all patches will have the same number of pixels in
             x and y, by default ``False``.
@@ -880,204 +885,131 @@ class MapImages:
         verbose : bool, optional
             If True, progress updates will be printed throughout, by default
             ``False``.
-        tree_level : str, optional
-            Tree level, choices between ``"parent"`` or ``"patch``, by default
-            ``"parent"``.
-        add_to_parent : bool, optional
-            If True, patches will be added to the MapImages instance's
-            ``images`` dictionary, by default ``True``.
-        id1 : int, optional
-            The start index of the images to patchify. Default is ``0``.
-        id2 : int, optional
-            The end index of the images to patchify. Default is ``-1`` (i.e., all
-            images after index ``id1`` will be patchified).
-
-        Raises
-        ------
-        ValueError
-            If ``id2 < id1``.
-
+       
         Returns
         -------
         None
         """
-        if id2 < 0:
-            img_keys = list(self.images[tree_level].keys())[id1:]
-        elif id2 < id1:
-            raise ValueError("id2 should be > id1.")
-        else:
-            img_keys = list(self.images[tree_level].keys())[id1:id2]
+        
+        image_ids = self.images[tree_level].keys()
 
-        for image_id in img_keys:
+        if path_save is None:
+            path_save = f"patches_{patch_size}_{method}"
+
+        for image_id in image_ids:
             image_path = self.images[tree_level][image_id]["image_path"]
+        
+            print(40 * "=")
+            print(f"Patchifying {os.path.relpath(image_path)}")
+            print(40 * "-")
 
-            patches_info = self._patchify(
-                image_path=image_path,
-                method=method,
+            # make sure the dir exists
+            self._make_dir(path_save)
+
+            if method in ["meters", "meter"]:
+                if "coordinates" not in self.images[tree_level][image_id].keys():
+                    raise ValueError(
+                        "[ERROR] Please add coordinate information first. Suggestion: Run add_metadata or add_geo_info."  # noqa
+                    )
+            
+                mean_pixel_height = self._calc_pixel_height_width(image_id)[1]
+                patch_size = int(patch_size / mean_pixel_height) ## check this is correct - should patch be different size in x and y?
+            
+            self._patchify_by_pixel(
+                image_id=image_id,
                 patch_size=patch_size,
                 path_save=path_save,
+                add_to_parents=add_to_parents,
                 square_cuts=square_cuts,
                 resize_factor=resize_factor,
                 output_format=output_format,
                 rewrite=rewrite,
-                verbose=verbose,
-                image_id=image_id,
-                tree_level=tree_level,
-            )
+                verbose=verbose
+                )
 
-            if add_to_parent:
-                for i in range(len(patches_info)):
-                    # Add patches to the .images["patch"]
-                    self.images_constructor(
-                        image_path=patches_info[i][0],
-                        parent_path=image_path,
-                        tree_level="patch",
-                        min_x=patches_info[i][1][0],
-                        min_y=patches_info[i][1][1],
-                        max_x=patches_info[i][1][2],
-                        max_y=patches_info[i][1][3],
-                    )
-
-        if add_to_parent:
-            # add patches to the parent dictionary
-            self.add_patches()
-
-    def _patchify(
-        self,
-        image_path: str,
-        method: Optional[str] = "pixel",
-        patch_size: Optional[int] = 100,
-        path_save: Optional[str] = "patches",
+    def _patchify_by_pixel(self,
+        image_id: str,
+        patch_size: int,
+        path_save: str,
+        add_to_parents: Optional[bool] = True,
         square_cuts: Optional[bool] = False,
         resize_factor: Optional[bool] = False,
         output_format: Optional[str] = "png",
         rewrite: Optional[bool] = False,
-        verbose: Optional[bool] = True,
-        image_id: Optional[Union[int, str]] = None,
-        tree_level: Optional[str] = None,
-    ) -> List:
-        """
-        Patchify one image
-
-        ..
-            Private method.
+        verbose: Optional[bool] = False,
+    ):
+        """Patchify one image and (if ``add_to_parents=True``) add the patch to the MapImages instance's ``images`` dictionary.
 
         Parameters
         ----------
-        image_path : str
-            Path to image.
-        method : str, optional
-            Method used to slice images, choices between ``"pixel"`` and
-            ``"meters"`` or ``"meter"``, by default ``"pixel"``.
-        patch_size : int, optional
-            Number of pixels/meters in both x and y to use for patchifying, by
-            default ``100``.
-        path_save : str, optional
-            Directory to save the patches, by default
-            ``"patches"``.
+        image_id : str
+            The ID of the image to patchify
+        patch_size : int
+            Number of pixels in both x and y to use for slicing
+        path_save : str
+            Directory to save the patches.
+        add_to_parents : bool, optional
+            If True, patches will be added to the MapImages instance's
+            ``images`` dictionary, by default ``True``.
         square_cuts : bool, optional
-            If ``True``, all patches will have the same number of pixels
-            in x and y, by default ``False``.
+            If True, all patches will have the same number of pixels in
+            x and y, by default ``False``.
         resize_factor : bool, optional
-            If ``True``, resize the images before patchifying, by
-            ``False``.
+            If True, resize the images before patchifying, by default ``False``.
         output_format : str, optional
-            Format to use when writing image files, by default
-            ``"png"``.
+            Format to use when writing image files, by default ``"png"``.
         rewrite : bool, optional
-            If ``True``, existing slices will be rewritten, by default
-            ``False``.
+            If True, existing patches will be rewritten, by default ``False``.
         verbose : bool, optional
-            If ``True``, progress updates will be printed throughout, by
-            default ``False``.
-        tree_level : str, optional
-            Tree level, choices between ``"parent"`` or ``"patch"``, by
-            default ``"parent"``.
-
-        Returns
-        -------
-        list
-            patches_info
+            If True, progress updates will be printed throughout, by default
+            ``False``.
         """
+        tree_level = self._get_tree_level(image_id)
 
-        print(40 * "=")
-        print(f"Patchifying {os.path.relpath(image_path)}")
-        print(40 * "-")
+        parent_path = self.images[tree_level][image_id]["image_path"]
+        img = Image.open(parent_path)
+        
+        if resize_factor:
+            original_height, original_width = img.height, img.width
+            img = img.resize((int(original_width / resize_factor), int(original_height / resize_factor)))
 
-        # make sure the dir exists
-        self._make_dir(path_save)
+        height, width = img.height, img.width
 
-        # which image should be sliced
-        image_path = os.path.abspath(image_path)
-        patches_info = None
-        if method == "pixel":
-            patches_info = patchify_by_pixel(
-                image_path=image_path,
-                patch_size=patch_size,
-                path_save=path_save,
-                square_cuts=square_cuts,
-                resize_factor=resize_factor,
-                output_format=output_format,
-                rewrite=rewrite,
-                verbose=verbose,
-            )
+        for x in range(0, width, patch_size):
+            for y in range(0, height, patch_size):
+                max_x = min(x + patch_size, width)
+                max_y = min(y + patch_size, height)
 
-        elif method in ["meters", "meter"]:
-            keys = self.images[tree_level][image_id].keys()
+                if square_cuts: #move min_x and min_y back a bit so the patch is square
+                    min_x = x - (patch_size - (max_x - x))
+                    min_y = y - (patch_size - (max_y - y))
 
-            if "coordinates" not in keys:
-                raise ValueError(
-                    "Please add coordinate information first. Suggestion: Run add_metadata or add_geo_info."  # noqa
-                )
+                else:
+                    min_x = x
+                    min_y = y
 
-            if "shape" not in keys:
-                self._add_shape_id(image_id=image_id, tree_level=tree_level)
+                patch_id = f"patch-{min_x}-{min_y}-{max_x}-{max_y}-#{image_id}#.{output_format}"
+                patch_path = os.path.join(path_save, patch_id)
+                patch_path = os.path.abspath(patch_path)
 
-            image_height, _, _ = self.images[tree_level][image_id]["shape"]
+                if os.path.isfile(patch_path):
+                    if not rewrite:
+                        self._print_if_verbose(f"[INFO] File already exists: {patch_path}.", verbose)
+            
+                else:
+                    self._print_if_verbose(f"[INFO] Creating: {patch_id}. Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.", verbose)
+            
+                    patch = img.crop((min_x, min_y, max_x, max_y))
+                    patch.save(patch_path, output_format)
 
-            # size in meter contains: (bottom, top, left, right)
-            size_in_m = self.calc_pixel_width_height(image_id)
-
-            # pixel height in m per pixel
-            pixel_height = size_in_m[1] / image_height
-            number_pixels4slice = int(patch_size / pixel_height)
-
-            patches_info = patchify_by_pixel(
-                image_path=image_path,
-                patch_size=number_pixels4slice,
-                path_save=path_save,
-                square_cuts=square_cuts,
-                resize_factor=resize_factor,
-                output_format=output_format,
-                rewrite=rewrite,
-                verbose=verbose,
-            )
-
-        return patches_info
-
-    def add_patches(self) -> None:
-        """
-        Add patches to parent.
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        This method adds patches to their corresponding parent image. It
-        checks if the parent image has any patches, and if not, it creates
-        a list of patches and assigns it to the parent. If the parent image
-        already has a list of patches, the method checks if the current patch
-        is already in the list. If not, the patch is added to the list.
-        """
-        for patch in self.images["patch"].keys():
-            patch_parent = self.images["patch"][patch]["parent_id"]
-            if "patches" not in self.images["parent"][patch_parent].keys():
-                self.images["parent"][patch_parent]["patches"] = [patch]
-            else:
-                if patch not in self.images["parent"][patch_parent]["patches"]:
-                    self.images["parent"][patch_parent]["patches"].append(patch)
+                if add_to_parents:
+                    self.images_constructor(
+                        image_path=patch_path,
+                        parent_path=parent_path,
+                        tree_level="patch",
+                        pixel_bounds = (min_x, min_y, max_x, max_y)
+                        )
+                    self._add_patch_coords_id(patch_id)
 
     def _make_dir(
         self, path_make: str, exists_ok: Optional[bool] = True
@@ -1089,6 +1021,83 @@ class MapImages:
             Private method.
         """
         os.makedirs(path_make, exist_ok=exists_ok)
+
+    def _calc_pixel_height_width(
+        self,
+        parent_id: Union[int, str],
+        method: Optional[str] = "great-circle",
+        verbose: Optional[bool] = False,
+    ) -> Tuple[Tuple, float, float]:
+        """
+        Calculate the height and width of each pixel in a given image in meters.
+
+        Parameters
+        ----------
+        parent_id : int or str
+            The ID of the parent image to calculate pixel size.
+        method : str, optional
+            Method to use for calculating image size in meters.
+            
+            Possible values: ``"great-circle"`` (default), ``"gc"``, ``"great_circle"``, ``"geodesic"`` or ``"gd"``. 
+            ``"great-circle"``, ``"gc"`` and ``"great_circle"`` compute size using the great-circle distance formula,
+            while ``"geodesic"`` and ``"gd"`` computes size using the geodesic distance formula.
+        verbose : bool, optional
+            If ``True``, print additional information during the calculation.
+            Default is ``False``.
+
+        Returns
+        -------
+        tuple
+            Tuple containing the size of the image in meters as a tuple of bottom, right, top and left distances (in that order) and the mean pixel height and width in meters.
+
+        Notes
+        -----
+        This method requires the parent image to have location metadata added
+        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
+        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
+
+        The calculations are performed using the ``geopy.distance.geodesic``
+        and ``geopy.distance.great_circle`` methods. Thus, the method requires
+        the ``geopy`` package to be installed.
+        """
+
+        if "coordinates" not in self.parents[parent_id].keys():
+            print(
+                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+            )
+            return
+
+        if "shape" not in self.parents[parent_id].keys():
+            self._add_shape_id(parent_id)
+
+        height, width, _ = self.parents[parent_id]["shape"]
+        xmin, ymin, xmax, ymax = self.parents[parent_id]["coordinates"]
+        
+        # Calculate the size of image in meters
+        if method in ["geodesic", "gd"]:
+            bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
+            right = geodesic((ymin, xmax), (ymax, xmax)).meters
+            top = geodesic((ymax, xmax), (ymax, xmin)).meters
+            left = geodesic((ymax, xmin), (ymin, xmin)).meters
+
+        elif method in ["gc", "great-circle", "great_circle"]:
+            bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
+            right = great_circle((ymin, xmax), (ymax, xmax)).meters
+            top = great_circle((ymax, xmax), (ymax, xmin)).meters
+            left = great_circle((ymax, xmin), (ymin, xmin)).meters
+        
+        else:
+            raise NotImplementedError(f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}')
+
+        size_in_m = (bottom, right, top, left) #anticlockwise order
+        
+        mean_pixel_height = np.mean([right/height, left/height])
+        mean_pixel_width = np.mean([bottom/width, top/width])
+        
+        self._print_if_verbose(f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}", verbose)
+        self._print_if_verbose(f"Each pixel is ~{mean_pixel_height:.3f} X {mean_pixel_width:.3f} meters (height x width).", verbose)  # noqa
+                
+        return size_in_m, mean_pixel_height, mean_pixel_width
 
     def calc_pixel_stats(
         self,
