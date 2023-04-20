@@ -484,14 +484,14 @@ class MapImages:
 
         Notes
         -----
-        The method runs :meth:`mapreader.load.images.MapImages.__add_shape_id`
+        The method runs :meth:`mapreader.load.images.MapImages._add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
         print(f"[INFO] Add shape, tree level: {tree_level}")
 
-        list_items = list(self.images[tree_level].keys())
-        for item in list_items:
-            self._add_shape_id(image_id=item, tree_level=tree_level)
+        image_ids = list(self.images[tree_level].keys())
+        for image_id in image_ids:
+            self._add_shape_id(image_id=image_id)
 
     def add_coord_increments(self) -> None:
         """
@@ -549,28 +549,29 @@ class MapImages:
         """
         print(f"[INFO] Add center coordinates, tree level: {tree_level}")
 
-        list_items = list(self.images[tree_level].keys())
-        par_id_list = []
-        for item in list_items:
+        image_ids = list(self.images[tree_level].keys())
+        
+        already_checked_parent_ids = [] #for if tree_level is patch, only print error message once for each parent image
+        for image_id in image_ids:
             if tree_level == "parent":
                 if "coordinates" not in self.parents[image_id].keys():
                     print(
-                        f"[WARNING] 'coordinates' could not be found in {item}. Suggestion: run add_metadata or add_geo_info"  # noqa
+                        f"[WARNING] 'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
                     )
                     continue
 
             if tree_level == "patch":
-                par_id = self.images[tree_level][item]["parent_id"]
+                parent_id = self.patches[image_id]["parent_id"]
 
-                if "coordinates" not in self.images["parent"][par_id].keys():
-                    if par_id not in par_id_list:
+                if "coordinates" not in self.parents[parent_id].keys():
+                    if parent_id not in already_checked_parent_ids:
                         print(
-                            f"[WARNING] 'coordinates' could not be found in {par_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or add_geo_info."  # noqa
+                            f"[WARNING] 'coordinates' could not be found in {parent_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or add_geo_info."  # noqa
                         )
-                        par_id_list.append(par_id)
+                        already_checked_parent_ids.append(parent_id)
                     continue
 
-            self._add_center_coord_id(image_id=item, tree_level=tree_level)
+            self._add_center_coord_id(image_id=image_id)
 
     def _add_shape_id(
         self, image_id: Union[int, str], tree_level: Optional[str] = "parent"
@@ -633,12 +634,12 @@ class MapImages:
 
         .. code-block:: python
 
-            dlon = abs(lon_max - lon_min) / image_width
             dlat = abs(lat_max - lat_min) / image_height
+            dlon = abs(lon_max - lon_min) / image_width
 
-        ``lon_max``, ``lon_min``, ``lat_max``, ``lat_min`` are the coordinate
-        bounds of the image, and ``image_width`` and ``image_height`` are the
-        width and height of the image in pixels respectively.
+        ``lon_min``, ``lat_min``, ``lon_max`` and ``lat_max`` are the coordinate
+        bounds of the image, and ``image_height`` and ``image_width`` are the
+        height and width of the image in pixels respectively.
 
         This method assumes that the coordinate and shape metadata of the
         image have already been added to the metadata.
@@ -664,9 +665,9 @@ class MapImages:
         min_x, min_y, max_x, max_y = self.parents[image_id]["coordinates"]
 
         # Calculate dlon and dlat
-        dlon = abs(lon_max - lon_min) / image_width
-        dlat = abs(lat_max - lat_min) / image_height
-
+        dlon = abs(max_x - min_x) / image_width
+        dlat = abs(max_y - min_y) / image_height
+        
         self.parents[image_id]["dlon"] = dlon
         self.parents[image_id]["dlat"] = dlat
 
@@ -1104,6 +1105,7 @@ class MapImages:
         parent_id: Optional[str] = None,
         calc_mean: Optional[bool] = True,
         calc_std: Optional[bool] = True,
+        verbose: Optional[bool] = False,
     ) -> None:
         """
         Calculate the mean and standard deviation of pixel values for all
@@ -1122,6 +1124,8 @@ class MapImages:
         calc_std : bool, optional
             Whether to calculate standard deviation of pixel values. 
             By default, ``True``.
+        verbose : bool, optional
+            Whether to print verbose outputs. By default, ``False``.
 
         Returns
         -------
@@ -1147,8 +1151,7 @@ class MapImages:
             parent_ids = [parent_id]
 
         for parent_id in parent_ids:
-            print(10 * "-")
-            print(f"[INFO] calculate pixel stats for image: {parent_id}")
+            self._print_if_verbose(f"\n[INFO] Calculating pixel stats for image: {parent_id}", verbose)
 
             if "patches" not in self.parents[parent_id]:
                 print(f"[WARNING] No patches found for: {parent_id}")
@@ -1181,24 +1184,7 @@ class MapImages:
                     img_std = img_stat.stddev
                     for i, band in enumerate(bands):
                         # Calculate std pixel values
-                        self.images["patch"][patch][f"std_pixel_{band}"] = img_std[i]/255
-
-
-    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
-        DataFrames for easy manipulation.
-
-        Returns
-        -------
-        tuple of two pandas DataFrames
-            The method returns a tuple of two DataFrames: One for the
-            ``parent`` images and one for the ``patch`` images.
-        """
-        parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
-        patches = pd.DataFrame.from_dict(self.images["patch"], orient="index")
-
-        return parents, patches
+                        self.patches[patch][f"std_pixel_{band}"] = img_std[i]/255
 
     def show_sample(
         self,
