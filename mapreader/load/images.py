@@ -397,7 +397,7 @@ class mapImages:
 
         Notes
         -----
-        The method runs :meth:`mapreader.load.images.mapImages.__add_shape_id`
+        The method runs :meth:`mapreader.load.images.mapImages._add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
         print(f"[INFO] Add shape, tree level: {tree_level}")
