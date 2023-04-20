@@ -377,66 +377,95 @@ class MapImages:
                     except:
                         self.images[tree_level][key][column]=item
 
-    def show_sample(
+    def add_geo_info(
         self,
-        num_samples: int,
-        tree_level: Optional[str] = "parent",
-        random_seed: Optional[int] = 65,
-        **kwds: Dict,
+        proj2convert: Optional[str] = "EPSG:4326",
+        verbose: Optional[bool] = True,
     ) -> None:
         """
-        Display a sample of images from a particular level in the image
-        hierarchy.
+        Add coordinates (reprojected to EPSG:4326) to all parents images using image metadata.
 
         Parameters
         ----------
-        num_samples : int
-            The number of images to display.
-        tree_level : str, optional
-            The level of the hierarchy to display images from, which can be
-            ``"patch"`` or ``"parent"`` (default).
-        random_seed : int, optional
-            The random seed to use for reproducibility. Default is ``65``.
-        **kwds : dict, optional
-            Additional keyword arguments to pass to
-            ``matplotlib.pyplot.figure()``.
+        proj2convert : str, optional
+            Projection to convert coordinates into, by default ``"EPSG:4326"``.
+        verbose : bool, optional
+            Whether to print verbose output, by default ``True``
 
         Returns
         -------
         None
+
+        Notes
+        -----
+        For each image in the parents dictionary, this method calls ``_add_geo_info_id`` and coordinates (if present) to the image in the ``parent`` dictionary.
         """
-        # set random seed for reproducibility
-        random.seed(random_seed)
+        image_ids = list(self.parents.keys())
+        
+        for image_id in image_ids:
+            self._add_geo_info_id(image_id, proj2convert)
 
-        img_keys = list(self.images[tree_level].keys())
-        num_samples = min(len(img_keys), num_samples)
-        sample_img_keys = random.sample(img_keys, k=num_samples)
+    def _add_geo_info_id(self,
+        image_id: str,
+        proj2convert: Optional[str] = "EPSG:4326",
+        verbose: Optional[bool] = True,
+    ) -> None:
+        
+        """
+        Add coordinates (reprojected to EPSG:4326) to an image.
 
-        if not kwds.get("figsize"):
-            plt.figure(figsize=(15, num_samples * 2))
+        Parameters
+        ----------
+        image_id : str
+            The ID of the image to add geographic information to
+        proj2convert : str, optional
+            Projection to convert coordinates into, by default ``"EPSG:4326"``.
+        verbose : bool, optional
+            Whether to print verbose output, by default ``True``
+
+        Returns
+        -------
+        None
+
+        Notes
+        ------
+        This method reads the image files specified in the ``image_path`` key
+        of each dictionary in the ``parent`` dictionary.
+
+        It then checks if the image has geographic coordinates in its metadata,
+        if not it prints a warning message and skips to the next image.
+
+        If coordinates are present, this method converts them to the specified
+        projection ``proj2convert``.
+
+        These are then added to the dictionary in the ``parent`` dictionary corresponding to each image.
+        """
+
+        image_path = self.parents[image_id]["image_path"]
+        
+        # Read the image using rasterio
+        tiff_src = rasterio.open(image_path)
+        
+        # Check whether coordinates are present
+        if isinstance(tiff_src.crs, type(None)):
+            self._print_if_verbose(f"No coordinates found in {image_id}. Try add_metadata instead.", verbose) # noqa
+            return
+        
         else:
-            plt.figure(figsize=kwds["figsize"])
-
-        for i, image_id in enumerate(sample_img_keys):
-            plt.subplot(num_samples // 3 + 1, 3, i + 1)
-            myimg = mpimg.imread(
-                self.images[tree_level][image_id]["image_path"]
+            # Get coordinates as string
+            tiff_proj = tiff_src.crs.to_string()
+            # Coordinate transformation: proj1 ---> proj2
+            # tiff is "lat, lon" instead of "x, y"
+            transformer = Transformer.from_crs(tiff_proj, proj2convert)
+            ymin, xmin = transformer.transform(
+                tiff_src.bounds.left, tiff_src.bounds.bottom
             )
-            plt.title(image_id, size=8)
-            plt.imshow(myimg)
-            plt.xticks([])
-            plt.yticks([])
-
-        plt.tight_layout()
-        plt.show()
-
-    def list_parents(self) -> List[str]:
-        """Return list of all parents"""
-        return list(self.images["parent"].keys())
-
-    def list_patches(self) -> List[str]:
-        """Return list of all patches"""
-        return list(self.images["patch"].keys())
+            ymax, xmax = transformer.transform(
+                tiff_src.bounds.right, tiff_src.bounds.top
+            )
+            # New projected coordinates
+            coords = (xmin, ymin, xmax, ymax)
+            self.parents[image_id]["coordinates"] = coords
 
     def add_shape(self, tree_level: Optional[str] = "parent") -> None:
         """
