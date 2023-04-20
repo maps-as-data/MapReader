@@ -17,8 +17,6 @@ from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
 
-from .slicers import patchify_by_pixel
-
 # from ..utils import geo_utils
 
 # Ignore warnings
