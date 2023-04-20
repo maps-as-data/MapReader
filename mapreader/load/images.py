@@ -832,9 +832,14 @@ class MapImages:
         height, width = img.height, img.width
         channels = len(img.mode)
 
-        (xmin, ymin, xmax, ymax) = self.images["parent"][parent_id]["coordinates"]
-        
+    @staticmethod
+    def _print_if_verbose(msg: str, verbose: bool) -> None:
+        """
+        Print message if verbose is True.
+        """
         if verbose:
+            print(msg)
+
     def _get_tree_level(self, image_id: str) -> str:
         """Identify tree level of an image from image_id.
 
