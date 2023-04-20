@@ -543,6 +543,7 @@ class MapImages:
         print("[INFO] Add coord-increments, tree level: parent")
 
         parent_list = self.list_parents()
+        
         for parent_id in parent_list:
             if "coordinates" not in self.parents[parent_id].keys():
                 print(
@@ -551,6 +552,20 @@ class MapImages:
                 continue
 
             self._add_coord_increments_id(image_id=parent_id)
+
+    def add_patch_coords(self, verbose: bool = False) -> None:
+        """Add coordinates to all patches in patches dictionary.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to print verbose outputs.
+            By default, ``False``
+        """
+        patch_list = self.list_patches()
+        
+        for patch_id in patch_list:
+            self._add_patch_coords_id(patch_id, verbose)
 
     def add_center_coord(self, tree_level: Optional[str] = "patch") -> None:
         """
@@ -696,141 +711,84 @@ class MapImages:
         self.parents[image_id]["dlon"] = dlon
         self.parents[image_id]["dlat"] = dlat
 
+    def _add_patch_coords_id(self, image_id: str, verbose: bool = False) -> None:
+        """Get coordinates of a patch
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the patch
+        verbose : bool, optional
+            Whether to print verbose outputs. 
+            By default, ``False``.
+
+        Return
+        -------
+        None
+        """
+        parent_id = self.patches[image_id]["parent_id"]
+            
+        if "coordinates" not in self.parents[parent_id].keys():
+            self._print_if_verbose(f"[WARNING] No coordinates found in  {parent_id} (parent of {image_id}). Suggestion: run add_metadata or add_geo_info.", verbose)
+            return
+
+        else:
+            if not all([k in self.parents[parent_id].keys() for k in ["dlat", "dlon"]]):
+                self._add_coord_increments_id(parent_id)
+            
+            # get min_x and min_y and pixel-wise dlon and dlat for parent image
+            parent_min_x = self.parents[parent_id]["coordinates"][0]
+            parent_min_y = self.parents[parent_id]["coordinates"][1]
+            dlon = self.parents[parent_id]["dlon"]
+            dlat = self.parents[parent_id]["dlat"]
+            
+            # get patch bounds
+            pixel_bounds = self.patches[image_id]["pixel_bounds"]
+
+            # get patch coords
+            min_x = (pixel_bounds[0] * dlon) + parent_min_x
+            min_y = (pixel_bounds[1] * dlat) + parent_min_y
+            max_x = (pixel_bounds[2] * dlon) + parent_min_x
+            max_y = (pixel_bounds[3] * dlat) + parent_min_y
+
+            self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
+
     def _add_center_coord_id(
         self,
         image_id: Union[int, str],
-        tree_level: Optional[str] = "patch",
         verbose: Optional[bool] = False,
     ) -> None:
         """
         Calculates and adds center coordinates (longitude as ``center_lon``
-        and latitude as ``center_lat``) to a given patch.
+        and latitude as ``center_lat``) to a given image_id's dictionary.
 
         Parameters
         ----------
         image_id : int or str
             The ID of the patch to add center coordinates to.
-        tree_level : str, optional
-            The level of the patch in the image hierarchy, either
-            ``"parent"`` or ``"patch"`` (default).
         verbose : bool, optional
             Whether to print warning messages or not. Defaults to ``False``.
-
-        Raises
-        ------
-        NotImplementedError
-            If ``tree_level`` is not set to ``"parent"`` or ``"patch"``.
 
         Returns
         -------
         None
         """
-        if tree_level == "patch":
-            par_id = self.images[tree_level][image_id]["parent_id"]
-
-            if ("dlon" not in self.images["parent"][par_id].keys()) or (
-                "dlat" not in self.images["parent"][par_id].keys()
-            ):
-                if "coordinates" not in self.images["parent"][par_id].keys():
-                    if verbose:
-                        print(
-                            f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
-                        )
-                    return
-
-                else:
-                    self._add_coord_increments_id(par_id)
-
-            dlon = self.images["parent"][par_id]["dlon"]
-            dlat = self.images["parent"][par_id]["dlat"]
-            lon_min, lat_min, lon_max, lat_max = self.images["parent"][par_id][
-                "coordinates"
-            ]
-            min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
-            min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
-            max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
-            max_abs_y = self.images[tree_level][image_id]["max_y"] * dlat
-
-            self.images[tree_level][image_id]["center_lon"] = (
-                lon_min + (min_abs_x + max_abs_x) / 2.0
-            )
-            self.images[tree_level][image_id]["center_lat"] = (
-                lat_max - (min_abs_y + max_abs_y) / 2.0
-            )
-
-        elif tree_level == "parent":
-            if "coordinates" not in self.images[tree_level][image_id].keys():
-                if verbose:
-                    print(
-                        f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
-                    )
-                return
-
-            print(f"[INFO] Reading 'coordinates' from {image_id}")
-            lon_min, lat_min, lon_max, lat_max = self.images[tree_level][
-                image_id
-            ]["coordinates"]
-            self.images[tree_level][image_id]["center_lon"] = (
-                lon_min + lon_max
-            ) / 2.0
-            self.images[tree_level][image_id]["center_lat"] = (
-                lat_min + lat_max
-            ) / 2.0
-        else:
-            raise NotImplementedError(
-                "Tree level must be set to 'parent' or 'patch'."
-            )
-
-    def calc_pixel_width_height(
-        self,
-        parent_id: Union[int, str],
-        method: Optional[str] = "great-circle",
-        verbose: Optional[bool] = False,
-    ) -> Tuple[float, float, float, float]:
-        """
-        Calculate the width and height of each pixel in a given image in meters.
-
-        Parameters
-        ----------
-        parent_id : int or str
-            The ID of the parent image to calculate pixel size.
-        method : str, optional
-            Method to use for calculating image size in meters.
-            
-            Possible values: ``"great-circle"`` (default), ``"gc"``, ``"great_circle"``, ``"geodesic"`` or ``"gd"``. 
-            ``"great-circle"``, ``"gc"`` and ``"great_circle"`` compute size using the great-circle distance formula,
-            while ``"geodesic"`` and ``"gd"`` computes size using the geodesic distance formula.
-        verbose : bool, optional
-            If ``True``, print additional information during the calculation.
-            Default is ``False``.
-
-        Returns
-        -------
-        tuple of floats
-            The size of the image in meters as a tuple of bottom, right, top and left distances (in that order).
-
-        Notes
-        -----
-        This method requires the parent image to have location metadata added
-        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
-        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
-
-        The calculations are performed using the ``geopy.distance.geodesic``
-        and ``geopy.distance.great_circle`` methods. Thus, the method requires
-        the ``geopy`` package to be installed.
-        """
 
         tree_level = self._get_tree_level(image_id)
 
-        if "coordinates" not in self.images["parent"][parent_id].keys():
-            print(
-                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
-            )
-            return
+        if "coordinates" not in self.images[tree_level][image_id].keys():
+            if tree_level == "parent":
+                self._print_if_verbose(f"[WARNING] No coordinates found for {image_id}. Suggestion: run add_metadata or add_geo_info.", verbose)
+                return
 
-        img = Image.open(self.images["parent"][parent_id]["image_path"])
-        height, width = img.height, img.width
-        channels = len(img.mode)
+            if tree_level == "patch":
+                self._add_patch_coords_id(image_id, verbose)
+
+        if "coordinates" in self.images[tree_level][image_id].keys():
+            print(f"[INFO] Reading 'coordinates' from {image_id}.")
+            min_x, min_y, max_x, max_y = self.images[tree_level][image_id]["coordinates"]
+            self.images[tree_level][image_id]["center_lat"] = np.mean(min_y, max_y)
+            self.images[tree_level][image_id]["center_lon"] = np.mean(min_x, max_x)
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
