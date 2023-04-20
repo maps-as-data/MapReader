@@ -121,10 +121,10 @@ class MapImages:
 
         # Create images variable (MAIN object variable)
         # New methods (e.g., reading/loading) should construct images this way
-        self.images = {
-            "parent": {},
-            "patch": {},
-        }
+        self.images = {"parent": {}, "patch": {}}
+        self.parents = self.images["parent"]
+        self.patches = self.images["patch"]
+
         for image_path in self.path_images:
             self.images_constructor(
                 image_path=image_path,
@@ -134,26 +134,26 @@ class MapImages:
             )
 
     def __len__(self) -> int:
-        return int(len(self.images["parent"]) + len(self.images["patch"]))
+        return int(len(self.parents) + len(self.patches))
 
     def __str__(self) -> Literal[""]:
         print(f"#images: {self.__len__()}")
 
-        print(f"\n#parents: {len(self.images['parent'])}")
-        for i, img in enumerate(self.images["parent"]):
+        print(f"\n#parents: {len(self.parents)}")
+        for i, img in enumerate(self.parents):
             print(os.path.relpath(img))
             if i >= 10:
                 print("...")
                 break
 
-        print(f"\n#patches: {len(self.images['patch'])}")
-        for i, img in enumerate(self.images["patch"]):
+        print(f"\n#patches: {len(self.patches)}")
+        for i, img in enumerate(self.patches):
             print(os.path.relpath(img))
             if i >= 10:
                 print("...")
                 break
         return ""
-
+    
     def images_constructor(
         self,
         image_path: str,
@@ -218,10 +218,9 @@ class MapImages:
         for k, v in kwds.items():
             self.images[tree_level][image_id][k] = v
 
-        if parent_id: # tree_level = 'patch' is implied
-            # ensure parent exists in parents dict
-            if parent_id not in self.images["parent"].keys(): 
-                self.images["parent"][parent_id] = {"parent_id": None, "image_path": abs_parent_path}
+        if parent_id:  # tree_level = 'patch' is implied
+            if parent_id not in self.parents.keys(): 
+                self.parents[parent_id] = {"parent_id": None, "image_path": abs_parent_path, "patches":[]}
             
             else: 
                 if "parent_id" not in self.images["parent"][parent_id].keys():
@@ -489,7 +488,7 @@ class MapImages:
 
         parent_list = self.list_parents()
         for parent_id in parent_list:
-            if "coordinates" not in self.images["parent"][parent_id].keys():
+            if "coordinates" not in self.parents[parent_id].keys():
                 print(
                     f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
                 )
@@ -525,7 +524,7 @@ class MapImages:
         par_id_list = []
         for item in list_items:
             if tree_level == "parent":
-                if "coordinates" not in self.images[tree_level][item].keys():
+                if "coordinates" not in self.parents[image_id].keys():
                     print(
                         f"[WARNING] 'coordinates' could not be found in {item}. Suggestion: run add_metadata or add_geo_info"  # noqa
                     )
@@ -622,33 +621,25 @@ class MapImages:
         :meth:`mapreader.load.images.MapImages._add_shape_id` method to add
         it.
         """
-        # Check for warnings
-        if "coordinates" not in self.images["parent"][image_id].keys():
-            if verbose:
-                print(
-                    f"[WARNING]'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
-                )
+
+        if "coordinates" not in self.parents[image_id].keys():
+            self._print_if_verbose(f"[WARNING]'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or add_geo_info.", verbose)
             return
 
-        # Add shapes if non-existent
-        if "shape" not in self.images["parent"][image_id].keys():
+        if "shape" not in self.parents[image_id].keys():
             self._add_shape_id(image_id)
 
-        # Extract height/width/chan from shape
-        image_height, image_width, _ = self.images["parent"][image_id]["shape"]
+        image_height, image_width, _ = self.parents[image_id]["shape"]
 
         # Extract coordinates from image (xmin, ymin, xmax, ymax)
-        lon_min, lat_min, lon_max, lat_max = self.images["parent"][image_id][
-            "coordinates"
-        ]
+        min_x, min_y, max_x, max_y = self.parents[image_id]["coordinates"]
 
         # Calculate dlon and dlat
         dlon = abs(lon_max - lon_min) / image_width
         dlat = abs(lat_max - lat_min) / image_height
 
-        # Assign values
-        self.images["parent"][image_id]["dlon"] = dlon
-        self.images["parent"][image_id]["dlat"] = dlat
+        self.parents[image_id]["dlon"] = dlon
+        self.parents[image_id]["dlat"] = dlat
 
     def _add_center_coord_id(
         self,
@@ -1121,14 +1112,14 @@ class MapImages:
             print(10 * "-")
             print(f"[INFO] calculate pixel stats for image: {parent_id}")
 
-            if "patches" not in self.images["parent"][parent_id]:
+            if "patches" not in self.parents[parent_id]:
                 print(f"[WARNING] No patches found for: {parent_id}")
                 continue
 
-            list_patches = self.images["parent"][parent_id]["patches"]
+            list_patches = self.parents[parent_id]["patches"]
 
             for patch in list_patches:
-                patch_data = self.images["patch"][patch]
+                patch_data = self.patches[patch]
                 patch_keys = patch_data.keys()
                 img = Image.open(patch_data["image_path"])
                 bands = img.getbands()
@@ -1146,7 +1137,8 @@ class MapImages:
                     img_mean = img_stat.mean
                     for i, band in enumerate(bands):
                         # Calculate mean pixel values
-                        self.images["patch"][patch][f"mean_pixel_{band}"] = img_mean[i]/255
+                        self.patches[patch][f"mean_pixel_{band}"] = img_mean[i]/255
+
                 if calc_std:
                     img_std = img_stat.stddev
                     for i, band in enumerate(bands):
@@ -1340,10 +1332,7 @@ class MapImages:
                 )
 
                 if save_kml_dir:
-                    if (
-                        "coordinates"
-                        not in self.images["parent"][one_image_id].keys()
-                    ):
+                    if ("coordinates" not in self.parents[image_id].keys()):
                         print(
                             "[WARNING] 'coordinates' could not be found. This is needed when save_kml_dir is set...continue"  # noqa
                         )
@@ -1746,8 +1735,8 @@ class MapImages:
 
         if clear_images:
             self.images = {}
-            self.images["parent"] = {}
-            self.images["patch"] = {}
+            self.parents = {}
+            self.patches = {}
 
         for file in files:
             if not os.path.isfile(file):
@@ -1762,14 +1751,14 @@ class MapImages:
             min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
 
             # Add patch
-            if not self.images["patch"].get(patch_id, False):
-                self.images["patch"][patch_id] = {}
-            self.images["patch"][patch_id]["parent_id"] = parent_id
-            self.images["patch"][patch_id]["image_path"] = file
-            self.images["patch"][patch_id]["min_x"] = min_x
-            self.images["patch"][patch_id]["min_y"] = min_y
-            self.images["patch"][patch_id]["max_x"] = max_x
-            self.images["patch"][patch_id]["max_y"] = max_y
+            if not self.patches.get(patch_id, False):
+                self.patches[patch_id] = {}
+            self.patches[patch_id]["parent_id"] = parent_id
+            self.patches[patch_id]["image_path"] = file
+            self.patches[patch_id]["min_x"] = min_x
+            self.patches[patch_id]["min_y"] = min_y
+            self.patches[patch_id]["max_x"] = max_x
+            self.patches[patch_id]["max_y"] = max_y
 
         if parent_paths:
             # Add parents
@@ -1912,17 +1901,17 @@ class MapImages:
                         )
 
             if update:
-                self.images["parent"] = {}
+                self.parents = {}
 
             for file in files:
                 parent_id = os.path.basename(file)
-                self.images["parent"][parent_id] = {"parent_id": None}
+                self.parents[parent_id] = {"parent_id": None}
                 if os.path.isfile(file):
-                    self.images["parent"][parent_id]["image_path"] = os.path.abspath(
+                    self.parents[parent_id]["image_path"] = os.path.abspath(
                         file
                     )
                 else:
-                    self.images["parent"][parent_id]["image_path"] = None
+                    self.parents[parent_id]["image_path"] = None
 
                 if add_geo_info:
                     self.add_geo_info()
@@ -1931,8 +1920,8 @@ class MapImages:
             if not isinstance(parent_ids, list):
                 parent_ids = [parent_ids]
             for parent_id in parent_ids:
-                self.images["parent"][parent_id] = {"parent_id": None}
-                self.images["parent"][parent_id]["image_path"] = None
+                self.parents[parent_id] = {"parent_id": None}
+                self.parents[parent_id]["image_path"] = None
 
     def load_df(
         self,
@@ -1963,29 +1952,29 @@ class MapImages:
             self.images = {"parent": {}, "patch": {}}
 
         if not isinstance(patch_df, type(None)):
-            self.images["patch"] = patch_df.to_dict(orient="index")
+            self.patches = patch_df.to_dict(orient="index")
 
         if not isinstance(parents, type(None)):
             if isinstance(parents, str):
                 self.load_parents(parents)
             else:
-                self.images["parent"] = parents.to_dict(orient="index")
+                self.parents = parents.to_dict(orient="index")
 
-            for parent_id in self.images["parent"].keys():
+            for parent_id in self.parents.keys():
                 # Do we need this?
                 # k2change = "patches"
-                # if k2change in self.images["parent"][parent_id]:
+                # if k2change in self.parents[parent_id]:
                 #    try:
-                #        self.images["parent"][parent_id][k2change] = self.images["parent"][parent_id][k2change]  # noqa
+                #        self.parents[parent_id][k2change] = self.parents[parent_id][k2change]  # noqa
                 #    except Exception as err:
                 #        print(err)
 
                 k2change = "coordinates"
-                if k2change in self.images["parent"][parent_id]:
+                if k2change in self.parents[parent_id]:
                     try:
-                        self.images["parent"][parent_id][
+                        self.parents[parent_id][
                             k2change
-                        ] = self.images["parent"][parent_id][k2change]
+                        ] = self.parents[parent_id][k2change]
                     except Exception as err:
                         print(err)
 
@@ -2026,14 +2015,14 @@ class MapImages:
             self.images = {"parent": {}, "patch": {}}
 
         if isinstance(patch_path, str) and os.path.isfile(patch_path):
-            self.images["patch"].update(
+            self.patches.update(
                 pd.read_csv(patch_path, index_col=index_col_patch).to_dict(
                     orient="index"
                 )
             )
 
         if isinstance(parent_path, str) and os.path.isfile(parent_path):
-            self.images["parent"].update(
+            self.parents.update(
                 pd.read_csv(parent_path, index_col=index_col_parent).to_dict(
                     orient="index"
                 )
@@ -2041,117 +2030,18 @@ class MapImages:
 
             self.add_patches()
 
-            for parent_id in self.images["parent"].keys():
+            for parent_id in self.parents.keys():
                 k2change = "patches"
-                if k2change in self.images["parent"][parent_id]:
-                    self.images["parent"][parent_id][k2change] = eval(
-                        self.images["parent"][parent_id][k2change]
+                if k2change in self.parents[parent_id]:
+                    self.parents[parent_id][k2change] = eval(
+                        self.parents[parent_id][k2change]
                     )
 
                 k2change = "coordinates"
-                if k2change in self.images["parent"][parent_id]:
-                    self.images["parent"][parent_id][k2change] = eval(
-                        self.images["parent"][parent_id][k2change]
+                if k2change in self.parents[parent_id]:
+                    self.parents[parent_id][k2change] = eval(
+                        self.parents[parent_id][k2change]
                     )
-
-    def add_geo_info(
-        self,
-        proj2convert: Optional[str] = "EPSG:4326",
-        calc_method: Optional[str] = "great-circle",
-        verbose: Optional[bool] = False,
-    ) -> None:
-        """
-        Add geographic information (shape, coordinates, reprojected to EPSG:4326,
-        and size in meters) to the ``images`` attribute of the ``MapImages``
-        instance from image metadata.
-
-        Parameters
-        ----------
-        proj2convert : str, optional
-            Projection to convert coordinates into, by default ``"EPSG:4326"``.
-        calc_method : str, optional
-            Method to use for calculating image size in meters. Possible
-            values: ``"great-circle"`` (default), ``"gc"`` (alias for
-            ``"great-circle"``), ``"geodesic"``. ``"great-circle"`` and
-            ``"gc"`` compute size using the great-circle distance formula,
-            while ``"geodesic"`` computes size using the geodesic distance
-            formula.
-        verbose : bool, optional
-            Whether to print progress messages, by default ``False``.
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        This method reads the image files specified in the ``image_path`` key
-        of each dictionary in the ``parent`` dictionary.
-
-        It then checks if the image has geographic coordinates in its metadata,
-        if not it prints a warning message and skips to the next image.
-
-        If coordinates are present, this method converts them to the specified
-        projection ``proj2convert`` and calculates the size of each pixel
-        based on the method specified in ``calc_method``.
-
-        The resulting information is then added to the dictionary in the
-        ``parent`` dictionary corresponding to each image.
-
-        Note that the calculations are performed using the
-        ``geopy.distance.geodesic`` and ``geopy.distance.great_circle``
-        methods. Thus, the method requires the ``geopy`` package to be
-        installed.
-        """
-        image_ids = list(self.images["parent"].keys())
-
-        for image_id in image_ids:
-            image_path = self.images["parent"][image_id]["image_path"]
-
-            # Read the image using rasterio
-            tiff_src = rasterio.open(image_path)
-
-            # Get height and width for image
-            image_height, image_width = tiff_src.shape
-
-            # Extract channels
-            image_channels = tiff_src.count
-
-            # Set shape
-            shape = (image_height, image_width, image_channels)
-            self.images["parent"][image_id]["shape"] = shape
-
-            # Check whether coordinates are present
-            if isinstance(tiff_src.crs, type(None)):
-                print(
-                    f"No coordinates found in {image_id}. Try add_metadata instead."  # noqa
-                )
-                continue
-
-            else:
-                # Get coordinates as string
-                tiff_proj = tiff_src.crs.to_string()
-
-                # Coordinate transformation: proj1 ---> proj2
-                # tiff is "lat, lon" instead of "x, y"
-                transformer = Transformer.from_crs(tiff_proj, proj2convert)
-                ymin, xmin = transformer.transform(
-                    tiff_src.bounds.left, tiff_src.bounds.bottom
-                )
-                ymax, xmax = transformer.transform(
-                    tiff_src.bounds.right, tiff_src.bounds.top
-                )
-
-                # New projected coordinates
-                coords = (xmin, ymin, xmax, ymax)
-                self.images["parent"][image_id]["coordinates"] = coords
-
-                # Calculate pixel size in meters
-                size_in_m = self.calc_pixel_width_height(
-                    parent_id=image_id,
-                    calc_size_in_m=calc_method,
-                    verbose=verbose,
-                )
                 self.images["parent"][image_id]["size_in_m"] = size_in_m
 
     '''
@@ -2176,8 +2066,8 @@ class MapImages:
 
         if clear_images:
             self.images = {}
-            self.images["parent"] = {}
-            self.images["patch"] = {}
+            self.parents = {}
+            self.patches = {}
             # XXX check
         if not isinstance(metadata, type(None)):
             include_metadata = True
@@ -2209,21 +2099,21 @@ class MapImages:
             min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
 
             # Add patch
-            if not self.images["patch"].get(patch_id, False):
-                self.images["patch"][patch_id] = {}
-            self.images["patch"][patch_id]["parent_id"] = parent_id
-            self.images["patch"][patch_id]["image_path"] = tpath
-            self.images["patch"][patch_id]["min_x"] = min_x
-            self.images["patch"][patch_id]["min_y"] = min_y
-            self.images["patch"][patch_id]["max_x"] = max_x
-            self.images["patch"][patch_id]["max_y"] = max_y
+            if not self.patches.get(patch_id, False):
+                self.patches[patch_id] = {}
+            self.patches[patch_id]["parent_id"] = parent_id
+            self.patches[patch_id]["image_path"] = tpath
+            self.patches[patch_id]["min_x"] = min_x
+            self.patches[patch_id]["min_y"] = min_y
+            self.patches[patch_id]["max_x"] = max_x
+            self.patches[patch_id]["max_y"] = max_y
 
         # XXX check
         if include_metadata:
             # metadata_cols = set(metadata_df.columns) - set(['rd_index_id'])
             for one_row in metadata_df.iterrows():
                 for one_col in list(metadata_cols2add):
-                    self.images["patch"][one_row[1]['rd_index_id']][one_col] = one_row[1][one_col]
+                    self.patches[one_row[1]['rd_index_id']][one_col] = one_row[1][one_col]
 
         if parent_paths:
             # Add parents
@@ -2266,14 +2156,14 @@ class MapImages:
             fmt {str} -- convert images variable to this format (default: {"dataframe"})
         """
         if fmt in ["pandas", "dataframe"]:
-            patches = pd.DataFrame.from_dict(self.images["patch"], orient="index")
+            patches = pd.DataFrame.from_dict(self.patches, orient="index")
             patches.reset_index(inplace=True)
             if len(patches) > 0:
                 patches.rename(columns={"image_path": "image_id"}, inplace=True)
                 patches.drop(columns=["index", "parent_id"], inplace=True)
                 patches["label"] = -1
 
-            parents = pd.DataFrame.from_dict(self.images["parent"], orient="index")
+            parents = pd.DataFrame.from_dict(self.parents, orient="index")
             parents.reset_index(inplace=True)
             if len(parents) > 0:
                 parents.rename(columns={"image_path": "image_id"}, inplace=True)
