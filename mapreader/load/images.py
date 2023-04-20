@@ -7,12 +7,12 @@ except ImportError:
 import rasterio
 from glob import glob
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import matplotlib.image as mpimg
 import numpy as np
 import os
 import pandas as pd
 from PIL import Image, ImageStat
-from pylab import cm as pltcm
 from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
@@ -1162,55 +1162,70 @@ class MapImages:
 
         return parents, patches
 
-    def show_par(
+    def show_sample(
         self,
-        parent_id: Union[int, str],
-        value: Optional[Union[List[str], bool]] = False,
-        **kwds,
+        num_samples: int,
+        tree_level: Optional[str] = "parent",
+        random_seed: Optional[int] = 65,
+        **kwds: Dict,
     ) -> None:
         """
-        A wrapper method for `.show()` which plots all patches of a
-        specified parent (`parent_id`).
+        Display a sample of images from a particular level in the image
+        hierarchy.
 
         Parameters
         ----------
-        parent_id : int or str
-            ID of the parent image to be plotted.
-        value : list or bool, optional
-            Value to be plotted on each patch, by default False.
+        num_samples : int
+            The number of images to display.
+        tree_level : str, optional
+            The level of the hierarchy to display images from, which can be
+            ``"patch"`` or ``"parent"`` (default).
+        random_seed : int, optional
+            The random seed to use for reproducibility. Default is ``65``.
+        **kwds : dict, optional
+            Additional keyword arguments to pass to
+            ``matplotlib.pyplot.figure()``.
 
         Returns
         -------
         None
-
-        Raises
-        ------
-        KeyError
-            If the parent_id is not found in the image dictionary.
-
-        Notes
-        -----
-        This is a wrapper method. See the documentation of the
-        :meth:`mapreader.load.images.MapImages.show` method for more detail.
         """
-        image_ids = self.images["parent"][parent_id]["patches"]
-        self.show(image_ids, value=value, **kwds)
+        # set random seed for reproducibility
+        random.seed(random_seed)
+
+        image_ids = list(self.images[tree_level].keys())
+        num_samples = min(len(image_ids), num_samples)
+        sample_image_ids = random.sample(image_ids, k=num_samples)
+
+        figsize = kwds.get("figsize", (15, num_samples * 2))
+        plt.figure(figsize=figsize)
+
+        for i, image_id in enumerate(sample_image_ids):
+            plt.subplot(num_samples // 3 + 1, 3, i + 1)
+            img = Image.open(
+                self.images[tree_level][image_id]["image_path"]
+            )
+            plt.title(image_id, size=8)
+            plt.imshow(img,)
+            plt.xticks([])
+            plt.yticks([])
+
+        plt.tight_layout()
+        plt.show()
 
     def show(
         self,
         image_ids: Union[str, List[str]],
-        value: Optional[Union[str, List[str], bool]] = False,
+        column_to_plot: Optional[str] = None,
         plot_parent: Optional[bool] = True,
-        border: Optional[bool] = True,
+        patch_border: Optional[bool] = True,
         border_color: Optional[str] = "r",
-        vmin: Optional[Union[float, List[float]]] = 0.5,
-        vmax: Optional[Union[float, List[float]]] = 2.5,
-        colorbar: Optional[Union[str, List[str]]] = "viridis",
-        alpha: Optional[Union[float, List[float]]] = 1.0,
-        discrete_colorbar: Optional[Union[int, List[int]]] = 256,
-        tree_level: Optional[str] = "patch",
-        grid_plot: Optional[Tuple[int, int]] = (20000, 20000),
-        plot_histogram: Optional[bool] = True,
+        vmin: Optional[float] = None,
+        vmax: Optional[float] = None,
+        alpha: Optional[float] = 1.0,
+        cmap: Optional[str] = "viridis",
+        discrete_cmap: Optional[int] = 256,
+        plot_histogram: Optional[bool] = False,
         save_kml_dir: Optional[Union[bool, str]] = False,
         image_width_resolution: Optional[int] = None,
         kml_dpi_image: Optional[int] = None,
@@ -1223,49 +1238,31 @@ class MapImages:
         ----------
         image_ids : str or list
             Image ID or list of image IDs to be plotted.
-        value : str, list or bool, optional
-            Value to plot on patches, by default ``False``.
+        column_to_plot : str, optional
+            Column whose values will be plotted on patches, by default ``None``.
         plot_parent : bool, optional
             If ``True``, parent image will be plotted in background, by
             default ``True``.
-        border : bool, optional
+        patch_border : bool, optional
             If ``True``, a border will be placed around each patch, by
             default ``True``.
         border_color : str, optional
             The color of the border. Default is ``"r"``.
-        vmin : float or list, optional
-            The minimum value for the colormap. By default ``0.5``.
-
-            If a list is provided, it must be the same length as ``image_ids``.
-        vmax : float or list, optional
-            The maximum value for the colormap. By default ``2.5``.
-
-            If a list is provided, it must be the same length as ``image_ids``.
-        colorbar : str or list, optional
-            Colorbar used to visualise chosen ``value``, by default
-            ``"viridis"``.
-
-            If a list is provided, it must be the same length as ``image_ids``.
-        alpha : float or list, optional
+        vmin : float, optional
+            The minimum value for the colormap. 
+            If ``None``, will be set to minimum value in ``column_to_plot``, by default ``None``.
+        vmax : float, optional
+            The maximum value for the colormap. 
+            If ``None``, will be set to the maximum value in ``column_to_plot``, by default ``None``.
+        alpha : float, optional
             Transparency level for plotting ``value`` with floating point
-            values ranging from 0.0 (transparent) to 1 (opaque). By default,
-            ``1.0``.
-
-            If a list is provided, it must be the same length as ``image_ids``.
-        discrete_colorbar : int or list, optional
-            Number of discrete colurs to use in colorbar, by default ``256``.
-
-            If a list is provided, it must be the same length as ``image_ids``.
-        tree_level : str, optional
-            The level of the image tree to be plotted. Must be either
-            ``"patch"`` (default) or ``"parent"``.
-        grid_plot : tuple, optional
-            The size of the grid (number of rows and columns) to be used to
-            plot images. Later adjusted to the true min/max of all subplots.
-            By default ``(20000, 20000)``.
+            values ranging from 0.0 (transparent) to 1 (opaque), by default ``1.0``.
+        cmap : str, optional
+            Colour map used to visualise chosen ``column_to_plot`` values, by default ``"viridis"``.
+        discrete_cmap : int, optional
+            Number of discrete colours to use in colour map, by default ``256``.
         plot_histogram : bool, optional
-            If ``True``, plot histograms of the ``value`` of images. By
-            default ``True``.
+            If ``True``, plot histograms of the ``value`` of images. By default ``False``.
         save_kml_dir : str or bool, optional
             If ``True``, save KML files of the images. If a string is provided,
             it is the path to the directory in which to save the KML files. If
@@ -1282,252 +1279,207 @@ class MapImages:
 
         Returns
         -------
-        None
+        list
+            A list of figures created by the method.
         """
         # create list, if not already a list
-        if not (isinstance(image_ids, list) or isinstance(image_ids, tuple)):
+        if isinstance(image_ids, str):
             image_ids = [image_ids]
-        values = [value] if not (isinstance(value, list)) else value[:]
-        vmins = [vmin] if not (isinstance(vmin, list)) else vmin[:]
-        vmaxs = [vmax] if not (isinstance(vmax, list)) else vmax[:]
-        colorbars = (
-            [colorbar] if not (isinstance(colorbar, list)) else colorbar[:]
-        )
-        alphas = [alpha] if not (isinstance(alpha, list)) else alpha[:]
-        discrete_colorbars = (
-            [discrete_colorbar]
-            if not (isinstance(discrete_colorbar, list))
-            else discrete_colorbar[:]
-        )
 
+        if not isinstance(image_ids, list):
+            raise ValueError(f"[ERROR] Please pass image_ids as str or list of strings.")
+
+        if all(self._get_tree_level(image_id) == "parent" for image_id in image_ids):
+            tree_level = "parent"
+        elif all(self._get_tree_level(image_id) == "patch" for image_id in image_ids):
+            tree_level = "patch"
+        else:
+            raise ValueError("[ERROR] Image IDs must all be at the same tree level")
+        
+        figures = []
         if tree_level == "parent":
-            for one_image_id in image_ids:
-                figsize = self._get_kwds(kwds, "figsize")
-                plt.figure(figsize=figsize)
+            for image_id in image_ids:
+                image_path = self.parents[image_id]["image_path"]
+                img = Image.open(image_path)
 
-                par_path = self.images["parent"][one_image_id]["image_path"]
-                par_image = Image.open(par_path)
-
-                # Change the resolution of the image if image_width_resolution
-                # is specified
-                if image_width_resolution is not None:
-                    basewidth = int(image_width_resolution)
-                    wpercent = basewidth / float(par_image.size[0])
-                    hsize = int((float(par_image.size[1]) * float(wpercent)))
-                    par_image = par_image.resize(
-                        (basewidth, hsize), Image.ANTIALIAS
+                # if image_width_resolution is specified, resize the image
+                if image_width_resolution:
+                    new_width = int(image_width_resolution)
+                    rescale_factor = new_width / img.width
+                    new_height = int(img.height * rescale_factor)
+                    img = img.resize(
+                        (new_width, new_height), Image.LANCZOS
                     )
 
-                # remove the borders
-                plt.gca().set_axis_off()
-                plt.subplots_adjust(
-                    top=1, bottom=0, right=1, left=0, hspace=0, wspace=0
-                )
+                figsize = kwds.get("figsize", (10,10))
+                fig = plt.figure(figsize=figsize)
+                plt.axis("off")
+                plt.imshow(img, zorder=1)
 
-                plt.imshow(
-                    par_image,
-                    zorder=1,
-                    interpolation="nearest",
-                    extent=(0, par_image.size[0], par_image.size[1], 0),
-                )
+                if column_to_plot:
+                    print("[WARNING] Values are only plotted on patches. If you'd like to plot values on all patches of a parent image, use ``show_parent`` instead.")
 
                 if save_kml_dir:
                     if ("coordinates" not in self.parents[image_id].keys()):
                         print(
-                            "[WARNING] 'coordinates' could not be found. This is needed when save_kml_dir is set...continue"  # noqa
+                            f"[WARNING] 'coordinates' could not be found in {image_id} so no KML file can be created/saved."  # noqa
                         )
                         continue
+                    else:
+                        os.makedirs(save_kml_dir, exist_ok=True)
+                        kml_out_path = os.path.join(save_kml_dir, image_id)
 
-                    # remove x/y ticks when creating KML out of images
-                    plt.xticks([])
-                    plt.yticks([])
+                        plt.savefig(
+                            kml_out_path,
+                            bbox_inches="tight",
+                            pad_inches=0,
+                            dpi=kml_dpi_image,
+                        )
 
-                    os.makedirs(save_kml_dir, exist_ok=True)
-                    path2kml = os.path.join(save_kml_dir, f"{one_image_id}")
-                    plt.savefig(
-                        f"{path2kml}",
-                        bbox_inches="tight",
-                        pad_inches=0,
-                        dpi=kml_dpi_image,
-                    )
-
-                    self._create_kml(
-                        path2kml=path2kml,
-                        value=one_image_id,
-                        coords=self.images["parent"][one_image_id]["coordinates"],
-                        counter=-1,
-                    )
-                else:
-                    plt.title(one_image_id)
-                    plt.show()
+                        self._create_kml(
+                            kml_out_path=kml_out_path,
+                            column_to_plot=column_to_plot,
+                            coords=self.parents[image_id]["coordinates"],
+                            counter=-1,
+                        )
+                
+                plt.title(image_id)
+                plt.show()
+                figures.append(fig)
+            
+            return figures
 
         elif tree_level == "patch":
             # Collect parents information
-            parents = {}
-            for i in range(len(image_ids)):
-                try:
-                    parent_id = self.images[tree_level][image_ids[i]][
-                        "parent_id"
-                    ]
-                except Exception as err:
-                    print(err)
+            parent_images = {}
+            for image_id in image_ids:   
+                parent_id = self.patches[image_id].get("parent_id", None)
+                
+                if parent_id is None:
+                    print(f"[WARNING] {image_id} has no parent. Skipping.")
                     continue
-
-                if parent_id not in parents:
-                    parents[parent_id] = {
-                        "path": self.images["parent"][parent_id]["image_path"],
-                        "patch": [],
+                
+                if parent_id not in parent_images.keys():
+                    parent_images[parent_id] = {
+                        "image_path": self.parents[parent_id]["image_path"],
+                        "patches": [image_id],
                     }
+                else: 
+                    parent_images[parent_id]["patches"].append(image_id)
+    
+            # plot each parent
+            for parent_id in parent_images.keys():
+                figsize = kwds.get("figsize", (10,10))
+                fig, ax = plt.subplots(figsize=figsize)
+                ax.axis("off")
 
-                parents[parent_id]["patch"].append(image_ids[i])
+                # initialize values_array - will be filled with values of 'value'
+                parent_height, parent_width, _ = self.parents[parent_id]["shape"]
+                values_array = np.full((parent_height,parent_width), np.nan)
+                        
+                for patch_id in parent_images[parent_id]["patches"]:
+                    patch_dic = self.patches[patch_id]
+                    pixel_bounds=patch_dic["pixel_bounds"] #min_x, min_y, max_x, max_y
+                    
+                    # Set the values for each patch
+                    if column_to_plot:
+                        patch_value = patch_dic.get(column_to_plot, None)
+                                
+                        # assign values to values_array
+                        values_array[pixel_bounds[1]:pixel_bounds[3], pixel_bounds[0]:pixel_bounds[2]] = patch_value
 
-            for i in parents.keys():
-                figsize = self._get_kwds(kwds, "figsize")
-                plt.figure(figsize=figsize)
+                    if patch_border:
+                        patch_xy = (pixel_bounds[0], pixel_bounds[1])
+                        patch_width = pixel_bounds[2] - pixel_bounds[0] # max_x - min_x 
+                        patch_height = pixel_bounds[3] - pixel_bounds[1] # max_y - min_y 
+                        rect = patches.Rectangle(patch_xy, patch_width, patch_height, fc="none", ec=border_color, lw=2, zorder=20)
+                        ax.add_patch(rect)
+                
+                if column_to_plot:
+                    vmin = vmin if vmin else np.min(values_array)
+                    vmax = vmax if vmax else np.max(values_array)
 
-                for i_value, value in enumerate(values):
-                    # initialize image2plot
-                    # will be filled with values of 'value'
-                    image2plot = np.empty(grid_plot)
-                    image2plot[:] = np.nan
-                    min_x, min_y, max_x, max_y = (
-                        grid_plot[1],
-                        grid_plot[0],
-                        0,
-                        0,
+                    # set discrete colorbar
+                    cmap = plt.get_cmap(cmap, discrete_cmap)
+
+                    values_plot = ax.imshow(
+                        values_array,
+                        zorder=10,
+                        cmap=cmap,
+                        vmin=vmin,
+                        vmax=vmax,
+                        alpha=alpha,
                     )
-                    for patch_id in parents[i]["patch"]:
-                        one_image = self.images[tree_level][patch_id]
-
-                        # Set the values for each patch
-                        if not value:
-                            pass
-
-                        elif value == "const":
-                            # Assign values to image2plot, update min_x,
-                            # min_y, ...
-                            image2plot[
-                                one_image["min_y"] : one_image["max_y"],
-                                one_image["min_x"] : one_image["max_x"],
-                            ] = 1.0
-
-                        elif value == "random":
-                            import random
-
-                            # assign values to image2plot, update min_x,
-                            # min_y, ...
-                            image2plot[
-                                one_image["min_y"] : one_image["max_y"],
-                                one_image["min_x"] : one_image["max_x"],
-                            ] = random.random()
-
-                        elif value:
-                            if value not in one_image:
-                                assign_value = None
-                            else:
-                                assign_value = one_image[value]
-                            # assign values to image2plot, update min_x,
-                            # min_y, ...
-                            image2plot[
-                                one_image["min_y"] : one_image["max_y"],
-                                one_image["min_x"] : one_image["max_x"],
-                            ] = assign_value
-
-                        # reset min/max of x and y
-                        min_x = min(min_x, one_image["min_x"])
-                        min_y = min(min_y, one_image["min_y"])
-                        max_x = max(max_x, one_image["max_x"])
-                        max_y = max(max_y, one_image["max_y"])
-
-                        if border:
-                            self._plot_border(
-                                one_image, plt, color=border_color
-                            )
-
-                    if value:
-                        vmin = vmins[i_value]
-                        vmax = vmaxs[i_value]
-                        alpha = alphas[i_value]
-                        colorbar = colorbars[i_value]
-                        discrete_colorbar = discrete_colorbars[i_value]
-
-                        # set discrete colorbar
-                        colorbar = pltcm.get_cmap(colorbar, discrete_colorbar)
-
-                        # Adjust image2plot to global min/max in x and y
-                        # directions
-                        image2plot = image2plot[min_y:max_y, min_x:max_x]
-                        plt.imshow(
-                            image2plot,
-                            zorder=10 + i_value,
-                            interpolation="nearest",
-                            cmap=colorbar,
-                            vmin=vmin,
-                            vmax=vmax,
-                            alpha=alpha,
-                            extent=(min_x, max_x, max_y, min_y),
-                        )
-
-                        if save_kml_dir:
-                            plt.xticks([])
-                            plt.yticks([])
-                        else:
-                            plt.colorbar(fraction=0.03)
 
                 if plot_parent:
-                    par_path = os.path.join(parents[i]["path"])
-                    par_image = mpimg.imread(par_path)
-                    plt.imshow(
-                        par_image,
-                        zorder=1,
-                        interpolation="nearest",
-                        extent=(0, par_image.shape[1], par_image.shape[0], 0),
-                    )
-                    if not save_kml_dir:
-                        plt.title(i)
+                    parent_path = parent_images[parent_id]["image_path"]
+                    parent_image = Image.open(parent_path)
 
-                if not save_kml_dir:
-                    plt.show()
-                else:
+                    ax.imshow(parent_image)
+                    
+                if save_kml_dir:
                     os.makedirs(save_kml_dir, exist_ok=True)
-                    path2kml = os.path.join(save_kml_dir, f"{value}_{i}")
+                    kml_out_path = os.path.join(save_kml_dir, parent_id)
                     plt.savefig(
-                        f"{path2kml}",
+                        f"{kml_out_path}",
                         bbox_inches="tight",
                         pad_inches=0,
                         dpi=kml_dpi_image,
                     )
-
                     self._create_kml(
-                        path2kml=path2kml,
-                        value=value,
-                        coords=self.images["parent"][i]["coordinates"],
-                        counter=i,
+                        kml_out_path=kml_out_path,
+                        column_to_plot=column_to_plot,
+                        coords=self.parents[image_id]["coordinates"],
+                        counter=-1,
                     )
+                
+                fig.colorbar(values_plot, shrink=0.8)
+                fig.suptitle(image_id)
+                fig.show()
+                figures.append(fig)
 
-                if value and plot_histogram:
-                    histogram_range = self._get_kwds(kwds, "histogram_range")
-                    plt.figure(figsize=(7, 5))
-                    plt.hist(
-                        image2plot.flatten(),
-                        color="k",
-                        bins=np.arange(
-                            histogram_range[0] - histogram_range[2] / 2.0,
-                            histogram_range[1] + histogram_range[2],
-                            histogram_range[2],
-                        ),
-                    )
-                    plt.xlabel(value, size=20)
-                    plt.ylabel("Freq.", size=20)
-                    plt.xticks(size=18)
-                    plt.yticks(size=18)
-                    plt.grid()
-                    plt.show()
+                if column_to_plot and plot_histogram:
+                    self._hist_values_array(column_to_plot, values_array, **kwds)
+                
+            return fig
+    
+    def show_parent(
+        self,
+        parent_id: Union[int, str],
+        column_to_plot: Optional[str] = None,
+        **kwds: Dict,
+    ) -> None:
+        """
+        A wrapper method for `.show()` which plots all patches of a
+        specified parent (`parent_id`).
+
+        Parameters
+        ----------
+        parent_id : int or str
+            ID of the parent image to be plotted.
+        column_to_plot : str, optional
+            Column whose values will be plotted on patches, by default ``None``.
+        **kwds: Dict
+            Key words to pass to ``show`` method. 
+            See help text for ``show`` for more information.
+
+        Returns
+        -------
+        list
+            A list of figures created by the method.
+
+        Notes
+        -----
+        This is a wrapper method. See the documentation of the
+        :meth:`mapreader.load.images.MapImages.show` method for more detail.
+        """
+        patch_ids = self.parents[parent_id]["patches"]
+        self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
 
     def _create_kml(
         self,
-        path2kml: str,
-        value: str,
+        kml_out_path: str,
+        column_to_plot: str,
         coords: Union[List, Tuple],
         counter: Optional[int] = -1,
     ) -> None:
@@ -1541,8 +1493,7 @@ class MapImages:
         path2kml : str
             Directory to save KML file.
         value : _type_
-            Value to be plotted on the underlying image.
-            See `.show()` for detail.
+            Column to plot on underlying image.
         coords : list or tuple
             Coordinates of the bounding box.
         counter : int, optional
@@ -1562,9 +1513,9 @@ class MapImages:
         kml = simplekml.Kml()
         ground = kml.newgroundoverlay(name=str(counter))
         if counter == -1:
-            ground.icon.href = f"./{value}"
+            ground.icon.href = f"./{column_to_plot}"
         else:
-            ground.icon.href = f"./{value}_{counter}"
+            ground.icon.href = f"./{column_to_plot}_{counter}"
 
         ground.latlonbox.north = lat_max
         ground.latlonbox.south = lat_min
@@ -1572,91 +1523,32 @@ class MapImages:
         ground.latlonbox.west = lon_min
         # ground.latlonbox.rotation = -14
 
-        kml.save(f"{path2kml}.kml")
+        kml.save(f"{kml_out_path}.kml")
 
-    def _plot_border(
+    def _hist_values_array(
         self,
-        image_dict: Dict,
-        plt: plt,
-        linewidth: Optional[int] = 0.5,
-        zorder: Optional[int] = 20,
-        color: Optional[str] = "r",
-    ) -> None:
-        """Plot border for an image
-
-        ..
-            Private method.
-
-        Arguments:
-            image_dict : dict
-                image dictionary, e.g., one item in ``self.images["patch"]``
-            plt : matplotlib.pyplot object
-                a matplotlib.pyplot object
-
-        Keyword Arguments:
-            linewidth : int
-                line-width (default: ``2``)
-            zorder : int
-                z-order for the border (default: ``5``)
-            color : str
-                color of the border (default: ``"r"``)
-        """
-        plt.plot(
-            [image_dict["min_x"], image_dict["min_x"]],
-            [image_dict["min_y"], image_dict["max_y"]],
-            lw=linewidth,
-            zorder=zorder,
-            color=color,
-        )
-        plt.plot(
-            [image_dict["min_x"], image_dict["max_x"]],
-            [image_dict["max_y"], image_dict["max_y"]],
-            lw=linewidth,
-            zorder=zorder,
-            color=color,
-        )
-        plt.plot(
-            [image_dict["max_x"], image_dict["max_x"]],
-            [image_dict["max_y"], image_dict["min_y"]],
-            lw=linewidth,
-            zorder=zorder,
-            color=color,
-        )
-        plt.plot(
-            [image_dict["max_x"], image_dict["min_x"]],
-            [image_dict["min_y"], image_dict["min_y"]],
-            lw=linewidth,
-            zorder=zorder,
-            color=color,
-        )
-
-    @staticmethod
-    def _get_kwds(
-        kwds: Dict, key: str
-    ) -> Union[Tuple[int, int], int, List[Union[int, float]], Any]:
-        """
-        If ``kwds`` dictionary has the ``key``, return value; otherwise, use
-        default for ``key`` provided.
-
-        ..
-            Private method.
-        """
-        if key in kwds:
-            return kwds[key]
-        else:
-            if key == "figsize":
-                return (10, 10)
-            elif key in ["vmin"]:
-                return 0
-            elif key in ["vmax", "alpha"]:
-                return 1
-            elif key in ["colorbar"]:
-                return "binary"
-            elif key in ["histogram_range"]:
-                return [0, 1, 0.01]
-            elif key in ["discrete_colorbar"]:
-                return 100
-
+        column_to_plot,
+        values_array,
+        **kwds,
+    ):
+        histogram_range = kwds.get("histogram_range", [0, 1, 0.01])
+        plt.figure(figsize=(7, 5))
+        plt.hist(
+            values_array.flatten(),
+            color="k",
+            bins=np.arange(
+                histogram_range[0] - histogram_range[2] / 2.0,
+                histogram_range[1] + histogram_range[2],
+                histogram_range[2],
+            ),)
+                    
+        plt.xlabel(column_to_plot, size=20)
+        plt.ylabel("Freq.", size=20)
+        plt.xticks(size=18)
+        plt.yticks(size=18)
+        plt.grid()
+        plt.show()
+        
     def load_patches(
         self,
         patch_paths: str,
