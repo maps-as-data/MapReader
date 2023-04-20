@@ -222,11 +222,38 @@ class MapImages:
             if parent_id not in self.parents.keys(): 
                 self.parents[parent_id] = {"parent_id": None, "image_path": abs_parent_path, "patches":[]}
             
-            else: 
-                if "parent_id" not in self.images["parent"][parent_id].keys():
-                    self.images["parent"][parent_id]["parent_id"] = None
-                if "image_path" not in self.images["parent"][parent_id].keys():
-                    self.images["parent"][parent_id]["image_path"] = abs_parent_path
+            #add patch to parent
+            self._add_patch_to_parent(image_id)
+
+    def _add_patch_to_parent(self, patch_id: str) -> None:
+        """
+        Add patch to parent.
+
+        Parameters
+        ----------
+        patch_id : str
+            The ID of the patch to be added
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method adds patches to their corresponding parent image.
+
+        It checks if the parent image has any patches, and if not, it creates
+        a list of patches and assigns it to the parent. If the parent image
+        already has a list of patches, the method checks if the current patch
+        is already in the list. If not, the patch is added to the list.
+        """
+        patch_parent = self.patches[patch_id]["parent_id"]
+        
+        if "patches" not in self.parents[patch_parent].keys():
+            self.parents[patch_parent]["patches"] = [patch_id]
+        else:
+            if patch_id not in self.parents[patch_parent]["patches"]:
+                self.parents[patch_parent]["patches"].append(patch_id)
 
     @staticmethod
     def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
@@ -1685,7 +1712,7 @@ class MapImages:
                 add_geo_info=add_geo_info,
             )
             # Add patches to the parent
-            self.add_patches()
+            self._add_patches_to_parents()
 
     @staticmethod
     def detect_par_id_from_path(
@@ -1894,7 +1921,7 @@ class MapImages:
                     except Exception as err:
                         print(err)
 
-            self.add_patches()
+            self._add_patches_to_parents()
 
     def load_csv_file(
         self,
@@ -1944,7 +1971,7 @@ class MapImages:
                 )
             )
 
-            self.add_patches()
+            self._add_patches_to_parents()
 
             for parent_id in self.parents.keys():
                 k2change = "patches"
@@ -1958,8 +1985,7 @@ class MapImages:
                     self.parents[parent_id][k2change] = eval(
                         self.parents[parent_id][k2change]
                     )
-                self.images["parent"][image_id]["size_in_m"] = size_in_m
-
+            
     '''
     def readPatches(self,
                   patch_paths,
@@ -2035,7 +2061,7 @@ class MapImages:
             # Add parents
             self.readParents(parent_paths=parent_paths)
             # Add patches to the parent
-            self.add_patches()
+            self._add_patches_to_parents()
 
     def process(self, tree_level="parent", update_paths=True,
                 save_preproc_dir="./test_preproc"):
