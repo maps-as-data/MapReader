@@ -601,20 +601,16 @@ class MapImages:
             self._add_center_coord_id(image_id=image_id)
 
     def _add_shape_id(
-        self, image_id: Union[int, str], tree_level: Optional[str] = "parent"
+        self, image_id: Union[int, str],
     ) -> None:
         """
         Add shape (image_height, image_width, image_channels) of the image
-        with specified ``image_id`` in the given ``tree_level`` to the
-        metadata.
+        with specified ``image_id`` to the metadata.
 
         Parameters
         ----------
         image_id : int or str
             The ID of the image to add shape metadata to.
-        tree_level : str, optional
-            The tree level where the image is located, which can be
-            ``"parent"`` (default) or ``"patch"``.
 
         Returns
         -------
@@ -627,6 +623,8 @@ class MapImages:
         The shape of the image is obtained by loading the image from its
         ``image_path`` value and getting its shape.
         """
+        tree_level = self._get_tree_level(image_id)
+
         myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
         # shape = (hwc)
         myimg_shape = myimg.shape
@@ -822,6 +820,8 @@ class MapImages:
         the ``geopy`` package to be installed.
         """
 
+        tree_level = self._get_tree_level(image_id)
+
         if "coordinates" not in self.images["parent"][parent_id].keys():
             print(
                 f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
@@ -835,37 +835,21 @@ class MapImages:
         (xmin, ymin, xmax, ymax) = self.images["parent"][parent_id]["coordinates"]
         
         if verbose:
-            print("[INFO] Using coordinates to compute width/height:")
-            print(f"[INFO] lat min/max: {ymin:.4f}/{ymax:.4f}")
-            print(f"[INFO] lon min/max: {xmin:.4f}/{xmax:.4f}")
-            print(f"[INFO] shape (hwc): {(height, width, channels)}")
+    def _get_tree_level(self, image_id: str) -> str:
+        """Identify tree level of an image from image_id.
 
-        # Calculate the size of image in meters
-        if method in ["geodesic", "gd"]:
-            bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
-            right = geodesic((ymin, xmax), (ymax, xmax)).meters
-            top = geodesic((ymax, xmax), (ymax, xmin)).meters
-            left = geodesic((ymax, xmin), (ymin, xmin)).meters
+        Parameters
+        ----------
+        image_id : str
+            The ID of the image to identify tree level for.
 
-        elif method in ["gc", "great-circle", "great_circle"]:
-            bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
-            right = great_circle((ymin, xmax), (ymax, xmax)).meters
-            top = great_circle((ymax, xmax), (ymax, xmin)).meters
-            left = great_circle((ymax, xmin), (ymin, xmin)).meters
-        
-        else:
-            raise NotImplementedError(f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}')
-
-        size_in_m = (bottom, right, top, left) #anticlockwise order
-        
-        mean_pixel_width = np.mean([size_in_m[0]/width, size_in_m[2]/width])
-        mean_pixel_height = np.mean([size_in_m[1]/height, size_in_m[3]/height])
-        
-        if verbose:
-            print(f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}")  # noqa
-            print(f"Each pixel is ~{mean_pixel_width:.3f} X {mean_pixel_height:.3f} meters (width x height).")  # noqa
-                
-        return size_in_m
+        Returns
+        -------
+        str
+            The tree level of the image.
+        """
+        tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
+        return tree_level
 
     def patchify_all(
         self,
