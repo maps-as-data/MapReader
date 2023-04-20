@@ -14,7 +14,7 @@ PATH2IMAGES = "./worked_examples/non-geospatial/classification_plant_phenotype/d
 PATH2ANNOTS = "./worked_examples/non-geospatial/classification_plant_phenotype/annotations_phenotype_open_access/phenotype_test_#kasra#.csv"
 
 
-def test_slice():
+def test_patchify():
     from mapreader import loader
 
     myimgs = loader(PATH2IMAGES)
@@ -29,9 +29,9 @@ def test_slice():
     assert len(all_imgs) == 2, "Expected 2 parents"
 
     # `method` can also be set to meters
-    myimgs.sliceAll(
+    myimgs.patchifyAll(
         path_save="./dataset/eg_slice_50_50",
-        slice_size=50,  # in pixels
+        patch_size=50,  # in pixels
         square_cuts=False,
         verbose=False,
         method="pixel",
