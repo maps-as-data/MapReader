@@ -78,9 +78,7 @@ class classifier:
         """
 
         if device in ["default", None]:
-            self.device = torch.device(
-                "cuda:0" if torch.cuda.is_available() else "cpu"
-            )
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
         print(f"[INFO] Device is set to {self.device}")
@@ -98,9 +96,7 @@ class classifier:
         self.best_loss = torch.tensor(np.inf)
         self.best_epoch = 0
         # temp file to save checkpoints during training/validation
-        self.tmp_save_filename = (
-            f"tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
-        )
+        self.tmp_save_filename = f"tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
 
         # add colors for printing/logging
         self._print_colors()
@@ -178,9 +174,7 @@ class classifier:
             return dl
         else:
             self.dataloader[set_name] = dl
-            self.dataset_sizes[set_name] = len(
-                self.dataloader[set_name].dataset
-            )
+            self.dataset_sizes[set_name] = len(self.dataloader[set_name].dataset)
             print(
                 f"[INFO] added '{set_name}' dataloader with {self.dataset_sizes[set_name]} elements."  # noqa
             )
@@ -200,9 +194,7 @@ class classifier:
         -------
         None
         """
-        print(
-            f"[INFO] labels:   {self.dataloader[set_name].dataset.uniq_labels}"
-        )
+        print(f"[INFO] labels:   {self.dataloader[set_name].dataset.uniq_labels}")
         if self.class_names is not None:
             print(f"[INFO] class-names: {self.class_names}")
 
@@ -236,9 +228,7 @@ class classifier:
         None
         """
         if self.class_names is None:
-            raise ValueError(
-                "[ERROR] specify class names using set_classnames method."
-            )
+            raise ValueError("[ERROR] specify class names using set_classnames method.")
         else:
             self.print_classes_dl()
 
@@ -312,9 +302,7 @@ class classifier:
                 min_lr, max_lr, len(list(self.model.named_parameters()))
             )
         else:
-            raise NotImplementedError(
-                "Implemented methods are: linspace and geomspace"
-            )
+            raise NotImplementedError("Implemented methods are: linspace and geomspace")
 
         list2optim = []
         for i, (name, params) in enumerate(self.model.named_parameters()):
@@ -372,9 +360,7 @@ class classifier:
             filter(lambda p: p.requires_grad, self.model.parameters())
         """
         if params2optim == "infer":
-            params2optim = filter(
-                lambda p: p.requires_grad, self.model.parameters()
-            )
+            params2optim = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
             optimizer = optim.Adam(params2optim, **optim_param_dict)
@@ -454,9 +440,7 @@ class classifier:
         else:
             return scheduler
 
-    def add_scheduler(
-        self, scheduler: torch.optim.lr_scheduler._LRScheduler
-    ) -> None:
+    def add_scheduler(self, scheduler: torch.optim.lr_scheduler._LRScheduler) -> None:
         """
         Add a scheduler to the classifier object.
 
@@ -603,9 +587,7 @@ class classifier:
         )
         print(line_divider)
 
-    def freeze_layers(
-        self, layers_to_freeze: Optional[List[str]] = []
-    ) -> None:
+    def freeze_layers(self, layers_to_freeze: Optional[List[str]] = []) -> None:
         """
         Freezes the specified layers in the neural network by setting
         ``requires_grad`` attribute to False for their parameters.
@@ -669,9 +651,7 @@ class classifier:
                 elif (layer[-1] != "*") and (layer == name):
                     param.requires_grad = True
 
-    def only_keep_layers(
-        self, only_keep_layers_list: Optional[List[str]] = []
-    ) -> None:
+    def only_keep_layers(self, only_keep_layers_list: Optional[List[str]] = []) -> None:
         """
         Only keep the specified layers (``only_keep_layers_list``) for
         gradient computation during the backpropagation.
@@ -836,9 +816,7 @@ class classifier:
             print("KeyboardInterrupted...Exiting...")
             if os.path.isfile(self.tmp_save_filename):
                 print(f"File found: {self.tmp_save_filename}...load...")
-                self.load(
-                    self.tmp_save_filename, remove_after_load=remove_after_load
-                )
+                self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
             else:
                 print("No temporary file was found.")
 
@@ -906,9 +884,7 @@ class classifier:
         """
 
         if self.criterion is None:
-            raise ValueError(
-                "[ERROR] criterion is needed. Use add_criterion method"
-            )
+            raise ValueError("[ERROR] criterion is needed. Use add_criterion method")
 
         for phase in phases:
             if phase not in self.dataloader.keys():
@@ -971,9 +947,7 @@ class classifier:
                 total_inp_counts = len(self.dataloader[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs, labels) in enumerate(
-                    self.dataloader[phase]
-                ):
+                for batch_idx, (inputs, labels) in enumerate(self.dataloader[phase]):
                     inputs = inputs.to(self.device)
                     labels = labels.to(self.device)
 
@@ -987,9 +961,7 @@ class classifier:
 
                     if phase.lower() in train_phase_names + valid_phase_names:
                         # forward, track history if only in train
-                        with torch.set_grad_enabled(
-                            phase.lower() in train_phase_names
-                        ):
+                        with torch.set_grad_enabled(phase.lower() in train_phase_names):
                             # Get model outputs and calculate loss
                             # Special case for inception because in training,
                             # it has an auxiliary output.
@@ -1028,9 +1000,7 @@ class classifier:
                         _, pred_label = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
-                        torch.nn.functional.softmax(outputs, dim=1)
-                        .cpu()
-                        .tolist()
+                        torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
                     )
                     running_pred_label.extend(pred_label.cpu().tolist())
                     running_orig_label.extend(labels.cpu().tolist())
@@ -1040,9 +1010,7 @@ class classifier:
                             total_inp_counts,
                             (batch_idx + 1) * phase_batch_size,
                         )
-                        progress_perc = (
-                            curr_inp_counts / total_inp_counts * 100.0
-                        )
+                        progress_perc = curr_inp_counts / total_inp_counts * 100.0
                         tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}%)"  # noqa
 
                         epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
@@ -1059,9 +1027,7 @@ class classifier:
                     # --- END: one batch
 
                 # scheduler
-                if phase.lower() in train_phase_names and (
-                    self.scheduler is not None
-                ):
+                if phase.lower() in train_phase_names and (self.scheduler is not None):
                     self.scheduler.step()
 
                 if phase.lower() in train_phase_names + valid_phase_names:
@@ -1090,9 +1056,7 @@ class classifier:
                     epoch_msg = self.gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint(
-                            "[INFO]", self.color_dred, epoch_msg + "\n"
-                        )
+                        self.cprint("[INFO]", self.color_dred, epoch_msg + "\n")
                     else:
                         self.cprint("[INFO]", self.color_dgreen, epoch_msg)
 
@@ -1102,10 +1066,7 @@ class classifier:
                 self.orig_label.extend(running_orig_label)
 
                 # Update best_loss and _epoch?
-                if (
-                    phase.lower() in valid_phase_names
-                    and epoch_loss < self.best_loss
-                ):
+                if phase.lower() in valid_phase_names and epoch_loss < self.best_loss:
                     self.best_loss = epoch_loss
                     self.best_epoch = epoch
                     best_model_wts = copy.deepcopy(self.model.state_dict())
@@ -1121,9 +1082,7 @@ class classifier:
                         self.save(self.tmp_save_filename, force=True)
 
         time_elapsed = time.time() - since
-        print(
-            f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s"
-        )
+        print(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -1135,9 +1094,7 @@ class classifier:
                 save_filename = f"checkpoint_{self.best_epoch}.pkl"
                 save_model_path = os.path.join(save_model_dir, save_filename)
                 self.save(save_model_path, force=True)
-                with open(
-                    os.path.join(save_model_dir, "info.txt"), "a+"
-                ) as fio:
+                with open(os.path.join(save_model_dir, "info.txt"), "a+") as fio:
                     fio.writelines(f"{save_filename},{self.best_loss:.5f}\n")
 
                 print(
@@ -1519,16 +1476,12 @@ class classifier:
 
         elif "alexnet" in model_name:
             num_ftrs = model_dw.classifier[6].in_features
-            model_dw.classifier[6] = nn.Linear(
-                num_ftrs, last_layer_num_classes
-            )
+            model_dw.classifier[6] = nn.Linear(num_ftrs, last_layer_num_classes)
 
         elif "vgg" in model_name:
             # vgg11_bn
             num_ftrs = model_dw.classifier[6].in_features
-            model_dw.classifier[6] = nn.Linear(
-                num_ftrs, last_layer_num_classes
-            )
+            model_dw.classifier[6] = nn.Linear(num_ftrs, last_layer_num_classes)
 
         elif "squeezenet" in model_name:
             model_dw.classifier[1] = nn.Conv2d(
@@ -1558,9 +1511,7 @@ class classifier:
 
         if add_model:
             self.del_model()
-            self.add_model(
-                model_dw, input_size=input_size, is_inception=is_inception
-            )
+            self.add_model(model_dw, input_size=input_size, is_inception=is_inception)
         else:
             return model_dw, input_size, is_inception
 
@@ -1746,13 +1697,9 @@ class classifier:
                     pred_ind = int(preds[j])
                     if pred_ind != class_index:
                         continue
-                    if (min_conf is not None) and (
-                        pred_conf[j][pred_ind] < min_conf
-                    ):
+                    if (min_conf is not None) and (pred_conf[j][pred_ind] < min_conf):
                         continue
-                    if (max_conf is not None) and (
-                        pred_conf[j][pred_ind] > max_conf
-                    ):
+                    if (max_conf is not None) and (pred_conf[j][pred_ind] > max_conf):
                         continue
 
                     counter += 1

@@ -88,9 +88,7 @@ class patchTorchDataset(torch.utils.data.Dataset):
         self.input_col = input_col
 
         if self.label_col in self.patchframe.columns.tolist():
-            self.uniq_labels = (
-                self.patchframe[self.label_col].unique().tolist()
-            )
+            self.uniq_labels = self.patchframe[self.label_col].unique().tolist()
         else:
             self.uniq_labels = "NS"
 
@@ -112,9 +110,7 @@ class patchTorchDataset(torch.utils.data.Dataset):
         """
         return len(self.patchframe)
 
-    def __getitem__(
-        self, idx: Union[int, torch.Tensor]
-    ) -> Tuple[torch.Tensor, Any]:
+    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, Any]:
         """
         Return the image and its label at the given index in the dataset.
 
@@ -347,9 +343,7 @@ class patchContextDataset(Dataset):
             self.context_save_path = os.path.abspath(context_save_path)
 
         if self.label_col in self.patchframe.columns.tolist():
-            self.uniq_labels = (
-                self.patchframe[self.label_col].unique().tolist()
-            )
+            self.uniq_labels = self.patchframe[self.label_col].unique().tolist()
         else:
             self.uniq_labels = "NS"
 
@@ -502,9 +496,7 @@ class patchContextDataset(Dataset):
                 par_name,
             )
         else:
-            par_path2read = os.path.join(
-                os.path.abspath(self.par_path), par_name
-            )
+            par_path2read = os.path.join(os.path.abspath(self.par_path), par_name)
 
         par_img = Image.open(par_path2read).convert(self.convert2)
 
@@ -650,9 +642,7 @@ class patchContextDataset(Dataset):
             context_img = self.save_parents_idx(idx, return_image=True)
         else:
             context_img = Image.open(
-                os.path.join(
-                    self.context_save_path, os.path.basename(img_path)
-                )
+                os.path.join(self.context_save_path, os.path.basename(img_path))
             ).convert(self.convert2)
 
         image = self.transform1(image)

@@ -1,4 +1,3 @@
-
 try:
     from geopy.distance import geodesic, great_circle
 except ImportError:
@@ -188,19 +187,11 @@ class mapImages:
                     "image_path": parent_path,
                 }
             # 2. parent_basename exists but parent_id is not defined
-            if (
-                "parent_id"
-                not in self.images["parent"][parent_basename].keys()
-            ):
+            if "parent_id" not in self.images["parent"][parent_basename].keys():
                 self.images["parent"][parent_basename]["parent_id"] = None
             # 3. parent_basename exists but image_path is not defined
-            if (
-                "image_path"
-                not in self.images["parent"][parent_basename].keys()
-            ):
-                self.images["parent"][parent_basename][
-                    "image_path"
-                ] = parent_path
+            if "image_path" not in self.images["parent"][parent_basename].keys():
+                self.images["parent"][parent_basename]["image_path"] = parent_path
 
     @staticmethod
     def splitImagePath(inp_path: str) -> Tuple[str, str]:
@@ -299,9 +290,7 @@ class mapImages:
         elif "image_id" in columns:
             image_id_col = "image_id"
         else:
-            raise ValueError(
-                "'name' or 'image_id' should be one of the columns."
-            )
+            raise ValueError("'name' or 'image_id' should be one of the columns.")
         metadata_df.drop_duplicates(subset=[image_id_col])
 
         for i, one_row in metadata_df.iterrows():
@@ -311,13 +300,13 @@ class mapImages:
             for one_col in columns:
                 if one_col in ["coord", "polygon"]:
                     # Make sure "coord" is interpreted as a tuple
-                    self.images[tree_level][one_row[image_id_col]][
-                        one_col
-                    ] = eval(one_row[one_col])
+                    self.images[tree_level][one_row[image_id_col]][one_col] = eval(
+                        one_row[one_col]
+                    )
                 else:
-                    self.images[tree_level][one_row[image_id_col]][
+                    self.images[tree_level][one_row[image_id_col]][one_col] = one_row[
                         one_col
-                    ] = one_row[one_col]
+                    ]
 
     def show_sample(
         self,
@@ -361,9 +350,7 @@ class mapImages:
 
         for i, image_id in enumerate(sample_img_keys):
             plt.subplot(num_samples // 3 + 1, 3, i + 1)
-            myimg = mpimg.imread(
-                self.images[tree_level][image_id]["image_path"]
-            )
+            myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
             plt.title(image_id, size=8)
             plt.imshow(myimg)
             plt.xticks([])
@@ -579,9 +566,7 @@ class mapImages:
         image_height, image_width, _ = self.images["parent"][image_id]["shape"]
 
         # Extract coordinates from image
-        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id][
-            "coord"
-        ]
+        lon_min, lon_max, lat_min, lat_max = self.images["parent"][image_id]["coord"]
 
         # Calculate dlon and dlat
         dlon = abs(lon_max - lon_min) / image_width
@@ -638,9 +623,7 @@ class mapImages:
 
             dlon = self.images["parent"][par_id]["dlon"]
             dlat = self.images["parent"][par_id]["dlat"]
-            lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id][
-                "coord"
-            ]
+            lon_min, lon_max, lat_min, lat_max = self.images["parent"][par_id]["coord"]
             min_abs_x = self.images[tree_level][image_id]["min_x"] * dlon
             max_abs_x = self.images[tree_level][image_id]["max_x"] * dlon
             min_abs_y = self.images[tree_level][image_id]["min_y"] * dlat
@@ -662,19 +645,13 @@ class mapImages:
                 return
 
             print(f"[INFO] Reading 'coord' from {image_id}")
-            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][
-                image_id
-            ]["coord"]
-            self.images[tree_level][image_id]["center_lon"] = (
-                lon_min + lon_max
-            ) / 2.0
-            self.images[tree_level][image_id]["center_lat"] = (
-                lat_min + lat_max
-            ) / 2.0
+            lon_min, lon_max, lat_min, lat_max = self.images[tree_level][image_id][
+                "coord"
+            ]
+            self.images[tree_level][image_id]["center_lon"] = (lon_min + lon_max) / 2.0
+            self.images[tree_level][image_id]["center_lat"] = (lat_min + lat_max) / 2.0
         else:
-            raise NotImplementedError(
-                "Tree level must be set to 'parent' or 'patch'."
-            )
+            raise NotImplementedError("Tree level must be set to 'parent' or 'patch'.")
 
     def calc_pixel_width_height(
         self,
@@ -1021,9 +998,7 @@ class mapImages:
                 if patch not in self.images["parent"][my_parent]["patches"]:
                     self.images["parent"][my_parent]["patches"].append(patch)
 
-    def _makeDir(
-        self, path_make: str, exists_ok: Optional[bool] = True
-    ) -> None:
+    def _makeDir(self, path_make: str, exists_ok: Optional[bool] = True) -> None:
         """
         Helper method to make directories.
 
@@ -1287,9 +1262,7 @@ class mapImages:
         values = [value] if not (isinstance(value, list)) else value[:]
         vmins = [vmin] if not (isinstance(vmin, list)) else vmin[:]
         vmaxs = [vmax] if not (isinstance(vmax, list)) else vmax[:]
-        colorbars = (
-            [colorbar] if not (isinstance(colorbar, list)) else colorbar[:]
-        )
+        colorbars = [colorbar] if not (isinstance(colorbar, list)) else colorbar[:]
         alphas = [alpha] if not (isinstance(alpha, list)) else alpha[:]
         discrete_colorbars = (
             [discrete_colorbar]
@@ -1311,9 +1284,7 @@ class mapImages:
                     basewidth = int(image_width_resolution)
                     wpercent = basewidth / float(par_image.size[0])
                     hsize = int((float(par_image.size[1]) * float(wpercent)))
-                    par_image = par_image.resize(
-                        (basewidth, hsize), Image.ANTIALIAS
-                    )
+                    par_image = par_image.resize((basewidth, hsize), Image.ANTIALIAS)
 
                 # remove the borders
                 plt.gca().set_axis_off()
@@ -1329,10 +1300,7 @@ class mapImages:
                 )
 
                 if save_kml_dir:
-                    if (
-                        "coord"
-                        not in self.images["parent"][one_image_id].keys()
-                    ):
+                    if "coord" not in self.images["parent"][one_image_id].keys():
                         print(
                             "[WARNING] 'coord' could not be found. This is needed when save_kml_dir is set...continue"  # noqa
                         )
@@ -1366,9 +1334,7 @@ class mapImages:
             parents = {}
             for i in range(len(image_ids)):
                 try:
-                    parent_id = self.images[tree_level][image_ids[i]][
-                        "parent_id"
-                    ]
+                    parent_id = self.images[tree_level][image_ids[i]]["parent_id"]
                 except Exception as err:
                     print(err)
                     continue
@@ -1440,9 +1406,7 @@ class mapImages:
                         max_y = max(max_y, one_image["max_y"])
 
                         if border:
-                            self._plotBorder(
-                                one_image, plt, color=border_color
-                            )
+                            self._plotBorder(one_image, plt, color=border_color)
 
                     if value:
                         vmin = vmins[i_value]
@@ -1552,9 +1516,7 @@ class mapImages:
         try:
             import simplekml
         except ImportError:
-            raise ImportError(
-                "[ERROR] simplekml is needed to create KML outputs."
-            )
+            raise ImportError("[ERROR] simplekml is needed to create KML outputs.")
 
         (lon_min, lon_max, lat_min, lat_max) = coords
 
@@ -1825,9 +1787,9 @@ class mapImages:
                 parent_id = os.path.basename(parent_path)
                 self.images["parent"][parent_id] = {"parent_id": None}
                 if os.path.isfile(parent_path):
-                    self.images["parent"][parent_id][
-                        "image_path"
-                    ] = os.path.abspath(parent_path)
+                    self.images["parent"][parent_id]["image_path"] = os.path.abspath(
+                        parent_path
+                    )
                 else:
                     self.images["parent"][parent_id]["image_path"] = None
 
@@ -1890,9 +1852,9 @@ class mapImages:
                 k2change = "coord"
                 if k2change in self.images["parent"][parent_id]:
                     try:
-                        self.images["parent"][parent_id][
-                            k2change
-                        ] = self.images["parent"][parent_id][k2change]
+                        self.images["parent"][parent_id][k2change] = self.images[
+                            "parent"
+                        ][parent_id][k2change]
                     except Exception as err:
                         print(err)
 
