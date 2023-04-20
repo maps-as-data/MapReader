@@ -162,8 +162,7 @@ class MapImages:
         **kwds: Dict,
     ) -> None:
         """
-        Constructs image data from the given image path and parent path and
-        adds it to the ``MapImages`` instance's ``images`` attribute.
+        Constructs image data from the given image path and parent path and adds it to the ``MapImages`` instance's ``images`` attribute.
 
         Parameters
         ----------
@@ -189,10 +188,7 @@ class MapImages:
 
         Notes
         -----
-        This method assumes that the ``images`` attribute has been initialized
-        on the MapImages instance as a dictionary with two levels of hierarchy,
-        ``"parent"`` and ``"patch"``. The image data is added to the
-        corresponding level based on the value of ``tree_level``.
+        This method assumes that the ``images`` attribute has been initialized on the MapImages instance as a dictionary with two levels of hierarchy, ``"parent"`` and ``"patch"``. The image data is added to the corresponding level based on the value of ``tree_level``.
         """
 
         if tree_level not in ["parent", "patch"]:
@@ -201,20 +197,22 @@ class MapImages:
             )
 
         if tree_level == "parent":
-            print("[WARNING] Ignoring `parent_path` as `tree_level`  is set to 'parent'.")
-            parent_path = None
+            if parent_path:
+                print("[WARNING] Ignoring `parent_path` as `tree_level`  is set to 'parent'.")
+                parent_path = None
             parent_id = None
 
         abs_image_path, image_id, _ = self._convert_image_path(image_path)
 
-        # if parent_path is defined get absolute parent path and parent id
-        if parent_id: 
+        # if parent_path is defined get absolute parent path and parent id (tree_level = "patch" is implied) 
+        if parent_path:
             abs_parent_path, parent_id, _ = self._convert_image_path(parent_path)
 
-        # add image, shape and other kwds to dictionary 
+        # add image, coords (if present), shape and other kwds to dictionary 
         self.images[tree_level][image_id] = {"parent_id": parent_id,"image_path": abs_image_path,}
-        self._add_shape_id(image_id, tree_level)
-        
+        if tree_level == "parent":
+            self._add_geo_info_id(image_id, verbose=False)
+        self._add_shape_id(image_id)
         for k, v in kwds.items():
             self.images[tree_level][image_id][k] = v
 
@@ -255,6 +253,30 @@ class MapImages:
             if patch_id not in self.parents[patch_parent]["patches"]:
                 self.parents[patch_parent]["patches"].append(patch_id)
 
+    def list_parents(self) -> List[str]:
+        """Return list of all parents"""
+        return list(self.parents.keys())
+
+    def list_patches(self) -> List[str]:
+        """Return list of all patches"""
+        return list(self.patches.keys())
+    
+    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
+        DataFrames for easy manipulation.
+
+        Returns
+        -------
+        tuple of two pandas DataFrames
+            The method returns a tuple of two DataFrames: One for the
+            ``parent`` images and one for the ``patch`` images.
+        """
+        parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
+        patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
+
+        return parent_df, patch_df
+    
     @staticmethod
     def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
         """
