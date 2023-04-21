@@ -231,6 +231,7 @@ class mapImages:
         delimiter: Optional[str] = "|",
         columns: Optional[List[str]] = None,
         tree_level: Optional[str] = "parent",
+        ignore_mismatch: Optional[bool] = False,
     ) -> None:
         """
         Add metadata information to the images dictionary.
@@ -260,6 +261,9 @@ class mapImages:
         tree_level : str, optional
             Determines which images dictionary (``"parent"`` or ``"child"``)
             to add the metadata to, by default ``"parent"``.
+        ignore_mismatch : bool, optional
+            Whether to error if metadata with mismatching information is passed. 
+            By default ``False``.
 
         Raises
         ------
@@ -279,27 +283,27 @@ class mapImages:
         """
         
         if isinstance(metadata, pd.DataFrame):
-            if columns is None:
+            if columns:
+                metadata_df=metadata[columns].copy()
+            else:
                 metadata_df=metadata.copy()
                 columns=list(metadata_df.columns)
-            else:
-                metadata_df=metadata[columns].copy()
         
         else: #if not df
-            if not metadata.endswith('.csv') and os.path.isfile(f"{metadata}.csv"): #needed?
+            if not metadata.endswith('.csv') and os.path.isfile(f"{metadata}.csv"):
                 metadata=f"{metadata}.csv"
             
             if os.path.isfile(metadata):
-                if columns is None:
+                if columns:
+                    metadata_df = pd.read_csv(
+                        metadata, usecols=columns, delimiter=delimiter
+                        )
+                else:
                     metadata_df = pd.read_csv(
                         metadata, index_col=index_col, delimiter=delimiter
                         )
                     columns=list(metadata_df.columns)
-                else: 
-                    metadata_df = pd.read_csv(
-                        metadata, usecols=columns, delimiter=delimiter
-                        )
-            
+
             else:
                 raise ValueError(
                     "[ERROR] ``metadata`` should either be the path to a csv file or a pandas DataFrame."  # noqa
@@ -333,14 +337,19 @@ class mapImages:
         missing_metadata=set(self.images[tree_level].keys())-set(metadata_df[image_id_col])
         extra_metadata=set(metadata_df[image_id_col])-set(self.images[tree_level].keys())
 
-        if len(missing_metadata)!=0: #should this have a verbose option?
-            print(
-                f"[WARNING] No metadata for: {[*missing_metadata]}"
-            )
-        if len(extra_metadata)!=0:
-            print(
-                f"[WARNING] Metadata contains information about non-existant images: {[*extra_metadata]}"
-            )
+        if not ignore_mismatch:
+            if len(missing_metadata)!=0 and len(extra_metadata)!=0:
+                raise ValueError(f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
+[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+                )
+            elif len(missing_metadata)!=0: 
+                raise ValueError(
+                    f"[ERROR] Metadata is missing information for: {[*missing_metadata]}"
+                )
+            elif len(extra_metadata)!=0:
+                raise ValueError(
+                    f"[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+                )
 
         for key in self.images[tree_level].keys():
             if key in missing_metadata:

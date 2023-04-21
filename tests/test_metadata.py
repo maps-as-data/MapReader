@@ -2,82 +2,128 @@ from mapreader import loader
 import pytest
 import os
 import pandas as pd
-import shutil
+import pathlib
+
+keys = ["parent_id", "image_path", "name", "coord", "other"]
+metadata_df = pd.DataFrame({"name":["file1.png", "file2.png", "file3.png"], "coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
 
 @pytest.fixture
-def dir_name():
-    return "metadata_test_dir"
+def matching_metadata_dir(tmp_path, metadata_df):
+    test_path = tmp_path / "test_dir"
+    os.mkdir(test_path)
+    files = ["file1.png", "file2.png", "file3.png"]
+    for file in files:
+        pathlib.Path(f"{test_path}/{file}").touch()
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    return test_path
 
-#if there is extra info in the metadata
-def test_extra_metadata(dir_name):  
-    os.mkdir(dir_name)
+@pytest.fixture
+def extra_metadata_dir(tmp_path, metadata_df):
+    test_path = tmp_path / "test_dir"
+    os.mkdir(test_path)
     files = ["file1.png", "file2.png"]
     for file in files:
-        with open(f"{dir_name}/{file}", "w") as f:
-            pass
-    metadata_df = pd.DataFrame({"name":["file1.png", "file2.png", "file3.png"], "coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":["one","two","three"]})
-    metadata_df.to_csv(f"{dir_name}/metadata_df.csv", sep="|")
-    
-    my_files=loader(f"{dir_name}/*png")
-    assert len(my_files)==2
-    my_files.add_metadata(f"{dir_name}/metadata_df.csv")
-    assert my_files.images["parent"]["file2.png"]["other"]=="two"
-    assert isinstance(my_files.images["parent"]["file2.png"]["coord"], tuple)
+        pathlib.Path(f"{test_path}/{file}").touch()
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    return test_path 
+
+@pytest.fixture
+def missing_metadata_dir(tmp_path, metadata_df):
+    test_path = tmp_path / "test_dir"
+    os.mkdir(test_path)
+    files = ["file1.png", "file2.png", "file3.png", "file4.png"]
+    for file in files:
+        pathlib.Path(f"{test_path}/{file}").touch()
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    return test_path
 
 #if metadata info matches 
-def test_matching_metdata(dir_name):
-    with open(f"{dir_name}/file3.png", "w") as f:
-        pass
-    
-    my_files=loader(f"{dir_name}/*png")
-    assert len(my_files)==3
-    my_files.add_metadata(f"{dir_name}/metadata_df.csv")
-    assert my_files.images["parent"]["file3.png"]["other"]=="three"
-    assert isinstance(my_files.images["parent"]["file3.png"]["coord"], tuple)
 
-#if you pass a metadata df
-def test_metadata_df(dir_name):
-    my_files=loader(f"{dir_name}/*png")
+def test_matching_metdata_csv(matching_metadata_dir, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
-    metadata_df=pd.read_csv(f"{dir_name}/metadata_df.csv", delimiter="|")
+    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv")
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
+
+def test_matching_metadata_df(matching_metadata_dir, metadata_df, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
+    assert len(my_files)==3
     my_files.add_metadata(metadata_df)
-    assert my_files.images["parent"]["file3.png"]["other"]=="three"
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
 
-#if you forget your file_ext
-def test_metadata_missing_file_ext(dir_name):
-    my_files=loader(f"{dir_name}/*png")
+def test_matching_metadata_csv_missing_file_ext(matching_metadata_dir, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
-    my_files.add_metadata(f"{dir_name}/metadata_df")
-    assert my_files.images["parent"]["file3.png"]["other"]=="three"
+    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df") #if you forget your file_ext (e.g. windows pcs dont show it)
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
 
 #if you pass index col - this should pick up if index.name is 'name' or 'image_id'
-def test_index_col(dir_name):
-    my_files=loader(f"{dir_name}/*png")
+def test_matching_metadata_csv_w_index_col(matching_metadata_dir, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
-    my_files.add_metadata(f"{dir_name}/metadata_df.csv",index_col="name")
-    assert my_files.images["parent"]["file3.png"]["other"]=="three"
+    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", index_col="name")
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
 
 #if you pass columns
-def test_usecols(dir_name):
-    my_files=loader(f"{dir_name}/*png")
+def test_matching_metadata_csv_w_usecols(matching_metadata_dir, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
-    file3_keys = list(my_files.images["parent"]["file3.png"].keys())
-    my_files.add_metadata(f"{dir_name}/metadata_df.csv",columns=["name","coord"])
-    file3_keys.append("name")
-    file3_keys.append("coord")
-    assert isinstance(my_files.images["parent"]["file3.png"]["coord"], tuple)
-    assert list(my_files.images["parent"]["file3.png"].keys()) == file3_keys
+    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", columns=["name","coord"])
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
+        assert isinstance(my_files.images["parent"][parent_id]["coord"], tuple)
 
+#if there is extra info in the metadata
+
+def test_extra_metadata_csv_ignore_mismatch(extra_metadata_dir,keys):  
+    my_files=loader(f"{extra_metadata_dir}/*png")
+    assert len(my_files)==2
+    my_files.add_metadata(f"{extra_metadata_dir}/metadata_df.csv", ignore_mismatch=True)
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
+    
+def test_extra_metadata_csv_errors(extra_metadata_dir):  
+    my_files=loader(f"{extra_metadata_dir}/*png")
+    assert len(my_files)==2
+    with pytest.raises(ValueError, match="information about non-existant images"):
+        my_files.add_metadata(f"{extra_metadata_dir}/metadata_df.csv")
+    
 #if there is missing info in metadata
-def test_missing_metadata(dir_name):
-    with open(f"{dir_name}/file4.png", "w") as f:
-        pass
-    
-    my_files=loader("./metadata_test_dir/*png")
+
+def test_missing_metadata_csv_ignore_mismatch(missing_metadata_dir, keys):  
+    my_files=loader(f"{missing_metadata_dir}/*png")
     assert len(my_files)==4
-    file4_keys = list(my_files.images["parent"]["file4.png"].keys())
-    my_files.add_metadata(f"{dir_name}/metadata_df.csv")
-    assert my_files.images["parent"]["file3.png"]["other"]=="three"
-    assert isinstance(my_files.images["parent"]["file3.png"]["coord"], tuple)
-    assert list(my_files.images["parent"]["file4.png"].keys()) == file4_keys
+    my_files.add_metadata(f"{missing_metadata_dir}/metadata_df.csv", ignore_mismatch=True)
+    for parent_id in ["file1.png", "file2.png", "file3.png"]:
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
+    assert list(my_files.images["parent"]["file4.png"].keys()) == ["parent_id", "image_path"]
     
+def test_missing_metadata_csv_errors(missing_metadata_dir):  
+    my_files=loader(f"{missing_metadata_dir}/*png")
+    assert len(my_files)==4
+    with pytest.raises(ValueError, match="missing information"):
+        my_files.add_metadata(f"{missing_metadata_dir}/metadata_df.csv")
+
+# other errors
+
+#if csv file doesn't exist
+def test_metadata_not_found(matching_metadata_dir):
+    my_files=loader(f"{matching_metadata_dir}/*png")
+    assert len(my_files)==3
+    with pytest.raises(ValueError):
+        my_files.add_metadata(f"{matching_metadata_dir}/fakefile.csv")
+
+def test_metadata_missing_name_or_image_id(matching_metadata_dir):
+    my_files=loader(f"{matching_metadata_dir}/*png")
+    assert len(my_files)==3
+    incomplete_metadata_df = pd.DataFrame({"coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
+    incomplete_metadata_df.to_csv(f"{matching_metadata_dir}/incomplete_metadata_df.csv", sep="|")
+    with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):
+        my_files.add_metadata(incomplete_metadata_df)
+    with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):
+        my_files.add_metadata(f"{matching_metadata_dir}/incomplete_metadata_df.csv")
+
