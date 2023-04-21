@@ -1,13 +1,10 @@
 from mapreader import SheetDownloader
 import pytest
+import pathlib
 from pathlib import Path
 from shapely.geometry import Polygon, LineString
 import os
 import shutil
-
-@pytest.fixture
-def test_dir():
-    return Path(__file__).resolve().parent
 
 @pytest.fixture
 def sample_dir():
@@ -15,7 +12,7 @@ def sample_dir():
 
 @pytest.fixture
 def sheet_downloader(sample_dir):
-    test_json = f"{sample_dir}/test_json.json" # contains one-inch metadata in idx 0-9 and six-inch metadata in idx 10-20
+    test_json = f"{sample_dir}/test_json.json" # contains 4 features, 2x one-inch metadata in idx 0-1 and 2x six-inch metadata in idx 2-3
     download_url = "https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png"
     return SheetDownloader(test_json, download_url)
 
@@ -28,18 +25,28 @@ def test_extract_published_dates(sheet_downloader):
     sd.extract_published_dates()
     assert sd.published_dates == True
     assert sd.features[0] ["properties"]["published_date"] == 1896 #a standard one
-    assert sd.features[3]["properties"]["published_date"] == 1896 #metadata has "1894 to 1896" - method saves end date
+    assert sd.features[3]["properties"]["published_date"] == 1896 #metadata has "1894 to 1896" - method take end date only (thoughts?)
+
+def test_minmax_latlon(sheet_downloader, capfd):
+    sd = sheet_downloader
+    sd.get_minmax_latlon()
+    out, _ = capfd.readouterr()
+    assert out == "[INFO] Min lat: 51.49344796, max lat: 54.75000003 \n[INFO] Min lon: -5.40999994, max lon: -0.16093917"
+
+# queries 
 
 def test_query_by_wfs_ids(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_wfs_ids(1) #test single wfs_id
     assert sd.wfs_id_nos == True
+    assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[0]
     sd.query_map_sheets_by_wfs_ids([1,2]) #test list of wfs_ids
     assert len(sd.found_queries) == 2
-    assert sd.found_queries[0] == sd.features[0]
-    sd.query_map_sheets_by_wfs_ids(131, append=True) #test append
+    assert sd.found_queries == sd.features[:2]
+    sd.query_map_sheets_by_wfs_ids(132, append=True) #test append
     assert len(sd.found_queries) == 3
+    assert sd.found_queries[2] == sd.features[3]
 
 def test_query_by_polygon(sheet_downloader):
     sd = sheet_downloader
@@ -50,9 +57,11 @@ def test_query_by_polygon(sheet_downloader):
     assert sd.found_queries[0] == sd.features[0]
     sd.query_map_sheets_by_polygon(polygon, mode = 'intersects') #test mode = 'intersects'
     assert len(sd.found_queries) == 2
+    assert sd.found_queries == sd.features[:2]
     another_polygon = Polygon([[-0.23045502, 51.49344796], [-0.23053988, 51.52237709], [-0.16097999, 51.52243594], [-0.16093917, 51.49350674], [-0.23045502, 51.49344796]]) #should match to features[3]
     sd.query_map_sheets_by_polygon(another_polygon, append=True) # test append
     assert len(sd.found_queries) == 3
+    assert sd.found_queries[2] == sd.features[3]
 
 def test_query_by_coords(sheet_downloader):
     sd = sheet_downloader
@@ -62,6 +71,7 @@ def test_query_by_coords(sheet_downloader):
     assert sd.found_queries[0] == sd.features[1]
     sd.query_map_sheets_by_coordinates((-0.23, 51.5), append = True) # test append
     assert len(sd.found_queries) == 2
+    assert sd.found_queries[1] == sd.features[3]
 
 def test_query_by_line(sheet_downloader):
     sd = sheet_downloader
@@ -69,17 +79,28 @@ def test_query_by_line(sheet_downloader):
     sd.query_map_sheets_by_line(line)
     assert sd.polygons == True
     assert len(sd.found_queries) == 2
-    assert sd.found_queries[0] == sd.features[0]
+    assert sd.found_queries == sd.features[:2]
     another_line = LineString([(-0.2, 51.5),(-0.21,51.6)])
     sd.query_map_sheets_by_line(another_line, append = True) # test append
     assert len(sd.found_queries) == 3
+    assert sd.found_queries[2] == sd.features[3]
 
+def test_query_by_string(sheet_downloader):
+    sd = sheet_downloader
+    sd.query_map_sheets_by_string("Westminster",["properties","PARISH"])
+    assert len(sd.found_queries) == 1
+    assert sd.found_queries[0] == sd.features[3]
+    sd.query_map_sheets_by_string("one_inch",["id"], append = True) #test append
+    assert len(sd.found_queries) == 3
+    assert sd.found_queries[1:3] == sd.features[:2]
 
-def test_download_all(sheet_downloader):
+# download
+
+def test_download_all(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
     assert sd.grid_bbs == True
-    maps_path="./test_maps/"
+    maps_path= tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname)
     assert os.path.exists(f"{maps_path}map_102352861.png")
@@ -89,15 +110,13 @@ def test_download_all(sheet_downloader):
     assert len(csv) == 5      
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[3].startswith('2|map_102352861.png')
-    shutil.rmtree(maps_path)
 
-def test_download_by_wfs_ids(sheet_downloader):
+def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
-    maps_path="./test_maps/"
+    maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_map_sheets_by_wfs_ids(1, maps_path, metadata_fname) #test single wfs_id
-    assert sd.wfs_id_nos == True
     assert os.path.exists(f"{maps_path}map_74487492.png")
     assert os.path.exists(f"{maps_path}{metadata_fname}")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -110,16 +129,14 @@ def test_download_by_wfs_ids(sheet_downloader):
     with open(f"{maps_path}{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3 #should have only downloaded/added one extra map   
-    shutil.rmtree(maps_path)
 
-def test_download_by_polygon(sheet_downloader):
+def test_download_by_polygon(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
     polygon = Polygon([[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]) #should match to features[0]
-    maps_path=f"./test_maps/"
+    maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"    
     sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname) #test mode = 'within'
-    assert sd.polygons == True
     assert os.path.exists(f"{maps_path}map_74487492.png")
     assert os.path.exists(f"{maps_path}{metadata_fname}")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -132,15 +149,13 @@ def test_download_by_polygon(sheet_downloader):
     with open(f"{maps_path}{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3 #should have only downloaded/added one extra map   
-    shutil.rmtree(maps_path)
 
-def test_download_by_coords(sheet_downloader):
+def test_download_by_coords(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
-    maps_path="./test_maps/"
+    maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"    
     sd.download_map_sheets_by_coordinates((-4.8, 54.5), maps_path, metadata_fname)
-    assert sd.polygons == True
     assert os.path.exists(f"{maps_path}map_74488550.png")
     assert os.path.exists(f"{maps_path}{metadata_fname}")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -148,16 +163,14 @@ def test_download_by_coords(sheet_downloader):
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_74488550.png')
-    shutil.rmtree(maps_path)
 
-def test_download_by_line(sheet_downloader):
+def test_download_by_line(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
-    maps_path="./test_maps/"
+    maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     line = LineString([(-5.4, 54.5), (-4.8, 54.5)])
     sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
-    assert sd.polygons == True
     assert os.path.exists(f"{maps_path}map_74488550.png")
     assert os.path.exists(f"{maps_path}{metadata_fname}")
     with open(f"{maps_path}{metadata_fname}") as f:
@@ -165,12 +178,25 @@ def test_download_by_line(sheet_downloader):
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_74487492.png')
-    shutil.rmtree(maps_path)
 
-def test_download_by_queries(sheet_downloader):
+def test_download_by_string(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
-    maps_path="./test_maps/"
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"
+    sd.download_map_sheets_by_string("Westminster",["properties","PARISH"], maps_path, metadata_fname)
+    assert os.path.exists(f"{maps_path}map_102352861.png")
+    assert os.path.exists(f"{maps_path}{metadata_fname}")
+    with open(f"{maps_path}{metadata_fname}") as f:
+        csv = f.readlines()
+    assert len(csv) == 2
+    assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
+    assert csv[1].startswith('0|map_102352861.png')
+
+def test_download_by_queries(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"    
     sd.query_map_sheets_by_wfs_ids(131)
     sd.query_map_sheets_by_coordinates((-4.8, 54.5), append=True)
@@ -183,7 +209,6 @@ def test_download_by_queries(sheet_downloader):
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_102352861.png|')
-    shutil.rmtree(maps_path)
 
 
 

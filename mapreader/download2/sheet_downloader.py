@@ -382,7 +382,7 @@ class SheetDownloader:
         keys : list
             A key or list of keys used to get the metadata field to search in.
             
-            Key(s) will be passed to each features dictionary. \
+            Key(s) will be passed to each features dictionary.
             i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
