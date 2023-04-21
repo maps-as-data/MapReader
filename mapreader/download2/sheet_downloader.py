@@ -250,15 +250,12 @@ class SheetDownloader:
         -----
         Use ``create_polygon_from_latlons()`` to create polygon.
         """
-        assert isinstance(
-            polygon, Polygon
-        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+        if not isinstance(polygon, Polygon):
+            raise ValueError("[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon.")
 
-        assert mode in [
-            "within",
-            "intersects",
-        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+        if mode not in ["within","intersects"]: 
+            raise NotImplementedError('[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.')
 
         if not self.polygons:
             self.get_polygons()
@@ -299,9 +296,10 @@ class SheetDownloader:
             Whether to print query results or not.
             By default False
         """
-        assert isinstance(
+        if not isinstance(
             coords, tuple
-        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
+        ):
+            raise ValueError("[ERROR] Please pass coords as a tuple in the form (x,y).")
 
         coords = Point(coords)
 
@@ -343,10 +341,11 @@ class SheetDownloader:
         Use ``create_line_from_latlons()`` to create line.
         """
 
-        assert isinstance(
+        if not isinstance(
             line, LineString
-        ), "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
-[HINT] Use ``create_line_from_latlons()`` to create line."
+        ): 
+            raise ValueError("[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line.")
 
         if not self.polygons:
             self.get_polygons()
@@ -395,9 +394,13 @@ class SheetDownloader:
         -----
         ``string`` is case insensitive.
         """
+        if not isinstance(string, str):
+            raise ValueError("[ERROR] Please pass ``string`` as a string.")
+        
         if isinstance(keys, str):
             keys = []
-        assert isinstance(keys, list), "[ERROR] Please pass key(s) as string or list of strings."
+        if not isinstance(keys, list):
+            raise ValueError("[ERROR] Please pass key(s) as string or list of strings.")
 
         if not append:
             self.found_queries = []  # reset each time
@@ -664,15 +667,17 @@ class SheetDownloader:
         -----
         Use ``create_polygon_from_latlons()`` to create polygon.
         """
-        assert isinstance(
+        if not isinstance(
             polygon, Polygon
-        ), "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+        ):
+            raise ValueError("[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon.")
 
-        assert mode in [
+        if mode not in [
             "within",
             "intersects",
-        ], '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+        ]:
+            raise NotImplementedError('[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.')
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -716,9 +721,10 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         """
 
-        assert isinstance(
+        if not isinstance(
             coords, tuple
-        ), "[ERROR] Please pass coords as a tuple in the form (x,y)."
+        ): 
+            raise ValueError("[ERROR] Please pass coords as a tuple in the form (x,y).")
 
         coords = Point(coords)
 
@@ -762,10 +768,11 @@ class SheetDownloader:
         Use ``create_line_from_latlons()`` to create line.
         """
 
-        assert isinstance(
+        if not isinstance(
             line, LineString
-        ), "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
-[HINT] Use ``create_line_from_latlons()`` to create line."
+        ):
+            raise ValueError("[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line.")
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -817,10 +824,13 @@ class SheetDownloader:
         -----
         ``string`` is case insensitive.
         """
-
+        if not isinstance(string, str):
+            raise ValueError("[ERROR] Please pass ``string`` as a string.")
+        
         if isinstance(keys, str):
             keys = []
-        assert isinstance(keys, list), "[ERROR] Please pass key(s) as string or list of strings."
+        if not isinstance(keys, list):
+            raise ValueError("[ERROR] Please pass key(s) as string or list of strings.")
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -859,7 +869,8 @@ class SheetDownloader:
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
-        assert len(self.found_queries) > 0, "[ERROR] No query results found/saved."
+        if len(self.found_queries) == 0:
+            raise ValueError("[ERROR] No query results found/saved.")
 
         features = self.found_queries
         self._download_map_sheets(features, path_save, metadata_fname)

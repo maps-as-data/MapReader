@@ -17,8 +17,7 @@ def sheet_downloader(sample_dir):
     return SheetDownloader(test_json, download_url)
 
 def test_init(sheet_downloader):
-    metadata = sheet_downloader
-    assert metadata.__len__() == 4
+    assert sheet_downloader.__len__() == 4
 
 def test_extract_published_dates(sheet_downloader):
     sd = sheet_downloader
@@ -31,7 +30,7 @@ def test_minmax_latlon(sheet_downloader, capfd):
     sd = sheet_downloader
     sd.get_minmax_latlon()
     out, _ = capfd.readouterr()
-    assert out == "[INFO] Min lat: 51.49344796, max lat: 54.75000003 \n[INFO] Min lon: -5.40999994, max lon: -0.16093917"
+    assert out == "[INFO] Min lat: 51.49344796, max lat: 54.75000003 \n[INFO] Min lon: -5.40999994, max lon: -0.16093917\n"
 
 # queries 
 
@@ -185,13 +184,13 @@ def test_download_by_string(sheet_downloader, tmp_path):
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_map_sheets_by_string("Westminster",["properties","PARISH"], maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_102352861.png")
+    assert os.path.exists(f"{maps_path}map_91617032.png")
     assert os.path.exists(f"{maps_path}{metadata_fname}")
     with open(f"{maps_path}{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
-    assert csv[1].startswith('0|map_102352861.png')
+    assert csv[1].startswith('0|map_91617032.png')
 
 def test_download_by_queries(sheet_downloader, tmp_path):
     sd = sheet_downloader
@@ -210,15 +209,86 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_102352861.png|')
 
+# errors
 
+def test_query_by_wfs_ids_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="as int or list of ints"):
+        sd.query_map_sheets_by_wfs_ids("str")
+    with pytest.raises(ValueError, match="as int or list of ints"):
+        sd.query_map_sheets_by_wfs_ids(21.4)
 
+def test_query_by_polygon_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="pass polygon as shapely.geometry.Polygon"):
+        sd.query_map_sheets_by_polygon([1,2])
+    polygon = Polygon([[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]) #should match to features[0]
+    with pytest.raises(NotImplementedError, match='``mode="within"`` or ``mode="intersects"``'):
+        sd.query_map_sheets_by_polygon(polygon, mode ="fake mode")
 
+def test_query_by_coords_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="pass coords as a tuple"):
+        sd.query_map_sheets_by_coordinates("str")
+
+def test_query_by_line_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="pass line as shapely.geometry.LineString"):
+        sd.query_map_sheets_by_line("str")
+
+def test_query_by_string_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="pass ``string`` as a string"):
+        sd.query_map_sheets_by_string(10, "id")
+    with pytest.raises(ValueError, match="as string or list of strings"):
+        sd.query_map_sheets_by_string("Westminster", 10)
+
+#need to add error for if you pass keys as list of non strings (eg.[10])
+
+def test_download_by_wfs_ids_errors(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"
+    with pytest.raises(ValueError, match = "No map sheets"):
+        sd.download_map_sheets_by_wfs_ids(12, maps_path, metadata_fname)
+
+def test_download_by_polygon_errors(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    polygon = Polygon([[0,1], [1,2], [2,3], [3,4], [0,1]])
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"    
+    with pytest.raises(ValueError, match = "out of map metadata bounds"):
+        sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname)
+
+def test_download_by_coords_errors(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"    
+    with pytest.raises(ValueError, match = "out of map metadata bounds"):
+        sd.download_map_sheets_by_coordinates((0,1), maps_path, metadata_fname)
+
+def test_download_by_line(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"
+    line = LineString([(0,1), (2,3)])
+    with pytest.raises(ValueError, match="out of map metadata bounds"):
+        sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
+
+def test_download_by_queries_errors(sheet_downloader, tmp_path):
+    sd = sheet_downloader
+    sd.get_grid_bb(10)
+    maps_path=tmp_path / "test_maps/"
+    metadata_fname="test_metadata.csv"    
+    with pytest.raises(ValueError, match="No query results"):
+        sd.download_map_sheets_by_queries(maps_path, metadata_fname)
 
     
 
-
-
-    
 
     
 
