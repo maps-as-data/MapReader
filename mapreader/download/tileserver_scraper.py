@@ -28,9 +28,7 @@ nest_asyncio.apply()
 _BASE_WAIT = 0.5
 
 
-def tile_idxs_in_poly(
-    poly: shapely.geometry.Polygon, zoom: int
-) -> Tuple[int, int]:
+def tile_idxs_in_poly(poly: shapely.geometry.Polygon, zoom: int) -> Tuple[int, int]:
     """
     Given a ``shapely.geometry.Polygon`` and a ``zoom`` (zoom level), generate
     a sequence of ``(x, y)`` tile indices that intersect with the Polygon.
@@ -117,7 +115,7 @@ async def fetch_and_save(
         ``True`` if the image is fetched successfully and saved to the
         specified file path, ``False`` otherwise.
     """
-    
+
     wait_for = _BASE_WAIT
     for _ in range(retries):
         try:
@@ -148,7 +146,7 @@ async def runner(opts: input_class) -> List[str]:
     opts : input_class
         The options for downloading the tiles, of the ``input_class`` type
         that contains the following attributes:
-        
+
         - ``poly`` (shapely.geometry.Polygon): The polygon (in GeoJSON format).
         - ``zoom`` (int): The zoom level.
         - ``url`` (str): The URL string (formatted with ``"{x}"``, ``"{y}"`` and ``"{z}"``)

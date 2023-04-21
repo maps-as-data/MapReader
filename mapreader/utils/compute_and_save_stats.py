@@ -10,7 +10,7 @@ from parhugin import multiFunc
 
 def save_stats(one_dir):
     mymaps = load_patches(
-        os.path.join(one_dir, "slice_50_50", "*png"),
+        os.path.join(one_dir, "patch_50_50", "*png"),
         parent_paths=os.path.join(one_dir, "*png"),
     )
 
@@ -18,9 +18,9 @@ def save_stats(one_dir):
     mymaps.add_metadata(metadata=path2metadata)
     mymaps.add_center_coord()
     mymaps.calc_pixel_stats()
-    pd_parent, pd_child = mymaps.convertImages()
-    pd_parent.to_csv(os.path.join(one_dir, "pd_parent.csv"), mode="w", header=True)
-    pd_child.to_csv(os.path.join(one_dir, "pd_child.csv"), mode="w", header=True)
+    parent_df, patch_df = mymaps.convertImages()
+    parent_df.to_csv(os.path.join(one_dir, "parent_df.csv"), mode="w", header=True)
+    patch_df.to_csv(os.path.join(one_dir, "patch_df.csv"), mode="w", header=True)
 
 
 list_dirs = glob("/maps_large/2021_experiments_1inch/chunks_*")

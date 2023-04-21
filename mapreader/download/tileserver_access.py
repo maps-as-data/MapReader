@@ -37,7 +37,7 @@ class TileServer:
         `MapReader/worked_examples/persistent_data <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples/persistent_data>`_.
     geometry : str, optional
         The type of geometry that defines the boundaries in the map. Defaults
-        to ``"polygone"``.
+        to ``"polygon"``.
     download_url : str, optional
         The base URL pattern used to download tiles from the server. This
         should contain placeholders for the x coordinate (``x``), the y
@@ -74,7 +74,7 @@ class TileServer:
     def __init__(
         self,
         metadata_path: Union[str, dict, list],
-        geometry: Optional[str] = "polygone",
+        geometry: Optional[str] = "polygon",
         download_url: Optional[
             str
         ] = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",  # noqa
@@ -89,7 +89,7 @@ class TileServer:
         self.download_url = download_url
 
         if isinstance(metadata_path, str) and os.path.isfile(metadata_path):
-            # Read a metada file
+            # Read a metadata file
             json_fio = open(metadata_path, "r")
             json_f = json_fio.readlines()[0]
             # change metadata to a dictionary:
@@ -288,9 +288,7 @@ class TileServer:
                         break
 
             if not already_in_candidates:
-                found_queries.append(
-                    copy.deepcopy(self.metadata_info_list[indx_q])
-                )
+                found_queries.append(copy.deepcopy(self.metadata_info_list[indx_q]))
                 found_queries[-1].extend(
                     [copy.deepcopy(self.metadata_coord_arr[indx_q]), indx_q]
                 )
@@ -360,7 +358,7 @@ class TileServer:
             maximum latitude of the rectangular boundary of the polygon.
 
         """
-        if self.geometry == "polygone":
+        if self.geometry == "polygon":
             coord_arr = np.array(coords)
             # if len(coord_arr) != 5:
             #    raise ValueError(f"[ERROR] expected length of coordinate list is 5. coords: {coords}") # noqa
@@ -371,7 +369,7 @@ class TileServer:
 
             """
             # this method results in smaller rectangles (compared to the
-            # original polygone) particularly if the map is strongly tilted
+            # original polygon) particularly if the map is strongly tilted
             min_lon = np.sort(coord_arr[:-1, 0])[1]
             max_lon = np.sort(coord_arr[:-1, 0])[2]
             min_lat = np.sort(coord_arr[:-1, 1])[1]
@@ -397,9 +395,7 @@ class TileServer:
         """
         self.metadata_query = []
         for one_item in self.found_queries:
-            self.metadata_query.append(
-                copy.deepcopy(self.metadata[one_item[3]])
-            )
+            self.metadata_query.append(copy.deepcopy(self.metadata[one_item[3]]))
 
     def minmax_latlon(self):
         """
@@ -411,7 +407,7 @@ class TileServer:
                 Will print a result like this:
 
                 .. code-block:: python
-                
+
                     Min/Max Lon: <min_longitude>, <max_longitude>
                     Min/Max Lat: <min_latitude>, <max_latitude>
 
@@ -479,7 +475,7 @@ class TileServer:
         output_maps_dirname : str, optional
             Directory to save combined map images, by default ``"maps"``.
         output_metadata_filename : str, optional
-            Name of the output metadata file, by default ``"metadata.csv"``.
+            Name of the output metadatata file, by default ``"metadata.csv"``.
 
             *Note: This file will be saved in the path equivalent to
             output_maps_dirname/output_metadata_filename.*
@@ -522,12 +518,10 @@ class TileServer:
         elif mode == "all":
             metadata = self.metadata
         else:
-            raise NotImplementedError(
-                "Mode must be 'query', 'queries', or 'all'."
-            )
+            raise NotImplementedError("Mode must be 'query', 'queries', or 'all'.")
 
         # Header and Footer for GeoJSON
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]
@@ -545,7 +539,7 @@ class TileServer:
         try_cond1 = try_cond2 = False
         if not os.path.isfile(metadata_output_path):
             with open(metadata_output_path, "w") as f:
-                f.writelines("|name|url|coord|pub_date|region|polygone\n")
+                f.writelines("|name|url|coord|pub_date|region|polygon\n")
                 counter = 0
         else:
             with open(metadata_output_path, "r") as f:
@@ -570,7 +564,7 @@ class TileServer:
                 if saved_metadata is not None:
                     try_cond1 = (
                         str(geometry["coordinates"][0][0])
-                        in saved_metadata["polygone"].to_list()
+                        in saved_metadata["polygon"].to_list()
                     )
                     try_cond2 = (
                         f'map_{properties["IMAGE"]}.png'
@@ -635,9 +629,7 @@ class TileServer:
                                 line2write = f"{counter}|"
                                 line2write += f"{poly_filename}|"
                                 line2write += f"{len(errors)}|"
-                                line2write += (
-                                    f"{os.path.basename(output_stitcher)}|"
-                                )
+                                line2write += f"{os.path.basename(output_stitcher)}|"
                                 line2write += f"{properties['IMAGEURL']}|"
                                 line2write += f"{values}\n"
                                 f.writelines(line2write)
@@ -713,32 +705,22 @@ class TileServer:
         published_date = -1
 
         try:
-            one_item_split = metadata_item["properties"]["WFS_TITLE"].split(
-                ","
-            )
+            one_item_split = metadata_item["properties"]["WFS_TITLE"].split(",")
             name_region = one_item_split[0].strip()
             for ois in one_item_split[1:]:
                 if "surveyed" in ois.lower():
-                    surveyed_date = self.find_and_clean_date(
-                        ois, ois_key="surveyed"
-                    )
+                    surveyed_date = self.find_and_clean_date(ois, ois_key="surveyed")
                 if "revised" in ois.lower():
-                    revised_date = self.find_and_clean_date(
-                        ois, ois_key="revised"
-                    )
+                    revised_date = self.find_and_clean_date(ois, ois_key="revised")
                 if "published" in ois.lower():
-                    published_date = self.find_and_clean_date(
-                        ois, ois_key="published"
-                    )
+                    published_date = self.find_and_clean_date(ois, ois_key="published")
         except:
             pass
 
         return name_region, surveyed_date, revised_date, published_date
 
     @staticmethod
-    def find_and_clean_date(
-        ois: str, ois_key: Optional[str] = "surveyed"
-    ) -> str:
+    def find_and_clean_date(ois: str, ois_key: Optional[str] = "surveyed") -> str:
         """
         Find and extract a date string from a given string (``ois``), typically
         representing a date metadata attribute. The date string is cleaned by
@@ -770,9 +752,7 @@ class TileServer:
         self,
         list2remove: Optional[List[str]] = [],
         map_extent: Optional[
-            Union[
-                Literal["uk"], List[float], Tuple[float, float, float, float]
-            ]
+            Union[Literal["uk"], List[float], Tuple[float, float, float, float]]
         ] = None,
         add_text=False,
     ) -> None:
@@ -827,9 +807,7 @@ class TileServer:
                 continue
 
             # Get coordinates
-            coords = np.array(
-                self.metadata[i]["geometry"]["coordinates"][0][0]
-            )
+            coords = np.array(self.metadata[i]["geometry"]["coordinates"][0][0])
 
             # Plot coordinates
             if cartopy_installed:
@@ -902,9 +880,7 @@ class TileServer:
         # Get all published dates
         all_published_date = []
         for metadata_item in self.metadata:
-            _, _, _, published_date = self.extract_region_dates_metadata(
-                metadata_item
-            )
+            _, _, _, published_date = self.extract_region_dates_metadata(metadata_item)
             all_published_date.append(int(published_date))
 
         # Get min/max date for all published dates
@@ -932,6 +908,15 @@ class TileServer:
         plt.xlabel("Published date", size=18)
         plt.ylabel("Counts", size=18)
         plt.show()
+
+    def __str__(self):
+        info = f"Metadata file has {self.__len__()} items."
+        info += f"\nDownload URL: {self.download_url}"
+        info += f"\nGeometry: {self.geometry}"
+        return info
+
+    def __len__(self):
+        return len(self.metadata)
 
     def download_tileserver_rect(
         self,
@@ -1033,12 +1018,10 @@ class TileServer:
         elif mode == "all":
             metadata = self.metadata
         else:
-            raise NotImplementedError(
-                "Mode must be 'query', 'queries', or 'all'."
-            )
+            raise NotImplementedError("Mode must be 'query', 'queries', or 'all'.")
 
         # Header and Footer for GeoJSON
-        header, footer = create_hf(geom="polygone")
+        header, footer = create_hf(geom="polygon")
 
         if id2 < 0:
             metadata = metadata[id1:]
@@ -1048,9 +1031,7 @@ class TileServer:
             metadata = metadata[id1:id2]
 
         # Dataframe to collect some information about results
-        result_df = pd.DataFrame(
-            columns=["name", "url", "coord", "pub_date", "region"]
-        )
+        result_df = pd.DataFrame(columns=["name", "url", "coord", "pub_date", "region"])
         counter = 0
         for metadata_item in metadata:
             # only for testing
@@ -1108,9 +1089,7 @@ class TileServer:
                 )
                 str2write = header + values + footer
 
-                poly_filename = properties["IMAGE"] + "_{}.geojson".format(
-                    counter
-                )
+                poly_filename = properties["IMAGE"] + "_{}.geojson".format(counter)
                 with open(os.path.join("geojson", poly_filename), "w") as f:
                     f.writelines(str2write)
 
@@ -1138,9 +1117,7 @@ class TileServer:
                             )
                             lat_len = abs(max_lat - min_lat)
                             lon_len = abs(max_lon - min_lon)
-                            if (lat_len <= min_lat_len) or (
-                                lon_len <= min_lon_len
-                            ):
+                            if (lat_len <= min_lat_len) or (lon_len <= min_lon_len):
                                 not_saved = True
                                 break
                             min_lat += adjust_mult * lat_len
@@ -1183,9 +1160,7 @@ class TileServer:
         if os.path.isdir(tile_tmp_dir):
             shutil.rmtree(tile_tmp_dir)
 
-        result_file = os.path.join(
-            output_maps_dirname, output_metadata_filename
-        )
+        result_file = os.path.join(output_maps_dirname, output_metadata_filename)
         if (not redownload) and (os.path.isfile(result_file)):
             result_df.to_csv(result_file, mode="a+", header=False)
         else:
