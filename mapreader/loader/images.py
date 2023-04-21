@@ -71,52 +71,7 @@ class mapImages:
         """Initializes the mapImages class."""
 
         if path_images:
-            if os.path.isdir(path_images):
-                # If no file_ext passed, get all files in directory
-                if not file_ext:
-                    files = glob(os.path.abspath(f"{path_images}/*.*"))
-                    if len(files) == 0:
-                        raise ValueError("[ERROR] No files found!")
-                    # check all files extensions are the same
-                    test_ext = files[0].split(".")[-1]
-                    if all(file.split(".")[-1] == test_ext for file in files):
-                        self.path_images = files
-                    else:
-                        raise ValueError(
-                            "[ERROR] Directory with multiple file types detected - please specificy file extension (`file_ext`) or, pass path to specific file types(wildcards accepted)."
-                        )
-
-                # If file_ext passed, get only these files
-                else:
-                    files = glob(os.path.abspath(f"{path_images}/*.{file_ext}"))
-                    if len(files) == 0:
-                        raise ValueError("[ERROR] No files found!")
-                    else:
-                        self.path_images = files
-
-            else:
-                files = glob(os.path.abspath(path_images))
-                if len(files) == 0:
-                    raise ValueError("[ERROR] No files found!")
-                # check all files extensions are the same
-                test_ext = files[0].split(".")[-1]
-                if all(file.split(".")[-1] == test_ext for file in files):
-                    self.path_images = files
-
-                # For instances of e.g. `path/to/dir/*`, and multiple file types detected, filter for files with extension == `file_ext` if multiple file types detected
-                else:
-                    if file_ext:
-                        files = [
-                            file for file in files if file.split(".")[-1] == file_ext
-                        ]
-                        if len(files) == 0:
-                            raise ValueError("[ERROR] No files found!")
-                        else:
-                            self.path_images = files
-                    else:
-                        raise ValueError(
-                            "[ERROR] Multiple file types detected - please specify file extension (`file_ext`) or, pass path to specific file types (wildcards accepted)"
-                        )
+            self.path_images = self._resolve_file_path(path_images, file_ext)
 
         else:
             self.path_images = []
@@ -134,6 +89,32 @@ class mapImages:
                 tree_level=tree_level,
                 **kwds,
             )
+
+    @staticmethod
+    def _resolve_file_path(file_path, file_ext):
+        if file_ext:
+            if os.path.isdir(file_path):
+                files = glob(os.path.abspath(f"{file_path}/*.{file_ext}"))
+            else: #if not dir
+                files = glob(os.path.abspath(file_path))
+                files = [file for file in files if file.split(".")[-1] == file_ext] 
+
+        else:
+            if os.path.isdir(file_path):
+                files = glob(os.path.abspath(f"{file_path}/*.*"))
+            else:
+                files = glob(os.path.abspath(file_path))
+
+        #check for issues
+        if len(files) == 0:
+            raise ValueError("[ERROR] No files found!")
+        test_ext = files[0].split(".")[-1]
+        if not all(file.split(".")[-1] == test_ext for file in files):
+            raise ValueError(
+                "[ERROR] Directory with multiple file types detected - please specificy file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
+            )
+        
+        return files
 
     def __len__(self) -> int:
         return int(len(self.images["parent"]) + len(self.images["child"]))
@@ -1750,40 +1731,7 @@ class mapImages:
         -------
         None
         """
-        if os.path.isdir(patch_paths):
-            if not patch_file_ext:
-                files = glob(os.path.abspath(f"{patch_paths}/*.*"))
-                if len(files) == 0:
-                    raise ValueError("[ERROR] No files found!")
-
-                test_ext = files[0].split(".")[-1]
-                if not all(file.split(".")[-1] == test_ext for file in files):
-                    raise ValueError(
-                        "[ERROR] Directory with multiple file types detected - please specificy file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
-                    )
-
-            else:
-                files = glob(os.path.abspath(f"{patch_paths}/*.{patch_file_ext}"))
-                if len(files) == 0:
-                    raise ValueError("[ERROR] No files found!")
-
-        else:
-            files = glob(os.path.abspath(patch_paths))
-            if len(files) == 0:
-                raise ValueError("[ERROR] No files found!")
-
-            test_ext = files[0].split(".")[-1]
-            if not all(file.split(".")[-1] == test_ext for file in files):
-                if patch_file_ext:
-                    files = [
-                        file for file in files if file.split(".")[-1] == patch_file_ext
-                    ]
-                    if len(files) == 0:
-                        raise ValueError("[ERROR] No files found!")
-                else:
-                    raise ValueError(
-                        "[ERROR] Multiple file types detected - please specify file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)"
-                    )
+        files = self._resolve_file_path(patch_paths, patch_file_ext)
 
         if clear_images:
             self.images = {}
@@ -1913,44 +1861,9 @@ class mapImages:
         -------
         None
         """
-
+        
         if parent_paths:
-            if os.path.isdir(parent_paths):
-                if not parent_file_ext:
-                    files = glob(os.path.abspath(f"{parent_paths}/*.*"))
-                    if len(files) == 0:
-                        raise ValueError("[ERROR] No files found!")
-
-                    test_ext = files[0].split(".")[-1]
-                    if not all(file.split(".")[-1] == test_ext for file in files):
-                        raise ValueError(
-                            "[ERROR] Directory with multiple file types detected - please specificy file extension (`parent_file_ext`) or, pass path to specific file types(wildcards accepted)."
-                        )
-
-                else:
-                    files = glob(os.path.abspath(f"{parent_paths}/*.{parent_file_ext}"))
-                    if len(files) == 0:
-                        raise ValueError("[ERROR] No files found!")
-
-            else:
-                files = glob(os.path.abspath(parent_paths))
-                if len(files) == 0:
-                    raise ValueError("[ERROR] No files found!")
-
-                test_ext = files[0].split(".")[-1]
-                if not all(file.split(".")[-1] == test_ext for file in files):
-                    if parent_file_ext:
-                        files = [
-                            file
-                            for file in files
-                            if file.split(".")[-1] == parent_file_ext
-                        ]
-                        if len(files) == 0:
-                            raise ValueError("[ERROR] No files found!")
-                    else:
-                        raise ValueError(
-                            "[ERROR] Multiple file types detected - please specify file extension (`parent_file_ext`) or, pass path to specific file types (wildcards accepted)"
-                        )
+            files = self._resolve_file_path(parent_paths, parent_file_ext)
 
             if update:
                 self.images["parent"] = {}
