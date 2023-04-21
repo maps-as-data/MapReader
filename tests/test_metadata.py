@@ -4,8 +4,13 @@ import os
 import pandas as pd
 import pathlib
 
-keys = ["parent_id", "image_path", "name", "coord", "other"]
-metadata_df = pd.DataFrame({"name":["file1.png", "file2.png", "file3.png"], "coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
+@pytest.fixture
+def keys():
+    return ["parent_id", "image_path", "name", "coord", "other"]
+
+@pytest.fixture
+def metadata_df():
+    return pd.DataFrame({"name":["file1.png", "file2.png", "file3.png"], "coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
 
 @pytest.fixture
 def matching_metadata_dir(tmp_path, metadata_df):
@@ -61,18 +66,20 @@ def test_matching_metadata_csv_missing_file_ext(matching_metadata_dir, keys):
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 
 #if you pass index col - this should pick up if index.name is 'name' or 'image_id'
-def test_matching_metadata_csv_w_index_col(matching_metadata_dir, keys):
+def test_matching_metadata_csv_w_index_col(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", index_col="name")
+    keys = ["parent_id", "image_path", "Unnamed: 0", "coord", "other", "name"]
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 
 #if you pass columns
-def test_matching_metadata_csv_w_usecols(matching_metadata_dir, keys):
+def test_matching_metadata_csv_w_usecols(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", columns=["name","coord"])
+    keys = ["parent_id", "image_path", "name", "coord"]
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
         assert isinstance(my_files.images["parent"][parent_id]["coord"], tuple)
