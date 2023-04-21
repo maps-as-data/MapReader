@@ -288,9 +288,7 @@ class TileServer:
                         break
 
             if not already_in_candidates:
-                found_queries.append(
-                    copy.deepcopy(self.metadata_info_list[indx_q])
-                )
+                found_queries.append(copy.deepcopy(self.metadata_info_list[indx_q]))
                 found_queries[-1].extend(
                     [copy.deepcopy(self.metadata_coord_arr[indx_q]), indx_q]
                 )
@@ -397,9 +395,7 @@ class TileServer:
         """
         self.metadata_query = []
         for one_item in self.found_queries:
-            self.metadata_query.append(
-                copy.deepcopy(self.metadata[one_item[3]])
-            )
+            self.metadata_query.append(copy.deepcopy(self.metadata[one_item[3]]))
 
     def minmax_latlon(self):
         """
@@ -411,7 +407,7 @@ class TileServer:
                 Will print a result like this:
 
                 .. code-block:: python
-                
+
                     Min/Max Lon: <min_longitude>, <max_longitude>
                     Min/Max Lat: <min_latitude>, <max_latitude>
 
@@ -522,9 +518,7 @@ class TileServer:
         elif mode == "all":
             metadata = self.metadata
         else:
-            raise NotImplementedError(
-                "Mode must be 'query', 'queries', or 'all'."
-            )
+            raise NotImplementedError("Mode must be 'query', 'queries', or 'all'.")
 
         # Header and Footer for GeoJSON
         header, footer = create_hf(geom="polygon")
@@ -635,9 +629,7 @@ class TileServer:
                                 line2write = f"{counter}|"
                                 line2write += f"{poly_filename}|"
                                 line2write += f"{len(errors)}|"
-                                line2write += (
-                                    f"{os.path.basename(output_stitcher)}|"
-                                )
+                                line2write += f"{os.path.basename(output_stitcher)}|"
                                 line2write += f"{properties['IMAGEURL']}|"
                                 line2write += f"{values}\n"
                                 f.writelines(line2write)
@@ -713,32 +705,22 @@ class TileServer:
         published_date = -1
 
         try:
-            one_item_split = metadata_item["properties"]["WFS_TITLE"].split(
-                ","
-            )
+            one_item_split = metadata_item["properties"]["WFS_TITLE"].split(",")
             name_region = one_item_split[0].strip()
             for ois in one_item_split[1:]:
                 if "surveyed" in ois.lower():
-                    surveyed_date = self.find_and_clean_date(
-                        ois, ois_key="surveyed"
-                    )
+                    surveyed_date = self.find_and_clean_date(ois, ois_key="surveyed")
                 if "revised" in ois.lower():
-                    revised_date = self.find_and_clean_date(
-                        ois, ois_key="revised"
-                    )
+                    revised_date = self.find_and_clean_date(ois, ois_key="revised")
                 if "published" in ois.lower():
-                    published_date = self.find_and_clean_date(
-                        ois, ois_key="published"
-                    )
+                    published_date = self.find_and_clean_date(ois, ois_key="published")
         except:
             pass
 
         return name_region, surveyed_date, revised_date, published_date
 
     @staticmethod
-    def find_and_clean_date(
-        ois: str, ois_key: Optional[str] = "surveyed"
-    ) -> str:
+    def find_and_clean_date(ois: str, ois_key: Optional[str] = "surveyed") -> str:
         """
         Find and extract a date string from a given string (``ois``), typically
         representing a date metadata attribute. The date string is cleaned by
@@ -770,9 +752,7 @@ class TileServer:
         self,
         list2remove: Optional[List[str]] = [],
         map_extent: Optional[
-            Union[
-                Literal["uk"], List[float], Tuple[float, float, float, float]
-            ]
+            Union[Literal["uk"], List[float], Tuple[float, float, float, float]]
         ] = None,
         add_text=False,
     ) -> None:
@@ -827,9 +807,7 @@ class TileServer:
                 continue
 
             # Get coordinates
-            coords = np.array(
-                self.metadata[i]["geometry"]["coordinates"][0][0]
-            )
+            coords = np.array(self.metadata[i]["geometry"]["coordinates"][0][0])
 
             # Plot coordinates
             if cartopy_installed:
@@ -902,9 +880,7 @@ class TileServer:
         # Get all published dates
         all_published_date = []
         for metadata_item in self.metadata:
-            _, _, _, published_date = self.extract_region_dates_metadata(
-                metadata_item
-            )
+            _, _, _, published_date = self.extract_region_dates_metadata(metadata_item)
             all_published_date.append(int(published_date))
 
         # Get min/max date for all published dates
@@ -1042,9 +1018,7 @@ class TileServer:
         elif mode == "all":
             metadata = self.metadata
         else:
-            raise NotImplementedError(
-                "Mode must be 'query', 'queries', or 'all'."
-            )
+            raise NotImplementedError("Mode must be 'query', 'queries', or 'all'.")
 
         # Header and Footer for GeoJSON
         header, footer = create_hf(geom="polygon")
@@ -1057,9 +1031,7 @@ class TileServer:
             metadata = metadata[id1:id2]
 
         # Dataframe to collect some information about results
-        result_df = pd.DataFrame(
-            columns=["name", "url", "coord", "pub_date", "region"]
-        )
+        result_df = pd.DataFrame(columns=["name", "url", "coord", "pub_date", "region"])
         counter = 0
         for metadata_item in metadata:
             # only for testing
@@ -1117,9 +1089,7 @@ class TileServer:
                 )
                 str2write = header + values + footer
 
-                poly_filename = properties["IMAGE"] + "_{}.geojson".format(
-                    counter
-                )
+                poly_filename = properties["IMAGE"] + "_{}.geojson".format(counter)
                 with open(os.path.join("geojson", poly_filename), "w") as f:
                     f.writelines(str2write)
 
@@ -1147,9 +1117,7 @@ class TileServer:
                             )
                             lat_len = abs(max_lat - min_lat)
                             lon_len = abs(max_lon - min_lon)
-                            if (lat_len <= min_lat_len) or (
-                                lon_len <= min_lon_len
-                            ):
+                            if (lat_len <= min_lat_len) or (lon_len <= min_lon_len):
                                 not_saved = True
                                 break
                             min_lat += adjust_mult * lat_len
@@ -1192,9 +1160,7 @@ class TileServer:
         if os.path.isdir(tile_tmp_dir):
             shutil.rmtree(tile_tmp_dir)
 
-        result_file = os.path.join(
-            output_maps_dirname, output_metadata_filename
-        )
+        result_file = os.path.join(output_maps_dirname, output_metadata_filename)
         if (not redownload) and (os.path.isfile(result_file)):
             result_df.to_csv(result_file, mode="a+", header=False)
         else:

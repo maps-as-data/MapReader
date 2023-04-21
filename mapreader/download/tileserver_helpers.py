@@ -108,13 +108,7 @@ def latlon2tile(lat: float, lon: float, zoom: int) -> Tuple[int, int]:
     return (
         n * ((lon + 180.0) / 360.0),
         n
-        * (
-            1
-            - (
-                math.log(math.tan(lat_radians) + 1 / math.cos(lat_radians))
-                / math.pi
-            )
-        )
+        * (1 - (math.log(math.tan(lat_radians) + 1 / math.cos(lat_radians)) / math.pi))
         / 2.0,
     )
 

@@ -96,9 +96,7 @@ def display_record(record: Tuple[str, str, str, int, int]) -> None:
         # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
         par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
 
-        plt.imshow(
-            par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par)
-        )
+        plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
         # ---
 
         plt.xticks([])
@@ -237,13 +235,9 @@ def prepare_data(
                     n=10, random_state=random.randint(0, 1e6)
                 )
             else:
-                df = df.groupby("pixel_groups").sample(
-                    n=10, random_state=random_state
-                )
+                df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
         except Exception:
-            print(
-                f"[INFO] len(df) = {len(df)}, .sample method is deactivated."
-            )
+            print(f"[INFO] len(df) = {len(df)}, .sample method is deactivated.")
             df = df.iloc[:num_samples]
     else:
         print(f"[WARNING] could not find {tar_param} in columns.")
@@ -509,9 +503,7 @@ def prepare_annotation(
         )
     else:
         if tree_level == "patch":
-            patch_paths = annotation_tasks["paths"][annotation_set][
-                "patch_paths"
-            ]
+            patch_paths = annotation_tasks["paths"][annotation_set]["patch_paths"]
         parent_paths = os.path.join(
             annotation_tasks["paths"][annotation_set]["parent_paths"]
         )
@@ -531,9 +523,7 @@ def prepare_annotation(
 
     if tree_level == "patch":
         # specify the path of patches and the parent images
-        mymaps = load_patches(
-            patch_paths=patch_paths, parent_paths=parent_paths
-        )
+        mymaps = load_patches(patch_paths=patch_paths, parent_paths=parent_paths)
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
@@ -551,11 +541,8 @@ def prepare_annotation(
             or isinstance(max_mean_pixel, float)
         ):
             calc_mean = True
-        
-        if (
-            isinstance(min_std_pixel, float)
-            or isinstance(max_std_pixel, float)
-        ):
+
+        if isinstance(min_std_pixel, float) or isinstance(max_std_pixel, float):
             calc_std = True
 
         if calc_mean or calc_std:
@@ -569,21 +556,15 @@ def prepare_annotation(
 
         if isinstance(min_alpha_channel, float):
             if "mean_pixel_A" in patch_df.columns:
-                patch_df = patch_df[
-                    patch_df["mean_pixel_A"] >= min_alpha_channel
-                ]
+                patch_df = patch_df[patch_df["mean_pixel_A"] >= min_alpha_channel]
 
         if isinstance(min_mean_pixel, float):
             if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[
-                    patch_df["mean_pixel_RGB"] >= min_mean_pixel
-                ]
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] >= min_mean_pixel]
 
         if isinstance(max_mean_pixel, float):
             if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[
-                    patch_df["mean_pixel_RGB"] <= max_mean_pixel
-                ]
+                patch_df = patch_df[patch_df["mean_pixel_RGB"] <= max_mean_pixel]
 
         if isinstance(min_std_pixel, float):
             if "std_pixel_RGB" in patch_df.columns:
@@ -670,9 +651,7 @@ def save_annotation(
         annotation_tasks = yaml.load(f, Loader=yaml.FullLoader)
 
     if annotation_set not in annotation_tasks["paths"].keys():
-        print(
-            f"{annotation_set} could not be found in {annotation_tasks_file}"
-        )
+        print(f"{annotation_set} could not be found in {annotation_tasks_file}")
     else:
         annot_file = os.path.join(
             annotation_tasks["paths"][annotation_set]["annot_dir"],

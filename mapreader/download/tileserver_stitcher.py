@@ -26,7 +26,7 @@ def runner(opts: input_class) -> None:
     opts : input_class
         The options for the runner, of the ``input_class`` type that contains
         the following attributes:
-        
+
         - ``dir`` (str): The directory containing the input images.
         - ``out_file`` (str): The output file path for the stitched image.
         - ``pixel_closest`` (int, optional): The closest pixel value to round the image size to.
@@ -69,12 +69,8 @@ def runner(opts: input_class) -> None:
     tile_w, tile_h = Image.open(filepaths[0]).size
 
     xys = list(map(xy, filepaths))
-    x_0, y_0 = min(map(lambda x_y: x_y[0], xys)), min(
-        map(lambda x_y: x_y[1], xys)
-    )
-    x_1, y_1 = max(map(lambda x_y: x_y[0], xys)), max(
-        map(lambda x_y: x_y[1], xys)
-    )
+    x_0, y_0 = min(map(lambda x_y: x_y[0], xys)), min(map(lambda x_y: x_y[1], xys))
+    x_1, y_1 = max(map(lambda x_y: x_y[0], xys)), max(map(lambda x_y: x_y[1], xys))
 
     n_x, n_y = x_1 - x_0, y_1 - y_0
 
@@ -134,9 +130,7 @@ def myround(x: Union[float, int], base: Optional[int] = 100) -> int:
     return base * round(x / base)
 
 
-def stitcher(
-    dir_name: str, out_file: str, pixel_closest: Optional[int] = None
-) -> None:
+def stitcher(dir_name: str, out_file: str, pixel_closest: Optional[int] = None) -> None:
     """
     Stitch together multiple images from a directory and save the result to a
     file.

@@ -41,10 +41,7 @@ def loader(
     :class:`mapreader.load.images.MapImages` class for more detail.
     """
     img = MapImages(
-        path_images=path_images,
-        tree_level=tree_level,
-        parent_path=parent_path,
-        **kwds
+        path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwds
     )
     return img
 

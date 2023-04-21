@@ -90,9 +90,7 @@ class classifierContext(classifier):
             print("KeyboardInterrupted... Exiting...")
             if os.path.isfile(self.tmp_save_filename):
                 print(f"File found: {self.tmp_save_filename}... Loading...")
-                self.load(
-                    self.tmp_save_filename, remove_after_load=remove_after_load
-                )
+                self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
             else:
                 print("No temporary file was found.")
 
@@ -160,9 +158,7 @@ class classifierContext(classifier):
         """
 
         if self.criterion is None:
-            raise ValueError(
-                "[ERROR] criterion is needed. Use add_criterion method"
-            )
+            raise ValueError("[ERROR] criterion is needed. Use add_criterion method")
 
         for phase in phases:
             if phase not in self.dataloader.keys():
@@ -243,9 +239,7 @@ class classifierContext(classifier):
 
                     if phase.lower() in train_phase_names + valid_phase_names:
                         # forward, track history if only in train
-                        with torch.set_grad_enabled(
-                            phase.lower() in train_phase_names
-                        ):
+                        with torch.set_grad_enabled(phase.lower() in train_phase_names):
                             # Get model outputs and calculate loss
                             # Special case for inception because in training
                             # it has an auxiliary output.
@@ -256,9 +250,7 @@ class classifierContext(classifier):
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
                             ):
-                                outputs, aux_outputs = self.model(
-                                    inputs1, inputs2
-                                )
+                                outputs, aux_outputs = self.model(inputs1, inputs2)
                                 loss1 = self.criterion(outputs, labels)
                                 loss2 = self.criterion(aux_outputs, labels)
                                 # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
@@ -286,9 +278,7 @@ class classifierContext(classifier):
                         _, pred_label = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
-                        torch.nn.functional.softmax(outputs, dim=1)
-                        .cpu()
-                        .tolist()
+                        torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
                     )
                     running_pred_label.extend(pred_label.cpu().tolist())
                     running_orig_label.extend(labels.cpu().tolist())
@@ -298,9 +288,7 @@ class classifierContext(classifier):
                             total_inp_counts,
                             (batch_idx + 1) * phase_batch_size,
                         )
-                        progress_perc = (
-                            curr_inp_counts / total_inp_counts * 100.0
-                        )
+                        progress_perc = curr_inp_counts / total_inp_counts * 100.0
                         tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}%)"  # noqa
 
                         epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
@@ -317,9 +305,7 @@ class classifierContext(classifier):
                     # --- END: one batch
 
                 # scheduler
-                if phase.lower() in train_phase_names and (
-                    self.scheduler is not None
-                ):
+                if phase.lower() in train_phase_names and (self.scheduler is not None):
                     self.scheduler.step()
 
                 if phase.lower() in train_phase_names + valid_phase_names:
@@ -348,9 +334,7 @@ class classifierContext(classifier):
                     epoch_msg = self.gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint(
-                            "[INFO]", self.color_dred, epoch_msg + "\n"
-                        )
+                        self.cprint("[INFO]", self.color_dred, epoch_msg + "\n")
                     else:
                         self.cprint("[INFO]", self.color_dgreen, epoch_msg)
 
@@ -360,10 +344,7 @@ class classifierContext(classifier):
                 self.orig_label.extend(running_orig_label)
 
                 # Update best_loss and _epoch?
-                if (
-                    phase.lower() in valid_phase_names
-                    and epoch_loss < self.best_loss
-                ):
+                if phase.lower() in valid_phase_names and epoch_loss < self.best_loss:
                     self.best_loss = epoch_loss
                     self.best_epoch = epoch
                     best_model_wts = copy.deepcopy(self.model.state_dict())
@@ -379,9 +360,7 @@ class classifierContext(classifier):
                         self.save(self.tmp_save_filename, force=True)
 
         time_elapsed = time.time() - since
-        print(
-            f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s"
-        )
+        print(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -593,13 +572,9 @@ class classifierContext(classifier):
                     pred_ind = int(preds[j])
                     if pred_ind != class_index:
                         continue
-                    if (min_conf is not None) and (
-                        pred_conf[j][pred_ind] < min_conf
-                    ):
+                    if (min_conf is not None) and (pred_conf[j][pred_ind] < min_conf):
                         continue
-                    if (max_conf is not None) and (
-                        pred_conf[j][pred_ind] > max_conf
-                    ):
+                    if (max_conf is not None) and (pred_conf[j][pred_ind] > max_conf):
                         continue
 
                     counter += 1

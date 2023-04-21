@@ -112,9 +112,7 @@ class loadAnnotations:
                 f"* update paths in '{self.col_path}' column by inserting '{path2dir}'"  # noqa
             )
             annots_rd[self.col_path] = (
-                os.path.abspath(path2dir)
-                + os.path.sep
-                + annots_rd[self.col_path]
+                os.path.abspath(path2dir) + os.path.sep + annots_rd[self.col_path]
             )
 
         if (len(self.annotations) == 0) or (append is False):
@@ -167,9 +165,7 @@ class loadAnnotations:
             print(f"[ERROR] length: {len(self.annotations)}")
             return
 
-        plt.imshow(
-            io.imread(self.annotations.iloc[indx][self.col_path]), cmap=cmap
-        )
+        plt.imshow(io.imread(self.annotations.iloc[indx][self.col_path]), cmap=cmap)
         plt.title(self.annotations.iloc[indx][self.col_label])
         plt.xticks([])
         plt.yticks([])
@@ -335,9 +331,7 @@ class loadAnnotations:
                 for one_input_id in list_input_ids:
                     input_id = int(one_input_id)
                     # Change both annotations and reviewed
-                    self.annotations.loc[
-                        input_id, self.col_label
-                    ] = input_label
+                    self.annotations.loc[input_id, self.col_label] = input_label
                     self.reviewed.loc[input_id, self.col_label] = input_label
                     print(f"{input_id} ---> new label: {input_label}")
 
@@ -369,9 +363,7 @@ class loadAnnotations:
             print(f"[ERROR] length: {len(self.annotations)}")
             return
 
-        annot2plot = self.annotations[
-            self.annotations[self.col_label] == tar_label
-        ]
+        annot2plot = self.annotations[self.annotations[self.col_label] == tar_label]
 
         if num_sample is None:
             num_sample = len(annot2plot)
@@ -445,14 +437,10 @@ class loadAnnotations:
             )
 
         if stratify_colname not in self.annotations.columns:
-            raise ValueError(
-                f"{stratify_colname} is not a column in the dataframe"
-            )
+            raise ValueError(f"{stratify_colname} is not a column in the dataframe")
 
         X = self.annotations  # Contains all columns.
-        y = X[
-            [stratify_colname]
-        ]  # Dataframe of just the column on which to stratify.
+        y = X[[stratify_colname]]  # Dataframe of just the column on which to stratify.
 
         # Split original dataframe into train and temp dataframes.
         df_train, df_temp, y_train, y_temp = train_test_split(
@@ -477,9 +465,7 @@ class loadAnnotations:
                 test_size=relative_frac_test,
                 random_state=random_state,
             )
-            assert len(self.annotations) == len(df_train) + len(df_val) + len(
-                df_test
-            )
+            assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
 
         self.train = df_train
         self.val = df_val
