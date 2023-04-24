@@ -1600,7 +1600,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.load_parents(
                 parent_paths=parent_paths,
                 parent_file_ext=parent_file_ext,
-                update=False,
+                overwrite=False,
                 add_geo_info=add_geo_info,
             )
             # Add patches to the parent
