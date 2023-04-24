@@ -184,6 +184,12 @@ class MapImages:
 
         abs_image_path, image_id, _ = self._convert_image_path(image_path)
 
+        img = Image.open(abs_image_path)
+        if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
+            raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
+Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
+See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
+
         # if parent_path is defined get absolute parent path and parent id (tree_level = "patch" is implied)
         if parent_path:
             abs_parent_path, parent_id, _ = self._convert_image_path(parent_path)

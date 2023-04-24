@@ -90,6 +90,10 @@ def test_loader_add_geo_info(sample_dir):
     assert list(tiff.images["parent"][image_ID].keys()) == keys
 
 # could add jpeg, IIIF, etc. here too
+def test_loader_tiff_32bit(sample_dir):
+    image_ID = "cropped_32bit.tif"
+    with pytest.raises(NotImplementedError, match = "Image mode"): 
+        loader(f"{sample_dir}/{image_ID}")
 
 # test other functions
 
