@@ -10,7 +10,7 @@ def sample_dir():
 
 
 def test_extractGeoInfo(sample_dir):
-    image_ID = "101200740.27_JPEG.tif"
+    image_ID = "cropped_101200740.27.tif"
     image_path = f"{sample_dir}/{image_ID}"
     shape, crs, coord = geo_utils.extractGeoInfo(image_path)
     assert shape == (12447, 16967, 3)
@@ -21,7 +21,7 @@ def test_extractGeoInfo(sample_dir):
 
 
 def test_reproject(sample_dir):
-    image_ID = "101200740.27_JPEG.tif"
+    image_ID = "cropped_101200740.27.tif"
     image_path = f"{sample_dir}/{image_ID}"
     _, _, new_crs, reprojected_coord, size_in_m = geo_utils.reprojectGeoInfo(
         image_path, calc_size_in_m="gc"

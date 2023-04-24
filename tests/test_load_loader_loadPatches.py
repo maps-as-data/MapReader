@@ -27,7 +27,7 @@ def empty_dir(tmp_path):
     os.mkdir(dir_path)
     return dir_path
 
-#load_patches() is just a wrapper for MapImages.loadPatches()
+#load_patches() is just a wrapper for MapImages.load_patches()
 
 #load just patches
 

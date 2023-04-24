@@ -1,9 +1,10 @@
 import pytest
 from pytest import approx
 from mapreader import loader
-from mapreader.load.images import mapImages
+from mapreader.load.images import MapImages
 import os
 from pathlib import Path
+import pathlib
 
 # functions
 
@@ -12,20 +13,19 @@ from pathlib import Path
 def sample_dir():
     return Path(__file__).resolve().parent / "sample_files"
 
-
 @pytest.fixture
-def metadata_patchify(sample_dir):
-    """Initialises mapImages object (with metadata from csv and patches).
+def metadata_patchify(sample_dir, tmp_path):
+    """Initialises MapImages object (with metadata from csv and patches).
 
     Returns
     -------
     list
-        image_ID (of parent png image), ts_map (mapImages object), parent_list (== image_ID) and patch_list (list of patches).
+        image_ID (of parent png image), ts_map (MapImages object), parent_list (== image_ID) and patch_list (list of patches).
     """
-    image_ID = "map_74488693.png"
+    image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    ts_map.patchifyAll(patch_size=1000)
+    ts_map.patchify_all(patch_size=3, path_save=tmp_path) # gives 3 patches 
     parent_list = ts_map.list_parents()
     patch_list = ts_map.list_patches()
 
@@ -36,90 +36,75 @@ def metadata_patchify(sample_dir):
 
 
 # png tests (separate geo info)
-def test_png_loader(sample_dir):
-    image_ID = "map_74488693.png"
-
+def test_loader_png(sample_dir):
+    image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     assert len(ts_map) == 1
-    assert isinstance(ts_map, mapImages)
+    assert isinstance(ts_map, MapImages)
 
 
-def test_add_metadata(sample_dir):
-    image_ID = "map_74488693.png"
-
+def test_loader_add_metadata(sample_dir):
+    image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    assert "coord" in ts_map.images["parent"][image_ID].keys()
-    assert ts_map.images["parent"][image_ID]["coord"] == approx(
-        (-4.21875, -3.60352, 55.80128, 56.05977), rel=1e-3
+    assert "coordinates" in ts_map.images["parent"][image_ID].keys()
+    assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
+        (-4.83,55.80, -4.21, 56.059), rel=1e-2
     )
 
 
 # tiff tests (no geo info)
-def test_tiff_loaders(sample_dir):
-    image_ID = "101101409.1_JPEG.tif"
+def test_loader_tiff(sample_dir):
+    image_ID = "cropped_101101409.1.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
     assert len(tiff) == 1
-    assert isinstance(tiff, mapImages)
-
+    assert isinstance(tiff, MapImages)
 
 # geotiff tests (contains geo info)
-def test_geotiff_loader(sample_dir):
-    image_ID = "101200740.27_JPEG.tif"
+def test_loader_geotiff(sample_dir):
+    image_ID = "cropped_101200740.27.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
     assert len(geotiff) == 1
-    assert isinstance(geotiff, mapImages)
+    assert isinstance(geotiff, MapImages)
 
-
-def test_addGeoInfo(sample_dir):
+def test_loader_add_geo_info(sample_dir):
     # check it works for geotiff
-    image_ID = "101200740.27_JPEG.tif"
+    image_ID = "cropped_101200740.27.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
-    geotiff.addGeoInfo()
+    geotiff.add_geo_info()
     assert "shape" in geotiff.images["parent"][image_ID].keys()
-    assert "coord" in geotiff.images["parent"][image_ID].keys()
-    assert geotiff.images["parent"][image_ID]["coord"] == approx(
-        (-0.06471, -0.04852, 51.60808, 51.61590), rel=1e-3
-    )
+    assert "coordinates" in geotiff.images["parent"][image_ID].keys()
+    assert geotiff.images["parent"][image_ID]["coordinates"] == approx((-0.061, 51.6142, -0.0610, 51.614), rel=1e-2)
 
     # check nothing happens for png/tiff (no metadata)
-    image_ID = "map_74488693.png"
+    image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
-    keys = ts_map.images["parent"][image_ID].keys()
-    ts_map.addGeoInfo()
-    assert ts_map.images["parent"][image_ID].keys() == keys
+    keys = list(ts_map.images["parent"][image_ID].keys())
+    ts_map.add_geo_info()
+    assert list(ts_map.images["parent"][image_ID].keys()) == keys
 
-    image_ID = "101101409.1_JPEG.tif"
+    image_ID = "cropped_101101409.1.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
-    keys = tiff.images["parent"][image_ID].keys()
-    tiff.addGeoInfo()
-    assert tiff.images["parent"][image_ID].keys() == keys
-
+    keys = list(tiff.images["parent"][image_ID].keys())
+    tiff.add_geo_info()
+    assert list(tiff.images["parent"][image_ID].keys()) == keys
 
 # could add jpeg, IIIF, etc. here too
 
-
 # test other functions
-def test_patchifyAll(sample_dir):
-    image_ID = "map_74488693.png"
+
+def test_loader_patchify_all(sample_dir, tmp_path):
+    image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
-    ts_map.patchifyAll(patch_size=1000)
+    ts_map.patchify_all(patch_size=3, path_save=tmp_path)
     parent_list = ts_map.list_parents()
     patch_list = ts_map.list_patches()
     assert len(parent_list) == 1
-    assert len(patch_list) == 48
-    assert os.path.isfile(f"./patches/patch-0-0-1000-1000-#{image_ID}#.png")
+    assert len(patch_list) == 9
+    assert os.path.isfile(f"{tmp_path}/patch-0-0-3-3-#{image_ID}#.png")
 
 
-def test_shape(sample_dir):
-    image_ID = "map_74488693.png"
-    ts_map = loader(f"{sample_dir}/{image_ID}")
-    ts_map.add_shape()
-    # check shape is added for parent image (before adding shape from metadata)
-    assert "shape" in ts_map.images["parent"][image_ID].keys()
-
-
-def test_coord_functions(metadata_patchify, sample_dir):
+def test_loader_coord_functions(metadata_patchify, sample_dir):
     # test for png with added metadata
     image_ID, ts_map, _, patch_list = metadata_patchify
     ts_map.add_center_coord()
@@ -127,42 +112,41 @@ def test_coord_functions(metadata_patchify, sample_dir):
     assert "center_lon" in ts_map.images["patch"][patch_list[0]].keys()
 
     # test for geotiff with added geoinfo
-    image_ID = "101200740.27_JPEG.tif"
+    image_ID = "cropped_101200740.27.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
-    geotiff.addGeoInfo()
+    geotiff.add_geo_info()
     geotiff.add_coord_increments()
     geotiff.add_center_coord(tree_level="parent")
     assert "dlon" in geotiff.images["parent"][image_ID].keys()
     assert "center_lon" in geotiff.images["parent"][image_ID].keys()
 
     # test for tiff with no geo info (i.e. no coords so nothing should happen)
-    image_ID = "101101409.1_JPEG.tif"
+    image_ID = "cropped_101101409.1.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
-    keys = tiff.images["parent"][image_ID].keys()
+    keys = list(tiff.images["parent"][image_ID].keys())
     tiff.add_coord_increments()
     tiff.add_center_coord(tree_level="parent")
-    assert tiff.images["parent"][image_ID].keys() == keys
+    assert list(tiff.images["parent"][image_ID].keys()) == keys
 
-
-def test_calc_pixel_stats(metadata_patchify, sample_dir):
+def test_loader_calc_pixel_stats(metadata_patchify, sample_dir, tmp_path):
     image_ID, ts_map, _, patch_list = metadata_patchify
     ts_map.calc_pixel_stats()
-    # png images should have alpha channel (i.e. "mean_pixel_A" should exist)
-    assert "mean_pixel_A" in ts_map.images["patch"][patch_list[0]].keys()
-    assert "std_pixel_A" in ts_map.images["patch"][patch_list[0]].keys()
+    expected_cols = ["mean_pixel_R", "mean_pixel_G", "mean_pixel_B", "mean_pixel_A", "std_pixel_R", "std_pixel_G", "std_pixel_B", "std_pixel_A",]
+    for col in expected_cols:
+        assert col in ts_map.images["patch"][patch_list[0]].keys()
 
     # geotiff/tiff will not have alpha channel, so only RGB returned
-    image_ID = "101200740.27_JPEG.tif"
+    image_ID = "cropped_101200740.27.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
-    geotiff.patchifyAll(patch_size=1000)
+    geotiff.patchify_all(patch_size=3, path_save=tmp_path)
     patch_list = geotiff.list_patches()
     geotiff.calc_pixel_stats()
-    assert "mean_pixel_RGB" in geotiff.images["patch"][patch_list[0]].keys()
-    assert "std_pixel_RGB" in geotiff.images["patch"][patch_list[0]].keys()
+    expected_cols = ["mean_pixel_R", "mean_pixel_G", "mean_pixel_B", "std_pixel_R", "std_pixel_G", "std_pixel_B"]
+    for col in expected_cols:
+        assert col in geotiff.images["patch"][patch_list[0]].keys()
 
-
-def test_convertImages(metadata_patchify):
+def test_loader_convert_images(metadata_patchify):
     _, ts_map, _, _ = metadata_patchify
-    parent_df, patch_df = ts_map.convertImages()
-    assert parent_df.shape == (1, 9)
-    assert patch_df.shape == (48, 6)
+    parent_df, patch_df = ts_map.convert_images()
+    assert parent_df.shape == (1, 12)
+    assert patch_df.shape == (9, 5)

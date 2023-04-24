@@ -3,10 +3,11 @@ import pytest
 import os
 import pandas as pd
 import shutil
+import pathlib
 
 @pytest.fixture
-def dir_name():
-    return "metadata_test_dir"
+def dir_name(tmp_path):
+    return tmp_path / "metadata_test_dir"
 
 #if there is extra info in the metadata
 def test_extra_metadata(dir_name):  

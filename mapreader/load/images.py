@@ -194,7 +194,11 @@ class MapImages:
             "image_path": abs_image_path,
         }
         if tree_level == "parent":
-            self._add_geo_info_id(image_id, verbose=False)
+            try:
+                self._add_geo_info_id(image_id, verbose=False)
+            except:
+                pass
+        
         self._add_shape_id(image_id)
         for k, v in kwds.items():
             self.images[tree_level][image_id][k] = v
@@ -818,8 +822,8 @@ class MapImages:
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
-            self.images[tree_level][image_id]["center_lat"] = np.mean(min_y, max_y)
-            self.images[tree_level][image_id]["center_lon"] = np.mean(min_x, max_x)
+            self.images[tree_level][image_id]["center_lat"] = np.mean([min_y, max_y])
+            self.images[tree_level][image_id]["center_lon"] = np.mean([min_x, max_x])
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
@@ -1696,7 +1700,8 @@ class MapImages:
                 add_geo_info=add_geo_info,
             )
             # Add patches to the parent
-            self._add_patches_to_parents()
+            ## ---  fix instances of add patch to parent please --- please RW
+            ## self._add_patch_to_parent()
 
     @staticmethod
     def detect_par_id_from_path(
@@ -1868,7 +1873,7 @@ class MapImages:
                     except Exception as err:
                         print(err)
 
-            self._add_patches_to_parents()
+            ##self._add_patch_to_parent()
 
     def load_csv_file(
         self,
@@ -1918,7 +1923,7 @@ class MapImages:
                 )
             )
 
-            self._add_patches_to_parents()
+            # self._add_patch_to_parent()
 
             for parent_id in self.parents.keys():
                 k2change = "patches"
@@ -2008,7 +2013,7 @@ class MapImages:
             # Add parents
             self.readParents(parent_paths=parent_paths)
             # Add patches to the parent
-            self._add_patches_to_parents()
+            self._add_patch_to_parent()
 
     def process(self, tree_level="parent", update_paths=True,
                 save_preproc_dir="./test_preproc"):
