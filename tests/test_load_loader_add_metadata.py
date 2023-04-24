@@ -3,10 +3,12 @@ import pytest
 import os
 import pandas as pd
 import pathlib
+from PIL import Image
+from random import randint
 
 @pytest.fixture
 def keys():
-    return ["parent_id", "image_path", "name", "coord", "other"]
+    return ["parent_id", "image_path", "shape", "name", "coord", "other"]
 
 @pytest.fixture
 def metadata_df():
@@ -18,7 +20,8 @@ def matching_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path
 
@@ -28,7 +31,8 @@ def extra_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path 
 
@@ -38,7 +42,8 @@ def missing_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png", "file4.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path
 
@@ -70,7 +75,7 @@ def test_matching_metadata_csv_w_index_col(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", index_col="name")
-    keys = ["parent_id", "image_path", "Unnamed: 0", "coord", "other", "name"]
+    keys = ["parent_id", "image_path", "shape", "Unnamed: 0", "coord", "other", "name"]
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 
@@ -79,7 +84,7 @@ def test_matching_metadata_csv_w_usecols(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv", columns=["name","coord"])
-    keys = ["parent_id", "image_path", "name", "coord"]
+    keys = ["parent_id", "image_path", "shape", "name", "coord"]
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
         assert isinstance(my_files.images["parent"][parent_id]["coord"], tuple)
@@ -107,7 +112,7 @@ def test_missing_metadata_csv_ignore_mismatch(missing_metadata_dir, keys):
     my_files.add_metadata(f"{missing_metadata_dir}/metadata_df.csv", ignore_mismatch=True)
     for parent_id in ["file1.png", "file2.png", "file3.png"]:
         assert list(my_files.images["parent"][parent_id].keys()) == keys
-    assert list(my_files.images["parent"]["file4.png"].keys()) == ["parent_id", "image_path"]
+    assert list(my_files.images["parent"]["file4.png"].keys()) == ["parent_id", "image_path", "shape"]
     
 def test_missing_metadata_csv_errors(missing_metadata_dir):  
     my_files=loader(f"{missing_metadata_dir}/*png")

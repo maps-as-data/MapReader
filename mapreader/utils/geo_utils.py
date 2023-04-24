@@ -22,7 +22,7 @@ def extractGeoInfo(image_path):
     """
     # read the image using rasterio
     tiff_src = rasterio.open(image_path)
-    image_height, image_width = tiff_src.shape
+    image_height, image_width = tiff_src.height, tiff_src.width
     image_channels = tiff_src.count
     tiff_shape = (image_height, image_width, image_channels)
 
@@ -60,9 +60,13 @@ def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False)
 
     # Coordinate transformation: proj1 ---> proj2
     transformer = Transformer.from_crs(tiff_proj, proj2convert)
-    ymax, xmin = transformer.transform(tiff_coord[0], tiff_coord[3])
-    ymin, xmax = transformer.transform(tiff_coord[2], tiff_coord[1])
-    coord = (xmin, xmax, ymin, ymax)
+    ymin, xmin = transformer.transform(
+        tiff_coord[0], tiff_coord[1]
+    )
+    ymax, xmax = transformer.transform(
+        tiff_coord[2], tiff_coord[3]
+    )
+    coord = (xmin, ymin, xmax, ymax)
 
     print(f"[INFO] New CRS: {proj2convert}")
     print("[INFO] Reprojected coordinates: %.4f %.4f %.4f %.4f" % coord)
