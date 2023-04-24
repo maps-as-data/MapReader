@@ -188,9 +188,7 @@ def preprocess(
     try:
         gdal_exec = distutils.spawn.find_executable("gdal_translate")
         if not gdal_exec:
-            err_msg = (
-                "gdal_translate could not be found. Refer to https://gdal.org/"
-            )
+            err_msg = "gdal_translate could not be found. Refer to https://gdal.org/"
             raise ImportError(err_msg)
 
         # Run gdal using subprocess, in our experiments, this was faster than

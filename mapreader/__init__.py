@@ -1,21 +1,22 @@
-from mapreader.loader.images import mapImages
-from mapreader.loader.loader import loader
-from mapreader.loader.loader import load_patches
+from mapreader.load.images import mapImages
+from mapreader.load.loader import loader
+from mapreader.load.loader import load_patches
 
 from mapreader.download import azure_access
 from mapreader.download.tileserver_access import TileServer
 
 from mapreader.annotate.load_annotate import loadAnnotations
 
-from mapreader.train.datasets import patchTorchDataset
-from mapreader.train.datasets import patchContextDataset
-from mapreader.train.classifier import classifier
-from mapreader.train.classifier_context import classifierContext
-from mapreader.train import custom_models
+from mapreader.learn.datasets import patchTorchDataset
+from mapreader.learn.datasets import patchContextDataset
+from mapreader.learn.classifier import classifier
+from mapreader.learn.classifier_context import classifierContext
+from mapreader.learn import custom_models
 
 from mapreader.process import process
 
 from . import _version
-__version__ = _version.get_versions()['version']
+
+__version__ = _version.get_versions()["version"]
 
 from mapreader.utils import geo_utils
