@@ -35,6 +35,9 @@ class mapImages:
     path_images : str or None, optional
         Path to the directory containing images (accepts wildcards). By
         default, ``False``
+    file_ext : str or False, optional
+        The file extension of the image files to be loaded, ignored if file types are specified in ``path_images`` (e.g. with ``"./path/to/dir/*png"``).
+        By default ``False``.
     tree_level : str, optional
         Level of the image hierarchy to construct. The value can be
         ``"parent"`` (default) and ``"patch"``.
@@ -57,6 +60,7 @@ class mapImages:
     def __init__(
         self,
         path_images: Optional[str] = None,
+        file_ext: Optional[Union[str, bool]] = False,
         tree_level: Optional[str] = "parent",
         parent_path: Optional[str] = None,
         **kwds: Dict,
@@ -64,8 +68,8 @@ class mapImages:
         """Initializes the mapImages class."""
 
         if path_images:
-            # List with all paths
-            self.path_images = glob(os.path.abspath(path_images))
+            self.path_images = self._resolve_file_path(path_images, file_ext)
+
         else:
             self.path_images = []
 
@@ -82,6 +86,32 @@ class mapImages:
                 tree_level=tree_level,
                 **kwds,
             )
+
+    @staticmethod
+    def _resolve_file_path(file_path, file_ext):
+        if file_ext:
+            if os.path.isdir(file_path):
+                files = glob(os.path.abspath(f"{file_path}/*.{file_ext}"))
+            else: #if not dir
+                files = glob(os.path.abspath(file_path))
+                files = [file for file in files if file.split(".")[-1] == file_ext] 
+
+        else:
+            if os.path.isdir(file_path):
+                files = glob(os.path.abspath(f"{file_path}/*.*"))
+            else:
+                files = glob(os.path.abspath(file_path))
+
+        #check for issues
+        if len(files) == 0:
+            raise ValueError("[ERROR] No files found!")
+        test_ext = files[0].split(".")[-1]
+        if not all(file.split(".")[-1] == test_ext for file in files):
+            raise ValueError(
+                "[ERROR] Directory with multiple file types detected - please specificy file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
+            )
+        
+        return files
 
     def __len__(self) -> int:
         return int(len(self.images["parent"]) + len(self.images["patch"]))
@@ -1622,7 +1652,9 @@ class mapImages:
     def loadPatches(
         self,
         patch_paths: str,
+        patch_file_ext: Optional[Union[str, bool]] = False,
         parent_paths: Optional[Union[str, bool]] = False,
+        parent_file_ext: Optional[Union[str, bool]] = False,
         add_geo_par: Optional[bool] = False,
         clear_images: Optional[bool] = False,
     ) -> None:
@@ -1636,11 +1668,17 @@ class mapImages:
             The file path of the patches to be loaded.
 
             *Note: The ``patch_paths`` parameter accepts wildcards.*
+        patch_file_ext : str or bool, optional
+            The file extension of the patches to be loaded, ignored if file extensions are specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
+            By default ``False``.
         parent_paths : str or bool, optional
             The file path of the parent images to be loaded. If set to
             ``False``, no parents are loaded. Default is ``False``.
 
             *Note: The ``parent_paths`` parameter accepts wildcards.*
+        parent_file_ext : str or bool, optional
+            The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
+            By default ``False``.
         add_geo_par : bool, optional
             If ``True``, adds geographic information to the parent image.
             Default is ``False``.
@@ -1652,21 +1690,20 @@ class mapImages:
         -------
         None
         """
-
-        patch_paths = glob(os.path.abspath(patch_paths))
+        files = self._resolve_file_path(patch_paths, patch_file_ext)
 
         if clear_images:
             self.images = {}
             self.images["parent"] = {}
             self.images["patch"] = {}
 
-        for file_path in patch_paths:
-            if not os.path.isfile(file_path):
-                print(f"[WARNING] file does not exist: {file_path}")
+        for file in files:
+            if not os.path.isfile(file):
+                print(f"[WARNING] File does not exist: {file}")
                 continue
 
             # patch ID is set to the basename
-            patch_id = os.path.basename(file_path)
+            patch_id = os.path.basename(file)
 
             # Parent ID and border can be detected using patch_id
             parent_id = self.detectParIDfromPath(patch_id)
@@ -1676,7 +1713,7 @@ class mapImages:
             if not self.images["patch"].get(patch_id, False):
                 self.images["patch"][patch_id] = {}
             self.images["patch"][patch_id]["parent_id"] = parent_id
-            self.images["patch"][patch_id]["image_path"] = file_path
+            self.images["patch"][patch_id]["image_path"] = file
             self.images["patch"][patch_id]["min_x"] = min_x
             self.images["patch"][patch_id]["min_y"] = min_y
             self.images["patch"][patch_id]["max_x"] = max_x
@@ -1685,7 +1722,10 @@ class mapImages:
         if parent_paths:
             # Add parents
             self.loadParents(
-                parent_paths=parent_paths, update=False, add_geo=add_geo_par
+                parent_paths=parent_paths,
+                parent_file_ext=parent_file_ext,
+                update=False,
+                add_geo=add_geo_par,
             )
             # Add patches to the parent
             self.addPatches()
@@ -1749,6 +1789,7 @@ class mapImages:
         self,
         parent_paths: Optional[Union[str, bool]] = False,
         parent_ids: Optional[Union[List[str], str, bool]] = False,
+        parent_file_ext: Optional[Union[str, bool]] = False,
         update: Optional[bool] = False,
         add_geo: Optional[bool] = False,
     ) -> None:
@@ -1765,6 +1806,9 @@ class mapImages:
         parent_ids : list, str or bool, optional
             ID(s) of parent images. Ignored if ``parent_paths`` are specified.
             By default ``False``.
+        parent_file_ext : str or bool, optional
+            The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
+            By default ``False``.
         update : bool, optional
             If ``True``, current parents will be overwritten, by default
             ``False``.
@@ -1776,19 +1820,19 @@ class mapImages:
         -------
         None
         """
-
+        
         if parent_paths:
-            if not isinstance(parent_paths, list):
-                parent_paths = glob(os.path.abspath(parent_paths))
+            files = self._resolve_file_path(parent_paths, parent_file_ext)
+
             if update:
                 self.images["parent"] = {}
 
-            for parent_path in parent_paths:
-                parent_id = os.path.basename(parent_path)
+            for file in files:
+                parent_id = os.path.basename(file)
                 self.images["parent"][parent_id] = {"parent_id": None}
-                if os.path.isfile(parent_path):
+                if os.path.isfile(file):
                     self.images["parent"][parent_id]["image_path"] = os.path.abspath(
-                        parent_path
+                        file
                     )
                 else:
                     self.images["parent"][parent_id]["image_path"] = None

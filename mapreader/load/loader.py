@@ -48,7 +48,9 @@ def loader(
 
 def load_patches(
     patch_paths: str,
+    patch_file_ext: Optional[Union[str, bool]] = False,
     parent_paths: Optional[Union[str, bool]] = False,
+    parent_file_ext: Optional[Union[str, bool]] = False,
     add_geo_par: Optional[bool] = False,
     clear_images: Optional[bool] = False,
 ) -> mapImages:
@@ -63,11 +65,17 @@ def load_patches(
         The file path of the patches to be loaded.
 
         *Note: The ``patch_paths`` parameter accepts wildcards.*
+    patch_file_ext : str or bool, optional
+        The file extension of the patches, ignored if file extensions are specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
+        By default ``False``.
     parent_paths : str or bool, optional
         The file path of the parent images to be loaded. If set to
         ``False``, no parents are loaded. Default is ``False``.
 
         *Note: The ``parent_paths`` parameter accepts wildcards.*
+    parent_file_ext : str or bool, optional
+        The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
+        By default ``False``.
     add_geo_par : bool, optional
         If ``True``, adds geographic information to the parent image.
         Default is ``False``.
@@ -93,7 +101,9 @@ def load_patches(
     img = mapImages()
     img.loadPatches(
         patch_paths=patch_paths,
+        patch_file_ext=patch_file_ext,
         parent_paths=parent_paths,
+        parent_file_ext=parent_file_ext,
         add_geo_par=add_geo_par,
         clear_images=clear_images,
     )

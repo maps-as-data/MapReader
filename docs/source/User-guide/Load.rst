@@ -18,7 +18,15 @@ First, your image files (e.g. png, jpeg, tiff or geotiff files) should be loaded
 
     my_files = loader("./path/to/files/*.png")
 
-.. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
+or
+
+This can be done using: 
+
+.. code-block:: python
+
+    from mapreader import loader
+
+    my_files = loader("./path/to/files/", file_ext="png")
 
 For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
@@ -27,7 +35,14 @@ For example, if you have downloaded your maps using the default settings of our 
     #EXAMPLE
     my_files = loader("./maps/*.png")
 
-The ``loader`` method creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
+or
+
+.. code-block:: python
+
+    #EXAMPLE 
+    my_files = loader("./maps", file_ext="png")
+
+The ``loader`` function creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
 To see the contents of this object, use: 
 
 .. code-block:: python
@@ -42,7 +57,9 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
     my_files.addGeoInfo()
 
-Or, if you have a separate metadata file (e.g. a ``.csv`` file), use: 
+.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``proj2convert``.
+
+Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 
 .. code-block:: python
 
