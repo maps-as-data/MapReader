@@ -86,7 +86,7 @@ class MapImages:
             )
 
     @staticmethod
-    def _resolve_file_path(file_path, file_ext):
+    def _resolve_file_path(file_path, file_ext = None):
         if file_ext:
             if os.path.isdir(file_path):
                 files = glob(os.path.abspath(f"{file_path}/*.{file_ext}"))
@@ -1044,6 +1044,9 @@ class MapImages:
         """
         patch_parent = self.patches[patch_id]["parent_id"]
 
+        if patch_parent not in self.parents.keys():
+            self.load_parents(parent_ids=patch_parent)
+        
         if "patches" not in self.parents[patch_parent].keys():
             self.parents[patch_parent]["patches"] = [patch_id]
         else:
@@ -1559,9 +1562,9 @@ class MapImages:
         files = self._resolve_file_path(patch_paths, patch_file_ext)
 
         if clear_images:
-            self.images = {}
-            self.parents = {}
-            self.patches = {}
+            self.images = {"parent": {}, "patch": {}}
+            self.parents = {} #are these needed?
+            self.patches = {} #are these needed?
 
         for file in files:
             if not os.path.isfile(file):
@@ -1572,18 +1575,19 @@ class MapImages:
             patch_id = os.path.basename(file)
 
             # Parent ID and border can be detected using patch_id
-            parent_id = self.detect_par_id_from_path(patch_id)
-            min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
+            try:
+                parent_id = self.detect_parent_id_from_path(patch_id)
+                pixel_bounds = self.detect_pixel_bounds_from_path(patch_id)
+            except:
+                parent_id = None
+                pixel_bounds = None
 
             # Add patch
             if not self.patches.get(patch_id, False):
                 self.patches[patch_id] = {}
             self.patches[patch_id]["parent_id"] = parent_id
             self.patches[patch_id]["image_path"] = file
-            self.patches[patch_id]["min_x"] = min_x
-            self.patches[patch_id]["min_y"] = min_y
-            self.patches[patch_id]["max_x"] = max_x
-            self.patches[patch_id]["max_y"] = max_y
+            self.patches[patch_id]["pixel_bounds"] = pixel_bounds
 
         if parent_paths:
             # Add parents
@@ -1598,7 +1602,7 @@ class MapImages:
             ## self._add_patch_to_parent()
 
     @staticmethod
-    def detect_par_id_from_path(
+    def detect_parent_id_from_path(
         image_id: Union[int, str], parent_delimiter: Optional[str] = "#"
     ) -> str:
         """
@@ -1620,7 +1624,7 @@ class MapImages:
         return image_id.split(parent_delimiter)[1]
 
     @staticmethod
-    def detect_border_from_path(
+    def detect_pixel_bounds_from_path(
         image_id: Union[int, str],
         # border_delimiter="-" # <-- not in use in this method
     ) -> Tuple[int, int, int, int]:
@@ -1657,7 +1661,7 @@ class MapImages:
         parent_paths: Optional[Union[str, bool]] = False,
         parent_ids: Optional[Union[List[str], str, bool]] = False,
         parent_file_ext: Optional[Union[str, bool]] = False,
-        update: Optional[bool] = False,
+        overwrite: Optional[bool] = False,
         add_geo_info: Optional[bool] = False,
     ) -> None:
         """
@@ -1676,7 +1680,7 @@ class MapImages:
         parent_file_ext : str or bool, optional
             The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
             By default ``False``.
-        update : bool, optional
+        overwrite : bool, optional
             If ``True``, current parents will be overwritten, by default
             ``False``.
         add_geo_info : bool, optional
@@ -1691,42 +1695,51 @@ class MapImages:
         if parent_paths:
             files = self._resolve_file_path(parent_paths, parent_file_ext)
 
-            if update:
+            if overwrite:
                 self.parents = {}
 
             for file in files:
-                parent_id = os.path.basename(file)
-                self.parents[parent_id] = {"parent_id": None}
-                if os.path.isfile(file):
-                    self.parents[parent_id]["image_path"] = os.path.abspath(file)
-                else:
-                    self.parents[parent_id]["image_path"] = None
+                if not os.path.isfile(file):
+                    print(f"[WARNING] File does not exist: {file}")
+                    continue
 
+                parent_id = os.path.basename(file)
+                
+                if not self.parents.get(parent_id, False):
+                    self.parents[parent_id] = {}
+                self.parents[parent_id]["parent_id"] = None 
+                self.parents[parent_id]["image_path"] = os.path.abspath(file) if os.path.isfile(file) else None
                 if add_geo_info:
                     self.add_geo_info()
 
         elif parent_ids:
             if not isinstance(parent_ids, list):
                 parent_ids = [parent_ids]
+            
             for parent_id in parent_ids:
-                self.parents[parent_id] = {"parent_id": None}
+                if not self.parents.get(parent_id, False):
+                    self.parents[parent_id] = {}
+                self.parents[parent_id]["parent_id"] = None
                 self.parents[parent_id]["image_path"] = None
+        
+        else:
+            raise ValueError("[ERROR] Please pass one of ``parent_paths`` or ``parent_ids``.")
 
     def load_df(
         self,
-        parents: Optional[Union[pd.DataFrame, str]] = None,
-        patch_df: Optional[Union[pd.DataFrame, str]] = None,
+        parent_df: Optional[pd.DataFrame] = None,
+        patch_df: Optional[pd.DataFrame] = None,
         clear_images: Optional[bool] = True,
     ) -> None:
         """
-        Form images variable from pandas DataFrame(s).
+        Create ``MapImages`` instance by loading data from pandas DataFrame(s).
 
         Parameters
         ----------
-        parents : pandas.DataFrame, str or None, optional
+        parent_df : pandas.DataFrame, optional
             DataFrame containing parents or path to parents, by default
             ``None``.
-        patch_df : pandas.DataFrame or None, optional
+        patch_df : pandas.DataFrame, optional
             DataFrame containing patches, by default ``None``.
         clear_images : bool, optional
             If ``True``, clear images before reading the dataframes, by
@@ -1740,36 +1753,16 @@ class MapImages:
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
 
-        if not isinstance(patch_df, type(None)):
-            self.patches = patch_df.to_dict(orient="index")
+        if isinstance(parent_df, pd.DataFrame):
+            self.parents.update(parent_df.to_dict(orient="index"))
 
-        if not isinstance(parents, type(None)):
-            if isinstance(parents, str):
-                self.load_parents(parents)
-            else:
-                self.parents = parents.to_dict(orient="index")
+        if isinstance(patch_df, pd.DataFrame):
+            self.patches.update(patch_df.to_dict(orient="index"))
 
-            for parent_id in self.parents.keys():
-                # Do we need this?
-                # k2change = "patches"
-                # if k2change in self.parents[parent_id]:
-                #    try:
-                #        self.parents[parent_id][k2change] = self.parents[parent_id][k2change]  # noqa
-                #    except Exception as err:
-                #        print(err)
+        for patch_id in self.list_patches():
+            self._add_patch_to_parent(patch_id)
 
-                k2change = "coordinates"
-                if k2change in self.parents[parent_id]:
-                    try:
-                        self.parents[parent_id][k2change] = self.parents[parent_id][
-                            k2change
-                        ]
-                    except Exception as err:
-                        print(err)
-
-            ##self._add_patch_to_parent()
-
-    def load_csv_file(
+    def load_csv(
         self,
         parent_path: Optional[str] = None,
         patch_path: Optional[str] = None,
@@ -1803,34 +1796,23 @@ class MapImages:
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
 
-        if isinstance(patch_path, str) and os.path.isfile(patch_path):
-            self.patches.update(
-                pd.read_csv(patch_path, index_col=index_col_patch).to_dict(
-                    orient="index"
-                )
-            )
+        if not isinstance(parent_path, str):
+            raise ValueError("[ERROR] Please pass ``parent_path`` as string.")
+        if not isinstance(patch_path, str):
+            raise ValueError("[ERROR] Please pass ``patch_path`` as string.")
 
-        if isinstance(parent_path, str) and os.path.isfile(parent_path):
-            self.parents.update(
-                pd.read_csv(parent_path, index_col=index_col_parent).to_dict(
-                    orient="index"
-                )
-            )
+        if os.path.isfile(parent_path):
+            parent_df = pd.read_csv(parent_path, index_col=index_col_parent)
+        else:
+            raise ValueError(f"[ERROR] {parent_path} cannot be found.")
+                    
+        if os.path.isfile(patch_path):
+            patch_df = pd.read_csv(patch_path, index_col=index_col_patch)
+        else:
+            raise ValueError(f"[ERROR] {patch_path} cannot be found.")
 
-            # self._add_patch_to_parent()
+        self.load_df(parent_df=parent_df, patch_df=patch_df, clear_images=clear_images)
 
-            for parent_id in self.parents.keys():
-                k2change = "patches"
-                if k2change in self.parents[parent_id]:
-                    self.parents[parent_id][k2change] = eval(
-                        self.parents[parent_id][k2change]
-                    )
-
-                k2change = "coordinates"
-                if k2change in self.parents[parent_id]:
-                    self.parents[parent_id][k2change] = eval(
-                        self.parents[parent_id][k2change]
-                    )
 
     def add_geo_info(
         self,
@@ -2000,7 +1982,7 @@ class MapImages:
             if include_metadata and (not patch_id in list(metadata['rd_index_id'])):
                 continue
             # Parent ID and border can be detected using patch_id
-            parent_id = self.detect_par_id_from_path(patch_id)
+            parent_id = self.detect_parent_id_from_path(patch_id)
             min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
 
             # Add patch
