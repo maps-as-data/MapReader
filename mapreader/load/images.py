@@ -214,60 +214,6 @@ class MapImages:
             # add patch to parent
             self._add_patch_to_parent(image_id)
 
-    def _add_patch_to_parent(self, patch_id: str) -> None:
-        """
-        Add patch to parent.
-
-        Parameters
-        ----------
-        patch_id : str
-            The ID of the patch to be added
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        This method adds patches to their corresponding parent image.
-
-        It checks if the parent image has any patches, and if not, it creates
-        a list of patches and assigns it to the parent. If the parent image
-        already has a list of patches, the method checks if the current patch
-        is already in the list. If not, the patch is added to the list.
-        """
-        patch_parent = self.patches[patch_id]["parent_id"]
-
-        if "patches" not in self.parents[patch_parent].keys():
-            self.parents[patch_parent]["patches"] = [patch_id]
-        else:
-            if patch_id not in self.parents[patch_parent]["patches"]:
-                self.parents[patch_parent]["patches"].append(patch_id)
-
-    def list_parents(self) -> List[str]:
-        """Return list of all parents"""
-        return list(self.parents.keys())
-
-    def list_patches(self) -> List[str]:
-        """Return list of all patches"""
-        return list(self.patches.keys())
-
-    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
-        DataFrames for easy manipulation.
-
-        Returns
-        -------
-        tuple of two pandas DataFrames
-            The method returns a tuple of two DataFrames: One for the
-            ``parent`` images and one for the ``patch`` images.
-        """
-        parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
-        patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
-
-        return parent_df, patch_df
-
     @staticmethod
     def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
         """
@@ -433,98 +379,64 @@ class MapImages:
                     except:
                         self.images[tree_level][key][column] = item
 
-    def add_geo_info(
+    def show_sample(
         self,
-        proj2convert: Optional[str] = "EPSG:4326",
-        verbose: Optional[bool] = True,
+        num_samples: int,
+        tree_level: Optional[str] = "parent",
+        random_seed: Optional[int] = 65,
+        **kwds: Dict,
     ) -> None:
         """
-        Add coordinates (reprojected to EPSG:4326) to all parents images using image metadata.
+        Display a sample of images from a particular level in the image
+        hierarchy.
 
         Parameters
         ----------
-        proj2convert : str, optional
-            Projection to convert coordinates into, by default ``"EPSG:4326"``.
-        verbose : bool, optional
-            Whether to print verbose output, by default ``True``
+        num_samples : int
+            The number of images to display.
+        tree_level : str, optional
+            The level of the hierarchy to display images from, which can be
+            ``"patch"`` or ``"parent"`` (default).
+        random_seed : int, optional
+            The random seed to use for reproducibility. Default is ``65``.
+        **kwds : dict, optional
+            Additional keyword arguments to pass to
+            ``matplotlib.pyplot.figure()``.
 
         Returns
         -------
         None
-
-        Notes
-        -----
-        For each image in the parents dictionary, this method calls ``_add_geo_info_id`` and coordinates (if present) to the image in the ``parent`` dictionary.
         """
-        image_ids = list(self.parents.keys())
+        # set random seed for reproducibility
+        random.seed(random_seed)
 
-        for image_id in image_ids:
-            self._add_geo_info_id(image_id, proj2convert)
+        image_ids = list(self.images[tree_level].keys())
+        num_samples = min(len(image_ids), num_samples)
+        sample_image_ids = random.sample(image_ids, k=num_samples)
 
-    def _add_geo_info_id(
-        self,
-        image_id: str,
-        proj2convert: Optional[str] = "EPSG:4326",
-        verbose: Optional[bool] = True,
-    ) -> None:
-        """
-        Add coordinates (reprojected to EPSG:4326) to an image.
+        figsize = kwds.get("figsize", (15, num_samples * 2))
+        plt.figure(figsize=figsize)
 
-        Parameters
-        ----------
-        image_id : str
-            The ID of the image to add geographic information to
-        proj2convert : str, optional
-            Projection to convert coordinates into, by default ``"EPSG:4326"``.
-        verbose : bool, optional
-            Whether to print verbose output, by default ``True``
-
-        Returns
-        -------
-        None
-
-        Notes
-        ------
-        This method reads the image files specified in the ``image_path`` key
-        of each dictionary in the ``parent`` dictionary.
-
-        It then checks if the image has geographic coordinates in its metadata,
-        if not it prints a warning message and skips to the next image.
-
-        If coordinates are present, this method converts them to the specified
-        projection ``proj2convert``.
-
-        These are then added to the dictionary in the ``parent`` dictionary corresponding to each image.
-        """
-
-        image_path = self.parents[image_id]["image_path"]
-
-        # Read the image using rasterio
-        tiff_src = rasterio.open(image_path)
-
-        # Check whether coordinates are present
-        if isinstance(tiff_src.crs, type(None)):
-            self._print_if_verbose(
-                f"No coordinates found in {image_id}. Try add_metadata instead.",
-                verbose,
-            )  # noqa
-            return
-
-        else:
-            # Get coordinates as string
-            tiff_proj = tiff_src.crs.to_string()
-            # Coordinate transformation: proj1 ---> proj2
-            # tiff is "lat, lon" instead of "x, y"
-            transformer = Transformer.from_crs(tiff_proj, proj2convert)
-            ymin, xmin = transformer.transform(
-                tiff_src.bounds.left, tiff_src.bounds.bottom
+        for i, image_id in enumerate(sample_image_ids):
+            plt.subplot(num_samples // 3 + 1, 3, i + 1)
+            img = Image.open(self.images[tree_level][image_id]["image_path"])
+            plt.title(image_id, size=8)
+            plt.imshow(
+                img,
             )
-            ymax, xmax = transformer.transform(
-                tiff_src.bounds.right, tiff_src.bounds.top
-            )
-            # New projected coordinates
-            coords = (xmin, ymin, xmax, ymax)
-            self.parents[image_id]["coordinates"] = coords
+            plt.xticks([])
+            plt.yticks([])
+
+        plt.tight_layout()
+        plt.show()
+
+    def list_parents(self) -> List[str]:
+        """Return list of all parents"""
+        return list(self.parents.keys())
+
+    def list_patches(self) -> List[str]:
+        """Return list of all patches"""
+        return list(self.patches.keys())
 
     def add_shape(self, tree_level: Optional[str] = "parent") -> None:
         """
@@ -836,29 +748,90 @@ class MapImages:
             self.images[tree_level][image_id]["center_lat"] = np.mean([min_y, max_y])
             self.images[tree_level][image_id]["center_lon"] = np.mean([min_x, max_x])
 
-    @staticmethod
-    def _print_if_verbose(msg: str, verbose: bool) -> None:
+    def _calc_pixel_height_width(
+        self,
+        parent_id: Union[int, str],
+        method: Optional[str] = "great-circle",
+        verbose: Optional[bool] = False,
+    ) -> Tuple[Tuple, float, float]:
         """
-        Print message if verbose is True.
-        """
-        if verbose:
-            print(msg)
-
-    def _get_tree_level(self, image_id: str) -> str:
-        """Identify tree level of an image from image_id.
+        Calculate the height and width of each pixel in a given image in meters.
 
         Parameters
         ----------
-        image_id : str
-            The ID of the image to identify tree level for.
+        parent_id : int or str
+            The ID of the parent image to calculate pixel size.
+        method : str, optional
+            Method to use for calculating image size in meters.
+
+            Possible values: ``"great-circle"`` (default), ``"gc"``, ``"great_circle"``, ``"geodesic"`` or ``"gd"``.
+            ``"great-circle"``, ``"gc"`` and ``"great_circle"`` compute size using the great-circle distance formula,
+            while ``"geodesic"`` and ``"gd"`` computes size using the geodesic distance formula.
+        verbose : bool, optional
+            If ``True``, print additional information during the calculation.
+            Default is ``False``.
 
         Returns
         -------
-        str
-            The tree level of the image.
+        tuple
+            Tuple containing the size of the image in meters as a tuple of bottom, right, top and left distances (in that order) and the mean pixel height and width in meters.
+
+        Notes
+        -----
+        This method requires the parent image to have location metadata added
+        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
+        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
+
+        The calculations are performed using the ``geopy.distance.geodesic``
+        and ``geopy.distance.great_circle`` methods. Thus, the method requires
+        the ``geopy`` package to be installed.
         """
-        tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
-        return tree_level
+
+        if "coordinates" not in self.parents[parent_id].keys():
+            print(
+                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+            )
+            return
+
+        if "shape" not in self.parents[parent_id].keys():
+            self._add_shape_id(parent_id)
+
+        height, width, _ = self.parents[parent_id]["shape"]
+        xmin, ymin, xmax, ymax = self.parents[parent_id]["coordinates"]
+
+        # Calculate the size of image in meters
+        if method in ["geodesic", "gd"]:
+            bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
+            right = geodesic((ymin, xmax), (ymax, xmax)).meters
+            top = geodesic((ymax, xmax), (ymax, xmin)).meters
+            left = geodesic((ymax, xmin), (ymin, xmin)).meters
+
+        elif method in ["gc", "great-circle", "great_circle"]:
+            bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
+            right = great_circle((ymin, xmax), (ymax, xmax)).meters
+            top = great_circle((ymax, xmax), (ymax, xmin)).meters
+            left = great_circle((ymax, xmin), (ymin, xmin)).meters
+
+        else:
+            raise NotImplementedError(
+                f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}'
+            )
+
+        size_in_m = (bottom, right, top, left)  # anticlockwise order
+
+        mean_pixel_height = np.mean([right / height, left / height])
+        mean_pixel_width = np.mean([bottom / width, top / width])
+
+        self._print_if_verbose(
+            f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}",
+            verbose,
+        )
+        self._print_if_verbose(
+            f"Each pixel is ~{mean_pixel_height:.3f} X {mean_pixel_width:.3f} meters (height x width).",
+            verbose,
+        )  # noqa
+
+        return size_in_m, mean_pixel_height, mean_pixel_width
 
     def patchify_all(
         self,
@@ -1047,6 +1020,36 @@ class MapImages:
                     )
                     self._add_patch_coords_id(patch_id)
 
+    def _add_patch_to_parent(self, patch_id: str) -> None:
+        """
+        Add patch to parent.
+
+        Parameters
+        ----------
+        patch_id : str
+            The ID of the patch to be added
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method adds patches to their corresponding parent image.
+
+        It checks if the parent image has any patches, and if not, it creates
+        a list of patches and assigns it to the parent. If the parent image
+        already has a list of patches, the method checks if the current patch
+        is already in the list. If not, the patch is added to the list.
+        """
+        patch_parent = self.patches[patch_id]["parent_id"]
+
+        if "patches" not in self.parents[patch_parent].keys():
+            self.parents[patch_parent]["patches"] = [patch_id]
+        else:
+            if patch_id not in self.parents[patch_parent]["patches"]:
+                self.parents[patch_parent]["patches"].append(patch_id)
+
     def _make_dir(self, path_make: str, exists_ok: Optional[bool] = True) -> None:
         """
         Helper method to make directories.
@@ -1055,91 +1058,6 @@ class MapImages:
             Private method.
         """
         os.makedirs(path_make, exist_ok=exists_ok)
-
-    def _calc_pixel_height_width(
-        self,
-        parent_id: Union[int, str],
-        method: Optional[str] = "great-circle",
-        verbose: Optional[bool] = False,
-    ) -> Tuple[Tuple, float, float]:
-        """
-        Calculate the height and width of each pixel in a given image in meters.
-
-        Parameters
-        ----------
-        parent_id : int or str
-            The ID of the parent image to calculate pixel size.
-        method : str, optional
-            Method to use for calculating image size in meters.
-
-            Possible values: ``"great-circle"`` (default), ``"gc"``, ``"great_circle"``, ``"geodesic"`` or ``"gd"``.
-            ``"great-circle"``, ``"gc"`` and ``"great_circle"`` compute size using the great-circle distance formula,
-            while ``"geodesic"`` and ``"gd"`` computes size using the geodesic distance formula.
-        verbose : bool, optional
-            If ``True``, print additional information during the calculation.
-            Default is ``False``.
-
-        Returns
-        -------
-        tuple
-            Tuple containing the size of the image in meters as a tuple of bottom, right, top and left distances (in that order) and the mean pixel height and width in meters.
-
-        Notes
-        -----
-        This method requires the parent image to have location metadata added
-        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
-        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
-
-        The calculations are performed using the ``geopy.distance.geodesic``
-        and ``geopy.distance.great_circle`` methods. Thus, the method requires
-        the ``geopy`` package to be installed.
-        """
-
-        if "coordinates" not in self.parents[parent_id].keys():
-            print(
-                f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
-            )
-            return
-
-        if "shape" not in self.parents[parent_id].keys():
-            self._add_shape_id(parent_id)
-
-        height, width, _ = self.parents[parent_id]["shape"]
-        xmin, ymin, xmax, ymax = self.parents[parent_id]["coordinates"]
-
-        # Calculate the size of image in meters
-        if method in ["geodesic", "gd"]:
-            bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
-            right = geodesic((ymin, xmax), (ymax, xmax)).meters
-            top = geodesic((ymax, xmax), (ymax, xmin)).meters
-            left = geodesic((ymax, xmin), (ymin, xmin)).meters
-
-        elif method in ["gc", "great-circle", "great_circle"]:
-            bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
-            right = great_circle((ymin, xmax), (ymax, xmax)).meters
-            top = great_circle((ymax, xmax), (ymax, xmin)).meters
-            left = great_circle((ymax, xmin), (ymin, xmin)).meters
-
-        else:
-            raise NotImplementedError(
-                f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}'
-            )
-
-        size_in_m = (bottom, right, top, left)  # anticlockwise order
-
-        mean_pixel_height = np.mean([right / height, left / height])
-        mean_pixel_width = np.mean([bottom / width, top / width])
-
-        self._print_if_verbose(
-            f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}",
-            verbose,
-        )
-        self._print_if_verbose(
-            f"Each pixel is ~{mean_pixel_height:.3f} X {mean_pixel_width:.3f} meters (height x width).",
-            verbose,
-        )  # noqa
-
-        return size_in_m, mean_pixel_height, mean_pixel_width
 
     def calc_pixel_stats(
         self,
@@ -1229,56 +1147,54 @@ class MapImages:
                         # Calculate std pixel values
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
 
-    def show_sample(
-        self,
-        num_samples: int,
-        tree_level: Optional[str] = "parent",
-        random_seed: Optional[int] = 65,
-        **kwds: Dict,
-    ) -> None:
+    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Display a sample of images from a particular level in the image
-        hierarchy.
-
-        Parameters
-        ----------
-        num_samples : int
-            The number of images to display.
-        tree_level : str, optional
-            The level of the hierarchy to display images from, which can be
-            ``"patch"`` or ``"parent"`` (default).
-        random_seed : int, optional
-            The random seed to use for reproducibility. Default is ``65``.
-        **kwds : dict, optional
-            Additional keyword arguments to pass to
-            ``matplotlib.pyplot.figure()``.
+        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
+        DataFrames for easy manipulation.
 
         Returns
         -------
-        None
+        tuple of two pandas DataFrames
+            The method returns a tuple of two DataFrames: One for the
+            ``parent`` images and one for the ``patch`` images.
         """
-        # set random seed for reproducibility
-        random.seed(random_seed)
+        parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
+        patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
 
-        image_ids = list(self.images[tree_level].keys())
-        num_samples = min(len(image_ids), num_samples)
-        sample_image_ids = random.sample(image_ids, k=num_samples)
+        return parent_df, patch_df
 
-        figsize = kwds.get("figsize", (15, num_samples * 2))
-        plt.figure(figsize=figsize)
+    def show_parent(
+        self,
+        parent_id: Union[int, str],
+        column_to_plot: Optional[str] = None,
+        **kwds: Dict,
+    ) -> None:
+        """
+        A wrapper method for `.show()` which plots all patches of a
+        specified parent (`parent_id`).
 
-        for i, image_id in enumerate(sample_image_ids):
-            plt.subplot(num_samples // 3 + 1, 3, i + 1)
-            img = Image.open(self.images[tree_level][image_id]["image_path"])
-            plt.title(image_id, size=8)
-            plt.imshow(
-                img,
-            )
-            plt.xticks([])
-            plt.yticks([])
+        Parameters
+        ----------
+        parent_id : int or str
+            ID of the parent image to be plotted.
+        column_to_plot : str, optional
+            Column whose values will be plotted on patches, by default ``None``.
+        **kwds: Dict
+            Key words to pass to ``show`` method.
+            See help text for ``show`` for more information.
 
-        plt.tight_layout()
-        plt.show()
+        Returns
+        -------
+        list
+            A list of figures created by the method.
+
+        Notes
+        -----
+        This is a wrapper method. See the documentation of the
+        :meth:`mapreader.load.images.MapImages.show` method for more detail.
+        """
+        patch_ids = self.parents[parent_id]["patches"]
+        self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
 
     def show(
         self,
@@ -1526,39 +1442,6 @@ class MapImages:
                     self._hist_values_array(column_to_plot, values_array, **kwds)
 
             return fig
-
-    def show_parent(
-        self,
-        parent_id: Union[int, str],
-        column_to_plot: Optional[str] = None,
-        **kwds: Dict,
-    ) -> None:
-        """
-        A wrapper method for `.show()` which plots all patches of a
-        specified parent (`parent_id`).
-
-        Parameters
-        ----------
-        parent_id : int or str
-            ID of the parent image to be plotted.
-        column_to_plot : str, optional
-            Column whose values will be plotted on patches, by default ``None``.
-        **kwds: Dict
-            Key words to pass to ``show`` method.
-            See help text for ``show`` for more information.
-
-        Returns
-        -------
-        list
-            A list of figures created by the method.
-
-        Notes
-        -----
-        This is a wrapper method. See the documentation of the
-        :meth:`mapreader.load.images.MapImages.show` method for more detail.
-        """
-        patch_ids = self.parents[parent_id]["patches"]
-        self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
 
     def _create_kml(
         self,
@@ -1948,6 +1831,123 @@ class MapImages:
                     self.parents[parent_id][k2change] = eval(
                         self.parents[parent_id][k2change]
                     )
+
+    def add_geo_info(
+        self,
+        proj2convert: Optional[str] = "EPSG:4326",
+        verbose: Optional[bool] = True,
+    ) -> None:
+        """
+        Add coordinates (reprojected to EPSG:4326) to all parents images using image metadata.
+
+        Parameters
+        ----------
+        proj2convert : str, optional
+            Projection to convert coordinates into, by default ``"EPSG:4326"``.
+        verbose : bool, optional
+            Whether to print verbose output, by default ``True``
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        For each image in the parents dictionary, this method calls ``_add_geo_info_id`` and coordinates (if present) to the image in the ``parent`` dictionary.
+        """
+        image_ids = list(self.parents.keys())
+
+        for image_id in image_ids:
+            self._add_geo_info_id(image_id, proj2convert)
+
+    def _add_geo_info_id(
+        self,
+        image_id: str,
+        proj2convert: Optional[str] = "EPSG:4326",
+        verbose: Optional[bool] = True,
+    ) -> None:
+        """
+        Add coordinates (reprojected to EPSG:4326) to an image.
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the image to add geographic information to
+        proj2convert : str, optional
+            Projection to convert coordinates into, by default ``"EPSG:4326"``.
+        verbose : bool, optional
+            Whether to print verbose output, by default ``True``
+
+        Returns
+        -------
+        None
+
+        Notes
+        ------
+        This method reads the image files specified in the ``image_path`` key
+        of each dictionary in the ``parent`` dictionary.
+
+        It then checks if the image has geographic coordinates in its metadata,
+        if not it prints a warning message and skips to the next image.
+
+        If coordinates are present, this method converts them to the specified
+        projection ``proj2convert``.
+
+        These are then added to the dictionary in the ``parent`` dictionary corresponding to each image.
+        """
+
+        image_path = self.parents[image_id]["image_path"]
+
+        # Read the image using rasterio
+        tiff_src = rasterio.open(image_path)
+
+        # Check whether coordinates are present
+        if isinstance(tiff_src.crs, type(None)):
+            self._print_if_verbose(
+                f"No coordinates found in {image_id}. Try add_metadata instead.",
+                verbose,
+            )  # noqa
+            return
+
+        else:
+            # Get coordinates as string
+            tiff_proj = tiff_src.crs.to_string()
+            # Coordinate transformation: proj1 ---> proj2
+            # tiff is "lat, lon" instead of "x, y"
+            transformer = Transformer.from_crs(tiff_proj, proj2convert)
+            ymin, xmin = transformer.transform(
+                tiff_src.bounds.left, tiff_src.bounds.bottom
+            )
+            ymax, xmax = transformer.transform(
+                tiff_src.bounds.right, tiff_src.bounds.top
+            )
+            # New projected coordinates
+            coords = (xmin, ymin, xmax, ymax)
+            self.parents[image_id]["coordinates"] = coords
+
+    @staticmethod
+    def _print_if_verbose(msg: str, verbose: bool) -> None:
+        """
+        Print message if verbose is True.
+        """
+        if verbose:
+            print(msg)
+
+    def _get_tree_level(self, image_id: str) -> str:
+        """Identify tree level of an image from image_id.
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the image to identify tree level for.
+
+        Returns
+        -------
+        str
+            The tree level of the image.
+        """
+        tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
+        return tree_level
 
     '''
     def readPatches(self,
