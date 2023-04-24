@@ -97,7 +97,10 @@ def test_addGeoInfo(sample_dir):
 
 
 # could add jpeg, IIIF, etc. here too
-
+def test_loader_tiff_32bit(sample_dir):
+    image_ID = "cropped_32bit.tif"
+    with pytest.raises(NotImplementedError, match = "Image mode"): 
+        loader(f"{sample_dir}/{image_ID}")
 
 # test other functions
 def test_patchifyAll(sample_dir):
