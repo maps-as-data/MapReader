@@ -283,7 +283,7 @@ class mapImages:
         ignore_mismatch : bool, optional
             Whether to error if metadata with mismatching information is passed. 
             By default ``False``.
-
+        
         Raises
         ------
         ValueError
