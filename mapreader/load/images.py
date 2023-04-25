@@ -252,10 +252,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def add_metadata(
         self,
         metadata: Union[str, pd.DataFrame],
+        index_col: Optional[Union[int, str]] = 0,
+        delimiter: Optional[str] = "|",
         columns: Optional[List[str]] = None,
         tree_level: Optional[str] = "parent",
-        index_col: Optional[int] = 0,
-        delimiter: Optional[str] = "|",
+        ignore_mismatch: Optional[bool] = False,
     ) -> None:
         """
         Add metadata information to the images dictionary.
@@ -265,24 +266,30 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         metadata : str or pandas.DataFrame
             A csv file path (normally created from a pandas DataFrame) or a
             pandas DataFrame that contains the metadata information.
+        index_col : int or str, optional
+            Column to use as the index when reading the csv file into a pandas.DataFrame.
+            Accepts column indices or column names.
+            By default ``0`` (first column).
+
+            Only used if a csv file path is provided as
+            the ``metadata`` parameter.
+            Ingored if ``columns`` parameter is passed.
+        delimiter : str, optional
+            Delimiter to use for reading the csv file into a pandas DataFrame, by default ``"|"``.
+
+            Only used if a csv file path is provided as
+            the ``metadata`` parameter.
         columns : list, optional
-            List of columns to use, by default ``None``.
+            List of columns indices or names to add to mapImages. 
+            If ``None`` is passed, all columns will be used. 
+            By default ``None``.
         tree_level : str, optional
             Determines which images dictionary (``"parent"`` or ``"patch"``)
             to add the metadata to, by default ``"parent"``.
-        index_col : int, optional
-            Column to use as the index when reading the csv file into a pandas
-            DataFrame, by default ``0``.
-
-            Needs only be provided if a csv file path is provided as
-            the ``metadata`` parameter.
-        delimiter : str, optional
-            Delimiter to use for reading the csv file into a pandas DataFrame,
-            by default ``"|"``.
-
-            Needs only be provided if a csv file path is provided as
-            the ``metadata`` parameter.
-
+        ignore_mismatch : bool, optional
+            Whether to error if metadata with mismatching information is passed. 
+            By default ``False``.
+        
         Raises
         ------
         ValueError
@@ -293,56 +300,92 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Returns
         -------
         None
+
+        Notes
+        ------
+        Your metadata file must contain an column which contains the Image IDs (filenames) of your images.
+        This should have a column name of either ``name`` or ``image_id``.
         """
-
+        
         if isinstance(metadata, pd.DataFrame):
-            metadata_df = metadata.copy()
-        elif os.path.isfile(metadata):
-            # read the metadata data
-            if index_col >= 0:
-                metadata_df = pd.read_csv(
-                    metadata, index_col=index_col, delimiter=delimiter
-                )
+            if columns:
+                metadata_df=metadata[columns].copy()
             else:
-                metadata_df = pd.read_csv(
-                    metadata, index_col=False, delimiter=delimiter
-                )
-        else:
-            raise ValueError(
-                "metadata should either path to a csv file or pandas DataFrame."  # noqa
-            )
+                metadata_df=metadata.copy()
+                columns=list(metadata_df.columns)
+        
+        else: #if not df
+            if not metadata.endswith('.csv') and os.path.isfile(f"{metadata}.csv"):
+                metadata=f"{metadata}.csv"
+            
+            if os.path.isfile(metadata):
+                if columns:
+                    metadata_df = pd.read_csv(
+                        metadata, usecols=columns, delimiter=delimiter
+                        )
+                else:
+                    metadata_df = pd.read_csv(
+                        metadata, index_col=index_col, delimiter=delimiter
+                        )
+                    columns=list(metadata_df.columns)
 
-        # remove duplicates using "name" column
-        if columns is None:
-            columns = list(metadata_df.columns)
+            else:
+                raise ValueError(
+                    "[ERROR] ``metadata`` should either be the path to a csv file or a pandas DataFrame."  # noqa
+                    )
 
-        if ("name" in columns) and ("image_id" in columns):
-            print(
-                "Both 'name' and 'image_id' columns exist! Use 'name' to index."  # noqa
-            )
-            image_id_col = "name"
+        #identify image_id column
+        #what to do if "name" or "image_id" are index col?
+        if index_col in ["name", "image_id"]:
+            metadata_df[index_col]=metadata_df.index
+            columns=list(metadata_df.columns)
+        
         if "name" in columns:
             image_id_col = "name"
+            if "image_id" in columns:
+                print("[WARNING] Both 'name' and 'image_id' columns exist! Using 'name' as index"  # noqa
+                    )
         elif "image_id" in columns:
             image_id_col = "image_id"
         else:
-            raise ValueError("'name' or 'image_id' should be one of the columns.")
-        metadata_df.drop_duplicates(subset=[image_id_col])
+            raise ValueError(
+                "[ERROR] 'name' or 'image_id' should be one of the columns."
+            )
+        
+        if any(metadata_df.duplicated(subset=image_id_col)):
+            print(
+                "[WARNING] Duplicates found in metadata. Keeping only first instance of each duplicated value"
+                )
+            metadata_df.drop_duplicates(subset=image_id_col, inplace=True, keep="First")
 
-        for i, one_row in metadata_df.iterrows():
-            if not one_row[image_id_col] in self.images[tree_level].keys():
-                # print(f"[WARNING] {one_row[image_id_col]} does not exist in images, skip!")  # noqa
+        #look for non-intersecting values
+        missing_metadata=set(self.images[tree_level].keys())-set(metadata_df[image_id_col])
+        extra_metadata=set(metadata_df[image_id_col])-set(self.images[tree_level].keys())
+
+        if not ignore_mismatch:
+            if len(missing_metadata)!=0 and len(extra_metadata)!=0:
+                raise ValueError(f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
+[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+                )
+            elif len(missing_metadata)!=0: 
+                raise ValueError(
+                    f"[ERROR] Metadata is missing information for: {[*missing_metadata]}"
+                )
+            elif len(extra_metadata)!=0:
+                raise ValueError(
+                    f"[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+                )
+
+        for key in self.images[tree_level].keys():
+            if key in missing_metadata:
                 continue
-            for one_col in columns:
-                if one_col in ["coord", "polygon"]:
-                    # Make sure "coord" is interpreted as a tuple
-                    self.images[tree_level][one_row[image_id_col]][one_col] = eval(
-                        one_row[one_col]
-                    )
-                else:
-                    self.images[tree_level][one_row[image_id_col]][one_col] = one_row[
-                        one_col
-                    ]
+            else:
+                data_series=metadata_df[metadata_df["name"]==key].squeeze()
+                for column, item in data_series.items():
+                    try:
+                        self.images[tree_level][key][column]=eval(item)
+                    except:
+                        self.images[tree_level][key][column]=item
 
     def show_sample(
         self,
