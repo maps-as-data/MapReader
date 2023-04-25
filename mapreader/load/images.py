@@ -16,8 +16,6 @@ from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
 
-# from ..utils import geo_utils
-
 # Ignore warnings
 import warnings
 
@@ -780,7 +778,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Returns
         -------
         tuple
-            Tuple containing the size of the image in meters as a tuple of bottom, right, top and left distances (in that order) and the mean pixel height and width in meters.
+            Tuple containing the size of the image in meters (as a tuple of left, bottom, right and top distances) and the mean pixel height and width in meters.
 
         Notes
         -----
@@ -823,13 +821,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}'
             )
 
-        size_in_m = (bottom, right, top, left)  # anticlockwise order
+        size_in_m = (left, bottom, right, top)  # anticlockwise order
 
         mean_pixel_height = np.mean([right / height, left / height])
         mean_pixel_width = np.mean([bottom / width, top / width])
 
         self._print_if_verbose(
-            f"[INFO] Size in meters of bottom/right/top/left: {bottom:.2f}/{right:.2f}/{top:.2f}/{left:.2f}",
+            f"[INFO] Size in meters of left/bottom/right/top: {left:.2f}/{bottom:.2f}/{right:.2f}/{top:.2f}",
             verbose,
         )
         self._print_if_verbose(

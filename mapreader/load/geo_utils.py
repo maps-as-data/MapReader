@@ -71,46 +71,35 @@ def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False)
     print(f"[INFO] New CRS: {proj2convert}")
     print("[INFO] Reprojected coordinates: %.4f %.4f %.4f %.4f" % coord)
 
+    height, width, _ = tiff_shape
+
     # Calculate the size of image in meters
-    if calc_size_in_m == "geodesic":
+    if calc_size_in_m in ["geodesic", "gd"]:
         bottom = geodesic((ymin, xmin), (ymin, xmax)).meters
         right = geodesic((ymin, xmax), (ymax, xmax)).meters
         top = geodesic((ymax, xmax), (ymax, xmin)).meters
         left = geodesic((ymax, xmin), (ymin, xmin)).meters
-        size_in_m = (bottom, top, left, right)
-        print(
-            f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
-        )
 
-        mean_width = np.mean(
-            [size_in_m[0] / tiff_shape[2], size_in_m[1] / tiff_shape[2]]
-        )
-        mean_height = np.mean(
-            [size_in_m[2] / tiff_shape[1], size_in_m[3] / tiff_shape[1]]
-        )
-        print(
-            f"Each pixel is ~{mean_width:.3f} X {mean_height:.3f} meters (width x height)."
-        )
-    elif calc_size_in_m in ["gc", "great-circle"]:
+    elif calc_size_in_m in ["gc", "great-circle", "great_circle"]:
         bottom = great_circle((ymin, xmin), (ymin, xmax)).meters
         right = great_circle((ymin, xmax), (ymax, xmax)).meters
         top = great_circle((ymax, xmax), (ymax, xmin)).meters
         left = great_circle((ymax, xmin), (ymin, xmin)).meters
-        size_in_m = (bottom, top, left, right)
-        print(
-            f"[INFO] size (in meters) bottom/top/left/right: {bottom:.2f}/{top:.2f}/{left:.2f}/{right:.2f}"
+
+    elif not calc_size_in_m:
+        size_in_m = False
+    
+    else:
+        raise NotImplementedError(
+            f'[ERROR] ``calc_size_in_m`` must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {calc_size_in_m}'
         )
 
-        mean_width = np.mean(
-            [size_in_m[0] / tiff_shape[2], size_in_m[1] / tiff_shape[2]]
-        )
-        mean_height = np.mean(
-            [size_in_m[2] / tiff_shape[1], size_in_m[3] / tiff_shape[1]]
-        )
-        print(
-            f"Each pixel is ~{mean_width:.3f} x {mean_height:.3f} meters (width x height)."
-        )
-    else:
-        size_in_m = False
+    size_in_m = (left, bottom, right, top)  # anticlockwise order
+
+    mean_pixel_height = np.mean([right / height, left / height])
+    mean_pixel_width = np.mean([bottom / width, top / width])
+
+    print(f"[INFO] Size in meters of left/bottom/right/top: {left:.2f}/{bottom:.2f}/{right:.2f}/{top:.2f}")
+    print(f"Each pixel is ~{mean_pixel_height:.3f} X {mean_pixel_width:.3f} meters (height x width).")  # noqa
 
     return tiff_shape, tiff_proj, proj2convert, coord, size_in_m

@@ -1,8 +1,7 @@
 import pytest
 from pytest import approx
-from mapreader.utils import geo_utils
+from mapreader.load import geo_utils, loader
 from pathlib import Path
-
 
 @pytest.fixture
 def sample_dir():
@@ -27,5 +26,17 @@ def test_reproject(sample_dir):
     )
     assert new_crs == "EPSG:4326"
     assert reprojected_coord == approx((-0.061, 51.6142, -0.0610, 51.614), rel=1e-2)
-    # assert size_in_m == approx((1118.21355, 1118.02101, 869.14959, 869.14959), rel=1e-2) check this
+    print(size_in_m)
+    assert size_in_m == approx((0.5904, 0.6209, 0.594, 0.6209), rel=1e-2)
 
+def test_versus_loader(sample_dir):
+    image_ID = "cropped_101200740.27.tif"
+    image_path = f"{sample_dir}/{image_ID}"
+    shape, _, _, reprojected_coords, size_in_m = geo_utils.reprojectGeoInfo(image_path, calc_size_in_m="great-circle")
+    geotiff = loader(image_path)
+    geotiff.add_geo_info()
+    assert geotiff.parents["cropped_101200740.27.tif"]["shape"] == shape
+    assert geotiff.parents["cropped_101200740.27.tif"]["coordinates"] == approx(reprojected_coords)
+    loader_size_in_m, _, _ = geotiff._calc_pixel_height_width("cropped_101200740.27.tif", method = "great-circle",)
+    assert loader_size_in_m == approx(size_in_m)
+    
