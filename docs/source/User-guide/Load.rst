@@ -10,7 +10,7 @@ MapReader's ``Load`` subpackage is used to load, visualise and patchify images (
 Load images (and metadata)
 ----------------------------
 
-First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using: 
+First, your image files (e.g. png, jpeg, tiff or geotiff files) should be loaded in using: 
 
 .. code-block:: python
 
@@ -18,7 +18,15 @@ First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using:
 
     my_files = loader("./path/to/files/*.png")
 
-.. note:: This file path should point directly to your files as opposed to the directory in which they are stored.
+or
+
+This can be done using: 
+
+.. code-block:: python
+
+    from mapreader import loader
+
+    my_files = loader("./path/to/files/", file_ext="png")
 
 For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
@@ -27,21 +35,29 @@ For example, if you have downloaded your maps using the default settings of our 
     #EXAMPLE
     my_files = loader("./maps/*.png")
 
-The ``loader`` method creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
+or
+
+.. code-block:: python
+
+    #EXAMPLE 
+    my_files = loader("./maps", file_ext="png")
+
+The ``loader`` function creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
 To see the contents of this object, use: 
 
 .. code-block:: python
 
     print(my_files)
 
-You will see that your images are labelled as either ``parents`` or ``children``.
-This naming structure is useful later on in the MapReader pipeline as it allows you to distinguish parent images (i.e. whole images) and child images (i.e. patches) as well as identify which parent image each patch has come from.
+You will see that your mapImages object contains the files you have loaded and that these are labelled as 'parents'. 
 
 If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``mapImages`` object using:
 
 .. code-block:: python
 
     my_files.addGeoInfo()
+
+.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``proj2convert``.
 
 Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 
@@ -77,9 +93,9 @@ To patchify your maps, use:
 
 .. code-block:: python
 
-    my_files.sliceAll()
+    my_files.patchifyAll()
 
-By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./tests``. 
+By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./patches``. 
 If you are following our reccommended directory structure, after patchifying, your directory should look like this:
 
 ::
@@ -92,7 +108,7 @@ If you are following our reccommended directory structure, after patchifying, yo
     │   ├── map3.png
     │   ├── ...
     │   └── metadata.csv
-    └──tests
+    └──patches
         ├── patch-0-100-#map1.png#.png
         ├── patch-100-200-#map1.png#.png
         ├── patch-200-300-#map1.png#.png
@@ -105,7 +121,7 @@ This save directory can be changed by specifying ``path_save``:
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(path_save="./maps/patches")
+    my_files.patchifyAll(path_save="./maps/patches")
 
 This will create the following directory structure:
 
@@ -126,14 +142,14 @@ This will create the following directory structure:
              └── ...
 
 
-If you would like to change the size of your patches, you can specify ``slice_size``.
+If you would like to change the size of your patches, you can specify ``patch_size``.
 
 e.g. to slice your maps into 500 x 500 pixel patches:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(slice_size=500)
+    my_files.patchifyAll(patch_size=500)
 
 Or, if you have loaded geographic coordinates into your ``mapImages`` object, you can specify ``method = "meters"`` to slice your images by meters instead of pixels.
 
@@ -142,18 +158,18 @@ e.g. to slice your maps into 50 x 50 meter patches:
 .. code-block:: python
 
     #EXAMPLE
-    my_files.sliceAll(method="meters", slice_size=50)
+    my_files.patchifyAll(method="meters", patch_size=50)
 
-After patchifying, you'll see that ``print(my_files)`` shows you have both parents and children (patches).
-To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_children()`` methods: 
+After patchifying, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
+To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
 
 .. code-block:: python
 
     parent_list = my_files.list_parents()
-    child_list = my_files.list_children()
+    patch_list = my_files.list_patches()
 
     print(parent_list)
-    print(child_list[0:5])  # too many to print them all!
+    print(patch_list[0:5])  # too many to print them all!
 
 Or, to view these in a dataframe, use:
 
@@ -178,17 +194,17 @@ To view a random sample of your images, use:
 
 
 By default, this will show you a random sample of your parent images.
-To see a random sample of your patches (child images) use the ``tree_level="child"`` argument: 
+To see a random sample of your patches use the ``tree_level="patch"`` argument: 
 
 .. code-block:: python
 
-    my_files.show_sample(num_samples=3, tree_level="child")
+    my_files.show_sample(num_samples=3, tree_level="patch")
 
 .. image:: ../figures/show_sample_child.png
     :width: 400px
 
 
-It can also be helpful to see your patches (child images) in the context of their parent image. 
+It can also be helpful to see your patches in the context of their parent image. 
 To do this use the ``.show()`` method. 
 
 e.g. :
@@ -196,7 +212,7 @@ e.g. :
 .. code-block:: python
 
     #EXAMPLE
-    my_files.show(child_list[250:300])
+    my_files.show(patch_list[250:300])
 
 .. image:: ../figures/show.png
     :width: 400px
@@ -207,7 +223,7 @@ or
 .. code-block:: python
 
     #EXAMPLE
-    files_to_show = [child_list[0], child_list[350], child_list[400]]
+    files_to_show = [patch_list[0], patch_list[350], patch_list[400]]
     my_files.show(files_to_show)
 
 .. image:: ../figures/show_list.png

@@ -7,9 +7,11 @@ MapReader's ``Annotate`` subpackage is used to interactively annotate images (e.
 
 This is done in three simple steps: 
 
-1. :ref:`Create an annotation tasks file`
-2. :ref:`Annotate your images`
-3. :ref:`Save your annotations`
+1. :ref:`Create_file`
+2. :ref:`Annotate_images`
+3. :ref:`Save_annotations`
+
+.. _Create_file:
 
 Create an annotation tasks file
 -----------------------------------
@@ -60,10 +62,12 @@ For example, if you want to annotate 'rail_space' (as in our `this paper <https:
 
 	paths:
 	  set_001:
-		patch_paths: "./tests/patch-*png"
+		patch_paths: "./patches/patch-*png"
 		parent_paths: "./maps/*png"
 		annot_dir: "./annotations_one_inch"
 		
+.. _Annotate_images:
+
 Annotate your images
 ----------------------
 
@@ -142,6 +146,8 @@ e.g. :
 
     annotation 
 
+.. _Save_annotations:
+
 Save your annotations
 ----------------------
 	
@@ -174,7 +180,7 @@ For example, if you have downloaded your maps using the default settings of our 
     │   ├── map3.png
     │   ├── ...
     │   └── metadata.csv
-    └──tests
+    └──patches
     │   ├── patch-0-100-#map1.png#.png
     │   ├── patch-100-200-#map1.png#.png
     │   ├── patch-200-300-#map1.png#.png

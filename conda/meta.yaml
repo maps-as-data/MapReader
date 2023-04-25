@@ -1,0 +1,64 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: mapreader
+  version: {{ data['version'] }}
+
+source:
+  path: ..
+
+build:
+  # If the installation is complex, or different between Unix and Windows, use
+  # separate bld.bat and build.sh files instead of this key.  Add the line
+  # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
+  # "skip: True  # [not win]" to limit to Windows.
+  script: 
+  # Now build the package itself
+  - {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
+  
+#   entry_points:
+#     {% for entry in data['entry_points']['console_scripts'] %}
+#       - {{ entry.split('=')[0].strip() }} = {{ entry.split('=')[1].strip() }}
+#     {% endfor %}
+  
+
+requirements:
+  # host:
+  #   - python
+  #   - pip
+  build:
+    - python
+    - setuptools
+  run:
+    - python >=3.8,<3.9.0a0
+    # Dependencies are defined in setup.py. Copy them here, handling any special cases.
+    {% for dep in data['install_requires'] %}
+    # Map PyPI names to conda-forge names. EG:
+    # - torch to pytorch
+    {% if dep.startswith('torch') and not dep.startswith('torchvision') %}
+    - {{ "py{}".format(dep.lower()) }}
+    # Replace ipyannotate version label with a PEP440 compatible one
+    {% elif dep.startswith('ipyannotate==0.1.0-beta.0') %}
+    - ipyannotate==0.1.0b0
+    {% else %}
+    # All other dependencies are the same
+    - {{ dep.lower() }}
+    {% endif %}
+    {% endfor %}
+
+test:
+  imports:
+    - mapreader
+  source_files:
+    - tests
+  requires:
+    - pytest
+    - pytest-cov
+  commands:
+    - pytest -k test_import
+
+about:
+  home: {{ data['url'] }}
+  summary: {{ data['description'] }}
+  license: {{ data.get('license') }}
+  license_file: LICENSE

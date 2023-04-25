@@ -9,7 +9,9 @@
 project = 'MapReader'
 copyright = '2023, RW'
 author = 'RW'
-release = '0.3.3'
+
+import mapreader
+release = mapreader.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -17,7 +19,6 @@ release = '0.3.3'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx.ext.autosectionlabel',
     'sphinx.ext.doctest',
     'sphinx_rtd_theme',
     'myst_parser',
@@ -49,7 +50,7 @@ autoapi_options = [
 ]
 
 autoapi_keep_files = True
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autoapi_add_toctree_entry = False
 
 # -- Options for HTML output -------------------------------------------------

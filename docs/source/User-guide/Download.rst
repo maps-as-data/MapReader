@@ -10,12 +10,14 @@ Download
 
 MapReader's ``Download`` subpackage is primarily used to download files (e.g. map images and metadata) stored remotely and contains two methods of downloading these files:
 
-- :ref:`Via TileServer_` - an open-source map server
-- :ref:`Via Azure-Blob-Storage_` - Microsoft's cloud storage
+- :ref:`Via_TileServer` - an open-source map server
+- :ref:`Via_Azure` - Microsoft's cloud storage
 
 If you already have your maps stored locally: skip this section and proceed on to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ part of the User Guide.
 
 If you have maps stored in a different cloud storage service, please refer to documentation for that service.
+
+.. _Via_TileServer:
 
 Via TileServer_
 ----------------
@@ -161,6 +163,7 @@ Furthermore, although by default ``.download_tilserver()`` downloads only querie
 
      my_ts.download_tileserver(mode="all")
 
+.. _Via_Azure:
 
 Via Azure-Blob-Storage_
 -------------------------

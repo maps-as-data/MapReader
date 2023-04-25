@@ -20,7 +20,6 @@ tasks:
 # ---------------------------------------
 paths:
   task_test_one_inch_maps_001:
-    patch_paths: "./maps/slice_50_50/patch-*PNG"
-    parent_paths: "./maps/*png"
+    patch_paths: "./maps_tutorial/slice_50_50/patch-*PNG"
+    parent_paths: "./maps_tutorial/*png"
     annot_dir: "./annotations_one_inch"
-
