@@ -19,6 +19,7 @@ A computer vision pipeline for exploring and analyzing images at scale
    Worked-examples
    api/index
    Contribution-guide
+   Developers-guide
 
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
