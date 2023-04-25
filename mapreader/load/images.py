@@ -278,7 +278,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         ignore_mismatch : bool, optional
             Whether to error if metadata with mismatching information is passed. 
             By default ``False``.
-
+        
         Raises
         ------
         ValueError
@@ -300,25 +300,23 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if columns:
                 metadata_df=metadata[columns].copy()
             else:
-                metadata_df = metadata.copy()
-                columns = list(metadata_df.columns)
-
-        else:  # if not df
-            if not metadata.endswith(".csv") and os.path.isfile(
-                f"{metadata}.csv"
-            ):  # needed?
-                metadata = f"{metadata}.csv"
-
+                metadata_df=metadata.copy()
+                columns=list(metadata_df.columns)
+        
+        else: #if not df
+            if not metadata.endswith('.csv') and os.path.isfile(f"{metadata}.csv"):
+                metadata=f"{metadata}.csv"
+            
             if os.path.isfile(metadata):
                 if columns:
                     metadata_df = pd.read_csv(
                         metadata, usecols=columns, delimiter=delimiter
-                    )
+                        )
                 else:
                     metadata_df = pd.read_csv(
                         metadata, index_col=index_col, delimiter=delimiter
-                    )
-                    columns = list(metadata_df.columns)
+                        )
+                    columns=list(metadata_df.columns)
 
             else:
                 raise ValueError(
@@ -381,7 +379,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     try:
                         self.images[tree_level][key][column] = eval(item)
                     except:
-                        self.images[tree_level][key][column] = item
+                        self.images[tree_level][key][column]=item
 
     def show_sample(
         self,
