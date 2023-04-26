@@ -893,6 +893,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if path_save is None:
             path_save = f"patches_{patch_size}_{method}"
+        
+        print(f'[INFO] Saving patches in directory named "{path_save}".')
 
         for image_id in tqdm(image_ids):
             image_path = self.images[tree_level][image_id]["image_path"]
