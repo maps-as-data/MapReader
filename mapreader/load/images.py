@@ -15,6 +15,7 @@ from PIL import Image, ImageStat
 from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
+from tqdm import tqdm
 
 # Ignore warnings
 import warnings
@@ -75,7 +76,7 @@ class MapImages:
         self.parents = self.images["parent"]
         self.patches = self.images["patch"]
 
-        for image_path in self.path_images:
+        for image_path in tqdm(self.path_images):
             self.images_constructor(
                 image_path=image_path,
                 parent_path=parent_path,
@@ -407,7 +408,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Returns
         -------
-        None
+        matplotlib.Figure
+            The figure generated
         """
         # set random seed for reproducibility
         random.seed(random_seed)
@@ -417,7 +419,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         sample_image_ids = random.sample(image_ids, k=num_samples)
 
         figsize = kwds.get("figsize", (15, num_samples * 2))
-        plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize)
 
         for i, image_id in enumerate(sample_image_ids):
             plt.subplot(num_samples // 3 + 1, 3, i + 1)
@@ -430,7 +432,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             plt.yticks([])
 
         plt.tight_layout()
-        plt.show()
+        return fig
 
     def list_parents(self) -> List[str]:
         """Return list of all parents"""
@@ -892,12 +894,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if path_save is None:
             path_save = f"patches_{patch_size}_{method}"
 
-        for image_id in image_ids:
+        for image_id in tqdm(image_ids):
             image_path = self.images[tree_level][image_id]["image_path"]
 
-            print(40 * "=")
-            print(f"Patchifying {os.path.relpath(image_path)}")
-            print(40 * "-")
+            self._print_if_verbose(f"Patchifying {os.path.relpath(image_path)}", verbose)
 
             # make sure the dir exists
             self._make_dir(path_save)
@@ -1199,12 +1199,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         :meth:`mapreader.load.images.MapImages.show` method for more detail.
         """
         patch_ids = self.parents[parent_id]["patches"]
-        self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
+        figures = self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
+        
+        return figures
 
     def show(
         self,
         image_ids: Union[str, List[str]],
         column_to_plot: Optional[str] = None,
+        figsize: Optional[tuple] = (10,10),
         plot_parent: Optional[bool] = True,
         patch_border: Optional[bool] = True,
         border_color: Optional[str] = "r",
@@ -1217,7 +1220,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         save_kml_dir: Optional[Union[bool, str]] = False,
         image_width_resolution: Optional[int] = None,
         kml_dpi_image: Optional[int] = None,
-        **kwds: Dict,
     ) -> None:
         """
         Plot images from a list of `image_ids`.
@@ -1231,6 +1233,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         plot_parent : bool, optional
             If ``True``, parent image will be plotted in background, by
             default ``True``.
+        figsize : tuple, optional
+            The size of the figure to be plotted. By default, ``(10,10)``.
         patch_border : bool, optional
             If ``True``, a border will be placed around each patch, by
             default ``True``.
@@ -1264,7 +1268,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             The resolution, in dots per inch, to create KML images when
             ``save_kml_dir`` is specified (as either ``True`` or with path).
             By default ``None``.
-
+        
         Returns
         -------
         list
@@ -1288,7 +1292,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         figures = []
         if tree_level == "parent":
-            for image_id in image_ids:
+            for image_id in tqdm(image_ids):
                 image_path = self.parents[image_id]["image_path"]
                 img = Image.open(image_path)
 
@@ -1299,7 +1303,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     new_height = int(img.height * rescale_factor)
                     img = img.resize((new_width, new_height), Image.LANCZOS)
 
-                figsize = kwds.get("figsize", (10, 10))
                 fig = plt.figure(figsize=figsize)
                 plt.axis("off")
                 plt.imshow(img, zorder=1)
@@ -1334,7 +1337,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         )
 
                 plt.title(image_id)
-                plt.show()
                 figures.append(fig)
 
             return figures
@@ -1358,8 +1360,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     parent_images[parent_id]["patches"].append(image_id)
 
             # plot each parent
-            for parent_id in parent_images.keys():
-                figsize = kwds.get("figsize", (10, 10))
+            for parent_id in tqdm(parent_images.keys()):
                 fig, ax = plt.subplots(figsize=figsize)
                 ax.axis("off")
 
@@ -1367,7 +1368,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 parent_height, parent_width, _ = self.parents[parent_id]["shape"]
                 values_array = np.full((parent_height, parent_width), np.nan)
 
-                for patch_id in parent_images[parent_id]["patches"]:
+                for patch_id in self.parents[parent_id]["patches"]:
                     patch_dic = self.patches[patch_id]
                     pixel_bounds = patch_dic[
                         "pixel_bounds"
@@ -1439,14 +1440,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
                 fig.colorbar(values_plot, shrink=0.8)
-                fig.suptitle(image_id)
-                fig.show()
+                ax.set_title(image_id)
                 figures.append(fig)
 
                 if column_to_plot and plot_histogram:
-                    self._hist_values_array(column_to_plot, values_array, **kwds)
+                    self._hist_values_array(column_to_plot, values_array)
 
-            return fig
+            return figures
 
     def _create_kml(
         self,
@@ -1499,18 +1499,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         column_to_plot,
         values_array,
-        **kwds,
     ):
-        histogram_range = kwds.get("histogram_range", [0, 1, 0.01])
         plt.figure(figsize=(7, 5))
         plt.hist(
             values_array.flatten(),
             color="k",
-            bins=np.arange(
-                histogram_range[0] - histogram_range[2] / 2.0,
-                histogram_range[1] + histogram_range[2],
-                histogram_range[2],
-            ),
+            bins=20,
         )
 
         plt.xlabel(column_to_plot, size=20)
@@ -1568,7 +1562,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.parents = {} #are these needed?
             self.patches = {} #are these needed?
 
-        for file in files:
+        for file in tqdm(files):
             if not os.path.isfile(file):
                 print(f"[WARNING] File does not exist: {file}")
                 continue
@@ -1700,7 +1694,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if overwrite:
                 self.parents = {}
 
-            for file in files:
+            for file in tqdm(files):
                 if not os.path.isfile(file):
                     print(f"[WARNING] File does not exist: {file}")
                     continue
