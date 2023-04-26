@@ -1,6 +1,9 @@
 Input guidance
 ===============
 
+.. contents:: Table of Contents
+    :depth: 2
+
 Input options
 --------------
 

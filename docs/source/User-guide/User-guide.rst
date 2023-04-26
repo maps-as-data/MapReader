@@ -13,7 +13,7 @@ Throughout this User Guide, we will use OS maps as examples.
 Please read this User Guide **before** looking through the worked examples.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    Download
    Load

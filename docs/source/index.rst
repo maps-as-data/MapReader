@@ -10,7 +10,7 @@ A computer vision pipeline for exploring and analyzing images at scale
 -----------------------------------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    About
    Install

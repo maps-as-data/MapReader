@@ -76,8 +76,7 @@ Style guide
 ::
     
     .. contents:: Table of contents
-        :maxdepth: 1
-        :local:
+        :depth: 1
 
 - Use ``.. toc-tree::`` to generate a table of contents (toc) linking to other pages in the documentation. e.g.
 
