@@ -19,7 +19,7 @@ The overall challenge with installing MapReader is that it some of its dependenc
 
 The solution is to create and build Conda packages that wrap each of the packages that are only available on PyPI, into a local Conda channel.  This local Conda channel is then used to build the MapReader package. The following directory structure is used:
 
-.. code-block:: bash
+::
 
     conda
     ├── meta.yaml            # <-- Conda recipe for MapReader

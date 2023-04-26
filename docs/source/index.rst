@@ -18,7 +18,7 @@ A computer vision pipeline for exploring and analyzing images at scale
    User-guide/User-guide
    Worked-examples
    api/index
-   Contribution-guide
+   Contribution-guide/Contribution-guide
    Developers-guide
 
 .. include:: ../../README.md
