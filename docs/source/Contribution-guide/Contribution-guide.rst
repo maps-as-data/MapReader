@@ -6,15 +6,6 @@ Welcome! We are pleased to know that you're interested in contributing to MapRea
 MapReader is a collaborative project, now expanding its community beyond the initial group in the `Living with Machines <https://livingwithmachines.ac.uk/>`_ project (The Alan Turing Institute).
 We welcome all contributions but **please** follow these guidelines to make sure your contributions can be easily integrated into the project. 
 
-.. toctree:: 
-    :maxdepth: 1
-    :caption: Guides
-
-    GitHub-guide
-    Worked-examples
-    Documentation
-    Code 
-
 .. contents:: Table of Contents
     :local:
 
@@ -67,3 +58,12 @@ We welcome contributions from community members of all skill levels and so have 
 - `Write a tutorial or worked example <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Worked-examples.html>`_ - For those who are familiar with using MapReader and would like to showcase an example of how to use it, but are not comfortable with using Sphinx to write documentation or writing code.
 - `Add to or update the MapReader documentation <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Documentation.html>`_ - For those who are familiar with using MapReader and either already comfortable with using Sphinx to write documentation or feel able to have a go at to learning it.
 - `Add to or update the MapReader code <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Code.html>`_ - For those who are familiar with using MapReader and either already comfortable with writing code in Python or feel able to have a go at learning it.
+
+.. toctree:: 
+    :maxdepth: 1
+    :caption: Guides
+
+    GitHub-guide
+    Worked-examples
+    Documentation
+    Code 
