@@ -1,5 +1,5 @@
-Add to or update the MapReader code
-===================================
+How to add to or update the MapReader code
+===========================================
 
 MapReader's code is written in `Python <https://www.python.org/>`_. 
 There are a number of ways in which you can contribute to our code, these include:

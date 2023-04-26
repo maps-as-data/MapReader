@@ -16,6 +16,7 @@ We welcome all contributions but **please** follow these guidelines to make sure
     Code 
 
 .. contents:: Table of Contents
+    :local:
 
 Joining the community
 ----------------------

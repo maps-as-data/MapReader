@@ -5,6 +5,7 @@ Installation instructions
 
 .. contents:: Table of Contents
    :depth: 2
+   :local:
 
 .. TODO: Add comments about how to get to conda in Windows
 

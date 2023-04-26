@@ -1,5 +1,5 @@
-Add to or update the MapReader documentation
-=============================================
+How to add to or update the MapReader documentation
+====================================================
 
 MapReader's documentation is generated using `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and hosted on `Read the docs <https://readthedocs.org/>`_. 
 There are a number of ways you can contribute to our documentation, these include:

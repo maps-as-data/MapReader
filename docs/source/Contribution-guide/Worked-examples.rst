@@ -1,5 +1,5 @@
-Write a tutorial or worked example
-===================================
+How to write a tutorial or worked example
+==========================================
 
 If you are using MapReader in your own work, we would love for you to showcase an example of how you are using MapReader by writing a new tutorial or worked example.
 
