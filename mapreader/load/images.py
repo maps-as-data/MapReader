@@ -192,11 +192,7 @@ class mapImages:
         image_path = os.path.abspath(image_path)
         image_id, _ = self.splitImagePath(image_path)
 
-        img = Image.open(image_path)
-        if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
-            raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
-Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
-See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
+        self._check_image_mode(image_path)
 
         if parent_path:
             parent_path = os.path.abspath(parent_path)
@@ -228,6 +224,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             # 3. parent_basename exists but image_path is not defined
             if "image_path" not in self.images["parent"][parent_basename].keys():
                 self.images["parent"][parent_basename]["image_path"] = parent_path
+
+    @staticmethod
+    def _check_image_mode(image_path):
+        try:
+            img = Image.open(image_path)       
+        except:
+            raise ValueError(f"[ERROR] {image_path} is not an image file.")
+       
+        if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
+                raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
+Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
+See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
 
     @staticmethod
     def splitImagePath(inp_path: str) -> Tuple[str, str]:
@@ -1751,6 +1759,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 print(f"[WARNING] File does not exist: {file}")
                 continue
 
+            self._check_image_mode(file)
+
             # patch ID is set to the basename
             patch_id = os.path.basename(file)
 
@@ -1877,6 +1887,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self.images["parent"] = {}
 
             for file in files:
+
+                self._check_image_mode(file)
+
                 parent_id = os.path.basename(file)
                 self.images["parent"][parent_id] = {"parent_id": None}
                 if os.path.isfile(file):

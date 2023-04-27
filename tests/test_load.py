@@ -4,6 +4,7 @@ from mapreader import loader
 from mapreader.load.images import mapImages
 import os
 from pathlib import Path
+import pathlib
 
 # functions
 
@@ -106,7 +107,7 @@ def test_loader_tiff_32bit(sample_dir):
 def test_patchifyAll(sample_dir):
     image_ID = "map_74488693.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
-    ts_map.patchifyAll(patch_size=1000)
+    ts_map.patchifyAll(path_save=tmp_path, patch_size=1000)
     parent_list = ts_map.list_parents()
     patch_list = ts_map.list_patches()
     assert len(parent_list) == 1
