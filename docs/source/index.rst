@@ -13,6 +13,7 @@ A computer vision pipeline for exploring and analyzing images at scale
    :maxdepth: 1
 
    About
+   Beginners-info
    Install
    Input-guidance
    User-guide/User-guide
@@ -20,6 +21,8 @@ A computer vision pipeline for exploring and analyzing images at scale
    api/index
    Contribution-guide/Contribution-guide
    Developers-guide
+
+------------
 
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
