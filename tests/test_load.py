@@ -112,7 +112,7 @@ def test_patchifyAll(sample_dir, tmp_path):
     patch_list = ts_map.list_patches()
     assert len(parent_list) == 1
     assert len(patch_list) == 48
-    assert os.path.isfile(f"./patches/patch-0-0-1000-1000-#{image_ID}#.png")
+    assert os.path.isfile(f"{tmp_path}/patch-0-0-1000-1000-#{image_ID}#.png")
 
 
 def test_shape(sample_dir):
