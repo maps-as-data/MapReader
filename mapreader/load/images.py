@@ -254,23 +254,21 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Parameters
         ----------
         metadata : str or pandas.DataFrame
-            A csv file path (normally created from a pandas DataFrame) or a
-            pandas DataFrame that contains the metadata information.
+            Path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
         index_col : int or str, optional
-            Column to use as the index when reading the csv file into a pandas.DataFrame.
+            Column to use as the index when reading the file and converting into a panda.DataFrame.
             Accepts column indices or column names.
             By default ``0`` (first column).
 
-            Only used if a csv file path is provided as
-            the ``metadata`` parameter.
+            Only used if a file path is provided as the ``metadata`` parameter.
             Ingored if ``columns`` parameter is passed.
         delimiter : str, optional
-            Delimiter to use for reading the csv file into a pandas DataFrame, by default ``"|"``.
+            Delimiter used in the ``csv`` file, by default ``"|"``.
 
-            Only used if a csv file path is provided as
+            Only used if a ``csv`` file path is provided as
             the ``metadata`` parameter.
         columns : list, optional
-            List of columns indices or names to add to mapImages.
+            List of columns indices or names to add to MapImages.
             If ``None`` is passed, all columns will be used.
             By default ``None``.
         tree_level : str, optional
@@ -283,7 +281,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Raises
         ------
         ValueError
-            If metadata is not a pandas DataFrame or a csv file path.
+            If metadata is not a pandas DataFrame or a ``csv``, ``xls`` or ``xlsx`` file path.
 
             If 'name' or 'image_id' is not one of the columns in the metadata.
 
@@ -293,7 +291,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Notes
         ------
-        Your metadata file must contain an column which contains the Image IDs (filenames) of your images.
+        Your metadata file must contain an column which contains the image IDs (filenames) of your images.
         This should have a column name of either ``name`` or ``image_id``.
         """
 
@@ -305,23 +303,32 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 columns=list(metadata_df.columns)
         
         else: #if not df
-            if not metadata.endswith('.csv') and os.path.isfile(f"{metadata}.csv"):
-                metadata=f"{metadata}.csv"
-            
             if os.path.isfile(metadata):
-                if columns:
-                    metadata_df = pd.read_csv(
-                        metadata, usecols=columns, delimiter=delimiter
-                        )
-                else:
-                    metadata_df = pd.read_csv(
-                        metadata, index_col=index_col, delimiter=delimiter
-                        )
-                    columns=list(metadata_df.columns)
+                if metadata.endswith('csv'):
+                    if columns:
+                        metadata_df = pd.read_csv(
+                            metadata, usecols=columns, delimiter=delimiter
+                            )
+                    else:
+                        metadata_df = pd.read_csv(
+                            metadata, index_col=index_col, delimiter=delimiter
+                            )
+                        columns=list(metadata_df.columns)
+                
+                elif metadata.endswith(('xls', 'xlsx')):
+                    if columns:
+                        metadata_df = pd.read_excel(
+                            metadata, usecols=columns,
+                            )
+                    else:
+                        metadata_df = pd.read_excel(
+                            metadata, index_col=index_col,
+                            )
+                        columns=list(metadata_df.columns)
 
             else:
                 raise ValueError(
-                    "[ERROR] ``metadata`` should either be the path to a csv file or a pandas DataFrame."  # noqa
+                    "[ERROR] ``metadata`` should either be the path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
                 )
 
         # identify image_id column
