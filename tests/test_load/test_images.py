@@ -11,7 +11,7 @@ import pathlib
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent / "sample_files"
+    return Path(__file__).resolve().parent.parent / "sample_files"
 
 @pytest.fixture
 def metadata_patchify(sample_dir, tmp_path):
@@ -44,9 +44,18 @@ def test_loader_png(sample_dir):
 
 
 def test_loader_add_metadata(sample_dir):
+    #metadata csv
     image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    assert "coordinates" in ts_map.images["parent"][image_ID].keys()
+    assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
+        (-4.83,55.80, -4.21, 56.059), rel=1e-2
+    )
+    #metadata xlsx
+    image_ID = "cropped_74488689.png"
+    ts_map = loader(f"{sample_dir}/{image_ID}")
+    ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.xlsx")
     assert "coordinates" in ts_map.images["parent"][image_ID].keys()
     assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
         (-4.83,55.80, -4.21, 56.059), rel=1e-2

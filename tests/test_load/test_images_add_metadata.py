@@ -23,6 +23,7 @@ def matching_metadata_dir(tmp_path, metadata_df):
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
 
 @pytest.fixture
@@ -56,17 +57,17 @@ def test_matching_metdata_csv(matching_metadata_dir, keys):
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 
+def test_matching_metdata_xlsx(matching_metadata_dir, keys):
+    my_files=loader(f"{matching_metadata_dir}/*png")
+    assert len(my_files)==3
+    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.xlsx")
+    for parent_id in my_files.list_parents():
+        assert list(my_files.images["parent"][parent_id].keys()) == keys
+
 def test_matching_metadata_df(matching_metadata_dir, metadata_df, keys):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(metadata_df)
-    for parent_id in my_files.list_parents():
-        assert list(my_files.images["parent"][parent_id].keys()) == keys
-
-def test_matching_metadata_csv_missing_file_ext(matching_metadata_dir, keys):
-    my_files=loader(f"{matching_metadata_dir}/*png")
-    assert len(my_files)==3
-    my_files.add_metadata(f"{matching_metadata_dir}/metadata_df") #if you forget your file_ext (e.g. windows pcs dont show it)
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 

@@ -1,4 +1,4 @@
-from mapreader import loader, load_patches
+from mapreader import load_patches
 import pytest
 import os
 import pathlib

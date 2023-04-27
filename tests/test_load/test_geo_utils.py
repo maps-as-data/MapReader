@@ -5,8 +5,7 @@ from pathlib import Path
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent / "sample_files"
-
+    return Path(__file__).resolve().parent.parent / "sample_files"
 
 def test_extractGeoInfo(sample_dir):
     image_ID = "cropped_101200740.27.tif"
