@@ -104,7 +104,7 @@ def test_loader_tiff_32bit(sample_dir):
         loader(f"{sample_dir}/{image_ID}")
 
 # test other functions
-def test_patchifyAll(sample_dir):
+def test_patchifyAll(sample_dir, tmp_path):
     image_ID = "map_74488693.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.patchifyAll(path_save=tmp_path, patch_size=1000)
