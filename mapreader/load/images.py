@@ -335,8 +335,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         # identify image_id column
         # what to do if "name" or "image_id" are index col?
-        if index_col in ["name", "image_id"]:
-            metadata_df[index_col] = metadata_df.index
+        if metadata_df.index.name in ["name", "image_id"]:
+            metadata_df[metadata_df.index.name] = metadata_df.index
             columns = list(metadata_df.columns)
 
         if "name" in columns:
@@ -428,7 +428,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         sample_image_ids = random.sample(image_ids, k=num_samples)
 
         figsize = kwds.get("figsize", (15, num_samples * 2))
-        fig = plt.figure(figsize=figsize)
+        plt.figure(figsize=figsize)
 
         for i, image_id in enumerate(sample_image_ids):
             plt.subplot(num_samples // 3 + 1, 3, i + 1)
@@ -441,7 +441,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             plt.yticks([])
 
         plt.tight_layout()
-        return fig
+        plt.show()
 
     def list_parents(self) -> List[str]:
         """Return list of all parents"""
@@ -477,13 +477,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in image_ids:
             self._add_shape_id(image_id=image_id)
 
-    def add_coord_increments(self) -> None:
+    def add_coord_increments(self, verbose: Optional[bool] = False) -> None:
         """
         Adds coordinate increments to each image at the parent level.
 
         Parameters
         ----------
-        None
+        verbose : bool, optional
+            Whether to print verbose outputs, by default ``False``.
 
         Returns
         -------
@@ -508,7 +509,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 )
                 continue
 
-            self._add_coord_increments_id(image_id=parent_id)
+            self._add_coord_increments_id(image_id=parent_id, verbose=verbose)
 
     def add_patch_coords(self, verbose: bool = False) -> None:
         """Add coordinates to all patches in patches dictionary.
@@ -521,10 +522,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         patch_list = self.list_patches()
 
-        for patch_id in patch_list:
+        for patch_id in tqdm(patch_list):
             self._add_patch_coords_id(patch_id, verbose)
 
-    def add_center_coord(self, tree_level: Optional[str] = "patch") -> None:
+    def add_center_coord(self, tree_level: Optional[str] = "patch", verbose: Optional[bool] = False) -> None:
         """
         Adds center coordinates to each image at the specified tree level.
 
@@ -533,6 +534,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level: str, optional
             The tree level where the center coordinates will be added. It can
             be either ``"parent"`` or ``"patch"`` (default).
+        verbose: bool, optional
+            Whether to print verbose outputs, by default ``False``.
 
         Returns
         -------
@@ -572,7 +575,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         already_checked_parent_ids.append(parent_id)
                     continue
 
-            self._add_center_coord_id(image_id=image_id)
+            self._add_center_coord_id(image_id=image_id, verbose=verbose)
 
     def _add_shape_id(
         self,
@@ -754,7 +757,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._add_patch_coords_id(image_id, verbose)
 
         if "coordinates" in self.images[tree_level][image_id].keys():
-            print(f"[INFO] Reading 'coordinates' from {image_id}.")
+            self._print_if_verbose(f"[INFO] Reading 'coordinates' from {image_id}.", verbose)
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
@@ -1016,7 +1019,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 
                 else:
                     self._print_if_verbose(
-                        f"[INFO] Creating: {patch_id}. Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.",
+                        f'[INFO] Creating "{patch_id}". Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.',
                         verbose,
                     )
 
@@ -1126,7 +1129,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         for parent_id in parent_ids:
             self._print_if_verbose(
-                f"\n[INFO] Calculating pixel stats for image: {parent_id}", verbose
+                f"\n[INFO] Calculating pixel stats for patches of image: {parent_id}", verbose
             )
 
             if "patches" not in self.parents[parent_id]:
@@ -1180,7 +1183,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def show_parent(
         self,
-        parent_id: Union[int, str],
+        parent_id: str,
         column_to_plot: Optional[str] = None,
         **kwds: Dict,
     ) -> None:
@@ -1190,7 +1193,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        parent_id : int or str
+        parent_id : str
             ID of the parent image to be plotted.
         column_to_plot : str, optional
             Column whose values will be plotted on patches, by default ``None``.
@@ -1912,6 +1915,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             # New projected coordinates
             coords = (xmin, ymin, xmax, ymax)
             self.parents[image_id]["coordinates"] = coords
+            self.parents[image_id]["CRS"] = proj2convert
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
@@ -1941,27 +1945,63 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self, 
         rewrite: Optional[bool] = False, 
         verbose: Optional[bool] = False,
+        crs: Optional[str] = None,
     ) -> None:
+        """Save all patches in MapImages instance as geotiffs.
+
+        Parameters
+        ----------
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : str, optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+        """
 
         patches_list = self.list_patches()
         
         for patch_id in tqdm(patches_list):
-            self._save_patch_as_geotiff(patch_id, rewrite, verbose)
+            self._save_patch_as_geotiff(patch_id, rewrite, verbose, crs)
 
     def _save_patch_as_geotiff(
         self, 
         patch_id: str, 
         rewrite: Optional[bool] = False, 
         verbose: Optional[bool] = False,
-    ):
+        crs: Optional[str] = None,
+    ) -> None:
+        """Save a patch as a geotiff.
+
+        Parameters
+        ----------
+        patch_id : str
+            The ID of the patch to write.
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : Optional[str], optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+
+        Raises
+        ------
+        ValueError
+            If patch directory does not exist.
+        """
+
         patch_path = self.patches[patch_id]["image_path"]
-        patch = Image.open(patch_path)
         patch_dir = os.path.dirname(patch_path)
-        patch_id_no_ext = os.path.splitext(patch_id)[0]
-        geotiff_path = f"{patch_dir}/{patch_id_no_ext}.tif"
-        
+
         if not os.path.exists(patch_dir):
             raise ValueError(f'[ERROR] Patch directory "{patch_dir}" does not exist.')
+        
+        patch_id_no_ext = os.path.splitext(patch_id)[0]
+        geotiff_path = f"{patch_dir}/{patch_id_no_ext}.tif"
         
         self.patches[patch_id]["geotiff_path"] = geotiff_path
         
@@ -1984,8 +2024,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "coordinates" not in self.patches[patch_id].keys():
             self._add_patch_coords_id(patch_id)
         coords = self.patches[patch_id]["coordinates"]
+        
+        if not crs:
+            crs = self.patches[patch_id].get("CRS", "EPSG:4326")
 
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
+        patch = Image.open(patch_path)
         patch_array = reshape_as_raster(patch)
 
         with rasterio.open(
@@ -1998,7 +2042,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             transform=patch_affine,
             dtype='uint8',
             nodata=0,
-            crs="EPSG:4326",
+            crs=crs,
         ) as dst:
             dst.write(patch_array)    
 
