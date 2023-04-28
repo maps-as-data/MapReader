@@ -16,6 +16,8 @@ from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
 from tqdm import tqdm
+import rasterio
+from rasterio.plot import reshape_as_raster
 
 # Ignore warnings
 import warnings
@@ -906,7 +908,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in tqdm(image_ids):
             image_path = self.images[tree_level][image_id]["image_path"]
 
-            self._print_if_verbose(f"Patchifying {os.path.relpath(image_path)}", verbose)
+            self._print_if_verbose(f"[INFO] Patchifying {os.path.relpath(image_path)}", verbose)
 
             # make sure the dir exists
             self._make_dir(path_save)
@@ -1007,12 +1009,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 patch_path = os.path.join(path_save, patch_id)
                 patch_path = os.path.abspath(patch_path)
 
-                if os.path.isfile(patch_path):
-                    if not rewrite:
-                        self._print_if_verbose(
-                            f"[INFO] File already exists: {patch_path}.", verbose
-                        )
-
+                if os.path.isfile(patch_path) and not rewrite:
+                    self._print_if_verbose(
+                        f"[INFO] File already exists: {patch_path}.", verbose
+                    )
+                
                 else:
                     self._print_if_verbose(
                         f"[INFO] Creating: {patch_id}. Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.",
@@ -1935,6 +1936,70 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
         return tree_level
+    
+    def save_patches_as_geotiffs(
+        self, 
+        rewrite: Optional[bool] = False, 
+        verbose: Optional[bool] = False,
+    ) -> None:
+
+        patches_list = self.list_patches()
+        
+        for patch_id in tqdm(patches_list):
+            self._save_patch_as_geotiff(patch_id, rewrite, verbose)
+
+    def _save_patch_as_geotiff(
+        self, 
+        patch_id: str, 
+        rewrite: Optional[bool] = False, 
+        verbose: Optional[bool] = False,
+    ):
+        patch_path = self.patches[patch_id]["image_path"]
+        patch = Image.open(patch_path)
+        patch_dir = os.path.dirname(patch_path)
+        geotiff_path = f"{patch_dir}/{patch_id}.tif"
+        
+        if not os.path.exists(patch_dir):
+            raise ValueError(f'[ERROR] Patch directory "{patch_dir}" does not exist.')
+        
+        self.patches[patch_id]["geotiff_path"] = geotiff_path
+        
+        if os.path.isfile(f"{patch_dir}/{patch_id}.tif"):
+            if not rewrite:
+                self._print_if_verbose(
+                    f'[INFO] File already exists: {geotiff_path}.', verbose
+                    )
+                return
+            
+        self._print_if_verbose(
+            f"[INFO] Creating: {geotiff_path}.",
+            verbose,
+        )
+
+        if "shape" not in self.patches[patch_id].keys():
+            self._add_shape_id(patch_id)
+        height, width, channels = self.patches[patch_id]["shape"]
+
+        if "coordinates" not in self.patches[patch_id].keys():
+            self._add_patch_coords_id(patch_id)
+        coords = self.patches[patch_id]["coordinates"]
+
+        patch_affine = rasterio.transform.from_bounds(*coords, width, height)
+        patch_array = reshape_as_raster(patch)
+
+        with rasterio.open(
+            f"{patch_dir}/{patch_id}.tif",
+            'w',
+            driver="GTiff",
+            height=patch.height,
+            width=patch.width,
+            count=channels,
+            transform=patch_affine,
+            dtype='uint8',
+            nodata=0,
+            crs="EPSG:4326",
+        ) as dst:
+            dst.write(patch_array)    
 
     '''
     def readPatches(self,
