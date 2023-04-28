@@ -356,7 +356,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             print(
                 "[WARNING] Duplicates found in metadata. Keeping only first instance of each duplicated value"
             )
-            metadata_df.drop_duplicates(subset=image_id_col, inplace=True, keep="First")
+            metadata_df.drop_duplicates(subset=image_id_col, inplace=True, keep="first")
 
         # look for non-intersecting values
         missing_metadata = set(self.images[tree_level].keys()) - set(
