@@ -156,7 +156,8 @@ class TileMerger:
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)
         )
 
-        logger.info("Merging tiles to one file..")
+        logger.info("Merging tiles to one file.")
+        
         for i, x, j, y in tqdm(
             [
                 (i, x, j, y)
@@ -169,9 +170,8 @@ class TileMerger:
             try:
                 current_tile = Image.open(self._generate_tile_name(current_cell))
                 merged_image.paste(current_tile, (tile_size * i, tile_size * j))
-
             except:
-                logger.warning(f"Cannot find tile with grid_index = {current_cell}")
+                logger.info(f"Cannot find tile with grid_index = {current_cell}")
 
         logger.info("Writing file..")
 

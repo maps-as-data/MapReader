@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Union
+from typing import Union, Optional
 from shapely.geometry import Polygon, LineString, Point, shape
 from shapely.ops import unary_union
 from .data_structures import Coordinate, GridBoundingBox
@@ -80,7 +80,7 @@ class SheetDownloader:
         """
         For each map in metadata, creates a polygon from map geometry and saves to ``features`` dictionary.
         """
-        for i, feature in enumerate(self.features):
+        for feature in self.features:
             polygon = shape(feature["geometry"])
             map_name = feature["properties"]["IMAGE"]
             if len(polygon.geoms) != 1:
@@ -89,7 +89,7 @@ class SheetDownloader:
 
         self.polygons = True
 
-    def get_grid_bb(self, zoom_level: int = 14) -> None:
+    def get_grid_bb(self, zoom_level: Optional[int] = 14) -> None:
         """
         For each map in metadata, creates a grid bounding box from map polygons and saves to ``features`` dictionary.
 
@@ -182,8 +182,8 @@ class SheetDownloader:
     def query_map_sheets_by_wfs_ids(
         self,
         wfs_ids: Union[list, int],
-        append: bool = False,
-        print: bool = False,
+        append: Optional[bool] = False,
+        print: Optional[bool] = False,
     ) -> None:
         """
         Find map sheets by WFS ID numbers.
@@ -225,7 +225,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_polygon(
-        self, polygon: Polygon, mode: str = "within", append: bool = False, print: bool = False,
+        self, polygon: Polygon, mode: Optional[str] = "within", append: Optional[bool] = False, print: Optional[bool] = False,
     ) -> None:
         """
         Find map sheets which are found within or intersecting with a defined polygon.
@@ -279,7 +279,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_coordinates(
-        self, coords: tuple, append: bool = False, print: bool = False
+        self, coords: tuple, append: Optional[bool] = False, print: Optional[bool] = False
     ) -> None:
         """
         Find maps sheets which contain a defined set of coordinates.
@@ -320,7 +320,7 @@ class SheetDownloader:
             self.print_found_queries()
 
     def query_map_sheets_by_line(
-        self, line: LineString, append: bool = False, print: bool = False
+        self, line: LineString, append: Optional[bool] = False, print: Optional[bool] = False
     ) -> None:
         """
         Find maps sheets which intersect with a line.
@@ -367,8 +367,8 @@ class SheetDownloader:
         self,
         string: str,
         keys: Union[str, list],
-        append: bool = False,
-        print: bool = False,
+        append: Optional[bool] = False,
+        print: Optional[bool] = False,
     ) -> None:
         """
         Find map sheets by searching for a string in a chosen metadata field.
@@ -451,7 +451,7 @@ class SheetDownloader:
         path_save : str
             Path to save merged items (i.e. whole map sheets)
         """
-        self.merger = TileMerger(output_folder=path_save)
+        self.merger = TileMerger(output_folder=f"{path_save}/")
     
     def _check_map_sheet_exists(self, feature: dict) -> bool:
         """
@@ -544,7 +544,7 @@ class SheetDownloader:
         exists = True if os.path.exists(out_filepath) else False
         metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
 
-    def _download_map_sheets(self, features: list, path_save: str = "./maps/", metadata_fname="metadata.csv"):
+    def _download_map_sheets(self, features: list, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False):
         """Download map sheets from a list of features.
 
         Parameters
@@ -552,24 +552,27 @@ class SheetDownloader:
         features : list
             list of features to download
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
 
         metadata_to_save = []
         for feature in features:
-            exists = self._check_map_sheet_exists(feature)
-            if not exists:
-                success = self._download_map(feature)
-                if success:
-                    metadata_to_save.append(self._save_metadata(feature))
+            if not overwrite:
+                if self._check_map_sheet_exists(feature):
+                    continue
+            success = self._download_map(feature)
+            if success:
+                metadata_to_save.append(self._save_metadata(feature))
 
-        metadata_path = "{}{}".format(path_save, metadata_fname)
+        metadata_path = f"{path_save}/{metadata_fname}"
         self._create_metadata_df(metadata_to_save, metadata_path)
 
     def download_all_map_sheets(
-        self, path_save: str = "./maps/", metadata_fname="metadata.csv"
+        self, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads all map sheets in metadata.
@@ -577,9 +580,11 @@ class SheetDownloader:
         Parameters
         ----------
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -593,8 +598,9 @@ class SheetDownloader:
     def download_map_sheets_by_wfs_ids(
         self,
         wfs_ids: Union[list, int],
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads map sheets by WFS ID numbers.
@@ -604,9 +610,11 @@ class SheetDownloader:
         wfs_ids : Union[list, int]
             The WFS ID numbers of the maps to download.
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
 
         if not self.wfs_id_nos:
@@ -637,14 +645,15 @@ class SheetDownloader:
             if wfs_id_no in requested_maps:
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_polygon(
         self,
         polygon: Polygon,
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
-        mode: str = "within",
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        mode: Optional[str] = "within",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Donwloads any map sheets which are found within or intersecting with a defined polygon.
@@ -654,7 +663,7 @@ class SheetDownloader:
         polygon : Polygon
             shapely Polygon
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
         mode : str, optional
@@ -662,6 +671,8 @@ class SheetDownloader:
             Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
             and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
             By default "within".
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
 
         Notes
         -----
@@ -702,10 +713,10 @@ class SheetDownloader:
                 if map_polygon.intersects(polygon):
                     features.append(feature)
         
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_coordinates(
-        self, coords: tuple, path_save: str = "./maps/", metadata_fname="metadata.csv"
+        self, coords: tuple, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool]= False,
     ) -> None:
         """
         Downloads any maps sheets which contain a defined set of coordinates.
@@ -716,9 +727,11 @@ class SheetDownloader:
         coords : tuple
             Coordinates in ``(x,y)`` format.
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
 
         if not isinstance(
@@ -746,10 +759,10 @@ class SheetDownloader:
             if map_polygon.contains(coords):
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_line(
-        self, line: LineString, path_save: str = "./maps/", metadata_fname="metadata.csv"
+        self, line: LineString, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite : Optional[bool] = False,
     ) -> None:
         """
         Downloads any maps sheets which intersect with a line.
@@ -759,9 +772,11 @@ class SheetDownloader:
         line : LineString
             shapely LineString
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``
 
         Notes
         -----
@@ -793,14 +808,15 @@ class SheetDownloader:
             if map_polygon.intersects(line):
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_string(
         self,
         string: str,
         keys: Union[str, list], 
-        path_save: str = "./maps/", 
-        metadata_fname="metadata.csv",
+        path_save: Optional[str] = "maps", 
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Download map sheets by searching for a string in a chosen metadata field.
@@ -816,9 +832,11 @@ class SheetDownloader:
             Key(s) will be passed to each features dictionary. \
             i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
 
         Notes
         -----
@@ -846,12 +864,13 @@ class SheetDownloader:
             if match:
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname)   
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)   
 
     def download_map_sheets_by_queries(
         self,
-        path_save: str = "./maps/",
-        metadata_fname="metadata.csv",
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads map sheets saved as query results.
@@ -859,9 +878,11 @@ class SheetDownloader:
         Parameters
         ----------
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
         metadata_fname : str, optional
             Name to use for metadata file, by default "metadata.csv"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -873,7 +894,7 @@ class SheetDownloader:
             raise ValueError("[ERROR] No query results found/saved.")
 
         features = self.found_queries
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def hist_published_dates(self, **kwargs) -> None:
         """
@@ -912,8 +933,8 @@ class SheetDownloader:
     def plot_features_on_map(
         self,
         features: list,
-        map_extent: Union[str, list, tuple, None] = None,
-        add_id: bool = True,
+        map_extent: Optional[Union[str, list, tuple]] = None,
+        add_id: Optional[bool] = True,
     ) -> None:
         """
         Plots boundaries of map sheets on a map using ``cartopy`` library, (if available).
@@ -1002,8 +1023,8 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_all_metadata_on_map(
         self,
-        map_extent: Union[str, list, tuple, None] = None,
-        add_id: bool = True,
+        map_extent: Optional[Union[str, list, tuple]] = None,
+        add_id: Optional[bool] = True,
     ) -> None:
         """
         Plots boundaries of all map sheets in metadata on a map using ``cartopy`` library (if available).
@@ -1026,8 +1047,8 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_queries_on_map(
         self,
-        map_extent: Union[str, list, tuple, None] = None,
-        add_id: bool = True,
+        map_extent: Optional[Union[str, list, tuple]] = None,
+        add_id: Optional[bool] = True,
     ) -> None:
         """
         Plots boundaries of query results on a map using ``cartopy`` library (if available).

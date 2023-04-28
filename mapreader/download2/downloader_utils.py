@@ -63,7 +63,7 @@ def create_line_from_latlons(
 
 
 # The code below converts lon-lat requests to the respective tile indices.
-# Code taken from https://github.com/baurls/TileStitcher.
+# Code adapted from https://github.com/baurls/TileStitcher.
 # Conversions are taken from https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames.
 
 
@@ -110,12 +110,10 @@ def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, in
         (x,y) tuple.
     """
     assert z >= 0, "Zoom level must be positive"
-    x = int(((lon + 180) / 360) * (2**z))
-    scaled_lat = lat * math.pi / 180
-    y = int(
-        (1 - (math.log(math.tan(scaled_lat) + 1 / math.cos(scaled_lat))) / math.pi)
-        * 2 ** (z - 1)
-    )
+    n = 2**z
+    x = int((lon + 180) / 360 * n)
+    lat_rad = math.radians(lat)
+    y = int((1 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
     return x, y
 
 
@@ -128,7 +126,8 @@ def _get_coordinate_from_index(x: int, y: int, z: int) -> Tuple[(float, float)]:
         (lon, lat) tuple.
     """
     assert z >= 0, "Zoom level must be positive"
-    divisor = 2**z
-    lon = (x / divisor) * 360 - 180
-    lat = math.degrees(math.atan(math.sinh(math.pi - (y / divisor) * 2 * math.pi)))
+    n = 2**z
+    lon = (x / n) * 360 - 180
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    lat = math.degrees(lat_rad)
     return lon, lat

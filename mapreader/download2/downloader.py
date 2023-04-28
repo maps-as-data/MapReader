@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Optional
 from shapely.geometry import Polygon
 from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader
@@ -74,7 +74,7 @@ class Downloader:
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
             print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
-            return True  
+            return True 
         return False
     
     def _download_map(self, grid_bb: GridBoundingBox) -> bool:
@@ -104,8 +104,9 @@ class Downloader:
     def download_map_by_polygon(
         self,
         polygon: Polygon,
-        zoom_level: int = 14,
-        path_save: str = "./maps/",
+        zoom_level: Optional[int] = 14,
+        path_save: Optional[str] = "maps",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads a map contained within a polygon.
@@ -117,7 +118,9 @@ class Downloader:
         zoom_level : int, optional
             The zoom level to use, by default 14
         path_save : str, optional
-            Path to save map sheets, by default "./maps/"
+            Path to save map sheets, by default "maps"
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
         """
 
         assert isinstance(
@@ -136,7 +139,8 @@ Please pass polygon as shapely.geometry.Polygon object.\n\
         grid_bb = GridBoundingBox(start_idx, end_idx)
 
         self._initialise_downloader()
-        self._initialise_merger(path_save)
-        exists = self._check_map_exists(grid_bb)
-        if not exists:
-            self._download_map(grid_bb)
+        self._initialise_merger(f"{path_save}/")
+        if not overwrite:
+            if self._check_map_exists(grid_bb):
+                return
+        self._download_map(grid_bb)
