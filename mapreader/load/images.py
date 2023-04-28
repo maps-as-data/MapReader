@@ -1957,14 +1957,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_path = self.patches[patch_id]["image_path"]
         patch = Image.open(patch_path)
         patch_dir = os.path.dirname(patch_path)
-        geotiff_path = f"{patch_dir}/{patch_id}.tif"
+        patch_id_no_ext = os.path.splitext(patch_id)[0]
+        geotiff_path = f"{patch_dir}/{patch_id_no_ext}.tif"
         
         if not os.path.exists(patch_dir):
             raise ValueError(f'[ERROR] Patch directory "{patch_dir}" does not exist.')
         
         self.patches[patch_id]["geotiff_path"] = geotiff_path
         
-        if os.path.isfile(f"{patch_dir}/{patch_id}.tif"):
+        if os.path.isfile(f"{geotiff_path}"):
             if not rewrite:
                 self._print_if_verbose(
                     f'[INFO] File already exists: {geotiff_path}.', verbose
@@ -1988,7 +1989,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_array = reshape_as_raster(patch)
 
         with rasterio.open(
-            f"{patch_dir}/{patch_id}.tif",
+            f"{geotiff_path}",
             'w',
             driver="GTiff",
             height=patch.height,
