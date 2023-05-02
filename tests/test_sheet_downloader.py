@@ -102,9 +102,10 @@ def test_download_all(sheet_downloader, tmp_path):
     maps_path= tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_102352861.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    print(f"{maps_path}map_102352861.png")
+    assert os.path.exists(f"{maps_path}/map_102352861.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 5      
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
@@ -116,16 +117,16 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_map_sheets_by_wfs_ids(1, maps_path, metadata_fname) #test single wfs_id
-    assert os.path.exists(f"{maps_path}map_74487492.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74487492.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_74487492.png')
     sd.download_map_sheets_by_wfs_ids([1,2], maps_path, metadata_fname) #test list of wfs_ids
-    assert os.path.exists(f"{maps_path}map_74488550.png")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74488550.png")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3 #should have only downloaded/added one extra map   
 
@@ -136,16 +137,16 @@ def test_download_by_polygon(sheet_downloader, tmp_path):
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"    
     sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname) #test mode = 'within'
-    assert os.path.exists(f"{maps_path}map_74487492.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74487492.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
     assert csv[1].startswith('0|map_74487492.png')    
     sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname, mode = 'intersects') #test mode = 'intersects', now 2 maps
-    assert os.path.exists(f"{maps_path}map_74488550.png")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74488550.png")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3 #should have only downloaded/added one extra map   
 
@@ -155,9 +156,9 @@ def test_download_by_coords(sheet_downloader, tmp_path):
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"    
     sd.download_map_sheets_by_coordinates((-4.8, 54.5), maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_74488550.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74488550.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
@@ -170,9 +171,9 @@ def test_download_by_line(sheet_downloader, tmp_path):
     metadata_fname="test_metadata.csv"
     line = LineString([(-5.4, 54.5), (-4.8, 54.5)])
     sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_74488550.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_74488550.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
@@ -184,9 +185,9 @@ def test_download_by_string(sheet_downloader, tmp_path):
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_map_sheets_by_string("Westminster",["properties","PARISH"], maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_91617032.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_91617032.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
@@ -201,9 +202,9 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     sd.query_map_sheets_by_coordinates((-4.8, 54.5), append=True)
     assert len(sd.found_queries) == 2
     sd.download_map_sheets_by_queries(maps_path, metadata_fname)
-    assert os.path.exists(f"{maps_path}map_102352861.png")
-    assert os.path.exists(f"{maps_path}{metadata_fname}")
-    with open(f"{maps_path}{metadata_fname}") as f:
+    assert os.path.exists(f"{maps_path}/map_102352861.png")
+    assert os.path.exists(f"{maps_path}/{metadata_fname}")
+    with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3   
     assert csv[0] == '|name|url|coordinates|published_date|grid_bb\n'
