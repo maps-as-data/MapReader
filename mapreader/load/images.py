@@ -43,7 +43,7 @@ class MapImages:
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
     **kwds : dict, optional
-        Additional keyword arguments to be passed to the ``images_constructor``
+        Additional keyword arguments to be passed to the ``_images_constructor``
         method.
 
     Attributes
@@ -79,7 +79,7 @@ class MapImages:
         self.patches = self.images["patch"]
 
         for image_path in tqdm(self.path_images):
-            self.images_constructor(
+            self._images_constructor(
                 image_path=image_path,
                 parent_path=parent_path,
                 tree_level=tree_level,
@@ -133,7 +133,7 @@ class MapImages:
                 break
         return ""
 
-    def images_constructor(
+    def _images_constructor(
         self,
         image_path: str,
         parent_path: Optional[str] = None,
@@ -1029,7 +1029,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     patch.save(patch_path, output_format)
 
                 if add_to_parents:
-                    self.images_constructor(
+                    self._images_constructor(
                         image_path=patch_path,
                         parent_path=parent_path,
                         tree_level="patch",
