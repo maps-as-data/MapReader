@@ -6,7 +6,7 @@ from shapely.ops import unary_union
 from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader
 from .tile_merging import TileMerger
-from .downloader_utils import get_index_from_coordinate
+from .downloader_utils import get_index_from_coordinate, get_coordinate_from_index
 import re
 import matplotlib.pyplot as plt
 # import cartopy.crs as ccrs - would be good to get this fixed (i think by conda package)
@@ -516,13 +516,20 @@ class SheetDownloader:
 
         map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
         map_url = str(feature["properties"]["IMAGEURL"])
-        coords = feature["polygon"].bounds
 
         if not self.published_dates:
             self.extract_published_dates()
 
         published_date = feature["properties"]["published_date"]
+        
         grid_bb = feature["grid_bb"]
+        
+        #use grid_bb to get coords of actually downloaded tiles
+        lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
+        xmin, ymin = lower_corner.lon, lower_corner.lat
+        upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
+        xmax, ymax = upper_corner.lon, upper_corner.lat
+        coords = (xmin, ymin, xmax, ymax)
 
         return [map_name, map_url, coords, published_date, grid_bb]
 
