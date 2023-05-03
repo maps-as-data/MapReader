@@ -295,6 +295,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         ------
         Your metadata file must contain an column which contains the image IDs (filenames) of your images.
         This should have a column name of either ``name`` or ``image_id``.
+
+        Existing information in your ``MapImages`` object will be overwritten if there are overlapping column headings in your metadata file/dataframe.
         """
 
         if isinstance(metadata, pd.DataFrame):
