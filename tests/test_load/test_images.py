@@ -64,21 +64,21 @@ def test_loader_add_metadata(sample_dir):
 
 # tiff tests (no geo info)
 def test_loader_tiff(sample_dir):
-    image_ID = "cropped_101101409.1.tif"
+    image_ID = "cropped_non_geo.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
     assert len(tiff) == 1
     assert isinstance(tiff, MapImages)
 
 # geotiff tests (contains geo info)
 def test_loader_geotiff(sample_dir):
-    image_ID = "cropped_101200740.27.tif"
+    image_ID = "cropped_geo.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
     assert len(geotiff) == 1
     assert isinstance(geotiff, MapImages)
 
 def test_loader_add_geo_info(sample_dir):
     # check it works for geotiff
-    image_ID = "cropped_101200740.27.tif"
+    image_ID = "cropped_geo.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
     geotiff.add_geo_info()
     assert "shape" in geotiff.images["parent"][image_ID].keys()
@@ -92,7 +92,7 @@ def test_loader_add_geo_info(sample_dir):
     ts_map.add_geo_info()
     assert list(ts_map.images["parent"][image_ID].keys()) == keys
 
-    image_ID = "cropped_101101409.1.tif"
+    image_ID = "cropped_non_geo.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
     keys = list(tiff.images["parent"][image_ID].keys())
     tiff.add_geo_info()
@@ -125,7 +125,7 @@ def test_loader_coord_functions(metadata_patchify, sample_dir):
     assert "center_lon" in ts_map.images["patch"][patch_list[0]].keys()
 
     # test for geotiff with added geoinfo
-    image_ID = "cropped_101200740.27.tif"
+    image_ID = "cropped_geo.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
     geotiff.add_geo_info()
     geotiff.add_coord_increments()
@@ -134,7 +134,7 @@ def test_loader_coord_functions(metadata_patchify, sample_dir):
     assert "center_lon" in geotiff.images["parent"][image_ID].keys()
 
     # test for tiff with no geo info (i.e. no coords so nothing should happen)
-    image_ID = "cropped_101101409.1.tif"
+    image_ID = "cropped_non_geo.tif"
     tiff = loader(f"{sample_dir}/{image_ID}")
     keys = list(tiff.images["parent"][image_ID].keys())
     tiff.add_coord_increments()
@@ -149,7 +149,7 @@ def test_loader_calc_pixel_stats(metadata_patchify, sample_dir, tmp_path):
         assert col in ts_map.images["patch"][patch_list[0]].keys()
 
     # geotiff/tiff will not have alpha channel, so only RGB returned
-    image_ID = "cropped_101200740.27.tif"
+    image_ID = "cropped_geo.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
     geotiff.patchify_all(patch_size=3, path_save=tmp_path)
     patch_list = geotiff.list_patches()

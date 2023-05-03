@@ -12,7 +12,7 @@ def sample_dir():
 def mixed_dir(sample_dir, tmp_path):
     dir_path = tmp_path / "mixed_dir"
     os.mkdir(dir_path)
-    files = [f"{sample_dir}/cropped_74488689.png", f"{sample_dir}/cropped_101101409.1.tif", f"{sample_dir}/cropped_101200740.27.tif", f"{sample_dir}/ts_downloaded_maps.csv"]
+    files = [f"{sample_dir}/cropped_74488689.png", f"{sample_dir}/cropped_non_geo.tif", f"{sample_dir}/cropped_geo.tif", f"{sample_dir}/ts_downloaded_maps.csv"]
     for file in files:
         shutil.copy(file, dir_path)
     return dir_path
@@ -21,7 +21,7 @@ def mixed_dir(sample_dir, tmp_path):
 def tiff_dir(tmp_path, sample_dir):
     dir_path = tmp_path / "tiff_dir"
     os.mkdir(dir_path)
-    files = [f"{sample_dir}/cropped_101101409.1.tif", f"{sample_dir}/cropped_101200740.27.tif"]
+    files = [f"{sample_dir}/cropped_non_geo.tif", f"{sample_dir}/cropped_geo.tif"]
     for file in files:
         shutil.copy(file, dir_path)
     return dir_path
