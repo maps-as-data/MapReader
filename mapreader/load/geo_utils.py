@@ -39,14 +39,14 @@ def extractGeoInfo(image_path):
     return tiff_shape, tiff_proj, tiff_coord
 
 
-def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False):
-    """Extract geographic information from GeoTiff files and reproject to specified CRS (`proj2convert`).
+def reproject_geo_info(image_path, target_crs="EPSG:4326", calc_size_in_m=False):
+    """Extract geographic information from GeoTiff files and reproject to specified CRS (`target_crs`).
 
     Parameters
     ----------
     image_path : str
         Path to image
-    proj2convert : str, optional
+    target_crs : str, optional
         Projection to convert coordinates into, by default "EPSG:4326"
     calc_size_in_m : str or bool, optional
         Method to compute pixel widths and heights, choices between "geodesic" and "great-circle" or "gc", by default "great-circle", by default False
@@ -59,7 +59,7 @@ def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False)
     tiff_shape, tiff_proj, tiff_coord = extractGeoInfo(image_path)
 
     # Coordinate transformation: proj1 ---> proj2
-    transformer = Transformer.from_crs(tiff_proj, proj2convert)
+    transformer = Transformer.from_crs(tiff_proj, target_crs)
     ymin, xmin = transformer.transform(
         tiff_coord[0], tiff_coord[1]
     )
@@ -68,7 +68,7 @@ def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False)
     )
     coord = (xmin, ymin, xmax, ymax)
 
-    print(f"[INFO] New CRS: {proj2convert}")
+    print(f"[INFO] New CRS: {target_crs}")
     print("[INFO] Reprojected coordinates: %.4f %.4f %.4f %.4f" % coord)
 
     height, width, _ = tiff_shape
@@ -102,4 +102,4 @@ def reprojectGeoInfo(image_path, proj2convert="EPSG:4326", calc_size_in_m=False)
     print(f"[INFO] Size in meters of left/bottom/right/top: {left:.2f}/{bottom:.2f}/{right:.2f}/{top:.2f}")
     print(f"Each pixel is ~{mean_pixel_height:.3f} X {mean_pixel_width:.3f} meters (height x width).")  # noqa
 
-    return tiff_shape, tiff_proj, proj2convert, coord, size_in_m
+    return tiff_shape, tiff_proj, target_crs, coord, size_in_m

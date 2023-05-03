@@ -20,7 +20,7 @@ def test_extractGeoInfo(sample_dir):
 def test_reproject(sample_dir):
     image_ID = "cropped_geo.tif"
     image_path = f"{sample_dir}/{image_ID}"
-    _, _, new_crs, reprojected_coord, size_in_m = geo_utils.reprojectGeoInfo(
+    _, _, new_crs, reprojected_coord, size_in_m = geo_utils.reproject_geo_info(
         image_path, calc_size_in_m="gc"
     )
     assert new_crs == "EPSG:4326"
@@ -31,7 +31,7 @@ def test_reproject(sample_dir):
 def test_versus_loader(sample_dir):
     image_ID = "cropped_geo.tif"
     image_path = f"{sample_dir}/{image_ID}"
-    shape, _, _, reprojected_coords, size_in_m = geo_utils.reprojectGeoInfo(image_path, calc_size_in_m="great-circle")
+    shape, _, _, reprojected_coords, size_in_m = geo_utils.reproject_geo_info(image_path, calc_size_in_m="great-circle")
     geotiff = loader(image_path)
     geotiff.add_geo_info()
     assert geotiff.parents["cropped_geo.tif"]["shape"] == shape
