@@ -821,7 +821,7 @@ class Annotator(pd.DataFrame):
         if len(args) > 0:
             data = args.pop(0)
         elif kwargs.get("data"):
-            data = kwargs["data"]
+            data = kwargs.get("data")
 
         kwargs["patches"] = (
             kwargs["patches"] if kwargs.get("patches") else "./patches/patch-*.png"
