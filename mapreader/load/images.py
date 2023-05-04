@@ -231,7 +231,8 @@ class mapImages:
         try:
             img = Image.open(image_path)       
         except PIL.UnidentifiedImageError:
-            raise ValueError(f"[ERROR] {image_path} is not an image file.")
+            raise PIL.UnidentifiedImageError(f"[ERROR] {image_path} is not an image file.\n\n\
+See https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.open for more information.")
        
         if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
             raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\

@@ -5,6 +5,7 @@ from mapreader.load.images import mapImages
 import os
 from pathlib import Path
 import pathlib
+import PIL
 
 # functions
 
@@ -102,6 +103,11 @@ def test_loader_tiff_32bit(sample_dir):
     image_ID = "cropped_32bit.tif"
     with pytest.raises(NotImplementedError, match = "Image mode"): 
         loader(f"{sample_dir}/{image_ID}")
+
+def test_loader_non_image(sample_dir):
+    file_ID = "ts_downloaded_maps.csv"
+    with pytest.raises(PIL.UnidentifiedImageError, match="not an image"): 
+        loader(f"{sample_dir}/{file_ID}")
 
 # test other functions
 def test_patchifyAll(sample_dir, tmp_path):
