@@ -16,7 +16,7 @@ def sample_dir():
 
 
 @pytest.fixture
-def metadata_patchify(sample_dir):
+def metadata_patchify(sample_dir, tmp_path):
     """Initialises mapImages object (with metadata from csv and patches).
 
     Returns
@@ -27,7 +27,7 @@ def metadata_patchify(sample_dir):
     image_ID = "map_74488693.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    ts_map.patchifyAll(patch_size=1000)
+    ts_map.patchifyAll(path_save=tmp_path, patch_size=1000)
     parent_list = ts_map.list_parents()
     patch_list = ts_map.list_patches()
 
@@ -154,7 +154,7 @@ def test_coord_functions(metadata_patchify, sample_dir):
     assert tiff.images["parent"][image_ID].keys() == keys
 
 
-def test_calc_pixel_stats(metadata_patchify, sample_dir):
+def test_calc_pixel_stats(metadata_patchify, sample_dir, tmp_path):
     image_ID, ts_map, _, patch_list = metadata_patchify
     ts_map.calc_pixel_stats()
     # png images should have alpha channel (i.e. "mean_pixel_A" should exist)
@@ -164,7 +164,7 @@ def test_calc_pixel_stats(metadata_patchify, sample_dir):
     # geotiff/tiff will not have alpha channel, so only RGB returned
     image_ID = "101200740.27_JPEG.tif"
     geotiff = loader(f"{sample_dir}/{image_ID}")
-    geotiff.patchifyAll(patch_size=1000)
+    geotiff.patchifyAll(path_save=tmp_path, patch_size=1000)
     patch_list = geotiff.list_patches()
     geotiff.calc_pixel_stats()
     assert "mean_pixel_RGB" in geotiff.images["patch"][patch_list[0]].keys()
