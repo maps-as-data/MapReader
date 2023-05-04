@@ -801,6 +801,18 @@ class Annotator(pd.DataFrame):
         annotated patch's filename.
     get_current_index()
         Returns the current index of the annotation process.
+
+    Example
+    -------
+    >>> annotator = Annotator(
+            task_name="railspace",
+            labels=["no_rail_space", "rail_space"],
+            username="james",
+            patches="./patches/patch-*.png"
+            parents="./maps/*.png"
+            annotations_dir="./annotations"
+        )
+    >>> annotator.annotate()
     """
 
     def __init__(self, *args, **kwargs):
