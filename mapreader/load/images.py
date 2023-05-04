@@ -10,6 +10,7 @@ import matplotlib.image as mpimg
 import numpy as np
 import os
 import pandas as pd
+import PIL
 from PIL import Image
 from pylab import cm as pltcm
 from pyproj import Transformer
@@ -229,11 +230,11 @@ class mapImages:
     def _check_image_mode(image_path):
         try:
             img = Image.open(image_path)       
-        except:
+        except PIL.UnidentifiedImageError:
             raise ValueError(f"[ERROR] {image_path} is not an image file.")
        
         if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
-                raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
+            raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
 Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
 See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
 
