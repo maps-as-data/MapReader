@@ -6,7 +6,7 @@ from PIL import Image
 from random import randint
 
 @pytest.fixture
-def test_dirs(tmp_path):
+def dirs(tmp_path):
     parent_path = tmp_path / "test_parent_dir"
     patch_path = parent_path / "patch_dir"
     os.mkdir(parent_path)
@@ -36,8 +36,8 @@ def empty_dir(tmp_path):
 
 #load just patches
 
-def test_no_parents(test_dirs):
-    _, patch_path = test_dirs
+def test_no_parents(dirs):
+    _, patch_path = dirs
     my_files = load_patches(patch_path)
     assert len(my_files) == 3
     my_files = load_patches(f"{patch_path}/")
@@ -53,8 +53,8 @@ def test_no_parents(test_dirs):
 
 #load patches and parents
 
-def test_w_parent_dir_and_parent_file_ext(test_dirs):
-    parent_path, patch_path = test_dirs
+def test_w_parent_dir_and_parent_file_ext(dirs):
+    parent_path, patch_path = dirs
     my_files = load_patches(patch_path, parent_paths=parent_path, parent_file_ext="png")
     assert len(my_files) == 6
     my_files = load_patches(patch_path, parent_paths=f"{parent_path}/", parent_file_ext="png")
@@ -62,8 +62,8 @@ def test_w_parent_dir_and_parent_file_ext(test_dirs):
     my_files = load_patches(patch_path, parent_paths=f"{parent_path}/*", parent_file_ext="png")
     assert len(my_files) == 6
 
-def test_w_parent_file_paths(test_dirs):
-    parent_path, patch_path = test_dirs
+def test_w_parent_file_paths(dirs):
+    parent_path, patch_path = dirs
     my_files = load_patches(patch_path, parent_paths=f"{parent_path}/*png")
     assert len(my_files) == 6
 
@@ -71,8 +71,8 @@ def test_w_parent_file_paths(test_dirs):
 
 # errors
 
-def test_multiple_file_types_errors(test_dirs):
-    parent_path, patch_path = test_dirs
+def test_multiple_file_types_errors(dirs):
+    parent_path, patch_path = dirs
     with pytest.raises(ValueError, match="multiple file types"):
         load_patches(parent_path)
     with pytest.raises(ValueError, match="multiple file types"):
@@ -80,8 +80,8 @@ def test_multiple_file_types_errors(test_dirs):
     with pytest.raises(ValueError, match="multiple file types"):
         load_patches(f"{parent_path}/*")
 
-def test_no_files_found_errors(test_dirs):
-    _, patch_path = test_dirs
+def test_no_files_found_errors(dirs):
+    _, patch_path = dirs
     with pytest.raises(ValueError, match="No files found"):
         load_patches(patch_path, patch_file_ext="tif")
     with pytest.raises(ValueError, match="No files found"):
