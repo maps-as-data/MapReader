@@ -1,172 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import functools
+import hashlib
+import json
+import os
+import random
+import string
+import sys
+from typing import Dict, List, Literal, Optional, Tuple, Union
+
+import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
-import random
 import requests
-import sys
 import yaml
-
-from mapreader import loader, load_patches
-
-from ipyannotate.toolbar import Toolbar
-from ipyannotate.tasks import Task, Tasks
-from ipyannotate.canvas import OutputCanvas
 from ipyannotate.annotation import Annotation
-from ipyannotate.buttons import (
-    ValueButton as Button,
-    NextButton as Next,
-    BackButton as Back,
-)
-
+from ipyannotate.buttons import BackButton as Back
+from ipyannotate.buttons import NextButton as Next
+from ipyannotate.buttons import ValueButton as Button
+from ipyannotate.canvas import OutputCanvas
+from ipyannotate.tasks import Task, Tasks
+from ipyannotate.toolbar import Toolbar
+from IPython.display import Image, clear_output, display
 from PIL import Image
-from typing import List, Optional, Union, Dict, Tuple
 
+from mapreader import load_patches, loader
 
-def display_record(record: Tuple[str, str, str, int, int]) -> None:
-    """
-    Displays an image and optionally, a context image with a patch border.
+# Ignore warnings
+import warnings
 
-    Parameters
-    ----------
-    record : tuple
-        A tuple containing the following elements:
-            - str : The name of the patch.
-            - str : The path to the image to be displayed.
-            - str : The path to the parent image, if any.
-            - int : The index of the task, if any.
-            - int : The number of times this patch has been displayed.
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    This function should be called from ``prepare_annotation``, there are
-    several global variables that are being set in the function.
-
-    This function uses ``matplotlib`` to display images. If the context image
-    is displayed, the border of the patch is highlighted in red.
-
-    Refer to ``ipyannotate`` and ``matplotlib`` for more info.
-    """
-
-    # setup the images
-    gridsize = (5, 1)
-    plt.clf()
-    plt.figure(figsize=(12, 12))
-    if treelevel == "patch" and contextimage:
-        plt.subplot2grid(gridsize, (2, 0))
-    else:
-        plt.subplot2grid(gridsize, (0, 0), rowspan=2)
-    plt.imshow(Image.open(record[1]))
-    plt.xticks([])
-    plt.yticks([])
-    plt.title(f"{record[0]}", size=20)
-
-    if treelevel == "patch" and contextimage:
-        parent_path = os.path.dirname(
-            annotation_tasks["paths"][record[3]]["parent_paths"]
-        )
-        # Here, we assume that min_x, min_y, max_x and max_y are in the patch
-        # name
-        split_path = record[0].split("-")
-        min_x, min_y, max_x, max_y = (
-            int(split_path[1]),
-            int(split_path[2]),
-            int(split_path[3]),
-            int(split_path[4]),
-        )
-
-        # context image
-        plt.subplot2grid(gridsize, (0, 0), rowspan=2)
-
-        # ---
-        path = os.path.join(parent_path, record[2])
-        par_img = Image.open(path).convert("RGB")
-        min_y_par = max(0, min_y - y_offset)
-        min_x_par = max(0, min_x - x_offset)
-        max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
-        max_y_par = min(max_y + y_offset, np.shape(par_img)[0])
-
-        # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
-        par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
-
-        plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
-        # ---
-
-        plt.xticks([])
-        plt.yticks([])
-
-        # plot the patch border on the context image
-        plt.plot([min_x, min_x], [min_y, max_y], lw=2, zorder=10, color="r")
-        plt.plot([min_x, max_x], [min_y, min_y], lw=2, zorder=10, color="r")
-        plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
-        plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
-
-        """
-        # context image
-        plt.subplot2grid(gridsize, (3, 0), rowspan=2)
-        min_y_par = 0
-        min_x_par = 0
-        max_x_par = par_img.shape[1]
-        max_y_par = par_img.shape[0]
-        plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
-                    extent=(min_x_par, max_x_par, max_y_par, min_y_par))
-        plt.plot([min_x_par, min_x_par],
-                    [min_y_par, max_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([min_x_par, max_x_par],
-                    [min_y_par, min_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([max_x_par, max_x_par],
-                    [max_y_par, min_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([max_x_par, min_x_par],
-                    [max_y_par, max_y_par],
-                    lw=2, zorder=10, color="k")
-
-        plt.xticks([])
-        plt.yticks([])
-
-        # plot the patch border on the context image
-        plt.plot([min_x, min_x],
-                    [min_y, max_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([min_x, max_x],
-                    [min_y, min_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([max_x, max_x],
-                    [max_y, min_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([max_x, min_x],
-                    [max_y, max_y],
-                    lw=2, zorder=10, color="r")
-        """
-
-    plt.tight_layout()
-    plt.show()
-
-    print(20 * "-")
-    print("Additional info:")
-    print(f"Counter: {record[-1]}")
-    if url_main:
-        try:
-            map_id = record[2].split("_")[-1].split(".")[0]
-            url = f"{url_main}/{map_id}"
-            # stream=True so we don't download the whole page, only check if
-            # the page exists
-            response = requests.get(url, stream=True)
-            assert response.status_code < 400
-            print()
-            print(f"URL: {url}")
-        except:
-            url = False
-            pass
+warnings.filterwarnings("ignore")
+# warnings.filterwarnings(
+#     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
 
 
 def prepare_data(
@@ -263,7 +130,7 @@ def annotation_interface(
     list_labels: List,
     list_colors: Optional[List[str]] = ["red", "green", "blue", "green"],
     annotation_set: Optional[str] = "001",
-    method: Optional[str] = "ipyannotate",
+    method: Optional[Literal["ipyannotate", "pigeonxt"]] = "ipyannotate",
     list_shortcuts: Optional[List[str]] = None,
 ) -> Annotation:
     """
@@ -282,7 +149,7 @@ def annotation_interface(
     annotation_set : str, optional
         String representing the annotation set, specified in the yaml file or
         via function argument, by default ``"001"``.
-    method : str, optional
+    method : Literal["ipyannotate", "pigeonxt"], optional
         String representing the method for annotation, by default
         ``"ipyannotate"``.
     list_shortcuts : list, optional
@@ -298,7 +165,7 @@ def annotation_interface(
     Raises
     ------
     SystemExit
-        If ``method`` parameter is not ``"ipyannotate"``.
+        If ``method`` parameter is not ``"ipyannotate"`` or ``pigeonxt``.
 
     Notes
     -----
@@ -306,7 +173,152 @@ def annotation_interface(
     library, which is a browser-based tool for annotating data.
     """
 
-    if method == "ipyannotate":
+    if method.lower() == "ipyannotate":
+
+        def display_record(record: Tuple[str, str, str, int, int]) -> None:
+            """
+            Displays an image and optionally, a context image with a patch
+            border.
+
+            Parameters
+            ----------
+            record : tuple
+                A tuple containing the following elements:
+                    - str : The name of the patch.
+                    - str : The path to the image to be displayed.
+                    - str : The path to the parent image, if any.
+                    - int : The index of the task, if any.
+                    - int : The number of times this patch has been displayed.
+
+            Returns
+            -------
+            None
+
+            Notes
+            -----
+            This function should be called from ``prepare_annotation``, there
+            are several global variables that are being set in the function.
+
+            This function uses ``matplotlib`` to display images. If the
+            context image is displayed, the border of the patch is highlighted
+            in red.
+
+            Refer to ``ipyannotate`` and ``matplotlib`` for more info.
+            """
+
+            # setup the images
+            gridsize = (5, 1)
+            plt.clf()
+            plt.figure(figsize=(12, 12))
+            if treelevel == "patch" and contextimage:
+                plt.subplot2grid(gridsize, (2, 0))
+            else:
+                plt.subplot2grid(gridsize, (0, 0), rowspan=2)
+            plt.imshow(Image.open(record[1]))
+            plt.xticks([])
+            plt.yticks([])
+            plt.title(f"{record[0]}", size=20)
+
+            if treelevel == "patch" and contextimage:
+                parent_path = os.path.dirname(
+                    annotation_tasks["paths"][record[3]]["parent_paths"]
+                )
+                # Here, we assume that min_x, min_y, max_x and max_y are in the patch
+                # name
+                split_path = record[0].split("-")
+                min_x, min_y, max_x, max_y = (
+                    int(split_path[1]),
+                    int(split_path[2]),
+                    int(split_path[3]),
+                    int(split_path[4]),
+                )
+
+                # context image
+                plt.subplot2grid(gridsize, (0, 0), rowspan=2)
+
+                # ---
+                path = os.path.join(parent_path, record[2])
+                par_img = Image.open(path).convert("RGB")
+                min_y_par = max(0, min_y - y_offset)
+                min_x_par = max(0, min_x - x_offset)
+                max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
+                max_y_par = min(max_y + y_offset, np.shape(par_img)[0])
+
+                # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
+                par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
+
+                plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+                # ---
+
+                plt.xticks([])
+                plt.yticks([])
+
+                # plot the patch border on the context image
+                plt.plot([min_x, min_x], [min_y, max_y], lw=2, zorder=10, color="r")
+                plt.plot([min_x, max_x], [min_y, min_y], lw=2, zorder=10, color="r")
+                plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
+                plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
+
+                """
+                # context image
+                plt.subplot2grid(gridsize, (3, 0), rowspan=2)
+                min_y_par = 0
+                min_x_par = 0
+                max_x_par = par_img.shape[1]
+                max_y_par = par_img.shape[0]
+                plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
+                            extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+                plt.plot([min_x_par, min_x_par],
+                            [min_y_par, max_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([min_x_par, max_x_par],
+                            [min_y_par, min_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([max_x_par, max_x_par],
+                            [max_y_par, min_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([max_x_par, min_x_par],
+                            [max_y_par, max_y_par],
+                            lw=2, zorder=10, color="k")
+
+                plt.xticks([])
+                plt.yticks([])
+
+                # plot the patch border on the context image
+                plt.plot([min_x, min_x],
+                            [min_y, max_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([min_x, max_x],
+                            [min_y, min_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([max_x, max_x],
+                            [max_y, min_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([max_x, min_x],
+                            [max_y, max_y],
+                            lw=2, zorder=10, color="r")
+                """
+
+            plt.tight_layout()
+            plt.show()
+
+            print(20 * "-")
+            print("Additional info:")
+            print(f"Counter: {record[-1]}")
+            if url_main:
+                try:
+                    map_id = record[2].split("_")[-1].split(".")[0]
+                    url = f"{url_main}/{map_id}"
+                    # stream=True so we don't download the whole page, only check if
+                    # the page exists
+                    response = requests.get(url, stream=True)
+                    assert response.status_code < 400
+                    print()
+                    print(f"URL: {url}")
+                except:
+                    url = False
+                    pass
+
         if not list_shortcuts:
             list_shortcuts = [
                 "1",
@@ -363,7 +375,7 @@ def annotation_interface(
         return annotation
 
     sys.exit(
-        f"method: {method} is not implemented. Currently, we support: ipyannotate"  # noqa
+        f"method: {method} is not implemented. Currently, we support: ipyannotate and pigeonxt"  # noqa
     )
 
 
@@ -389,6 +401,7 @@ def prepare_annotation(
     urlmain: Optional[str] = "https://maps.nls.uk/view/",
     random_state: Optional[Union[str, int]] = "random",
     list_shortcuts: Optional[List[tuple]] = None,
+    method: Optional[Literal["ipyannotate", "pigeonxt"]] = "ipyannotate",
 ) -> Dict:
     """Prepare image data for annotation and launch the annotation interface.
 
@@ -463,6 +476,9 @@ def prepare_annotation(
     list_shortcuts : list of tuples, optional
         A list of tuples containing shortcut key assignments for label names.
         Default is ``None``.
+    method : Literal["ipyannotate", "pigeonxt"], optional
+        String representing the method for annotation, by default
+        ``"ipyannotate"``.
 
     Returns
     -------
@@ -613,6 +629,7 @@ def prepare_annotation(
             list_labels=list_labels,
             annotation_set=annotation_set,
             list_shortcuts=list_shortcuts,
+            method=method,
         )
         return annotation
 
@@ -694,3 +711,433 @@ def save_annotation(
         print(f"[INFO] Total number of annotations: {len(image_df)}")
     else:
         print("[INFO] No annotations to save!")
+
+
+class Annotator(pd.DataFrame):
+    """
+    A subclass of pd.DataFrame that allows the user to annotate images and
+    save the annotations as a CSV file.
+
+    Parameters
+    ----------
+    data : str or dict or list or None, optional
+        Data to create the Annotator DataFrame.
+    patches : str, optional
+        Path to patches folder to load the images.
+    parents : str, optional
+        Path to parents folder to load the parent images.
+    annotations_dir : str, optional
+        Directory to save the annotations CSV file.
+    username : str, optional
+        Username for the annotation session.
+    task_name : str, optional
+        Name of the annotation task.
+    image_column : str, optional
+        Name of the image column in the dataframe.
+    label_column : str, optional
+        Name of the label column in the dataframe.
+    labels : list of str, optional
+        List of possible labels for the annotations.
+    scramble_frame : bool, optional
+        Whether to randomly shuffle the examples during annotation.
+    buttons_per_row : int, optional
+        Number of buttons to display per row in the annotation interface.
+    auto_save : bool, optional
+        Whether to automatically save annotations during annotation.
+    example_process_fn : function, optional
+        Function to process each example during annotation.
+    final_process_fn : function, optional
+        Function to process the entire annotation process.
+
+    Attributes
+    ----------
+    buttons : list of widgets.Button
+        List of annotation buttons.
+    labels : list of str
+        List of possible labels for the annotations.
+    label_column : str
+        Name of the label column in the dataframe.
+    image_column : str
+        Name of the image column in the dataframe.
+    buttons_per_row : int
+        Number of buttons to display per row in the annotation interface.
+    example_process_fn : function
+        Function to process each example during annotation.
+    final_process_fn : function
+        Function to process the entire annotation process.
+    auto_save : bool
+        Whether to automatically save annotations during annotation.
+    annotations_dir : str
+        Directory to save the annotations CSV file.
+    task_name : str
+        Name of the annotation task.
+    id : str
+        Unique identifier for the current annotation session.
+    _file_name : str
+        Filename for the annotations CSV file.
+    username : str
+        Username for the current annotation session.
+    current_index : int
+        Current index of the annotation process.
+    stop_at_last_example : bool
+        Whether the annotation process should stop when it reaches the last
+        example in the dataframe.
+    out : Output
+        Output widget that displays the current image during annotation.
+    box : HBox or VBox
+        Widget box that contains the annotation buttons.
+    filtered
+        Returns a new dataframe that only contains rows with non-null labels.
+
+    Methods
+    -------
+    annotate()
+        Renders the annotation interface for the first image.
+    render()
+        Displays the image at the current index in the annotation interface.
+    get_labelled_data(sort=True)
+        Returns a dataframe that contains the index and the label column,
+        sorted by (a) the filename of the parent map image and (b) the
+        annotated patch's filename.
+    get_current_index()
+        Returns the current index of the annotation process.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Untangle args and kwargs
+        data = None
+        if len(args) > 0:
+            data = args.pop(0)
+        elif kwargs.get("data"):
+            data = kwargs["data"]
+
+        kwargs["patches"] = (
+            kwargs["patches"] if kwargs.get("patches") else "./patches/patch-*.png"
+        )
+        kwargs["parents"] = (
+            kwargs["parents"] if kwargs.get("parents") else "./maps/*.png"
+        )
+        kwargs["annotations_dir"] = (
+            kwargs["annotations_dir"]
+            if kwargs.get("annotations_dir")
+            else "./annotations"
+        )
+        kwargs["username"] = kwargs["username"] if kwargs.get("username") else None
+        kwargs["task_name"] = kwargs["task_name"] if kwargs.get("task_name") else "task"
+        kwargs["image_column"] = (
+            kwargs["image_column"] if kwargs.get("image_column") else "image_path"
+        )
+        kwargs["label_column"] = (
+            kwargs["label_column"] if kwargs.get("label_column") else "label"
+        )
+        kwargs["labels"] = kwargs["labels"] if kwargs.get("labels") else []
+        kwargs["scramble_frame"] = (
+            kwargs["scramble_frame"] if kwargs.get("scramble_frame") else True
+        )
+        kwargs["buttons_per_row"] = (
+            kwargs["buttons_per_row"] if kwargs.get("buttons_per_row") else None
+        )
+        kwargs["auto_save"] = kwargs["auto_save"] if kwargs.get("auto_save") else True
+        kwargs["example_process_fn"] = (
+            kwargs["example_process_fn"] if kwargs.get("example_process_fn") else None
+        )
+        kwargs["final_process_fn"] = (
+            kwargs["final_process_fn"] if kwargs.get("final_process_fn") else None
+        )
+        kwargs["username"] = (
+            kwargs["username"]
+            if kwargs.get("username")
+            else "".join(
+                [random.choice(string.ascii_letters + string.digits) for n in range(30)]
+            )
+        )
+
+        # Check data
+        if isinstance(data, str):
+            # we have data as string = assume it's a path to a
+            data = pd.read_csv(data)
+
+        if isinstance(data, (dict, list)):
+            # we have data as string = assume it's a path to a
+            data = pd.DataFrame(data)
+
+        if isinstance(data, type(None)):
+            # If we don't get data provided, we'll use the patches and parents
+            # to load up the patches
+            try:
+                data = self._load_frame(**kwargs)
+            except NameError:
+                raise SyntaxError(
+                    "Data must be provided or class must have a _load_frame method."
+                )
+
+        if not len(data):
+            raise RuntimeError("No data available.")
+
+        # Test for columns
+        if kwargs["label_column"] not in data.columns:
+            raise SyntaxError(
+                f"Your DataFrame does not have the label column ({kwargs['label_column']})"
+            )
+
+        if kwargs["image_column"] not in data.columns:
+            raise SyntaxError(
+                f"Your DataFrame does not have the image column ({kwargs['image_column']})"
+            )
+
+        image_list = json.dumps(
+            sorted(data[kwargs["image_column"]].to_list()), sort_keys=True
+        )
+        kwargs["id"] = hashlib.md5(image_list.encode("utf-8")).hexdigest()
+
+        _file_name = (
+            kwargs["task_name"].replace(" ", "_")
+            + f"_#{kwargs['username']}#-{kwargs['id']}.csv"
+        )
+        kwargs["_file_name"] = os.path.join(kwargs["annotations_dir"], _file_name)
+
+        # Test for existing file
+        if os.path.exists(kwargs["_file_name"]):
+            existing_annotations = pd.read_csv(kwargs["_file_name"], index_col=0)
+            existing_annotations[label_column] = existing_annotations[
+                label_column
+            ].apply(lambda x: labels[x])
+
+            data = data.join(
+                existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
+            )
+            data[label_column] = data["label_y"].fillna(data[f"{label_column}_x"])
+            data = data.drop(columns=[f"{label_column}_x", f"{label_column}_y"])
+            data["changed"] = data[label_column].apply(lambda x: True if x else False)
+
+        # initiate as a DataFrame
+        super().__init__(data)
+
+        self.buttons = []
+        self.labels = kwargs["labels"]
+        self.label_column = kwargs["label_column"]
+        self.image_column = kwargs["image_column"]
+        self.buttons_per_row = kwargs["buttons_per_row"]
+        self.example_process_fn = kwargs["example_process_fn"]
+        self.final_process_fn = kwargs["final_process_fn"]
+        self.auto_save = kwargs["auto_save"]
+        self.annotations_dir = kwargs["annotations_dir"]
+        self.task_name = kwargs["task_name"]
+        self.id = kwargs["id"]
+        self._file_name = kwargs["_file_name"]
+        self.username = kwargs["username"]
+
+        # Set current index
+        self.current_index = -1
+
+        # Set max buttons
+        if not self.buttons_per_row:
+            self.buttons_per_row = len(self.labels)
+
+        # Setup buttons
+        self._setup_buttons()
+
+        # Setup box for buttons
+        self._setup_box()
+
+    def _load_frame(self, *args, **kwargs):
+        patches = load_patches(
+            patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
+        )
+        patches.calc_pixel_stats()
+        _, patches = patches.convertImages()
+
+        if kwargs["label_column"] not in patches.columns:
+            patches[kwargs["label_column"]] = None
+        patches["changed"] = False
+
+        if kwargs["scramble_frame"]:
+            # Scramble them!
+            patches = patches.sample(frac=1)
+
+        return patches
+
+    def _setup_buttons(self):
+        for label in self.labels:
+            btn = widgets.Button(description=label)
+
+            def on_click(lbl, *_, **__):
+                self._add_annotation(lbl)
+
+            btn.on_click(functools.partial(on_click, label))
+            self.buttons.append(btn)
+
+        # back button
+        btn = widgets.Button(description="prev", button_style="info")
+        btn.on_click(self._prev_example)
+        self.buttons.append(btn)
+
+        # next button
+        btn = widgets.Button(description="next", button_style="info")
+        btn.style.button_color = "#B3C8D0"
+        btn.on_click(self._next_example)
+        self.buttons.append(btn)
+
+    def _setup_box(self):
+        if len(self.buttons) > self.buttons_per_row:
+            self.box = widgets.VBox(
+                [
+                    widgets.HBox(self.buttons[x : x + self.buttons_per_row])
+                    for x in range(0, len(self.buttons), self.buttons_per_row)
+                ]
+            )
+        else:
+            self.box = widgets.HBox(self.buttons)
+
+    def annotate(self) -> None:
+        """
+        Renders the annotation interface for the first image.
+
+        Returns
+        -------
+        None
+        """
+        self.out = widgets.Output()
+        display(self.box)
+        display(self.out)
+        self._next_example()
+
+    def _next_example(self, *args):
+        if self.current_index < len(self):
+            if len(args) == 1 and isinstance(args[0], int):
+                self.current_index = args[0]
+            else:
+                self.current_index += 1
+            self.render()
+
+    def _prev_example(self, *args):
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.render()
+
+    def render(self) -> None:
+        """
+        Displays the image at the current index in the annotation interface.
+
+        If the current index is greater than or equal to the length of the
+        dataframe, the method disables the "next" button and calls the
+        ``final_process_fn`` method, if defined.
+
+        Returns
+        -------
+        None
+        """
+        # Check whether we have reached the end
+        if self.current_index >= len(self):
+            if self.stop_at_last_example:
+                print("Annotation done.")
+                if self.final_process_fn is not None:
+                    if self.auto_save:
+                        self._auto_save()
+                    self.final_process_fn(self)
+                for button in self.buttons:
+                    button.disabled = True
+            else:
+                self._prev_example()
+            return
+
+        # render buttons
+        ix = self.iloc[self.current_index].name
+        for button in self.buttons:
+            if button.description == "prev":
+                # disable previous button when at first example
+                button.disabled = self.current_index <= 0
+            elif button.description == "next":
+                # disable skip button when at last example
+                button.disabled = self.current_index >= len(self) - 1
+            elif button.description != "submit":
+                if self.at[ix, self.label_column] == button.description:
+                    button.icon = "check"
+                else:
+                    button.icon = ""
+
+        # display new example
+        with self.out:
+            clear_output(wait=True)
+            image_path = self.at[ix, self.image_column]
+            with open(image_path, "rb") as f:
+                image = f.read()
+            display(widgets.Image(value=image))
+
+    def _add_annotation(self, annotation):
+        """Toggle annotation."""
+        ix = self.iloc[self.current_index].name
+        self.at[ix, self.label_column] = annotation
+        self.at[ix, "changed"] = True
+        if self.example_process_fn is not None:
+            self.example_process_fn(self.at[ix, self.image_column], annotation)
+        if self.auto_save:
+            self._auto_save()
+        self._next_example(self.get_current_index())
+
+    @property
+    def filtered(self) -> pd.DataFrame:
+        _filter = ~self[self.label_column].isna()
+        return self[_filter]
+
+    def get_labelled_data(self, sort: bool = Optional[True]) -> pd.DataFrame:
+        """
+        Returns a dataframe containing only the labelled images and their
+        associated label index.
+
+        Parameters
+        ----------
+        sort : bool, optional
+            Whether to sort the dataframe by the order of the images in the
+            input data, by default True
+
+        Returns
+        -------
+        pandas.DataFrame
+            A dataframe containing the labelled images and their associated
+            label index.
+        """
+        col = self.filtered[self.label_column].apply(lambda x: self.labels.index(x))
+        df = pd.DataFrame(col, index=pd.Index(col.index, name="image_id"))
+        if not sort:
+            return df
+
+        df["sort_value"] = df.index.to_list()
+        df["sort_value"] = df["sort_value"].apply(
+            lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
+        )
+        return df.sort_values("sort_value").drop(columns=["sort_value"])
+
+    def _auto_save(self):
+        self.get_labelled_data(sort=True).to_csv(self._file_name)
+
+    def get_current_index(self) -> int:
+        """
+        Returns the current index in the dataframe of the image being
+        displayed in the annotation interface.
+
+        If the current index is less than 0 or greater than or equal to the
+        length of the dataframe, the method returns the
+        current index.
+
+        Returns
+        -------
+        int
+            The current index in the dataframe of the image being displayed in
+            the annotation interface.
+        """
+        if self.current_index == -1:
+            self.current_index = 0
+
+        while True:
+            if self.current_index == len(self):
+                return self.current_index
+
+            ix = self.iloc[self.current_index].name
+
+            # If the label column at the index is None, return the index,
+            # otherwise add one and continue
+            if isinstance(self.at[ix, self.label_column], type(None)):
+                return self.current_index
+            else:
+                self.current_index += 1
