@@ -59,7 +59,7 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
     my_files.addGeoInfo()
 
-.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``proj2convert``.
+.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``target_crs``.
 
 Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 

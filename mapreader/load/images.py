@@ -1827,7 +1827,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def add_geo_info(
         self,
-        proj2convert: Optional[str] = "EPSG:4326",
+        target_crs: Optional[str] = "EPSG:4326",
         verbose: Optional[bool] = True,
     ) -> None:
         """
@@ -1835,7 +1835,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        proj2convert : str, optional
+        target_crs : str, optional
             Projection to convert coordinates into, by default ``"EPSG:4326"``.
         verbose : bool, optional
             Whether to print verbose output, by default ``True``
@@ -1851,12 +1851,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         image_ids = list(self.parents.keys())
 
         for image_id in image_ids:
-            self._add_geo_info_id(image_id, proj2convert)
+            self._add_geo_info_id(image_id, target_crs)
 
     def _add_geo_info_id(
         self,
         image_id: str,
-        proj2convert: Optional[str] = "EPSG:4326",
+        target_crs: Optional[str] = "EPSG:4326",
         verbose: Optional[bool] = True,
     ) -> None:
         """
@@ -1866,7 +1866,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         ----------
         image_id : str
             The ID of the image to add geographic information to
-        proj2convert : str, optional
+        target_crs : str, optional
             Projection to convert coordinates into, by default ``"EPSG:4326"``.
         verbose : bool, optional
             Whether to print verbose output, by default ``True``
@@ -1884,7 +1884,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if not it prints a warning message and skips to the next image.
 
         If coordinates are present, this method converts them to the specified
-        projection ``proj2convert``.
+        projection ``target_crs``.
 
         These are then added to the dictionary in the ``parent`` dictionary corresponding to each image.
         """
@@ -1907,7 +1907,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             tiff_proj = tiff_src.crs.to_string()
             # Coordinate transformation: proj1 ---> proj2
             # tiff is "lat, lon" instead of "x, y"
-            transformer = Transformer.from_crs(tiff_proj, proj2convert)
+            transformer = Transformer.from_crs(tiff_proj, target_crs)
             ymin, xmin = transformer.transform(
                 tiff_src.bounds.left, tiff_src.bounds.bottom
             )
@@ -1917,7 +1917,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             # New projected coordinates
             coords = (xmin, ymin, xmax, ymax)
             self.parents[image_id]["coordinates"] = coords
-            self.parents[image_id]["CRS"] = proj2convert
+            self.parents[image_id]["CRS"] = target_crs
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
