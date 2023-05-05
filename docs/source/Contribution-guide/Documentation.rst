@@ -23,15 +23,6 @@ To do this (assuming you have installed MapReader from source, as per our `Insta
 
 .. note:: You may need to change the file path depending on where your MapReader directory is saved. 
 
-At present, the sphinx extensions we are using (i.e. those in ``MapReader/docs/requirements.txt``) are:
-
-- sphinx_rtd_theme
-- myst-parser
-- sphinx-autoapi
-- sphinx-copybutton
-- nbsphinx
-- pandoc
-
 Writing in reStructuredText
 ---------------------------
 

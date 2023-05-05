@@ -7,7 +7,7 @@ Installation instructions
    :depth: 2
    :local:
 
-.. TODO: Add comments about how to get to conda in Windows
+.. todo:: Add comments about how to get to conda in Windows
 
 Step 1: Set up a virtual python environment
 ----------------------------------------------
@@ -79,7 +79,7 @@ Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. TODO: You will need to install git on windows (can be done via conda - but need to look for alternatives)
+.. todo:: You will need to install git on windows (can be done via conda - but need to look for alternatives)
 
 -  Clone the ``mapreader`` source code from the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_:
 

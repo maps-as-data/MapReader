@@ -20,7 +20,7 @@ For this, you will need:
 * A ``json`` file containing metadata for each map you would like to query/download. 
 * The base URL of the map layer which you would like to access.
 
-.. TODO: RW - Unsure if the below is true so will need to check. Leaving for now.
+.. todo:: RW - Unsure if the below is true so will need to check. Leaving for now.
 
 The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. 
 This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
@@ -29,7 +29,7 @@ You may have different kinds of metadata from different sources for your map fil
 We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
 
 
-.. comment: TODO add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
+.. todo:: add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
 
 Option 2 - If your files are already saved locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,7 +78,7 @@ Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), 
 
 .. note:: Your map images should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
 
-.. comment: TODO - Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
+.. todo:: Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
 
 Preparing your metadata
 ------------------------

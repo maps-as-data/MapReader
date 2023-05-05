@@ -27,6 +27,10 @@ A computer vision pipeline for exploring and analyzing images at scale
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
 
+-------------
+
+.. todolist::
+
 Indices and tables
 ==================
 

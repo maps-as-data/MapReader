@@ -1,7 +1,7 @@
 Worked examples
 ================
 
-.. TODO: Explain these different use cases
+.. todo:: Explain these different use cases
 
 .. list-table::
    :widths: 25 25 25
