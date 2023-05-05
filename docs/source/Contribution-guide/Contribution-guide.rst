@@ -59,9 +59,13 @@ We welcome contributions from community members of all skill levels and so have 
 - `Add to or update the MapReader documentation <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Documentation.html>`_ - For those who are familiar with using MapReader and either already comfortable with using Sphinx to write documentation or feel able to have a go at to learning it.
 - `Add to or update the MapReader code <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Code.html>`_ - For those who are familiar with using MapReader and either already comfortable with writing code in Python or feel able to have a go at learning it.
 
+----------
+
+Guides 
+------
+
 .. toctree:: 
     :maxdepth: 1
-    :caption: Guides
 
     GitHub-guide
     Worked-examples
