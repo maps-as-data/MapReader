@@ -763,6 +763,9 @@ class Annotator(pd.DataFrame):
     stop_at_last_example : bool, optional
         Whether the annotation process should stop when it reaches the last
         example in the dataframe. Default: True.
+    show_context : bool, optional
+        Whether to show the images that appear around the given image that
+        is being annotated. Default: False.
 
     Attributes
     ----------
@@ -895,6 +898,9 @@ class Annotator(pd.DataFrame):
             if kwargs.get("stop_at_last_example")
             else True
         )
+        kwargs["show_context"] = (
+            kwargs["show_context"] if kwargs.get("show_context") else False
+        )
 
         # Check metadata
         if isinstance(metadata, str):
@@ -995,7 +1001,9 @@ class Annotator(pd.DataFrame):
         self.annotations_file = kwargs["annotations_file"]
         self.username = kwargs["username"]
         self.stop_at_last_example = kwargs["stop_at_last_example"]
+        self.show_context = kwargs["show_context"]
         self.metadata = metadata
+        self.patch_width, self.patch_height = self.get_patch_size()
 
         # Set current index
         self.current_index = -1
@@ -1062,7 +1070,7 @@ class Annotator(pd.DataFrame):
         else:
             self.box = widgets.HBox(self.buttons)
 
-    def annotate(self) -> None:
+    def annotate(self, show_context=None) -> None:
         """
         Renders the annotation interface for the first image.
 
@@ -1070,6 +1078,9 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
+        if show_context is not None:
+            self.show_context = show_context
+
         self.out = widgets.Output()
         display(self.box)
         display(self.out)
@@ -1114,8 +1125,9 @@ class Annotator(pd.DataFrame):
                 self._prev_example()
             return
 
-        # render buttons
         ix = self.iloc[self.current_index].name
+
+        # render buttons
         for button in self.buttons:
             if button.description == "prev":
                 # disable previous button when at first example
@@ -1132,10 +1144,12 @@ class Annotator(pd.DataFrame):
         # display new example
         with self.out:
             clear_output(wait=True)
-            image_path = self.at[ix, self.image_column]
-            with open(image_path, "rb") as f:
-                image = f.read()
-            display(widgets.Image(value=image))
+            image = self.get_patch_image(ix)
+            if self.show_context:
+                context = self.get_context()
+                display(context)
+            else:
+                display(image)
 
     def _add_annotation(self, annotation: str) -> None:
         """Toggle annotation."""
@@ -1214,3 +1228,109 @@ class Annotator(pd.DataFrame):
                 return self.current_index
             else:
                 self.current_index += 1
+
+    def get_patch_size(self):
+        def test_int(x):
+            try:
+                int(x)
+                return True
+            except ValueError:
+                return False
+
+        first_file = self.sort_index().index[0]
+        _, _, patch_width, patch_height = [
+            int(x) for x in first_file.split("-") if test_int(x)
+        ]
+        return patch_width, patch_height
+
+    def get_patch_image(self, ix):
+        image_path = self.at[ix, self.image_column]
+        with open(image_path, "rb") as f:
+            image = f.read()
+
+        return widgets.Image(value=image)
+
+    def get_context(self):
+        def get_path(image_path, dim=True):
+            if dim:
+                im = Image.open(image_path)
+                alpha = Image.new("L", im.size, 90)
+                im.putalpha(alpha)
+                im.save(".temp.png")
+
+                return widgets.Image.from_file(".temp.png")
+            return widgets.Image.from_file(image_path)
+
+        def get_empty_square():
+            im = Image.new(
+                size=(self.patch_width, self.patch_height),
+                mode="RGB",
+                color="white",
+            )
+            im.save(".temp.png")
+            return widgets.Image.from_file(".temp.png")
+
+        ix = self.iloc[self.current_index].name
+        current_x = self.at[ix, "min_x"]
+        current_y = self.at[ix, "min_y"]
+        current_parent = self.at[ix, "parent_id"]
+        image_path = self.at[ix, self.image_column]
+
+        parent_frame = self.query(f"parent_id=='{current_parent}'")
+
+        # self.get_patch_image(ix)
+
+        one_less_x = current_x - self.patch_width  # -1 x
+        one_more_x = current_x + self.patch_width  # +1 x
+
+        one_less_y = current_y - self.patch_height  # -1 y
+        one_more_y = current_y + self.patch_height  # +1 y
+
+        nw = parent_frame.query(f"min_x == {one_less_x} & min_y == {one_less_y}")
+        n = parent_frame.query(f"min_x == {current_x} & min_y == {one_less_y}")
+        ne = parent_frame.query(f"min_x == {one_more_x} & min_y == {one_less_y}")
+
+        nw = parent_frame.query(f"min_x == {one_less_x} & min_y == {one_less_y}")
+        n = parent_frame.query(f"min_x == {current_x} & min_y == {one_less_y}")
+        ne = parent_frame.query(f"min_x == {one_more_x} & min_y == {one_less_y}")
+
+        w = parent_frame.query(f"min_x == {one_less_x} & min_y == {current_y}")
+        e = parent_frame.query(f"min_x == {one_more_x} & min_y == {current_y}")
+
+        sw = parent_frame.query(f"min_x == {one_less_x} & min_y == {one_more_y}")
+        s = parent_frame.query(f"min_x == {current_x} & min_y == {one_more_y}")
+        se = parent_frame.query(f"min_x == {one_more_x} & min_y == {one_more_y}")
+
+        nw_image = nw.at[nw.index[0], "image_path"] if len(nw.index) == 1 else None
+        n_image = n.at[n.index[0], "image_path"] if len(n.index) == 1 else None
+        ne_image = ne.at[ne.index[0], "image_path"] if len(ne.index) == 1 else None
+        w_image = w.at[w.index[0], "image_path"] if len(w.index) == 1 else None
+        e_image = e.at[e.index[0], "image_path"] if len(e.index) == 1 else None
+        sw_image = sw.at[sw.index[0], "image_path"] if len(sw.index) == 1 else None
+        s_image = s.at[s.index[0], "image_path"] if len(s.index) == 1 else None
+        se_image = se.at[se.index[0], "image_path"] if len(se.index) == 1 else None
+
+        top_row = [
+            get_path(x[0], dim=x[1]) if x[0] else get_empty_square()
+            for x in [(nw_image, True), (n_image, True), (ne_image, True)]
+        ]
+        middle_row = [
+            get_path(x[0], dim=x[1]) if x[0] else get_empty_square()
+            for x in [(w_image, True), (image_path, False), (e_image, True)]
+        ]
+        bottom_row = [
+            get_path(x[0], dim=x[1]) if x[0] else get_empty_square()
+            for x in [(sw_image, True), (s_image, True), (se_image, True)]
+        ]
+
+        # drop temp file
+        if os.path.exists(".temp.png"):
+            os.remove(".temp.png")
+
+        return widgets.VBox(
+            [
+                widgets.HBox(top_row),
+                widgets.HBox(middle_row),
+                widgets.HBox(bottom_row),
+            ]
+        )
