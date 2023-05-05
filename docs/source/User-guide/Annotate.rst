@@ -19,7 +19,7 @@ Create an annotation tasks file
 To set up your annotation tasks, you will need to create a separate ``annotation_tasks.yaml`` file.
 An example file which can be used as a template can be found in ``MapReader/worked_examples/``.
 
-.. TODO: Note that you can do this via texteditor in windows or something like ??? in mac/linux
+.. todo:: Note that you can do this via texteditor in windows or something like ??? in mac/linux
 
 Your ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and ``paths``.
 	
@@ -75,8 +75,8 @@ Annotate your images
 
 To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``annotation_task.yaml``), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
 
-.. TODO: Give big list of different options here
-.. TODO: Explain that things don't autosave
+.. todo:: Give big list of different options here
+.. todo:: Explain that things don't autosave
 
 e.g. following our 'rail_space' example from earlier:
 

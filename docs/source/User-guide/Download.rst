@@ -1,8 +1,8 @@
 Download
 =========
 
-.. TODO: Add comment saying navigate in your terminal to your working directory and then open a notebook from there. Shift right click on a folder in windows to copy path name.
-.. TODO: Add instruction to create a new notebook.
+.. todo:: Add comment saying navigate in your terminal to your working directory and then open a notebook from there. Shift right click on a folder in windows to copy path name.
+.. todo:: Add instruction to create a new notebook.
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
@@ -27,9 +27,9 @@ This is done by providing MapReader with a metadata file (usually a ``json`` fil
 
 Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`_ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_, are provided in ``MapReader/worked_examples/persistent_data``.
 
-.. TODO: include list of requirements of json metadata file, and what form those fields should take (e.g. coordinates) (Rosie)
+.. todo:: include list of requirements of json metadata file, and what form those fields should take (e.g. coordinates) (Rosie)
 
-.. TODO: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
+.. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
 To set up your download, create a ``TileServer`` object and specify ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the XYZ URL for your tileset): 
 
