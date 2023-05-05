@@ -7,6 +7,7 @@ from pathlib import Path
 import pathlib
 import pandas as pd
 from PIL import Image
+import PIL
 from random import randint
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def init_ts_maps(sample_dir, tmp_path):
     image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    ts_map.patchify_all(patch_size=3, path_save=tmp_path) # gives 3 patches 
+    ts_map.patchify_all(patch_size=3, path_save=tmp_path) # gives 9 patches 
     parent_list = ts_map.list_parents()
     patch_list = ts_map.list_patches()
 
@@ -92,7 +93,7 @@ def test_loader_add_metadata(sample_dir):
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
     assert "coordinates" in ts_map.images["parent"][image_ID].keys()
     assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
-        (-4.83,55.80, -4.21, 56.059), rel=1e-2
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
     )
     #metadata xlsx
     image_ID = "cropped_74488689.png"
@@ -236,6 +237,11 @@ def test_loader_tiff_32bit(sample_dir):
     image_ID = "cropped_32bit.tif"
     with pytest.raises(NotImplementedError, match = "Image mode"): 
         loader(f"{sample_dir}/{image_ID}")
+
+def test_loader_non_image(sample_dir):
+    file_ID = "ts_downloaded_maps.csv"
+    with pytest.raises(PIL.UnidentifiedImageError, match="not an image"): 
+        loader(f"{sample_dir}/{file_ID}")
 
 # --- test other functions ---
 
