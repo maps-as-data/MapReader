@@ -224,12 +224,14 @@ class MapImages:
             img = Image.open(image_path)       
         except PIL.UnidentifiedImageError:
             raise PIL.UnidentifiedImageError(f"[ERROR] {image_path} is not an image file.\n\n\
-See https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.open for more information.")
+See https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.open for more information."
+                                             )
        
         if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
             raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
 Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
-See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information.")
+See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information."
+                                      )
 
     @staticmethod
     def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
