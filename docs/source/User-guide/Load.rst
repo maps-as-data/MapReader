@@ -350,7 +350,7 @@ e.g. to view "mean_pixel_R" on your patches:
 
     #EXAMPLE
     parent_list = my_files.list_parents()
-    my_files.show_par(parent_list[0], column_to_plot="mean_pixel_R")
+    my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R")
 
 .. image:: ../figures/show_par_RGB.png
     :width: 400px
