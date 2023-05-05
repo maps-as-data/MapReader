@@ -1,5 +1,5 @@
-Load & Patchify
-===============
+Load
+=====
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
