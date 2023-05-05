@@ -788,8 +788,8 @@ class Annotator(pd.DataFrame):
         Name of the annotation task.
     id : str
         Unique identifier for the current annotation session.
-    _file_name : str
-        Filename for the annotations CSV file.
+    annotations_file : str
+        Filename for the resulting annotations CSV file.
     username : str
         Username for the current annotation session.
     current_index : int
@@ -947,18 +947,20 @@ class Annotator(pd.DataFrame):
         )
         kwargs["id"] = hashlib.md5(image_list.encode("utf-8")).hexdigest()
 
-        _file_name = (
+        annotations_file = (
             kwargs["task_name"].replace(" ", "_")
             + f"_#{kwargs['username']}#-{kwargs['id']}.csv"
         )
-        kwargs["_file_name"] = os.path.join(kwargs["annotations_dir"], _file_name)
+        kwargs["annotations_file"] = os.path.join(
+            kwargs["annotations_dir"], annotations_file
+        )
 
         # Test for existing file
-        if os.path.exists(kwargs["_file_name"]):
+        if os.path.exists(kwargs["annotations_file"]):
             print(
                 f"[INFO] Existing annotations for {kwargs['username']} being loaded..."
             )
-            existing_annotations = pd.read_csv(kwargs["_file_name"], index_col=0)
+            existing_annotations = pd.read_csv(kwargs["annotations_file"], index_col=0)
             existing_annotations[kwargs["label_column"]] = existing_annotations[
                 kwargs["label_column"]
             ].apply(lambda x: kwargs["labels"][x])
@@ -990,7 +992,7 @@ class Annotator(pd.DataFrame):
         self.annotations_dir = kwargs["annotations_dir"]
         self.task_name = kwargs["task_name"]
         self.id = kwargs["id"]
-        self._file_name = kwargs["_file_name"]
+        self.annotations_file = kwargs["annotations_file"]
         self.username = kwargs["username"]
         self.stop_at_last_example = kwargs["stop_at_last_example"]
         self.metadata = metadata
@@ -1180,7 +1182,7 @@ class Annotator(pd.DataFrame):
         return df.sort_values("sort_value").drop(columns=["sort_value"])
 
     def _auto_save(self):
-        self.get_labelled_data(sort=True).to_csv(self._file_name)
+        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
 
     def get_current_index(self) -> int:
         """
