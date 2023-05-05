@@ -3,6 +3,8 @@ import pytest
 import os
 import pandas as pd
 import pathlib
+from PIL import Image
+from random import randint
 
 @pytest.fixture
 def keys():
@@ -18,7 +20,8 @@ def matching_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path
 
@@ -28,7 +31,8 @@ def extra_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path 
 
@@ -38,7 +42,8 @@ def missing_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png", "file4.png"]
     for file in files:
-        pathlib.Path(f"{test_path}/{file}").touch()
+        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
     return test_path
 
