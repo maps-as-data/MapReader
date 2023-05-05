@@ -887,10 +887,7 @@ class Annotator(pd.DataFrame):
             kwargs["username"]
             if kwargs.get("username")
             else "".join(
-                [
-                    random.choice(string.ascii_letters + string.digits)
-                    for n in range(30)
-                ]
+                [random.choice(string.ascii_letters + string.digits) for n in range(30)]
             )
         )
 
@@ -964,9 +961,15 @@ class Annotator(pd.DataFrame):
             data = data.join(
                 existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
             )
-            data[kwargs["label_column"]] = data["label_y"].fillna(data[f"{kwargs['label_column']}_x"])
-            data = data.drop(columns=[f"{kwargs['label_column']}_x", f"{kwargs['label_column']}_y"])
-            data["changed"] = data[kwargs["label_column"]].apply(lambda x: True if x else False)
+            data[kwargs["label_column"]] = data["label_y"].fillna(
+                data[f"{kwargs['label_column']}_x"]
+            )
+            data = data.drop(
+                columns=[f"{kwargs['label_column']}_x", f"{kwargs['label_column']}_y"]
+            )
+            data["changed"] = data[kwargs["label_column"]].apply(
+                lambda x: True if x else False
+            )
 
         # initiate as a DataFrame
         super().__init__(data)
