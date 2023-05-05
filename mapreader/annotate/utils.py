@@ -1086,20 +1086,20 @@ class Annotator(pd.DataFrame):
         display(self.out)
         self._next_example()
 
-    def _next_example(self, *args) -> None:
+    def _next_example(self, *args, **kwargs) -> None:
         if self.current_index < len(self):
             if len(args) == 1 and isinstance(args[0], int):
                 self.current_index = args[0]
             else:
                 self.current_index += 1
-            self.render()
+            self.render(**kwargs)
 
     def _prev_example(self, *args) -> None:
         if self.current_index > 0:
             self.current_index -= 1
             self.render()
 
-    def render(self) -> None:
+    def render(self, *args, **kwargs) -> None:
         """
         Displays the image at the current index in the annotation interface.
 
@@ -1150,6 +1150,20 @@ class Annotator(pd.DataFrame):
                 display(context)
             else:
                 display(image)
+            display(
+                widgets.FloatSlider(
+                    value=self.label.count(),
+                    min=0,
+                    max=len(self),
+                    step=1,
+                    description=f"{self.label.count()} / {len(self)}",
+                    disabled=True,
+                    continuous_update=False,
+                    orientation="horizontal",
+                    readout=False,
+                    # readout_format='.0f',
+                )
+            )
 
     def _add_annotation(self, annotation: str) -> None:
         """Toggle annotation."""
