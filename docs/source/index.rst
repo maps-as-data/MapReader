@@ -6,8 +6,7 @@
 MapReader
 =========
 
-A computer vision pipeline for exploring and analyzing images at scale
------------------------------------------------------------------------
+**A computer vision pipeline for exploring and analyzing images at scale** 
 
 .. toctree::
    :maxdepth: 1
@@ -29,7 +28,8 @@ A computer vision pipeline for exploring and analyzing images at scale
 
 -------------
 
-.. todolist::
+.. admonition:: To do list
+   .. todolist::
 
 Indices and tables
 ==================

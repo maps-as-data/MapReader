@@ -51,7 +51,7 @@ This section can contain as many annotation sets as you would like and should be
 		parent_paths: "./path/to/parents_2/"
 		annot_dir: "./path/to/save/annotations_2"
 
-For example, if you want to annotate 'rail_space' (as in our `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
+For example, if you want to annotate 'rail_space' (as in `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
 	   
 .. code-block:: yaml
 
