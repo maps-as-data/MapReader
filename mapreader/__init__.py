@@ -1,4 +1,4 @@
-from mapreader.load.images import mapImages
+from mapreader.load.images import MapImages
 from mapreader.load.loader import loader
 from mapreader.load.loader import load_patches
 
@@ -19,4 +19,4 @@ from . import _version
 
 __version__ = _version.get_versions()["version"]
 
-from mapreader.utils import geo_utils
+from mapreader.load import geo_utils

@@ -9,7 +9,7 @@ def test_import():
         load_patches,
         loadAnnotations,
         loader,
-        mapImages,
+        MapImages,
         patchTorchDataset,
     )
     import mapreader.download.azure_access as azure_access
