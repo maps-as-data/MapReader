@@ -10,7 +10,9 @@ MapReader's ``Load`` subpackage is used to load, visualise and patchify images (
 Load images (and metadata)
 ----------------------------
 
-First, your image files (e.g. png, jpeg, tiff or geotiff files) should be loaded in using: 
+First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using MapReader's ``loader()`` function. 
+
+This can be done using: 
 
 .. code-block:: python
 
@@ -57,7 +59,7 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
     my_files.addGeoInfo()
 
-.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``proj2convert``.
+.. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``target_crs``.
 
 Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
 
