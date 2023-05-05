@@ -760,6 +760,9 @@ class Annotator(pd.DataFrame):
         Function to process each example during annotation. Default: None.
     final_process_fn : function, optional
         Function to process the entire annotation process. Default: None.
+    stop_at_last_example : bool, optional
+        Whether the annotation process should stop when it reaches the last
+        example in the dataframe. Default: True.
 
     Attributes
     ----------
@@ -791,9 +794,6 @@ class Annotator(pd.DataFrame):
         Username for the current annotation session.
     current_index : int
         Current index of the annotation process.
-    stop_at_last_example : bool
-        Whether the annotation process should stop when it reaches the last
-        example in the dataframe.
     out : Output
         Output widget that displays the current image during annotation.
     box : HBox or VBox
@@ -889,6 +889,11 @@ class Annotator(pd.DataFrame):
             else "".join(
                 [random.choice(string.ascii_letters + string.digits) for n in range(30)]
             )
+        )
+        kwargs["stop_at_last_example"] = (
+            kwargs["stop_at_last_example"]
+            if kwargs.get("stop_at_last_example")
+            else True
         )
 
         # Check metadata
@@ -987,6 +992,7 @@ class Annotator(pd.DataFrame):
         self.id = kwargs["id"]
         self._file_name = kwargs["_file_name"]
         self.username = kwargs["username"]
+        self.stop_at_last_example = kwargs["stop_at_last_example"]
         self.metadata = metadata
 
         # Set current index
