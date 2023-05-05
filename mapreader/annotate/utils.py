@@ -1153,7 +1153,7 @@ class Annotator(pd.DataFrame):
         _filter = ~self[self.label_column].isna()
         return self[_filter]
 
-    def get_labelled_data(self, sort: bool = Optional[True]) -> pd.DataFrame:
+    def get_labelled_data(self, sort: Optional[bool] = True) -> pd.DataFrame:
         """
         Returns a dataframe containing only the labelled images and their
         associated label index.
