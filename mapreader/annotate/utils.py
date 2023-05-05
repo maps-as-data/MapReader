@@ -1002,7 +1002,7 @@ class Annotator(pd.DataFrame):
         # Setup box for buttons
         self._setup_box()
 
-    def _load_frames(self, *args, **kwargs):
+    def _load_frames(self, *args, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
         patches = load_patches(
             patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
         )
@@ -1022,7 +1022,7 @@ class Annotator(pd.DataFrame):
 
         return parents, patches
 
-    def _setup_buttons(self):
+    def _setup_buttons(self) -> None:
         for label in self.labels:
             btn = widgets.Button(description=label)
 
@@ -1043,7 +1043,7 @@ class Annotator(pd.DataFrame):
         btn.on_click(self._next_example)
         self.buttons.append(btn)
 
-    def _setup_box(self):
+    def _setup_box(self) -> None:
         if len(self.buttons) > self.buttons_per_row:
             self.box = widgets.VBox(
                 [
@@ -1067,7 +1067,7 @@ class Annotator(pd.DataFrame):
         display(self.out)
         self._next_example()
 
-    def _next_example(self, *args):
+    def _next_example(self, *args) -> None:
         if self.current_index < len(self):
             if len(args) == 1 and isinstance(args[0], int):
                 self.current_index = args[0]
@@ -1075,7 +1075,7 @@ class Annotator(pd.DataFrame):
                 self.current_index += 1
             self.render()
 
-    def _prev_example(self, *args):
+    def _prev_example(self, *args) -> None:
         if self.current_index > 0:
             self.current_index -= 1
             self.render()
@@ -1129,7 +1129,7 @@ class Annotator(pd.DataFrame):
                 image = f.read()
             display(widgets.Image(value=image))
 
-    def _add_annotation(self, annotation):
+    def _add_annotation(self, annotation: str) -> None:
         """Toggle annotation."""
         ix = self.iloc[self.current_index].name
         self.at[ix, self.label_column] = annotation
