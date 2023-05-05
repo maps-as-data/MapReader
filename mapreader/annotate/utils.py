@@ -721,33 +721,45 @@ class Annotator(pd.DataFrame):
     Parameters
     ----------
     data : str or dict or list or None, optional
-        Data to create the Annotator DataFrame.
+        Data to create the Annotator DataFrame. Default:
+        "./patches/patch-*.png"
     patches : str, optional
-        Path to patches folder to load the images.
+        Path to patches folder to load the images, if no ``data`` is provided.
+        Default: "./patches/patch-*.png"
     parents : str, optional
-        Path to parents folder to load the parent images.
+        Path to parents folder to load the parent images, if no ``data`` is
+        provided. Default: "./maps/*.png"
+    metadata : str, optional
+        Path to metadata file. Default: "./maps/metadata.csv"
     annotations_dir : str, optional
-        Directory to save the annotations CSV file.
+        Directory to save the annotations CSV file. Default: "./annotations"
     username : str, optional
-        Username for the annotation session.
+        Username for the annotation session. If no username is provided, the
+        class will generate a hash string for the current user. Note: This
+        means that annotations cannot be resumed later.
     task_name : str, optional
-        Name of the annotation task.
+        Name of the annotation task. Default: "task"
     image_column : str, optional
-        Name of the image column in the dataframe.
+        Name of the image column in the ``data`` dataframe, describing the
+        path to the image. Default: "image_path"
     label_column : str, optional
-        Name of the label column in the dataframe.
-    labels : list of str, optional
-        List of possible labels for the annotations.
+        Name of the label column in the ``data`` dataframe, where final labels
+        are/will be stored. Default: "label"
+    labels : list of str
+        List of possible labels for the annotations. Must be provided as a
+        list.
     scramble_frame : bool, optional
-        Whether to randomly shuffle the examples during annotation.
+        Whether to randomly shuffle the examples during annotation. Default:
+        True.
     buttons_per_row : int, optional
         Number of buttons to display per row in the annotation interface.
     auto_save : bool, optional
-        Whether to automatically save annotations during annotation.
+        Whether to automatically save annotations during annotation. Default:
+        True.
     example_process_fn : function, optional
-        Function to process each example during annotation.
+        Function to process each example during annotation. Default: None.
     final_process_fn : function, optional
-        Function to process the entire annotation process.
+        Function to process the entire annotation process. Default: None.
 
     Attributes
     ----------
@@ -818,10 +830,22 @@ class Annotator(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         # Untangle args and kwargs
         data = None
-        if len(args) > 0:
+        if len(args) == 1:
             data = args.pop(0)
-        elif kwargs.get("data"):
+        elif len(args) == 2:
+            data = args.pop(0)
+            metadata = args.pop(1)
+        elif isinstance(
+            kwargs.get("data"), (str, dict, list, type(None), pd.DataFrame)
+        ):
             data = kwargs.get("data")
+        elif kwargs.get("data") is not None:
+            raise SyntaxError(f"Cannot interpret data of type {type(data)}")
+
+        if isinstance(
+            kwargs.get("metadata"), (str, dict, list, type(None), pd.DataFrame)
+        ):
+            metadata = kwargs.get("metadata")
 
         kwargs["patches"] = (
             kwargs["patches"] if kwargs.get("patches") else "./patches/patch-*.png"
@@ -833,6 +857,9 @@ class Annotator(pd.DataFrame):
             kwargs["annotations_dir"]
             if kwargs.get("annotations_dir")
             else "./annotations"
+        )
+        kwargs["metadata"] = (
+            kwargs["metadata"] if kwargs.get("metadata") else "./maps/metadata.csv"
         )
         kwargs["username"] = kwargs["username"] if kwargs.get("username") else None
         kwargs["task_name"] = kwargs["task_name"] if kwargs.get("task_name") else "task"
@@ -860,9 +887,21 @@ class Annotator(pd.DataFrame):
             kwargs["username"]
             if kwargs.get("username")
             else "".join(
-                [random.choice(string.ascii_letters + string.digits) for n in range(30)]
+                [
+                    random.choice(string.ascii_letters + string.digits)
+                    for n in range(30)
+                ]
             )
         )
+
+        # Check metadata
+        if isinstance(metadata, str):
+            # we have data as string = assume it's a path to a
+            data = pd.read_csv(data)
+
+        if isinstance(metadata, (dict, list)):
+            # we have data as string = assume it's a path to a
+            data = pd.DataFrame(data)
 
         # Check data
         if isinstance(data, str):
@@ -874,17 +913,21 @@ class Annotator(pd.DataFrame):
             data = pd.DataFrame(data)
 
         if isinstance(data, type(None)):
-            # If we don't get data provided, we'll use the patches and parents
-            # to load up the patches
+            # If we don't get data provided, we'll use the patches and parents to
+            # load up the patches
             try:
-                data = self._load_frame(**kwargs)
+                metadata, data = self._load_frames(**kwargs)
             except NameError:
                 raise SyntaxError(
-                    "Data must be provided or class must have a _load_frame method."
+                    "Data must be provided or class must have a _load_frames method."
                 )
 
+        # Last check for metadata + data
         if not len(data):
             raise RuntimeError("No data available.")
+
+        if not len(metadata):
+            raise RuntimeError("No metadata available.")
 
         # Test for columns
         if kwargs["label_column"] not in data.columns:
@@ -910,17 +953,20 @@ class Annotator(pd.DataFrame):
 
         # Test for existing file
         if os.path.exists(kwargs["_file_name"]):
+            print(
+                f"[INFO] Existing annotations for {kwargs['username']} being loaded..."
+            )
             existing_annotations = pd.read_csv(kwargs["_file_name"], index_col=0)
-            existing_annotations[label_column] = existing_annotations[
-                label_column
-            ].apply(lambda x: labels[x])
+            existing_annotations[kwargs["label_column"]] = existing_annotations[
+                kwargs["label_column"]
+            ].apply(lambda x: kwargs["labels"][x])
 
             data = data.join(
                 existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
             )
-            data[label_column] = data["label_y"].fillna(data[f"{label_column}_x"])
-            data = data.drop(columns=[f"{label_column}_x", f"{label_column}_y"])
-            data["changed"] = data[label_column].apply(lambda x: True if x else False)
+            data[kwargs["label_column"]] = data["label_y"].fillna(data[f"{kwargs['label_column']}_x"])
+            data = data.drop(columns=[f"{kwargs['label_column']}_x", f"{kwargs['label_column']}_y"])
+            data["changed"] = data[kwargs["label_column"]].apply(lambda x: True if x else False)
 
         # initiate as a DataFrame
         super().__init__(data)
@@ -938,6 +984,7 @@ class Annotator(pd.DataFrame):
         self.id = kwargs["id"]
         self._file_name = kwargs["_file_name"]
         self.username = kwargs["username"]
+        self.metadata = metadata
 
         # Set current index
         self.current_index = -1
@@ -952,12 +999,15 @@ class Annotator(pd.DataFrame):
         # Setup box for buttons
         self._setup_box()
 
-    def _load_frame(self, *args, **kwargs):
+    def _load_frames(self, *args, **kwargs):
         patches = load_patches(
             patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
         )
         patches.calc_pixel_stats()
-        _, patches = patches.convertImages()
+
+        patches.add_metadata(kwargs["metadata"])
+
+        parents, patches = patches.convertImages()
 
         if kwargs["label_column"] not in patches.columns:
             patches[kwargs["label_column"]] = None
@@ -967,7 +1017,7 @@ class Annotator(pd.DataFrame):
             # Scramble them!
             patches = patches.sample(frac=1)
 
-        return patches
+        return parents, patches
 
     def _setup_buttons(self):
         for label in self.labels:
