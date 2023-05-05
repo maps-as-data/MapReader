@@ -23,7 +23,7 @@ from ipyannotate.buttons import ValueButton as Button
 from ipyannotate.canvas import OutputCanvas
 from ipyannotate.tasks import Task, Tasks
 from ipyannotate.toolbar import Toolbar
-from IPython.display import Image, clear_output, display
+from IPython.display import clear_output, display
 from PIL import Image
 
 from mapreader import load_patches, loader
