@@ -231,30 +231,6 @@ class Annotator(pd.DataFrame):
         if kwargs.get("sortby"):
             data = data.sort_values(kwargs["sortby"])
 
-        query1 = " & ".join(
-            [
-                f"{col} >= {min_value}"
-                for col, min_value in kwargs.get("min_values", {}).items()
-            ]
-        )
-        query2 = " & ".join(
-            [
-                f"{col} <= {max_value}"
-                for col, max_value in kwargs.get("max_values", {}).items()
-            ]
-        )
-
-        query = None
-        if query1 and query2:
-            query = query1 + " & " + query2
-        elif query2:
-            query = query2
-        elif query1:
-            query = query1
-
-        if query:
-            data = data.query(query)
-
         image_list = json.dumps(
             sorted(data[kwargs["image_column"]].to_list()), sort_keys=True
         )
@@ -396,21 +372,39 @@ class Annotator(pd.DataFrame):
         else:
             self.box = widgets.HBox(self.buttons)
 
-    def annotate(self, show_context=None) -> None:
+    def annotate(self, show_context=None, min_values={}, max_values={}) -> None:
         """
         Renders the annotation interface for the first image.
+
+        Parameters
+        ----------
+        min_values : dict, optional
+            A dictionary consisting of column names (keys) and minimum values as
+            floating point values (values) which will be applied as a filter to
+            the annotation data before annotations commence. Default: ``{}``.
+        max_values : dict, optional
+            A dictionary consisting of column names (keys) and maximum values as
+            floating point values (values) which will be applied as a filter to
+            the annotation data before annotations commence. Default: ``{}``.
 
         Returns
         -------
         None
         """
+        self.current_index = -1
+        for button in self.buttons:
+            button.disabled = False
+
         if show_context is not None:
             self.show_context = show_context
+
+        self.min_values = min_values
+        self.max_values = max_values
 
         self.out = widgets.Output()
         display(self.box)
         display(self.out)
-        self._next_example()
+        self._next_example(self.get_current_index())
 
     def _next_example(self, *args, **kwargs) -> None:
         if self.current_index < len(self):
@@ -437,9 +431,14 @@ class Annotator(pd.DataFrame):
         None
         """
         # Check whether we have reached the end
-        if self.current_index >= len(self):
+        if self.current_index >= len(self) - 1:
             if self.stop_at_last_example:
-                print("Annotation done.")
+                clear_output()
+                display(
+                    widgets.HTML(
+                        f"<p><b>All annotations done with current settings.</b></p>"
+                    )
+                )
                 if self.auto_save:
                     self._auto_save()
                 for button in self.buttons:
@@ -484,11 +483,20 @@ class Annotator(pd.DataFrame):
                     barstyle="success",
                 )
             )
+            display(
+                widgets.HTML(
+                    f"""
+                    <p>
+                    <b>Eligible subjects with current settings: {self.eligible_subjects_count()}</b><br />
+                    <i>Current index: {self.current_index}</i>
+                    </p>"""
+                )
+            )
             if self.at[ix, "url"]:
                 url = self.at[ix, "url"]
                 display(
                     widgets.HTML(
-                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
+                        f'<hr /><p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
                     )
                 )
 
@@ -561,37 +569,6 @@ class Annotator(pd.DataFrame):
 
     def _auto_save(self):
         self.get_labelled_data(sort=True).to_csv(self.annotations_file)
-
-    def get_current_index(self) -> int:
-        """
-        Returns the current index in the dataframe of the image being
-        displayed in the annotation interface.
-
-        If the current index is less than 0 or greater than or equal to the
-        length of the dataframe, the method returns the
-        current index.
-
-        Returns
-        -------
-        int
-            The current index in the dataframe of the image being displayed in
-            the annotation interface.
-        """
-        if self.current_index == -1:
-            self.current_index = 0
-
-        while True:
-            if self.current_index == len(self):
-                return self.current_index
-
-            ix = self.iloc[self.current_index].name
-
-            # If the label column at the index is None, return the index,
-            # otherwise add one and continue
-            if isinstance(self.at[ix, self.label_column], type(None)):
-                return self.current_index
-            else:
-                self.current_index += 1
 
     def get_patch_size(self):
         patch_width = self.max_x[0] - self.min_x[0]
@@ -690,3 +667,68 @@ class Annotator(pd.DataFrame):
                 widgets.HBox(bottom_row),
             ]
         )
+
+    def get_current_index(self) -> int:
+        """
+        Returns the current index in the dataframe of the image being
+        displayed in the annotation interface.
+
+        If the current index is less than 0 or greater than or equal to the
+        length of the dataframe, the method returns the
+        current index.
+
+        Returns
+        -------
+        int
+            The current index in the dataframe of the image being displayed in
+            the annotation interface.
+        """
+        if self.current_index == -1:
+            self.current_index = 0
+
+        while True:
+            if self.current_index == len(self):
+                self.current_index -= 1
+                return self.current_index
+
+            ix = self.iloc[self.current_index].name
+            label_value = self.at[ix, self.label_column]
+
+            # If the label column at the index is None, return the index,
+            # otherwise add one and continue
+            if not isinstance(label_value, type(None)):
+                self.current_index += 1
+                continue
+
+            test = [
+                self.at[ix, col] >= min_value
+                for col, min_value in self.min_values.items()
+            ] + [
+                self.at[ix, col] <= max_value
+                for col, max_value in self.max_values.items()
+            ]
+            if not all(test):
+                self.current_index += 1
+                continue
+
+            return self.current_index
+
+        raise RuntimeError("An unexpected error occurred.")
+
+    def eligible_subjects_count(self):
+        def check_legibility(row):
+            if row.label != None:
+                return False
+
+            test = [
+                row[col] >= min_value for col, min_value in self.min_values.items()
+            ] + [row[col] <= max_value for col, max_value in self.max_values.items()]
+
+            if not all(test):
+                return False
+
+            return True
+
+        test = self.copy()
+        test["eligible"] = test.apply(check_legibility, axis=1)
+        return len(test[test.eligible is True])
