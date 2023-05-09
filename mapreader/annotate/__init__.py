@@ -67,6 +67,8 @@ class Annotator(pd.DataFrame):
     show_context : bool, optional
         Whether to show the images that appear around the given image that
         is being annotated. Default: False.
+    sortby : str, optional
+        The name of the column by which to sort the data to be annotated.
 
     Attributes
     ----------
