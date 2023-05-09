@@ -436,7 +436,7 @@ class Annotator(pd.DataFrame):
                 clear_output()
                 display(
                     widgets.HTML(
-                        f"<p><b>All annotations done with current settings.</b></p>"
+                        "<p><b>All annotations done with current settings.</b></p>"
                     )
                 )
                 if self.auto_save:
@@ -472,6 +472,13 @@ class Annotator(pd.DataFrame):
                 display(context)
             else:
                 display(image)
+            if self.at[ix, "url"]:
+                url = self.at[ix, "url"]
+                display(
+                    widgets.HTML(
+                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
+                    )
+                )
             display(
                 widgets.IntProgress(
                     value=self.label.count(),
@@ -486,19 +493,11 @@ class Annotator(pd.DataFrame):
             display(
                 widgets.HTML(
                     f"""
-                    <p>
-                    <b>Eligible subjects with current settings: {self.eligible_subjects_count()}</b><br />
+                    <b>Eligible images with current settings: {self.eligible_image_count()}</b><br />
                     <i>Current index: {self.current_index}</i>
-                    </p>"""
+                    """
                 )
             )
-            if self.at[ix, "url"]:
-                url = self.at[ix, "url"]
-                display(
-                    widgets.HTML(
-                        f'<hr /><p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
-                    )
-                )
 
     def _add_annotation(self, annotation: str) -> None:
         """Toggle annotation."""
@@ -715,9 +714,9 @@ class Annotator(pd.DataFrame):
 
         raise RuntimeError("An unexpected error occurred.")
 
-    def eligible_subjects_count(self):
+    def eligible_image_count(self):
         def check_legibility(row):
-            if row.label != None:
+            if row.label is not None:
                 return False
 
             test = [
