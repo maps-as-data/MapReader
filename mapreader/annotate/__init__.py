@@ -57,10 +57,6 @@ class Annotator(pd.DataFrame):
     auto_save : bool, optional
         Whether to automatically save annotations during annotation. Default:
         True.
-    example_process_fn : function, optional
-        Function to process each example during annotation. Default: None.
-    final_process_fn : function, optional
-        Function to process the entire annotation process. Default: None.
     stop_at_last_example : bool, optional
         Whether the annotation process should stop when it reaches the last
         example in the dataframe. Default: True.
@@ -90,10 +86,6 @@ class Annotator(pd.DataFrame):
         Name of the image column in the dataframe.
     buttons_per_row : int
         Number of buttons to display per row in the annotation interface.
-    example_process_fn : function
-        Function to process each example during annotation.
-    final_process_fn : function
-        Function to process the entire annotation process.
     auto_save : bool
         Whether to automatically save annotations during annotation.
     annotations_dir : str
@@ -161,59 +153,28 @@ class Annotator(pd.DataFrame):
         ):
             metadata = kwargs.get("metadata")
 
-        kwargs["patches"] = (
-            kwargs["patches"] if kwargs.get("patches") else "./patches/patch-*.png"
-        )
-        kwargs["parents"] = (
-            kwargs["parents"] if kwargs.get("parents") else "./maps/*.png"
-        )
-        kwargs["annotations_dir"] = (
-            kwargs["annotations_dir"]
-            if kwargs.get("annotations_dir")
-            else "./annotations"
-        )
-        kwargs["metadata"] = (
-            kwargs["metadata"] if kwargs.get("metadata") else "./maps/metadata.csv"
-        )
-        kwargs["username"] = kwargs["username"] if kwargs.get("username") else None
-        kwargs["task_name"] = kwargs["task_name"] if kwargs.get("task_name") else "task"
-        kwargs["image_column"] = (
-            kwargs["image_column"] if kwargs.get("image_column") else "image_path"
-        )
-        kwargs["label_column"] = (
-            kwargs["label_column"] if kwargs.get("label_column") else "label"
-        )
-        kwargs["labels"] = kwargs["labels"] if kwargs.get("labels") else []
-        kwargs["scramble_frame"] = (
-            kwargs["scramble_frame"] if kwargs.get("scramble_frame") else True
-        )
-        kwargs["buttons_per_row"] = (
-            kwargs["buttons_per_row"] if kwargs.get("buttons_per_row") else None
-        )
-        kwargs["auto_save"] = kwargs["auto_save"] if kwargs.get("auto_save") else True
-        kwargs["example_process_fn"] = (
-            kwargs["example_process_fn"] if kwargs.get("example_process_fn") else None
-        )
-        kwargs["final_process_fn"] = (
-            kwargs["final_process_fn"] if kwargs.get("final_process_fn") else None
-        )
-        kwargs["username"] = (
-            kwargs["username"]
-            if kwargs.get("username")
-            else "".join(
+        kwargs["patches"] = kwargs.get("patches", "./patches/patch-*.png")
+        kwargs["parents"] = kwargs.get("parents", "./maps/*.png")
+        kwargs["annotations_dir"] = kwargs.get("annotations_dir", "./annotations")
+
+        kwargs["metadata"] = kwargs.get("metadata", "./maps/metadata.csv")
+        kwargs["username"] = kwargs.get(
+            "username",
+            "".join(
                 [random.choice(string.ascii_letters + string.digits) for n in range(30)]
-            )
+            ),
         )
-        kwargs["stop_at_last_example"] = (
-            kwargs["stop_at_last_example"]
-            if kwargs.get("stop_at_last_example")
-            else True
-        )
-        kwargs["show_context"] = (
-            kwargs["show_context"] if kwargs.get("show_context") else False
-        )
-        kwargs["min_values"] = kwargs["min_values"] if kwargs.get("min_values") else {}
-        kwargs["max_values"] = kwargs["max_values"] if kwargs.get("max_values") else {}
+        kwargs["task_name"] = kwargs.get("task_name", "task")
+        kwargs["image_column"] = kwargs.get("image_column", "image_path")
+        kwargs["label_column"] = kwargs.get("label_column", "label")
+        kwargs["labels"] = kwargs.get("labels", [])
+        kwargs["scramble_frame"] = kwargs.get("scramble_frame", True)
+        kwargs["buttons_per_row"] = kwargs.get("buttons_per_row", None)
+        kwargs["auto_save"] = kwargs.get("auto_save", True)
+        kwargs["stop_at_last_example"] = kwargs.get("stop_at_last_example", True)
+        kwargs["show_context"] = kwargs.get("show_context", True)
+        kwargs["min_values"] = kwargs.get("min_values", {})
+        kwargs["max_values"] = kwargs.get("max_values", {})
 
         # Check metadata
         if isinstance(metadata, str):
@@ -357,8 +318,6 @@ class Annotator(pd.DataFrame):
         self.label_column = kwargs["label_column"]
         self.image_column = kwargs["image_column"]
         self.buttons_per_row = kwargs["buttons_per_row"]
-        self.example_process_fn = kwargs["example_process_fn"]
-        self.final_process_fn = kwargs["final_process_fn"]
         self.auto_save = kwargs["auto_save"]
         self.annotations_dir = kwargs["annotations_dir"]
         self.task_name = kwargs["task_name"]
@@ -471,8 +430,7 @@ class Annotator(pd.DataFrame):
         Displays the image at the current index in the annotation interface.
 
         If the current index is greater than or equal to the length of the
-        dataframe, the method disables the "next" button and calls the
-        ``final_process_fn`` method, if defined.
+        dataframe, the method disables the "next" button and saves the data.
 
         Returns
         -------
@@ -482,10 +440,8 @@ class Annotator(pd.DataFrame):
         if self.current_index >= len(self):
             if self.stop_at_last_example:
                 print("Annotation done.")
-                if self.final_process_fn is not None:
-                    if self.auto_save:
-                        self._auto_save()
-                    self.final_process_fn(self)
+                if self.auto_save:
+                    self._auto_save()
                 for button in self.buttons:
                     button.disabled = True
             else:
@@ -541,8 +497,6 @@ class Annotator(pd.DataFrame):
         ix = self.iloc[self.current_index].name
         self.at[ix, self.label_column] = annotation
         self.at[ix, "changed"] = True
-        if self.example_process_fn is not None:
-            self.example_process_fn(self.at[ix, self.image_column], annotation)
         if self.auto_save:
             self._auto_save()
         self._next_example(self.get_current_index())
