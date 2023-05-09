@@ -69,6 +69,14 @@ class Annotator(pd.DataFrame):
         is being annotated. Default: False.
     sortby : str, optional
         The name of the column by which to sort the data to be annotated.
+    min_values : dict, optional
+        A dictionary consisting of column names (keys) and minimum values as
+        floating point values (values) which will be applied as a filter to
+        the annotation data before annotations commence. Default: ``{}``.
+    max_values : dict, optional
+        A dictionary consisting of column names (keys) and maximum values as
+        floating point values (values) which will be applied as a filter to
+        the annotation data before annotations commence. Default: ``{}``.
 
     Attributes
     ----------
@@ -204,6 +212,8 @@ class Annotator(pd.DataFrame):
         kwargs["show_context"] = (
             kwargs["show_context"] if kwargs.get("show_context") else False
         )
+        kwargs["min_values"] = kwargs["min_values"] if kwargs.get("min_values") else {}
+        kwargs["max_values"] = kwargs["max_values"] if kwargs.get("max_values") else {}
 
         # Check metadata
         if isinstance(metadata, str):
@@ -251,9 +261,30 @@ class Annotator(pd.DataFrame):
                 f"Your DataFrame does not have the image column ({kwargs['image_column']})"
             )
 
+        if kwargs.get("sortby"):
+            data = data.sort_values(kwargs["sortby"])
+
+        query = (
+            " & ".join(
+                [
+                    f"{col} >= {min_value}"
+                    for col, min_value in kwargs.get("min_values", {}).items()
+                ]
+            )
+            + " & "
+            + " & ".join(
+                [
+                    f"{col} <= {max_value}"
+                    for col, max_value in kwargs.get("max_values", {}).items()
+                ]
+            )
+        )
+        data = data.query(query)
+
         image_list = json.dumps(
             sorted(data[kwargs["image_column"]].to_list()), sort_keys=True
         )
+
         kwargs["id"] = hashlib.md5(image_list.encode("utf-8")).hexdigest()
 
         annotations_file = (
@@ -290,9 +321,6 @@ class Annotator(pd.DataFrame):
                 lambda x: True if x else False
             )
 
-        if kwargs.get("sortby"):
-            data = data.sort_values(kwargs["sortby"])
-
         # initiate as a DataFrame
         super().__init__(data)
 
@@ -311,6 +339,8 @@ class Annotator(pd.DataFrame):
         self.username = kwargs["username"]
         self.stop_at_last_example = kwargs["stop_at_last_example"]
         self.show_context = kwargs["show_context"]
+        self.min_values = kwargs["min_values"]
+        self.max_values = kwargs["max_values"]
         self.metadata = metadata
         self.patch_width, self.patch_height = self.get_patch_size()
 
