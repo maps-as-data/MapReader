@@ -393,6 +393,14 @@ class Annotator(pd.DataFrame):
 
         Example
         -------
+        >>> annotator = Annotator(
+                task_name="railspace",
+                labels=["no_rail_space", "rail_space"],
+                username="james",
+                patches="./patches/patch-*.png"
+                parents="./maps/*.png"
+                annotations_dir="./annotations"
+            )
         >>> annotator.annotate()
         >>> annotator.annotate(show_context=False)
         >>> annotator.annotate(
