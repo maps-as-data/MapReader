@@ -288,6 +288,9 @@ class Annotator(pd.DataFrame):
                 lambda x: True if x else False
             )
 
+        if kwargs.get("sortby"):
+            data = data.sort_values(kwargs["sortby"])
+
         # initiate as a DataFrame
         super().__init__(data)
 
