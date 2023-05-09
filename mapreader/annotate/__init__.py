@@ -731,4 +731,4 @@ class Annotator(pd.DataFrame):
 
         test = self.copy()
         test["eligible"] = test.apply(check_legibility, axis=1)
-        return len(test[test.eligible is True])
+        return len(test[test.eligible == True])
