@@ -346,8 +346,7 @@ class Annotator(pd.DataFrame):
                         f"{kwargs['image_column']}_y",
                     ]
                 )
-            except KeyError:
-                # Looks like the columns don't exist, so leave it be.
+            except:
                 pass
 
         # initiate as a DataFrame
@@ -519,17 +518,14 @@ class Annotator(pd.DataFrame):
             else:
                 display(image)
             display(
-                widgets.FloatSlider(
+                widgets.IntProgress(
                     value=self.label.count(),
                     min=0,
                     max=len(self),
                     step=1,
                     description=f"{self.label.count()} / {len(self)}",
-                    disabled=True,
-                    continuous_update=False,
                     orientation="horizontal",
-                    readout=False,
-                    # readout_format='.0f',
+                    barstyle="success",
                 )
             )
             if self.at[ix, "url"]:
