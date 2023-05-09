@@ -238,6 +238,12 @@ class Annotator(pd.DataFrame):
             # load up the patches
             try:
                 metadata, data = self._load_frames(**kwargs)
+                try:
+                    data = data.join(metadata["url"], on="parent_id")
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Could not join the URL column from the metadata with the data: {e}"
+                    )
             except NameError:
                 raise SyntaxError(
                     "Data must be provided or class must have a _load_frames method."
@@ -264,22 +270,29 @@ class Annotator(pd.DataFrame):
         if kwargs.get("sortby"):
             data = data.sort_values(kwargs["sortby"])
 
-        query = (
-            " & ".join(
-                [
-                    f"{col} >= {min_value}"
-                    for col, min_value in kwargs.get("min_values", {}).items()
-                ]
-            )
-            + " & "
-            + " & ".join(
-                [
-                    f"{col} <= {max_value}"
-                    for col, max_value in kwargs.get("max_values", {}).items()
-                ]
-            )
+        query1 = " & ".join(
+            [
+                f"{col} >= {min_value}"
+                for col, min_value in kwargs.get("min_values", {}).items()
+            ]
         )
-        data = data.query(query)
+        query2 = " & ".join(
+            [
+                f"{col} <= {max_value}"
+                for col, max_value in kwargs.get("max_values", {}).items()
+            ]
+        )
+
+        query = None
+        if query1 and query2:
+            query = query1 + " & " + query2
+        elif query2:
+            query = query2
+        elif query1:
+            query = query1
+
+        if query:
+            data = data.query(query)
 
         image_list = json.dumps(
             sorted(data[kwargs["image_column"]].to_list()), sort_keys=True
@@ -301,9 +314,13 @@ class Annotator(pd.DataFrame):
                 f"[INFO] Existing annotations for {kwargs['username']} being loaded..."
             )
             existing_annotations = pd.read_csv(kwargs["annotations_file"], index_col=0)
-            existing_annotations[kwargs["label_column"]] = existing_annotations[
-                kwargs["label_column"]
-            ].apply(lambda x: kwargs["labels"][x])
+            try:
+                existing_annotations[kwargs["label_column"]] = existing_annotations[
+                    kwargs["label_column"]
+                ].apply(lambda x: kwargs["labels"][x])
+            except TypeError:
+                # We will assume the label column now contains the label value and not the indices for the labels
+                pass
 
             data = data.join(
                 existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
@@ -320,6 +337,18 @@ class Annotator(pd.DataFrame):
             data["changed"] = data[kwargs["label_column"]].apply(
                 lambda x: True if x else False
             )
+
+            try:
+                data[kwargs["image_column"]] = data[f"{kwargs['image_column']}_x"]
+                data = data.drop(
+                    columns=[
+                        f"{kwargs['image_column']}_x",
+                        f"{kwargs['image_column']}_y",
+                    ]
+                )
+            except KeyError:
+                # Looks like the columns don't exist, so leave it be.
+                pass
 
         # initiate as a DataFrame
         super().__init__(data)
@@ -503,6 +532,13 @@ class Annotator(pd.DataFrame):
                     # readout_format='.0f',
                 )
             )
+            if self.at[ix, "url"]:
+                url = self.at[ix, "url"]
+                display(
+                    widgets.HTML(
+                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
+                    )
+                )
 
     def _add_annotation(self, annotation: str) -> None:
         """Toggle annotation."""
@@ -608,17 +644,9 @@ class Annotator(pd.DataFrame):
                 self.current_index += 1
 
     def get_patch_size(self):
-        def test_int(x):
-            try:
-                int(x)
-                return True
-            except ValueError:
-                return False
+        patch_width = self.max_x[0] - self.min_x[0]
+        patch_height = self.max_y[0] - self.min_y[0]
 
-        first_file = self.sort_index().index[0]
-        _, _, patch_width, patch_height = [
-            int(x) for x in first_file.split("-") if test_int(x)
-        ]
         return patch_width, patch_height
 
     def get_patch_image(self, ix):
