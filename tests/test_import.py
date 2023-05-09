@@ -8,7 +8,7 @@ def test_import():
         load_patches,
         loadAnnotations,
         loader,
-        mapImages,
+        MapImages,
         patchTorchDataset,
         Downloader,
         SheetDownloader,
