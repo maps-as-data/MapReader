@@ -390,6 +390,15 @@ class Annotator(pd.DataFrame):
         Returns
         -------
         None
+
+        Example
+        -------
+        >>> annotator.annotate()
+        >>> annotator.annotate(show_context=False)
+        >>> annotator.annotate(
+                min_values={"mean_pixel_A": 0.88},
+                max_values={"mean_pixel_A": 0.98}
+            )
         """
         self.current_index = -1
         for button in self.buttons:
