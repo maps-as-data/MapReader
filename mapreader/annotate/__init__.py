@@ -485,7 +485,12 @@ class Annotator(pd.DataFrame):
         _filter = ~self[self.label_column].isna()
         return self[_filter]
 
-    def get_labelled_data(self, sort: Optional[bool] = True) -> pd.DataFrame:
+    def get_labelled_data(
+        self,
+        sort: Optional[bool] = True,
+        index_labels: Optional[bool] = False,
+        include_paths: Optional[bool] = True,
+    ) -> pd.DataFrame:
         """
         Returns a dataframe containing only the labelled images and their
         associated label index.
@@ -495,6 +500,13 @@ class Annotator(pd.DataFrame):
         sort : bool, optional
             Whether to sort the dataframe by the order of the images in the
             input data, by default True
+        index_labels : bool, optional
+            Whether to return the label's index number (in the labels list
+            provided in setting up the instance) or the human-readable label
+            for each row, by default False
+        include_paths : bool, optional
+            Whether to return a column containing the full path to the
+            annotated image or not, by default True
 
         Returns
         -------
@@ -502,8 +514,21 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
-        col = self.filtered[self.label_column].apply(lambda x: self.labels.index(x))
-        df = pd.DataFrame(col, index=pd.Index(col.index, name="image_id"))
+        if index_labels:
+            col1 = self.filtered[self.label_column].apply(
+                lambda x: self.labels.index(x)
+            )
+        else:
+            col1 = self.filtered[self.label_column]
+
+        if include_paths:
+            col2 = self.filtered[self.image_column]
+            df = pd.DataFrame(
+                {self.image_column: col2, self.label_column: col1},
+                index=pd.Index(col1.index, name="image_id"),
+            )
+        else:
+            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
         if not sort:
             return df
 
