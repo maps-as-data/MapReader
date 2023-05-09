@@ -48,7 +48,7 @@ def matching_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
 
@@ -60,7 +60,7 @@ def extra_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     return test_path 
 
 @pytest.fixture
@@ -71,7 +71,7 @@ def missing_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="|")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     return test_path
 
 
