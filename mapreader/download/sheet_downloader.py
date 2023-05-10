@@ -106,6 +106,9 @@ class SheetDownloader:
         if not self.polygons:
             self.get_polygons()
 
+        if self.crs != "EPSG:4326":
+            raise NotImplementedError("[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets projected in EPSG 4326.")
+
         for feature in self.features:
             polygon = feature["polygon"]
             min_x, min_y, max_x, max_y = polygon.bounds
