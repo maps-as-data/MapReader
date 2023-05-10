@@ -549,7 +549,7 @@ class SheetDownloader:
             columns=["name", "url", "coordinates", "published_date", "grid_bb"],
         )
         exists = True if os.path.exists(out_filepath) else False
-        metadata_df.to_csv(out_filepath, sep="|", mode="a", header=not exists)
+        metadata_df.to_csv(out_filepath, sep="\t", mode="a", header=not exists)
 
     def _download_map_sheets(self, features: list, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False):
         """Download map sheets from a list of features.
