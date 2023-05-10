@@ -17,7 +17,7 @@ To do this (assuming you have installed MapReader from source, as per our `Insta
 
 .. code-block:: bash 
 
-    conda activate mr_py38
+    conda activate mapreader
     pip install sphinx
     pip install -r MapReader/docs/requirements.txt
 

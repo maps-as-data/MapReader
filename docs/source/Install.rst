@@ -22,11 +22,11 @@ A discussion of which of these to choose can be found `here <https://docs.conda.
 
 Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual python environment:
 
--  Create a new conda environment for ``mapreader`` (you can call this what you like, we use ``mr_pyXX`` where ``XX`` is your python version):
+-  Create a new conda environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
 
    .. code-block:: bash
 
-      conda create -n mr_py38 python=3.8
+      conda create -n mapreader python=3.8
 
    This will create a conda enviroment which uses python version 3.8. 
 
@@ -34,7 +34,7 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    .. code-block:: bash
 
-      conda activate mr_py38
+      conda activate mapreader
 
 Method 2: Using venv or other
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,15 +54,15 @@ For example, if you would like to use venv, open your terminal and use the follo
 
    You should then run the above command again to check your python version has updated.
 
--  Create a new virtual python environment for ``mapreader`` (you can call this what you like, we recommend ``mr_pyXX`` where ``XX`` is your python version):
+-  Create a new virtual python environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
 
    .. code-block:: bash
       
-      python3 -m venv mr_py38
+      python3 -m venv mapreader
 
 -  Activate your virtual environment:
 
-      source mr_py38/bin/activate
+      source mapreader/bin/activate
 
 Step 2: Install MapReader
 --------------------------
@@ -112,9 +112,9 @@ Step 3: Add virtual python environment to notebooks
 
    .. code-block:: bash
    
-      python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+      python -m ipykernel install --user --name mapreader --display-name "Python (mr_py)"
 
-.. note:: if you have used a differe nt name for your python virtual environment replace the ``mr_py38`` with whatever name you have used.
+.. note:: if you have used a differe nt name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
 
 Troubleshooting
 ----------------
