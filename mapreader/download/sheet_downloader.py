@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import shutil
 from functools import reduce
+from pyproj.crs import CRS
 
 
 class SheetDownloader:
@@ -68,7 +69,10 @@ class SheetDownloader:
             )
 
         self.tile_server = my_ts
-
+        
+        crs_string = CRS(self.metadata["crs"]["properties"]["name"])
+        self.crs = crs_string.to_string()
+        
     def __str__(self) -> str:
         info = f"[INFO] Metadata file has {self.__len__()} item(s)."
         return info
@@ -535,7 +539,9 @@ class SheetDownloader:
         xmax, ymax = upper_corner.lon, upper_corner.lat
         coords = (xmin, ymin, xmax, ymax)
 
-        return [map_name, map_url, coords, published_date, grid_bb]
+        crs = self.crs
+
+        return [map_name, map_url, coords, crs, published_date, grid_bb]
 
     def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
         """
@@ -550,7 +556,7 @@ class SheetDownloader:
         """
         metadata_df = pd.DataFrame(
             metadata_to_save,
-            columns=["name", "url", "coordinates", "published_date", "grid_bb"],
+            columns=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
         )
         exists = True if os.path.exists(out_filepath) else False
         metadata_df.to_csv(out_filepath, sep="\t", mode="a", header=not exists)
@@ -966,7 +972,9 @@ class SheetDownloader:
         add_id : bool, optional
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
-        
+        if self.crs != "EPSG:4326":
+            print("[WARNING] This method assumes your coordinates are projected using EPSG 4326. The plot may therefore be incorrect.")
+            
         if add_id:
             if not self.wfs_id_nos:
                 self.extract_wfs_id_nos()
