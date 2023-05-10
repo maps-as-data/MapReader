@@ -61,8 +61,10 @@ For example, if you would like to use venv, open your terminal and use the follo
       python3 -m venv mapreader
 
 -  Activate your virtual environment:
-
-      source mapreader/bin/activate
+   
+   .. code-block:: bash
+      
+      source mr_py38/bin/activate
 
 Step 2: Install MapReader
 --------------------------
@@ -110,7 +112,7 @@ Step 3: Add virtual python environment to notebooks
 
 - To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
-   .. code-block:: bash
+.. code-block:: bash
    
       python -m ipykernel install --user --name mapreader --display-name "Python (mr_py)"
 

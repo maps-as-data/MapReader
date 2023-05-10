@@ -1,4 +1,4 @@
-Beginners information
+Coding Basics
 ======================
 
 Using the terminal
