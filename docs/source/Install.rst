@@ -112,9 +112,9 @@ Step 3: Add virtual python environment to notebooks
 
 - To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
-   .. code-block:: bash
+.. code-block:: bash
    
-      python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
+   python -m ipykernel install --user --name mr_py38 --display-name "Python (mr_py38)"
 
 .. note:: if you have used a differe nt name for your python virtual environment replace the ``mr_py38`` with whatever name you have used.
 
