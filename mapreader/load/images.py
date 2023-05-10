@@ -735,6 +735,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             max_y = (pixel_bounds[3] * dlat) + parent_min_y
 
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
+            self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
 
     def _add_center_coord_id(
         self,
