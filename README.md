@@ -78,7 +78,7 @@ The MapReader documentation can be found [here](https://mapreader.readthedocs.io
 
 **New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/Install.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/Input-guidance.html) for guidance on the initial set up of MapReader.
 
-**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/User-guide.html) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustratng use cases such as:
+**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/User-guide/User-guide.html) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustratng use cases such as:
 - Geospatial images (i.e. maps)
 - Non-geospatial images 
 
