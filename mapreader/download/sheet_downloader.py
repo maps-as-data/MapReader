@@ -366,7 +366,7 @@ class SheetDownloader:
     def query_map_sheets_by_string(
         self,
         string: str,
-        keys: Union[str, list],
+        keys: Union[str, list] = None,
         append: Optional[bool] = False,
         print: Optional[bool] = False,
     ) -> None:
@@ -378,11 +378,13 @@ class SheetDownloader:
         string : str
             The string to search for. 
             Can be raw string and use regular expressions.
-        keys : list
+        keys : str or list, optional
             A key or list of keys used to get the metadata field to search in.
             
             Key(s) will be passed to each features dictionary.
-            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"].
+
+            If ``None``, will search in all metadata fields. By default ``None``. 
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list. 
             By default False
@@ -397,8 +399,10 @@ class SheetDownloader:
         if not isinstance(string, str):
             raise ValueError("[ERROR] Please pass ``string`` as a string.")
         
-        if isinstance(keys, str):
+        if keys is None:
             keys = []
+        if isinstance(keys, str):
+            keys = [keys]
         if not isinstance(keys, list):
             raise ValueError("[ERROR] Please pass key(s) as string or list of strings.")
 
@@ -820,7 +824,7 @@ class SheetDownloader:
     def download_map_sheets_by_string(
         self,
         string: str,
-        keys: Union[str, list], 
+        keys: Union[str, list] = None, 
         path_save: Optional[str] = "maps", 
         metadata_fname: Optional[str] = "metadata.csv",
         overwrite: Optional[bool] = False,
@@ -833,11 +837,13 @@ class SheetDownloader:
         string : str
             The string to search for. 
             Can be raw string and use regular expressions.
-        keys : list
+        keys : str or list, optional
             A key or list of keys used to get the metadata field to search in.
             
             Key(s) will be passed to each features dictionary. \
             i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+
+            If ``None``, will search in all metadata fields. By default ``None``. 
         path_save : str, optional
             Path to save map sheets, by default "maps"
         metadata_fname : str, optional
@@ -852,8 +858,10 @@ class SheetDownloader:
         if not isinstance(string, str):
             raise ValueError("[ERROR] Please pass ``string`` as a string.")
         
-        if isinstance(keys, str):
+        if keys is None:
             keys = []
+        if isinstance(keys, str):
+            keys = [keys]
         if not isinstance(keys, list):
             raise ValueError("[ERROR] Please pass key(s) as string or list of strings.")
 
