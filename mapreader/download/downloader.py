@@ -1,7 +1,7 @@
 from typing import Union, Optional
 from shapely.geometry import Polygon
 from .data_structures import Coordinate, GridBoundingBox
-from .tile_loading import TileDownloader
+from .tile_loading import TileDownloader, DEFAULT_TEMP_FOLDER
 from .tile_merging import TileMerger
 from .downloader_utils import get_index_from_coordinate
 import shutil
@@ -98,7 +98,7 @@ class Downloader:
         else:
             print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
 
-        shutil.rmtree("_tile_cache/")
+        shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return success
 
     def download_map_by_polygon(

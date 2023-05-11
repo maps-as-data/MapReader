@@ -4,7 +4,7 @@ from typing import Union, Optional
 from shapely.geometry import Polygon, LineString, Point, shape
 from shapely.ops import unary_union
 from .data_structures import Coordinate, GridBoundingBox
-from .tile_loading import TileDownloader
+from .tile_loading import TileDownloader, DEFAULT_TEMP_FOLDER
 from .tile_merging import TileMerger
 from .downloader_utils import get_coordinate_from_index, get_grid_bb_from_polygon, get_polygon_from_grid_bb
 import re
@@ -15,6 +15,7 @@ import pandas as pd
 import shutil
 from functools import reduce
 from pyproj.crs import CRS
+
 
 
 class SheetDownloader:
@@ -498,7 +499,7 @@ class SheetDownloader:
         else:
             print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
         
-        shutil.rmtree("_tile_cache/")
+        shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return success
 
     def _save_metadata(

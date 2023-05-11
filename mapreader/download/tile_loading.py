@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 from .data_structures import GridIndex, GridBoundingBox
 
+DEFAULT_TEMP_FOLDER = "_tile_cache/"
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 
 
@@ -37,7 +38,7 @@ class TileDownloader:
             Whether or not to show progress bar, by default False.
         """
         self.tile_servers = tile_servers
-        self.temp_folder = "_tile_cache/"
+        self.temp_folder = DEFAULT_TEMP_FOLDER
         self.img_format = (
             img_format if img_format is not None else DEFAULT_IMG_DOWNLOAD_FORMAT
         )

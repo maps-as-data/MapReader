@@ -11,9 +11,8 @@ from .data_structures import GridIndex, GridBoundingBox
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TEMP_FOLDER = "_tile_cache/"
+from .tile_loading import DEFAULT_TEMP_FOLDER, DEFAULT_IMG_DOWNLOAD_FORMAT
 DEFAULT_OUT_FOLDER = "./"
-DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 DEFAULT_IMG_STORE_FORMAT = ("png", "PNG")
 
 
@@ -57,7 +56,7 @@ class TileMerger:
         self.output_folder = (
             output_folder if output_folder is not None else DEFAULT_OUT_FOLDER
         )
-        self.temp_folder = "_tile_cache/"
+        self.temp_folder = DEFAULT_TEMP_FOLDER
         self.show_progress = show_progress
 
     @staticmethod
