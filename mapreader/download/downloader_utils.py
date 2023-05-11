@@ -86,7 +86,7 @@ def get_index_from_coordinate(coordinate: Coordinate, zoom: int) -> GridIndex:
 
 
 def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
-    """Create Coordiante object from GridIndex.
+    """Create Coordinate object from GridIndex.
 
     Parameters
     ----------
@@ -96,6 +96,9 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
     Returns
     -------
     Coordinate
+        The upper left corner of the tile.
+
+    
     """
     lon, lat = _get_coordinate_from_index(grid_index.x, grid_index.y, grid_index.z)
     return Coordinate(lat, lon)
@@ -123,7 +126,7 @@ def _get_coordinate_from_index(x: int, y: int, z: int) -> Tuple[(float, float)]:
     Returns
     -------
     Tuple
-        (lon, lat) tuple.
+        (lon, lat) tuple representing the upper left corner of the tile.
     """
     assert z >= 0, "Zoom level must be positive"
     n = 2**z
