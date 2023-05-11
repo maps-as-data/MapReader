@@ -89,9 +89,12 @@ def test_query_by_string(sheet_downloader):
     sd.query_map_sheets_by_string("Westminster",["properties","PARISH"])
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[3]
-    sd.query_map_sheets_by_string("one_inch",["id"], append = True) #test append
+    sd.query_map_sheets_by_string("one_inch", "id", append = True) #test append + w/ keys as string
     assert len(sd.found_queries) == 3
     assert sd.found_queries[1:3] == sd.features[:2]
+    sd.query_map_sheets_by_string("095", append = True) #test w/ no keys
+    assert len(sd.found_queries) == 4
+    assert sd.found_queries[3] == sd.features[2]
 
 # download
 
@@ -184,12 +187,14 @@ def test_download_by_string(sheet_downloader, tmp_path):
     sd.get_grid_bb(10)
     maps_path=tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
-    sd.download_map_sheets_by_string("Westminster",["properties","PARISH"], maps_path, metadata_fname)
+    sd.download_map_sheets_by_string("Westminster",["properties","PARISH"], maps_path, metadata_fname) #test w/ keys list
+    sd.download_map_sheets_by_string("one_inch", "id", maps_path, metadata_fname) #test w/ keys string
+    sd.download_map_sheets_by_string("095", path_save=maps_path, metadata_fname=metadata_fname) #test w/ no keys
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
-    assert len(csv) == 2
+    assert len(csv) == 5
     assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
     assert csv[1].startswith('0\tmap_91617032.png')
 
