@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 from .data_structures import GridIndex, GridBoundingBox
 
-DEFAULT_TEMP_FOLDER = "_tile_cache/"
+DEFAULT_TEMP_FOLDER = "_tile_cache/" # must end with a "/"
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 
 
