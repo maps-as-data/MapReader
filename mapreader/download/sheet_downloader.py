@@ -111,7 +111,7 @@ class SheetDownloader:
 
         for feature in self.features:
             polygon = feature["polygon"]
-            grid_bb = get_grid_bb_from_polygon(zoom_level, polygon)
+            grid_bb = get_grid_bb_from_polygon(polygon, zoom_level)
 
             feature["grid_bb"] = grid_bb
 
