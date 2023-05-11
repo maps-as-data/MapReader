@@ -33,3 +33,5 @@ def sheet_downloader(monkeypatch, sample_dir):
     sdl = SheetDownloader(test_json, download_url)
 
     monkeypatch.setattr(sdl.downloader, "_trigger_download", _mock_trigger_download)
+    return sdl
+
