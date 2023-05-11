@@ -1152,7 +1152,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             list_patches = self.parents[parent_id]["patches"]
 
-            for patch in list_patches:
+            for patch in tqdm(list_patches):
                 patch_data = self.patches[patch]
                 patch_keys = patch_data.keys()
                 img = Image.open(patch_data["image_path"])
