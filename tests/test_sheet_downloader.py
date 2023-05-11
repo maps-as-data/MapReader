@@ -4,7 +4,7 @@ import pathlib
 from pathlib import Path
 from shapely.geometry import Polygon, LineString
 import os
-import shutil
+import json
 
 @pytest.fixture
 def sample_dir():
@@ -31,6 +31,11 @@ def test_minmax_latlon(sheet_downloader, capfd):
     sd.get_minmax_latlon()
     out, _ = capfd.readouterr()
     assert out == "[INFO] Min lat: 51.49344796, max lat: 54.75000003 \n[INFO] Min lon: -5.40999994, max lon: -0.16093917\n"
+
+def test_crs(sheet_downloader):
+    sd = sheet_downloader
+    sd.get_grid_bb()
+    assert sd.crs == "EPSG:4326"
 
 # queries 
 
@@ -216,6 +221,13 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     assert csv[1].startswith('0\tmap_102352861.png\t')
 
 # errors
+
+def test_crs_errors(sample_dir):
+    test_json = f"{sample_dir}/test_json_epsg3857.json" # crs set to EPSG:3857 (note: coordinates are wrong)
+    download_url = "https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png"
+    sd = SheetDownloader(test_json, download_url)
+    with pytest.raises(NotImplementedError, match="EPSG:4326"):
+        sd.get_grid_bb()
 
 def test_query_by_wfs_ids_errors(sheet_downloader):
     sd = sheet_downloader
