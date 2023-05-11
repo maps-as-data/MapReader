@@ -300,5 +300,5 @@ def test_loader_calc_pixel_stats(init_ts_maps, sample_dir, tmp_path):
 def test_loader_convert_images(init_ts_maps):
     _, ts_map, _, _ = init_ts_maps
     parent_df, patch_df = ts_map.convert_images()
-    assert parent_df.shape == (1, 12)
-    assert patch_df.shape == (9, 5)
+    assert parent_df.shape == (1, 13)
+    assert patch_df.shape == (9, 6)
