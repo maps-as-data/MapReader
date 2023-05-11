@@ -255,7 +255,6 @@ def test_loader_patchify_all(sample_dir, tmp_path):
     assert len(patch_list) == 9
     assert os.path.isfile(f"{tmp_path}/patch-0-0-3-3-#{image_ID}#.png")
 
-
 def test_loader_coord_functions(init_ts_maps, sample_dir):
     # test for png with added metadata
     image_ID, ts_map, _, patch_list = init_ts_maps
@@ -302,3 +301,18 @@ def test_loader_convert_images(init_ts_maps):
     parent_df, patch_df = ts_map.convert_images()
     assert parent_df.shape == (1, 13)
     assert patch_df.shape == (9, 6)
+    parent_df, patch_df = ts_map.convert_images(save=True)
+    assert os.path.isfile("./parent_df.csv")
+    assert os.path.isfile("./patch_df.csv")
+    os.remove("./parent_df.csv")
+    os.remove("./patch_df.csv")
+    parent_df, patch_df = ts_map.convert_images(save=True, save_format="excel")
+    assert os.path.isfile("./parent_df.xlsx")
+    assert os.path.isfile("./patch_df.xlsx")
+    os.remove("./parent_df.xlsx")
+    os.remove("./patch_df.xlsx")
+
+def test_loader_convert_images_errors(init_ts_maps):
+    _, ts_map, _, _ = init_ts_maps
+    with pytest.raises(ValueError, match="``save_format`` should be one of"):
+        ts_map.convert_images(save=True, save_format="json")
