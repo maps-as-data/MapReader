@@ -6,7 +6,7 @@ from shapely.ops import unary_union
 from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader
 from .tile_merging import TileMerger
-from .downloader_utils import get_index_from_coordinate, get_coordinate_from_index
+from .downloader_utils import get_coordinate_from_index, get_grid_bb_from_polygon, get_polygon_from_grid_bb
 import re
 import matplotlib.pyplot as plt
 # import cartopy.crs as ccrs - would be good to get this fixed (i think by conda package)
@@ -111,14 +111,7 @@ class SheetDownloader:
 
         for feature in self.features:
             polygon = feature["polygon"]
-            min_x, min_y, max_x, max_y = polygon.bounds
-
-            start = Coordinate(min_y, max_x)  # (lat, lon)
-            end = Coordinate(max_y, min_x)  # (lat, lon)
-
-            start_idx = get_index_from_coordinate(start, zoom_level)
-            end_idx = get_index_from_coordinate(end, zoom_level)
-            grid_bb = GridBoundingBox(start_idx, end_idx)
+            grid_bb = get_grid_bb_from_polygon(zoom_level, polygon)
 
             feature["grid_bb"] = grid_bb
 
@@ -534,13 +527,10 @@ class SheetDownloader:
         published_date = feature["properties"]["published_date"]
         
         grid_bb = feature["grid_bb"]
-        
+
         #use grid_bb to get coords of actually downloaded tiles
-        lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
-        xmin, ymin = lower_corner.lon, lower_corner.lat
-        upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
-        xmax, ymax = upper_corner.lon, upper_corner.lat
-        coords = (xmin, ymin, xmax, ymax)
+        polygon = get_polygon_from_grid_bb(grid_bb)
+        coords = polygon.bounds
 
         crs = self.crs
 

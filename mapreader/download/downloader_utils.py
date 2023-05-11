@@ -3,7 +3,7 @@ from shapely.geometry import Polygon, LineString, box
 import math
 from typing import Tuple
 
-from .data_structures import Coordinate, GridIndex
+from .data_structures import Coordinate, GridIndex, GridBoundingBox
 
 
 def create_polygon_from_latlons(
@@ -57,9 +57,47 @@ def create_line_from_latlons(
     
     y1,x1 = lat1,lon1 = lat1_lon1 # for clarity - can delete?
     y2,x2 = lat2,lon2 = lat2_lon2 # for clarity - can delete?
+    return LineString([(x1,y1),(x2,y2)])
 
-    line = LineString([(x1,y1),(x2,y2)])
-    return line
+def get_grid_bb_from_polygon(self, polygon: Polygon, zoom_level: int):
+    """
+    Create GridBoundingBox object from shapely.Polygon
+
+    Parameters
+    ----------
+    polygon : shapely.Polygon
+        shapely.Polygon to convert.
+    zoom_level : int
+        Zoom level to use when creating GridBoundingBox
+
+    Returns
+    -------
+    GridBoundingBox
+    """
+    min_x, min_y, max_x, max_y = polygon.bounds
+    start = Coordinate(min_y, max_x)  # (lat, lon)
+    end = Coordinate(max_y, min_x)  # (lat, lon)
+    start_idx = get_index_from_coordinate(start, zoom_level)
+    end_idx = get_index_from_coordinate(end, zoom_level)
+    return GridBoundingBox(start_idx, end_idx)
+
+def get_polygon_from_grid_bb(self, grid_bb: GridBoundingBox):
+    """
+    Create shapely.Polygon object from GridBoundingBox
+
+    Parameters
+    ----------
+    grid_bb : GridBoundingBox
+        GridBoundingBox to convert.
+
+    Returns
+    -------
+    shapely.Polygon
+    """
+    lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
+    upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
+    polygon = create_polygon_from_latlons(lower_corner.lat, lower_corner.lon, upper_corner.lat, upper_corner.lon)
+    return polygon
 
 
 # The code below converts lon-lat requests to the respective tile indices.
