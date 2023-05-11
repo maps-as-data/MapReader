@@ -107,7 +107,7 @@ class SheetDownloader:
             self.get_polygons()
 
         if self.crs != "EPSG:4326":
-            raise NotImplementedError("[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets projected in EPSG 4326.")
+            raise NotImplementedError("[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets using coordinates in WGS1984 (aka EPSG:4326).")
 
         for feature in self.features:
             polygon = feature["polygon"]
