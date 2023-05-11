@@ -59,7 +59,7 @@ def create_line_from_latlons(
     y2,x2 = lat2,lon2 = lat2_lon2 # for clarity - can delete?
     return LineString([(x1,y1),(x2,y2)])
 
-def get_grid_bb_from_polygon(self, polygon: Polygon, zoom_level: int):
+def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     """
     Create GridBoundingBox object from shapely.Polygon
 
@@ -81,7 +81,7 @@ def get_grid_bb_from_polygon(self, polygon: Polygon, zoom_level: int):
     end_idx = get_index_from_coordinate(end, zoom_level)
     return GridBoundingBox(start_idx, end_idx)
 
-def get_polygon_from_grid_bb(self, grid_bb: GridBoundingBox):
+def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     """
     Create shapely.Polygon object from GridBoundingBox
 
