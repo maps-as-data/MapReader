@@ -259,7 +259,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         metadata: Union[str, pd.DataFrame],
         index_col: Optional[Union[int, str]] = 0,
-        delimiter: Optional[str] = "|",
+        delimiter: Optional[str] = "\t",
         columns: Optional[List[str]] = None,
         tree_level: Optional[str] = "parent",
         ignore_mismatch: Optional[bool] = False,
@@ -279,7 +279,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Only used if a file path is provided as the ``metadata`` parameter.
             Ingored if ``columns`` parameter is passed.
         delimiter : str, optional
-            Delimiter used in the ``csv`` file, by default ``"|"``.
+            Delimiter used in the ``csv`` file, by default ``"\t"``.
 
             Only used if a ``csv`` file path is provided as
             the ``metadata`` parameter.
@@ -751,6 +751,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             max_y = (pixel_bounds[3] * dlat) + parent_min_y
 
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
+            self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
 
     def _add_patch_polygon_id(self, image_id: str, verbose: bool = False) -> None:
         """Create polygon from a patch
@@ -1220,10 +1221,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         # Calculate std pixel values
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
 
-    def convert_images(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def convert_images(self, save: Optional[bool] = False, save_format: Optional[str] ="csv") -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the ``MapImages`` instance's ``images`` dictionary into pandas
         DataFrames for easy manipulation.
+
+        Parameters
+        ----------
+
+        save : bool, optional
+            Whether to save the dataframes as files. By default ``False``.
+        save_format : str, optional
+            If ``save = True``, the file format to use when saving the dataframes.
+            Options of csv ("csv") or excel ("excel" or "xlsx"). 
+            By default, "csv".
 
         Returns
         -------
@@ -1233,6 +1244,22 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
         patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
+
+        if save:
+
+            if save_format == "csv":
+                parent_df.to_csv("parent_df.csv", sep="\t")
+                print('[INFO] Saved parent dataframe as "parent_df.csv"')
+                patch_df.to_csv("patch_df.csv", sep="\t")
+                print('[INFO] Saved patch dataframe as "patch_df.csv"')
+            elif save_format in ["excel", "xlsx"]:
+                parent_df.to_excel("parent_df.xlsx")
+                print('[INFO] Saved parent dataframe as "parent_df.xlsx"')
+                patch_df.to_excel("patch_df.xlsx")
+                print('[INFO] Saved patch dataframe as "patch_df.xslx"')
+
+            else:
+                raise ValueError(f'[ERROR] ``save_format`` should be one of "csv", "excel" or "xlsx". Not {save_format}.')
 
         return parent_df, patch_df
 
