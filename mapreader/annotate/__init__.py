@@ -38,6 +38,8 @@ class Annotator(pd.DataFrame):
         provided. Default: "./maps/*.png"
     metadata : str, optional
         Path to metadata file. Default: "./maps/metadata.csv"
+    metadata_delimiter : str, optional
+        Separator in the metadata file. Default: ",".
     annotations_dir : str, optional
         Directory to save the annotations CSV file. Default: "./annotations"
     username : str, optional
@@ -181,6 +183,7 @@ class Annotator(pd.DataFrame):
         kwargs["show_context"] = kwargs.get("show_context", True)
         kwargs["min_values"] = kwargs.get("min_values", {})
         kwargs["max_values"] = kwargs.get("max_values", {})
+        kwargs["metadata_delimiter"] = kwargs.get("metadata_delimiter", ",")
 
         # Check metadata
         if isinstance(metadata, str):
@@ -312,6 +315,7 @@ class Annotator(pd.DataFrame):
         self.max_values = kwargs["max_values"]
         self.metadata = metadata
         self.patch_width, self.patch_height = self.get_patch_size()
+        self.metadata_delimiter = kwargs["metadata_delimiter"]
 
         # Ensure labels are of type list
         if not isinstance(self.labels, list):
@@ -352,7 +356,7 @@ class Annotator(pd.DataFrame):
         )
         patches.calc_pixel_stats()
 
-        patches.add_metadata(kwargs["metadata"])
+        patches.add_metadata(kwargs["metadata"], delimiter=kwargs["metadata_delimiter"])
 
         parents, patches = patches.convertImages()
 
