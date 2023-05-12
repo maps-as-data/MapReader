@@ -351,11 +351,19 @@ class Annotator(pd.DataFrame):
         self.queue = self.get_queue()
 
     def _load_frames(self, *args, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        print(
+            f"[INFO] Loading patches and parents data from {kwargs['patches']} and {kwargs['parents']}"
+        )
         patches = load_patches(
             patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
         )
+
+        # Add pixel stats
         patches.calc_pixel_stats()
 
+        print(
+            f"[INFO] Adding metadata from {kwargs['metadata']} (delimiter {kwargs['metadata_delimiter']})"
+        )
         patches.add_metadata(kwargs["metadata"], delimiter=kwargs["metadata_delimiter"])
 
         parents, patches = patches.convertImages()
