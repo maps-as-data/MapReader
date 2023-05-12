@@ -43,7 +43,7 @@ class MapImages:
         ``"parent"`` (default) and ``"patch"``.
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
-    **kwds : dict, optional
+    **kwargs : dict, optional
         Additional keyword arguments to be passed to the ``_images_constructor``
         method.
 
@@ -63,7 +63,7 @@ class MapImages:
         file_ext: Optional[Union[str, bool]] = False,
         tree_level: Optional[str] = "parent",
         parent_path: Optional[str] = None,
-        **kwds: Dict,
+        **kwargs: Dict,
     ):
         """Initializes the MapImages class."""
 
@@ -84,7 +84,7 @@ class MapImages:
                 image_path=image_path,
                 parent_path=parent_path,
                 tree_level=tree_level,
-                **kwds,
+                **kwargs,
             )
 
     @staticmethod
@@ -139,7 +139,7 @@ class MapImages:
         image_path: str,
         parent_path: Optional[str] = None,
         tree_level: Optional[str] = "parent",
-        **kwds: Dict,
+        **kwargs: Dict,
     ) -> None:
         """
         Constructs image data from the given image path and parent path and adds it to the ``MapImages`` instance's ``images`` attribute.
@@ -153,7 +153,7 @@ class MapImages:
         tree_level : str, optional
             Level of the image hierarchy to construct, either ``"parent"``
             (default) or ``"parent"``.
-        **kwds : dict, optional
+        **kwargs : dict, optional
             Additional keyword arguments to be included in the constructed
             image data.
 
@@ -192,7 +192,7 @@ class MapImages:
         if parent_path:
             abs_parent_path, parent_id, _ = self._convert_image_path(parent_path)
 
-        # add image, coords (if present), shape and other kwds to dictionary
+        # add image, coords (if present), shape and other kwargs to dictionary
         self.images[tree_level][image_id] = {
             "parent_id": parent_id,
             "image_path": abs_image_path,
@@ -204,7 +204,7 @@ class MapImages:
                 pass
         
         self._add_shape_id(image_id)
-        for k, v in kwds.items():
+        for k, v in kwargs.items():
             self.images[tree_level][image_id][k] = v
 
         if parent_id:  # tree_level = 'patch' is implied
@@ -410,7 +410,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         num_samples: int,
         tree_level: Optional[str] = "parent",
         random_seed: Optional[int] = 65,
-        **kwds: Dict,
+        **kwargs: Dict,
     ) -> None:
         """
         Display a sample of images from a particular level in the image
@@ -425,7 +425,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             ``"patch"`` or ``"parent"`` (default).
         random_seed : int, optional
             The random seed to use for reproducibility. Default is ``65``.
-        **kwds : dict, optional
+        **kwargs : dict, optional
             Additional keyword arguments to pass to
             ``matplotlib.pyplot.figure()``.
 
@@ -441,7 +441,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         num_samples = min(len(image_ids), num_samples)
         sample_image_ids = random.sample(image_ids, k=num_samples)
 
-        figsize = kwds.get("figsize", (15, num_samples * 2))
+        figsize = kwargs.get("figsize", (15, num_samples * 2))
         plt.figure(figsize=figsize)
 
         for i, image_id in enumerate(sample_image_ids):
@@ -1199,7 +1199,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         parent_id: str,
         column_to_plot: Optional[str] = None,
-        **kwds: Dict,
+        **kwargs: Dict,
     ) -> None:
         """
         A wrapper method for `.show()` which plots all patches of a
@@ -1211,7 +1211,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             ID of the parent image to be plotted.
         column_to_plot : str, optional
             Column whose values will be plotted on patches, by default ``None``.
-        **kwds: Dict
+        **kwargs: Dict
             Key words to pass to ``show`` method.
             See help text for ``show`` for more information.
 
@@ -1226,7 +1226,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         :meth:`mapreader.load.images.MapImages.show` method for more detail.
         """
         patch_ids = self.parents[parent_id]["patches"]
-        figures = self.show(patch_ids, column_to_plot=column_to_plot, **kwds)
+        figures = self.show(patch_ids, column_to_plot=column_to_plot, **kwargs)
         
         return figures
 

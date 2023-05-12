@@ -9,7 +9,7 @@ def loader(
     path_images: Optional[str] = None,
     tree_level: Optional[str] = "parent",
     parent_path: Optional[str] = None,
-    **kwds: Dict
+    **kwargs: dict
 ) -> MapImages:
     """
     Creates a ``MapImages`` class to manage a collection of image paths and
@@ -25,7 +25,7 @@ def loader(
         ``"parent"`` (default) and ``"patch"``.
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
-    **kwds : dict, optional
+    **kwargs : dict, optional
         Additional keyword arguments to be passed to the ``imagesConstructor``
         method.
 
@@ -41,7 +41,7 @@ def loader(
     :class:`mapreader.load.images.MapImages` class for more detail.
     """
     img = MapImages(
-        path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwds
+        path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwargs
     )
     return img
 
