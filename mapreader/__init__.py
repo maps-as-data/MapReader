@@ -5,8 +5,7 @@ from mapreader.load.loader import load_patches
 from mapreader.download import azure_access
 from mapreader.download.tileserver_access import TileServer
 
-from mapreader.annotate.load_annotate import loadAnnotations
-
+from mapreader.learn.load_annotations import AnnotationsLoader
 from mapreader.learn.datasets import patchTorchDataset
 from mapreader.learn.datasets import patchContextDataset
 from mapreader.learn.classifier import classifier

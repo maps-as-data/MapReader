@@ -25,7 +25,7 @@ except ImportError:
     parhugin_installed = False
 
 
-class patchTorchDataset(torch.utils.data.Dataset):
+class PatchDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         patchframe: pd.DataFrame,
