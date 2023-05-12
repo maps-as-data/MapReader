@@ -271,7 +271,8 @@ class Annotator(pd.DataFrame):
                     kwargs["label_column"]
                 ].apply(lambda x: kwargs["labels"][x])
             except TypeError:
-                # We will assume the label column now contains the label value and not the indices for the labels
+                # We will assume the label column now contains the label value
+                # and not the indices for the labels
                 pass
 
             patch_df = patch_df.join(
@@ -324,6 +325,7 @@ class Annotator(pd.DataFrame):
         self.metadata = parent_df
         self.patch_width, self.patch_height = self.get_patch_size()
         self.metadata_delimiter = kwargs["metadata_delimiter"]
+        self.data_delimiter = kwargs["data_delimiter"]
 
         # Ensure labels are of type list
         if not isinstance(self.labels, list):
@@ -628,6 +630,12 @@ class Annotator(pd.DataFrame):
         return widgets.Image(value=image)
 
     def get_context(self):
+        """
+        TODO:
+        - add docstring
+        - ensure view of the patch is no larger than 150px x 150px using ImageOps.contain(image, (150, 150))
+        """
+
         def get_path(image_path, dim=True):
             if dim == True or dim == "True":
                 dim = True
