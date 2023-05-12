@@ -255,7 +255,7 @@ class Annotator(pd.DataFrame):
         )
 
         # Ensure annotations directory exists
-        os.mkdirs(kwargs["annotations_dir"], exist_ok=True)
+        os.mkdir(kwargs["annotations_dir"], exist_ok=True)
 
         # Test for existing file
         if os.path.exists(kwargs["annotations_file"]):
@@ -376,6 +376,7 @@ class Annotator(pd.DataFrame):
 
         if kwargs["label_column"] not in patches.columns:
             patches[kwargs["label_column"]] = None
+
         patches["changed"] = False
 
         if kwargs["scramble_frame"]:
