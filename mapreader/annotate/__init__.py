@@ -287,7 +287,7 @@ class Annotator(pd.DataFrame):
                     f"{kwargs['label_column']}_y",
                 ]
             )
-            patch_df["changed"] = patch_df[kwargs["label_column"]].apply(
+            patch_df["annotated"] = patch_df[kwargs["label_column"]].apply(
                 lambda x: True if x else False
             )
 
@@ -382,7 +382,7 @@ class Annotator(pd.DataFrame):
         if kwargs["label_column"] not in patches.columns:
             patches[kwargs["label_column"]] = None
 
-        patches["changed"] = False
+        patches["annotated"] = False
 
         if kwargs["scramble_frame"]:
             # Scramble them!
@@ -550,7 +550,7 @@ class Annotator(pd.DataFrame):
         # ix = self.iloc[self.current_index].name
         ix = self.queue[self.current_index]
         self.at[ix, self.label_column] = annotation
-        self.at[ix, "changed"] = True
+        self.at[ix, "annotated"] = True
         if self.auto_save:
             self._auto_save()
         self._next_example()
