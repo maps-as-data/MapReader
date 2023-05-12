@@ -300,7 +300,7 @@ def test_loader_convert_images(init_ts_maps):
     _, ts_map, _, _ = init_ts_maps
     parent_df, patch_df = ts_map.convert_images()
     assert parent_df.shape == (1, 13)
-    assert patch_df.shape == (9, 6)
+    assert patch_df.shape == (9, 7)
     parent_df, patch_df = ts_map.convert_images(save=True)
     assert os.path.isfile("./parent_df.csv")
     assert os.path.isfile("./patch_df.csv")
