@@ -308,11 +308,11 @@ class AnnotationsLoader():
         Returns
         -------
         Tuple
-            A tuple containing the train, val and test dataframes. 
+            A tuple containing the PatchDatasets. 
 
         Notes
         -----
-        As well as returning the dataframes, this method also saves them as ``self.train``, ``self.val``, ``self.test``.
+        As well as returning the PatchDatasets, this method also saves the dataframes as ``self.train``, ``self.val``, ``self.test``.
 
         Following fractional ratios provided by the user, where each subset is
         stratified by the values in a specific column (that is, each subset has
@@ -330,7 +330,7 @@ class AnnotationsLoader():
 
         labels = self.annotations[self.label_col]
 
-        # Split original dataframe into train and temp dataframes.
+        # Split original dataframe into train and temp (val+test) dataframes.
         df_train, df_temp, _, labels_temp = train_test_split(
             self.annotations,
             labels,

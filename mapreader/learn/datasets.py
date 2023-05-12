@@ -49,7 +49,7 @@ class PatchDataset(torch.utils.data.Dataset):
             "label".
         convert2 : str, optional
             The color format to convert the image to. Default is "RGB".
-        input_col : int, optional
+        patch_paths_col : int, optional
             The index of the column in the DataFrame containing the image
             paths. Default is 0.
 
@@ -61,10 +61,10 @@ class PatchDataset(torch.utils.data.Dataset):
             The name of the column containing the image labels.
         convert2 : str
             The color format to convert the image to.
-        input_col : int
+        patch_paths_col : int
             The index of the column in the DataFrame containing the image
             paths.
-        uniq_labels : list
+        unique_labels : list
             The unique labels in the label column of the patchframe DataFrame.
         transform : callable
             A callable object (a torchvision transform) that takes in an image
@@ -85,17 +85,17 @@ class PatchDataset(torch.utils.data.Dataset):
         self.patchframe = patchframe
         self.label_col = label_col
         self.image_mode = image_mode
-        self.input_col = patch_paths_col
+        self.patch_paths_col = patch_paths_col
 
-        if self.label_col in self.patchframe.columns.tolist():
-            self.uniq_labels = self.patchframe[self.label_col].unique().tolist()
+        if self.label_col not in self.patchframe.columns:
+            raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
         else:
-            self.uniq_labels = "NS"
+            self.unique_labels = self.patchframe[self.label_col].unique().tolist()
 
-        if transform in ["train", "val"]:
+        if transform in ["train", "val", "test"]:
             self.transform = self._default_transform(transform)
         else:
-            self.transform = transform
+            self.transform = transform # CHECK THIS - RW
 
     def __len__(self) -> int:
         """
@@ -126,8 +126,8 @@ class PatchDataset(torch.utils.data.Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
-        image = Image.open(img_path).convert(self.convert2)
+        img_path = os.path.join(self.patchframe.iloc[idx, self.patch_paths_col])
+        image = Image.open(img_path).convert(self.image_mode)
 
         image = self.transform(image)
 
@@ -156,7 +156,7 @@ class PatchDataset(torch.utils.data.Dataset):
         -----
         This method returns the original image associated with the given index
         by loading the image file using the file path stored in the
-        ``input_col`` column of the ``patchframe`` DataFrame at the given
+        ``patch_paths_col`` column of the ``patchframe`` DataFrame at the given
         index. The loaded image is then converted to the format specified by
         the ``convert2`` attribute of the object. The resulting
         ``PIL.Image.Image`` object is returned.
@@ -164,8 +164,8 @@ class PatchDataset(torch.utils.data.Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
-        image = Image.open(img_path).convert(self.convert2)
+        img_path = os.path.join(self.patchframe.iloc[idx, self.patch_paths_col])
+        image = Image.open(img_path).convert(self.image_mode)
 
         return image
 
@@ -196,6 +196,8 @@ class PatchDataset(torch.utils.data.Dataset):
         """
         normalize_mean = [0.485, 0.456, 0.406]
         normalize_std = [0.229, 0.224, 0.225]
+
+        t_type = "val" if t_type == "train" else t_type #train and val are synonymous
 
         data_transforms = {
             "train": transforms.Compose(
@@ -233,7 +235,7 @@ class patchContextDataset(Dataset):
         transform2: Optional[str] = None,
         label_col: Optional[str] = "label",
         convert2: Optional[str] = "RGB",
-        input_col: Optional[int] = 0,
+        patch_paths_col: Optional[int] = 0,
         context_save_path: Optional[str] = "./maps/maps_context",
         create_context: Optional[bool] = False,
         par_path: Optional[str] = "./maps",
@@ -261,7 +263,7 @@ class patchContextDataset(Dataset):
             information. Default is "label".
         convert2 : str, optional
             The color space of the images. Default is "RGB".
-        input_col : int, optional
+        patch_paths_col : int, optional
             The index of the column in ``patchframe`` that contains the input
             image paths. Default is 0.
         context_save_path : str, optional
@@ -291,7 +293,7 @@ class patchContextDataset(Dataset):
             information.
         convert2 : str
             The color space of the images.
-        input_col : int
+        patch_paths_col : int
             The index of the column in ``patchframe`` that contains the input
             image paths.
         par_path : str
@@ -308,7 +310,7 @@ class patchContextDataset(Dataset):
             Whether or not to create context maps.
         context_save_path : str
             The path to save context maps to.
-        uniq_labels : list or str
+        unique_labels : list or str
             The unique labels in ``label_col``, or "NS" if ``label_col`` not in
             ``patchframe``.
 
@@ -329,7 +331,7 @@ class patchContextDataset(Dataset):
         self.patchframe = patchframe
         self.label_col = label_col
         self.convert2 = convert2
-        self.input_col = input_col
+        self.patch_paths_col = patch_paths_col
         self.par_path = par_path
         self.x_offset = x_offset
         self.y_offset = y_offset
@@ -340,9 +342,9 @@ class patchContextDataset(Dataset):
             self.context_save_path = os.path.abspath(context_save_path)
 
         if self.label_col in self.patchframe.columns.tolist():
-            self.uniq_labels = self.patchframe[self.label_col].unique().tolist()
+            self.unique_labels = self.patchframe[self.label_col].unique().tolist()
         else:
-            self.uniq_labels = "NS"
+            self.unique_labels = "NS"
 
         if transform1 in ["train", "val"]:
             self.transform1 = self._default_transform(transform1)
@@ -457,7 +459,7 @@ class patchContextDataset(Dataset):
         -------
         None
         """
-        img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
+        img_path = os.path.join(self.patchframe.iloc[idx, self.patch_paths_col])
         img_rd = Image.open(img_path).convert(self.convert2)
 
         if not return_image:
@@ -558,7 +560,7 @@ class patchContextDataset(Dataset):
         -----
         This method returns the original image associated with the given index
         by loading the image file using the file path stored in the
-        ``input_col`` column of the ``patchframe`` DataFrame at the given
+        ``patch_paths_col`` column of the ``patchframe`` DataFrame at the given
         index. The loaded image is then converted to the format specified by
         the ``convert2`` attribute of the object. The resulting
         ``PIL.Image.Image`` object is returned.
@@ -566,7 +568,7 @@ class patchContextDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
+        img_path = os.path.join(self.patchframe.iloc[idx, self.patch_paths_col])
 
         image = Image.open(img_path).convert(self.convert2)
 
@@ -632,7 +634,7 @@ class patchContextDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
+        img_path = os.path.join(self.patchframe.iloc[idx, self.patch_paths_col])
         image = Image.open(img_path).convert(self.convert2)
 
         if self.create_context:
