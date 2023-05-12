@@ -7,10 +7,10 @@ def test_import():
         TileServer,
         classifier,
         load_patches,
-        loadAnnotations,
+        AnnotationsLoader,
         loader,
         MapImages,
-        patchTorchDataset,
+        PatchDataset,
     )
     import mapreader.download.azure_access as azure_access
     from mapreader.annotate.utils import prepare_annotation, save_annotation
