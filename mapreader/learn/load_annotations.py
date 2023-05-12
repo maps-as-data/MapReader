@@ -8,9 +8,11 @@ import pandas as pd
 import numpy as np
 from skimage import io
 from sklearn.model_selection import train_test_split
-from typing import Union, Optional
+from typing import Union, Optional, Dict, Callable
 from PIL import Image
+from decimal import Decimal
 
+from .datasets import PatchDataset
 
 class AnnotationsLoader():
     def __init__(self):
@@ -271,10 +273,13 @@ class AnnotationsLoader():
 
     def split_annotations(
         self,
-        frac_train: Optional[float] = 0.70,
-        frac_val: Optional[float] = 0.15,
-        frac_test: Optional[float] = 0.15,
+        frac_train: Optional[Union[str, float]] = 0.70,
+        frac_val: Optional[Union[str, float]] = 0.15,
+        frac_test: Optional[Union[str, float]] = 0.15,
         random_state: Optional[int] = 1364,
+        train_transform: Optional[Union[str, Callable]] = "train",
+        val_transform: Optional[Union[str, Callable]] = "val",
+        test_transform: Optional[Union[str, Callable]] = "test",
     ) -> tuple:
         """
         Splits the dataset into three subsets: training, validation, and test
@@ -315,9 +320,12 @@ class AnnotationsLoader():
         this splitting by running ``train_test_split()`` twice.
         """
 
-        if abs(frac_train + frac_val + frac_test - 1.0) > 1e-4:
+        for frac in [frac_train, frac_val, frac_test]:
+            frac = Decimal(str(frac))
+
+        if sum([frac_train + frac_val + frac_test]) != 1:
             raise ValueError(
-                f"[ERROR] ``frac_train`` ({frac_train}), ``frac_val`` ({frac_val}) and ``frac_test`` ({frac_test}) do not add up to 1.0."
+                f"[ERROR] ``frac_train`` ({frac_train}), ``frac_val`` ({frac_val}) and ``frac_test`` ({frac_test}) do not add up to 1."
             ) # noqa
 
         labels = self.annotations[self.label_col]
@@ -331,12 +339,7 @@ class AnnotationsLoader():
             random_state=random_state,
         )
 
-        if abs(frac_test) < 1e-3:
-            df_val = labels_temp
-            df_test = None
-            assert len(self.annotations) == len(df_train) + len(df_val)
-        
-        else:
+        if frac_test != 0:
             # Split the temp dataframe into val and test dataframes.
             relative_frac_test = frac_test / (frac_val + frac_test)
             df_val, df_test, _, _ = train_test_split(
@@ -348,16 +351,27 @@ class AnnotationsLoader():
             )
             assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
 
+        else:
+            df_val = labels_temp
+            assert len(self.annotations) == len(df_train) + len(df_val)
+        
         self.train = df_train
         self.val = df_val
-        self.test = df_test
+
+        train_dataset = PatchDataset(self.train, train_transform, self.patch_paths_col, self.label_col, )
+        val_dataset = PatchDataset(self.val, val_transform, self.patch_paths_col, self.label_col)
 
         print(f"[INFO] Number of annotations in each set:\n\
-    - Train:      {len(self.train)}\n\
-    - Validate:   {len(self.val)}\n\
-    - Test:       {len(self.test) if self.test is not None else 0}")
+    - Train:        {len(train_dataset)}\n\
+    - Validate:     {len(val_dataset)}")
+        
+        if df_test is not None:
+            self.test = df_test
+            test_dataset = PatchDataset(self.test, test_transform, self.patch_paths_col, self.label_col)     
+            print(f"    - Test:         {len(test_dataset)}")
+            return train_dataset, val_dataset, test_dataset
 
-        return df_train, df_val, df_test
+        return train_dataset, val_dataset
     
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")
@@ -365,5 +379,5 @@ class AnnotationsLoader():
             value_counts = self.annotations[self.label_col].value_counts()
             print(f'[INFO] Number of instances of each label (from column "{self.label_col}"):')
             for label, count in value_counts.items():
-                print(f"\t{label}:  {count}")
+                print(f"    - {label}:      {count}")
         return ""

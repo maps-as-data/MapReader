@@ -29,10 +29,10 @@ class PatchDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         patchframe: pd.DataFrame,
-        transform: Optional[Callable] = None,
+        transform: Union[str, Callable],
+        patch_paths_col: Optional[int] = 0,
         label_col: Optional[str] = "label",
-        convert2: Optional[str] = "RGB",
-        input_col: Optional[int] = 0,
+        image_mode: Optional[str] = "RGB",
     ):
         """
         A PyTorch Dataset class for loading image patches from a DataFrame.
@@ -84,8 +84,8 @@ class PatchDataset(torch.utils.data.Dataset):
         """
         self.patchframe = patchframe
         self.label_col = label_col
-        self.convert2 = convert2
-        self.input_col = input_col
+        self.image_mode = image_mode
+        self.input_col = patch_paths_col
 
         if self.label_col in self.patchframe.columns.tolist():
             self.uniq_labels = self.patchframe[self.label_col].unique().tolist()
@@ -94,8 +94,6 @@ class PatchDataset(torch.utils.data.Dataset):
 
         if transform in ["train", "val"]:
             self.transform = self._default_transform(transform)
-        elif transform is None:
-            raise ValueError("transform argument is not set.")
         else:
             self.transform = transform
 
@@ -167,13 +165,12 @@ class PatchDataset(torch.utils.data.Dataset):
             idx = idx.tolist()
 
         img_path = os.path.join(self.patchframe.iloc[idx, self.input_col])
-
         image = Image.open(img_path).convert(self.convert2)
 
         return image
 
     def _default_transform(
-        self, t_type: Optional[str] = "train", resize2: Optional[int] = 224
+        self, t_type: Optional[str] = "train", resize: Optional[Union[int, tuple]] = (224,224)
     ) -> Dict:
         """
         Returns a dictionary containing the default image transformations for
@@ -184,8 +181,8 @@ class PatchDataset(torch.utils.data.Dataset):
         t_type : str, optional
             The type of transformation to return. Either "train" or "val".
             Default is "train".
-        resize2 : int, optional
-            The size in pixels to resize the image to. Default is 224.
+        resize2 : int or tuple, optional
+            The size in pixels to resize the image to. Default is (224, 224).
 
         Returns
         -------
@@ -203,7 +200,7 @@ class PatchDataset(torch.utils.data.Dataset):
         data_transforms = {
             "train": transforms.Compose(
                 [
-                    transforms.Resize(resize2),
+                    transforms.Resize(resize),
                     transforms.RandomApply(
                         [
                             transforms.RandomHorizontalFlip(),
@@ -218,7 +215,7 @@ class PatchDataset(torch.utils.data.Dataset):
             ),
             "val": transforms.Compose(
                 [
-                    transforms.Resize(resize2),
+                    transforms.Resize(resize),
                     transforms.ToTensor(),
                     transforms.Normalize(normalize_mean, normalize_std),
                 ]
