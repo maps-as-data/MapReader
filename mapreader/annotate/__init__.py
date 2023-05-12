@@ -188,11 +188,11 @@ class Annotator(pd.DataFrame):
         # Check metadata
         if isinstance(metadata, str):
             # we have data as string = assume it's a path to a
-            data = pd.read_csv(data)
+            metadata = pd.read_csv(metadata, delimiter=kwargs["metadata_delimiter"])
 
         if isinstance(metadata, (dict, list)):
             # we have data as string = assume it's a path to a
-            data = pd.DataFrame(data)
+            metadata = pd.DataFrame(metadata)
 
         # Check data
         if isinstance(data, str):
