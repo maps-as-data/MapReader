@@ -11,13 +11,15 @@ import ipywidgets as widgets
 import pandas as pd
 from IPython.display import clear_output, display
 from numpy import array_split
-from PIL import Image
+from PIL import Image, ImageOps
 
 from ..load.loader import load_patches
 
 _CENTER_LAYOUT = widgets.Layout(
     display="flex", flex_flow="column", align_items="center"
 )
+
+MAX_SIZE = 100
 
 
 class Annotator(pd.DataFrame):
@@ -183,32 +185,29 @@ class Annotator(pd.DataFrame):
         kwargs["show_context"] = kwargs.get("show_context", True)
         kwargs["min_values"] = kwargs.get("min_values", {})
         kwargs["max_values"] = kwargs.get("max_values", {})
-        kwargs["data_delimiter"] = kwargs.get("data_delimiter", "|")
         kwargs["metadata_delimiter"] = kwargs.get("metadata_delimiter", "|")
 
-        # Check parent data
+        # Check metadata
         if isinstance(parent_df, str):
-            # we have parent data as string = assume it's a path to a csv file
+            # we have data as string = assume it's a path to a
             parent_df = pd.read_csv(parent_df, delimiter=kwargs["metadata_delimiter"])
 
         if isinstance(parent_df, (dict, list)):
-            # we have parent data as dict/list = assume it's data to create
-            # parent frame
+            # we have data as string = assume it's a path to a
             parent_df = pd.DataFrame(parent_df)
 
         # Check data
         if isinstance(patch_df, str):
-            # we have patch data as string = assume it's a path to a csv file
+            # we have data as string = assume it's a path to a
             patch_df = pd.read_csv(patch_df)
 
         if isinstance(patch_df, (dict, list)):
-            # we have patch data as dict/list = assume it's data to create
-            # patch frame
+            # we have data as string = assume it's a path to a
             patch_df = pd.DataFrame(patch_df)
 
         if isinstance(patch_df, type(None)):
-            # If we don't get patch data provided, we'll use the patches and
-            # parents to load up the patches
+            # If we don't get data provided, we'll use the patches and parents to
+            # load up the patches
             try:
                 parent_df, patch_df = self._load_frames(**kwargs)
                 try:
@@ -224,10 +223,10 @@ class Annotator(pd.DataFrame):
 
         # Last check for metadata + data
         if not len(patch_df):
-            raise RuntimeError("No patch data available.")
+            raise RuntimeError("No data available.")
 
         if not len(parent_df):
-            raise RuntimeError("No parent data available.")
+            raise RuntimeError("No metadata available.")
 
         # Test for columns
         if kwargs["label_column"] not in patch_df.columns:
@@ -257,9 +256,6 @@ class Annotator(pd.DataFrame):
             kwargs["annotations_dir"], annotations_file
         )
 
-        # Ensure annotations directory exists
-        os.makedirs(kwargs["annotations_dir"], exist_ok=True)
-
         # Test for existing file
         if os.path.exists(kwargs["annotations_file"]):
             print(
@@ -271,8 +267,7 @@ class Annotator(pd.DataFrame):
                     kwargs["label_column"]
                 ].apply(lambda x: kwargs["labels"][x])
             except TypeError:
-                # We will assume the label column now contains the label value
-                # and not the indices for the labels
+                # We will assume the label column now contains the label value and not the indices for the labels
                 pass
 
             patch_df = patch_df.join(
@@ -287,7 +282,7 @@ class Annotator(pd.DataFrame):
                     f"{kwargs['label_column']}_y",
                 ]
             )
-            patch_df["annotated"] = patch_df[kwargs["label_column"]].apply(
+            patch_df["changed"] = patch_df[kwargs["label_column"]].apply(
                 lambda x: True if x else False
             )
 
@@ -325,7 +320,6 @@ class Annotator(pd.DataFrame):
         self.metadata = parent_df
         self.patch_width, self.patch_height = self.get_patch_size()
         self.metadata_delimiter = kwargs["metadata_delimiter"]
-        self.data_delimiter = kwargs["data_delimiter"]
 
         # Ensure labels are of type list
         if not isinstance(self.labels, list):
@@ -369,7 +363,7 @@ class Annotator(pd.DataFrame):
             patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
         )
 
-        # Add pixel stats -- TODO: check for columns in patches, if non-existent then:
+        # Add pixel stats
         patches.calc_pixel_stats()
 
         print(
@@ -381,8 +375,7 @@ class Annotator(pd.DataFrame):
 
         if kwargs["label_column"] not in patches.columns:
             patches[kwargs["label_column"]] = None
-
-        patches["annotated"] = False
+        patches["changed"] = False
 
         if kwargs["scramble_frame"]:
             # Scramble them!
@@ -550,7 +543,7 @@ class Annotator(pd.DataFrame):
         # ix = self.iloc[self.current_index].name
         ix = self.queue[self.current_index]
         self.at[ix, self.label_column] = annotation
-        self.at[ix, "annotated"] = True
+        self.at[ix, "changed"] = True
         if self.auto_save:
             self._auto_save()
         self._next_example()
@@ -641,11 +634,26 @@ class Annotator(pd.DataFrame):
                 dim = True
                 im = Image.open(image_path)
                 image_path = ".temp.png"
+
+                # add alpha
                 alpha = Image.new("L", im.size, 60)
                 im.putalpha(alpha)
+
+                # ensure size
+                if max(im.size) > MAX_SIZE:
+                    im = ImageOps.contain(im, (MAX_SIZE, MAX_SIZE))
+
                 im.save(image_path)
             else:
                 dim = False
+
+                # ensure correct size
+                im = Image.open(image_path)
+                if max(im.size) > MAX_SIZE:
+                    im = ImageOps.contain(im, (MAX_SIZE, MAX_SIZE))
+
+                image_path = ".temp.png"
+                im.save(image_path)
 
             with open(image_path, "rb") as f:
                 im = f.read()
