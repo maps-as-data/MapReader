@@ -19,6 +19,8 @@ from typing import Literal, Optional, Union, Dict, Tuple, List, Any
 from tqdm import tqdm
 import rasterio
 from rasterio.plot import reshape_as_raster
+from shapely.geometry import box
+import geopandas as geopd
 
 # Ignore warnings
 import warnings
@@ -539,6 +541,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for patch_id in tqdm(patch_list):
             self._add_patch_coords_id(patch_id, verbose)
 
+    def add_patch_polygon(self, verbose: bool = False) -> None:
+        """Add polygon to all patches in patches dictionary.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to print verbose outputs.
+            By default, ``False``
+        """
+        patch_list = self.list_patches()
+
+        for patch_id in tqdm(patch_list):
+            self._add_patch_polygon_id(patch_id, verbose)
+
     def add_center_coord(self, tree_level: Optional[str] = "patch", verbose: Optional[bool] = False) -> None:
         """
         Adds center coordinates to each image at the specified tree level.
@@ -735,6 +751,30 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             max_y = (pixel_bounds[3] * dlat) + parent_min_y
 
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
+
+    def _add_patch_polygon_id(self, image_id: str, verbose: bool = False) -> None:
+        """Create polygon from a patch
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the patch
+        verbose : bool, optional
+            Whether to print verbose outputs.
+            By default, ``False``.
+
+        Return
+        -------
+        None
+        """
+        
+        if "coordinates" not in self.patches[image_id].keys():
+            self._add_patch_coords_id(image_id, verbose)
+        
+        if "coordinates" in self.patches[image_id].keys():
+            coords = self.patches[image_id]["coordinates"]
+            crs = self.patches[image_id]["crs"]
+            self.patches[image_id]["polygon"] = box(*coords)
 
     def _add_center_coord_id(
         self,
@@ -1048,6 +1088,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         pixel_bounds=(min_x, min_y, max_x, max_y),
                     )
                     self._add_patch_coords_id(patch_id)
+                    self._add_patch_polygon_id(patch_id)
 
     def _add_patch_to_parent(self, patch_id: str) -> None:
         """
@@ -1141,7 +1182,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         else:
             parent_ids = [parent_id]
 
-        for parent_id in parent_ids:
+        for parent_id in tqdm(parent_ids):
             self._print_if_verbose(
                 f"\n[INFO] Calculating pixel stats for patches of image: {parent_id}", verbose
             )
@@ -1152,7 +1193,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             list_patches = self.parents[parent_id]["patches"]
 
-            for patch in tqdm(list_patches):
+            for patch in list_patches:
                 patch_data = self.patches[patch]
                 patch_keys = patch_data.keys()
                 img = Image.open(patch_data["image_path"])
@@ -1933,7 +1974,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             # New projected coordinates
             coords = (xmin, ymin, xmax, ymax)
             self.parents[image_id]["coordinates"] = coords
-            self.parents[image_id]["CRS"] = target_crs
+            self.parents[image_id]["crs"] = target_crs
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
@@ -1975,7 +2016,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to print verbose outputs, by default False
         crs : str, optional
             The CRS of the coordinates.
-            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            If None, the method will first look for ``crs`` in the patches dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
             By default None.
         """
 
@@ -2003,7 +2044,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to print verbose outputs, by default False
         crs : Optional[str], optional
             The CRS of the coordinates.
-            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            If None, the method will first look for ``crs`` in the patches dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
             By default None.
 
         Raises
@@ -2044,7 +2085,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         coords = self.patches[patch_id]["coordinates"]
         
         if not crs:
-            crs = self.patches[patch_id].get("CRS", "EPSG:4326")
+            crs = self.patches[patch_id].get("crs", "EPSG:4326")
 
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
         patch = Image.open(patch_path)
@@ -2063,6 +2104,34 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             crs=crs,
         ) as dst:
             dst.write(patch_array)    
+
+    def save_patches_to_geojson(
+        self, 
+        geojson_fname: Optional[str] = "patches.geojson",
+        rewrite: Optional[bool] = False, 
+        verbose: Optional[bool] = False,
+        crs: Optional[str] = None,
+    ) -> None:
+
+        if os.path.isfile(geojson_fname):
+            if not rewrite:
+                self._print_if_verbose(
+                    f'[INFO] File already exists: {geojson_fname}.', verbose
+                    )
+                return
+            
+        parent_df, patch_df = self.convert_images()
+        patch_df.reset_index(names="image_id", inplace=True)
+
+        if not crs:
+            if "crs" in patch_df.columns:
+                if len(patch_df["crs"].unique()) == 1:
+                    crs = patch_df["crs"].unique()[0]
+            else:
+                crs = "EPSG:4326"
+
+        geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
+        geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
 
     '''
     def readPatches(self,
