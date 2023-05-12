@@ -41,7 +41,7 @@ class Annotator(pd.DataFrame):
     metadata : str, optional
         Path to metadata file. Default: "./maps/metadata.csv"
     metadata_delimiter : str, optional
-        Separator in the metadata file. Default: ",".
+        Separator in the metadata file. Default: "|".
     annotations_dir : str, optional
         Directory to save the annotations CSV file. Default: "./annotations"
     username : str, optional
