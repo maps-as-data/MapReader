@@ -2142,13 +2142,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if os.path.isfile(geojson_fname):
             if not rewrite:
-                self._print_if_verbose(
-                    f'[INFO] File already exists: {geojson_fname}.', verbose
-                    )
+                print(f'[WARNING] File already exists: {geojson_fname}. Use ``rewrite=True`` to overwrite.')
                 return
             
-        parent_df, patch_df = self.convert_images()
-        patch_df.reset_index(names="image_id", inplace=True)
+        _, patch_df = self.convert_images()
 
         if not crs:
             if "crs" in patch_df.columns:
@@ -2157,6 +2154,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             else:
                 crs = "EPSG:4326"
 
+        patch_df.reset_index(names="image_id", inplace=True)
+        patch_df = patch_df[["image_id", "parent_id", "image_path", "polygon"]]
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
 
