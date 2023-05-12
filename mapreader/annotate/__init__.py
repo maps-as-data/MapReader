@@ -364,7 +364,7 @@ class Annotator(pd.DataFrame):
             patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
         )
 
-        # Add pixel stats
+        # Add pixel stats -- TODO: check for columns in patches, if non-existent then:
         patches.calc_pixel_stats()
 
         print(
