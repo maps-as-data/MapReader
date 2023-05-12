@@ -183,29 +183,32 @@ class Annotator(pd.DataFrame):
         kwargs["show_context"] = kwargs.get("show_context", True)
         kwargs["min_values"] = kwargs.get("min_values", {})
         kwargs["max_values"] = kwargs.get("max_values", {})
+        kwargs["data_delimiter"] = kwargs.get("data_delimiter", "|")
         kwargs["metadata_delimiter"] = kwargs.get("metadata_delimiter", "|")
 
-        # Check metadata
+        # Check parent data
         if isinstance(parent_df, str):
-            # we have data as string = assume it's a path to a
+            # we have parent data as string = assume it's a path to a csv file
             parent_df = pd.read_csv(parent_df, delimiter=kwargs["metadata_delimiter"])
 
         if isinstance(parent_df, (dict, list)):
-            # we have data as string = assume it's a path to a
+            # we have parent data as dict/list = assume it's data to create
+            # parent frame
             parent_df = pd.DataFrame(parent_df)
 
         # Check data
         if isinstance(patch_df, str):
-            # we have data as string = assume it's a path to a
+            # we have patch data as string = assume it's a path to a csv file
             patch_df = pd.read_csv(patch_df)
 
         if isinstance(patch_df, (dict, list)):
-            # we have data as string = assume it's a path to a
+            # we have patch data as dict/list = assume it's data to create
+            # patch frame
             patch_df = pd.DataFrame(patch_df)
 
         if isinstance(patch_df, type(None)):
-            # If we don't get data provided, we'll use the patches and parents to
-            # load up the patches
+            # If we don't get patch data provided, we'll use the patches and
+            # parents to load up the patches
             try:
                 parent_df, patch_df = self._load_frames(**kwargs)
                 try:
@@ -221,10 +224,10 @@ class Annotator(pd.DataFrame):
 
         # Last check for metadata + data
         if not len(patch_df):
-            raise RuntimeError("No data available.")
+            raise RuntimeError("No patch data available.")
 
         if not len(parent_df):
-            raise RuntimeError("No metadata available.")
+            raise RuntimeError("No parent data available.")
 
         # Test for columns
         if kwargs["label_column"] not in patch_df.columns:
@@ -255,7 +258,7 @@ class Annotator(pd.DataFrame):
         )
 
         # Ensure annotations directory exists
-        os.mkdir(kwargs["annotations_dir"], exist_ok=True)
+        os.mkdirs(kwargs["annotations_dir"], exist_ok=True)
 
         # Test for existing file
         if os.path.exists(kwargs["annotations_file"]):
