@@ -320,6 +320,7 @@ class Annotator(pd.DataFrame):
         self.metadata = parent_df
         self.patch_width, self.patch_height = self.get_patch_size()
         self.metadata_delimiter = kwargs["metadata_delimiter"]
+        self.scramble_frame = kwargs["scramble_frame"]
 
         # Ensure labels are of type list
         if not isinstance(self.labels, list):
@@ -416,8 +417,9 @@ class Annotator(pd.DataFrame):
         prev_btn.on_click(self._prev_example)
 
         # next button
+        description = "next random patch »" if self.scramble_frame else "next »"
         next_btn = widgets.Button(
-            description="next »", layout=widgets.Layout(flex="1 1 0%", width="auto")
+            description=description, layout=widgets.Layout(flex="1 1 0%", width="auto")
         )
         next_btn.on_click(self._next_example)
 
