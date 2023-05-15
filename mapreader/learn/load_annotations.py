@@ -13,6 +13,7 @@ from PIL import Image
 from decimal import Decimal
 
 from .datasets import PatchDataset
+from torch.utils.data import DataLoader
 
 class AnnotationsLoader():
     def __init__(self):
@@ -21,6 +22,7 @@ class AnnotationsLoader():
         self.id_col = None
         self.patch_paths_col = None
         self.label_col = None
+        self.datasets = None
             
     def load(
         self,
@@ -105,6 +107,10 @@ class AnnotationsLoader():
         plt.axis("off")
         plt.title(patch_label)
         plt.show()
+
+    def print_unique_labels(self) -> None:
+        unique_labels = self.annotations[self.label_col].unique().tolist()
+        print(f'[INFO] Unique labels: {unique_labels}')
 
     def review_labels(
         self,
@@ -271,7 +277,7 @@ class AnnotationsLoader():
             plt.title(annot2plot.iloc[i][self.label_col])
         plt.show()
 
-    def split_annotations(
+    def create_datasets(
         self,
         frac_train: Optional[Union[str, float]] = 0.70,
         frac_val: Optional[Union[str, float]] = 0.15,
@@ -280,7 +286,7 @@ class AnnotationsLoader():
         train_transform: Optional[Union[str, Callable]] = "train",
         val_transform: Optional[Union[str, Callable]] = "val",
         test_transform: Optional[Union[str, Callable]] = "test",
-    ) -> tuple:
+    ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test
         sets (DataFrames).
@@ -307,12 +313,11 @@ class AnnotationsLoader():
 
         Returns
         -------
-        Tuple
-            A tuple containing the PatchDatasets. 
+        None
 
         Notes
         -----
-        As well as returning the PatchDatasets, this method also saves the dataframes as ``self.train``, ``self.val``, ``self.test``.
+        This method saves the split datasets as a dictionary in ``self.datasets``.
 
         Following fractional ratios provided by the user, where each subset is
         stratified by the values in a specific column (that is, each subset has
@@ -353,26 +358,57 @@ class AnnotationsLoader():
 
         else:
             df_val = labels_temp
+            df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
         
-        self.train = df_train
-        self.val = df_val
-
-        train_dataset = PatchDataset(self.train, train_transform, self.patch_paths_col, self.label_col, )
-        val_dataset = PatchDataset(self.val, val_transform, self.patch_paths_col, self.label_col)
-
-        print(f"[INFO] Number of annotations in each set:\n\
-    - Train:        {len(train_dataset)}\n\
-    - Validate:     {len(val_dataset)}")
-        
+        train_dataset = PatchDataset(df_train, train_transform, self.patch_paths_col, self.label_col, )
+        val_dataset = PatchDataset(df_val, val_transform, self.patch_paths_col, self.label_col)
         if df_test is not None:
-            self.test = df_test
-            test_dataset = PatchDataset(self.test, test_transform, self.patch_paths_col, self.label_col)     
-            print(f"    - Test:         {len(test_dataset)}")
-            return train_dataset, val_dataset, test_dataset
+            test_dataset = PatchDataset(df_test, test_transform, self.patch_paths_col, self.label_col)     
+        
+        datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
+        dataset_sizes = {set_name:len(datasets[set_name]) for set_name in datasets.keys()}
 
-        return train_dataset, val_dataset
-    
+        self.datasets = datasets
+        self.dataset_sizes = dataset_sizes
+
+        print(f'[INFO] Number of annotations in each set:\n\
+    - Train:        {dataset_sizes["train"]}\n\
+    - Validate:     {dataset_sizes["val"]}\n\
+    - Test:         {dataset_sizes["test"]}')
+        
+    def create_dataloaders(
+            self, 
+            batch_size: Optional[int] = 16, 
+            shuffle: Optional[bool] = True, 
+            num_workers: Optional[int] = 0, 
+            **kwargs
+        ) -> None:
+        """Creates a dictionary containing PyTorch dataloaders and
+        saves it to as ``self.dataloaders``.
+
+        Parameters
+        ----------
+        batch_size : int, optional
+            The batch size to use for the dataloader. By default ``16``.
+        shuffle : bool, optional
+            Whether to shuffle the dataset during training. By default ``True``.
+        num_workers : int, optional
+            The number of worker threads to use for loading data. By default ``0``.
+        **kwds :
+            Additional keyword arguments to pass to PyTorch's ``DataLoader`` constructor.
+        """
+        
+        if self.datasets:
+            datasets = self.datasets
+        else: 
+            print("[INFO] Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations.")
+            self.create_datasets()
+
+        dataloaders = {set_name: DataLoader(datasets[set_name], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, **kwargs) for set_name in datasets.keys()}
+
+        self.dataloaders = dataloaders
+
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")
         if len(self.annotations) > 0:
