@@ -424,7 +424,7 @@ class Annotator(pd.DataFrame):
         self.navbox = widgets.VBox([widgets.HBox([prev_btn, next_btn])])
 
     def annotate(
-        self, show_context=None, min_values={}, max_values={}, surrounding=1
+        self, show_context=None, min_values={}, max_values={}, surrounding=1, margin=0
     ) -> None:
         """
         Renders the annotation interface for the first image.
@@ -454,6 +454,7 @@ class Annotator(pd.DataFrame):
         self.min_values = min_values
         self.max_values = max_values
         self.surrounding = surrounding
+        self.margin = margin
 
         # re-set up queue
         self.queue = self.get_queue()
@@ -658,7 +659,7 @@ class Annotator(pd.DataFrame):
             with open(image_path, "rb") as f:
                 im = f.read()
 
-            layout = widgets.Layout(margin="0px")
+            layout = widgets.Layout(margin=f"{self.margin}px")
             return widgets.Image(value=im, layout=layout)
 
         def get_empty_square():
