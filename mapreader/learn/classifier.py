@@ -12,7 +12,7 @@ import sys
 import time
 
 from datetime import datetime
-from typing import Union, List, Optional, Tuple, Dict, Any, Hashable
+from typing import Union, List, Optional, Tuple, Dict, Any, Hashable, Iterable
 
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import roc_auc_score
@@ -31,17 +31,31 @@ from torchvision import models
 # from torch.nn.modules.module import _addindent
 
 
-class classifier:
-    def __init__(self, device: Optional[str] = "default"):
+class ClassifierContainer:
+    def __init__(
+        self, 
+        model: nn.Module,
+        dataloaders: Dict[str, DataLoader],
+        device: Optional[str] = "default",
+        input_size: Optional[int] = (224,224),
+        is_inception: Optional[bool] = False
+    ):
         """
-        Initialize a classifier object.
+        Initialize an Classifier object.
 
         Parameters
         ----------
+        model : nn.Module
+            The PyTorch model to add to the object. See: ``torchvision.models``
         device : str, optional
             The device to be used for training and storing models. Can be set
             to ``"default"``, ``"cpu"``, ``"cuda:0"``, etc. By default
             ``"default"``.
+        input_size : int, optional
+            The expected input size of the model. Default is ``224``.
+        is_inception : bool, optional
+            Whether the model is an Inception-style model. Default is
+            ``False``.
 
         Attributes
         ----------
@@ -75,199 +89,51 @@ class classifier:
         tmp_save_filename : str
             A temporary file name to save checkpoints during training and
             validation.
+    
+        Raises
+        ------
+        ValueError
+            If the object's ``class_names`` attribute is ``None``. They should
+            be specified with the ``set_classnames`` method.
         """
 
+        # set up device
         if device in ["default", None]:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
         print(f"[INFO] Device is set to {self.device}")
 
-        self.dataloader = {}
-        self.dataset_sizes = {}
-        self.class_names = None
-        self.model = None
+        # set up model and move to device
+        self.model = model.to(self.device)
+        self.input_size = input_size
+        self.is_inception = is_inception
+
+        # add dataloaders
+        self.dataloader = dataloaders
+        for set_name, dataloader in dataloaders.items():
+            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+
         self.optimizer = None
         self.scheduler = None
-        self.input_size = None
-        self.is_inception = None
+        self.criterion = None
+
         self.metrics = {}
         self.last_epoch = 0
         self.best_loss = torch.tensor(np.inf)
         self.best_epoch = 0
+
         # temp file to save checkpoints during training/validation
         self.tmp_save_filename = f"tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
 
         # add colors for printing/logging
         self._print_colors()
 
-    def set_classnames(self, classname_dict: dict) -> None:
-        """
-        Set the class names and the number of classes in the object detection
-        model.
-
-        Parameters
-        ----------
-        classname_dict : dict
-            A dictionary containing the class IDs (as keys) and their
-            corresponding names (as values). E.g.
-            ``{0: "rail space", 1: "No rail space"}``
-
-        Returns
-        -------
-        None
-        """
-        self.class_names = classname_dict
-        self.num_classes = len(self.class_names)
-
-    def add2dataloader(
-        self,
-        dataset: torch.utils.data.Dataset,
-        set_name: Optional[Union[str, None]] = None,
-        batch_size: Optional[int] = 16,
-        shuffle: Optional[bool] = True,
-        num_workers: Optional[int] = 0,
-        **kwds,
-    ) -> torch.utils.data.DataLoader:
-        """
-        Adds a PyTorch dataloader to the object's ``dataloader`` dictionary
-        property and returns it.
-
-        Parameters
-        ----------
-        dataset : torch.utils.data.Dataset
-            The PyTorch dataset to use for the dataloader.
-        set_name : str or None, optional
-            The name to use when adding the dataloader to the object's
-            ``dataloader`` dictionary property (e.g., ``"train"``, ``"val"``
-            or ``"test"``).
-
-            If ``None`` (default), the dataloader is returned without being
-            added to the dictionary.
-        batch_size : int, optional
-            The batch size to use for the dataloader. Default is ``16``.
-        shuffle : bool, optional
-            Whether to shuffle the dataset during training. Default is
-            ``True``.
-        num_workers : int, optional
-            The number of worker threads to use for loading data. Default is
-            ``0``.
-        **kwds :
-            Additional keyword arguments to pass to PyTorch's ``DataLoader``
-            constructor.
-
-        Returns
-        -------
-        dl : torch.utils.data.DataLoader
-            The dataloader that was created.
-        """
-
-        dl = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            num_workers=num_workers,
-            **kwds,
-        )
-
-        if set_name is None:
-            return dl
-        else:
-            self.dataloader[set_name] = dl
-            self.dataset_sizes[set_name] = len(self.dataloader[set_name].dataset)
-            print(
-                f"[INFO] added '{set_name}' dataloader with {self.dataset_sizes[set_name]} elements."  # noqa
-            )
-
-    def print_classes_dl(self, set_name: Optional[str] = "train"):
-        """
-        Prints information about the labels and class names (if available)
-        associated with a dataloader.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            The name of the dataloader to print information about, normally
-            specified in ``self.add2dataloader``. Default is ``"train"``.
-
-        Returns
-        -------
-        None
-        """
-        print(f"[INFO] labels:   {self.dataloader[set_name].dataset.uniq_labels}")
-        if self.class_names is not None:
-            print(f"[INFO] class-names: {self.class_names}")
-
-    def add_model(
-        self,
-        model: nn.Module,
-        input_size: Optional[int] = 224,
-        is_inception: Optional[bool] = False,
-    ) -> None:
-        """
-        Add a PyTorch model to the classifier object.
-
-        Parameters
-        ----------
-        model : nn.Module
-            The PyTorch model to add to the object. See: ``torchvision.models``
-        input_size : int, optional
-            The expected input size of the model. Default is ``224``.
-        is_inception : bool, optional
-            Whether the model is an Inception-style model. Default is
-            ``False``.
-
-        Raises
-        ------
-        ValueError
-            If the object's ``class_names`` attribute is ``None``. They should
-            be specified with the ``set_classnames`` method.
-
-        Returns
-        -------
-        None
-        """
-        if self.class_names is None:
-            raise ValueError("[ERROR] specify class names using set_classnames method.")
-        else:
-            self.print_classes_dl()
-
-        self.model = model.to(self.device)
-        self.input_size = input_size
-        self.is_inception = is_inception
-
-    def del_model(self) -> None:
-        """
-        Deletes the PyTorch model from the classifier object.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        This function deletes the PyTorch model from the object and resets any
-        associated metadata, such as the expected input size and whether the
-        model is an Inception-style model. It also resets any associated
-        metrics and best epoch/loss values.
-        """
-        self.model = None
-        self.input_size = None
-        self.is_inception = None
-        self.metrics = {}
-        self.last_epoch = 0
-        self.best_loss = torch.tensor(np.inf)
-        self.best_epoch = 0
-
-    def layerwise_lr(
+    def generate_layerwise_lrs(
         self,
         min_lr: float,
         max_lr: float,
-        ltype: Optional[str] = "linspace",
+        spacing: Optional[str] = "linspace",
     ) -> List[Dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -279,41 +145,38 @@ class classifier:
             The minimum learning rate to be used.
         max_lr : float
             The maximum learning rate to be used.
-        ltype : str, optional
+        spacing : str, optional
             The type of sequence to use for spacing the specified interval
             learning rates. Can be either ``"linspace"`` or ``"geomspace"``,
             where `"linspace"` uses evenly spaced learning rates over a
             specified interval and `"geomspace"` uses learning rates spaced
-            evenly on a log scale (a geometric progression). Defaults to
-            ``"linspace"``.
+            evenly on a log scale (a geometric progression). By default ``"linspace"``.
 
         Returns
         -------
         list of dicts
             A list of dictionaries containing the parameters and learning
             rates for each layer.
-        """
-        if ltype.lower() in ["line", "linear", "linspace"]:
-            list_lrs = np.linspace(
+        """   
+        if spacing.lower() == "linspace":
+            lrs = np.linspace(
                 min_lr, max_lr, len(list(self.model.named_parameters()))
             )
-        elif ltype.lower() in ["log", "geomspace"]:
-            list_lrs = np.geomspace(
+        elif spacing.lower() in ["log", "geomspace"]:
+            lrs = np.geomspace(
                 min_lr, max_lr, len(list(self.model.named_parameters()))
             )
         else:
-            raise NotImplementedError("Implemented methods are: linspace and geomspace")
+            raise NotImplementedError('[ERROR] ``spacing`` must be one of "linspace" or "geomspace"')
 
-        list2optim = []
-        for i, (name, params) in enumerate(self.model.named_parameters()):
-            list2optim.append({"params": params, "lr": list_lrs[i]})
+        params2optimise = [{"params": params, "learning rate": lrs[i]} for i, (_, params) in enumerate(self.model.named_parameters())]
 
-        return list2optim
+        return params2optimise
 
     def initialize_optimizer(
         self,
         optim_type: Optional[str] = "adam",
-        params2optim: Optional[str] = "infer",
+        params2optimise: Optional[Union[str, Iterable]] = "infer",
         optim_param_dict: Optional[dict] = {"lr": 1e-3},
         add_optim: Optional[bool] = True,
     ) -> Union[torch.optim.Optimizer, None]:
@@ -326,7 +189,7 @@ class classifier:
         optim_type : str, optional
             The type of optimizer to use. Can be set to ``"adam"`` (default),
             ``"adamw"``, or ``"sgd"``.
-        params2optim : str or iterable, optional
+        params2optimise : str or iterable, optional
             The parameters to optimize. If set to ``"infer"``, all model
             parameters that require gradients will be optimized, by default
             ``"infer"``.
@@ -359,15 +222,17 @@ class classifier:
 
             filter(lambda p: p.requires_grad, self.model.parameters())
         """
-        if params2optim == "infer":
-            params2optim = filter(lambda p: p.requires_grad, self.model.parameters())
+        if params2optimise == "infer":
+            params2optimise = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
-            optimizer = optim.Adam(params2optim, **optim_param_dict)
+            optimizer = optim.Adam(params2optimise, **optim_param_dict)
         elif optim_type.lower() in ["adamw"]:
-            optimizer = optim.AdamW(params2optim, **optim_param_dict)
+            optimizer = optim.AdamW(params2optimise, **optim_param_dict)
         elif optim_type.lower() in ["sgd"]:
-            optimizer = optim.SGD(params2optim, **optim_param_dict)
+            optimizer = optim.SGD(params2optimise, **optim_param_dict)
+        else:
+            raise NotImplementedError('[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``.')
 
         if add_optim:
             self.add_optimizer(optimizer)
@@ -422,17 +287,23 @@ class classifier:
             The initialized learning rate scheduler. Only returned if
             ``add_scheduler`` is set to False.
         """
+        if self.optimizer is None:
+            raise ValueError(
+                "[ERROR] Optimizer is not yet defined. \n\n\
+Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
+            )
+        
         if scheduler_type.lower() in ["steplr"]:
             scheduler = optim.lr_scheduler.StepLR(
                 self.optimizer, **scheduler_param_dict
             )
         elif scheduler_type.lower() in ["onecyclelr"]:
             scheduler = optim.lr_scheduler.OneCycleLR(
-                self.optimizer, **scheduler_param_dict
+                self.optimizer, **scheduler_param_dict # RW - Cannot use hthis with default scheduler_param_dict - need to update
             )
         else:
             raise NotImplementedError(
-                f"[ERROR] scheduler of type: {scheduler_type} is not implemented."  # noqa
+                f'[ERROR] At present, ``scheduler_type`` can only be "steplr" or "onecyclelr". Not {scheduler_type}.'  # noqa
             )
 
         if add_scheduler:
@@ -461,19 +332,20 @@ class classifier:
         """
         if self.optimizer is None:
             raise ValueError(
-                "[ERROR] optimizer is needed. Use initialize_optimizer or add_optimizer"  # noqa
+                "[ERROR] Optimizer is needed. Use initialize_optimizer or add_optimizer"  # noqa
             )
 
         self.scheduler = scheduler
 
-    def add_criterion(self, criterion: torch.nn.modules.loss._Loss) -> None:
+    def add_criterion(self, criterion: Optional[Union[str, nn.modules.loss._Loss]] = "cross entropy") -> None:
         """
         Add a loss criterion to the classifier object.
 
         Parameters
         ----------
-        criterion : torch.nn.modules.loss._Loss
+        criterion : str or torch.nn.modules.loss._Loss
             The loss criterion to add to the classifier object.
+            Accepted string values are "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) and "mse" (mean squared error).
 
         Returns
         -------
@@ -481,6 +353,21 @@ class classifier:
             The function only modifies the ``criterion`` attribute of the
             classifier and does not return anything.
         """
+        if isinstance(criterion, str):
+            if criterion in ["cross entropy", "ce"]:
+                criterion = nn.CrossEntropyLoss()
+            elif criterion == "bce":
+                criterion = nn.BCELoss()
+            elif criterion == "mse":
+                criterion == nn.MSELoss()
+            else:
+                raise NotImplementedError('[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).')
+        
+        print(f'[INFO] Using "{criterion}" as criterion.')
+
+        if not isinstance(criterion, nn.modules.loss._Loss):
+            raise ValueError('[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).')
+            
         self.criterion = criterion
 
     def model_summary(
@@ -490,7 +377,7 @@ class classifier:
     ) -> None:
         """
         Print a summary of the model including the modules, the number of
-        parameters in each module, and the dimension of the output tensor of
+        parameters in eaach module, and the dimension of the output tensor of
         each module. If ``only_trainable`` is ``True``, it only prints the
         trainable parameters.
 
@@ -531,10 +418,7 @@ class classifier:
         Credit: this function is the modified version of
         https://stackoverflow.com/a/62508086.
         """
-
-        if self.model is None:
-            raise ValueError("[ERROR] no model is added. Use .add_model")
-
+        
         # header
         col1, col2, col3 = "modules", "parameters", "dim"
         line_divider = sum(print_space) * "-" + "----------"
@@ -884,7 +768,8 @@ class classifier:
         """
 
         if self.criterion is None:
-            raise ValueError("[ERROR] criterion is needed. Use add_criterion method")
+            raise ValueError("[ERROR] Criterion is not yet defined.\n\n\
+Use ``add_criterion`` to define one.")
 
         for phase in phases:
             if phase not in self.dataloader.keys():
@@ -1462,7 +1347,7 @@ class classifier:
         # Each of these variables is model specific.
         model_dw = models.__getattribute__(model_name)
         model_dw = model_dw(pretrained)
-        input_size = 224
+        input_size = (224,224)
         is_inception = False
 
         if last_layer_num_classes in ["default"]:
@@ -1557,9 +1442,12 @@ class classifier:
         data in a grid format. It also calls the ``_imshow`` method of the
         ``ImageClassifierData`` class to show the sample data.
         """
+        if set_name not in self.dataloader.keys():
+            raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
+
         if print_batch_info:
             # print info about batch size
-            self.batch_info(set_name)
+            self.print_batch_info(set_name)
 
         dl_iter = iter(self.dataloader[set_name])
         for _ in range(batch_number):
@@ -1570,11 +1458,11 @@ class classifier:
         out = torchvision.utils.make_grid(inputs)
         self._imshow(
             out,
-            title=str([self.class_names[int(x)] for x in classes]),
+            title=str([classes]),
             figsize=figsize,
         )
 
-    def batch_info(self, set_name: Optional[str] = "train") -> None:
+    def print_batch_info(self, set_name: Optional[str] = "train") -> None:
         """
         Print information about a dataset's batches, samples, and batch-size.
 
@@ -1588,15 +1476,17 @@ class classifier:
         -------
         None
         """
-
+        if set_name not in self.dataloader.keys():
+            raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
+        
         batch_size = self.dataloader[set_name].batch_size
         num_samples = len(self.dataloader[set_name].dataset)
         num_batches = int(np.ceil(num_samples / batch_size))
 
-        print(f"[INFO] dataset: {set_name}")
-        print(f"#samples:    {num_samples}")
-        print(f"#batch size: {batch_size}")
-        print(f"#batches:    {num_batches}")
+        print(f"[INFO] dataset: {set_name}\n\
+        - items:        {num_samples}\n\
+        - batch size:   {batch_size}\n\
+        - batches:      {num_batches}")
 
     @staticmethod
     def _imshow(
@@ -1634,6 +1524,7 @@ class classifier:
         plt.imshow(inp)
         if title is not None:
             plt.title(title)
+        plt.axis("off")
         plt.pause(0.001)  # pause a bit so that plots are updated
         plt.show()
 

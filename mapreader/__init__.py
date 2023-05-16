@@ -8,7 +8,7 @@ from mapreader.download.tileserver_access import TileServer
 from mapreader.learn.load_annotations import AnnotationsLoader
 from mapreader.learn.datasets import PatchDataset
 from mapreader.learn.datasets import patchContextDataset
-from mapreader.learn.classifier import classifier
+from mapreader.learn.classifier import ClassifierContainer
 from mapreader.learn.classifier_context import classifierContext
 from mapreader.learn import custom_models
 

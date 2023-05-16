@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .classifier import classifier
+from .classifier import ClassifierContainer
 
 import copy
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ from typing import Union, List, Optional, Tuple, Dict
 import torch
 
 
-class classifierContext(classifier):
+class classifierContext(ClassifierContainer):
     def train(
         self,
         phases: Optional[List[str]] = ["train", "val"],
