@@ -13,7 +13,8 @@ from PIL import Image
 from decimal import Decimal
 
 from .datasets import PatchDataset
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
+from torch import Tensor
 
 class AnnotationsLoader():
     def __init__(self):
@@ -58,6 +59,10 @@ class AnnotationsLoader():
             annotations = self._load_annotations_csv(annotations, delimiter, scramble_frame, reset_index)
         
         annotations = annotations.astype({self.label_col:str}) # ensure labels are interpreted as strings 
+        
+        unique_labels = annotations[self.label_col].unique().tolist()
+        self.unique_labels = unique_labels
+        annotations["label_index"] = annotations[self.label_col].apply(self._get_label_index)
 
         if append:
             self.annotations = self.annotations.append(annotations)
@@ -109,8 +114,10 @@ class AnnotationsLoader():
         plt.show()
 
     def print_unique_labels(self) -> None:
-        unique_labels = self.annotations[self.label_col].unique().tolist()
-        print(f'[INFO] Unique labels: {unique_labels}')
+        if len(self.annotations) == 0:
+            raise ValueError("[ERROR] No annotations loaded.")
+
+        print(f'[INFO] Unique labels: {self.unique_labels}')
 
     def review_labels(
         self,
@@ -157,6 +164,10 @@ class AnnotationsLoader():
         ``include_df["image_path"]`` are reviewed. The reviewed DataFrame is
         deduplicated based on the ``deduplicate_col``.
         """
+        if len(self.annotations) == 0:
+            raise ValueError("[ERROR] No annotations loaded.")
+
+        
         if label_to_review:
             annots2review = self.annotations[
                 self.annotations[self.label_col] == label_to_review
@@ -232,6 +243,10 @@ class AnnotationsLoader():
                     # Change both annotations and reviewed
                     self.annotations.loc[input_id, self.label_col] = input_label
                     self.reviewed.loc[input_id, self.label_col] = input_label
+                    # Update label indices
+                    self.annotations.loc[input_id, "label_index"] = self._get_label_index(input_label)
+                    self.reviewed.loc[input_id, "label_index"] = self._get_label_index(input_label)
+                    assert self.annotations[self.label_col].value_counts().tolist() == self.annotations["label_index"].value_counts().tolist()
                     print(f'[INFO] Image {input_id} has been relabelled as "{input_label}"')
 
                 user_input_ids = input(q)
@@ -288,8 +303,7 @@ class AnnotationsLoader():
         test_transform: Optional[Union[str, Callable]] = "test",
     ) -> None:
         """
-        Splits the dataset into three subsets: training, validation, and test
-        sets (DataFrames).
+        Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
 
         Parameters
         ----------
@@ -324,6 +338,8 @@ class AnnotationsLoader():
         the same relative frequency of the values in the column). It performs
         this splitting by running ``train_test_split()`` twice.
         """
+        if len(self.annotations) == 0:
+            raise ValueError("[ERROR] No annotations loaded.")
 
         for frac in [frac_train, frac_val, frac_test]:
             frac = Decimal(str(frac))
@@ -378,36 +394,77 @@ class AnnotationsLoader():
     - Test:         {dataset_sizes["test"]}')
         
     def create_dataloaders(
-            self, 
-            batch_size: Optional[int] = 16, 
-            shuffle: Optional[bool] = True, 
+            self,
+            batch_size: Optional[int] = 16,
+            sampler: Optional[Union[Sampler, str, None]] = "default",
+            shuffle: Optional[bool] = False,
             num_workers: Optional[int] = 0, 
             **kwargs
         ) -> None:
-        """Creates a dictionary containing PyTorch dataloaders and
-        saves it to as ``self.dataloaders``.
+        """Creates a dictionary containing PyTorch dataloaders
+        saves it to as ``self.dataloaders`` and returns it.
 
         Parameters
         ----------
         batch_size : int, optional
             The batch size to use for the dataloader. By default ``16``.
+        sampler : Sampler or False, optional
+            
         shuffle : bool, optional
-            Whether to shuffle the dataset during training. By default ``True``.
+            Whether to shuffle the dataset during training. By default ``False``.
         num_workers : int, optional
             The number of worker threads to use for loading data. By default ``0``.
         **kwds :
             Additional keyword arguments to pass to PyTorch's ``DataLoader`` constructor.
+
+        Returns
+        --------
+        Dict
+            Dictionary containing dataloaders.        
         """
-        
         if self.datasets:
             datasets = self.datasets
         else: 
             print("[INFO] Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations.")
             self.create_datasets()
 
-        dataloaders = {set_name: DataLoader(datasets[set_name], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, **kwargs) for set_name in datasets.keys()}
+        if isinstance(sampler, str):
+            if sampler == "default":
+                print("[INFO] Using default sampler.")
+                sampler = self._define_sampler()
+            else:
+                raise ValueError('[ERROR] ``sampler`` can only be a PyTorch sampler, ``"default"`` or ``None``.')
+
+        if sampler and shuffle:
+            print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
+
+        dataloaders = {set_name: DataLoader(datasets[set_name], batch_size=batch_size, sampler=sampler if set_name == "train" else None, shuffle=False if set_name == "train" else shuffle, num_workers=num_workers, **kwargs) for set_name in datasets.keys()}
 
         self.dataloaders = dataloaders
+        
+        return dataloaders
+
+    def _define_sampler(self):
+
+        if not self.datasets:
+            self.create_datasets()
+        
+        datasets = self.datasets
+
+        if "train" in datasets.keys():
+            value_counts = datasets["train"].patch_df[self.label_col].value_counts().to_list()
+            weights = np.reciprocal(Tensor(value_counts))
+            weights = weights.double()
+            sampler = WeightedRandomSampler(weights[datasets["train"].patch_df["label_index"].tolist()], num_samples=len(datasets["train"].patch_df))
+
+        else:
+            raise ValueError('[ERROR] "train" should be one the dataset names.')
+        
+        return sampler
+
+    def _get_label_index(self, label: str):
+        label_index = self.unique_labels.index(label)
+        return label_index
 
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")
