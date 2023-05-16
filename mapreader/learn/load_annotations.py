@@ -389,9 +389,9 @@ class AnnotationsLoader():
         self.dataset_sizes = dataset_sizes
 
         print(f'[INFO] Number of annotations in each set:\n\
-    - Train:        {dataset_sizes["train"]}\n\
-    - Validate:     {dataset_sizes["val"]}\n\
-    - Test:         {dataset_sizes["test"]}')
+        - Train:        {dataset_sizes["train"]}\n\
+        - Validate:     {dataset_sizes["val"]}\n\
+        - Test:         {dataset_sizes["test"]}')
         
     def create_dataloaders(
             self,
@@ -422,11 +422,11 @@ class AnnotationsLoader():
         Dict
             Dictionary containing dataloaders.        
         """
-        if self.datasets:
-            datasets = self.datasets
-        else: 
+        if not self.datasets:
             print("[INFO] Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations.")
             self.create_datasets()
+            
+        datasets = self.datasets
 
         if isinstance(sampler, str):
             if sampler == "default":
@@ -472,5 +472,5 @@ class AnnotationsLoader():
             value_counts = self.annotations[self.label_col].value_counts()
             print(f'[INFO] Number of instances of each label (from column "{self.label_col}"):')
             for label, count in value_counts.items():
-                print(f"    - {label}:      {count}")
+                print(f"        - {label}:      {count}")
         return ""
