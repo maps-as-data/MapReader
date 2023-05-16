@@ -130,6 +130,8 @@ You can then check how many annotated images are in each set by checking the val
 Prepare images (transform) and datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. todo:: "Most neural networks expect the images of a fixed size. Therefore, we will need to write some preprocessing code." Add note about this is why we resize and also comment on square images.
+
 Before using your images in training, validation or inference, you will first want to prepare your images using image transformations.
 This can be done by using `torchvision's transformms module <https://pytorch.org/vision/stable/transforms.html>`_. 
 
