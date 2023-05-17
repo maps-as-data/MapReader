@@ -32,6 +32,7 @@ class PatchDataset(Dataset):
         transform: Union[str, Callable],
         patch_paths_col: Optional[int] = 0,
         label_col: Optional[str] = "label",
+        label_index_col: Optional[str] = "label_index",
         image_mode: Optional[str] = "RGB",
     ):
         """
@@ -44,14 +45,17 @@ class PatchDataset(Dataset):
         transform : callable, optional
             A callable object (a torchvision transform) that takes in an image
             and performs image transformations. Default is None.
-        label_col : str, optional
-            The name of the column containing the image labels. Default is
-            "label".
-        convert2 : str, optional
-            The color format to convert the image to. Default is "RGB".
         patch_paths_col : int, optional
             The index of the column in the DataFrame containing the image
             paths. Default is 0.
+        label_col : str, optional
+            The name of the column containing the image labels. Default is
+            "label".
+        label_index_col : str, optional
+            The name of the column containing the indices of the image labels. Default is
+            "label_index".
+        image_mode : str, optional
+            The color format to convert the image to. Default is "RGB".
 
         Attributes
         ----------
@@ -59,11 +63,13 @@ class PatchDataset(Dataset):
             DataFrame containing the paths to image patches and their labels.
         label_col : str
             The name of the column containing the image labels.
-        convert2 : str
-            The color format to convert the image to.
-        patch_paths_col : int
-            The index of the column in the DataFrame containing the image
+        label_index_col : str
+            The name of the column containing the labels indices.
+        patch_paths_col : str
+            The name of the column in the DataFrame containing the image
             paths.
+        image_mode : str
+            The color format to convert the image to.
         unique_labels : list
             The unique labels in the label column of the patch_df DataFrame.
         transform : callable
@@ -84,6 +90,7 @@ class PatchDataset(Dataset):
         """
         self.patch_df = patch_df
         self.label_col = label_col
+        self.label_index_col = label_index_col
         self.image_mode = image_mode
         self.patch_paths_col = patch_paths_col
 
@@ -91,6 +98,9 @@ class PatchDataset(Dataset):
             raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
         else:
             self.unique_labels = self.patch_df[self.label_col].unique().tolist()
+
+        if self.label_index_col not in self.patch_df.columns:
+            raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
 
         if transform in ["train", "val", "test"]:
             self.transform = self._default_transform(transform)
@@ -140,8 +150,13 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             image_label = self.patch_df.iloc[idx][self.label_col]
         else:
             image_label = None
+        
+        if self.label_index_col in self.patch_df.iloc[idx].keys():
+            image_label_index = self.patch_df.iloc[idx][self.label_index_col]
+        else:
+            image_label_index = None
 
-        return img, image_label
+        return img, image_label, image_label_index
 
     def return_orig_image(self, idx: Union[int, torch.Tensor]) -> Image:
         """
