@@ -21,10 +21,12 @@ import torch
 from torch import optim
 import torch.nn as nn
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler
 
 import torchvision
 from torchvision import models
+
+from .datasets import PatchDataset
 
 # import pickle
 # from tqdm.autonotebook import tqdm
@@ -36,6 +38,7 @@ class ClassifierContainer:
         self, 
         model: nn.Module,
         dataloaders: Dict[str, DataLoader],
+        labels_map: Dict[int, str],
         device: Optional[str] = "default",
         input_size: Optional[int] = (224,224),
         is_inception: Optional[bool] = False
@@ -113,6 +116,8 @@ class ClassifierContainer:
         self.dataloaders = dataloaders
         for set_name, dataloader in dataloaders.items():
             print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+
+        self.labels_map = labels_map
 
         self.optimizer = None
         self.scheduler = None
@@ -968,6 +973,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
+        self.pred_label = [self.labels_map.get(i,None) for i in self.pred_label_indices]
+        self.orig_label = [self.labels_map.get(i, None) for i in self.orig_label_indices]
+
         time_elapsed = time.time() - since
         print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
@@ -1537,26 +1545,24 @@ Output will show batch number {num_batches}.')
         plt.pause(0.001)  # pause a bit so that plots are updated
         plt.show()
 
-    def inference_sample_results(
+    def show_inference_sample_results(
         self,
+        label: str,
         num_samples: Optional[int] = 6,
-        class_index: Optional[int] = 0,
         set_name: Optional[str] = "train",
         min_conf: Optional[Union[None, float]] = None,
         max_conf: Optional[Union[None, float]] = None,
         figsize: Optional[Tuple[int, int]] = (15, 15),
     ) -> None:
         """
-        Performs inference on a given dataset and displays results for a
-        specified class.
+        Shows a sample of the results of the inference. 
 
         Parameters
         ----------
+        label : str, optional
+            The label for which to display results.
         num_samples : int, optional
             The number of sample results to display. Defaults to ``6``.
-        class_index : int, optional
-            The index of the class for which to display results. Defaults to
-            ``0``.
         set_name : str, optional
             The name of the dataset split to use for inference. Defaults to
             ``"train"``.
@@ -1592,23 +1598,24 @@ Output will show batch number {num_batches}.')
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
 
+                label_index_dict = {label:index for label, index in zip(labels, label_indices)}
+
                 # go through images in batch
                 for j in range(len(preds)):
-                    pred_ind = int(preds[j])
-                    if pred_ind != class_index:
+                    predicted_index = int(preds[j])
+                    if predicted_index != label_index_dict[label]:
                         continue
-                    if (min_conf is not None) and (pred_conf[j][pred_ind] < min_conf):
+                    if (min_conf is not None) and (pred_conf[j][predicted_index] < min_conf):
                         continue
-                    if (max_conf is not None) and (pred_conf[j][pred_ind] > max_conf):
+                    if (max_conf is not None) and (pred_conf[j][predicted_index] > max_conf):
                         continue
 
                     counter += 1
 
-                    class_name = self.class_names[pred_ind]
-                    conf_score = pred_conf[j][pred_ind]
+                    conf_score = pred_conf[j][predicted_index]
                     ax = plt.subplot(int(num_samples / 2.0), 3, counter)
                     ax.axis("off")
-                    ax.set_title(f"{class_name} | {conf_score:.3f}")
+                    ax.set_title(f"{label} | {conf_score:.3f}")
 
                     inp = inputs.cpu().data[j].numpy().transpose((1, 2, 0))
                     inp = np.clip(inp, 0, 1)
@@ -1673,6 +1680,24 @@ Output will show batch number {num_batches}.')
             joblib.dump(obj2write, myfile)
 
         torch.save(mymodel, os.path.join(par_name, f"model_{base_name}"))
+
+    def load_dataset(
+        self,
+        dataset: PatchDataset,
+        set_name: str,
+        batch_size: Optional[int] = 16,
+        sampler: Optional[Union[Sampler, None]] = None,
+        shuffle: Optional[bool] = False,
+        num_workers: Optional[int] = 0, 
+        **kwargs
+    ) -> None:
+        
+        if sampler and shuffle:
+            print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
+
+        dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, shuffle=shuffle, num_workers=num_workers, **kwargs)
+
+        self.dataloaders[set_name] = dataloader
 
     def load(
         self,
