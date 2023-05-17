@@ -31,8 +31,8 @@ class PatchDataset(Dataset):
         patch_df: pd.DataFrame,
         transform: Union[str, Callable],
         patch_paths_col: Optional[int] = 0,
-        label_col: Optional[str] = "label",
-        label_index_col: Optional[str] = "label_index",
+        label_col: Optional[str] = None,
+        label_index_col: Optional[str] = None,
         image_mode: Optional[str] = "RGB",
     ):
         """
@@ -49,11 +49,9 @@ class PatchDataset(Dataset):
             The index of the column in the DataFrame containing the image
             paths. Default is 0.
         label_col : str, optional
-            The name of the column containing the image labels. Default is
-            "label".
+            The name of the column containing the image labels. Default is None.
         label_index_col : str, optional
-            The name of the column containing the indices of the image labels. Default is
-            "label_index".
+            The name of the column containing the indices of the image labels. Default is None.
         image_mode : str, optional
             The color format to convert the image to. Default is "RGB".
 
@@ -93,14 +91,17 @@ class PatchDataset(Dataset):
         self.label_index_col = label_index_col
         self.image_mode = image_mode
         self.patch_paths_col = patch_paths_col
+        self.unique_labels = []
 
-        if self.label_col not in self.patch_df.columns:
-            raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
-        else:
-            self.unique_labels = self.patch_df[self.label_col].unique().tolist()
-
-        if self.label_index_col not in self.patch_df.columns:
-            raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
+        if self.label_col:
+            if self.label_col not in self.patch_df.columns:
+                raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
+            else:
+                self.unique_labels = self.patch_df[self.label_col].unique().tolist()
+        
+        if self.label_index_col:
+            if self.label_index_col not in self.patch_df.columns:
+                raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
 
         if transform in ["train", "val", "test"]:
             self.transform = self._default_transform(transform)
@@ -149,12 +150,12 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         if self.label_col in self.patch_df.iloc[idx].keys():
             image_label = self.patch_df.iloc[idx][self.label_col]
         else:
-            image_label = None
+            image_label = ""
         
         if self.label_index_col in self.patch_df.iloc[idx].keys():
             image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:
-            image_label_index = None
+            image_label_index = -1
 
         return img, image_label, image_label_index
 
