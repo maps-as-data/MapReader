@@ -64,6 +64,9 @@ class AnnotationsLoader():
         self.unique_labels = unique_labels
         annotations["label_index"] = annotations[self.label_col].apply(self._get_label_index)
 
+        labels_map = {i:label for i, label in enumerate(unique_labels)}
+        self.labels_map = labels_map
+
         if append:
             self.annotations = self.annotations.append(annotations)
         else:
@@ -377,10 +380,10 @@ class AnnotationsLoader():
             df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
         
-        train_dataset = PatchDataset(df_train, train_transform, self.patch_paths_col, self.label_col, )
-        val_dataset = PatchDataset(df_val, val_transform, self.patch_paths_col, self.label_col)
+        train_dataset = PatchDataset(df_train, train_transform, patch_paths_col=self.patch_paths_col, label_col=self.label_col, label_index_col="label_index")
+        val_dataset = PatchDataset(df_val, val_transform, patch_paths_col=self.patch_paths_col, label_col=self.label_col, label_index_col="label_index")
         if df_test is not None:
-            test_dataset = PatchDataset(df_test, test_transform, self.patch_paths_col, self.label_col)     
+            test_dataset = PatchDataset(df_test, test_transform, patch_paths_col=self.patch_paths_col, label_col=self.label_col, label_index_col="label_index")     
         
         datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
         dataset_sizes = {set_name:len(datasets[set_name]) for set_name in datasets.keys()}
