@@ -36,12 +36,13 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self, 
-        model: nn.Module,
+        model: Union[nn.Module, str],
         dataloaders: Dict[str, DataLoader],
         labels_map: Dict[int, str],
         device: Optional[str] = "default",
         input_size: Optional[int] = (224,224),
-        is_inception: Optional[bool] = False
+        is_inception: Optional[bool] = False,
+        **kwargs
     ):
         """
         Initialize an Classifier object.
@@ -99,6 +100,12 @@ class ClassifierContainer:
             If the object's ``class_names`` attribute is ``None``. They should
             be specified with the ``set_classnames`` method.
         """
+        # add dataloaders
+        self.dataloaders = dataloaders
+        for set_name, dataloader in dataloaders.items():
+            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+
+        self.labels_map = labels_map
 
         # set up device
         if device in ["default", None]:
@@ -108,16 +115,12 @@ class ClassifierContainer:
         print(f"[INFO] Device is set to {self.device}")
 
         # set up model and move to device
-        self.model = model.to(self.device)
-        self.input_size = input_size
-        self.is_inception = is_inception
-
-        # add dataloaders
-        self.dataloaders = dataloaders
-        for set_name, dataloader in dataloaders.items():
-            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
-
-        self.labels_map = labels_map
+        if isinstance(model, nn.Module):
+            self.model = model.to(self.device)
+            self.input_size = input_size
+            self.is_inception = is_inception
+        elif isinstance(model, str):
+            self.initialize_model(model, **kwargs)
 
         self.optimizer = None
         self.scheduler = None
@@ -948,7 +951,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                     )
 
                     epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
-                    epoch_msg = self.gen_epoch_msg(phase, epoch_msg)
+                    epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
                         self.cprint("[INFO]", self.__color_dred, epoch_msg + "\n")
@@ -1124,7 +1127,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                     epoch,
                 )
 
-    def gen_epoch_msg(self, phase: str, epoch_msg: str) -> str:
+    def _gen_epoch_msg(self, phase: str, epoch_msg: str) -> str:
         """
         Generates a log message for an epoch during training or validation.
         The message includes information about the loss, F-score, and recall
@@ -1360,7 +1363,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         is_inception = False
 
         if last_layer_num_classes in ["default"]:
-            last_layer_num_classes = self.num_classes
+            last_layer_num_classes = len(self.labels_map)
         else:
             last_layer_num_classes = int(last_layer_num_classes)
 
@@ -1401,13 +1404,11 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             input_size = 299
 
         else:
-            raise ValueError("Invalid model name, exiting...")
+            raise NotImplementedError("[ERROR] Invalid model name.") # CHECK THIS
 
-        if add_model:
-            self.del_model()
-            self.add_model(model_dw, input_size=input_size, is_inception=is_inception)
-        else:
-            return model_dw, input_size, is_inception
+        self.model = model_dw.to(self.device)
+        self.input_size = input_size
+        self.is_inception = is_inception
 
     def show_sample(
         self,
