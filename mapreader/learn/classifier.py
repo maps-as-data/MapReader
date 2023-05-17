@@ -61,7 +61,7 @@ class ClassifierContainer:
         ----------
         device : torch.device
             The device being used for training and storing models.
-        dataloader : dict
+        dataloaders : dict
             A dictionary to store dataloaders for the model.
         dataset_sizes : dict
             A dictionary to store sizes of datasets for the model.
@@ -110,7 +110,7 @@ class ClassifierContainer:
         self.is_inception = is_inception
 
         # add dataloaders
-        self.dataloader = dataloaders
+        self.dataloaders = dataloaders
         for set_name, dataloader in dataloaders.items():
             print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
 
@@ -124,7 +124,9 @@ class ClassifierContainer:
         self.best_epoch = 0
 
         # temp file to save checkpoints during training/validation
-        self.tmp_save_filename = f"tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+        if not os.path.exists("./tmp_checkpoints"):
+            os.makedirs("./tmp_checkpoints")
+        self.tmp_save_filename = f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
 
         # add colors for printing/logging
         self._print_colors()
@@ -367,7 +369,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         if not isinstance(criterion, nn.modules.loss._Loss):
             raise ValueError('[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).')
-            
+        
         self.criterion = criterion
 
     def model_summary(
@@ -435,7 +437,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             if (not parameter.requires_grad) and only_trainable:
                 continue
             elif not parameter.requires_grad:
-                cbeg, cend = self.color_red, self.color_reset
+                cbeg, cend = self.__color_red, self.__color_reset
             else:
                 cbeg = cend = ""
 
@@ -697,12 +699,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 print_info_batch_freq=print_info_batch_freq,
             )
         except KeyboardInterrupt:
-            print("KeyboardInterrupted...Exiting...")
+            print("[INFO] Exiting...")
             if os.path.isfile(self.tmp_save_filename):
-                print(f"File found: {self.tmp_save_filename}...load...")
+                print(f"[INFO] Loading {self.tmp_save_filename} as model.")
                 self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
             else:
-                print("No temporary file was found.")
+                print("[INFO] No checkpoint file found - model has not been updated.")
 
     def train_core(
         self,
@@ -760,7 +762,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         KeyError
             If the specified phase cannot be found in the keys of the object's
-            ``dataloader`` dictionary property.
+            ``dataloaders`` dictionary property.
 
         Returns
         -------
@@ -771,10 +773,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             raise ValueError("[ERROR] Criterion is not yet defined.\n\n\
 Use ``add_criterion`` to define one.")
 
+        print(f"[INFO] Each epoch will pass: {phases}.")
+        
         for phase in phases:
-            if phase not in self.dataloader.keys():
+            if phase not in self.dataloaders.keys():
                 raise KeyError(
-                    f"[ERROR] specified phase: {phase} cannot be find in object's dataloader with keys: {self.dataloader.keys()}"  # noqa
+                    f'[ERROR] "{phase}" dataloader cannot be found in dataloaders.\n\
+    Valid options for ``phases`` argument are: {self.dataloaders.keys()}'  # noqa
                 )
 
         if verbosity_level >= 1:
@@ -787,8 +792,8 @@ Use ``add_criterion`` to define one.")
         valid_phase_names = ["val", "validation", "eval", "evaluation"]
         best_model_wts = copy.deepcopy(self.model.state_dict())
         self.pred_conf = []
-        self.pred_label = []
-        self.orig_label = []
+        self.pred_label_indices = []
+        self.orig_label_indices = []
         if save_model_dir is not None:
             save_model_dir = os.path.abspath(save_model_dir)
 
@@ -801,9 +806,9 @@ Use ``add_criterion`` to define one.")
                 tboard_writer = SummaryWriter(tensorboard_path)
             except ImportError:
                 print(
-                    "[WARNING] could not import SummaryWriter from torch.utils.tensorboard"  # noqa
+                    "[WARNING] Could not import ``SummaryWriter`` from torch.utils.tensorboard"  # noqa
                 )
-                print("[WARNING] continue without tensorboard.")
+                print("[WARNING] Continuing without tensorboard.")
                 tensorboard_path = None
 
         start_epoch = self.last_epoch + 1
@@ -820,26 +825,27 @@ Use ``add_criterion`` to define one.")
                 # initialize vars with one epoch lifetime
                 running_loss = 0.0
                 running_pred_conf = []
-                running_pred_label = []
-                running_orig_label = []
+                running_pred_label_indices = []
+                running_orig_label_indices = []
 
                 # TQDM
-                # batch_loop = tqdm(iter(self.dataloader[phase]), total=len(self.dataloader[phase]), leave=False) # noqa
+                # batch_loop = tqdm(iter(self.dataloaders[phase]), total=len(self.dataloaders[phase]), leave=False) # noqa
                 # if phase.lower() in train_phase_names+valid_phase_names:
                 #     batch_loop.set_description(f"Epoch {epoch}/{end_epoch}")
 
-                phase_batch_size = self.dataloader[phase].batch_size
-                total_inp_counts = len(self.dataloader[phase].dataset)
+                phase_batch_size = self.dataloaders[phase].batch_size
+                total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs, labels) in enumerate(self.dataloader[phase]):
+                for batch_idx, (inputs, labels, label_indices) in enumerate(self.dataloaders[phase]):
                     inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
+                    label_indices = label_indices.to(self.device)
 
                     if self.optimizer is None:
                         if phase.lower() in train_phase_names:
                             raise ValueError(
-                                f"[ERROR] optimizer should be set when phase is {phase}. Use initialize_optimizer or add_optimizer."  # noqa
+                                f"[ERROR] An optimizer should be defined for {phase} phase.\n\
+Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             )
                     else:
                         self.optimizer.zero_grad()
@@ -858,16 +864,15 @@ Use ``add_criterion`` to define one.")
                                 phase.lower() in train_phase_names
                             ):
                                 outputs, aux_outputs = self.model(inputs)
-                                loss1 = self.criterion(outputs, labels)
-                                loss2 = self.criterion(aux_outputs, labels)
+                                loss1 = self.criterion(outputs, label_indices)
+                                loss2 = self.criterion(aux_outputs, label_indices)
                                 # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
                                 loss = loss1 + 0.4 * loss2
                             else:
                                 outputs = self.model(inputs)
-                                # labels = labels.long().squeeze_()
-                                loss = self.criterion(outputs, labels)
+                                loss = self.criterion(outputs, label_indices)
 
-                            _, pred_label = torch.max(outputs, dim=1)
+                            _, pred_label_indices = torch.max(outputs, dim=1)
 
                             # backward + optimize only if in training phase
                             if phase.lower() in train_phase_names:
@@ -882,13 +887,13 @@ Use ``add_criterion`` to define one.")
                         # batch_loop.refresh()
                     else:
                         outputs = self.model(inputs)
-                        _, pred_label = torch.max(outputs, dim=1)
+                        _, pred_label_indices = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
                         torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
                     )
-                    running_pred_label.extend(pred_label.cpu().tolist())
-                    running_orig_label.extend(labels.cpu().tolist())
+                    running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
+                    running_orig_label_indices.extend(label_indices.cpu().tolist())
 
                     if batch_idx % print_info_batch_freq == 0:
                         curr_inp_counts = min(
@@ -896,19 +901,19 @@ Use ``add_criterion`` to define one.")
                             (batch_idx + 1) * phase_batch_size,
                         )
                         progress_perc = curr_inp_counts / total_inp_counts * 100.0
-                        tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}%)"  # noqa
+                        tmp_str = f"{curr_inp_counts}/{total_inp_counts} ({progress_perc:5.1f}% )"  # noqa
 
                         epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
                         epoch_msg += f"{tmp_str: >20} -- "
 
                         if phase.lower() in valid_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.color_dred, epoch_msg)
+                            self.cprint("[INFO]", self.__color_dred, epoch_msg)
                         elif phase.lower() in train_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
                         else:
-                            self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
                     # --- END: one batch
 
                 # scheduler
@@ -917,7 +922,7 @@ Use ``add_criterion`` to define one.")
 
                 if phase.lower() in train_phase_names + valid_phase_names:
                     # --- collect statistics
-                    epoch_loss = running_loss / self.dataset_sizes[phase]
+                    epoch_loss = running_loss / len(self.dataloaders[phase].dataset)
                     self._add_metrics(f"epoch_loss_{phase}", epoch_loss)
 
                     if tboard_writer is not None:
@@ -929,8 +934,8 @@ Use ``add_criterion`` to define one.")
 
                     # other metrics (precision/recall/F1)
                     self.calculate_add_metrics(
-                        running_orig_label,
-                        running_pred_label,
+                        running_orig_label_indices,
+                        running_pred_label_indices,
                         running_pred_conf,
                         phase,
                         epoch,
@@ -941,14 +946,14 @@ Use ``add_criterion`` to define one.")
                     epoch_msg = self.gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", self.color_dred, epoch_msg + "\n")
+                        self.cprint("[INFO]", self.__color_dred, epoch_msg + "\n")
                     else:
-                        self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                        self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
 
                 # labels/confidence
                 self.pred_conf.extend(running_pred_conf)
-                self.pred_label.extend(running_pred_label)
-                self.orig_label.extend(running_orig_label)
+                self.pred_label_indices.extend(running_pred_label_indices)
+                self.orig_label_indices.extend(running_orig_label_indices)
 
                 # Update best_loss and _epoch?
                 if phase.lower() in valid_phase_names and epoch_loss < self.best_loss:
@@ -958,16 +963,13 @@ Use ``add_criterion`` to define one.")
 
                 if phase.lower() in valid_phase_names:
                     if epoch % tmp_file_save_freq == 0:
-                        print(
-                            f"SAVE temp file: {self.tmp_save_filename} | set .last_epoch: {epoch}"  # noqa
-                        )
-                        tmp_str = f"[INFO] SAVE temp file: {self.tmp_save_filename} | set .last_epoch: {epoch}\n"  # noqa
-                        print(self.color_lgrey + tmp_str + self.color_reset)
+                        tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
+                        print(self.__color_lgrey + tmp_str + self.__color_reset)
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
         time_elapsed = time.time() - since
-        print(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
+        print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -983,9 +985,8 @@ Use ``add_criterion`` to define one.")
                     fio.writelines(f"{save_filename},{self.best_loss:.5f}\n")
 
                 print(
-                    f"[INFO] Save model epoch: {self.best_epoch} with least valid loss: {self.best_loss:.4f}"  # noqa
-                )
-                print(f"[INFO] Path: {save_model_path}")
+                    f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
+[INFO] Path: {save_model_path}") # noqa
 
     def calculate_add_metrics(
         self,
@@ -1417,7 +1418,7 @@ Use ``add_criterion`` to define one.")
             Name of the dataset (``"train"``/``"validation"``) to display the
             sample from, by default ``"train"``.
         batch_number : int, optional
-            Number of batches to display, by default ``1``.
+            Which batch to display, by default ``1``.
         print_batch_info : bool, optional
             Whether to print information about the batch size, by default
             ``True``.
@@ -1442,23 +1443,31 @@ Use ``add_criterion`` to define one.")
         data in a grid format. It also calls the ``_imshow`` method of the
         ``ImageClassifierData`` class to show the sample data.
         """
-        if set_name not in self.dataloader.keys():
+        if set_name not in self.dataloaders.keys():
             raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
 
         if print_batch_info:
             # print info about batch size
             self.print_batch_info(set_name)
 
-        dl_iter = iter(self.dataloader[set_name])
+        dataloader = self.dataloaders[set_name]
+
+        num_batches = int(np.ceil(len(dataloader.dataset) / dataloader.batch_size))
+        if min(num_batches, batch_number) != batch_number:
+            print(f'[INFO] "{set_name}" only contains {num_batches}.\n\
+Output will show batch number {num_batches}.')
+            batch_number = num_batches
+        
+        dl_iter = iter(dataloader)
         for _ in range(batch_number):
             # Get a batch of training data
-            inputs, classes = next(dl_iter)
-
+            inputs, labels, label_indices = next(dl_iter)
+            
         # Make a grid from batch
         out = torchvision.utils.make_grid(inputs)
         self._imshow(
             out,
-            title=str([classes]),
+            title=f"{labels}\n{label_indices.tolist()}",
             figsize=figsize,
         )
 
@@ -1476,11 +1485,11 @@ Use ``add_criterion`` to define one.")
         -------
         None
         """
-        if set_name not in self.dataloader.keys():
+        if set_name not in self.dataloaders.keys():
             raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
         
-        batch_size = self.dataloader[set_name].batch_size
-        num_samples = len(self.dataloader[set_name].dataset)
+        batch_size = self.dataloaders[set_name].batch_size
+        num_samples = len(self.dataloaders[set_name].dataset)
         num_batches = int(np.ceil(num_samples / batch_size))
 
         print(f"[INFO] dataset: {set_name}\n\
@@ -1575,9 +1584,9 @@ Use ``add_criterion`` to define one.")
         counter = 0
         fig = plt.figure(figsize=figsize)
         with torch.no_grad():
-            for inputs, labels in iter(self.dataloader[set_name]):
+            for inputs, labels, label_indices in iter(self.dataloaders[set_name]):
                 inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
+                label_indices = label_indices.to(self.device)
 
                 outputs = self.model(inputs)
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
@@ -1742,37 +1751,37 @@ Use ``add_criterion`` to define one.")
     def _print_colors(self):
         """Private function, setting color attributes on the object."""
         # color
-        self.color_lgrey = "\033[1;90m"
-        self.color_grey = "\033[90m"  # broing information
-        self.color_yellow = "\033[93m"  # FYI
-        self.color_orange = "\033[0;33m"  # Warning
+        self.__color_lgrey = "\033[1;90m"
+        self.__color_grey = "\033[90m"  # broing information
+        self.__color_yellow = "\033[93m"  # FYI
+        self.__color_orange = "\033[0;33m"  # Warning
 
-        self.color_lred = "\033[1;31m"  # there is smoke
-        self.color_red = "\033[91m"  # fire!
-        self.color_dred = "\033[2;31m"  # Everything is on fire
+        self.__color_lred = "\033[1;31m"  # there is smoke
+        self.__color_red = "\033[91m"  # fire!
+        self.__color_dred = "\033[2;31m"  # Everything is on fire
 
-        self.color_lblue = "\033[1;34m"
-        self.color_blue = "\033[94m"
-        self.color_dblue = "\033[2;34m"
+        self.__color_lblue = "\033[1;34m"
+        self.__color_blue = "\033[94m"
+        self.__color_dblue = "\033[2;34m"
 
-        self.color_lgreen = "\033[1;32m"  # all is normal
-        self.color_green = "\033[92m"  # something else
-        self.color_dgreen = "\033[2;32m"  # even more interesting
+        self.__color_lgreen = "\033[1;32m"  # all is normal
+        self.__color_green = "\033[92m"  # something else
+        self.__color_dgreen = "\033[2;32m"  # even more interesting
 
-        self.color_lmagenta = "\033[1;35m"
-        self.color_magenta = "\033[95m"  # for title
-        self.color_dmagenta = "\033[2;35m"
+        self.__color_lmagenta = "\033[1;35m"
+        self.__color_magenta = "\033[95m"  # for title
+        self.__color_dmagenta = "\033[2;35m"
 
-        self.color_cyan = "\033[96m"  # system time
-        self.color_white = "\033[97m"  # final time
+        self.__color_cyan = "\033[96m"  # system time
+        self.__color_white = "\033[97m"  # final time
 
-        self.color_black = "\033[0;30m"
+        self.__color_black = "\033[0;30m"
 
-        self.color_reset = "\033[0m"
-        self.color_bold = "\033[1m"
-        self.color_under = "\033[4m"
+        self.__color_reset = "\033[0m"
+        self.__color_bold = "\033[1m"
+        self.__color_under = "\033[4m"
 
-    def get_time(self) -> str:
+    def _get_dtime(self) -> str:
         """
         Get the current date and time as a formatted string.
 
@@ -1781,8 +1790,8 @@ Use ``add_criterion`` to define one.")
         str
             A string representing the current date and time.
         """
-        time = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
-        return time
+        dtime = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
+        return dtime
 
     def cprint(self, type_info: str, bc_color: str, text: str) -> None:
         """
@@ -1802,13 +1811,13 @@ Use ``add_criterion`` to define one.")
         None
             The colored message is displayed on the standard output stream.
         """
-        ho_nam = socket.gethostname().split(".")[0][:10]
+        host_name = socket.gethostname().split(".")[0][:10]
 
         print(
-            self.color_green + self.get_time() + self.color_reset,
-            self.color_magenta + ho_nam + self.color_reset,
-            self.color_bold + self.color_grey + type_info + self.color_reset,
-            bc_color + text + self.color_reset,
+            self.__color_green + self._get_dtime() + self.__color_reset,
+            self.__color_magenta + host_name + self.__color_reset,
+            self.__color_bold + self.__color_grey + type_info + self.__color_reset,
+            bc_color + text + self.__color_reset,
         )
 
     def update_progress(
