@@ -36,12 +36,14 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self, 
-        model: Union[nn.Module, str],
+        model: Union[nn.Module, str, None],
         dataloaders: Dict[str, DataLoader],
         labels_map: Dict[int, str],
         device: Optional[str] = "default",
         input_size: Optional[int] = (224,224),
         is_inception: Optional[bool] = False,
+        load_path: Optional[str] = None,
+        force_device: Optional[bool] = False,
         **kwargs
     ):
         """
@@ -114,30 +116,39 @@ class ClassifierContainer:
             self.device = device
         print(f"[INFO] Device is set to {self.device}")
 
-        # set up model and move to device
-        if isinstance(model, nn.Module):
-            self.model = model.to(self.device)
-            self.input_size = input_size
-            self.is_inception = is_inception
-        elif isinstance(model, str):
-            self.initialize_model(model, **kwargs)
+        if model and load_path:
+            raise ValueError("[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``.")
+        
+        if model:
+            print("[INFO] Initializing model.")
 
-        self.optimizer = None
-        self.scheduler = None
-        self.criterion = None
+            # set up model and move to device
+            if isinstance(model, nn.Module):
+                self.model = model.to(self.device)
+                self.input_size = input_size
+                self.is_inception = is_inception
+            elif isinstance(model, str):
+                self.initialize_model(model, **kwargs)
 
-        self.metrics = {}
-        self.last_epoch = 0
-        self.best_loss = torch.tensor(np.inf)
-        self.best_epoch = 0
+            self.optimizer = None
+            self.scheduler = None
+            self.criterion = None
 
-        # temp file to save checkpoints during training/validation
-        if not os.path.exists("./tmp_checkpoints"):
-            os.makedirs("./tmp_checkpoints")
-        self.tmp_save_filename = f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+            self.metrics = {}
+            self.last_epoch = 0
+            self.best_loss = torch.tensor(np.inf)
+            self.best_epoch = 0
 
-        # add colors for printing/logging
-        self._print_colors()
+            # temp file to save checkpoints during training/validation
+            if not os.path.exists("./tmp_checkpoints"):
+                os.makedirs("./tmp_checkpoints")
+            self.tmp_save_filename = f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+
+            # add colors for printing/logging
+            self._print_colors()
+        
+        if load_path:
+            self.load(load_path=load_path, force_device=force_device)
 
     def generate_layerwise_lrs(
         self,
@@ -709,7 +720,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         except KeyboardInterrupt:
             print("[INFO] Exiting...")
             if os.path.isfile(self.tmp_save_filename):
-                print(f"[INFO] Loading {self.tmp_save_filename} as model.")
+                print(f'[INFO] Loading "{self.tmp_save_filename}" as model.')
                 self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
             else:
                 print("[INFO] No checkpoint file found - model has not been updated.")
@@ -1703,7 +1714,6 @@ Output will show batch number {num_batches}.')
     def load(
         self,
         load_path: str,
-        remove_after_load: Optional[bool] = False,
         force_device: Optional[bool] = False,
     ) -> None:
         """
@@ -1716,9 +1726,6 @@ Output will show batch number {num_batches}.')
         ----------
         load_path : str
             Path to the saved file to load.
-        remove_after_load : bool, optional
-            Whether to remove the saved file after loading. Defaults to
-            ``False``.
         force_device : bool or str, optional
             Whether to force the use of a specific device, or the name of the
             device to use. If set to ``True``, the default device is used.
@@ -1747,14 +1754,13 @@ Output will show batch number {num_batches}.')
         mydevice = self.device
 
         if not os.path.isfile(load_path):
-            raise FileNotFoundError(f"file not found: {load_path}")
+            raise FileNotFoundError(f'[ERROR] "{load_path}" cannot be found.')
 
+        print(f'[INFO] Loading "{load_path}".')
+        
         with open(load_path, "rb") as myfile:
             # objPickle = pickle.load(myfile)
             objPickle = joblib.load(myfile)
-
-        if remove_after_load:
-            os.remove(load_path)
 
         self.__dict__ = objPickle
 
