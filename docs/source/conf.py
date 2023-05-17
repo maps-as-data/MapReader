@@ -25,6 +25,9 @@ extensions = [
     'autoapi.extension',
     'sphinx_copybutton',
     'nbsphinx',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
+    'sphinx_togglebutton'
 ]
 
 templates_path = ['_templates']
@@ -52,6 +55,15 @@ autoapi_options = [
 autoapi_keep_files = True
 autodoc_typehints = "description"
 autoapi_add_toctree_entry = False
+
+# -- Napoleon settings ----
+
+napoleon_numpy_docstring = True
+napoleon_include_private_with_doc = True
+napoleon_include_special_with_doc = True
+
+# -- todo --
+todo_include_todos=True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

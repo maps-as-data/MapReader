@@ -1933,7 +1933,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             # New projected coordinates
             coords = (xmin, ymin, xmax, ymax)
             self.parents[image_id]["coordinates"] = coords
-            self.parents[image_id]["CRS"] = target_crs
+            self.parents[image_id]["crs"] = target_crs
 
     @staticmethod
     def _print_if_verbose(msg: str, verbose: bool) -> None:
@@ -1975,7 +1975,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to print verbose outputs, by default False
         crs : str, optional
             The CRS of the coordinates.
-            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            If None, the method will first look for ``crs`` in the patches dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
             By default None.
         """
 
@@ -2003,7 +2003,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to print verbose outputs, by default False
         crs : Optional[str], optional
             The CRS of the coordinates.
-            If None, the method will first look for ``CRS`` in the patches dictionary and use those. If ``CRS`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            If None, the method will first look for ``crs`` in the patches dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
             By default None.
 
         Raises
@@ -2044,7 +2044,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         coords = self.patches[patch_id]["coordinates"]
         
         if not crs:
-            crs = self.patches[patch_id].get("CRS", "EPSG:4326")
+            crs = self.patches[patch_id].get("crs", "EPSG:4326")
 
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
         patch = Image.open(patch_path)
