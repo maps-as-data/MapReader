@@ -541,7 +541,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for patch_id in tqdm(patch_list):
             self._add_patch_coords_id(patch_id, verbose)
 
-    def add_patch_polygon(self, verbose: bool = False) -> None:
+    def add_patch_polygons(self, verbose: bool = False) -> None:
         """Add polygon to all patches in patches dictionary.
 
         Parameters
@@ -553,7 +553,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_list = self.list_patches()
 
         for patch_id in tqdm(patch_list):
-            self._add_patch_polygon_id(patch_id, verbose)
+            self._add_patch_polygons_id(patch_id, verbose)
 
     def add_center_coord(self, tree_level: Optional[str] = "patch", verbose: Optional[bool] = False) -> None:
         """
@@ -753,8 +753,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
             self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
 
-    def _add_patch_polygon_id(self, image_id: str, verbose: bool = False) -> None:
-        """Create polygon from a patch
+    def _add_patch_polygons_id(self, image_id: str, verbose: bool = False) -> None:
+        """Create polygon from a patch and save to patch dictionary.
 
         Parameters
         ----------
@@ -774,7 +774,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         
         if "coordinates" in self.patches[image_id].keys():
             coords = self.patches[image_id]["coordinates"]
-            crs = self.patches[image_id]["crs"]
             self.patches[image_id]["polygon"] = box(*coords)
 
     def _add_center_coord_id(
@@ -1089,7 +1088,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         pixel_bounds=(min_x, min_y, max_x, max_y),
                     )
                     self._add_patch_coords_id(patch_id)
-                    self._add_patch_polygon_id(patch_id)
+                    self._add_patch_polygons_id(patch_id)
 
     def _add_patch_to_parent(self, patch_id: str) -> None:
         """
@@ -2136,16 +2135,31 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self, 
         geojson_fname: Optional[str] = "patches.geojson",
         rewrite: Optional[bool] = False, 
-        verbose: Optional[bool] = False,
         crs: Optional[str] = None,
     ) -> None:
+        """Saves patches to a geojson file.
 
+        Parameters
+        ----------
+        geojson_fname : Optional[str], optional
+            The name of the geojson file, by default "patches.geojson"
+        rewrite : Optional[bool], optional
+            Whether to overwrite an existing file, by default False.
+        crs : Optional[str], optional
+            The CRS to use when writing the geojson.
+            If None, the method will look for "crs" in the patches dictionary and, if found, will use that. Otherwise it will set the crs to the default value of "EPSG:4326".
+            By default None
+        """
         if os.path.isfile(geojson_fname):
             if not rewrite:
                 print(f'[WARNING] File already exists: {geojson_fname}. Use ``rewrite=True`` to overwrite.')
                 return
-            
+    
         _, patch_df = self.convert_images()
+
+        if "polygon" not in patch_df.columns:
+            self.add_patch_polygons()
+            _, patch_df = self.convert_images()
 
         if not crs:
             if "crs" in patch_df.columns:
