@@ -15,9 +15,13 @@ from decimal import Decimal
 from .datasets import PatchDataset
 from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
 from torch import Tensor
+from torchvision.transforms import Compose
 
 class AnnotationsLoader():
     def __init__(self):
+        """
+        A Class for loading annnotations and preparing datasets and dataloaders for use in training/validation of a model.
+        """
         self.annotations = pd.DataFrame()
         self.reviewed = pd.DataFrame()
         self.id_col = None
@@ -36,7 +40,35 @@ class AnnotationsLoader():
         scramble_frame: Optional[bool] = False,
         reset_index: Optional[bool] = False,
         ):
-        
+        """Loads annotations from a csv file or dataframe and can be used to set the ``id_col``, ``patch_paths_col`` and ``label_col`` attributes.
+
+        Parameters
+        ----------
+        annotations : Union[str, pd.DataFrame]
+            The annotations. 
+            Can either be the path to a csv file or a pandas.DataFrame.
+        delimiter : Optional[str], optional
+            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+        id_col : Optional[str], optional
+            The name of the column which contains the image IDs, by default "image_id".
+        patch_paths_col : Optional[str], optional
+            The name of the column containing the image paths, by default "image_path".
+        label_col : Optional[str], optional
+            The name of the column containing the image labels, by default "label".
+        append : Optional[bool], optional
+            Whether to append the annotations to a pre-existing ``annotations`` dataframe.
+            If False, existing dataframe will be overwritten. 
+            By default True.
+        scramble_frame : Optional[bool], optional
+            Whether to shuffle the rows of the dataframe, by default False.
+        reset_index : Optional[bool], optional
+            Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
+
+        Raises
+        ------
+        ValueError
+            If ``annotations`` is passed as something other than a string or pd.DataFrame.
+        """
         if not isinstance(annotations, (str, pd.DataFrame)):
             raise ValueError("[ERROR] Please pass ``annotations`` as a string (path to csv file) or pd.DataFrame.")
     
@@ -74,7 +106,37 @@ class AnnotationsLoader():
 
         print(self)
 
-    def _load_annotations_csv(self, annotations, delimiter, scramble_frame, reset_index):
+    def _load_annotations_csv(
+            self, 
+            annotations: str, 
+            delimiter: Optional[str] = "\t", 
+            scramble_frame: Optional[bool] = False,
+            reset_index: Optional[bool] = False
+        ) -> pd.DataFrame:
+        """Loads annotations from a csv file.
+
+        Parameters
+        ----------
+        annotations : str
+            The path to the annotations csv file.
+        delimiter : Optional[str], optional
+            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+        scramble_frame : Optional[bool], optional
+            Whether to shuffle the rows of the dataframe, by default False.
+        reset_index : Optional[bool], optional
+            Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
+        
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe containing the annotations.
+        
+        Raises
+        ------
+        ValueError
+            If ``annotations`` is passed as something other than a string or pd.DataFrame.
+        """
+
         if os.path.isfile(annotations):
             print(f'[INFO] Reading "{annotations}"')
             annotations = pd.read_csv(annotations, sep=delimiter)
@@ -117,6 +179,13 @@ class AnnotationsLoader():
         plt.show()
 
     def print_unique_labels(self) -> None:
+        """Prints unique labels
+
+        Raises
+        ------
+        ValueError
+            If no annotations are found.
+        """
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
 
@@ -125,7 +194,7 @@ class AnnotationsLoader():
     def review_labels(
         self,
         label_to_review: Optional[str] = None,
-        chunks: Optional[int] = 8 * 6,
+        chunks: Optional[int] = 8 * 3,
         num_cols: Optional[int] = 8,
         exclude_df: Optional[pd.DataFrame] = None,
         include_df: Optional[pd.DataFrame] = None,
@@ -141,7 +210,7 @@ class AnnotationsLoader():
             The target label to review. If not provided, all labels will be
             reviewed, by default ``None``.
         chunks : int, optional
-            The number of images to display at a time, by default ``8 * 6``.
+            The number of images to display at a time, by default ``24``.
         num_cols : int, optional
             The number of columns in the display, by default ``8``.
         exclude_df : pandas.DataFrame, optional
@@ -159,13 +228,12 @@ class AnnotationsLoader():
         Notes
         ------
         This method reviews images with their corresponding labels and allows
-        the user to change the label for each image. The updated labels are
-        saved in both the annotations and reviewed DataFrames. If
-        ``exclude_df`` is provided, images with ``image_path`` in
-        ``exclude_df["image_path"]`` are skipped in the review process. If
-        ``include_df`` is provided, only images with ``image_path`` in
-        ``include_df["image_path"]`` are reviewed. The reviewed DataFrame is
-        deduplicated based on the ``deduplicate_col``.
+        the user to change the label for each image. 
+        
+        Updated labels are saved in ``self.annotations`` and in a newly created ``self.reviewed`` DataFrame. 
+        If ``exclude_df`` is provided, images found in this df are skipped in the review process. 
+        If ``include_df`` is provided, only images found in this df are reviewed. 
+        The ``self.reviewed`` DataFrame is deduplicated based on the ``deduplicate_col``.
         """
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
@@ -260,7 +328,9 @@ class AnnotationsLoader():
         print("[INFO] Exited.")
 
     def show_sample(
-        self, label_to_show: str, num_samples: Optional[int] = 9
+        self, 
+        label_to_show: str, 
+        num_samples: Optional[int] = 9
     ) -> None:
         """Show a random sample of images with the specified label (tar_label).
 
@@ -269,8 +339,8 @@ class AnnotationsLoader():
         label_to_show : str, optional
             The label of the images to show.
         num_sample : int, optional
-            The number of images to show. If ``None``, all images with the
-            specified label will be shown. Default is ``10``.
+            The number of images to show. 
+            If ``None``, all images with the specified label will be shown. Default is ``9``.
 
         Returns
         -------
@@ -301,9 +371,9 @@ class AnnotationsLoader():
         frac_val: Optional[Union[str, float]] = 0.15,
         frac_test: Optional[Union[str, float]] = 0.15,
         random_state: Optional[int] = 1364,
-        train_transform: Optional[Union[str, Callable]] = "train",
-        val_transform: Optional[Union[str, Callable]] = "val",
-        test_transform: Optional[Union[str, Callable]] = "test",
+        train_transform: Optional[Union[str, Compose, Callable]] = "train",
+        val_transform: Optional[Union[str, Compose, Callable]] = "val",
+        test_transform: Optional[Union[str, Compose, Callable]] = "test",
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -311,16 +381,29 @@ class AnnotationsLoader():
         Parameters
         ----------
         frac_train : float, optional
-            Fraction of the dataset to be used for training. The default is
-            ``0.70``.
+            Fraction of the dataset to be used for training.
+            By default ``0.70``.
         frac_val : float, optional
-            Fraction of the dataset to be used for validation. The default is
-            ``0.15``.
+            Fraction of the dataset to be used for validation. 
+            By default ``0.15``.
         frac_test : float, optional
-            Fraction of the dataset to be used for testing. The default is
-            ``0.15``.
+            Fraction of the dataset to be used for testing. 
+            By default ``0.15``.
         random_state : int, optional
             Random seed to ensure reproducibility. The default is ``1364``.
+        train_transform: str, tochvision.transforms.Compose or Callable, optional
+            The transform to use on the training dataset images.
+            Options are "train", "test" or "val" or, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose).
+            By default "train".
+        val_transform: str, tochvision.transforms.Compose or Callable, optional
+            The transform to use on the validation dataset images.
+            Options are "train", "test" or "val" or, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose).
+            By default "val".
+        test_transform: str, tochvision.transforms.Compose or Callable, optional
+            The transform to use on the test dataset images.
+            Options are "train", "test" or "val" or, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose).
+            By default "test".
+            
 
         Raises
         ------
@@ -340,6 +423,8 @@ class AnnotationsLoader():
         stratified by the values in a specific column (that is, each subset has
         the same relative frequency of the values in the column). It performs
         this splitting by running ``train_test_split()`` twice.
+
+        See ``PatchDataset`` for more information on transforms.
         """
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
@@ -412,7 +497,7 @@ class AnnotationsLoader():
         batch_size : int, optional
             The batch size to use for the dataloader. By default ``16``.
         sampler : Sampler or False, optional
-            
+            The sampler to use when creating batches from the training dataset.
         shuffle : bool, optional
             Whether to shuffle the dataset during training. By default ``False``.
         num_workers : int, optional
@@ -423,7 +508,11 @@ class AnnotationsLoader():
         Returns
         --------
         Dict
-            Dictionary containing dataloaders.        
+            Dictionary containing dataloaders.   
+
+        Notes
+        -----
+        ``sampler`` will only be applied to the training dataset (datasets["train"]). 
         """
         if not self.datasets:
             print("[INFO] Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations.")
@@ -448,7 +537,19 @@ class AnnotationsLoader():
         return dataloaders
 
     def _define_sampler(self):
+        """Defines a weighted random sampler for the training dataset.
+        Weighting are proportional to the reciprocal of number of instances of each label.
 
+        Returns
+        -------
+        torch.utils.data.WeightedRandomSampler
+            The sampler
+
+        Raises
+        ------
+        ValueError
+            If "train" cannot be found in ``self.datasets.keys()``.
+        """
         if not self.datasets:
             self.create_datasets()
         
@@ -465,9 +566,25 @@ class AnnotationsLoader():
         
         return sampler
 
-    def _get_label_index(self, label: str):
-        label_index = self.unique_labels.index(label)
-        return label_index
+    def _get_label_index(self, label: str) -> int:
+        """Gets the index of a label.
+
+        Parameters
+        ----------
+        label : str
+            A label from the ``label_col`` of the ``patch_df``.
+
+        Returns
+        -------
+        int
+            The index of the label.
+        
+        Notes
+        -----
+        Used to generate the ``label_index`` column.
+
+        """
+        return self.unique_labels.index(label)
 
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")

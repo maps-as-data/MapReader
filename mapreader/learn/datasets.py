@@ -29,25 +29,26 @@ class PatchDataset(Dataset):
     def __init__(
         self,
         patch_df: pd.DataFrame,
-        transform: Union[str, Callable],
-        patch_paths_col: Optional[int] = 0,
+        transform: Union[str, transforms.Compose, Callable],
+        patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
         image_mode: Optional[str] = "RGB",
     ):
-        """
-        A PyTorch Dataset class for loading image patches from a DataFrame.
+        """A PyTorch Dataset class for loading image patches from a DataFrame.
 
         Parameters
         ----------
         patch_df : pandas.DataFrame
             DataFrame containing the paths to image patches and their labels.
-        transform : callable, optional
-            A callable object (a torchvision transform) that takes in an image
-            and performs image transformations. Default is None.
-        patch_paths_col : int, optional
-            The index of the column in the DataFrame containing the image
-            paths. Default is 0.
+        transform : Union[str, transforms.Compose, Callable]
+            The transform to use on the image.
+            A string can be used to call default transforms - options are "train", "test" or "val". 
+            Alternatively, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose) that takes in an image
+            and performs image transformations can be used. 
+            At minimum, transform should be ``torchvision.transforms.ToTensor()``.            
+        patch_paths_col : str, optional
+            The name of the column in the DataFrame containing the image paths. Default is "image_path".
         label_col : str, optional
             The name of the column containing the image labels. Default is None.
         label_index_col : str, optional
@@ -79,13 +80,23 @@ class PatchDataset(Dataset):
         __len__()
             Returns the length of the dataset.
         __getitem__(idx)
-            Retrieves the image and label at the given index in the dataset.
+            Retrieves the image, its label and the index of that label at the given index in the dataset.
         return_orig_image(idx)
             Retrieves the original image at the given index in the dataset.
         _default_transform(t_type, resize2)
             Returns a dictionary containing the default image transformations
             for the train and validation sets.
+
+        Raises
+        ------
+        ValueError
+            If ``label_col`` not in ``patch_df``.
+        ValueError
+            If ``label_index_col`` not in ``patch_df``.
+        ValueError
+            If ``transform`` passed as a string, but not one of "train", "test" or "val".
         """
+
         self.patch_df = patch_df
         self.label_col = label_col
         self.label_index_col = label_index_col
@@ -103,10 +114,13 @@ class PatchDataset(Dataset):
             if self.label_index_col not in self.patch_df.columns:
                 raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
 
-        if transform in ["train", "val", "test"]:
-            self.transform = self._default_transform(transform)
+        if isinstance(transform, str):
+            if transform in ["train", "val", "test"]:
+                self.transform = self._default_transform(transform)
+            else:
+                raise ValueError(f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.')
         else:
-            self.transform = transform # CHECK THIS - RW
+            self.transform = transform
 
     def __len__(self) -> int:
         """
@@ -121,7 +135,7 @@ class PatchDataset(Dataset):
 
     def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, Any]:
         """
-        Return the image and its label at the given index in the dataset.
+        Return the image, its label and the index of that label at the given index in the dataset.
 
         Parameters
         ----------
@@ -131,8 +145,8 @@ class PatchDataset(Dataset):
         Returns
         -------
         tuple
-            A tuple containing the transformed image and its label (if
-            available). The label is -1 if it is not present in the DataFrame.
+            A tuple containing the transformed image, its label the index of that label (if
+            available). The label is "" and has index -1 if it is not present in the DataFrame.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -200,12 +214,12 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
     ) -> Dict:
         """
         Returns a dictionary containing the default image transformations for
-        the train and validation sets.
+        the train, test and validation sets.
 
         Parameters
         ----------
         t_type : str, optional
-            The type of transformation to return. Either "train" or "val".
+            The type of transformation to return. Either "train", "test" or "val".
             Default is "train".
         resize2 : int or tuple, optional
             The size in pixels to resize the image to. Default is (224, 224).
@@ -213,12 +227,12 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         Returns
         -------
         dict
-            A dictionary containing the default image transformations for the
+            A torchvision.transforms.Compose containing the default image transformations for the
             specified type.
 
-        Raises
-        ------
-        None
+        Notes
+        -----
+        "val" and "test" are aliased by this method - both return the same transforms.
         """
         normalize_mean = [0.485, 0.456, 0.406]
         normalize_std = [0.229, 0.224, 0.225]

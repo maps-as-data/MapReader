@@ -26,6 +26,8 @@ from torch.utils.data import DataLoader, Sampler
 import torchvision
 from torchvision import models
 
+from torchinfo import summary
+
 from .datasets import PatchDataset
 
 # import pickle
@@ -36,7 +38,7 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self, 
-        model: Union[nn.Module, str, None],
+        model: Union[str, nn.Module, None],
         dataloaders: Dict[str, DataLoader],
         labels_map: Dict[int, str],
         device: Optional[str] = "default",
@@ -47,21 +49,35 @@ class ClassifierContainer:
         **kwargs
     ):
         """
-        Initialize an Classifier object.
+        Initialize an ClassifierContainer object.
 
         Parameters
         ----------
-        model : nn.Module
-            The PyTorch model to add to the object. See: ``torchvision.models``
+        model : str, nn.Module or None
+            The PyTorch model to add to the object - see ``https://pytorch.org/vision/0.8/models.html`.
+
+            - If passed as a string, will run ``_initialize_model(model, **kwargs)``- valid options are "resnet", "alexnet", "vgg", "squeezenet", "densenet" or "inception".
+            - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
+        dataloaders: Dict
+            A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
+        labels_map: Dict
+            A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
         device : str, optional
-            The device to be used for training and storing models. Can be set
-            to ``"default"``, ``"cpu"``, ``"cuda:0"``, etc. By default
-            ``"default"``.
+            The device to be used for training and storing models. 
+            Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
         input_size : int, optional
-            The expected input size of the model. Default is ``224``.
+            The expected input size of the model. Default is ``(224,224)``.
         is_inception : bool, optional
-            Whether the model is an Inception-style model. Default is
-            ``False``.
+            Whether the model is an Inception-style model. 
+            Default is ``False``.
+        load_path : str, optional
+            The path to an ``.obj`` file containing a 
+        force_device : bool, optional
+            Whether to force the use of a specific device. 
+            If set to ``True``, the default device is used.
+            Defaults to ``False``.
+        kwargs : Dict
+            Keyword arguments to pass to the ``_initialize_model()`` method if ``load_path`` is specified.
 
         Attributes
         ----------
@@ -69,20 +85,22 @@ class ClassifierContainer:
             The device being used for training and storing models.
         dataloaders : dict
             A dictionary to store dataloaders for the model.
+        labels_map : dict
+            A dictionary mapping label indices to their labels.
         dataset_sizes : dict
             A dictionary to store sizes of datasets for the model.
-        class_names : None or list of str
-            A list of class names for the model.
-        model : None or torch.nn.Module
-            The model being trained.
-        optimizer : None or torch.optim.Optimizer
-            The optimizer being used for training the model.
-        scheduler : None or torch.optim.lr_scheduler._LRScheduler
-            The learning rate scheduler being used for training the model.
+        model : torch.nn.Module
+            The model.
         input_size : None or tuple of int
             The size of the input to the model.
         is_inception : None or bool
             A flag indicating if the model is an Inception model.
+        optimizer : None or torch.optim.Optimizer
+            The optimizer being used for training the model.
+        scheduler : None or torch.optim.lr_scheduler._LRScheduler
+            The learning rate scheduler being used for training the model.
+        criterion : None or nn.modules.loss._Loss
+            The criterion to use for training the model.
         metrics : dict
             A dictionary to store the metrics computed during training.
         last_epoch : int
@@ -95,12 +113,6 @@ class ClassifierContainer:
         tmp_save_filename : str
             A temporary file name to save checkpoints during training and
             validation.
-    
-        Raises
-        ------
-        ValueError
-            If the object's ``class_names`` attribute is ``None``. They should
-            be specified with the ``set_classnames`` method.
         """
         # add dataloaders
         self.dataloaders = dataloaders
@@ -128,7 +140,7 @@ class ClassifierContainer:
                 self.input_size = input_size
                 self.is_inception = is_inception
             elif isinstance(model, str):
-                self.initialize_model(model, **kwargs)
+                self._initialize_model(model, **kwargs)
 
             self.optimizer = None
             self.scheduler = None
@@ -393,15 +405,26 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def model_summary(
         self,
-        only_trainable: Optional[bool] = False,
-        print_space: Optional[List[int]] = [40, 20, 20],
+        input_size: Optional[Union[tuple, list]] = None,
+        trainable_col: Optional[bool] = False,
+        **kwargs,
     ) -> None:
         """
-        Print a summary of the model including the modules, the number of
-        parameters in eaach module, and the dimension of the output tensor of
-        each module. If ``only_trainable`` is ``True``, it only prints the
-        trainable parameters.
+        Print a summary of the model.
 
+        Parameters
+        ----------
+        input_size : tuple or list, optional
+            The size of the input data.
+            If None, input size is taken from "train" dataloader (``self.dataloaders["train"]).
+        trainable_col : bool, optional
+            If ``True``, adds a column showing which parameters are trainable.
+            Defaults to ``False``.
+        **kwargs : Dict
+            Keyword arguments to pass to ``torchinfo.summary()`` (see https://github.com/TylerYep/torchinfo).
+
+        Notes
+        -----
         Other ways to check params:
 
         .. code-block:: python
@@ -420,77 +443,19 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             for name, param in self.model.named_parameters():
                 n = name.split(".")[0].split("_")[0]
                 print(name, param.requires_grad)
-
-        Parameters
-        ----------
-        only_trainable : bool, optional
-            If ``True``, only the trainable parameters will be printed.
-            Defaults to ``False``.
-        print_space : list, optional
-            A list with three integers defining the width of each column in
-            the printed table. By default, ``[40, 20, 20]``.
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        Credit: this function is the modified version of
-        https://stackoverflow.com/a/62508086.
         """
-        
-        # header
-        col1, col2, col3 = "modules", "parameters", "dim"
-        line_divider = sum(print_space) * "-" + "----------"
-        print(line_divider)
-        print(
-            f"| {col1:>{print_space[0]}} | {col2:>{print_space[1]}} | {col3:>{print_space[2]}}"  # noqa
-        )
-        print(line_divider)
+        if not input_size:
+            batch_size = self.dataloaders["train"].batch_size
+            channels = len(self.dataloaders["train"].dataset.image_mode)
+            input_size = (batch_size, channels, *self.input_size)
 
-        # body
-        total_params = 0
-        total_trainable_params = 0
-        for name, parameter in self.model.named_parameters():
-            if (not parameter.requires_grad) and only_trainable:
-                continue
-            elif not parameter.requires_grad:
-                cbeg, cend = self.__color_red, self.__color_reset
-            else:
-                cbeg = cend = ""
+        if trainable_col:
+            col_names=["num_params", "output_size", "trainable"]
+        else:
+            col_names=["output_size","output_size", "num_params"]
 
-            param = parameter.numel()
-
-            print(
-                f"{cbeg}| {name:>{print_space[0]}} | {param:>{print_space[1]}} | {str(list(parameter.shape)):>{print_space[2]}} |{cend}"  # noqa
-            )
-
-            total_params += param
-            if parameter.requires_grad:
-                total_trainable_params += param
-
-        # footer
-        print(line_divider)
-        if not only_trainable:
-            print(
-                f"| {'Total params':>{print_space[0]}} | {total_params:>{print_space[1]}} | {'':>{print_space[2]}} |"  # noqa
-            )
-        print(
-            f"| {'Total trainable params':>{print_space[0]}} | {total_trainable_params:>{print_space[1]}} | {'':>{print_space[2]}} |"  # noqa
-        )
-        print(line_divider)
-
-        # add 6 to sum(print_space) as we have two times: " | " with size 3 in
-        # the other/above prints
-        print(f"| {'Other parameters:':<{sum(print_space) + 6}} |")
-        print(
-            f"| {'* input size:   '+str(self.input_size):<{sum(print_space) + 6}} |"  # noqa
-        )
-        print(
-            f"| {'* is_inception: '+str(self.is_inception):<{sum(print_space) + 6}} |"  # noqa
-        )
-        print(line_divider)
+        model_summary = summary(self.model, input_size=input_size, col_names=col_names, **kwargs)
+        print(model_summary)
 
     def freeze_layers(self, layers_to_freeze: Optional[List[str]] = []) -> None:
         """
@@ -1316,12 +1281,11 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         plt.grid()
         plt.show()
 
-    def initialize_model(
+    def _initialize_model(
         self,
         model_name: str,
         pretrained: Optional[bool] = True,
         last_layer_num_classes: Optional[Union[str, int]] = "default",
-        add_model: Optional[bool] = True,
     ) -> Tuple[Any, int, bool]:
         """
         Initializes a PyTorch model with the option to change the number of
@@ -1333,16 +1297,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         Parameters
         ----------
         model_name : str
-            Name of a PyTorch model. See
-            https://pytorch.org/vision/0.8/models.html
+            Name of a PyTorch model. 
+            Options of "resnet", "alexnet", "vgg", "squeezenet", "densenet" and "inception".
         pretrained : bool, optional
             Use pretrained version, by default ``True``
         last_layer_num_classes : str or int, optional
             Number of elements in the last layer. If ``"default"``, sets it to
             the number of classes. By default, ``"default"``.
-        add_model : bool, optional
-            If ``True`` (default), adds the initialized model to the instance
-            of the class.
 
         Returns
         -------
@@ -1363,7 +1324,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         Inception v3 requires the input size to be ``(299, 299)``, whereas all
         of the other models expect ``(224, 224)``.
 
-        See https://pytorch.org/vision/0.8/models.html for available models.
+        See https://pytorch.org/vision/0.8/models.html.
         """
 
         # Initialize these variables which will be set in this if statement.
