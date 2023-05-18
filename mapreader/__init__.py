@@ -1,9 +1,10 @@
-from mapreader.load.images import mapImages
+from mapreader.load.images import MapImages
 from mapreader.load.loader import loader
 from mapreader.load.loader import load_patches
 
-from mapreader.download import azure_access
-from mapreader.download.tileserver_access import TileServer
+from mapreader.download.sheet_downloader import SheetDownloader
+from mapreader.download.downloader import Downloader
+from mapreader.download.downloader_utils import create_polygon_from_latlons, create_line_from_latlons
 
 from mapreader.annotate.load_annotate import loadAnnotations
 
@@ -19,4 +20,4 @@ from . import _version
 
 __version__ = _version.get_versions()["version"]
 
-from mapreader.utils import geo_utils
+from mapreader.load import geo_utils
