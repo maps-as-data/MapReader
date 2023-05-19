@@ -11,25 +11,45 @@ Input options
 The MapReader pipeline is explained in detail `here <https://mapreader.readthedocs.io/en/latest/About.html>`__.
 The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
-Option 1 - If you want to download maps from a TileServer
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Option 1 - If you want to download map sheets from a TileServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to download maps from a TileServer using MapReaders ``Download`` subpackage, you will need to begin with the 'Download' task. 
 For this, you will need:
 
-* A ``json`` file containing metadata for each map you would like to query/download. 
-* The base URL of the map layer which you would like to access.
+* A ``json`` file containing metadata for each map sheet you would like to query/download. 
+* The URL of the XYZ tile layer which you would like to access.
 
-.. todo:: RW - Unsure if the below is true so will need to check. Leaving for now.
+At minimum, for each map sheet, your ``json`` file should contain information on:
 
-The key starting point is to be sure you have metadata for each map, or, "item-level" metadata in a json file. 
-This allows every map file to be associated with its georeferencing information, title, publication date, or other basic information that you would like to be preserved and associated with patches.
+- the name and URL of the sheet
+- the geometry of the sheet (i.e. its coordinates)
+- the coordinate reference system (CRS) used
 
-You may have different kinds of metadata from different sources for your map files (e.g. descriptive or bibliographic metadata from a collection record, or technical metadata about georeferencing). 
-We provide detailed guidance about requirements for your metadata file if you are working with maps from a Tile Server service.
+These should be saved in a format that looks something like this:
 
+.. code-block:: javascript
 
-.. todo:: add guidance about metadata requirement for other file types (not tile server) (Rosie) - need column in metadata that corresponds to image id in images object.
+    {
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "geometry": {
+                "geometry_name": "the_geom",
+                "coordinates": [...]
+            },
+            "properties": {
+                "IMAGE": "...",
+                "WFS_TITLE": "..."
+                "IMAGEURL": "..."
+            },
+        }],
+        "crs": {
+            "name": "EPSG:4326"
+            },
+    }
+
+Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`_ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_, are provided in ``MapReader/worked_examples/persistent_data``.
 
 Option 2 - If your files are already saved locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
