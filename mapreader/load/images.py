@@ -2169,7 +2169,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 crs = "EPSG:4326"
 
         patch_df.reset_index(names="image_id", inplace=True)
-        patch_df = patch_df[["image_id", "parent_id", "image_path", "polygon"]]
+        
+        #drop pixel stats columns
+        patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
+        #drop tuple columns - cause errors
+        for col in patch_df.columns:
+            if isinstance(patch_df[col][0], tuple):
+                patch_df.drop(columns=col, inplace=True)
+        
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
 
