@@ -408,7 +408,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def show_sample(
         self,
         num_samples: int,
-        tree_level: Optional[str] = "parent",
+        tree_level: Optional[str] = "patch",
         random_seed: Optional[int] = 65,
         **kwds: Dict,
     ) -> None:
@@ -422,7 +422,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             The number of images to display.
         tree_level : str, optional
             The level of the hierarchy to display images from, which can be
-            ``"patch"`` or ``"parent"`` (default).
+            ``"patch"`` or ``"parent"``. By default "patch".
         random_seed : int, optional
             The random seed to use for reproducibility. Default is ``65``.
         **kwds : dict, optional
@@ -1471,6 +1471,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         vmax=vmax,
                         alpha=alpha,
                     )
+                    
+                    fig.colorbar(values_plot, shrink=0.8)
 
                 if plot_parent:
                     parent_path = parent_images[parent_id]["image_path"]
@@ -1494,7 +1496,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         counter=-1,
                     )
 
-                fig.colorbar(values_plot, shrink=0.8)
                 ax.set_title(image_id)
                 figures.append(fig)
 
