@@ -4,7 +4,7 @@ import pytest
 def test_import():
     # This is based on all the imports found in the various tutorial notebooks
     from mapreader import (
-        classifier,
+        ClassifierContainer,
         load_patches,
         AnnotationsLoader,
         loader,
