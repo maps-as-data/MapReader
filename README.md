@@ -32,12 +32,12 @@
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale. 
 
-MapReader was developed in the [Living with Machines](https://livingwithmachines.ac.uk/) project to analyze large collections of historical maps but is a _**generalisable**_ computer vision pipeline which can be applied to _**any images**_ in a wide variety of domains. 
+MapReader was developed in the [Living with Machines](https://livingwithmachines.ac.uk/) project to analyze large collections of historical maps but is a _**generalizable**_ computer vision pipeline which can be applied to _**any images**_ in a wide variety of domains. 
 
 
 ## Overview
 
-MapReader is a groundbreaking interdisciplinary tool that emerged from a specific set of geospatial historical research questions. It was inspired by methods in biomedical imaging and geographic information science, which were adapted for annotation and use by historians, for example in [JVC](https://doi.org/10.1093/jvcult/vcab009) and [MapReader](https://arxiv.org/abs/2111.15592) papers. The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets, and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
+MapReader is a groundbreaking interdisciplinary tool that emerged from a specific set of geospatial historical research questions. It was inspired by methods in biomedical imaging and geographic information science, which were adapted for use by historians, for example in our [Journal of Victorian Culture](https://doi.org/10.1093/jvcult/vcab009) and [Geospatial Humanities 2022 SIGSPATIAL workshop](https://arxiv.org/abs/2111.15592) papers. The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets, and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
 
 ### MapReader pipeline 
 
@@ -76,9 +76,9 @@ Various **plotting and analysis** functionalities are also included (based on pa
 
 The MapReader documentation can be found [here](https://mapreader.readthedocs.io/en/latest/index.html).
 
-**New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/Install.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/Input-guidance.html) for guidance on the initial set up of MapReader.
+**New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/Install.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/Input-guidance.html) for help with the initial set up of MapReader.
 
-**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/User-guide.html) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustratng use cases such as:
+**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/User-guide/User-guide.html) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustratng use cases such as:
 - Geospatial images (i.e. maps)
 - Non-geospatial images 
 
@@ -86,7 +86,7 @@ The MapReader documentation can be found [here](https://mapreader.readthedocs.io
 
 ## How to cite MapReader
 
-If you use MapReader in your work, please consider acknowledging us by citing [our paper](https://dl.acm.org/doi/10.1145/3557919.3565812):
+If you use MapReader in your work, please consider acknowledging us by citing [our SIGSPATIAL paper](https://dl.acm.org/doi/10.1145/3557919.3565812):
 
 - Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
 
