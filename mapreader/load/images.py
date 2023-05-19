@@ -20,6 +20,8 @@ from tqdm import tqdm
 import rasterio
 from rasterio.plot import reshape_as_raster
 from shapely.geometry import box
+
+os.environ['USE_PYGEOS'] = '0' #see here https://github.com/geopandas/geopandas/issues/2691
 import geopandas as geopd
 
 # Ignore warnings
