@@ -41,36 +41,17 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 
 ### MapReader pipeline 
 
-The MapReader pipeline consists of two main components:
-1. preprocessing/annotation 
-2. training/inference
-
 <div align="center">
   <figure>
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/MapReader_pipeline.png"
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/figures/pipeline_explained.png"
         alt="MapReader pipeline"
         width="70%">
   </figure>
 </div>
 
+The MapReader pipeline consists of a linear sequence of tasks which, together, can be used to train a computer vision (CV) classifier to recognise visual features within maps and identify patches containing these features across entire map collections.
+See our [About MapReader](https://mapreader.readthedocs.io/en/latest/About.html) page to learn more.
 
-### What is included?
-
-The MapReader package provides a set of tools to:
-
-- **download** images/maps and metadata stored on web-servers (e.g. tileserves which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere).
-- **load** images/maps and metadata stored locally.
-- **preprocess** images/maps:
-  - patchify (create patches from a parent image), 
-  - resample (use image transformations to alter pixel-dimensions/resolution/orientation/etc.),
-  - remove borders outside the neatline,
-  - reproject between coordinate reference systems (CRS).
-- **annotate** images/maps (or their patches) using an interactive annotation tool.
-- **train, fine-tune, and evaluate** Computer Vision (CV) models and use these to **predict** labels (i.e. model inference) on large sets of images/maps.
-
-Various **plotting and analysis** functionalities are also included (based on packages such as *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/)).
-
-<!--- or mb picture here? --->
 
 ## Documentation 
 
@@ -83,6 +64,24 @@ The MapReader documentation can be found [here](https://mapreader.readthedocs.io
 - Non-geospatial images 
 
  **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/api/index.html) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/Contribution-guide.html) for guidance on how to contribute to the MapReader package.
+ 
+ 
+## What is included in this repo?
+
+The MapReader package provides a set of tools to:
+
+- **Download** images/maps and metadata stored on web-servers (e.g. tileserves which can be used to retrieve maps from OpenStreetMap (OSM), the National Library of Scotland (NLS), or elsewhere).
+- **Load** images/maps and metadata stored locally.
+- **Preprocess** images/maps:
+  - patchify (create patches from a parent image), 
+  - resample (use image transformations to alter pixel-dimensions/resolution/orientation/etc.),
+  - remove borders outside the neatline,
+  - reproject between coordinate reference systems (CRS).
+- **Annotate** images/maps (or their patches) using an interactive annotation tool.
+- **Train or fine-tune** Computer Vision (CV) models and use these to **predict** labels (i.e. model inference) on large sets of images/maps.
+
+Various **plotting and analysis** functionalities are also included (based on packages such as *matplotlib*, *cartopy*, *Google Earth*, and [kepler.gl](https://kepler.gl/)).
+
 
 ## How to cite MapReader
 
