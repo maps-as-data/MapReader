@@ -50,6 +50,7 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 </div>
 
 The MapReader pipeline consists of a linear sequence of tasks which, together, can be used to train a computer vision (CV) classifier to recognise visual features within maps and identify patches containing these features across entire map collections.
+
 See our [About MapReader](https://mapreader.readthedocs.io/en/latest/About.html) page to learn more.
 
 
