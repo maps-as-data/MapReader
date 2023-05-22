@@ -1,5 +1,5 @@
-Learn and Predict
-==================
+Classify
+=========
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
 
