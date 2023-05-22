@@ -10,7 +10,7 @@ from mapreader.classify.load_annotations import AnnotationsLoader
 from mapreader.classify.datasets import PatchDataset
 from mapreader.classify.datasets import PatchContextDataset
 from mapreader.classify.classifier import ClassifierContainer
-from mapreader.classify.classifier_context import classifierContext
+from mapreader.classify.classifier_context import ClassifierContextContainer
 from mapreader.classify import custom_models
 
 from mapreader.process import process

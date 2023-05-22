@@ -797,6 +797,7 @@ Use ``add_criterion`` to define one.")
 
         start_epoch = self.last_epoch + 1
         end_epoch = self.last_epoch + num_epochs
+        
         # --- Main train loop
         for epoch in range(start_epoch, end_epoch + 1):
             # --- loop, phases
@@ -1598,6 +1599,7 @@ Output will show batch number {num_batches}.')
                         self.model.train(mode=was_training)
                         plt.show()
                         return
+                    
             self.model.train(mode=was_training)
             plt.show()
 
