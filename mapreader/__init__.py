@@ -8,7 +8,7 @@ from mapreader.download.downloader_utils import create_polygon_from_latlons, cre
 
 from mapreader.classify.load_annotations import AnnotationsLoader
 from mapreader.classify.datasets import PatchDataset
-from mapreader.classify.datasets import patchContextDataset
+from mapreader.classify.datasets import PatchContextDataset
 from mapreader.classify.classifier import ClassifierContainer
 from mapreader.classify.classifier_context import classifierContext
 from mapreader.classify import custom_models

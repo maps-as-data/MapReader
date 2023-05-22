@@ -69,9 +69,7 @@ class AnnotationsLoader():
         ValueError
             If ``annotations`` is passed as something other than a string or pd.DataFrame.
         """
-        if not isinstance(annotations, (str, pd.DataFrame)):
-            raise ValueError("[ERROR] Please pass ``annotations`` as a string (path to csv file) or pd.DataFrame.")
-    
+
         if not self.id_col:
             self.id_col = id_col
         elif self.id_col != id_col:
@@ -87,6 +85,8 @@ class AnnotationsLoader():
         elif self.label_col != label_col:
             print(f'[WARNING] Label column was previously "{self.label_col}, but will now be set to {label_col}.')
 
+        if not isinstance(annotations, (str, pd.DataFrame)):
+            raise ValueError("[ERROR] Please pass ``annotations`` as a string (path to csv file) or pd.DataFrame.")
         if isinstance(annotations, str):
             annotations = self._load_annotations_csv(annotations, delimiter, scramble_frame, reset_index)
         
