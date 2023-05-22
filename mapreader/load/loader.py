@@ -26,7 +26,7 @@ def loader(
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
     **kwargs : dict, optional
-        Additional keyword arguments to be passed to the ``imagesConstructor``
+        Additional keyword arguments to be passed to the ``_images_constructor()``
         method.
 
     Returns

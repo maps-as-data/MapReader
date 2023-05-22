@@ -19,6 +19,8 @@ Create an annotation tasks file
 To set up your annotation tasks, you will need to create a separate ``annotation_tasks.yaml`` file.
 An example file which can be used as a template can be found in ``MapReader/worked_examples/``.
 
+.. todo:: Note that you can do this via texteditor in windows or something like ??? in mac/linux
+
 Your ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and ``paths``.
 	
 The ``tasks`` section is used to specify annotation tasks and their labels. 
@@ -49,7 +51,7 @@ This section can contain as many annotation sets as you would like and should be
 		parent_paths: "./path/to/parents_2/"
 		annot_dir: "./path/to/save/annotations_2"
 
-For example, if you want to annotate 'rail_space' (as in our `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
+For example, if you want to annotate 'rail_space' (as in `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
 	   
 .. code-block:: yaml
 
@@ -73,11 +75,14 @@ Annotate your images
 
 To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_file`` (i.e. the ``annotation_task.yaml``), tell MapReader which ``task`` you'd like to run and which  ``annotation_set`` you would like to run on. 
 
+.. todo:: Give big list of different options here
+.. todo:: Explain that things don't autosave
+
 e.g. following our 'rail_space' example from earlier:
 
 .. code-block:: python
 
-	#EXAMPLE
+	  #EXAMPLE
     from mapreader.annotate.utils import prepare_annotation
 
     annotation = prepare_annotation(
@@ -104,7 +109,14 @@ e.g. :
 .. code-block:: python
 
 	#EXAMPLE	
-    annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100)
+    annotation=prepare_annotation(
+        userID="rosie", 
+        annotation_tasks_file="annotation_tasks.yaml", 
+        task="rail_space", 
+        annotation_set="set_001", 
+        context_image=True, 
+        xoffset=100, 
+        yoffset=100)
 
     annotation 
 
@@ -120,7 +132,17 @@ e.g. :
 
 .. code-block:: python
 		
-    annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
+    annotation=prepare_annotation(
+        userID="rosie", 
+        annotation_tasks_file="annotation_tasks.yaml", 
+        task="rail_space", 
+        annotation_set="set_001", 
+        context_image=True, 
+        xoffset=100, 
+        yoffset=100, 
+        min_mean_pixel=0.5, 
+        max_mean_pixel=0.9
+    )
 
     annotation 
 
@@ -133,7 +155,7 @@ Once you have annotated your images, you should save your annotations using:
 
 .. code-block:: python
 
-	#EXAMPLE
+	  #EXAMPLE
     from mapreader.annotate.utils import save_annotation
 
     save_annotation(

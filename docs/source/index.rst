@@ -6,22 +6,30 @@
 MapReader
 =========
 
-A computer vision pipeline for exploring and analyzing images at scale
------------------------------------------------------------------------
+**A computer vision pipeline for exploring and analyzing images at scale** 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    About
+   Beginners-info
    Install
    Input-guidance
    User-guide/User-guide
    Worked-examples
    api/index
-   Contribution-guide
+   Contribution-guide/Contribution-guide
+   Developers-guide
+
+------------
 
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
+
+-------------
+
+.. admonition:: To do list
+   .. todolist::
 
 Indices and tables
 ==================

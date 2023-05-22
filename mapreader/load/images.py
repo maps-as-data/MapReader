@@ -917,6 +917,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
 
         image_ids = self.images[tree_level].keys()
+        original_patch_size = patch_size
 
         if path_save is None:
             path_save = f"patches_{patch_size}_{method}"
@@ -939,7 +940,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
                 mean_pixel_height = self._calc_pixel_height_width(image_id)[1]
                 patch_size = int(
-                    patch_size / mean_pixel_height
+                    original_patch_size / mean_pixel_height
                 )  ## check this is correct - should patch be different size in x and y?
 
             self._patchify_by_pixel(
