@@ -164,7 +164,7 @@ Use ``add_criterion`` to define one.")
         print(f"[INFO] Each epoch will pass: {phases}.")
 
         for phase in phases:
-            if phase not in self.dataloader.keys():
+            if phase not in self.dataloaders.keys():
                 raise KeyError(
                     f'[ERROR] "{phase}" dataloader cannot be found in dataloaders.\n\
     Valid options for ``phases`` argument are: {self.dataloaders.keys()}'  # noqa
@@ -218,16 +218,16 @@ Use ``add_criterion`` to define one.")
                 running_orig_label_indices = []
 
                 # TQDM
-                # batch_loop = tqdm(iter(self.dataloader[phase]), total=len(self.dataloader[phase]), leave=False) # noqa
+                # batch_loop = tqdm(iter(self.dataloaders[phase]), total=len(self.dataloaders[phase]), leave=False) # noqa
                 # if phase.lower() in train_phase_names+valid_phase_names:
                 #     batch_loop.set_description(f"Epoch {epoch}/{end_epoch}")
 
-                phase_batch_size = self.dataloader[phase].batch_size
-                total_inp_counts = len(self.dataloader[phase].dataset)
+                phase_batch_size = self.dataloaders[phase].batch_size
+                total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
                 for batch_idx, (inputs1, inputs2, labels, label_indices) in enumerate(
-                    self.dataloader[phase]
+                    self.dataloaders[phase]
                 ):
                     inputs1 = inputs1.to(self.device)
                     inputs2 = inputs2.to(self.device)
@@ -256,6 +256,14 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 phase.lower() in train_phase_names
                             ):
                                 outputs, aux_outputs = self.model(inputs1, inputs2)
+
+                                if not all(isinstance(out, torch.Tensor) for out in [outputs, aux_outputs]):
+                                    try:
+                                        outputs = outputs.logits
+                                        aux_outputs = aux_outputs.logits
+                                    except AttributeError as err:
+                                        raise AttributeError(err.message)
+                                
                                 loss1 = self.criterion(outputs, label_indices)
                                 loss2 = self.criterion(aux_outputs, label_indices)
                                 # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
@@ -263,6 +271,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             else:
                                 outputs = self.model(inputs1, inputs2)
                                 # labels = labels.long().squeeze_()
+                                if not isinstance(outputs, torch.Tensor):
+                                    try:
+                                        outputs = outputs.logits
+                                    except AttributeError as err:
+                                        raise AttributeError(err.message)
+                                
                                 loss = self.criterion(outputs, label_indices)
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
@@ -280,6 +294,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                         # batch_loop.refresh()
                     else:
                         outputs = self.model(inputs1, inputs2)
+
+                        if not isinstance(outputs, torch.Tensor):
+                            try:
+                                outputs = outputs.logits
+                            except AttributeError as err:
+                                raise AttributeError(err.message)
+                            
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
@@ -574,6 +595,13 @@ Output will show batch number {num_batches}.')
                 label_indices = label_indices.to(self.device)
             
                 outputs = self.model(inputs1, inputs2)
+
+                if not isinstance(outputs, torch.Tensor):
+                    try:
+                        outputs = outputs.logits
+                    except AttributeError as err:
+                        raise AttributeError(err.message)
+                    
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
 
