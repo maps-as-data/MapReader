@@ -6,9 +6,11 @@ import os
 from pathlib import Path
 import pathlib
 import pandas as pd
+import geopandas as geopd
 from PIL import Image
 import PIL
 from random import randint
+from shapely.geometry import Polygon
 
 @pytest.fixture
 def sample_dir():
@@ -300,7 +302,7 @@ def test_loader_convert_images(init_ts_maps):
     _, ts_map, _, _ = init_ts_maps
     parent_df, patch_df = ts_map.convert_images()
     assert parent_df.shape == (1, 13)
-    assert patch_df.shape == (9, 6)
+    assert patch_df.shape == (9, 7)
     parent_df, patch_df = ts_map.convert_images(save=True)
     assert os.path.isfile("./parent_df.csv")
     assert os.path.isfile("./patch_df.csv")
@@ -316,3 +318,18 @@ def test_loader_convert_images_errors(init_ts_maps):
     _, ts_map, _, _ = init_ts_maps
     with pytest.raises(ValueError, match="``save_format`` should be one of"):
         ts_map.convert_images(save=True, save_format="json")
+
+def test_loader_add_patch_polygons(init_ts_maps):
+    _, ts_map, _, patch_list = init_ts_maps
+    ts_map.add_patch_polygons()
+    assert "polygon" in ts_map.patches[patch_list[0]].keys()
+    assert isinstance(ts_map.patches[patch_list[0]]["polygon"], Polygon)
+    
+def test_loader_save_to_geojson(init_ts_maps, tmp_path):
+    _, ts_map, _, _ = init_ts_maps
+    ts_map.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
+    assert os.path.exists(f"{tmp_path}/patches.geojson")
+    geo_df = geopd.read_file(f"{tmp_path}/patches.geojson")
+    assert "geometry" in geo_df.columns
+    assert str(geo_df.crs.to_string()) == "EPSG:4326"
+    assert isinstance(geo_df["geometry"][0], Polygon)
