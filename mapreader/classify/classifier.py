@@ -39,8 +39,8 @@ class ClassifierContainer:
     def __init__(
         self, 
         model: Union[str, nn.Module, None],
-        dataloaders: Dict[str, DataLoader],
-        labels_map: Dict[int, str],
+        dataloaders: Union[Dict[str, DataLoader], None],
+        labels_map: Union[Dict[int, str], None],
         device: Optional[str] = "default",
         input_size: Optional[int] = (224,224),
         is_inception: Optional[bool] = False,
@@ -54,14 +54,16 @@ class ClassifierContainer:
         Parameters
         ----------
         model : str, nn.Module or None
-            The PyTorch model to add to the object - see ``https://pytorch.org/vision/0.8/models.html`.
+            The PyTorch model to add to the object.
 
-            - If passed as a string, will run ``_initialize_model(model, **kwargs)``- valid options are "resnet", "alexnet", "vgg", "squeezenet", "densenet" or "inception".
+            - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
-        dataloaders: Dict
+        dataloaders: Dict or None
             A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
-        labels_map: Dict
+            Can only be ``None`` if ``load_path`` is specified as dataloaders will be loaded from file.
+        labels_map: Dict or None
             A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
+            Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
         device : str, optional
             The device to be used for training and storing models. 
             Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
@@ -77,7 +79,7 @@ class ClassifierContainer:
             If set to ``True``, the default device is used.
             Defaults to ``False``.
         kwargs : Dict
-            Keyword arguments to pass to the ``_initialize_model()`` method if ``load_path`` is specified.
+            Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
 
         Attributes
         ----------
@@ -114,12 +116,6 @@ class ClassifierContainer:
             A temporary file name to save checkpoints during training and
             validation.
         """
-        # add dataloaders
-        self.dataloaders = dataloaders
-        for set_name, dataloader in dataloaders.items():
-            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
-
-        self.labels_map = labels_map
 
         # set up device
         if device in ["default", None]:
@@ -128,9 +124,24 @@ class ClassifierContainer:
             self.device = device
         print(f"[INFO] Device is set to {self.device}")
 
+        #check if loading an pre-existing object
         if model and load_path:
             raise ValueError("[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``.")
+        if any(val == None for val in [model, dataloaders, labels_map]) and not load_path:
+            raise ValueError("[ERROR] Unless passing ``load_path``, ``model``, ``dataloaders`` and ``labels_map`` must be defined.")
+
+        if load_path:
+            self.load(load_path=load_path, force_device=force_device)
         
+        # add dataloaders
+        if dataloaders:
+            self.dataloaders = dataloaders
+            for set_name, dataloader in dataloaders.items():
+                print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+
+        if labels_map:
+            self.labels_map = labels_map
+
         if model:
             print("[INFO] Initializing model.")
 
@@ -158,9 +169,6 @@ class ClassifierContainer:
 
             # add colors for printing/logging
             self._print_colors()
-        
-        if load_path:
-            self.load(load_path=load_path, force_device=force_device)
 
     def generate_layerwise_lrs(
         self,
@@ -326,11 +334,11 @@ class ClassifierContainer:
 Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             )
         
-        if scheduler_type.lower() in ["steplr"]:
+        if scheduler_type.lower() == "steplr":
             scheduler = optim.lr_scheduler.StepLR(
                 self.optimizer, **scheduler_param_dict
             )
-        elif scheduler_type.lower() in ["onecyclelr"]:
+        elif scheduler_type.lower() == "onecyclelr":
             scheduler = optim.lr_scheduler.OneCycleLR(
                 self.optimizer, **scheduler_param_dict # RW - Cannot use hthis with default scheduler_param_dict - need to update
             )
@@ -387,11 +395,11 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             classifier and does not return anything.
         """
         if isinstance(criterion, str):
-            if criterion in ["cross entropy", "ce"]:
+            if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
                 criterion = nn.CrossEntropyLoss()
-            elif criterion == "bce":
+            elif criterion == ["bce", "binary_cross_entropy", "binary cross entropy", "binary cross-entropy"]:
                 criterion = nn.BCELoss()
-            elif criterion == "mse":
+            elif criterion == ["mse", "mean_square_error", "mean_squared_error", "mean squared error"]:
                 criterion == nn.MSELoss()
             else:
                 raise NotImplementedError('[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).')
@@ -1314,14 +1322,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         Initializes a PyTorch model with the option to change the number of
         classes in the last layer (``last_layer_num_classes``).
 
-        The function handles six PyTorch models: ResNet, AlexNet, VGG,
-        SqueezeNet, DenseNet, and Inception v3.
-
         Parameters
         ----------
         model_name : str
-            Name of a PyTorch model. 
-            Options of "resnet", "alexnet", "vgg", "squeezenet", "densenet" and "inception".
+            Name of a PyTorch model. See https://pytorch.org/vision/0.8/models.html for options.
         pretrained : bool, optional
             Use pretrained version, by default ``True``
         last_layer_num_classes : str or int, optional
@@ -1644,8 +1648,8 @@ Output will show batch number {num_batches}.')
         Parameters
         ----------
         save_path : str, optional
-            The path to the file to write. If the file already exists and
-            ``force`` is not ``True``, a ``FileExistsError`` is raised.
+            The path to the file to write. 
+            If the file already exists and``force`` is not ``True``, a ``FileExistsError`` is raised.
             Defaults to ``"default.obj"``.
         force : bool, optional
             Whether to overwrite the file if it already exists. Defaults to
@@ -1668,7 +1672,7 @@ Output will show batch number {num_batches}.')
             if force:
                 os.remove(save_path)
             else:
-                raise FileExistsError(f"file already exists: {save_path}")
+                raise FileExistsError(f"[INFO] File already exists: {save_path}")
 
         # parent/base-names
         par_name = os.path.dirname(os.path.abspath(save_path))

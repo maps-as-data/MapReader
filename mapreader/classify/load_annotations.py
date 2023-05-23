@@ -496,7 +496,7 @@ class AnnotationsLoader():
         ----------
         batch_size : int, optional
             The batch size to use for the dataloader. By default ``16``.
-        sampler : Sampler or False, optional
+        sampler : Sampler, str or None, optional
             The sampler to use when creating batches from the training dataset.
         shuffle : bool, optional
             Whether to shuffle the dataset during training. By default ``False``.
