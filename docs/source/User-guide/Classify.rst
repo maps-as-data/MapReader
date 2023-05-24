@@ -124,7 +124,7 @@ Before using your annotated images to train your model, you will first need to:
 
 **2.  Define some** `transforms <https://pytorch.org/vision/stable/transforms.html>`__ **which will be applied to your images to ensure your they are in the right format.**
     
-    Some default image transforms, generated using `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`_, are predefined in the ``PatchDataset`` class.
+    Some default image transforms, generated using `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, are predefined in the ``PatchDataset`` class.
     
     .. admonition:: See default transforms
         :class: dropdown
@@ -337,7 +337,7 @@ In order to train/fine-tune your model, will need to define:
         #EXAMPLE
         my_classifier.add_criterion("cross-entropy")
     
-    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`_ as our criterion. 
+    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`__ as our criterion. 
     You should change this to suit your needs.
     
     .. admonition:: Advanced usage
@@ -536,7 +536,7 @@ Metrics from this inference can then be viewed using:
 
     my_classifier.metrics["metric_to_view"]
 
-e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AUC)<https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html>`__ macro metric:
+e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AUC) <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html>`__ macro metric:
 
 .. code-block:: python
 

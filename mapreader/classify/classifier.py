@@ -425,7 +425,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         input_size : tuple or list, optional
             The size of the input data.
-            If None, input size is taken from "train" dataloader (``self.dataloaders["train"]).
+            If None, input size is taken from "train" dataloader (``self.dataloaders["train"]``\).
         trainable_col : bool, optional
             If ``True``\, adds a column showing which parameters are trainable.
             Defaults to ``False``\.
@@ -1638,7 +1638,7 @@ Output will show batch number {num_batches}.')
         ----------
         save_path : str, optional
             The path to the file to write. 
-            If the file already exists and``force`` is not ``True``\, a ``FileExistsError`` is raised.
+            If the file already exists and ``force`` is not ``True``\, a ``FileExistsError`` is raised.
             Defaults to ``"default.obj"``\.
         force : bool, optional
             Whether to overwrite the file if it already exists. Defaults to
@@ -1721,15 +1721,6 @@ Output will show batch number {num_batches}.')
         ------
         FileNotFoundError
             If the specified file does not exist.
-
-        Modifies
-        ----------
-        self.__dict__ : dict
-            The state of the class instance is updated with the contents of
-            the saved file.
-        os.environ["CUDA_VISIBLE_DEVICES"] : str
-            The CUDA_VISIBLE_DEVICES environment variable is updated if the
-            ``force_device`` argument is specified.
 
         Returns
         -------
