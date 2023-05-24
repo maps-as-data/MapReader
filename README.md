@@ -57,6 +57,7 @@ See our [About MapReader](https://mapreader.readthedocs.io/en/latest/About.html)
 ## Documentation 
 
 The MapReader documentation can be found [here](https://mapreader.readthedocs.io/en/latest/index.html).
+[THIS JUST TAKES US TO THE TOP OF THIS PAGE, SO WE CAN LOSE IT?]
 
 **New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/Install.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/Input-guidance.html) for help with the initial set up of MapReader.
 
