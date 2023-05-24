@@ -67,11 +67,13 @@ For example, to show your "rail_space" label:
     #EXAMPLE
     annotated_images.show_image_labels("rail_space")
 
+.. todo:: update this pic
+
 .. image:: ../figures/show_image_labels_10.png
     :width: 400px
 
 
-By default, this will show you a sample of 10 images, but this can be changed by specifying ``num_sample``. 
+By default, this will show you a sample of 9 images, but this can be changed by specifying ``num_sample``. 
 
 When viewing your annotations, you may notice that you have mislabelled one of your images.
 The ``.review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
@@ -95,7 +97,7 @@ Before using your annotated images to train your model, you will first need to:
 
 .. _ratios:
 
-1.  **Split your annotated images into "train", "val" and and, optionally, "test" `datasets <https://pytorch.org/tutorials/beginner/basics/data_tutorial.html>`__.**
+**1.  Split your annotated images into "train", "val" and and, optionally, "test"** `datasets <https://pytorch.org/tutorials/beginner/basics/data_tutorial.html>`__\ **.**
 
     By default, when creating your "train", "val" and "test" datasets, MapReader will split your annotated images as follows:
 
@@ -120,7 +122,7 @@ Before using your annotated images to train your model, you will first need to:
 
 .. _transforms:
 
-1.  **Define some `transforms <https://pytorch.org/vision/stable/transforms.html>`_ which will be applied to your images to ensure your they are in the right format.**
+**2.  Define some** `transforms <https://pytorch.org/vision/stable/transforms.html>`__ **which will be applied to your images to ensure your they are in the right format.**
     
     Some default image transforms, generated using `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`_, are predefined in the ``PatchDataset`` class.
     
@@ -156,7 +158,7 @@ Before using your annotated images to train your model, you will first need to:
 
 .. _sampler:
 
-1.  **Create `dataloaders <https://pytorch.org/tutorials/beginner/basics/data_tutorial.html>`__ which can be used to load small batches of your dataset during training/inference and apply the transforms to each image in the batch.**
+**3.  Create** `dataloaders <https://pytorch.org/tutorials/beginner/basics/data_tutorial.html>`__ **which can be used to load small batches of your dataset during training/inference and apply the transforms to each image in the batch.**
 
     In many cases, you will want to create batches which are approximately representative of your whole dataset.
     This requires a `sampler <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__ with weights inversely proportional to the number of instances of each label within each dataset.
@@ -186,7 +188,7 @@ To split your annotated images and create your dataloaders, use:
 By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``.create_datasets()`` method.
 It will then create a dataloader for each dataset, using a batch size of 16 and the :ref:`default sampler<sampler>`.
 
-To change the ratios used to split your annotations, you can specify ``frac_train``, ``frac_val`` and ``frac_test``:abbr:
+To change the ratios used to split your annotations, you can specify ``frac_train``, ``frac_val`` and ``frac_test``:
 
 .. code-block:: python
 
@@ -222,7 +224,7 @@ MapReader's ``ClassifierContainer()`` class is used to:
 
 - Load models.
 - Load dataloaders and labels map.
-- Define a loss function (criterion), optimiser and scheduler.
+- Define a criterion (loss function), optimizer and scheduler.
 - Train and evaluate models using already annotated images.
 - Predict labels of un-annotated images (model inference).
 - Visualise datasets and predictions.
@@ -239,7 +241,7 @@ Your dataloaders and labels map (``annotated_images.labels_map``) should be pass
 
 There are a number of options for the ``model`` argument:
 
-    1.  To load a model from `torchvision.models <https://pytorch.org/vision/stable/models.html>`__, pass one of the model names as the ``model`` argument.
+    **1.  To load a model from** `torchvision.models <https://pytorch.org/vision/stable/models.html>`__\ **, pass one of the model names as the ``model`` argument.**
 
         e.g. To load "resnet18":
 
@@ -251,7 +253,7 @@ There are a number of options for the ``model`` argument:
         By default, this will load a pretrained form of the model and reshape the last layer to output the same number of nodes as labels in your dataset.
         You can load an untrained model by specifying ``pretrained=False``.
 
-    2.  To load a customised model, define a `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ and pass this as the ``model`` argument.
+    **2.  To load a customised model, define a** `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ **and pass this as the ``model`` argument.**
         
         e.g. To load a pretrained "resnet18" and reshape the last layer:
 
@@ -272,7 +274,7 @@ There are a number of options for the ``model`` argument:
         This is equivalent to passing ``model="resnet18"`` (as above) but further customisations are, of course, possible. 
         See `here <https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html>`__ for more details of how to do this.
 
-    3.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.
+    **3.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.**
 
         If you have already trained a model using MapReader, your outputs, by default, should be saved in directory called ``models``.
         Within this directory will be ``checkpoint_X.pkl`` and ``model_checkpoint_X.pkl`` files.
@@ -306,7 +308,7 @@ There are a number of options for the ``model`` argument:
 
             If you use this option, your optimizer, scheduler and criterion will be loaded from last time.       
 
-    4.  To load a `hugging face model <https://huggingface.co/models>`__, choose your model, follow the "Use in Transformers" instructions to load it and then pass this as the ``model`` argument.
+    **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" instructions to load it and then pass this as the ``model`` argument.**
 
         e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__. To load it:
 
@@ -325,7 +327,7 @@ Define optimizer, scheduler and criterion
 
 In order to train/fine-tune your model, will need to define:
 
-1.  **A criterion ("loss function") - This works out how well your model is performing (the "loss").**
+**1.  A criterion ("loss function") - This works out how well your model is performing (the "loss").**
 
     To add a criterion, use ``.add_criterion()``.
     
@@ -353,7 +355,7 @@ In order to train/fine-tune your model, will need to define:
             criterion = nn.L1Loss()
             my_classifier.add_criterion(criterion)
 
-2.  **An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
+**2.  An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
 
     The ``.initialize_optimizer()`` method is used to add an optimiser to you ``ClassifierContainer()`` (``my_classifier``):
 
@@ -392,7 +394,7 @@ In order to train/fine-tune your model, will need to define:
 
         my_classifier.initialize_optimizer(params2optimise=params2optimise)
 
-3.  **A scheduler - This defines how to adjust your learning rates during training.**
+**3.  A scheduler - This defines how to adjust your learning rates during training.**
 
     To add a scheduler, use the ``.initialize_scheduler()`` method:
     
