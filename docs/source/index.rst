@@ -29,6 +29,8 @@ MapReader
 -------------
 
 .. admonition:: To do list
+   :class: dropdown
+   
    .. todolist::
 
 Indices and tables

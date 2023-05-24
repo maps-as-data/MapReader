@@ -36,7 +36,7 @@ For example, if you have set up your directory as reccommended in our `Input Gui
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other parameters you may want to specify when adding metadata to your images include:
+    Other arguments you may want to specify when adding metadata to your images include:
 
     - ``delimiter`` - By default, this is set to "\t" so will assume your ``csv`` file is tab delimited. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
@@ -207,7 +207,7 @@ To change the batch size used when creating your dataloaders, use the ``batch_si
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other parameters you may want to specify when adding metadata to your images include:
+    Other arguments you may want to specify when adding metadata to your images include:
 
     - ``sampler`` - By default, this is set to ``default`` and so the :ref:`default sampler<sampler>` will be used when creating your dataloaders and batches. You can choose not to use a sampler by specifying ``sampler=None`` or, you can define a custom sampler using `pytorch's sampler class <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__.
     - ``shuffle`` - If your datasets are ordered (e.g. ``"a","a","a","a","b","c"``), you can use ``shuffle=True`` to create dataloaders which contain shuffled batches of data. This cannot be used in conjunction with a sampler and so, by default, ``shuffle=False``. 
@@ -322,7 +322,7 @@ There are a number of options for the ``model`` argument:
 
             my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map) 
 
-Define optimizer, scheduler and criterion
+Define criterion, optimizer and scheduler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to train/fine-tune your model, will need to define:
@@ -330,6 +330,7 @@ In order to train/fine-tune your model, will need to define:
 **1.  A criterion ("loss function") - This works out how well your model is performing (the "loss").**
 
     To add a criterion, use ``.add_criterion()``.
+    This method accepts any of "cross-entropy", "binary cross-entropy" and "mean squared error" as its ``criterion`` argument:
     
     .. code-block:: python
     
@@ -342,9 +343,7 @@ In order to train/fine-tune your model, will need to define:
     .. admonition:: Advanced usage
         :class: dropdown
     
-        The ``add_criterion()`` method accepts any of "cross-entropy", "binary cross-entropy" and "mean squared error" as its ``criterion`` argument. 
-        
-        However, if you would like to use a different loss function, you can pass any `torch.nn loss function <https://pytorch.org/docs/stable/nn.html#loss-functions>`__ as the ``criterion`` argument.
+        If you would like to use a loss function other than those implemented, you can pass any `torch.nn loss function <https://pytorch.org/docs/stable/nn.html#loss-functions>`__ as the ``criterion`` argument.
     
         e.g. to use the mean absolute error as your loss function:
     
@@ -424,46 +423,47 @@ To begin training/fine-tuning your model, use:
 
     my_classifier.train()
 
-By default, this will run 25 epochs of training and validating your model and save your model in a newly created ``./models`` directory.
-The ``num_epochs`` and ``save_model_dir`` arguments can be specified to change these.
+By default, this will run through 25 training iterations. 
+Each iteration will pass one epoch of training data (forwards step), adjust the model parameters (backwards step) and then calculate the loss using your validation dataset. 
+The model with the least loss will then be saved in a newly created ``./models`` directory.
 
-e.g. to run 10 epochs of training and save your model in a newly created ``my_models_directory``:
+The ``num_epochs`` argument can be specified to change the number of training iterations (i.e. passes through your training dataset).
+
+e.g. to pass through 10 epochs of training data:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_classifier.train(num_epochs=10, save_model_dir="./my_models_directory")
+    my_classifier.train(num_epochs=10)
 
-Other arguments you may want to specify when training your model include:
+.. admonition:: Advanced usage
+    :class: dropdown
 
-- ``phases``: phases to perform at each epoch
-- ``tensorboard_path``: directory to save tensorboard files
-- ``verbosity_level``: -1 (quiet), 0 (normal), 1 (verbose), 2 (very verbose), 3 (debug)
+    Other arguments you may want to specify when training your model include:
+
+    - ``phases`` - By default, this is set to ``["train", "val"]`` and so each training iteration will pass through an epoch of the training data and then the validation data. Use the ``phases`` argument if you would like to change this (e.g. ``phases = ["train", "train", "val"]``.
+    - ``save_model_dir`` - This specifies the directory to save your models. By default, it is set to ``models`` and so your models and checkpoint files are saved in a ``./models`` directory. To change this, specify the ``save_model_dir`` argument (e.g. ``save_model_dir="../my_models_dir"``).
+    - ``tensorboard_path`` - By default, this is set to ``None`` meaning that no TensorBoard logs are saved. Pass a file path as the ``tensorboard_path`` argument to save these logs.
+    - ``verbose`` - By default, this is set to ``False`` and so minimal outputs are printed during training. Set ``verbose=True`` to see verbose outputs.
 
 Plot metrics
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accesible via your ``classifier()`` objects ``.metrics`` attribute. 
-To list these metrics, use:
+Metrics are stored in a dictionary accesible via the ``.metrics`` attribute. 
+To list these, use:
 
 .. code-block:: python
 
     list(myclassifier.metrics.keys())
 
-To view specific metrics from training/validating, use:
+.. todo:: Explain what these metrics are/mean
 
-.. code-block:: python
+To help visualise the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
 
-    my_classifier.metrics["metric_to_view"]
+The name of the metrics you would like to plot should be passed as the ``y_axis`` argument.
+This can take any number/combination of metrics.
 
-e.g. :
-
-.. code-block:: python
-
-    #EXAMPLE
-    my_classifier.metrics["epoch_fscore_micro_train"]
-
-Or, to help visualise the progress of your training, metrics can be plotted using ``.plot_metric()``: 
+e.g. to plot the loss during each epoch of training and validation:
 
 .. code-block:: python
 
@@ -478,67 +478,66 @@ Or, to help visualise the progress of your training, metrics can be plotted usin
     :width: 400px
 
 
-Inference 
------------
+Testing 
+--------
 
-Finally, to use your model for inference, use:
+The "test" dataset can be used to test your model. 
+This can be done using the ``.inference()`` method:
 
 .. code-block:: python
 
-    my_classifier.inference(set_name="your_dataset_name")
+    my_classifier.inference(set_name="test")
 
-e.g. to run the trained model on the 'test' dataset, use:
+To see a sample of your predictions, use: 
+
+.. code-block:: python
+
+    my_classifier.inference_sample_results(label="rail_space")
+
+.. image:: ../figures/inference_sample_results.png
+    :width: 400px
+
+
+.. note:: This will show you the transformed images which may look weird to the human eye.
+
+By default, the ``.show_inference_sample_results()`` method will show you six samples of your "test" dataset.
+To change the number of samples shown, specify the ``num_samples`` argument.
+
+It can be useful to see instances where your model is struggling to classify your images. 
+This can be done using the ``min_conf`` and ``max_conf`` arguments. 
+
+e.g. To view samples where the model is less than 80% confident about its prediction:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_classifier.inference(set_name="test")
+    my_classifier.inference_sample_results("railspace", max_conf=80)
 
-By default, metrics will not be calculated or added to the ``.metrics`` dictionary during inference.
-So, to add these in so that they can be viewed and plotted, use ``.calculate_add_metrics()``. 
+This can help you identify images that might need to be brought into your training data for further optimisation of your model.
+
+By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``.metrics`` attribute.
+Instead, they must be added using the ``.calculate_add_metrics()``. 
 
 e.g. to add metrics for the 'test' dataset: 
 
 .. code-block:: python
 
     #EXAMPLE
-    my_classifier.calculate_add_metrics(
+    my_classifier.calculate_add_metrics(a
         y_true=my_classifier.orig_label,
         y_pred=my_classifier.pred_label,
         y_score=my_classifier.pred_conf,
         phase="test",
     )
 
-Metrics from this inference can then be viewed as above. 
-
-To see a sample of your inference results, use: 
+Metrics from this inference can then be viewed using:
 
 .. code-block:: python
 
-    my_classifier.inference_sample_results(set_name="your_dataset_name")
+    my_classifier.metrics["metric_to_view"]
 
-e.g. :
-
-.. code-block:: python
-
-    #EXAMPLE
-    my_classifier.inference_sample_results(set_name="test")
-
-.. image:: ../figures/inference_sample_results.png
-    :width: 400px
-
-
-By default, this will show you 6 samples of your first class (label). 
-The ``num_samples`` and ``class_index`` arguments can be specified to change this.
-
-You may also want specify the minimum (and maximum) prediction confidence for your samples. 
-This can be done using ``min_conf`` and ``max_conf``.
-
-e.g. :
+e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AUC)<https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html>`__ macro metric:
 
 .. code-block:: python
 
-    #EXAMPLE
-    my_classifier.inference_sample_results(
-        set_name="test", num_samples=3, class_index=1, min_conf=80
-    )
+    my_classifier.metrics["epoch_rocauc_macro_test"]

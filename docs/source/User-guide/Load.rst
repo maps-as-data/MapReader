@@ -77,7 +77,7 @@ For example, if you have downloaded your maps using the default settings of our 
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other parameters you may want to specify when adding metadata to your images include:
+    Other arguments you may want to specify when adding metadata to your images include:
 
     - ``index_col`` - By default, this is set to ``0`` so the first column of your csv/excel will be used as the index column when creating a pandas dataframe. If you would like to use a different column you can specify ``index_col``.
     - ``columns`` - By default, the ``.add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the columns argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
@@ -181,7 +181,7 @@ As above, you can use the ``path_save`` argument to change where these patches a
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other parameters you may want to specify when patchifying your images include:
+    Other arguments you may want to specify when patchifying your images include:
 
     - ``square_cuts`` - By default, this is set to ``False`` and so, if your ``patch_size`` is not a factor of your image size (e.g. slicing a 100x100 pixel image into 10x10 pixel patches), you will have some rectangular patches created at the edges of your image. Setting it to ``True`` (by specifying ``square_cuts=True``) will result in all your patches being square but will result in some overlap between edge patches. This is useful if you need square images for training your model and don't want to warp your rectangular images by resizing them later on.
     - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``.patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
@@ -374,7 +374,7 @@ e.g. to view "mean_pixel_R" on your patches:
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other parameters you may want to specify when showing your images (for both the ``.show()`` and ``.show_parent()`` methods):
+    Other arguments you may want to specify when showing your images (for both the ``.show()`` and ``.show_parent()`` methods):
 
     - ``plot_parent`` - By default, this is set to ``True`` so that the parent image is shown. If you would like to remove the parent image, e.g. if you are plotting column values, you can set ``plot_parent=False``. This should speed up the code for plotting.
     - ``patch_border`` - By default, this is set to ``True`` so that borders are plotted around each patch. Setting ``patch_border`` to ``False`` (by specifying ``patch_border=False``) will stop patch borders being shown. 
