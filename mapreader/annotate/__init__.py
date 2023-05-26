@@ -218,6 +218,7 @@ class Annotator(pd.DataFrame):
         # Set up standards for context display
         self.surrounding = 1
         self.margin = 1
+        self.max_size = MAX_SIZE
 
         # Ensure labels are of type list
         if not isinstance(self._labels, list):
@@ -313,8 +314,12 @@ class Annotator(pd.DataFrame):
         Tuple[int, int]
             Width and height of the patches.
         """
-        patch_width = self.max_x[0] - self.min_x[0]
-        patch_height = self.max_y[0] - self.min_y[0]
+        patch_width = (
+            self.sort_values("min_x").max_x[0] - self.sort_values("min_x").min_x[0]
+        )
+        patch_height = (
+            self.sort_values("min_y").max_y[0] - self.sort_values("min_y").min_y[0]
+        )
 
         return patch_width, patch_height
 
@@ -419,40 +424,30 @@ class Annotator(pd.DataFrame):
         ipywidgets.VBox
             An IPython VBox widget containing the surrounding patches for
             context.
-
-        ..
-            TODO: ensure view of the patch is no larger than 150px x 150px
-            using ImageOps.contain(image, (150, 150))
         """
 
         def get_path(image_path, dim=True):
-            if dim == True or dim == "True":
-                dim = True
-                im = Image.open(image_path)
-                image_path = ".temp.png"
+            # Resize the image
+            im = Image.open(image_path)
+            if max(im.size) > self.max_size:
+                print(f"[DEBUG] Resizing {image_path} to {self.max_size}")
+                im = ImageOps.contain(im, (self.max_size, self.max_size))
+                print(f"[DEBUG] --> {im.size}")
 
-                # add alpha
+            # Dim the image
+            if dim == True or dim == "True":
                 alpha = Image.new("L", im.size, 60)
                 im.putalpha(alpha)
 
-                # ensure size
-                if max(im.size) > MAX_SIZE:
-                    im = ImageOps.contain(im, (MAX_SIZE, MAX_SIZE))
+            # Save temp image
+            image_path = ".temp.png"
+            im.save(image_path)
 
-                im.save(image_path)
-            else:
-                dim = False
-
-                # ensure correct size
-                im = Image.open(image_path)
-                if max(im.size) > MAX_SIZE:
-                    im = ImageOps.contain(im, (MAX_SIZE, MAX_SIZE))
-
-                image_path = ".temp.png"
-                im.save(image_path)
-
+            # Read as bytes
             with open(image_path, "rb") as f:
                 im = f.read()
+
+            Path(image_path).unlink()
 
             layout = widgets.Layout(margin=f"{self.margin}px")
             return widgets.Image(value=im, layout=layout)
@@ -526,6 +521,7 @@ class Annotator(pd.DataFrame):
         max_values: Optional[dict] = {},
         surrounding: Optional[int] = 1,
         margin: Optional[int] = 0,
+        max_size: Optional[int] = MAX_SIZE,
     ) -> None:
         """
         Renders the annotation interface for the first image.
@@ -549,6 +545,9 @@ class Annotator(pd.DataFrame):
             The number of surrounding images to show for context. Default: 1.
         margin : int, optional
             The margin to use for the context images. Default: 0.
+        max_size : int, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
 
         Returns
         -------
@@ -565,6 +564,7 @@ class Annotator(pd.DataFrame):
         self._max_values = max_values
         self.surrounding = surrounding
         self.margin = margin
+        self.max_size = max_size
 
         # re-set up queue
         self._queue = self.get_queue()
@@ -690,18 +690,18 @@ class Annotator(pd.DataFrame):
             add_ins = []
             if self.at[ix, "url"]:
                 url = self.at[ix, "url"]
-                add_ins += [
-                    widgets.HTML(
-                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
-                    )
-                ]
+                text = f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
+                add_ins += [widgets.HTML(text)]
+
+            value = self.current_index + 1 if self.current_index else 1
+            description = f"{value} / {len(self._queue)}"
             add_ins += [
                 widgets.IntProgress(
-                    value=self.current_index + 1 if self.current_index else 1,
+                    value=value,
                     min=0,
                     max=len(self._queue),
                     step=1,
-                    description=f"{self.current_index + 1 if self.current_index else 1} / {len(self._queue)}",
+                    description=description,
                     orientation="horizontal",
                     barstyle="success",
                 )
