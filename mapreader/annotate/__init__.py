@@ -5,7 +5,7 @@ import os
 import random
 import string
 from itertools import product
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, List
 
 import ipywidgets as widgets
 import pandas as pd
@@ -15,134 +15,18 @@ from PIL import Image, ImageOps
 
 from ..load.loader import load_patches
 
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
+MAX_SIZE = 100
+
 _CENTER_LAYOUT = widgets.Layout(
     display="flex", flex_flow="column", align_items="center"
 )
 
-MAX_SIZE = 100
-
 
 class Annotator(pd.DataFrame):
-    """
-    A subclass of pd.DataFrame that allows the user to annotate images and
-    save the annotations as a CSV file.
-
-    Parameters
-    ----------
-    data : str or dict or list or None, optional
-        Data to create the Annotator DataFrame. Default:
-        "./patches/patch-*.png"
-    patches : str, optional
-        Path to patches folder to load the images, if no ``data`` is provided.
-        Default: "./patches/patch-*.png"
-    parents : str, optional
-        Path to parents folder to load the parent images, if no ``data`` is
-        provided. Default: "./maps/*.png"
-    metadata : str, optional
-        Path to metadata file. Default: "./maps/metadata.csv"
-    metadata_delimiter : str, optional
-        Separator in the metadata file. Default: "|".
-    annotations_dir : str, optional
-        Directory to save the annotations CSV file. Default: "./annotations"
-    username : str, optional
-        Username for the annotation session. If no username is provided, the
-        class will generate a hash string for the current user. Note: This
-        means that annotations cannot be resumed later.
-    task_name : str, optional
-        Name of the annotation task. Default: "task"
-    image_column : str, optional
-        Name of the image column in the ``data`` dataframe, describing the
-        path to the image. Default: "image_path"
-    label_column : str, optional
-        Name of the label column in the ``data`` dataframe, where final labels
-        are/will be stored. Default: "label"
-    labels : list of str
-        List of possible labels for the annotations. Must be provided as a
-        list.
-    scramble_frame : bool, optional
-        Whether to randomly shuffle the examples during annotation. Default:
-        True.
-    buttons_per_row : int, optional
-        Number of buttons to display per row in the annotation interface.
-    auto_save : bool, optional
-        Whether to automatically save annotations during annotation. Default:
-        True.
-    stop_at_last_example : bool, optional
-        Whether the annotation process should stop when it reaches the last
-        example in the dataframe. Default: True.
-    show_context : bool, optional
-        Whether to show the images that appear around the given image that
-        is being annotated. Default: False.
-    sortby : str, optional
-        The name of the column by which to sort the data to be annotated.
-    min_values : dict, optional
-        A dictionary consisting of column names (keys) and minimum values as
-        floating point values (values) which will be applied as a filter to
-        the annotation data before annotations commence. Default: ``{}``.
-    max_values : dict, optional
-        A dictionary consisting of column names (keys) and maximum values as
-        floating point values (values) which will be applied as a filter to
-        the annotation data before annotations commence. Default: ``{}``.
-
-    Attributes
-    ----------
-    buttons : list of widgets.Button
-        List of annotation buttons.
-    labels : list of str
-        List of possible labels for the annotations.
-    label_column : str
-        Name of the label column in the dataframe.
-    image_column : str
-        Name of the image column in the dataframe.
-    buttons_per_row : int
-        Number of buttons to display per row in the annotation interface.
-    auto_save : bool
-        Whether to automatically save annotations during annotation.
-    annotations_dir : str
-        Directory to save the annotations CSV file.
-    task_name : str
-        Name of the annotation task.
-    id : str
-        Unique identifier for the current annotation session.
-    annotations_file : str
-        Filename for the resulting annotations CSV file.
-    username : str
-        Username for the current annotation session.
-    current_index : int
-        Current index of the annotation process.
-    out : Output
-        Output widget that displays the current image during annotation.
-    box : HBox or VBox
-        Widget box that contains the annotation buttons.
-    filtered
-        Returns a new dataframe that only contains rows with non-null labels.
-
-    Methods
-    -------
-    annotate()
-        Renders the annotation interface for the first image.
-    render()
-        Displays the image at the current index in the annotation interface.
-    get_labelled_data(sort=True)
-        Returns a dataframe that contains the index and the label column,
-        sorted by (a) the filename of the parent map image and (b) the
-        annotated patch's filename.
-    get_current_index()
-        Returns the current index of the annotation process.
-
-    Example
-    -------
-    >>> annotator = Annotator(
-            task_name="railspace",
-            labels=["no_rail_space", "rail_space"],
-            username="james",
-            patches="./patches/patch-*.png"
-            parents="./maps/*.png"
-            annotations_dir="./annotations"
-        )
-    >>> annotator.annotate()
-    """
-
     def __init__(self, *args, **kwargs):
         # Untangle args and kwargs
         patch_df = None
@@ -302,8 +186,14 @@ class Annotator(pd.DataFrame):
         # initiate as a DataFrame
         super().__init__(patch_df)
 
-        self.buttons = []
-        self.labels = kwargs["labels"]
+        # pixel_bounds = x0, y0, x1, y1 # I checked with Rosie
+        self["min_x"] = self.pixel_bounds.apply(lambda x: x[0])
+        self["min_y"] = self.pixel_bounds.apply(lambda x: x[1])
+        self["max_x"] = self.pixel_bounds.apply(lambda x: x[2])
+        self["max_y"] = self.pixel_bounds.apply(lambda x: x[3])
+
+        self._buttons = []
+        self._labels = kwargs["labels"]
         self.label_column = kwargs["label_column"]
         self.image_column = kwargs["image_column"]
         self.buttons_per_row = kwargs["buttons_per_row"]
@@ -315,29 +205,32 @@ class Annotator(pd.DataFrame):
         self.username = kwargs["username"]
         self.stop_at_last_example = kwargs["stop_at_last_example"]
         self.show_context = kwargs["show_context"]
-        self.min_values = kwargs["min_values"]
-        self.max_values = kwargs["max_values"]
+        self._min_values = kwargs["min_values"]
+        self._max_values = kwargs["max_values"]
         self.metadata = parent_df
         self.patch_width, self.patch_height = self.get_patch_size()
         self.metadata_delimiter = kwargs["metadata_delimiter"]
-        self.scramble_frame = kwargs["scramble_frame"]
+
+        # Set up standards for context display
+        self.surrounding = 1
+        self.margin = 1
 
         # Ensure labels are of type list
-        if not isinstance(self.labels, list):
+        if not isinstance(self._labels, list):
             raise SyntaxError("Labels provided must be as a list")
 
         # Ensure unique values in list
-        self.labels = sorted(list(set(self.labels)))
+        self._labels = sorted(list(set(self._labels)))
 
         # Set max buttons
         if not self.buttons_per_row:
-            if (len(self.labels) % 2) == 0:
-                if len(self.labels) > 4:
+            if (len(self._labels) % 2) == 0:
+                if len(self._labels) > 4:
                     self.buttons_per_row = 4
                 else:
                     self.buttons_per_row = 2
             else:
-                if len(self.labels) == 3:
+                if len(self._labels) == 3:
                     self.buttons_per_row = 3
                 else:
                     self.buttons_per_row = 5
@@ -353,9 +246,30 @@ class Annotator(pd.DataFrame):
         self._setup_box()
 
         # Setup queue
-        self.queue = self.get_queue()
+        self._queue = self.get_queue()
 
-    def _load_frames(self, *args, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    @classmethod
+    def _load_frames(cls, *_, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Loads patches and parents data from given paths and returns the
+        corresponding dataframes.
+
+        Parameters
+        ----------
+        **kwargs :
+            Needs to contain "patches" and "parents"
+
+            Needs to contain "metadata" and "metadata_delimiter"
+
+            Needs to contain "label_column"
+
+            Needs to contain "scramble_frame"
+
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            Parents and patches dataframes.
+        """
         print(
             f"[INFO] Loading patches and parents data from {kwargs['patches']}\
                 and {kwargs['parents']}"
@@ -372,7 +286,7 @@ class Annotator(pd.DataFrame):
         )
         patches.add_metadata(kwargs["metadata"], delimiter=kwargs["metadata_delimiter"])
 
-        parents, patches = patches.convertImages()
+        parents, patches = patches.convert_images()
 
         if kwargs["label_column"] not in patches.columns:
             patches[kwargs["label_column"]] = None
@@ -384,8 +298,27 @@ class Annotator(pd.DataFrame):
 
         return parents, patches
 
+    def get_patch_size(self):
+        """
+        Calculate and return the width and height of the patches based on the
+        first patch of the DataFrame, assuming the same shape of patches
+        across the frame.
+
+        Returns
+        -------
+        Tuple[int, int]
+            Width and height of the patches.
+        """
+        patch_width = self.max_x[0] - self.min_x[0]
+        patch_height = self.max_y[0] - self.min_y[0]
+
+        return patch_width, patch_height
+
     def _setup_buttons(self) -> None:
-        for label in self.labels:
+        """
+        Set up buttons for each label to be annotated.
+        """
+        for label in self._labels:
             btn = widgets.Button(
                 description=label,
                 button_style="info",
@@ -397,18 +330,21 @@ class Annotator(pd.DataFrame):
                 self._add_annotation(lbl)
 
             btn.on_click(functools.partial(on_click, label))
-            self.buttons.append(btn)
+            self._buttons.append(btn)
 
     def _setup_box(self) -> None:
-        if len(self.buttons) > self.buttons_per_row:
+        """
+        Set up the box which holds all the buttons.
+        """
+        if len(self._buttons) > self.buttons_per_row:
             self.box = widgets.VBox(
                 [
-                    widgets.HBox(self.buttons[x : x + self.buttons_per_row])
-                    for x in range(0, len(self.buttons), self.buttons_per_row)
+                    widgets.HBox(self._buttons[x : x + self.buttons_per_row])
+                    for x in range(0, len(self._buttons), self.buttons_per_row)
                 ]
             )
         else:
-            self.box = widgets.HBox(self.buttons)
+            self.box = widgets.HBox(self._buttons)
 
         # back button
         prev_btn = widgets.Button(
@@ -417,219 +353,72 @@ class Annotator(pd.DataFrame):
         prev_btn.on_click(self._prev_example)
 
         # next button
-        description = "next random patch »" if self.scramble_frame else "next »"
         next_btn = widgets.Button(
-            description=description, layout=widgets.Layout(flex="1 1 0%", width="auto")
+            description="next »", layout=widgets.Layout(flex="1 1 0%", width="auto")
         )
         next_btn.on_click(self._next_example)
 
         self.navbox = widgets.VBox([widgets.HBox([prev_btn, next_btn])])
 
-    def annotate(
-        self, show_context=None, min_values={}, max_values={}, surrounding=1, margin=0
-    ) -> None:
+    def get_queue(
+        self, as_type: Optional[str] = "list"
+    ) -> Union[List[int], pd.Index, pd.Series]:
         """
-        Renders the annotation interface for the first image.
+        Gets the indices of rows which are legible for annotation.
 
         Parameters
         ----------
-        min_values : dict, optional
-            A dictionary consisting of column names (keys) and minimum values as
-            floating point values (values) which will be applied as a filter to
-            the annotation data before annotations commence. Default: ``{}``.
-        max_values : dict, optional
-            A dictionary consisting of column names (keys) and maximum values as
-            floating point values (values) which will be applied as a filter to
-            the annotation data before annotations commence. Default: ``{}``.
+        as_type : str, optional
+            The format in which to return the indices. Options: "list",
+            "index". Default is "list". If any other value is provided, it
+            returns a pandas.Series.
 
         Returns
         -------
-        None
+        List[int] or pandas.Index or pandas.Series
+            Depending on "as_type", returns either a list of indices, a
+            pd.Index object, or a pd.Series of legible rows.
         """
-        self.current_index = -1
-        for button in self.buttons:
-            button.disabled = False
 
-        if show_context is not None:
-            self.show_context = show_context
+        def check_legibility(row):
+            if row.label is not None:
+                return False
 
-        self.min_values = min_values
-        self.max_values = max_values
-        self.surrounding = surrounding
-        self.margin = margin
+            test = [
+                row[col] >= min_value for col, min_value in self._min_values.items()
+            ] + [row[col] <= max_value for col, max_value in self._max_values.items()]
 
-        # re-set up queue
-        self.queue = self.get_queue()
+            if not all(test):
+                return False
 
-        self.out = widgets.Output()
-        display(self.box)
-        display(self.navbox)
-        display(self.out)
+            return True
 
-        # self.get_current_index()
-        # TODO: Does not pick the correct NEXT...
-        self._next_example()
+        test = self.copy()
+        test["eligible"] = test.apply(check_legibility, axis=1)
+        test = test[
+            ["eligible"] + [col for col in test.columns if not col == "eligible"]
+        ]
 
-    def render(self) -> None:
-        """
-        Displays the image at the current index in the annotation interface.
-
-        If the current index is greater than or equal to the length of the
-        dataframe, the method disables the "next" button and saves the data.
-
-        Returns
-        -------
-        None
-        """
-        # Check whether we have reached the end
-        if self.current_index >= len(self) - 1:
-            if self.stop_at_last_example:
-                self.render_complete()
-            else:
-                self._prev_example()
-            return
-
-        # ix = self.iloc[self.current_index].name
-        ix = self.queue[self.current_index]
-
-        # render buttons
-        for button in self.buttons:
-            if button.description == "prev":
-                # disable previous button when at first example
-                button.disabled = self.current_index <= 0
-            elif button.description == "next":
-                # disable skip button when at last example
-                button.disabled = self.current_index >= len(self) - 1
-            elif button.description != "submit":
-                if self.at[ix, self.label_column] == button.description:
-                    button.icon = "check"
-                else:
-                    button.icon = ""
-
-        # display new example
-        with self.out:
-            clear_output(wait=True)
-            image = self.get_patch_image(ix)
-            if self.show_context:
-                context = self.get_context()
-                display(context)
-            else:
-                display(image)
-            add_ins = []
-            if self.at[ix, "url"]:
-                url = self.at[ix, "url"]
-                add_ins += [
-                    widgets.HTML(
-                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
-                    )
-                ]
-            add_ins += [
-                widgets.IntProgress(
-                    value=self.current_index + 1 if self.current_index else 1,
-                    min=0,
-                    max=len(self.queue),
-                    step=1,
-                    description=f"{self.current_index + 1 if self.current_index else 1} / {len(self.queue)}",
-                    orientation="horizontal",
-                    barstyle="success",
-                )
-            ]
-            display(
-                widgets.VBox(
-                    add_ins,
-                    layout=_CENTER_LAYOUT,
-                )
-            )
-
-    def _add_annotation(self, annotation: str) -> None:
-        """Toggle annotation."""
-        # ix = self.iloc[self.current_index].name
-        ix = self.queue[self.current_index]
-        self.at[ix, self.label_column] = annotation
-        self.at[ix, "changed"] = True
-        if self.auto_save:
-            self._auto_save()
-        self._next_example()
-
-    @property
-    def filtered(self) -> pd.DataFrame:
-        _filter = ~self[self.label_column].isna()
-        return self[_filter]
-
-    def get_labelled_data(
-        self,
-        sort: Optional[bool] = True,
-        index_labels: Optional[bool] = False,
-        include_paths: Optional[bool] = True,
-    ) -> pd.DataFrame:
-        """
-        Returns a dataframe containing only the labelled images and their
-        associated label index.
-
-        Parameters
-        ----------
-        sort : bool, optional
-            Whether to sort the dataframe by the order of the images in the
-            input data, by default True
-        index_labels : bool, optional
-            Whether to return the label's index number (in the labels list
-            provided in setting up the instance) or the human-readable label
-            for each row, by default False
-        include_paths : bool, optional
-            Whether to return a column containing the full path to the
-            annotated image or not, by default True
-
-        Returns
-        -------
-        pandas.DataFrame
-            A dataframe containing the labelled images and their associated
-            label index.
-        """
-        if index_labels:
-            col1 = self.filtered[self.label_column].apply(
-                lambda x: self.labels.index(x)
-            )
-        else:
-            col1 = self.filtered[self.label_column]
-
-        if include_paths:
-            col2 = self.filtered[self.image_column]
-            df = pd.DataFrame(
-                {self.image_column: col2, self.label_column: col1},
-                index=pd.Index(col1.index, name="image_id"),
-            )
-        else:
-            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
-        if not sort:
-            return df
-
-        df["sort_value"] = df.index.to_list()
-        df["sort_value"] = df["sort_value"].apply(
-            lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
-        )
-        return df.sort_values("sort_value").drop(columns=["sort_value"])
-
-    def _auto_save(self):
-        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
-
-    def get_patch_size(self):
-        patch_width = self.max_x[0] - self.min_x[0]
-        patch_height = self.max_y[0] - self.min_y[0]
-
-        return patch_width, patch_height
-
-    def get_patch_image(self, ix):
-        image_path = self.at[ix, self.image_column]
-        with open(image_path, "rb") as f:
-            image = f.read()
-
-        return widgets.Image(value=image)
+        indices = test[test.eligible].index
+        if as_type == "list":
+            return list(indices)
+        if as_type == "index":
+            return indices
+        return test[test.eligible]
 
     def get_context(self):
         """
-        TODO:
-        - add docstring
-        - ensure view of the patch is no larger than 150px x 150px using ImageOps.contain(image, (150, 150))
+        Provides the surrounding context for the patch to be annotated.
+
+        Returns
+        -------
+        ipywidgets.VBox
+            An IPython VBox widget containing the surrounding patches for
+            context.
+
+        ..
+            TODO: ensure view of the patch is no larger than 150px x 150px
+            using ImageOps.contain(image, (150, 150))
         """
 
         def get_path(image_path, dim=True):
@@ -685,7 +474,7 @@ class Annotator(pd.DataFrame):
                 )
             )
 
-        ix = self.queue[self.current_index]
+        ix = self._queue[self.current_index]
 
         x = self.at[ix, "min_x"]
         y = self.at[ix, "min_y"]
@@ -726,35 +515,75 @@ class Annotator(pd.DataFrame):
 
         return widgets.VBox(h_boxes, layout=_CENTER_LAYOUT)
 
-    def get_queue(self, as_type="list"):
-        def check_legibility(row):
-            if row.label is not None:
-                return False
+    def annotate(
+        self,
+        show_context: Optional[bool] = None,
+        min_values: Optional[dict] = {},
+        max_values: Optional[dict] = {},
+        surrounding: Optional[int] = 1,
+        margin: Optional[int] = 0,
+    ) -> None:
+        """
+        Renders the annotation interface for the first image.
 
-            test = [
-                row[col] >= min_value for col, min_value in self.min_values.items()
-            ] + [row[col] <= max_value for col, max_value in self.max_values.items()]
+        Parameters
+        ----------
+        show_context : bool, optional
+            Whether or not to display the surrounding context for each image.
+            Default: None.
+        min_values : dict, optional
+            Minimum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default: {}.
+        max_values : dict, optional
+            Maximum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default: {}.
+        surrounding : int, optional
+            The number of surrounding images to show for context. Default: 1.
+        margin : int, optional
+            The margin to use for the context images. Default: 0.
 
-            if not all(test):
-                return False
+        Returns
+        -------
+        None
+        """
+        self.current_index = -1
+        for button in self._buttons:
+            button.disabled = False
 
-            return True
+        if show_context is not None:
+            self.show_context = show_context
 
-        test = self.copy()
-        test["eligible"] = test.apply(check_legibility, axis=1)
-        test = test[
-            ["eligible"] + [col for col in test.columns if not col == "eligible"]
-        ]
+        self._min_values = min_values
+        self._max_values = max_values
+        self.surrounding = surrounding
+        self.margin = margin
 
-        indices = test[test.eligible].index
-        if as_type == "list":
-            return list(indices)
-        if as_type == "index":
-            return indices
-        return test[test.eligible]
+        # re-set up queue
+        self._queue = self.get_queue()
 
-    def _next_example(self, *args):
-        if not len(self.queue):
+        self.out = widgets.Output()
+        display(self.box)
+        display(self.navbox)
+        display(self.out)
+
+        # self.get_current_index()
+        # TODO: Does not pick the correct NEXT...
+        self._next_example()
+
+    def _next_example(self, *_) -> Tuple[int, int, str]:
+        """
+        Advances the annotation interface to the next image.
+
+        Returns
+        -------
+        Tuple[int, int, str]
+            Previous index, current index, and path of the current image.
+        """
+        if not len(self._queue):
             self.render_complete()
             return
 
@@ -764,21 +593,29 @@ class Annotator(pd.DataFrame):
             current_index = self.current_index + 1
 
             try:
-                self.queue[current_index]
+                self._queue[current_index]
                 self.previous_index = self.current_index
                 self.current_index = current_index
             except IndexError:
                 pass
 
-        ix = self.queue[self.current_index]
+        ix = self._queue[self.current_index]
 
         img_path = self.at[ix, self.image_column]
 
         self.render()
         return self.previous_index, self.current_index, img_path
 
-    def _prev_example(self, *args):
-        if not len(self.queue):
+    def _prev_example(self, *_) -> Tuple[int, int, str]:
+        """
+        Moves the annotation interface to the previous image.
+
+        Returns
+        -------
+        Tuple[int, int, str]
+            Previous index, current index, and path of the current image.
+        """
+        if not len(self._queue):
             self.render_complete()
             return
 
@@ -788,25 +625,211 @@ class Annotator(pd.DataFrame):
             current_index = 0
 
         try:
-            self.queue[current_index]
+            self._queue[current_index]
             self.previous_index = current_index - 1
             self.current_index = current_index
         except IndexError:
             pass
 
-        ix = self.queue[self.current_index]
+        ix = self._queue[self.current_index]
 
         img_path = self.at[ix, self.image_column]
 
         self.render()
         return self.previous_index, self.current_index, img_path
 
+    def render(self) -> None:
+        """
+        Displays the image at the current index in the annotation interface.
+
+        If the current index is greater than or equal to the length of the
+        dataframe, the method disables the "next" button and saves the data.
+
+        Returns
+        -------
+        None
+        """
+        # Check whether we have reached the end
+        if self.current_index >= len(self) - 1:
+            if self.stop_at_last_example:
+                self.render_complete()
+            else:
+                self._prev_example()
+            return
+
+        # ix = self.iloc[self.current_index].name
+        ix = self._queue[self.current_index]
+
+        # render buttons
+        for button in self._buttons:
+            if button.description == "prev":
+                # disable previous button when at first example
+                button.disabled = self.current_index <= 0
+            elif button.description == "next":
+                # disable skip button when at last example
+                button.disabled = self.current_index >= len(self) - 1
+            elif button.description != "submit":
+                if self.at[ix, self.label_column] == button.description:
+                    button.icon = "check"
+                else:
+                    button.icon = ""
+
+        # display new example
+        with self.out:
+            clear_output(wait=True)
+            image = self.get_patch_image(ix)
+            if self.show_context:
+                context = self.get_context()
+                display(context)
+            else:
+                display(image)
+            add_ins = []
+            if self.at[ix, "url"]:
+                url = self.at[ix, "url"]
+                add_ins += [
+                    widgets.HTML(
+                        f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
+                    )
+                ]
+            add_ins += [
+                widgets.IntProgress(
+                    value=self.current_index + 1 if self.current_index else 1,
+                    min=0,
+                    max=len(self._queue),
+                    step=1,
+                    description=f"{self.current_index + 1 if self.current_index else 1} / {len(self._queue)}",
+                    orientation="horizontal",
+                    barstyle="success",
+                )
+            ]
+            display(
+                widgets.VBox(
+                    add_ins,
+                    layout=_CENTER_LAYOUT,
+                )
+            )
+
+    def get_patch_image(self, ix: int) -> widgets.Image:
+        """
+        Returns the image at the given index.
+
+        Parameters
+        ----------
+        ix : int
+            The index of the image in the dataframe.
+
+        Returns
+        -------
+        ipywidgets.Image
+            A widget displaying the image at the given index.
+        """
+        image_path = self.at[ix, self.image_column]
+        with open(image_path, "rb") as f:
+            image = f.read()
+
+        return widgets.Image(value=image)
+
+    def _add_annotation(self, annotation: str) -> None:
+        """
+        Adds the provided annotation to the current image.
+
+        Parameters
+        ----------
+        annotation : str
+            The label to add to the current image.
+
+        Returns
+        -------
+        None
+        """
+        # ix = self.iloc[self.current_index].name
+        ix = self._queue[self.current_index]
+        self.at[ix, self.label_column] = annotation
+        self.at[ix, "changed"] = True
+        if self.auto_save:
+            self._auto_save()
+        self._next_example()
+
+    def _auto_save(self):
+        """
+        Automatically saves the annotations made so far.
+
+        Returns
+        -------
+        None
+        """
+        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
+
+    def get_labelled_data(
+        self,
+        sort: Optional[bool] = True,
+        index_labels: Optional[bool] = False,
+        include_paths: Optional[bool] = True,
+    ) -> pd.DataFrame:
+        """
+        Returns the annotations made so far.
+
+        Parameters
+        ----------
+        sort : bool, optional
+            Whether to sort the dataframe by the order of the images in the
+            input data, by default True
+        index_labels : bool, optional
+            Whether to return the label's index number (in the labels list
+            provided in setting up the instance) or the human-readable label
+            for each row, by default False
+        include_paths : bool, optional
+            Whether to return a column containing the full path to the
+            annotated image or not, by default True
+
+        Returns
+        -------
+        pandas.DataFrame
+            A dataframe containing the labelled images and their associated
+            label index.
+        """
+        if index_labels:
+            col1 = self.filtered[self.label_column].apply(
+                lambda x: self._labels.index(x)
+            )
+        else:
+            col1 = self.filtered[self.label_column]
+
+        if include_paths:
+            col2 = self.filtered[self.image_column]
+            df = pd.DataFrame(
+                {self.image_column: col2, self.label_column: col1},
+                index=pd.Index(col1.index, name="image_id"),
+            )
+        else:
+            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
+        if not sort:
+            return df
+
+        df["sort_value"] = df.index.to_list()
+        df["sort_value"] = df["sort_value"].apply(
+            lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
+        )
+        return df.sort_values("sort_value").drop(columns=["sort_value"])
+
+    @property
+    def filtered(self) -> pd.DataFrame:
+        _filter = ~self[self.label_column].isna()
+        return self[_filter]
+
     def render_complete(self):
+        """
+        Renders the completion message once all images have been annotated.
+
+        Returns
+        -------
+        None
+        """
         clear_output()
         display(
             widgets.HTML(f"<p><b>All annotations done with current settings.</b></p>")
         )
         if self.auto_save:
             self._auto_save()
-        for button in self.buttons:
+        for button in self._buttons:
             button.disabled = True
