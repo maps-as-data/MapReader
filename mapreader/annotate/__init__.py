@@ -5,6 +5,7 @@ import os
 import random
 import string
 from itertools import product
+from pathlib import Path
 from typing import Optional, Tuple, Union, List
 
 import ipywidgets as widgets
@@ -210,6 +211,9 @@ class Annotator(pd.DataFrame):
         self.metadata = parent_df
         self.patch_width, self.patch_height = self.get_patch_size()
         self.metadata_delimiter = kwargs["metadata_delimiter"]
+
+        # Create annotations_dir
+        Path(self.annotations_dir).mkdir(parents=True, exist_ok=True)
 
         # Set up standards for context display
         self.surrounding = 1
