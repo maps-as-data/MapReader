@@ -827,7 +827,7 @@ class Annotator(pd.DataFrame):
         """
         clear_output()
         display(
-            widgets.HTML(f"<p><b>All annotations done with current settings.</b></p>")
+            widgets.HTML("<p><b>All annotations done with current settings.</b></p>")
         )
         if self.auto_save:
             self._auto_save()
