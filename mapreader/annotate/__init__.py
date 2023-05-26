@@ -186,7 +186,7 @@ class Annotator(pd.DataFrame):
         # initiate as a DataFrame
         super().__init__(patch_df)
 
-        # pixel_bounds = x0, y0, x1, y1 # I checked with Rosie
+        # pixel_bounds = x0, y0, x1, y1 # TODO: verify this is the correct order
         self["min_x"] = self.pixel_bounds.apply(lambda x: x[0])
         self["min_y"] = self.pixel_bounds.apply(lambda x: x[1])
         self["max_x"] = self.pixel_bounds.apply(lambda x: x[2])
