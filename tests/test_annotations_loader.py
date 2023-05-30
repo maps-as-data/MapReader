@@ -16,6 +16,7 @@ def load_annots(sample_dir):
     annots.load(f"{sample_dir}/test_annots.csv", scramble_frame=True, reset_index=True)
     return annots
 
+@pytest.mark.dependency(name="load_annots_csv", scope="session")
 def test_load_csv(load_annots, sample_dir):
     annots = load_annots
     assert len(annots.annotations) == 29
@@ -52,6 +53,7 @@ def test_create_datasets_custom_transforms(load_annots):
     for v in annots.datasets.values():
         assert v.transform == my_transform
 
+@pytest.mark.dependency(name="dataloaders", scope="session")
 def test_create_dataloaders_default_sampler(load_annots):
     annots = load_annots
     dataloaders = annots.create_dataloaders(batch_size=8)

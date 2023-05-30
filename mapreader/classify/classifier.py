@@ -398,9 +398,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         if isinstance(criterion, str):
             if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
                 criterion = nn.CrossEntropyLoss()
-            elif criterion == ["bce", "binary_cross_entropy", "binary cross entropy", "binary cross-entropy"]:
+            elif criterion in ["bce", "binary_cross_entropy", "binary cross entropy", "binary cross-entropy"]:
                 criterion = nn.BCELoss()
-            elif criterion == ["mse", "mean_square_error", "mean_squared_error", "mean squared error"]:
+            elif criterion in ["mse", "mean_square_error", "mean_squared_error", "mean squared error"]:
                 criterion == nn.MSELoss()
             else:
                 raise NotImplementedError('[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).')

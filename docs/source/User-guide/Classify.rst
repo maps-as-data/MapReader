@@ -356,11 +356,11 @@ In order to train/fine-tune your model, will need to define:
 
 **2.  An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
 
-    The ``.initialize_optimizer()`` method is used to add an optimiser to you ``ClassifierContainer()`` (``my_classifier``):
+    The ``.initialize_optimizer()`` method is used to add an optimizer to you ``ClassifierContainer()`` (``my_classifier``):
 
     .. code-block:: python
 
-        my_classifier.initialize_model()
+        my_classifier.initialize_optimizer()
 
     The ``optim_type`` argument can be used to select the `optimisation algorithm <https://pytorch.org/docs/stable/optim.html#algorithms>`__.
     By default, this is set to `"adam" <https://pytorch.org/docs/stable/generated/torch.optim.Adam.html#torch.optim.Adam>`__, one of the  most commonly used algorithms.
@@ -385,7 +385,7 @@ In order to train/fine-tune your model, will need to define:
     .. code-block:: python 
 
         #EXAMPLE
-        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, "geomspace")
+        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
 
     You should then pass your ``params2optimise`` list to the ``.initialize_optimizer()`` method:
 
