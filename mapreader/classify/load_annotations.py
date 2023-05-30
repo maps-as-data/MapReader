@@ -93,7 +93,7 @@ class AnnotationsLoader():
         annotations = annotations.astype({self.label_col:str}) # ensure labels are interpreted as strings 
 
         if append:
-            self.annotations = self.annotations.append(annotations)
+            self.annotations = pd.concat([self.annotations, annotations])
         else:
             self.annotations = annotations
 
@@ -367,9 +367,9 @@ class AnnotationsLoader():
 
     def create_datasets(
         self,
-        frac_train: Optional[Union[str, float]] = 0.70,
-        frac_val: Optional[Union[str, float]] = 0.15,
-        frac_test: Optional[Union[str, float]] = 0.15,
+        frac_train: Optional[float] = 0.70,
+        frac_val: Optional[float] = 0.15,
+        frac_test: Optional[float] = 0.15,
         random_state: Optional[int] = 1364,
         train_transform: Optional[Union[str, Compose, Callable]] = "train",
         val_transform: Optional[Union[str, Compose, Callable]] = "val",
