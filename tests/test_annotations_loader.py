@@ -13,7 +13,7 @@ def sample_dir():
 @pytest.fixture
 def load_annots(sample_dir):
     annots = AnnotationsLoader()
-    annots.load(f"{sample_dir}/test_annots.csv", scramble_frame=True, reset_index=True)
+    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True)
     return annots
 
 @pytest.mark.dependency(name="load_annots_csv", scope="session")
