@@ -91,18 +91,18 @@ class AnnotationsLoader():
             annotations = self._load_annotations_csv(annotations, delimiter, scramble_frame, reset_index)
         
         annotations = annotations.astype({self.label_col:str}) # ensure labels are interpreted as strings 
-        
-        unique_labels = annotations[self.label_col].unique().tolist()
-        self.unique_labels = unique_labels
-        annotations["label_index"] = annotations[self.label_col].apply(self._get_label_index)
-
-        labels_map = {i:label for i, label in enumerate(unique_labels)}
-        self.labels_map = labels_map
 
         if append:
             self.annotations = self.annotations.append(annotations)
         else:
             self.annotations = annotations
+
+        unique_labels = self.annotations[self.label_col].unique().tolist()
+        self.unique_labels = unique_labels
+        self.annotations["label_index"] = self.annotations[self.label_col].apply(self._get_label_index)
+
+        labels_map = {i:label for i, label in enumerate(unique_labels)}
+        self.labels_map = labels_map
 
         print(self)
 
@@ -139,7 +139,7 @@ class AnnotationsLoader():
 
         if os.path.isfile(annotations):
             print(f'[INFO] Reading "{annotations}"')
-            annotations = pd.read_csv(annotations, sep=delimiter)
+            annotations = pd.read_csv(annotations, sep=delimiter, index_col=0)
         else:
             raise ValueError(f'[ERROR] "{annotations}" cannot be found.')
                 
