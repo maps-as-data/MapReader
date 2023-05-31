@@ -44,9 +44,9 @@ class PatchDataset(Dataset):
             DataFrame or path to csv file containing the paths to image patches and their labels.
         transform : Union[str, transforms.Compose, Callable]
             The transform to use on the image.
-            A string can be used to call default transforms - options are "train", "test" or "val". 
+            A string can be used to call default transforms - options are "train", "test" or "val".
             Alternatively, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose) that takes in an image
-            and performs image transformations can be used. 
+            and performs image transformations can be used.
             At minimum, transform should be ``torchvision.transforms.ToTensor()``.
         delimiter : str, optional
             The delimiter to use when reading the dataframe. By default ``"\t"``.
@@ -102,7 +102,7 @@ class PatchDataset(Dataset):
 
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
-        
+
         elif isinstance(patch_df, str):
             if os.path.isfile(patch_df):
                 print(f'[INFO] Reading "{patch_df}".')
@@ -110,10 +110,12 @@ class PatchDataset(Dataset):
                 self.patch_df = patch_df
             else:
                 raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
-        
+
         else:
-            raise ValueError("[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame.")
-    
+            raise ValueError(
+                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+            )
+
         self.label_col = label_col
         self.label_index_col = label_index_col
         self.image_mode = image_mode
@@ -122,23 +124,33 @@ class PatchDataset(Dataset):
 
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
-                raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
+                raise ValueError(
+                    f"[ERROR] Label column ({label_col}) not in dataframe."
+                )
             else:
                 self.unique_labels = self.patch_df[self.label_col].unique().tolist()
-        
+
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
                 if self.label_col:
-                    print(f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column.")
-                    self.patch_df[self.label_index_col] = self.patch_df[self.label_col].apply(self._get_label_index)
+                    print(
+                        f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                    )
+                    self.patch_df[self.label_index_col] = self.patch_df[
+                        self.label_col
+                    ].apply(self._get_label_index)
                 else:
-                    raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
+                    raise ValueError(
+                        f"[ERROR] Label index column ({label_index_col}) not in dataframe."
+                    )
 
         if isinstance(transform, str):
             if transform in ["train", "val", "test"]:
                 self.transform = self._default_transform(transform)
             else:
-                raise ValueError(f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.')
+                raise ValueError(
+                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                )
         else:
             self.transform = transform
 
@@ -176,8 +188,10 @@ class PatchDataset(Dataset):
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
         else:
-            raise ValueError(f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.')
+            raise ValueError(
+                f'[ERROR] "{img_path} cannot be found.\n\
+Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         img = self.transform(img)
 
@@ -185,7 +199,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             image_label = self.patch_df.iloc[idx][self.label_col]
         else:
             image_label = ""
-        
+
         if self.label_index_col in self.patch_df.iloc[idx].keys():
             image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:
@@ -220,17 +234,21 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             idx = idx.tolist()
 
         img_path = self.patch_df.iloc[idx][self.patch_paths_col]
-        
+
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
         else:
-            raise ValueError(f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.')
+            raise ValueError(
+                f'[ERROR] "{img_path} cannot be found.\n\
+Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         return img
 
     def _default_transform(
-        self, t_type: Optional[str] = "train", resize: Optional[Union[int, tuple]] = (224,224)
+        self,
+        t_type: Optional[str] = "train",
+        resize: Optional[Union[int, tuple]] = (224, 224),
     ) -> Dict:
         """
         Returns a dictionary containing the default image transformations for
@@ -256,7 +274,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         normalize_mean = [0.485, 0.456, 0.406]
         normalize_std = [0.229, 0.224, 0.225]
 
-        t_type = "val" if t_type == "test" else t_type #test and val are synonymous
+        t_type = "val" if t_type == "test" else t_type  # test and val are synonymous
 
         data_transforms = {
             "train": transforms.Compose(
@@ -283,7 +301,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             ),
         }
         return data_transforms[t_type]
-    
+
     def _get_label_index(self, label: str) -> int:
         """Gets the index of a label.
 
@@ -296,13 +314,14 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         -------
         int
             The index of the label.
-        
+
         Notes
         -----
         Used to generate the ``label_index`` column.
 
         """
         return self.unique_labels.index(label)
+
 
 # --- Dataset that returns an image, its context and its label
 class PatchContextDataset(PatchDataset):
@@ -311,7 +330,7 @@ class PatchContextDataset(PatchDataset):
         patch_df: Union[pd.DataFrame, str],
         transform1: str,
         transform2: str,
-        delimiter : str = "\t",
+        delimiter: str = "\t",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
@@ -411,7 +430,7 @@ class PatchContextDataset(PatchDataset):
 
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
-        
+
         elif isinstance(patch_df, str):
             if os.path.isfile(patch_df):
                 print(f'[INFO] Reading "{patch_df}".')
@@ -419,10 +438,12 @@ class PatchContextDataset(PatchDataset):
                 self.patch_df = patch_df
             else:
                 raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
-        
+
         else:
-            raise ValueError("[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame.")
-    
+            raise ValueError(
+                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+            )
+
         self.label_col = label_col
         self.label_index_col = label_index_col
         self.image_mode = image_mode
@@ -432,27 +453,39 @@ class PatchContextDataset(PatchDataset):
         self.y_offset = y_offset
         self.slice_method = slice_method
         self.create_context = create_context
-        self.context_save_path = os.path.abspath(context_save_path) # we need this either way I think?
+        self.context_save_path = os.path.abspath(
+            context_save_path
+        )  # we need this either way I think?
 
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
-                raise ValueError(f"[ERROR] Label column ({label_col}) not in dataframe.")
+                raise ValueError(
+                    f"[ERROR] Label column ({label_col}) not in dataframe."
+                )
             else:
                 self.unique_labels = self.patch_df[self.label_col].unique().tolist()
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
                 if self.label_col:
-                    print(f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column.")
-                    self.patch_df[self.label_index_col] = self.patch_df[self.label_col].apply(self._get_label_index)
+                    print(
+                        f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                    )
+                    self.patch_df[self.label_index_col] = self.patch_df[
+                        self.label_col
+                    ].apply(self._get_label_index)
                 else:
-                    raise ValueError(f"[ERROR] Label index column ({label_index_col}) not in dataframe.")
+                    raise ValueError(
+                        f"[ERROR] Label index column ({label_index_col}) not in dataframe."
+                    )
 
         if isinstance(transform1, str):
             if transform1 in ["train", "val", "test"]:
                 self.transform1 = self._default_transform(transform1)
             else:
-                raise ValueError(f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.')
+                raise ValueError(
+                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                )
         else:
             self.transform1 = transform1
 
@@ -460,7 +493,9 @@ class PatchContextDataset(PatchDataset):
             if transform2 in ["train", "val", "test"]:
                 self.transform2 = self._default_transform(transform2)
             else:
-                raise ValueError(f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.')
+                raise ValueError(
+                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                )
         else:
             self.transform2 = transform2
 
@@ -568,8 +603,10 @@ class PatchContextDataset(PatchDataset):
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
         else:
-            raise ValueError(f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.')
+            raise ValueError(
+                f'[ERROR] "{img_path} cannot be found.\n\
+Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if not return_image:
             os.makedirs(self.context_save_path, exist_ok=True)
@@ -705,8 +742,10 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
         else:
-            raise ValueError(f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.')
+            raise ValueError(
+                f'[ERROR] "{img_path} cannot be found.\n\
+Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if self.create_context:
             context_img = self.save_parents_idx(idx, return_image=True)
@@ -722,7 +761,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             image_label = self.patch_df.iloc[idx][self.label_col]
         else:
             image_label = ""
-        
+
         if self.label_index_col in self.patch_df.iloc[idx].keys():
             image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:

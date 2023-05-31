@@ -37,16 +37,16 @@ from .datasets import PatchDataset
 
 class ClassifierContainer:
     def __init__(
-        self, 
+        self,
         model: Union[str, nn.Module, None],
         dataloaders: Union[Dict[str, DataLoader], None],
         labels_map: Union[Dict[int, str], None],
         device: Optional[str] = "default",
-        input_size: Optional[int] = (224,224),
+        input_size: Optional[int] = (224, 224),
         is_inception: Optional[bool] = False,
         load_path: Optional[str] = None,
         force_device: Optional[bool] = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize an ClassifierContainer object.
@@ -58,7 +58,7 @@ class ClassifierContainer:
 
             - If passed as a string, will run ``_initialize_model(model, **kwargs)``\. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
-            
+
         dataloaders: Dict or None
             A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
             Can only be ``None`` if ``load_path`` is specified as dataloaders will be loaded from file.
@@ -66,17 +66,17 @@ class ClassifierContainer:
             A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
             Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
         device : str, optional
-            The device to be used for training and storing models. 
+            The device to be used for training and storing models.
             Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
         input_size : int, optional
             The expected input size of the model. Default is ``(224,224)``\.
         is_inception : bool, optional
-            Whether the model is an Inception-style model. 
+            Whether the model is an Inception-style model.
             Default is ``False``\.
         load_path : str, optional
-            The path to an ``\.obj`` file containing a 
+            The path to an ``\.obj`` file containing a
         force_device : bool, optional
-            Whether to force the use of a specific device. 
+            Whether to force the use of a specific device.
             If set to ``True``\, the default device is used.
             Defaults to ``False``\.
         kwargs : Dict
@@ -125,20 +125,29 @@ class ClassifierContainer:
             self.device = device
         print(f"[INFO] Device is set to {self.device}")
 
-        #check if loading an pre-existing object
+        # check if loading an pre-existing object
         if model and load_path:
-            raise ValueError("[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``\.")
-        if any(val == None for val in [model, dataloaders, labels_map]) and not load_path:
-            raise ValueError("[ERROR] Unless passing ``load_path``\, ``model``\, ``dataloaders`` and ``labels_map`` must be defined.")
+            raise ValueError(
+                "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``\."
+            )
+        if (
+            any(val == None for val in [model, dataloaders, labels_map])
+            and not load_path
+        ):
+            raise ValueError(
+                "[ERROR] Unless passing ``load_path``\, ``model``\, ``dataloaders`` and ``labels_map`` must be defined."
+            )
 
         if load_path:
             self.load(load_path=load_path, force_device=force_device)
-        
+
         # add dataloaders
         if dataloaders:
             self.dataloaders = dataloaders
             for set_name, dataloader in dataloaders.items():
-                print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+                print(
+                    f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
+                )
 
         if labels_map:
             self.labels_map = labels_map
@@ -166,7 +175,9 @@ class ClassifierContainer:
             # temp file to save checkpoints during training/validation
             if not os.path.exists("./tmp_checkpoints"):
                 os.makedirs("./tmp_checkpoints")
-            self.tmp_save_filename = f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+            self.tmp_save_filename = (
+                f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+            )
 
             # add colors for printing/logging
             self._print_colors()
@@ -199,19 +210,20 @@ class ClassifierContainer:
         list of dicts
             A list of dictionaries containing the parameters and learning
             rates for each layer.
-        """   
+        """
         if spacing.lower() == "linspace":
-            lrs = np.linspace(
-                min_lr, max_lr, len(list(self.model.named_parameters()))
-            )
+            lrs = np.linspace(min_lr, max_lr, len(list(self.model.named_parameters())))
         elif spacing.lower() in ["log", "geomspace"]:
-            lrs = np.geomspace(
-                min_lr, max_lr, len(list(self.model.named_parameters()))
-            )
+            lrs = np.geomspace(min_lr, max_lr, len(list(self.model.named_parameters())))
         else:
-            raise NotImplementedError('[ERROR] ``spacing`` must be one of "linspace" or "geomspace"')
+            raise NotImplementedError(
+                '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
+            )
 
-        params2optimise = [{"params": params, "learning rate": lrs[i]} for i, (_, params) in enumerate(self.model.named_parameters())]
+        params2optimise = [
+            {"params": params, "learning rate": lrs[i]}
+            for i, (_, params) in enumerate(self.model.named_parameters())
+        ]
 
         return params2optimise
 
@@ -274,7 +286,9 @@ class ClassifierContainer:
         elif optim_type.lower() in ["sgd"]:
             optimizer = optim.SGD(params2optimise, **optim_param_dict)
         else:
-            raise NotImplementedError('[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``\.')
+            raise NotImplementedError(
+                '[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``\.'
+            )
 
         if add_optim:
             self.add_optimizer(optimizer)
@@ -334,14 +348,15 @@ class ClassifierContainer:
                 "[ERROR] Optimizer is not yet defined. \n\n\
 Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             )
-        
+
         if scheduler_type.lower() == "steplr":
             scheduler = optim.lr_scheduler.StepLR(
                 self.optimizer, **scheduler_param_dict
             )
         elif scheduler_type.lower() == "onecyclelr":
             scheduler = optim.lr_scheduler.OneCycleLR(
-                self.optimizer, **scheduler_param_dict # RW - Cannot use hthis with default scheduler_param_dict - need to update
+                self.optimizer,
+                **scheduler_param_dict,  # RW - Cannot use hthis with default scheduler_param_dict - need to update
             )
         else:
             raise NotImplementedError(
@@ -379,7 +394,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         self.scheduler = scheduler
 
-    def add_criterion(self, criterion: Optional[Union[str, nn.modules.loss._Loss]] = "cross entropy") -> None:
+    def add_criterion(
+        self, criterion: Optional[Union[str, nn.modules.loss._Loss]] = "cross entropy"
+    ) -> None:
         """
         Add a loss criterion to the classifier object.
 
@@ -398,18 +415,32 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         if isinstance(criterion, str):
             if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
                 criterion = nn.CrossEntropyLoss()
-            elif criterion in ["bce", "binary_cross_entropy", "binary cross entropy", "binary cross-entropy"]:
+            elif criterion in [
+                "bce",
+                "binary_cross_entropy",
+                "binary cross entropy",
+                "binary cross-entropy",
+            ]:
                 criterion = nn.BCELoss()
-            elif criterion in ["mse", "mean_square_error", "mean_squared_error", "mean squared error"]:
+            elif criterion in [
+                "mse",
+                "mean_square_error",
+                "mean_squared_error",
+                "mean squared error",
+            ]:
                 criterion == nn.MSELoss()
             else:
-                raise NotImplementedError('[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).')
-        
+                raise NotImplementedError(
+                    '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
+                )
+
         print(f'[INFO] Using "{criterion}" as criterion.')
 
         if not isinstance(criterion, nn.modules.loss._Loss):
-            raise ValueError('[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).')
-        
+            raise ValueError(
+                '[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
+            )
+
         self.criterion = criterion
 
     def model_summary(
@@ -459,11 +490,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             input_size = (batch_size, channels, *self.input_size)
 
         if trainable_col:
-            col_names=["num_params", "output_size", "trainable"]
+            col_names = ["num_params", "output_size", "trainable"]
         else:
-            col_names=["output_size","output_size", "num_params"]
+            col_names = ["output_size", "output_size", "num_params"]
 
-        model_summary = summary(self.model, input_size=input_size, col_names=col_names, **kwargs)
+        model_summary = summary(
+            self.model, input_size=input_size, col_names=col_names, **kwargs
+        )
         print(model_summary)
 
     def freeze_layers(self, layers_to_freeze: Optional[List[str]] = []) -> None:
@@ -751,11 +784,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         """
 
         if self.criterion is None:
-            raise ValueError("[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one.")
+            raise ValueError(
+                "[ERROR] Criterion is not yet defined.\n\n\
+Use ``add_criterion`` to define one."
+            )
 
         print(f"[INFO] Each training step will pass: {phases}.")
-        
+
         for phase in phases:
             if phase not in self.dataloaders.keys():
                 raise KeyError(
@@ -794,7 +829,7 @@ Use ``add_criterion`` to define one.")
 
         start_epoch = self.last_epoch + 1
         end_epoch = self.last_epoch + num_epochs
-        
+
         # --- Main train loop
         for epoch in range(start_epoch, end_epoch + 1):
             # --- loop, phases
@@ -819,7 +854,9 @@ Use ``add_criterion`` to define one.")
                 total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs, labels, label_indices) in enumerate(self.dataloaders[phase]):
+                for batch_idx, (inputs, labels, label_indices) in enumerate(
+                    self.dataloaders[phase]
+                ):
                     inputs = inputs.to(self.device)
                     label_indices = label_indices.to(self.device)
 
@@ -846,14 +883,17 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 phase.lower() in train_phase_names
                             ):
                                 outputs, aux_outputs = self.model(inputs)
-                                
-                                if not all(isinstance(out, torch.Tensor) for out in [outputs, aux_outputs]):
+
+                                if not all(
+                                    isinstance(out, torch.Tensor)
+                                    for out in [outputs, aux_outputs]
+                                ):
                                     try:
                                         outputs = outputs.logits
                                         aux_outputs = aux_outputs.logits
                                     except AttributeError as err:
                                         raise AttributeError(err.message)
-                                
+
                                 loss1 = self.criterion(outputs, label_indices)
                                 loss2 = self.criterion(aux_outputs, label_indices)
                                 # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
@@ -861,7 +901,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
                             else:
                                 outputs = self.model(inputs)
-                                
+
                                 if not isinstance(outputs, torch.Tensor):
                                     try:
                                         outputs = outputs.logits
@@ -890,7 +930,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 outputs = outputs.logits
                             except AttributeError as err:
                                 raise AttributeError(err.message)
-                            
+
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
@@ -972,8 +1012,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
-        self.pred_label = [self.labels_map.get(i,None) for i in self.pred_label_indices]
-        self.orig_label = [self.labels_map.get(i, None) for i in self.orig_label_indices]
+        self.pred_label = [
+            self.labels_map.get(i, None) for i in self.pred_label_indices
+        ]
+        self.orig_label = [
+            self.labels_map.get(i, None) for i in self.orig_label_indices
+        ]
 
         time_elapsed = time.time() - since
         print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
@@ -993,7 +1037,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
                 print(
                     f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
-[INFO] Path: {save_model_path}") # noqa
+[INFO] Path: {save_model_path}"
+                )  # noqa
 
     def calculate_add_metrics(
         self,
@@ -1347,7 +1392,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         # Each of these variables is model specific.
         model_dw = models.__getattribute__(model_name)
         model_dw = model_dw(pretrained)
-        input_size = (224,224)
+        input_size = (224, 224)
         is_inception = False
 
         if last_layer_num_classes in ["default"]:
@@ -1392,7 +1437,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             input_size = 299
 
         else:
-            raise NotImplementedError("[ERROR] Invalid model name.") # CHECK THIS
+            raise NotImplementedError("[ERROR] Invalid model name.")  # CHECK THIS
 
         self.model = model_dw.to(self.device)
         self.input_size = input_size
@@ -1441,7 +1486,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         ``ImageClassifierData`` class to show the sample data.
         """
         if set_name not in self.dataloaders.keys():
-            raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
 
         if print_batch_info:
             # print info about batch size
@@ -1451,15 +1498,17 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
         num_batches = int(np.ceil(len(dataloader.dataset) / dataloader.batch_size))
         if min(num_batches, batch_number) != batch_number:
-            print(f'[INFO] "{set_name}" only contains {num_batches}.\n\
-Output will show batch number {num_batches}.')
+            print(
+                f'[INFO] "{set_name}" only contains {num_batches}.\n\
+Output will show batch number {num_batches}.'
+            )
             batch_number = num_batches
-        
+
         dl_iter = iter(dataloader)
         for _ in range(batch_number):
             # Get a batch of training data
             inputs, labels, label_indices = next(dl_iter)
-            
+
         # Make a grid from batch
         out = torchvision.utils.make_grid(inputs)
         self._imshow(
@@ -1483,16 +1532,20 @@ Output will show batch number {num_batches}.')
         None
         """
         if set_name not in self.dataloaders.keys():
-            raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
-        
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
+
         batch_size = self.dataloaders[set_name].batch_size
         num_samples = len(self.dataloaders[set_name].dataset)
         num_batches = int(np.ceil(num_samples / batch_size))
 
-        print(f"[INFO] dataset: {set_name}\n\
+        print(
+            f"[INFO] dataset: {set_name}\n\
         - items:        {num_samples}\n\
         - batch size:   {batch_size}\n\
-        - batches:      {num_batches}")
+        - batches:      {num_batches}"
+        )
 
     @staticmethod
     def _imshow(
@@ -1544,7 +1597,7 @@ Output will show batch number {num_batches}.')
         figsize: Optional[Tuple[int, int]] = (15, 15),
     ) -> None:
         """
-        Shows a sample of the results of the inference. 
+        Shows a sample of the results of the inference.
 
         Parameters
         ----------
@@ -1584,27 +1637,31 @@ Output will show batch number {num_batches}.')
                 label_indices = label_indices.to(self.device)
 
                 outputs = self.model(inputs)
-                
+
                 if not isinstance(outputs, torch.Tensor):
                     try:
                         outputs = outputs.logits
                     except AttributeError as err:
                         raise AttributeError(err.message)
-                        
+
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
 
-                #reverse the labels_map dict
-                label_index_dict = {v:k for k, v in self.labels_map}
+                # reverse the labels_map dict
+                label_index_dict = {v: k for k, v in self.labels_map}
 
                 # go through images in batch
                 for j in range(len(preds)):
                     predicted_index = int(preds[j])
                     if predicted_index != label_index_dict[label]:
                         continue
-                    if (min_conf is not None) and (pred_conf[j][predicted_index] < min_conf):
+                    if (min_conf is not None) and (
+                        pred_conf[j][predicted_index] < min_conf
+                    ):
                         continue
-                    if (max_conf is not None) and (pred_conf[j][predicted_index] > max_conf):
+                    if (max_conf is not None) and (
+                        pred_conf[j][predicted_index] > max_conf
+                    ):
                         continue
 
                     counter += 1
@@ -1622,7 +1679,7 @@ Output will show batch number {num_batches}.')
                         self.model.train(mode=was_training)
                         plt.show()
                         return
-                    
+
             self.model.train(mode=was_training)
             plt.show()
 
@@ -1637,7 +1694,7 @@ Output will show batch number {num_batches}.')
         Parameters
         ----------
         save_path : str, optional
-            The path to the file to write. 
+            The path to the file to write.
             If the file already exists and ``force`` is not ``True``\, a ``FileExistsError`` is raised.
             Defaults to ``"default.obj"``\.
         force : bool, optional
@@ -1686,14 +1743,20 @@ Output will show batch number {num_batches}.')
         batch_size: Optional[int] = 16,
         sampler: Optional[Union[Sampler, None]] = None,
         shuffle: Optional[bool] = False,
-        num_workers: Optional[int] = 0, 
-        **kwargs
+        num_workers: Optional[int] = 0,
+        **kwargs,
     ) -> None:
-        
         if sampler and shuffle:
             print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
 
-        dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, shuffle=shuffle, num_workers=num_workers, **kwargs)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            sampler=sampler,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            **kwargs,
+        )
 
         self.dataloaders[set_name] = dataloader
 
@@ -1734,7 +1797,7 @@ Output will show batch number {num_batches}.')
             raise FileNotFoundError(f'[ERROR] "{load_path}" cannot be found.')
 
         print(f'[INFO] Loading "{load_path}".')
-        
+
         with open(load_path, "rb") as myfile:
             # objPickle = pickle.load(myfile)
             objPickle = joblib.load(myfile)

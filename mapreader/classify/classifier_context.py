@@ -158,9 +158,11 @@ class ClassifierContextContainer(ClassifierContainer):
         """
 
         if self.criterion is None:
-            raise ValueError("[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one.")
-        
+            raise ValueError(
+                "[ERROR] Criterion is not yet defined.\n\n\
+Use ``add_criterion`` to define one."
+            )
+
         print(f"[INFO] Each epoch will pass: {phases}.")
 
         for phase in phases:
@@ -257,13 +259,16 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             ):
                                 outputs, aux_outputs = self.model(inputs1, inputs2)
 
-                                if not all(isinstance(out, torch.Tensor) for out in [outputs, aux_outputs]):
+                                if not all(
+                                    isinstance(out, torch.Tensor)
+                                    for out in [outputs, aux_outputs]
+                                ):
                                     try:
                                         outputs = outputs.logits
                                         aux_outputs = aux_outputs.logits
                                     except AttributeError as err:
                                         raise AttributeError(err.message)
-                                
+
                                 loss1 = self.criterion(outputs, label_indices)
                                 loss2 = self.criterion(aux_outputs, label_indices)
                                 # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
@@ -276,7 +281,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                         outputs = outputs.logits
                                     except AttributeError as err:
                                         raise AttributeError(err.message)
-                                
+
                                 loss = self.criterion(outputs, label_indices)
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
@@ -300,7 +305,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 outputs = outputs.logits
                             except AttributeError as err:
                                 raise AttributeError(err.message)
-                            
+
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
                     running_pred_conf.extend(
@@ -382,8 +387,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
-        self.pred_label = [self.labels_map.get(i,None) for i in self.pred_label_indices]
-        self.orig_label = [self.labels_map.get(i, None) for i in self.orig_label_indices]
+        self.pred_label = [
+            self.labels_map.get(i, None) for i in self.pred_label_indices
+        ]
+        self.orig_label = [
+            self.labels_map.get(i, None) for i in self.orig_label_indices
+        ]
 
         time_elapsed = time.time() - since
         print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
@@ -404,7 +413,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
                 print(
                     f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
-[INFO] Path: {save_model_path}") # noqa
+[INFO] Path: {save_model_path}"
+                )  # noqa
 
     def show_sample(
         self,
@@ -449,7 +459,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         ``ImageClassifierData`` class to show the sample data.
         """
         if set_name not in self.dataloaders.keys():
-            raise ValueError(f'[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}.')
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
 
         if print_batch_info:
             # print info about batch size
@@ -459,8 +471,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
         num_batches = int(np.ceil(len(dataloader.dataset) / dataloader.batch_size))
         if min(num_batches, batch_number) != batch_number:
-            print(f'[INFO] "{set_name}" only contains {num_batches}.\n\
-Output will show batch number {num_batches}.')
+            print(
+                f'[INFO] "{set_name}" only contains {num_batches}.\n\
+Output will show batch number {num_batches}.'
+            )
             batch_number = num_batches
 
         dl_iter = iter(dataloader)
@@ -518,7 +532,7 @@ Output will show batch number {num_batches}.')
             rates for each layer.
         """
         params2optimise = []
-        
+
         for group in range(len(sep_group_names)):
             # count number of layers in this group
             num_grp_layers = 0
@@ -532,7 +546,9 @@ Output will show batch number {num_batches}.')
             elif spacing.lower() in ["log", "geomspace"]:
                 list_lrs = np.geomspace(min_lr, max_lr, num_grp_layers)
             else:
-                raise NotImplementedError('[ERROR] ``spacing`` must be one of "linspace" or "geomspace"')
+                raise NotImplementedError(
+                    '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
+                )
 
             # assign learning rates
             i_count = 0
@@ -554,7 +570,7 @@ Output will show batch number {num_batches}.')
         figsize: Optional[Tuple[int, int]] = (15, 15),
     ) -> None:
         """
-        Shows a sample of the results of the inference. 
+        Shows a sample of the results of the inference.
 
         Parameters
         ----------
@@ -589,11 +605,13 @@ Output will show batch number {num_batches}.')
         counter = 0
         fig = plt.figure(figsize=figsize)
         with torch.no_grad():
-            for inputs1, inputs2, labels, label_indices in iter(self.dataloaders[set_name]):
+            for inputs1, inputs2, labels, label_indices in iter(
+                self.dataloaders[set_name]
+            ):
                 inputs1 = inputs1.to(self.device)
                 inputs2 = inputs2.to(self.device)
                 label_indices = label_indices.to(self.device)
-            
+
                 outputs = self.model(inputs1, inputs2)
 
                 if not isinstance(outputs, torch.Tensor):
@@ -601,20 +619,26 @@ Output will show batch number {num_batches}.')
                         outputs = outputs.logits
                     except AttributeError as err:
                         raise AttributeError(err.message)
-                    
+
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
 
-                label_index_dict = {label:index for label, index in zip(labels, label_indices)}
+                label_index_dict = {
+                    label: index for label, index in zip(labels, label_indices)
+                }
 
                 # go through images in batch
                 for j in range(len(preds)):
                     predicted_index = int(preds[j])
                     if predicted_index != label_index_dict[label]:
                         continue
-                    if (min_conf is not None) and (pred_conf[j][predicted_index] < min_conf):
+                    if (min_conf is not None) and (
+                        pred_conf[j][predicted_index] < min_conf
+                    ):
                         continue
-                    if (max_conf is not None) and (pred_conf[j][predicted_index] > max_conf):
+                    if (max_conf is not None) and (
+                        pred_conf[j][predicted_index] > max_conf
+                    ):
                         continue
 
                     counter += 1
