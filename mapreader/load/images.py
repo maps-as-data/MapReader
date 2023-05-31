@@ -1143,7 +1143,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         else:
             parent_ids = [parent_id]
 
-        for parent_id in parent_ids:
+        for parent_id in tqdm(parent_ids):
             self._print_if_verbose(
                 f"\n[INFO] Calculating pixel stats for patches of image: {parent_id}", verbose
             )
@@ -1154,7 +1154,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             list_patches = self.parents[parent_id]["patches"]
 
-            for patch in tqdm(list_patches):
+            for patch in list_patches:
                 patch_data = self.patches[patch]
                 patch_keys = patch_data.keys()
                 img = Image.open(patch_data["image_path"])
@@ -1610,22 +1610,31 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
-        files = self._resolve_file_path(patch_paths, patch_file_ext)
+        patch_files = self._resolve_file_path(patch_paths, patch_file_ext)
 
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
             self.parents = {} #are these needed?
             self.patches = {} #are these needed?
 
-        for file in tqdm(files):
-            if not os.path.isfile(file):
-                print(f"[WARNING] File does not exist: {file}")
+        if parent_paths:
+            # Add parents
+            self.load_parents(
+                parent_paths=parent_paths,
+                parent_file_ext=parent_file_ext,
+                overwrite=False,
+                add_geo_info=add_geo_info,
+            )
+        
+        for patch_file in tqdm(patch_files):
+            if not os.path.isfile(patch_file):
+                print(f"[WARNING] File does not exist: {patch_file}")
                 continue
 
-            self._check_image_mode(file)
+            self._check_image_mode(patch_file)
 
             # patch ID is set to the basename
-            patch_id = os.path.basename(file)
+            patch_id = os.path.basename(patch_file)
 
             # Parent ID and border can be detected using patch_id
             try:
@@ -1639,20 +1648,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if not self.patches.get(patch_id, False):
                 self.patches[patch_id] = {}
             self.patches[patch_id]["parent_id"] = parent_id
-            self.patches[patch_id]["image_path"] = file
+            self.patches[patch_id]["image_path"] = patch_file
             self.patches[patch_id]["pixel_bounds"] = pixel_bounds
 
-        if parent_paths:
-            # Add parents
-            self.load_parents(
-                parent_paths=parent_paths,
-                parent_file_ext=parent_file_ext,
-                overwrite=False,
-                add_geo_info=add_geo_info,
-            )
             # Add patches to the parent
-            ## ---  fix instances of add patch to parent please --- please RW
-            ## self._add_patch_to_parent()
+            self._add_patch_to_parent(patch_id)
 
     @staticmethod
     def detect_parent_id_from_path(
