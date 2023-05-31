@@ -398,7 +398,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if key in missing_metadata:
                 continue
             else:
-                data_series = metadata_df[metadata_df["name"] == key].squeeze()
+                data_series = metadata_df[metadata_df[image_id_col] == key].squeeze()
                 for column, item in data_series.items():
                     try:
                         self.images[tree_level][key][column] = eval(item)
