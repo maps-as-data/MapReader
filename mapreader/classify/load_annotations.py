@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from glob import glob
-import matplotlib.pyplot as plt
 import os
-import pandas as pd
-import numpy as np
-from skimage import io
-from sklearn.model_selection import train_test_split
-from typing import Union, Optional, Dict, Callable
-from PIL import Image
 from decimal import Decimal
+from typing import Callable, Optional, Union
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from PIL import Image
+from sklearn.model_selection import train_test_split
+from torch import Tensor
+from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
+from torchvision.transforms import Compose
 
 from .datasets import PatchDataset
-from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
-from torch import Tensor
-from torchvision.transforms import Compose
 
 
 class AnnotationsLoader:

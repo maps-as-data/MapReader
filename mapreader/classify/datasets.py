@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+from typing import Callable, Dict, Optional, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
-
-from PIL import Image, ImageOps
-from typing import Optional, Dict, Callable, Tuple, Any, Union
-
 import torch
+from PIL import Image, ImageOps
 from torch.utils.data import Dataset
 from torchvision import transforms
 
@@ -484,7 +483,7 @@ class PatchContextDataset(PatchDataset):
                 self.transform1 = self._default_transform(transform1)
             else:
                 raise ValueError(
-                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                    '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
             self.transform1 = transform1
@@ -494,7 +493,7 @@ class PatchContextDataset(PatchDataset):
                 self.transform2 = self._default_transform(transform2)
             else:
                 raise ValueError(
-                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                    '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
             self.transform2 = transform2

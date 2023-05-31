@@ -2,31 +2,25 @@
 # -*- coding: utf-8 -*-
 
 import copy
-import joblib
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import random
 import socket
 import sys
 import time
-
 from datetime import datetime
-from typing import Union, List, Optional, Tuple, Dict, Any, Hashable, Iterable
+from typing import Any, Dict, Hashable, Iterable, List, Optional, Tuple, Union
 
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.metrics import roc_auc_score
-
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-from torch import optim
 import torch.nn as nn
-
-from torch.utils.data import DataLoader, Sampler
-
 import torchvision
-from torchvision import models
-
+from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
+from torch import optim
+from torch.utils.data import DataLoader, Sampler
 from torchinfo import summary
+from torchvision import models
 
 from .datasets import PatchDataset
 

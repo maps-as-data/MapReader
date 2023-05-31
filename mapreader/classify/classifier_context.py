@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .classifier import ClassifierContainer
-
 import copy
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import time
-import torchvision
 
 # from tqdm.autonotebook import tqdm
-from typing import Union, List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple, Union
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
+import torchvision
+
+from .classifier import ClassifierContainer
 
 
 class ClassifierContextContainer(ClassifierContainer):
@@ -553,7 +553,7 @@ Output will show batch number {num_batches}.'
             # assign learning rates
             i_count = 0
             for _, (name, params) in enumerate(self.model.named_parameters()):
-                if not sep_group_names[group] in name:
+                if sep_group_names[group] not in name:
                     continue
                 params2optimise.append({"params": params, "lr": list_lrs[i_count]})
                 i_count += 1
@@ -603,7 +603,7 @@ Output will show batch number {num_batches}.'
         self.model.eval()
 
         counter = 0
-        fig = plt.figure(figsize=figsize)
+        plt.figure(figsize=figsize)
         with torch.no_grad():
             for inputs1, inputs2, labels, label_indices in iter(
                 self.dataloaders[set_name]
