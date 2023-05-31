@@ -1,6 +1,8 @@
 Worked examples
 ================
 
+.. todo:: Explain these different use cases
+
 .. list-table::
    :widths: 25 25 25
    :header-rows: 0

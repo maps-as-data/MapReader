@@ -27,7 +27,7 @@ setuptools.setup(
         "pyproj>=3.2.0,<4.0.0",
         "azure-storage-blob>=12.9.0,<13.0.0",
         "aiohttp>=3.8.1,<4.0.0",
-        "Shapely>=1.8.0,<2.0.0",
+        "Shapely>=2.0.0,<3.0.0",
         "nest-asyncio>=1.5.1,<2.0.0",
         "scikit-image>=0.18.3",
         "scikit-learn>=1.0.1,<2.0.0",

@@ -1,7 +1,10 @@
 Download
 =========
 
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
+.. todo:: Add comment saying navigate in your terminal to your working directory and then open a notebook from there. Shift right click on a folder in windows to copy path name.
+.. todo:: Add instruction to create a new notebook.
+
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
@@ -28,7 +31,7 @@ SheetDownloader
 To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets. 
 Guidance on what this metadata ``json`` should contain can be found in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__.
 
-.. TODO: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
+.. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
 To set up your sheet downloader, you should first create a ``SheetDownloader`` instance, specifying a ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the URL for your XYZ tile layer).
 This is done using:
