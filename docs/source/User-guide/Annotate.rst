@@ -81,8 +81,8 @@ To prepare your annotations, you must specify a ``userID``, ``annotation_tasks_f
 e.g. following our 'rail_space' example from earlier:
 
 .. code-block:: python
-
-	  #EXAMPLE
+  
+  #EXAMPLE
     from mapreader.annotate.utils import prepare_annotation
 
     annotation = prepare_annotation(
