@@ -1493,7 +1493,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                             patch_height,
                             fc="none",
                             ec=border_color,
-                            lw=2,
+                            lw=1,
                             zorder=20,
                         )
                         ax.add_patch(rect)
