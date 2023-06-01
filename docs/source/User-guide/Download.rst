@@ -59,11 +59,12 @@ To help you visualise your metadata, the boundaries of the map sheets included i
 
 .. code-block:: python
 
-     my_ts.plot_all_metadata_on_map(add_id=True)
+     my_ts.plot_all_metadata_on_map()
 
 .. image:: ../figures/plot_metadata_on_map.png
      :width: 400px
      :align: center
+
 
 
 The ``add_id`` argument can be used to add the WFS ID numbers of your map sheets on the resulting plot. 
@@ -71,11 +72,11 @@ This can be helpful in identifying the map sheets you'd like to download.
 
 Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download map sheets using a number of methods:
 
-1. Any which are within or intersect/overlap with a polygon.
+**1. Any which are within or intersect/overlap with a polygon.
 2. Any which contain a set of given coordinates.
 3. Any which intersect with a line.
 4. By WFS ID numbers.
-5. By searching for a string within a metadata field.
+5. By searching for a string within a metadata field.**
 
 These methods can be used to either directly download maps, or to create a list of queries which can interacted with and downloaded subsequently.
 
@@ -427,3 +428,5 @@ Again, by default, these will result in the directory structure shown in downloa
 
 Downloader
 ----------
+
+TBC

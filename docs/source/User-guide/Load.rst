@@ -105,7 +105,7 @@ To patchify your maps, use:
 
     my_files.patchify_all()
 
-By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./patches_100_pixel`` (here, ``100`` represents the ``patch_size`` and ``pixel`` represents the method used to slice your parent images). 
+By default, this slices images into 100 x 100 pixel patches which are saved as ``.png`` files in a newly created directory called ``./patches_100_pixel`` (here, ``100`` represents the ``patch_size`` and ``pixel`` represents the method used to slice your parent images). 
 
 If you are following our reccommended directory structure, after patchifying, your directory should look like this:
 
@@ -162,7 +162,7 @@ e.g. to slice your maps into 500 x 500 pixel patches:
     #EXAMPLE
     my_files.patchify_all(patch_size=500)
 
-This will save your patches in a directory called ``patches_500_pixel``.
+This will save your patches as ``.png`` files in a directory called ``patches_500_pixel``.
 
 .. note:: You can combine the above options to change both the directory name in which patches are saved and patch size.
 
@@ -175,7 +175,7 @@ e.g. to slice your maps into 50 x 50 meter patches:
     #EXAMPLE
     my_files.patchify_all(method="meters", patch_size=50)
 
-This will save your patches in a directory called ``patches_50_meters``.
+This will save your patches as ``.png`` files in a directory called ``patches_50_meters``.
 As above, you can use the ``path_save`` argument to change where these patches are saved.
 
 .. admonition:: Advanced usage
@@ -187,16 +187,15 @@ As above, you can use the ``path_save`` argument to change where these patches a
     - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``.patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
     - ``rewrite`` - By default, this is set to ``False`` so that if your patches already exist they are not overwritten. Setting it to ``True`` (by specifying ``rewrite=True``) will mean already existing patches are recreated and overwritten.
 
-
 If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), use:
 
 .. code-block:: python
 
     my_files.save_patches_as_geotiffs()
 
-This will save each patch in your ``MapImages`` object as a geotiff in your patches directory.
+This will save each patch in your ``MapImages`` object as a ``.geotiff`` file in your patches directory.
 
-After patchifying, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
+After running the ``.patchify_all()`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
 To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
 
 .. code-block:: python
@@ -209,7 +208,8 @@ To view an iterable list of these, you can use the ``.list_parents()`` and ``.li
 
 Having these list saved as variables can be useful later on in the pipeline.
 
-To create dataframes from your ``MapImages`` objects, use:
+It can also be useful to create dataframes from your ``MapImages`` objects. 
+To do this, use:
 
 .. code-block:: python
 
@@ -228,6 +228,31 @@ or
     patch_df
 
 .. note:: These parent and patch dataframes **will not** automatically update so you will want to run this command again if you add new information into your ``MapImages`` object.
+
+At any point, you can also save these dataframes by passing the ``save`` argument to the ``.convert_images()`` method:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images(save=True)
+
+By default, this will save your parent and patch dataframes as ``parent_df.csv`` and ``patch_df.csv`` respectively.
+
+If instead, you'd like to save them as excel files, add ``save_format="excel"`` to your command:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images(save=True, save_format="excel")
+
+Alternatively, you can save your patch metadata in a georeferenced json (i.e. geojson) file. 
+To do this, use:
+
+.. code-block:: python
+
+    my_files.save_patches_to_geojson()
+
+By default, this will save all the metadata for your patches in a newly created ``patches.geojson`` file. 
+
+.. note:: The patch images are **not** saved within this file, only the metadata and patch coordinates.
 
 Visualise (optional)
 ---------------------
