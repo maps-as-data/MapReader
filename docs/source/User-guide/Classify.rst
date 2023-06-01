@@ -320,7 +320,9 @@ There are a number of options for the ``model`` argument:
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
 
-            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map) 
+            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+
+        .. note:: You will need to install the ``transformers`` python package to do this (``pip install transformers``).  
 
 Define criterion, optimizer and scheduler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

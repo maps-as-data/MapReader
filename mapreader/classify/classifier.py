@@ -1642,7 +1642,7 @@ Output will show batch number {num_batches}.'
                 _, preds = torch.max(outputs, 1)
 
                 # reverse the labels_map dict
-                label_index_dict = {v: k for k, v in self.labels_map}
+                label_index_dict = {v: k for k, v in self.labels_map.items()}
 
                 # go through images in batch
                 for j in range(len(preds)):

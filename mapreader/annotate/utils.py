@@ -527,7 +527,7 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=False,
+                index_col=0,
                 ignore_mismatch=True,
                 delimiter="\t",
                 tree_level=tree_level,
@@ -582,7 +582,7 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=False,
+                index_col=0,
                 ignore_mismatch=True,
                 delimiter="\t",
                 tree_level=tree_level,
@@ -659,7 +659,7 @@ def save_annotation(
 
     # Read an existing annotation file (for the same task and userID)
     try:
-        image_df = pd.read_csv(annot_file, sep="\t")
+        image_df = pd.read_csv(annot_file, sep="\t", index_col=0)
     except:
         image_df = pd.DataFrame(columns=["image_id", "image_path", "label"])
 
