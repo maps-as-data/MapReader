@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional, Union, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -86,8 +86,7 @@ class PatchDataset(Dataset):
         return_orig_image(idx)
             Retrieves the original image at the given index in the dataset.
         _default_transform(t_type, resize2)
-            Returns a dictionary containing the default image transformations
-            for the train and validation sets.
+            Returns a transforms.Compose containing the default image transformations for the train and validation sets.
 
         Raises
         ------
@@ -148,7 +147,7 @@ class PatchDataset(Dataset):
                 self.transform = self._default_transform(transform)
             else:
                 raise ValueError(
-                    f'[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
+                    '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
             self.transform = transform
@@ -164,7 +163,7 @@ class PatchDataset(Dataset):
         """
         return len(self.patch_df)
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> tuple:
+    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, str, int]:
         """
         Return the image, its label and the index of that label at the given index in the dataset.
 
@@ -175,9 +174,12 @@ class PatchDataset(Dataset):
 
         Returns
         -------
-        tuple
-            A tuple containing the transformed image, its label the index of that label (if
-            available). The label is "" and has index -1 if it is not present in the DataFrame.
+        Tuple[torch.Tensor, str, int]
+            A tuple containing the transformed image, its label the index of that label.
+
+        Notes
+        ------
+            The label is "" and has index -1 if it is not present in the DataFrame.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -247,23 +249,22 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
     def _default_transform(
         self,
         t_type: Optional[str] = "train",
-        resize: Optional[Union[int, tuple]] = (224, 224),
-    ) -> Dict:
+        resize: Optional[Union[int, Tuple[int, int]]] = (224, 224),
+    ) -> transforms.Compose:
         """
-        Returns a dictionary containing the default image transformations for
-        the train, test and validation sets.
+        Returns the default image transformations for the train, test and validation sets as a transforms.Compose.
 
         Parameters
         ----------
         t_type : str, optional
             The type of transformation to return. Either "train", "test" or "val".
             Default is "train".
-        resize2 : int or tuple, optional
+        resize2 : int or Tuple[int, int], optional
             The size in pixels to resize the image to. Default is (224, 224).
 
         Returns
         -------
-        dict
+        transforms.Compose
             A torchvision.transforms.Compose containing the default image transformations for the specified type.
 
         Notes
@@ -714,7 +715,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         plt.subplot(1, 2, 2)
         plt.show()
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> tuple:
+    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, str, int]:
         """
         Retrieves the patch image, the context image and the label at the
         given index in the dataset (``idx``).
@@ -726,11 +727,12 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
 
         Returns
         -------
-        tuple of form (torch.Tensor, torch.Tensor, label, label_index)
-            A tuple of three elements, where the first element is a tensor
-            containing the patch image, the second element is a tensor
-            containing the context image, and the third element is an integer
-            label.
+        Tuple(torch.Tensor, torch.Tensor, str, int)
+            A tuple containing the transformed image, the context image, the image label the index of that label.
+            
+        Notes
+        ------
+            The label is "" and has index -1 if it is not present in the DataFrame.
 
         """
         if torch.is_tensor(idx):

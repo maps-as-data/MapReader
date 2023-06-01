@@ -125,7 +125,7 @@ class ClassifierContainer:
                 "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``\."
             )
         if (
-            any(val == None for val in [model, dataloaders, labels_map])
+            any(val is None for val in [model, dataloaders, labels_map])
             and not load_path
         ):
             raise ValueError(
@@ -350,7 +350,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         elif scheduler_type.lower() == "onecyclelr":
             scheduler = optim.lr_scheduler.OneCycleLR(
                 self.optimizer,
-                **scheduler_param_dict,  # RW - Cannot use hthis with default scheduler_param_dict - need to update
+                **scheduler_param_dict,  # TODO: RW - Cannot use this with default scheduler_param_dict - need to update
             )
         else:
             raise NotImplementedError(
@@ -1431,7 +1431,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             input_size = 299
 
         else:
-            raise NotImplementedError("[ERROR] Invalid model name.")  # CHECK THIS
+            raise NotImplementedError("[ERROR] Invalid model name.")
 
         self.model = model_dw.to(self.device)
         self.input_size = input_size
@@ -1818,7 +1818,7 @@ Output will show batch number {num_batches}.'
         """Private function, setting color attributes on the object."""
         # color
         self.__color_lgrey = "\033[1;90m"
-        self.__color_grey = "\033[90m"  # broing information
+        self.__color_grey = "\033[90m"  # boring information
         self.__color_yellow = "\033[93m"  # FYI
         self.__color_orange = "\033[0;33m"  # Warning
 
