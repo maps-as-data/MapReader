@@ -456,7 +456,7 @@ To list these, use:
 
 .. code-block:: python
 
-    list(myclassifier.metrics.keys())
+    list(my_classifier.metrics.keys())
 
 .. todo:: Explain what these metrics are/mean
 
@@ -494,7 +494,7 @@ To see a sample of your predictions, use:
 
 .. code-block:: python
 
-    my_classifier.inference_sample_results(label="rail_space")
+    my_classifier.show_inference_sample_results(label="rail_space")
 
 .. image:: ../figures/inference_sample_results.png
     :width: 400px
@@ -543,3 +543,116 @@ e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AU
 .. code-block:: python
 
     my_classifier.metrics["epoch_rocauc_macro_test"]
+
+Saving your work
+------------------
+
+Each time you train your model, MapReader will save the best version of your model (that with the least loss) in the ``./models/`` directory.
+
+If you wouild like to explicitly save your work, use:
+
+.. code-block:: python
+
+    my_classifier.save("file_name.pkl")
+
+This will save both your ``ClassifierContainer()`` and your model as `pickle <https://docs.python.org/3/library/pickle.html>`__ files.
+
+e.g. : 
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_classifier.save("classifier.pkl")
+
+This will save your ``ClassifierContainer()`` as ``classifier.pkl`` and your model as ``model_classifier.pkl``.
+
+Infer (predict)
+----------------
+
+Once you are happy with your model's predictions, you can then use it to predict labels on the rest of your (un-annotated) patches.
+
+To do this, you will need to create a new dataset containing your patches:
+
+.. code-block:: python
+
+    from mapreader import PatchDataset
+
+    infer = PatchDataset("./patch_df.csv", delimiter="\t", transform="test")
+
+.. note:: You should have created this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance).
+
+The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
+See :ref:`this section<transforms>` for more information on transforms.
+
+You should then add this dataset to your ``ClassifierContainer()`` (``my_classifier``\):
+
+.. code-block:: python
+
+    my_classifier.load_dataset(infer, set_name="infer")
+
+This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute. 
+
+By default, the ``.load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler. 
+You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
+See :ref:`this section<sampler>` for more information on samplers.
+
+After loading your dataset, you can then simply run the ``.inference()`` method to infer the labels on the patches in your dataset:
+
+.. code-block:: python
+
+    my_classifier.inference(set_name="infer")
+
+As with the "test" dataset, to see a sample of your predictions, use: 
+
+.. code-block:: python
+
+    my_classifier.show_inference_sample_results(label="rail_space", set_name="infer")
+
+Add predictions to metadata and save
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To add your predictions to your patch metadata (saved in ``patch_df.csv``), you will need to add your predictions and confidence values to your ``infer`` dataset's dataframe. 
+
+This dataframe is saved as the datasets ``patch_df`` attribute.
+To view it, use:
+
+.. code-block:: python
+
+    infer.patch_df
+
+To add your predictions and confidence values to this dataframe use:
+
+.. code-block:: python 
+
+    import numpy as np
+
+    infer.patch_df['predicted_label'] = my_classifier.pred_label
+    infer.patch_df['pred'] = my_classifier.pred_label_indices
+    infer.patch_df['conf'] = np.array(my_classifier.pred_conf).max(axis=1)
+
+If you view your dataframe again (by running ``infer.patch_df`` as above), you will see your predictions and confidence values have been added as columns.
+
+From here, you can either save your results using:
+
+.. code-block:: python 
+
+    infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
+
+Or, you can use the ``MapImages`` object to create some visualisations of your results:
+
+.. code-block:: python
+
+    from mapreader import load_patches
+    
+    my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
+    
+    infer_df = infer.patch_df.reset_index(names="image_id") # ensure image_id is one of the columns
+    my_maps.add_metadata(infer_df, tree_level='patch') # add dataframe as metadata
+    my_maps.add_shape()
+
+    parent_list = my_maps.list_parents()
+    my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
+
+Refer to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance for further details on how these methods work.
+
+

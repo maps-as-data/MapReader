@@ -1740,6 +1740,23 @@ Output will show batch number {num_batches}.'
         num_workers: Optional[int] = 0,
         **kwargs,
     ) -> None:
+        """Creates a DataLoader from a PatchDataset and adds it to the ``dataloaders`` dictionary.
+
+        Parameters
+        ----------
+        dataset : PatchDataset
+            The dataset to add
+        set_name : str
+            The name to use for the dataset
+        batch_size : Optional[int], optional
+            The batch size to use when creating the DataLoader, by default 16
+        sampler : Optional[Union[Sampler, None]], optional
+            The sampler to use when creating the DataLoader, by default None
+        shuffle : Optional[bool], optional
+            Whether to shuffle the PatchDataset, by default False
+        num_workers : Optional[int], optional
+            The number of worker threads to use for loading data, by default 0.
+        """
         if sampler and shuffle:
             print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
 
