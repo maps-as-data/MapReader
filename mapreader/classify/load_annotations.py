@@ -454,8 +454,9 @@ class AnnotationsLoader:
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
 
-        for frac in [frac_train, frac_val, frac_test]:
-            frac = Decimal(str(frac))
+        frac_train = Decimal(str(frac_train))
+        frac_val = Decimal(str(frac_val))
+        frac_test = Decimal(str(frac_test))
 
         if sum([frac_train + frac_val + frac_test]) != 1:
             raise ValueError(
@@ -469,18 +470,19 @@ class AnnotationsLoader:
             self.annotations,
             labels,
             stratify=labels,
-            test_size=(1.0 - frac_train),
+            test_size=float(1 - frac_train),
             random_state=random_state,
         )
 
         if frac_test != 0:
             # Split the temp dataframe into val and test dataframes.
-            relative_frac_test = frac_test / (frac_val + frac_test)
+            relative_frac_test = Decimal(frac_test / (frac_val + frac_test))
+            relative_frac_test = relative_frac_test.quantize(Decimal("0.001"))
             df_val, df_test, _, _ = train_test_split(
                 df_temp,
                 labels_temp,
                 stratify=labels_temp,
-                test_size=relative_frac_test,
+                test_size=float(relative_frac_test),
                 random_state=random_state,
             )
             assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
