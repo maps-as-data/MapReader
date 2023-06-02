@@ -687,6 +687,6 @@ def save_annotation(
         image_df.to_csv(annot_file, mode="w", sep="\t")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")
-        print(f"[INFO] Total number of annotations: {len(image_df)}")
+        print(f"[INFO] Total number of saved annotations: {len(image_df)}")
     else:
         print("[INFO] No annotations to save!")
