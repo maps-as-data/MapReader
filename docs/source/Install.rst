@@ -64,7 +64,7 @@ For example, if you would like to use venv, open your terminal and use the follo
    
    .. code-block:: bash
       
-      source mr_py38/bin/activate
+      source mapreader/bin/activate
 
 Step 2: Install MapReader
 --------------------------
