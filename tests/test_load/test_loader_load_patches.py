@@ -39,17 +39,17 @@ def empty_dir(tmp_path):
 def test_no_parents(dirs):
     _, patch_path = dirs
     my_files = load_patches(patch_path)
-    assert len(my_files) == 3
+    assert len(my_files) == 5 #file1.png and file2.png will be added as parents (w/ no file path)
     my_files = load_patches(f"{patch_path}/")
-    assert len(my_files) == 3
+    assert len(my_files) == 5
     my_files = load_patches(f"{patch_path}/*")
-    assert len(my_files) == 3
+    assert len(my_files) == 5
     my_files = load_patches(f"{patch_path}/*png")
-    assert len(my_files) == 3
+    assert len(my_files) == 5
     my_files = load_patches(patch_path, patch_file_ext="png")
-    assert len(my_files) == 3
+    assert len(my_files) == 5
     my_files = load_patches(f"{patch_path}/*", patch_file_ext="png")
-    assert len(my_files) == 3
+    assert len(my_files) == 5
 
 #load patches and parents
 

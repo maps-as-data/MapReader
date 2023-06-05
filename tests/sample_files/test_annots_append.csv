@@ -1,0 +1,3 @@
+	image_id	image_path	label
+0	patch-0-0-3000-3000-#cropped_74488689#.png	/MapReader/tests/sample_files/cropped_74488689.png	new
+1	patch-0-0-4000-3000-#cropped_74488689g#.png	/MapReader/tests/sample_files/cropped_74488689.png	new

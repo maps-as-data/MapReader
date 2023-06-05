@@ -48,6 +48,7 @@ setuptools.setup(
         "simplekml>=1.3.6,<2.0.0",
         "versioneer>=0.28",
         "tqdm",
+        "torchinfo",
 	    "openpyxl",
     ],
     
