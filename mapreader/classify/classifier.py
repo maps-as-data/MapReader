@@ -422,7 +422,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 "mean_squared_error",
                 "mean squared error",
             ]:
-                criterion == nn.MSELoss()
+                criterion = nn.MSELoss()
             else:
                 raise NotImplementedError(
                     '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
