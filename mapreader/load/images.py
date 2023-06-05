@@ -1247,6 +1247,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
         patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
 
+        parent_df.index.set_names("image_id", inplace=True)
+        patch_df.index.set_names("image_id", inplace=True)
+
         if save:
 
             if save_format == "csv":
