@@ -18,5 +18,5 @@ tasks:
 # ---------------------------------------
 paths:
   task_mnist:
-    parent_paths: "../../../mapreader/datasets/small_mnist/*.png"
+    parent_paths: "./small_mnist/*.png"
     annot_dir: "./annotations_mnist"

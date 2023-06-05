@@ -18,6 +18,6 @@ tasks:
 # ---------------------------------------
 paths:
   task_test_phenotype:
-    patch_paths: "./dataset/open_access_plant/slice_50_50/*PNG"
+    patch_paths: "./patches_50_pixel/*png"
     parent_paths: "./dataset/open_access_plant/*png"
     annot_dir: "./annotations_phenotype_open_access"
