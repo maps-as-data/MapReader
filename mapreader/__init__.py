@@ -6,13 +6,12 @@ from mapreader.download.sheet_downloader import SheetDownloader
 from mapreader.download.downloader import Downloader
 from mapreader.download.downloader_utils import create_polygon_from_latlons, create_line_from_latlons
 
-from mapreader.annotate.load_annotate import loadAnnotations
-
-from mapreader.learn.datasets import patchTorchDataset
-from mapreader.learn.datasets import patchContextDataset
-from mapreader.learn.classifier import classifier
-from mapreader.learn.classifier_context import classifierContext
-from mapreader.learn import custom_models
+from mapreader.classify.load_annotations import AnnotationsLoader
+from mapreader.classify.datasets import PatchDataset
+from mapreader.classify.datasets import PatchContextDataset
+from mapreader.classify.classifier import ClassifierContainer
+from mapreader.classify.classifier_context import ClassifierContextContainer
+from mapreader.classify import custom_models
 
 from mapreader.process import process
 

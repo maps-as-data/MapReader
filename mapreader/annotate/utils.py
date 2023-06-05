@@ -223,7 +223,7 @@ def prepare_data(
         # annotate all patches in the pandas dataframe
         pass
 
-    tar_param = "mean_pixel_RGB"
+    tar_param = "mean_pixel_R"
     if tar_param in df.columns:
         try:
             pd.options.mode.chained_assignment = None
@@ -527,21 +527,15 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=-1,
-                delimiter=",",
+                index_col=0,
+                ignore_mismatch=True,
+                delimiter="\t",
                 tree_level=tree_level,
             )
 
-        calc_mean = calc_std = False
+        calc_mean = True
+        calc_std = False
         # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
-        if (
-            sortby == "mean"
-            or isinstance(min_alpha_channel, float)
-            or isinstance(min_mean_pixel, float)
-            or isinstance(max_mean_pixel, float)
-        ):
-            calc_mean = True
-
         if isinstance(min_std_pixel, float) or isinstance(max_std_pixel, float):
             calc_std = True
 
@@ -549,38 +543,38 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_mean=calc_mean, calc_std=calc_std)
 
         # convert images to dataframe
-        _, patch_df = mymaps.convertImages()
+        _, patch_df = mymaps.convert_images()
 
         if sortby == "mean":
-            patch_df.sort_values("mean_pixel_RGB", inplace=True)
+            patch_df.sort_values("mean_pixel_R", inplace=True)
 
         if isinstance(min_alpha_channel, float):
             if "mean_pixel_A" in patch_df.columns:
                 patch_df = patch_df[patch_df["mean_pixel_A"] >= min_alpha_channel]
 
         if isinstance(min_mean_pixel, float):
-            if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["mean_pixel_RGB"] >= min_mean_pixel]
+            if "mean_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_R"] >= min_mean_pixel]
 
         if isinstance(max_mean_pixel, float):
-            if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["mean_pixel_RGB"] <= max_mean_pixel]
+            if "mean_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_R"] <= max_mean_pixel]
 
         if isinstance(min_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] >= min_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] >= min_std_pixel]
 
         if isinstance(max_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] <= max_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] <= max_std_pixel]
 
         if isinstance(min_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] >= min_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] >= min_std_pixel]
 
         if isinstance(max_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] <= max_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] <= max_std_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:
@@ -588,12 +582,13 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=-1,
-                delimiter=",",
+                index_col=0,
+                ignore_mismatch=True,
+                delimiter="\t",
                 tree_level=tree_level,
             )
         # convert images to dataframe
-        patch_df, _ = mymaps.convertImages()
+        patch_df, _ = mymaps.convert_images()
         col_names = ["image_path"]
 
     # prepare data for annotation
@@ -664,9 +659,9 @@ def save_annotation(
 
     # Read an existing annotation file (for the same task and userID)
     try:
-        image_df = pd.read_csv(annot_file)
+        image_df = pd.read_csv(annot_file, sep="\t", index_col=0)
     except:
-        image_df = pd.DataFrame(columns=["image_id", "label"])
+        image_df = pd.DataFrame(columns=["image_id", "image_path", "label"])
 
     new_labels = 0
     newly_annotated = 0
@@ -674,12 +669,13 @@ def save_annotation(
         if annotation.tasks[i].value is not None:
             newly_annotated += 1
             if (
-                not annotation.tasks[i].output[0]
-                in image_df["image_id"].values.tolist()
+                annotation.tasks[i].output[0]
+                not in image_df["image_id"].values.tolist()
             ):
                 image_df = image_df.append(
                     {
                         "image_id": annotation.tasks[i].output[0],
+                        "image_path": annotation.tasks[i].output[1],
                         "label": annotation.tasks[i].value,
                     },
                     ignore_index=True,
@@ -687,10 +683,10 @@ def save_annotation(
                 new_labels += 1
 
     if len(image_df) > 0:
-        image_df = image_df.set_index("image_id")
-        image_df.to_csv(annot_file, mode="w")
+        #image_df = image_df.set_index("image_id")
+        image_df.to_csv(annot_file, mode="w", sep="\t")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")
-        print(f"[INFO] Total number of annotations: {len(image_df)}")
+        print(f"[INFO] Total number of saved annotations: {len(image_df)}")
     else:
         print("[INFO] No annotations to save!")
