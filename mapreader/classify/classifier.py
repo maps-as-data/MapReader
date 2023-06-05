@@ -428,9 +428,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                     '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
                 )
 
-        print(f'[INFO] Using "{criterion}" as criterion.')
+            print(f'[INFO] Using "{criterion}" as criterion.')
 
-        if not isinstance(criterion, nn.modules.loss._Loss):
+        elif not isinstance(criterion, nn.modules.loss._Loss):
             raise ValueError(
                 '[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
             )
