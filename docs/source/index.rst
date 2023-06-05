@@ -16,7 +16,7 @@ MapReader
    Install
    Input-guidance
    User-guide/User-guide
-   Worked-examples
+   Worked-examples/Worked-examples
    api/index
    Contribution-guide/Contribution-guide
    Developers-guide
