@@ -168,7 +168,7 @@ These polygons can be created using MapReader's ``create_polygon_from_latlons()`
 
 .. code-block:: python
 
-     from mapreader.download.downloader_utils import create_polygon_from_latlons
+     from mapreader import create_polygon_from_latlons
 
      my_polygon = create_polygon_from_latlons(min_lat, min_lon, max_lat, max_lon)
 
@@ -221,7 +221,7 @@ Again, by default, this will result in the directory structure shown in download
 
 .. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
 
-2. Finding map sheets which contain a set of coordinates.
+1. Finding map sheets which contain a set of coordinates.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``.query_map_sheets_by_coordinates()`` and ``download_map_sheets_by_coordinates()`` methods can be used find and download map sheets which contain a set of coordinates.
@@ -278,7 +278,7 @@ These lines can be created using MapReader's ``create_line_from_latlons()`` func
 
 .. code-block:: python
 
-     from mapreader.download.downloader_utils import create_line_from_latlons
+     from mapreader import create_line_from_latlons
 
      my_line = create_line_from_latlons((lat1, lon1), (lat2, lon2))
 
@@ -366,7 +366,7 @@ Again, by default, these will result in the directory structure shown in downloa
 
 .. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
 
-1. Finding map sheets by searching for a string in their metadata.
+5. Finding map sheets by searching for a string in their metadata.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``.query_map_sheets_by_string()`` and ``download_map_sheets_by_string()`` methods can be used find and download map sheets by searching for a string in their metadata.
@@ -385,7 +385,7 @@ e.g. :
 .. code-block:: python
 
      #EXAMPLE
-     my_ts.query_map_sheets_by_string("*shire")
+     my_ts.query_map_sheets_by_string("n?don")
 
 .. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
 
