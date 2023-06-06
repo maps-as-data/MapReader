@@ -27,10 +27,6 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install build --user
-    # - name: Create build version number for development builds
-    #   if: ${{ ! startsWith(github.ref, 'refs/tags') }}
-    #   run: |
-    #     poetry version `poetry version -s``echo -alpha.`${{ github.run_number }}
     - name: Build a binary wheel and a source tarball
       run: |
         python3 -m build --sdist --wheel --outdir dist/
