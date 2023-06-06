@@ -63,7 +63,7 @@ napoleon_include_private_with_doc = True
 napoleon_include_special_with_doc = True
 
 # -- todo --
-todo_include_todos=True
+todo_include_todos=False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
