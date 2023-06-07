@@ -2,9 +2,11 @@
 name: Publish Tagged Python 🐍 distributions 📦 to PyPI
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - v*
+
 
 jobs:
   build-and-publish:
