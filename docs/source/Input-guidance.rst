@@ -11,19 +11,25 @@ Input options
 The MapReader pipeline is explained in detail `here <https://mapreader.readthedocs.io/en/latest/About.html>`__.
 The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
-Option 1 - If you want to download map sheets from a TileServer
+Option 1 - If the map(s) you want have been georeferenced and made available via a Tile Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you want to download maps from a TileServer using MapReaders ``Download`` subpackage, you will need to begin with the 'Download' task. 
+Some GLAM institions or other services make digitised, georeferenced maps available via tile servers, for example as raster (XYZ, or 'slippy map') tiles.
+
+Instructions for accessing tile layers from one example collection is below:
+
+- National Library of Scotland tile layers
+
+If you want to download maps from a TileServer using MapReader's ``Download`` subpackage, you will need to begin with the 'Download' task. 
 For this, you will need:
 
 * A ``json`` file containing metadata for each map sheet you would like to query/download. 
 * The URL of the XYZ tile layer which you would like to access.
 
-At minimum, for each map sheet, your ``json`` file should contain information on:
+At a minimum, for each map sheet, your ``json`` file should contain information on:
 
-- the name and URL of the sheet
-- the geometry of the sheet (i.e. its coordinates)
+- the name and URL of an individual sheet that is contained in the composite layer
+- the geometry of the sheet (i.e. its coordinates), so that, where applicable, individual sheets can be isolated from the whole layer
 - the coordinate reference system (CRS) used
 
 These should be saved in a format that looks something like this:
@@ -49,6 +55,7 @@ These should be saved in a format that looks something like this:
             },
     }
 
+.. Check these links are still valid
 Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`_ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_, are provided in ``MapReader/worked_examples/persistent_data``.
 
 Option 2 - If your files are already saved locally
@@ -64,6 +71,8 @@ If you would like to work with georeferenced maps, you will need either:
 Alternatively, if you would like to work with non-georeferenced maps/images, you will need:
 
 * Your images saved as standard image files (e.g. JPEG, PNG or TIFF).
+
+.. note:: It is possible to use non-georeferenced maps in MapReader, however none of the functionality around plotting patches based on geospatial coordinates will be possible. In this case, patches can be analyzed as regions within a map sheet, where the sheet itself may have some geospatial information associated with it (e.g. the geospatial coordinates for its center point, or the place name in its title).
 
 Recommended directory structure
 --------------------------------
@@ -98,15 +107,17 @@ Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), 
 
 .. note:: Your map images should be stored in a flat directory. They **cannot be nested** (e.g. if you have states within a nation, or some other hierarchy or division).
 
-.. todo:: Katie to add comment about user needing to have maps accessible either in cloud storage (Azure, etc.) or locally.
+.. note:: Additionally, map images should be available locally or you should set up access via cloud storage. If you are working with a very large corpus of maps, you should consider running MapReader in a Virtual Machine with adequate storage.
 
 Preparing your metadata
 ------------------------
 
 MapReader uses the file names of your map images as unique identifiers (``image_id`` s).
-Therefore, if you would like to associate metadata to your map images, then, **at minimum**, your metadata must contain a column/header named ``image_id`` or ``name`` whose contents is the file names of your map images.
+Therefore, if you would like to associate metadata to your map images, then, **at minimum**, your metadata must contain a column/header named ``image_id`` or ``name`` whose content is the file name of each map image.
 
 To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `pandas readable file format <https://pandas.pydata.org/>`_.
+
+.. note:: Many map collections do not have item-level metadata, however even the minimal requirements here (a filename, geospatial coordinates, and CRS) will suffice for using MapReader. It is always a good idea to talk to the curators of the map collections you wish to use with MapReader to see if there are metadata files that can be shared for research purposes.
 
 
 Option 1 - Using a ``csv``, ``xls`` or ``xlsx`` file
@@ -132,6 +143,8 @@ If you are loading metadata from a ``csv``, ``xls`` or ``xlsx`` file, your file 
 
 Your file can contain as many columns/rows as you like, so long as it contains at least one named ``image_id`` or ``name``.
 
+.. Add comment about nature of coordinates as supplied by NLS vs what they might be for other collections
+
 Option 2 - Loading metadata from other file formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -143,4 +156,26 @@ To do this, you will need to use python to:
 2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
 3. Pass your dataframe to MapReader.
 
-Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not reccomended.
+Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary. A conversation with the collection curator is always a good idea to check what formats metadata may already be available in/or easily made available in using existing workflows.
+
+Accessing Maps via TileServers
+------------------------------
+
+National Library of Scotland
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to bring in any other georeferenced layers from the National Library of Scotland into MapReader. Many of these layers have links to WMTS and XYZ URLs, which can be easily found on the NLS website's georeferencing layers list. To do this, you can create a TileServer object and specify the metadata_path (the path to your metadata.json file) and the download_url (the WMTS or XYZ URL for your tileset).
+
+For example, _`on this page the NLS lists all their georeferenced tilesets <https://maps.nls.uk/guides/georeferencing/layers-list/>`_ with links. If we wanted to use the "Ordnance Survey - 10 mile, General, 1955 - 1:633,600", we can find its XYZ link on that page: https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png. Inserted into the script, it would look something like this:
+
+.. code-block:: python
+from mapreader import TileServer
+
+my_ts = TileServer(
+    metadata_path="path/to/metadata.json",
+    download_url="https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png",
+)
+
+More information about using NLS georeferenced layers _`is available here <https://maps.nls.uk/guides/georeferencing/layers-urls/>`_, including details about accessing metadata for each layer. Please note the Re-use terms for each layer, as these vary.
+
+
