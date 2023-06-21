@@ -1431,7 +1431,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             input_size = 299
 
         else:
-            raise NotImplementedError("[ERROR] Invalid model name.")
+            raise NotImplementedError("[ERROR] Invalid model name. Try loading your model directly and this as the `model` argument instead.")
 
         self.model = model_dw.to(self.device)
         self.input_size = input_size
