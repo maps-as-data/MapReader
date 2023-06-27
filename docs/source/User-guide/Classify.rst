@@ -308,9 +308,10 @@ There are a number of options for the ``model`` argument:
 
             If you use this option, your optimizer, scheduler and criterion will be loaded from last time.       
 
-    **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" instructions to load it and then pass this as the ``model`` argument.**
+    **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" or "Use in timm" instructions to load it and then pass this as the ``model`` argument.**
 
-        e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__. To load it:
+        e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__. 
+        It can be loaded using the `transformers <https://github.com/huggingface/transformers>`__ library:
 
         .. code-block:: python
 
@@ -322,7 +323,22 @@ There are a number of options for the ``model`` argument:
 
             my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
 
-        .. note:: You will need to install the ``transformers`` python package to do this (``pip install transformers``).  
+        .. note:: You will need to install the `transformers <https://github.com/huggingface/transformers>`__ library to do this (``pip install transformers``).  
+
+        e.g. `This model <https://huggingface.co/timm/resnest101e.in1k>`__ is an example of one which uses the `timm <https://huggingface.co/docs/timm/index>`__ library. 
+        It can be loaded as follows:
+
+        .. code-block:: python
+
+            #EXAMPLE
+            import timm
+
+            my_model = timm.create_model("hf_hub:timm/resnest101e.in1k", pretrained=True, num_classes=len(annotated_images.labels_map))
+
+            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+
+        .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).  
+
 
 Define criterion, optimizer and scheduler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
