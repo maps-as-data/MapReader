@@ -1,9 +1,7 @@
 from mapreader import AnnotationsLoader, ClassifierContainer
 from mapreader.classify.datasets import PatchDataset
 import pytest
-import pathlib
 from pathlib import Path
-import pandas as pd
 import numpy as np
 from torchvision import models
 import torch
@@ -26,20 +24,42 @@ def load_classifier(sample_dir):
     classifier = ClassifierContainer(None, None, None, load_path=f"{sample_dir}/test.pkl")
     return classifier
 
-def test_init_resnet18(inputs, sample_dir):
+#test loading model using model name as string
+
+def test_init_models_string(inputs):
     annots, dataloaders = inputs
-    classifier = ClassifierContainer("resnet18", dataloaders=dataloaders, labels_map=annots.labels_map) #resnet18 as str
-    assert isinstance(classifier.model, models.ResNet)
-    
+    for model_info in [
+        ["resnet18", models.ResNet],
+        ["alexnet", models.AlexNet],
+        ["vgg11", models.VGG], 
+        ["squeezenet", models.SqueezeNet],
+        ["densenet121", models.DenseNet],
+        ["inception", models.Inception3],
+    ]:
+        model, model_type = model_info
+        assert isinstance(model, model_type) # sanity check
+        classifier = ClassifierContainer(model, dataloaders=dataloaders, labels_map=annots.labels_map)
+        assert isinstance(classifier.model, model_type)
+
+#test loading model using torch load
+
+def test_init_resnet18_torch(inputs):
+    annots, dataloaders = inputs
     my_model = models.resnet18(pretrained=True)
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
     classifier = ClassifierContainer(my_model, dataloaders, annots.labels_map) #resnet18 as nn.Module
     assert isinstance(classifier.model, models.ResNet)
 
+#test loading model from pickle file using torch load
+
+def test_init_resnet18_pickle(inputs, sample_dir):
+    annots, dataloaders = inputs
     my_model = torch.load(f"{sample_dir}/model_test.pkl")
     classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map) #resnet18 as pkl (from sample files)
     assert isinstance(classifier.model, models.ResNet)
+
+#test loading object from pickle file
 
 def test_init_load(inputs, load_classifier):
     annots, dataloaders = inputs
@@ -124,4 +144,4 @@ def test_scheduler_errors(load_classifier):
     with pytest.raises(NotImplementedError, match="can only be"):
         classifier.initialize_scheduler("a fake scheduler type")
 
-#cant test train/infer due to fake file paths
+#dont test train/infer here due to fake file paths
