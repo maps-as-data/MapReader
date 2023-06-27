@@ -3,10 +3,9 @@ import os
 from typing import Union, Optional
 from shapely.geometry import Polygon, LineString, Point, shape
 from shapely.ops import unary_union
-from .data_structures import Coordinate, GridBoundingBox
 from .tile_loading import TileDownloader, DEFAULT_TEMP_FOLDER
 from .tile_merging import TileMerger
-from .downloader_utils import get_coordinate_from_index, get_grid_bb_from_polygon, get_polygon_from_grid_bb
+from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
 import re
 import matplotlib.pyplot as plt
 # import cartopy.crs as ccrs - would be good to get this fixed (i think by conda package)
@@ -15,6 +14,7 @@ import pandas as pd
 import shutil
 from functools import reduce
 from pyproj.crs import CRS
+import matplotlib.image as mpimg
 
 
 
@@ -474,9 +474,14 @@ class SheetDownloader:
         map_name = str("map_" + feature["properties"]["IMAGE"])        
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
-            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
-            return True
+            try:
+                mpimg.imread(f"{path_save}{map_name}.png")
+                print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+                return True
+            except OSError:
+                return False
         return False
+            
 
     def _download_map(self, feature: dict) -> bool:
         """
@@ -504,14 +509,19 @@ class SheetDownloader:
 
     def _save_metadata(
         self, 
-        feature: dict
-    ) -> list:
+        feature: dict,
+        out_filepath: str,
+    ) -> None:
         """
-        Creates list of selected metadata items.
+        Creates list of selected metadata items and saves to a csv file.
+        If file exists, metadata list is appended.
 
         Parameters
         ----------
         feature : dict
+            The feature for which to extract the metadata from
+        out_filepath : str
+            The path to save metadata csv.
 
         Returns
         -------
@@ -535,25 +545,20 @@ class SheetDownloader:
 
         crs = self.crs
 
-        return [map_name, map_url, coords, crs, published_date, grid_bb]
-
-    def _create_metadata_df(self, metadata_to_save: list, out_filepath) -> None:
-        """
-        Creates metadata datframe from list of ``metadata_to_save`` and saves as csv.
-
-        Parameters
-        ----------
-        metadata_to_save : list
-            List of metadata to save
-        out_filepath : _type_
-            File path where metadata csv will be saved.
-        """
-        metadata_df = pd.DataFrame(
+        metadata_to_save = [map_name, map_url, coords, crs, published_date, grid_bb]
+        new_metadata_df = pd.DataFrame(
             metadata_to_save,
-            columns=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
-        )
-        exists = True if os.path.exists(out_filepath) else False
-        metadata_df.to_csv(out_filepath, sep="\t", mode="a", header=not exists)
+            index=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
+        ).T
+        
+        if os.path.exists(out_filepath):
+            existing_metadata_df = pd.read_csv(out_filepath, sep="\t", index_col=0)
+            metadata_df = pd.concat([existing_metadata_df, new_metadata_df], ignore_index=True)
+            metadata_df.drop_duplicates(subset=["grid_bb"], keep="first", inplace=True)
+        else: 
+            metadata_df = new_metadata_df
+        
+        metadata_df.to_csv(out_filepath, sep="\t")
 
     def _download_map_sheets(self, features: list, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False):
         """Download map sheets from a list of features.
@@ -570,17 +575,14 @@ class SheetDownloader:
             Whether to overwrite existing maps, by default ``False``.
         """
 
-        metadata_to_save = []
         for feature in features:
             if not overwrite:
                 if self._check_map_sheet_exists(feature):
                     continue
             success = self._download_map(feature)
             if success:
-                metadata_to_save.append(self._save_metadata(feature))
-
-        metadata_path = f"{path_save}/{metadata_fname}"
-        self._create_metadata_df(metadata_to_save, metadata_path)
+                metadata_path = f"{path_save}/{metadata_fname}"
+                self._save_metadata(feature, metadata_path)
 
     def download_all_map_sheets(
         self, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False,
@@ -604,7 +606,7 @@ class SheetDownloader:
         self._initialise_merger(path_save)
 
         features = self.features
-        self._download_map_sheets(features, path_save, metadata_fname)
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_wfs_ids(
         self,
