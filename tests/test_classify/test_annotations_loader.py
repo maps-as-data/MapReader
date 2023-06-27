@@ -27,6 +27,7 @@ def test_load_csv(load_annots, sample_dir):
     assert annots.unique_labels == ["stuff", "nothing", "new"]
     assert annots.labels_map == {0: 'stuff', 1: 'nothing', 2: 'new'}
 
+@pytest.mark.dependency(name="load_annots_df", scope="session")
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
     df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep="\t", index_col=0)

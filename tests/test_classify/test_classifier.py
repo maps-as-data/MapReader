@@ -1,14 +1,18 @@
-from mapreader import AnnotationsLoader, ClassifierContainer
-from mapreader.classify.datasets import PatchDataset
-import timm
-import pytest
+import os
 from pathlib import Path
+
 import numpy as np
-from torchvision import models
+import pandas as pd
+import pytest
+import timm
 import torch
 import transformers
+from torchvision import models
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification
-import os
+
+from mapreader import AnnotationsLoader, ClassifierContainer
+from mapreader.classify.datasets import PatchDataset
+
 
 @pytest.fixture
 def sample_dir():
@@ -23,13 +27,24 @@ def inputs(sample_dir):
     return annots, dataloaders
 
 @pytest.fixture
+def infer_inputs(sample_dir):
+    infer_dict = {
+            "image_id":["cropped_74488689.png"],
+            "image_path":[f"{sample_dir}/cropped_74488689.png"]
+            }
+    infer_df = pd.DataFrame.from_dict(infer_dict, orient="columns")
+    infer = PatchDataset(infer_df, transform="val")
+    return infer
+
+@pytest.fixture
 def load_classifier(sample_dir):
     classifier = ClassifierContainer(None, None, None, load_path=f"{sample_dir}/test.pkl")
     return classifier
 
 #test loading model using model name as string
 
-def test_init_models_string(inputs):
+@pytest.mark.dependency(name="models_by_string", scope="session")
+def test_init_models_string(inputs, infer_inputs):
     annots, dataloaders = inputs
     for model2test in [
         ["resnet18", models.ResNet],
@@ -70,6 +85,7 @@ def test_init_resnet18_pickle(inputs, sample_dir):
 
 #test loading model from hugging face
 
+@pytest.mark.dependency(name="hf_models", scope="session")
 def test_init_resnet18_hf(inputs):
     annots, dataloaders = inputs
     AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
@@ -88,6 +104,7 @@ def test_init_resnet18_timm(inputs):
     classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map)
     assert isinstance(classifier.model, timm.models.ResNet)
 
+@pytest.mark.dependency(name="timm_models", scope="session")
 def test_init_models_timm(inputs):
     annots, dataloaders = inputs
     for model2test in [
@@ -190,4 +207,56 @@ def test_scheduler_errors(load_classifier):
     with pytest.raises(NotImplementedError, match="can only be"):
         classifier.initialize_scheduler("a fake scheduler type")
 
-#dont test train/infer here due to fake file paths
+#dont test train here due to fake file paths
+
+#test inference w/ various models and model-types
+
+@pytest.mark.dependency(depends=["models_by_string"], scope="session")
+def test_infer_models_by_string(inputs, infer_inputs):
+    annots, dataloaders = inputs
+    for model in [
+        "resnet18", 
+        "alexnet", 
+        "vgg11", 
+        "squeezenet1_0", 
+        "densenet121", 
+        "inception_v3"
+    ]:
+        classifier = ClassifierContainer(model, dataloaders=dataloaders, labels_map=annots.labels_map)
+        classifier.add_criterion()
+        classifier.initialize_optimizer()
+        classifier.initialize_scheduler()
+        classifier.load_dataset(infer_inputs, set_name="infer")
+        classifier.inference("infer")
+
+@pytest.mark.dependency(depends=["hf_models"], scope="session")
+def test_infer_hf_models(inputs, infer_inputs):
+    annots, dataloaders = inputs
+    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
+    classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map)
+    classifier.add_criterion()
+    classifier.initialize_optimizer()
+    classifier.initialize_scheduler()
+    classifier.load_dataset(infer_inputs, set_name="infer")
+    classifier.inference("infer")
+
+@pytest.mark.dependency(depends=["timm_models"], scope="session")
+def test_infer_timm_models(inputs, infer_inputs):
+    annots, dataloaders = inputs
+    for model in [
+        "resnest50d_4s2x40d", 
+        "resnest101e",
+        "swsl_resnext101_32x8d", 
+        "resnet152", 
+        "tf_efficientnet_b3_ns",
+        "swin_base_patch4_window7_224",
+        "vit_base_patch16_224",
+    ]: #these are models from 2021 paper
+        my_model = timm.create_model(model, pretrained=True, num_classes=len(annots.labels_map))
+        classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map)
+        classifier.add_criterion()
+        classifier.initialize_optimizer()
+        classifier.initialize_scheduler()
+        classifier.load_dataset(infer_inputs, set_name="infer")
+        classifier.inference("infer")
