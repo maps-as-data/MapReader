@@ -12,7 +12,7 @@ import os
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent / "sample_files"
+    return Path(__file__).resolve().parent.parent / "sample_files"
 
 @pytest.fixture
 @pytest.mark.dependency(depends=["load_annots_csv", "dataloaders"], scope="session")
@@ -35,14 +35,18 @@ def test_init_models_string(inputs):
         ["resnet18", models.ResNet],
         ["alexnet", models.AlexNet],
         ["vgg11", models.VGG], 
-        ["squeezenet", models.SqueezeNet],
+        ["squeezenet1_0", models.SqueezeNet],
         ["densenet121", models.DenseNet],
-        ["inception", models.Inception3],
+        ["inception_v3", models.Inception3],
     ]:
         model, model_type = model2test
-        assert isinstance(model, model_type) # sanity check
         classifier = ClassifierContainer(model, dataloaders=dataloaders, labels_map=annots.labels_map)
         assert isinstance(classifier.model, model_type)
+
+def test_init_models_string_errors(inputs):
+    annots, dataloaders = inputs
+    with pytest.raises(NotImplementedError, match="Invalid model name"):
+        ClassifierContainer("resnext101_32x8d", dataloaders=dataloaders, labels_map=annots.labels_map)
 
 #test loading model (e.g. resnet18) using torch load
 
