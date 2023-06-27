@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install mapreader
+          python -m pip install mapreader[dev]
 
       - name: Install Tools
         run: |
