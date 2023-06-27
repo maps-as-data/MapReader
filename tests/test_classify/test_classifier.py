@@ -1,10 +1,13 @@
 from mapreader import AnnotationsLoader, ClassifierContainer
 from mapreader.classify.datasets import PatchDataset
+import timm
 import pytest
 from pathlib import Path
 import numpy as np
 from torchvision import models
 import torch
+import transformers
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 import os
 
 @pytest.fixture
@@ -28,7 +31,7 @@ def load_classifier(sample_dir):
 
 def test_init_models_string(inputs):
     annots, dataloaders = inputs
-    for model_info in [
+    for model2test in [
         ["resnet18", models.ResNet],
         ["alexnet", models.AlexNet],
         ["vgg11", models.VGG], 
@@ -36,16 +39,17 @@ def test_init_models_string(inputs):
         ["densenet121", models.DenseNet],
         ["inception", models.Inception3],
     ]:
-        model, model_type = model_info
+        model, model_type = model2test
         assert isinstance(model, model_type) # sanity check
         classifier = ClassifierContainer(model, dataloaders=dataloaders, labels_map=annots.labels_map)
         assert isinstance(classifier.model, model_type)
 
-#test loading model using torch load
+#test loading model (e.g. resnet18) using torch load
 
 def test_init_resnet18_torch(inputs):
     annots, dataloaders = inputs
     my_model = models.resnet18(pretrained=True)
+    assert isinstance(my_model, models.ResNet) # sanity check
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
     classifier = ClassifierContainer(my_model, dataloaders, annots.labels_map) #resnet18 as nn.Module
@@ -56,8 +60,46 @@ def test_init_resnet18_torch(inputs):
 def test_init_resnet18_pickle(inputs, sample_dir):
     annots, dataloaders = inputs
     my_model = torch.load(f"{sample_dir}/model_test.pkl")
+    assert isinstance(my_model, models.ResNet) # sanity check
     classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map) #resnet18 as pkl (from sample files)
     assert isinstance(classifier.model, models.ResNet)
+
+#test loading model from hugging face
+
+def test_init_resnet18_hf(inputs):
+    annots, dataloaders = inputs
+    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
+    model_type = transformers.models.resnet.ResNetForImageClassification
+    assert isinstance(my_model, model_type) # sanity check
+    classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map)
+    assert isinstance(classifier.model, model_type)
+
+#test loading model using timm
+
+def test_init_resnet18_timm(inputs):
+    annots, dataloaders = inputs
+    my_model = timm.create_model("resnet18", pretrained=True, num_classes=len(annots.labels_map))
+    assert isinstance(my_model, timm.models.ResNet) # sanity check
+    classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map)
+    assert isinstance(classifier.model, timm.models.ResNet)
+
+def test_init_models_timm(inputs):
+    annots, dataloaders = inputs
+    for model2test in [
+        ["resnest50d_4s2x40d", timm.models.ResNet],
+        ["resnest101e", timm.models.ResNet],
+        ["swsl_resnext101_32x8d", timm.models.ResNet],
+        ["resnet152", timm.models.ResNet],
+        ["tf_efficientnet_b3_ns", timm.models.EfficientNet],
+        ["swin_base_patch4_window7_224", timm.models.swin_transformer.SwinTransformer],
+        ["vit_base_patch16_224", timm.models.vision_transformer.VisionTransformer],
+    ]: #these are models from 2021 paper
+        model, model_type = model2test
+        my_model = timm.create_model(model, pretrained=True, num_classes=len(annots.labels_map))
+        assert isinstance(my_model, model_type)
+        classifier = ClassifierContainer(my_model, dataloaders=dataloaders, labels_map=annots.labels_map) 
+        assert isinstance(classifier.model, model_type)
 
 #test loading object from pickle file
 
