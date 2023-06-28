@@ -635,10 +635,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         tree_level = self._get_tree_level(image_id)
 
-        myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
-        # shape = (hwc)
-        myimg_shape = myimg.shape
-        self.images[tree_level][image_id]["shape"] = myimg_shape
+        try: 
+            myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
+            # shape = (hwc)
+            myimg_shape = myimg.shape
+            self.images[tree_level][image_id]["shape"] = myimg_shape
+        except OSError:
+            raise ValueError(f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.')
 
     def _add_coord_increments_id(
         self, image_id: Union[int, str], verbose: Optional[bool] = False
