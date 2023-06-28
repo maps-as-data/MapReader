@@ -16,7 +16,7 @@ import PIL
 from pyproj import Transformer
 import random
 from typing import Literal, Optional, Union, Dict, Tuple, List, Any
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import rasterio
 from rasterio.plot import reshape_as_raster
 from shapely.geometry import box

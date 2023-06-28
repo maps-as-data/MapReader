@@ -15,6 +15,7 @@ import shutil
 from functools import reduce
 from pyproj.crs import CRS
 import matplotlib.image as mpimg
+from tqdm.auto import tqdm
 
 
 
@@ -502,7 +503,7 @@ class SheetDownloader:
         if success:
             print(f'[INFO] Downloaded "{map_name}.png"')
         else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
         
         shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return success
@@ -575,7 +576,7 @@ class SheetDownloader:
             Whether to overwrite existing maps, by default ``False``.
         """
 
-        for feature in features:
+        for feature in tqdm(features):
             if not overwrite:
                 if self._check_map_sheet_exists(feature):
                     continue
