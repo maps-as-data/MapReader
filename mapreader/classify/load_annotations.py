@@ -33,6 +33,7 @@ class AnnotationsLoader:
         self,
         annotations: Union[str, pd.DataFrame],
         delimiter: Optional[str] = "\t",
+        images_dir: Optional[str] = None,
         id_col: Optional[str] = "image_id",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = "label",
@@ -49,6 +50,11 @@ class AnnotationsLoader:
             Can either be the path to a csv file or a pandas.DataFrame.
         delimiter : Optional[str], optional
             The delimiter to use when loading the csv file as a dataframe, by default "\t".
+        images_dir : Optional[str], optional
+            The path to the directory in which patches are stored.
+            This argument should be passed if image paths are different from the path saved in annoations dataframe/csv.
+            If None, no updates will be made to the image paths in the annotations dataframe/csv. 
+            By default None.
         id_col : Optional[str], optional
             The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
@@ -99,6 +105,10 @@ class AnnotationsLoader:
             annotations = self._load_annotations_csv(
                 annotations, delimiter, scramble_frame, reset_index
             )
+
+        if images_dir:
+            abs_images_dir = os.path.abspath(images_dir)
+            annotations[self.patch_paths_col] = f"{abs_images_dir}/"+annotations[self.id_col]
 
         annotations = annotations.astype(
             {self.label_col: str}
@@ -185,7 +195,11 @@ class AnnotationsLoader:
         patch_row = self.annotations[self.annotations[self.id_col] == patch_id]
         patch_path = patch_row[self.patch_paths_col].values[0]
         patch_label = patch_row[self.label_col].values[0]
-        img = Image.open(patch_path)
+        try:
+            img = Image.open(patch_path)
+        except FileNotFoundError:
+            raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.')
 
         plt.imshow(img)
         plt.axis("off")
@@ -295,7 +309,11 @@ class AnnotationsLoader:
                 # int(ceil(chunks / num_cols))
                 plt.subplot((chunks // num_cols), num_cols, counter)
                 patch_path = annots2review.iloc[image_idx][self.patch_paths_col]
-                img = Image.open(patch_path)
+                try:
+                    img = Image.open(patch_path)
+                except FileNotFoundError:
+                    raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.')
                 plt.imshow(img)
                 plt.xticks([])
                 plt.yticks([])
@@ -384,7 +402,11 @@ class AnnotationsLoader:
         for i in range(num_samples):
             plt.subplot(int(num_samples / 2.0), 3, i + 1)
             patch_path = annot2plot.iloc[i][self.patch_paths_col]
-            img = Image.open(patch_path)
+            try:
+                img = Image.open(patch_path)
+            except FileNotFoundError:
+                raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.')
             plt.imshow(img)
             plt.axis("off")
             plt.title(annot2plot.iloc[i][self.label_col])
