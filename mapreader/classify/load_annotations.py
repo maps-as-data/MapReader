@@ -34,6 +34,7 @@ class AnnotationsLoader:
         annotations: Union[str, pd.DataFrame],
         delimiter: Optional[str] = "\t",
         images_dir: Optional[str] = None,
+        remove_broken: Optional[bool] = True,
         id_col: Optional[str] = "image_id",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = "label",
@@ -55,6 +56,10 @@ class AnnotationsLoader:
             This argument should be passed if image paths are different from the path saved in annoations dataframe/csv.
             If None, no updates will be made to the image paths in the annotations dataframe/csv. 
             By default None.
+        remove_broken : Optional[bool], optional
+            Whether to remove annotations with broken image paths.
+            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            By default True.
         id_col : Optional[str], optional
             The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
@@ -119,6 +124,8 @@ class AnnotationsLoader:
         else:
             self.annotations = annotations
 
+        self._check_patch_paths(remove_broken=remove_broken)
+
         unique_labels = self.annotations[self.label_col].unique().tolist()
         self.unique_labels = unique_labels
         self.annotations["label_index"] = self.annotations[self.label_col].apply(
@@ -174,6 +181,32 @@ class AnnotationsLoader:
 
         annotations.drop_duplicates(subset=self.id_col, inplace=True, keep="first")
         return annotations
+
+    def _check_patch_paths(
+            self,
+            remove_broken: Optional[bool] = True,
+        ) -> None:
+
+        if len(self.annotations) == 0:
+            return
+
+        broken_paths = []
+        for i, patch_path in self.annotations[self.patch_paths_col].iteritems():
+            if not os.path.exists(patch_path):
+                broken_paths.append(patch_path)
+                if remove_broken:
+                    self.annotations.drop(i, inplace=True)
+        
+        if len(broken_paths)!=0: # write broken paths to text file
+            with open('broken_files.txt', 'w') as f:
+                for broken_path in broken_paths:
+                    f.write(f"{broken_path}\n")
+            
+            print(f"[WARNING] {len(broken_paths)} files cannot be found. Check 'broken_paths.txt' for more details.")
+
+            if remove_broken:
+                print(f"[INFO] Annotations with broken file paths have been removed.\n\
+Number of annotations remaining: {len(self.annotations)}")
 
     def show_patch(self, patch_id: str) -> None:
         """
