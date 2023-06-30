@@ -30,7 +30,6 @@ setuptools.setup(
         "Shapely>=2.0.0,<3.0.0",
         "nest-asyncio>=1.5.1,<2.0.0",
         "scikit-image>=0.18.3",
-        "scikit-learn>=1.0.1,<2.0.0",
         "torch>=1.10.0,<2.0.0",
         "torchvision>=0.11.1,<0.12.1",
         "jupyter>=1.0.0,<2.0.0",
@@ -49,7 +48,7 @@ setuptools.setup(
         "versioneer>=0.28",
         "tqdm",
         "torchinfo",
-	    "openpyxl",
+        "openpyxl",
     ],
     
     classifiers=[
