@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
-from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
 from torchvision.transforms import Compose
@@ -523,33 +522,28 @@ Please check your image paths and update them if necessary.')
                 f"[ERROR] ``frac_train`` ({frac_train}), ``frac_val`` ({frac_val}) and ``frac_test`` ({frac_test}) do not add up to 1."
             )  # noqa
 
-        labels = self.annotations[self.label_col]
+        df_train  = pd.DataFrame()
+        df_val  = pd.DataFrame()
+        df_test   = pd.DataFrame()
 
-        # Split original dataframe into train and temp (val+test) dataframes.
-        df_train, df_temp, _, labels_temp = train_test_split(
-            self.annotations,
-            labels,
-            stratify=labels,
-            test_size=float(1 - frac_train),
-            random_state=random_state,
-        )
+        for unique_label in self.unique_labels: # to stratify
+            data = self.annotations[self.annotations[self.label_col] == unique_label]
+            data = data.sample(frac=1) # shuffle
+            n_data = len(data)
+            n_train = round(n_data * frac_train)
+            n_val = round(n_data * frac_val)
+            df_train = pd.concat([df_train, data[:n_train]])
+            df_val = pd.concat([df_val, data[n_train:n_train+n_val]])
+            df_test = pd.concat([df_test, data[n_train+n_val:]])
 
-        if frac_test != 0:
-            # Split the temp dataframe into val and test dataframes.
-            relative_frac_test = Decimal(frac_test / (frac_val + frac_test))
-            relative_frac_test = relative_frac_test.quantize(Decimal("0.001"))
-            df_val, df_test, _, _ = train_test_split(
-                df_temp,
-                labels_temp,
-                stratify=labels_temp,
-                test_size=float(relative_frac_test),
-                random_state=random_state,
-            )
-            assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
+        df_train = df_train.sample(frac=1) # shuffle
+        df_val = df_val.sample(frac=1) # shuffle
+        df_test = df_test.sample(frac=1) # shuffle
 
-        else:
-            df_val = labels_temp
-            df_test = None
+        assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
+        
+        if frac_test == 0:
+            assert len(df_test) == 0
             assert len(self.annotations) == len(df_train) + len(df_val)
 
         train_dataset = PatchDataset(
@@ -566,14 +560,14 @@ Please check your image paths and update them if necessary.')
             label_col=self.label_col,
             label_index_col="label_index",
         )
-        if df_test is not None:
-            test_dataset = PatchDataset(
-                df_test,
-                test_transform,
-                patch_paths_col=self.patch_paths_col,
-                label_col=self.label_col,
-                label_index_col="label_index",
-            )
+        
+        test_dataset = PatchDataset(
+            df_test,
+            test_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
+        )
 
         datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
         dataset_sizes = {
