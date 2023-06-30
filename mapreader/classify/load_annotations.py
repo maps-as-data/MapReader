@@ -202,10 +202,15 @@ class AnnotationsLoader:
                 for broken_path in broken_paths:
                     f.write(f"{broken_path}\n")
             
-            print(f"[WARNING] {len(broken_paths)} files cannot be found. Check 'broken_paths.txt' for more details.")
+            print(f"[WARNING] {len(broken_paths)} files cannot be found.\
+Check 'broken_paths.txt' for more details and, if possible, update your file paths using the 'images_dir' argument.")
 
             if remove_broken:
-                print(f"[INFO] Annotations with broken file paths have been removed.\n\
+                if len(self.annotations)==0:
+                    raise ValueError("[ERROR] No annotations remaining.\
+Please check your files exist and, if possible, update your file paths using the 'images_dir' argument.")
+                else:
+                    print(f"[INFO] Annotations with broken file paths have been removed.\n\
 Number of annotations remaining: {len(self.annotations)}")
 
     def show_patch(self, patch_id: str) -> None:
