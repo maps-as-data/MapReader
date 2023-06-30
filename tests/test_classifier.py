@@ -17,7 +17,7 @@ def sample_dir():
 @pytest.mark.dependency(depends=["load_annots_csv", "dataloaders"], scope="session")
 def inputs(sample_dir):
     annots = AnnotationsLoader()
-    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True)
+    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True, remove_broken=False)
     dataloaders = annots.create_dataloaders(batch_size=8)
     return annots, dataloaders
 
