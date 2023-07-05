@@ -488,8 +488,8 @@ class AnnotationsLoader:
             assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
 
         else:
-            df_val = labels_temp
-            df_test = None
+            df_val = df_temp
+            df_test = pd.DataFrame(columns=self.annotations.columns)
             assert len(self.annotations) == len(df_train) + len(df_val)
 
         train_dataset = PatchDataset(
@@ -506,13 +506,12 @@ class AnnotationsLoader:
             label_col=self.label_col,
             label_index_col="label_index",
         )
-        if df_test is not None:
-            test_dataset = PatchDataset(
-                df_test,
-                test_transform,
-                patch_paths_col=self.patch_paths_col,
-                label_col=self.label_col,
-                label_index_col="label_index",
+        test_dataset = PatchDataset(
+            df_test,
+            test_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
             )
 
         datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
