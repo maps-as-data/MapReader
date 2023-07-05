@@ -32,7 +32,7 @@ class AnnotationsLoader:
     def load(
         self,
         annotations: Union[str, pd.DataFrame],
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] =",",
         id_col: Optional[str] = "image_id",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = "label",
@@ -48,7 +48,7 @@ class AnnotationsLoader:
             The annotations.
             Can either be the path to a csv file or a pandas.DataFrame.
         delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+            The delimiter to use when loading the csv file as a dataframe, by default ",".
         id_col : Optional[str], optional
             The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
@@ -123,7 +123,7 @@ class AnnotationsLoader:
     def _load_annotations_csv(
         self,
         annotations: str,
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] = ",",
         scramble_frame: Optional[bool] = False,
         reset_index: Optional[bool] = False,
     ) -> pd.DataFrame:
@@ -134,7 +134,7 @@ class AnnotationsLoader:
         annotations : str
             The path to the annotations csv file.
         delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+            The delimiter to use when loading the csv file as a dataframe, by default ",".
         scramble_frame : Optional[bool], optional
             Whether to shuffle the rows of the dataframe, by default False.
         reset_index : Optional[bool], optional

@@ -553,13 +553,13 @@ class SheetDownloader:
         ).T
         
         if os.path.exists(out_filepath):
-            existing_metadata_df = pd.read_csv(out_filepath, sep="\t", index_col=0)
+            existing_metadata_df = pd.read_csv(out_filepath, sep=",", index_col=0)
             metadata_df = pd.concat([existing_metadata_df, new_metadata_df], ignore_index=True)
             metadata_df.drop_duplicates(subset=["grid_bb"], keep="first", inplace=True)
         else: 
             metadata_df = new_metadata_df
         
-        metadata_df.to_csv(out_filepath, sep="\t")
+        metadata_df.to_csv(out_filepath, sep=",")
 
     def _download_map_sheets(self, features: list, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False):
         """Download map sheets from a list of features.

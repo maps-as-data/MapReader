@@ -29,7 +29,7 @@ def test_load_csv(load_annots, sample_dir):
 
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
-    df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep="\t", index_col=0)
+    df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep=",", index_col=0)
     annots.load(df)
     assert len(annots.annotations) == 29
     assert isinstance(annots.annotations, pd.DataFrame)

@@ -261,7 +261,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         metadata: Union[str, pd.DataFrame],
         index_col: Optional[Union[int, str]] = 0,
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] = ",",
         columns: Optional[List[str]] = None,
         tree_level: Optional[str] = "parent",
         ignore_mismatch: Optional[bool] = False,
@@ -281,7 +281,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Only used if a file path is provided as the ``metadata`` parameter.
             Ingored if ``columns`` parameter is passed.
         delimiter : str, optional
-            Delimiter used in the ``csv`` file, by default ``"\t"``.
+            Delimiter used in the ``csv`` file, by default ``","``.
 
             Only used if a ``csv`` file path is provided as
             the ``metadata`` parameter.
@@ -1226,7 +1226,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         # Calculate std pixel values
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
 
-    def convert_images(self, save: Optional[bool] = False, save_format: Optional[str] ="csv") -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def convert_images(
+            self, 
+            save: Optional[bool] = False, 
+            save_format: Optional[str] ="csv",
+            delimiter: Optional[str]=",",
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the ``MapImages`` instance's ``images`` dictionary into pandas
         DataFrames for easy manipulation.
@@ -1240,6 +1245,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             If ``save = True``, the file format to use when saving the dataframes.
             Options of csv ("csv") or excel ("excel" or "xlsx"). 
             By default, "csv".
+        delimiter : str, optional
+            The delimiter to use when saving the dataframe. By default ``","``.
 
         Returns
         -------
@@ -1256,9 +1263,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if save:
 
             if save_format == "csv":
-                parent_df.to_csv("parent_df.csv", sep="\t")
+                parent_df.to_csv("parent_df.csv", sep=delimiter)
                 print('[INFO] Saved parent dataframe as "parent_df.csv"')
-                patch_df.to_csv("patch_df.csv", sep="\t")
+                patch_df.to_csv("patch_df.csv", sep=delimiter)
                 print('[INFO] Saved patch dataframe as "patch_df.csv"')
             elif save_format in ["excel", "xlsx"]:
                 parent_df.to_excel("parent_df.xlsx")
@@ -1873,6 +1880,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         clear_images: Optional[bool] = False,
         index_col_patch: Optional[int] = 0,
         index_col_parent: Optional[int] = 0,
+        delimiter: Optional[str] = ",",
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
@@ -1892,6 +1900,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Column to set as index for the patch DataFrame, by default ``0``.
         index_col_parent : int, optional
             Column to set as index for the parent DataFrame, by default ``0``.
+        delimiter : str, optional
+            The delimiter to use when reading the dataframe. By default ``","``.
 
         Returns
         -------
@@ -1906,12 +1916,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             raise ValueError("[ERROR] Please pass ``patch_path`` as string.")
 
         if os.path.isfile(parent_path):
-            parent_df = pd.read_csv(parent_path, index_col=index_col_parent)
+            parent_df = pd.read_csv(parent_path, index_col=index_col_parent, sep=delimiter)
         else:
             raise ValueError(f"[ERROR] {parent_path} cannot be found.")
                     
         if os.path.isfile(patch_path):
-            patch_df = pd.read_csv(patch_path, index_col=index_col_patch)
+            patch_df = pd.read_csv(patch_path, index_col=index_col_patch, sep=delimiter)
         else:
             raise ValueError(f"[ERROR] {patch_path} cannot be found.")
 

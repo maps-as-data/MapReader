@@ -50,7 +50,7 @@ def matching_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
     metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
 
@@ -62,7 +62,7 @@ def extra_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
     return test_path 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def missing_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
     return test_path
 
 
@@ -188,7 +188,7 @@ def test_metadata_missing_name_or_image_id(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     incomplete_metadata_df = pd.DataFrame({"coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
-    incomplete_metadata_df.to_csv(f"{matching_metadata_dir}/incomplete_metadata_df.csv", sep="|")
+    incomplete_metadata_df.to_csv(f"{matching_metadata_dir}/incomplete_metadata_df.csv", sep=",")
     with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):
         my_files.add_metadata(incomplete_metadata_df)
     with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):
