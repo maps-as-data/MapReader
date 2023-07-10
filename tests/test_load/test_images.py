@@ -51,6 +51,7 @@ def matching_metadata_dir(tmp_path, metadata_df):
         rand_colour = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
+    metadata_df.to_csv(f"{test_path}/metadata_df.tsv", sep="\t")
     metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
 
@@ -93,6 +94,14 @@ def test_loader_add_metadata(sample_dir):
     image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    assert "coordinates" in ts_map.images["parent"][image_ID].keys()
+    assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
+    #metadata tsv
+    image_ID = "cropped_74488689.png"
+    ts_map = loader(f"{sample_dir}/{image_ID}")
+    ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.tsv", delimiter="\t")
     assert "coordinates" in ts_map.images["parent"][image_ID].keys()
     assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
         (-4.83, 55.80, -4.21, 56.059), rel=1e-2

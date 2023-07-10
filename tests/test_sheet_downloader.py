@@ -116,8 +116,8 @@ def test_download_all(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 5      
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[3].startswith('2\tmap_102352861.png')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[3].startswith('2,map_102352861.png')
 
 def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     sd = sheet_downloader
@@ -130,8 +130,8 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_74487492.png')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_74487492.png')
     sd.download_map_sheets_by_wfs_ids([1,2], maps_path, metadata_fname) #test list of wfs_ids
     assert os.path.exists(f"{maps_path}/map_74488550.png")
     with open(f"{maps_path}/{metadata_fname}") as f:
@@ -150,8 +150,8 @@ def test_download_by_polygon(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_74487492.png')    
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_74487492.png')    
     sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname, mode = 'intersects') #test mode = 'intersects', now 2 maps
     assert os.path.exists(f"{maps_path}/map_74488550.png")
     with open(f"{maps_path}/{metadata_fname}") as f:
@@ -169,8 +169,8 @@ def test_download_by_coords(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 2   
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_74488550.png')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_74488550.png')
 
 def test_download_by_line(sheet_downloader, tmp_path):
     sd = sheet_downloader
@@ -184,8 +184,8 @@ def test_download_by_line(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3   
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_74487492.png')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_74487492.png')
 
 def test_download_by_string(sheet_downloader, tmp_path):
     sd = sheet_downloader
@@ -200,8 +200,8 @@ def test_download_by_string(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 5
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_91617032.png')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_91617032.png')
 
 def test_download_by_queries(sheet_downloader, tmp_path):
     sd = sheet_downloader
@@ -217,8 +217,8 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     with open(f"{maps_path}/{metadata_fname}") as f:
         csv = f.readlines()
     assert len(csv) == 3   
-    assert csv[0] == '\tname\turl\tcoordinates\tcrs\tpublished_date\tgrid_bb\n'
-    assert csv[1].startswith('0\tmap_102352861.png\t')
+    assert csv[0] == ',name,url,coordinates,crs,published_date,grid_bb\n'
+    assert csv[1].startswith('0,map_102352861.png,')
 
 # errors
 

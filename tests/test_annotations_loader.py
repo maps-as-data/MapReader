@@ -27,6 +27,18 @@ def test_load_csv(load_annots, sample_dir):
     assert annots.unique_labels == ["stuff", "nothing", "new"]
     assert annots.labels_map == {0: 'stuff', 1: 'nothing', 2: 'new'}
 
+@pytest.mark.dependency(name="load_annots_csv", scope="session")
+def test_load_tsv(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(f"{sample_dir}/test_annots.tsv", delimiter="\t", reset_index=True)
+    assert len(annots.annotations) == 29
+    assert isinstance(annots.annotations, pd.DataFrame)
+    assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
+    annots.load(f"{sample_dir}/test_annots_append.csv", append=True) #test append
+    assert len(annots.annotations) == 31
+    assert annots.unique_labels == ["stuff", "nothing", "new"]
+    assert annots.labels_map == {0: 'stuff', 1: 'nothing', 2: 'new'}
+
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
     df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep=",", index_col=0)
