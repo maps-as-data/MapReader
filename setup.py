@@ -50,6 +50,7 @@ setuptools.setup(
         "tqdm",
         "torchinfo",
 	    "openpyxl",
+        "owslib",
     ],
     
     classifiers=[
