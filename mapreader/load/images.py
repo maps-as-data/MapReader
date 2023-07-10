@@ -272,7 +272,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Parameters
         ----------
         metadata : str or pandas.DataFrame
-            Path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
+            Path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
         index_col : int or str, optional
             Column to use as the index when reading the file and converting into a panda.DataFrame.
             Accepts column indices or column names.
@@ -324,7 +324,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         
         else: #if not df
             if os.path.isfile(metadata):
-                if metadata.endswith('csv'):
+                if metadata.endswith(('xls', 'xlsx')):
+                    if columns:
+                        metadata_df = pd.read_excel(
+                            metadata, usecols=columns,
+                            )
+                    else:
+                        metadata_df = pd.read_excel(
+                            metadata, index_col=index_col,
+                            )
+                        columns=list(metadata_df.columns)
+            
+                elif metadata.endswith('sv'): #csv, tsv, etc
                     if columns:
                         metadata_df = pd.read_csv(
                             metadata, usecols=columns, delimiter=delimiter
@@ -335,20 +346,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                             )
                         columns=list(metadata_df.columns)
                 
-                elif metadata.endswith(('xls', 'xlsx')):
-                    if columns:
-                        metadata_df = pd.read_excel(
-                            metadata, usecols=columns,
-                            )
-                    else:
-                        metadata_df = pd.read_excel(
-                            metadata, index_col=index_col,
-                            )
-                        columns=list(metadata_df.columns)
 
             else:
                 raise ValueError(
-                    "[ERROR] ``metadata`` should either be the path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
+                    "[ERROR] ``metadata`` should either be the path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
                 )
 
         # identify image_id column
