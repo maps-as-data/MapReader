@@ -59,7 +59,7 @@ def display_record(record: Tuple[str, str, str, int, int]) -> None:
     gridsize = (5, 1)
     plt.clf()
     plt.figure(figsize=(12, 12))
-    if tree_level == "patch" and context_image:
+    if treelevel == "patch" and contextimage:
         plt.subplot2grid(gridsize, (2, 0))
     else:
         plt.subplot2grid(gridsize, (0, 0), rowspan=2)
@@ -68,7 +68,7 @@ def display_record(record: Tuple[str, str, str, int, int]) -> None:
     plt.yticks([])
     plt.title(f"{record[0]}", size=20)
 
-    if tree_level == "patch" and context_image:
+    if treelevel == "patch" and contextimage:
         parent_path = os.path.dirname(
             annotation_tasks["paths"][record[3]]["parent_paths"]
         )
@@ -482,8 +482,8 @@ def prepare_annotation(
     global x_offset
     global y_offset
     global url_main
-    global tree_level
-    global context_image
+    global treelevel
+    global contextimage
 
     # Note: it is not possible to define global variable + args with the same
     # names so here, we read xoffset and yoffset, assign them to two global
@@ -491,8 +491,8 @@ def prepare_annotation(
     x_offset = xoffset
     y_offset = yoffset
     url_main = urlmain
-    tree_level = tree_level
-    context_image = context_image
+    treelevel = tree_level
+    contextimage = context_image
 
     with open(annotation_tasks_file) as annot_file_fio:
         annotation_tasks = yaml.load(annot_file_fio, Loader=yaml.FullLoader)
