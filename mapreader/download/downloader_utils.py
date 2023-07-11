@@ -143,7 +143,7 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
 
 
 def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, int)]:
-    """Generate (x,y) tuple from Coordinate latitutes and longitutes.
+    """Generate (x,y) tuple from Coordinate latitudes and longitudes.
 
     Returns
     -------

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Callable, Optional, Union, Tuple
+from typing import Callable, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +15,6 @@ from torchvision import transforms
 # Import parhugin
 try:
     from parhugin import multiFunc
-
     parhugin_installed = True
 except ImportError:
     print(
