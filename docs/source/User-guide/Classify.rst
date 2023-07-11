@@ -25,7 +25,7 @@ First, load in your annotations using:
     annotated_images = AnnotationsLoader()
     annotated_images.load(annotations = "./path/to/annotations.csv")
 
-For example, if you have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
+For example, if you have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
 
 .. code-block:: python
 
@@ -177,7 +177,7 @@ Before using your annotated images to train your model, you will first need to:
         - ``"a"`` weights: 1/10 (one in ten chance of picking an ``"a"`` when creating a batch)
         - ``"b"`` weights: 1/4 (one in four chance of picking an ``"b"`` when creating a batch)
     
-    Using a sampler to create representative batches is particularly important for inbalanced datasets (i.e. those which contain different numbers of each label). 
+    Using a sampler to create representative batches is particularly important for imbalanced datasets (i.e. those which contain different numbers of each label). 
 
 To split your annotated images and create your dataloaders, use: 
 
@@ -217,7 +217,7 @@ To change the batch size used when creating your dataloaders, use the ``batch_si
 Train
 ------
 
-Initialise ``ClassifierContainer()``
+Initialize ``ClassifierContainer()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MapReader's ``ClassifierContainer()`` class is used to:
@@ -227,15 +227,15 @@ MapReader's ``ClassifierContainer()`` class is used to:
 - Define a criterion (loss function), optimizer and scheduler.
 - Train and evaluate models using already annotated images.
 - Predict labels of un-annotated images (model inference).
-- Visualise datasets and predictions.
+- Visualize datasets and predictions.
 
-You can initialise a ``ClassifierContainer()`` object (``my_classifier``) using:
+You can initialize a ``ClassifierContainer()`` object (``my_classifier``) using:
 
 .. code-block:: python
 
-    from mapreader import ClassiferContainer
+    from mapreader import ClassifierContainer
 
-    my_classifier = ClassiferContainer(model, dataloaders, labels_map)
+    my_classifier = ClassifierContainer(model, dataloaders, labels_map)
 
 Your dataloaders and labels map (``annotated_images.labels_map``) should be passed as the ``dataloaders`` and ``labels_map`` arguments respectively.
 
@@ -248,12 +248,12 @@ There are a number of options for the ``model`` argument:
         .. code-block:: python
         
             #EXAMPLE
-            my_classifier = ClassiferContainer("resnet18", dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer("resnet18", dataloaders, annotated_images.labels_map)
 
         By default, this will load a pretrained form of the model and reshape the last layer to output the same number of nodes as labels in your dataset.
         You can load an untrained model by specifying ``pretrained=False``.
 
-    **2.  To load a customised model, define a** `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ **and pass this as the ``model`` argument.**
+    **2.  To load a customized model, define a** `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ **and pass this as the ``model`` argument.**
         
         e.g. To load a pretrained "resnet18" and reshape the last layer:
 
@@ -271,7 +271,7 @@ There are a number of options for the ``model`` argument:
 
             my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
 
-        This is equivalent to passing ``model="resnet18"`` (as above) but further customisations are, of course, possible. 
+        This is equivalent to passing ``model="resnet18"`` (as above) but further customizations are, of course, possible. 
         See `here <https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html>`__ for more details of how to do this.
 
     **3.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.**
@@ -297,7 +297,7 @@ There are a number of options for the ``model`` argument:
             The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer()``.
             If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer()``.
         
-            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initialising your ``ClassifierContainer()``:
+            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer()``:
         
             .. code-block:: python
             
@@ -380,22 +380,22 @@ In order to train/fine-tune your model, will need to define:
 
         my_classifier.initialize_optimizer()
 
-    The ``optim_type`` argument can be used to select the `optimisation algorithm <https://pytorch.org/docs/stable/optim.html#algorithms>`__.
+    The ``optim_type`` argument can be used to select the `optimization algorithm <https://pytorch.org/docs/stable/optim.html#algorithms>`__.
     By default, this is set to `"adam" <https://pytorch.org/docs/stable/generated/torch.optim.Adam.html#torch.optim.Adam>`__, one of the  most commonly used algorithms.
     You should change this to suit your needs. 
 
-    The ``params2optimise`` argument can be used to select which parameters to optimise during training.
-    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimised.
+    The ``params2optimize`` argument can be used to select which parameters to optimize during training.
+    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimized.
 
     When training/fine-tuning your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
     Normally, when fine-tuning pre-trained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers and larger learning rates assigned to later layers.
 
-    To define a list of parameters to optimise within each layer, with learning rates defined for each parameter, use:
+    To define a list of parameters to optimize within each layer, with learning rates defined for each parameter, use:
 
     .. code-block:: python 
 
         #EXAMPLE
-        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
+        params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
 
     By default, a linear function is used to distribute the learning rates (using ``min_lr`` for the first layer and ``max_lr`` for the last layer). 
     This can be changed to a logarithmic function by specifying ``spacing="geomspace"``:
@@ -403,13 +403,13 @@ In order to train/fine-tune your model, will need to define:
     .. code-block:: python 
 
         #EXAMPLE
-        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
+        params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
 
-    You should then pass your ``params2optimise`` list to the ``.initialize_optimizer()`` method:
+    You should then pass your ``params2optimize`` list to the ``.initialize_optimizer()`` method:
 
     .. code-block:: python
 
-        my_classifier.initialize_optimizer(params2optimise=params2optimise)
+        my_classifier.initialize_optimizer(params2optimize=params2optimize)
 
 **3.  A scheduler - This defines how to adjust your learning rates during training.**
 
@@ -467,7 +467,7 @@ e.g. to pass through 10 epochs of training data:
 Plot metrics
 ^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accesible via the ``.metrics`` attribute. 
+Metrics are stored in a dictionary accessible via the ``.metrics`` attribute. 
 To list these, use:
 
 .. code-block:: python
@@ -476,7 +476,7 @@ To list these, use:
 
 .. todo:: Explain what these metrics are/mean
 
-To help visualise the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
+To help visualize the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
 
 The name of the metrics you would like to plot should be passed as the ``y_axis`` argument.
 This can take any number/combination of metrics.
@@ -531,7 +531,7 @@ e.g. To view samples where the model is less than 80% confident about its predic
     #EXAMPLE
     my_classifier.inference_sample_results("railspace", max_conf=80)
 
-This can help you identify images that might need to be brought into your training data for further optimisation of your model.
+This can help you identify images that might need to be brought into your training data for further optimization of your model.
 
 By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``.metrics`` attribute.
 Instead, they must be added using the ``.calculate_add_metrics()``. 
@@ -565,7 +565,7 @@ Saving your work
 
 Each time you train your model, MapReader will save the best version of your model (that with the least loss) in the ``./models/`` directory.
 
-If you wouild like to explicitly save your work, use:
+If you would like to explicitly save your work, use:
 
 .. code-block:: python
 
@@ -654,7 +654,7 @@ From here, you can either save your results using:
 
     infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
 
-Or, you can use the ``MapImages`` object to create some visualisations of your results:
+Or, you can use the ``MapImages`` object to create some visualizations of your results:
 
 .. code-block:: python
 

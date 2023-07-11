@@ -14,7 +14,7 @@ The inputs you will need for MapReader will depend on where you begin within the
 Option 1 - If the map(s) you want have been georeferenced and made available via a Tile Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some GLAM institions or other services make digitised, georeferenced maps available via tile servers, for example as raster (XYZ, or 'slippy map') tiles.
+Some GLAM institutions or other services make digitized, georeferenced maps available via tile servers, for example as raster (XYZ, or 'slippy map') tiles.
 
 Instructions for accessing tile layers from one example collection is below:
 
@@ -78,7 +78,7 @@ Alternatively, if you would like to work with non-georeferenced maps/images, you
 Recommended directory structure
 --------------------------------
 
-If you are using non-georeferenced image files (e.g. PNG files) plus a separate metadata file, we reccomend setting these up in the following directory structure:
+If you are using non-georeferenced image files (e.g. PNG files) plus a separate metadata file, we recommend setting these up in the following directory structure:
 
 ::
 

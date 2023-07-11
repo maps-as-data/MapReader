@@ -49,8 +49,7 @@ setuptools.setup(
         "versioneer>=0.28",
         "tqdm",
         "torchinfo",
-	    "openpyxl",
-        "owslib",
+        "openpyxl",
     ],
     
     classifiers=[
