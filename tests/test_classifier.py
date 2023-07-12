@@ -88,6 +88,7 @@ def test_save(load_classifier, tmp_path):
     classifier.save(save_path=f"{tmp_path}/out.obj")
     assert os.path.isfile(f"{tmp_path}/out.obj")
     assert os.path.isfile(f"{tmp_path}/model_out.obj")
+    assert os.path.isfile(f"{tmp_path}/model_state_dict_out.obj")
 
 def test_load_dataset(load_classifier, sample_dir):
     classifier = load_classifier

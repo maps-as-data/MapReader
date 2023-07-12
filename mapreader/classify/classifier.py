@@ -1431,7 +1431,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             input_size = 299
 
         else:
-            raise NotImplementedError("[ERROR] Invalid model name.")
+            raise NotImplementedError("[ERROR] Invalid model name. Try loading your model directly and this as the `model` argument instead.")
 
         self.model = model_dw.to(self.device)
         self.input_size = input_size
@@ -1729,6 +1729,7 @@ Output will show batch number {num_batches}.'
             joblib.dump(obj2write, myfile)
 
         torch.save(mymodel, os.path.join(par_name, f"model_{base_name}"))
+        torch.save(mymodel.state_dict(), os.path.join(par_name, f"model_state_dict_{base_name}"))
 
     def load_dataset(
         self,
