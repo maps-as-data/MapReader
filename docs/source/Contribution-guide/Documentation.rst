@@ -27,9 +27,10 @@ Writing in reStructuredText
 ---------------------------
 
 reStructuredText (rst) is the default plaintext markup language used by `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ and is the primary language used throughout our documentation.
-If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`__ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__) available online, so have a google.
+If you have never used or written in rst, `this primer <https://docutils.sourceforge.io/rst.html>`_ is a great place to start. 
+There are also numerous other rst 'cheatsheets' (e.g. `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`__ and `here <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__) available online, so have a google.
 
-To help make your rst files easier to read and review, please start each new sentence on a new line. 
+To help make your rst files easier to read and review, **please start each new sentence on a new line**. 
 This will make no difference to how the text is displayed, but will make it much easier to read when reviewing changes in a pull request.
 
 Before you begin

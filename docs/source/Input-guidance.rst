@@ -12,7 +12,7 @@ The MapReader pipeline is explained in detail `here <https://mapreader.readthedo
 The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
 Option 1 - If the map(s) you want have been georeferenced and made available via a Tile Server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some GLAM institions or other services make digitised, georeferenced maps available via tile servers, for example as raster (XYZ, or 'slippy map') tiles.
 
@@ -56,6 +56,7 @@ These should be saved in a format that looks something like this:
     }
 
 .. Check these links are still valid
+
 Some example metadata files, corresponding to the `OS one-inch 2nd edition maps <https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/index.html>`_ and `OS six-inch 1st edition maps for Scotland <https://mapseries-tilesets.s3.amazonaws.com/os/6inchfirst/index.html>`_, are provided in ``MapReader/worked_examples/persistent_data``.
 
 Option 2 - If your files are already saved locally
@@ -156,7 +157,8 @@ To do this, you will need to use python to:
 2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
 3. Pass your dataframe to MapReader.
 
-Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary. A conversation with the collection curator is always a good idea to check what formats metadata may already be available in/or easily made available in using existing workflows.
+Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary. 
+A conversation with the collection curator is always a good idea to check what formats metadata may already be available in/or easily made available in using existing workflows.
 
 Accessing Maps via TileServers
 ------------------------------
@@ -164,18 +166,22 @@ Accessing Maps via TileServers
 National Library of Scotland
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is possible to bring in any other georeferenced layers from the National Library of Scotland into MapReader. Many of these layers have links to WMTS and XYZ URLs, which can be easily found on the NLS website's georeferencing layers list. To do this, you can create a TileServer object and specify the metadata_path (the path to your metadata.json file) and the download_url (the WMTS or XYZ URL for your tileset).
+It is possible to bring in any other georeferenced layers from the National Library of Scotland into MapReader. 
+To do this, you would need to create a TileServer object and specify the metadata_path (the path to your metadata.json file) and the download_url (the WMTS or XYZ URL for your tileset) for your chosen tilelayer.
 
-For example, _`on this page the NLS lists all their georeferenced tilesets <https://maps.nls.uk/guides/georeferencing/layers-list/>`_ with links. If we wanted to use the "Ordnance Survey - 10 mile, General, 1955 - 1:633,600", we can find its XYZ link on that page: https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png. Inserted into the script, it would look something like this:
+`This page <https://maps.nls.uk/guides/georeferencing/layers-list/>`__ lists some of the NLS's most popular georeferenced layers and provides links to their WMTS and XYZ URLs.
+If, for example, you wanted to use the "Ordnance Survey - 10 mile, General, 1955 - 1:633,600" in MapReader, you would need to look up its XYZ URL (https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png) and insert it your MapReader code as shown below:
 
 .. code-block:: python
-from mapreader import TileServer
+    
+    from mapreader import TileServer
 
-my_ts = TileServer(
-    metadata_path="path/to/metadata.json",
-    download_url="https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png",
-)
+    my_ts = TileServer(
+        metadata_path="path/to/metadata.json",
+        download_url="https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png",
+    )
 
-More information about using NLS georeferenced layers _`is available here <https://maps.nls.uk/guides/georeferencing/layers-urls/>`_, including details about accessing metadata for each layer. Please note the Re-use terms for each layer, as these vary.
+.. note:: You would need to generate the corresponding `metadata.json` before running this code.
 
-
+More information about using NLS georeferenced layers is available `here <https://maps.nls.uk/guides/georeferencing/layers-urls/>`__, including details about accessing metadata for each layer. 
+Please note the Re-use terms for each layer, as these vary.
