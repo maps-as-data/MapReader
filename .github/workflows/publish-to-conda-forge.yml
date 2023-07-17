@@ -2,10 +2,11 @@
 name: Publish to Conda Forge
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
-
+    tags:
+      - v*
+      
 jobs:
 
   build_conda:
