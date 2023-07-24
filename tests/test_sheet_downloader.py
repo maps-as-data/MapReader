@@ -1,10 +1,11 @@
-from mapreader import SheetDownloader
-import pytest
-import pathlib
-from pathlib import Path
-from shapely.geometry import Polygon, LineString
 import os
-import json
+from pathlib import Path
+
+import pytest
+from shapely.geometry import LineString, Polygon
+
+from mapreader import SheetDownloader
+
 
 @pytest.fixture
 def sample_dir():
@@ -22,7 +23,7 @@ def test_init(sheet_downloader):
 def test_extract_published_dates(sheet_downloader):
     sd = sheet_downloader
     sd.extract_published_dates()
-    assert sd.published_dates == True
+    assert sd.published_dates is True
     assert sd.features[0] ["properties"]["published_date"] == 1896 #a standard one
     assert sd.features[3]["properties"]["published_date"] == 1896 #metadata has "1894 to 1896" - method take end date only (thoughts?)
 
@@ -42,7 +43,7 @@ def test_crs(sheet_downloader):
 def test_query_by_wfs_ids(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_wfs_ids(1) #test single wfs_id
-    assert sd.wfs_id_nos == True
+    assert sd.wfs_id_nos is True
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[0]
     sd.query_map_sheets_by_wfs_ids([1,2]) #test list of wfs_ids
@@ -56,7 +57,7 @@ def test_query_by_polygon(sheet_downloader):
     sd = sheet_downloader
     polygon = Polygon([[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]) #should match to features[0]
     sd.query_map_sheets_by_polygon(polygon) #test mode = 'within'
-    assert sd.polygons == True
+    assert sd.polygons is True
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[0]
     sd.query_map_sheets_by_polygon(polygon, mode = 'intersects') #test mode = 'intersects'
@@ -70,7 +71,7 @@ def test_query_by_polygon(sheet_downloader):
 def test_query_by_coords(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_coordinates((-4.8, 54.5))
-    assert sd.polygons == True
+    assert sd.polygons is True
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[1]
     sd.query_map_sheets_by_coordinates((-0.23, 51.5), append = True) # test append
@@ -81,7 +82,7 @@ def test_query_by_line(sheet_downloader):
     sd = sheet_downloader
     line = LineString([(-5.4, 54.5), (-4.8, 54.5)])
     sd.query_map_sheets_by_line(line)
-    assert sd.polygons == True
+    assert sd.polygons is True
     assert len(sd.found_queries) == 2
     assert sd.found_queries == sd.features[:2]
     another_line = LineString([(-0.2, 51.5),(-0.21,51.6)])
@@ -106,7 +107,7 @@ def test_query_by_string(sheet_downloader):
 def test_download_all(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
-    assert sd.grid_bbs == True
+    assert sd.grid_bbs is True
     maps_path= tmp_path / "test_maps/"
     metadata_fname="test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname)
@@ -288,7 +289,7 @@ def test_download_by_coords_errors(sheet_downloader, tmp_path):
     with pytest.raises(ValueError, match = "out of map metadata bounds"):
         sd.download_map_sheets_by_coordinates((0,1), maps_path, metadata_fname)
 
-def test_download_by_line(sheet_downloader, tmp_path):
+def test_download_by_line_errors(sheet_downloader, tmp_path):
     sd = sheet_downloader
     sd.get_grid_bb(10)
     maps_path=tmp_path / "test_maps/"

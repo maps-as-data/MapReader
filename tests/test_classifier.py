@@ -1,13 +1,14 @@
+import os
+from pathlib import Path
+
+import numpy as np
+import pytest
+import torch
+from torchvision import models
+
 from mapreader import AnnotationsLoader, ClassifierContainer
 from mapreader.classify.datasets import PatchDataset
-import pytest
-import pathlib
-from pathlib import Path
-import pandas as pd
-import numpy as np
-from torchvision import models
-import torch
-import os
+
 
 @pytest.fixture
 def sample_dir():
@@ -56,13 +57,13 @@ def test_add_criterion(load_classifier):
     classifier.add_criterion(my_criterion)
     assert isinstance(classifier.criterion, torch.nn.L1Loss)
 
-def test_initialize_optimiser(load_classifier):
+def test_initialize_optimizer(load_classifier):
     classifier = load_classifier
     classifier.initialize_optimizer("sgd")
     assert isinstance(classifier.optimizer, torch.optim.SGD)
     
-    params2optimise = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
-    classifier.initialize_optimizer("adam", params2optimise)
+    params2optimizes = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
+    classifier.initialize_optimizer("adam", params2optimizes)
     assert isinstance(classifier.optimizer, torch.optim.Adam)
 
 def test_initialize_scheduler(load_classifier):
@@ -88,6 +89,7 @@ def test_save(load_classifier, tmp_path):
     classifier.save(save_path=f"{tmp_path}/out.obj")
     assert os.path.isfile(f"{tmp_path}/out.obj")
     assert os.path.isfile(f"{tmp_path}/model_out.obj")
+    assert os.path.isfile(f"{tmp_path}/model_state_dict_out.obj")
 
 def test_load_dataset(load_classifier, sample_dir):
     classifier = load_classifier

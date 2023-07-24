@@ -20,7 +20,7 @@ from .datasets import PatchDataset
 class AnnotationsLoader:
     def __init__(self):
         """
-        A Class for loading annnotations and preparing datasets and dataloaders for use in training/validation of a model.
+        A Class for loading annotations and preparing datasets and dataloaders for use in training/validation of a model.
         """
         self.annotations = pd.DataFrame()
         self.reviewed = pd.DataFrame()
@@ -580,7 +580,7 @@ class AnnotationsLoader:
                 )
 
         if sampler and shuffle:
-            print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
+            print("[INFO] ``sampler`` is defined so train dataset will be un-shuffled.")
 
         dataloaders = {
             set_name: DataLoader(

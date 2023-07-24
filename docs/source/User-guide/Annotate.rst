@@ -19,7 +19,7 @@ Create an annotation tasks file
 To set up your annotation tasks, you will need to create a separate ``annotation_tasks.yaml`` file.
 An example file which can be used as a template can be found in ``MapReader/worked_examples/``.
 
-.. todo:: Note that you can do this via texteditor in windows or something like ??? in mac/linux
+.. todo:: Note that you can do this via text editor in windows or something like ??? in mac/linux
 
 Your ``annotation_tasks.yaml`` file needs to contain two sections: ``tasks`` and ``paths``.
 	
@@ -51,7 +51,7 @@ This section can contain as many annotation sets as you would like and should be
 		parent_paths: "./path/to/parents_2/"
 		annot_dir: "./path/to/save/annotations_2"
 
-For example, if you want to annotate 'rail_space' (as in `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the reccomended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
+For example, if you want to annotate 'rail_space' (as in `this paper <https://dl.acm.org/doi/10.1145/3557919.3565812>`_) and have been using the recommended/default directory structure, your ``annotation_tasks.yaml`` should look like this: 
 	   
 .. code-block:: yaml
 
@@ -123,7 +123,7 @@ e.g. :
 .. image:: ../figures/annotate_context.png
 	:width: 400px
 
-By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``. 
+By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intensities using ``sortby="mean"``. 
 	
 You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. 
 This is particularly useful if your images (e.g. maps) have collars or margins that you would like to avoid.
@@ -168,7 +168,7 @@ Once you have annotated your images, you should save your annotations using:
 
 This saves your annotations as a ``csv`` file in the ``annot_dir`` specified in your annotation tasks file.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
 
 ::
 
