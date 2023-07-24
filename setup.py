@@ -47,11 +47,20 @@ setuptools.setup(
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
         "versioneer>=0.28",
-        "tqdm",
-        "torchinfo",
-        "openpyxl",
+        "tqdm<5.0.0",
+        "torchinfo<2.0.0",
+        "openpyxl<4.0.0",
     ],
-    
+    extras_require={
+        "dev": [
+            "pytest<8.0.0",
+            "pytest-cov>=4.1.0,<5.0.0",
+            "timm<1.0.0",
+            "transformers<5.0.0",
+            "black>=23.7.0,<24.0.0",
+            "flake8>=6.0.0,<7.0.0",
+        ]
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
@@ -70,7 +79,6 @@ setuptools.setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         ],
-
     entry_points={
         'console_scripts': [
             'mapreader = mapreader.mapreader:main',
