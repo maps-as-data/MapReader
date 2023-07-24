@@ -32,7 +32,7 @@ In order to train a CV classifier to recognize visual features within your maps,
 Why use MapReader?
 -------------------
 
-MapReader becomes useful when the number of maps you wish to analyze exceeds the number which you (or your team) are willing/capable of annotating manually.
+MapReader becomes useful when the number of maps you wish to analyze exceeds the number which you (or your team) are willing to/capable of annotating manually.
 
 This exact number will vary depending on:
 
