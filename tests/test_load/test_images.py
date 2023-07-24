@@ -1,16 +1,18 @@
-import pytest
-from pytest import approx
-from mapreader import loader
-from mapreader.load.images import MapImages
 import os
 from pathlib import Path
-import pathlib
-import pandas as pd
-import geopandas as geopd
-from PIL import Image
-import PIL
 from random import randint
+
+import geopandas as geopd
+import pandas as pd
+import PIL
+import pytest
+from PIL import Image
+from pytest import approx
 from shapely.geometry import Polygon
+
+from mapreader import loader
+from mapreader.load.images import MapImages
+
 
 @pytest.fixture
 def sample_dir():
@@ -18,7 +20,7 @@ def sample_dir():
 
 @pytest.fixture
 def init_ts_maps(sample_dir, tmp_path):
-    """Initialises MapImages object (with metadata from csv and patches).
+    """Initializes MapImages object (with metadata from csv and patches).
 
     Returns
     -------
@@ -48,8 +50,8 @@ def matching_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png"]
     for file in files:
-        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
-        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
+        rand_color = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
@@ -60,8 +62,8 @@ def extra_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png"]
     for file in files:
-        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
-        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
+        rand_color = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     return test_path 
 
@@ -71,8 +73,8 @@ def missing_metadata_dir(tmp_path, metadata_df):
     os.mkdir(test_path)
     files = ["file1.png", "file2.png", "file3.png", "file4.png"]
     for file in files:
-        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
-        Image.new("RGB",(9,9), color = rand_colour).save(f"{test_path}/{file}")
+        rand_color = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
     metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
     return test_path
 
@@ -107,14 +109,14 @@ def test_loader_add_metadata(sample_dir):
     )
 
 #if metadata info matches 
-def test_matching_metdata_csv(matching_metadata_dir, keys):
+def test_matching_metadata_csv(matching_metadata_dir, keys):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.csv")
     for parent_id in my_files.list_parents():
         assert list(my_files.images["parent"][parent_id].keys()) == keys
 
-def test_matching_metdata_xlsx(matching_metadata_dir, keys):
+def test_matching_metadata_xlsx(matching_metadata_dir, keys):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     my_files.add_metadata(f"{matching_metadata_dir}/metadata_df.xlsx")
@@ -158,7 +160,7 @@ def test_extra_metadata_csv_ignore_mismatch(extra_metadata_dir,keys):
 def test_extra_metadata_csv_errors(extra_metadata_dir):  
     my_files=loader(f"{extra_metadata_dir}/*png")
     assert len(my_files)==2
-    with pytest.raises(ValueError, match="information about non-existant images"):
+    with pytest.raises(ValueError, match="information about non-existent images"):
         my_files.add_metadata(f"{extra_metadata_dir}/metadata_df.csv")
     
 #if there is missing info in metadata

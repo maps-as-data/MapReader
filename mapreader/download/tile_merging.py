@@ -2,16 +2,16 @@
 
 import logging
 import os
+from typing import Union
 
 from PIL import Image
 from tqdm import tqdm
-from typing import Union
 
-from .data_structures import GridIndex, GridBoundingBox
+from .data_structures import GridBoundingBox, GridIndex
+from .tile_loading import DEFAULT_IMG_DOWNLOAD_FORMAT, DEFAULT_TEMP_FOLDER
 
 logger = logging.getLogger(__name__)
 
-from .tile_loading import DEFAULT_TEMP_FOLDER, DEFAULT_IMG_DOWNLOAD_FORMAT
 DEFAULT_OUT_FOLDER = "./"
 DEFAULT_IMG_STORE_FORMAT = ("png", "PNG")
 
@@ -112,7 +112,7 @@ class TileMerger:
         return image
 
     def _load_tile_size(self, grid_bb: GridBoundingBox):
-        """Finds size of tiles bassed on GridBoundingBox
+        """Finds size of tiles based on GridBoundingBox
 
         Parameters
         ----------
@@ -146,7 +146,7 @@ class TileMerger:
         Returns
         -------
         bool
-            True if file has sucessfully downloaded, False if not.
+            True if file has successfully downloaded, False if not.
         """
         os.makedirs(self.output_folder, exist_ok=True)
 

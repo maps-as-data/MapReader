@@ -18,7 +18,7 @@ To ensure opening new issues is as easy as possible, we have set up three issue 
 These are:
 
 - **Bug report** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/bug_report.md>`__): This template should be used to report bugs in the MapReader code.
-- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`__): This template should be used to suggest new features/functionalities that could be incoroportated into the MapReader code.
+- **Feature request** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/feature_request.md>`__): This template should be used to suggest new features/functionalities that could be incorporated into the MapReader code.
 - **Documentation update** (`preview here <https://github.com/Living-with-machines/MapReader/blob/main/.github/ISSUE_TEMPLATE/documentation_update.md>`__): This template should be used for reporting errors, like typos and broken links, in our documentation and to suggest updates or new additions to documentation/tutorials/worked examples/etc. 
 
 If you feel your issue does not fit any of these templates, please open a blank issue and provide as much information as possible to help the MapReader community work to resolve the issue.
