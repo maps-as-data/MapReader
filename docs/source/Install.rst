@@ -55,7 +55,7 @@ For example, if you would like to use venv, open your terminal and use the follo
       python3 --version
 
    If this returns a version below 3.7, you will need download an updated python version. 
-   You can do this by donwloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
+   You can do this by downloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
 
    You should then run the above command again to check your python version has updated.
 
@@ -130,7 +130,7 @@ Step 3: Add virtual python environment to notebooks
    
       python -m ipykernel install --user --name mapreader --display-name "Python (mr_py)"
 
-.. note:: if you have used a differe nt name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
+.. note:: if you have used a different name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
 
 Troubleshooting
 ----------------

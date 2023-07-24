@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from typing import Optional, Union
+
 from mapreader.load.images import MapImages
-from typing import Optional, Union, Dict
 
 
 def loader(

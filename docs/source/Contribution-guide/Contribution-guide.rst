@@ -38,7 +38,7 @@ Here are a few examples of such actions:
 
 - Use respectful, gender-neutral and inclusive language (learn more about inclusive writing on page 22 of University of Leicester Study Skills pdf, also available as a zipped html).
 - Aim to include perspectives of researchers from different research backgrounds such as science, humanities and social sciences by not limiting the scope to only scientific domains.
-- Make sure that colour palettes used throughout figures are accessible to colour-blind readers and contributors.
+- Make sure that color palettes used throughout figures are accessible to color-blind readers and contributors.
 
 Pre-requisites
 --------------
@@ -47,7 +47,7 @@ Regardless of how you will be contributing to MapReader, you will need to:
 
 1. Ensure you have a `GitHub account <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_ set up.
 2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our `GitHub guide <https://mapreader.readthedocs.io/en/latest/Contribution-guide/GitHub-guide.html>`__ before continuing.
-3. Set up a virtual python environment and install MapReader (as per our `Installation instuctions <https://mapreader.readthedocs.io/en/latest/Install.html>`_).
+3. Set up a virtual python environment and install MapReader (as per our `Installation instructions <https://mapreader.readthedocs.io/en/latest/Install.html>`_).
 4. Have read this guide.
 
 Ways to contribute

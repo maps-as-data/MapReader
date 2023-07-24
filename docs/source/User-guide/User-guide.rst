@@ -8,7 +8,7 @@ This User Guide provides guidance to all users of MapReader on how to use the Ma
 We have tried to split our guide logically, into smaller sub-tasks, which may be used as part of an end-to-end run of the MapReader pipeline (detailed `here <https://mapreader.readthedocs.io/en/latest/About.html>`__).
 
 Throughout this User Guide, we will use OS maps as examples. 
-**These are provided for illustratative purposes only.**
+**These are provided for illustrative purposes only.**
 
 Please read this User Guide **before** looking through the worked examples.
 

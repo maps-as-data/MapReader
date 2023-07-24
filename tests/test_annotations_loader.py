@@ -1,10 +1,13 @@
-from mapreader import AnnotationsLoader
-from mapreader.classify.datasets import PatchDataset
-import pytest
 from pathlib import Path
+
 import pandas as pd
+import pytest
 from torch.utils.data import DataLoader, RandomSampler
 from torchvision import transforms
+
+from mapreader import AnnotationsLoader
+from mapreader.classify.datasets import PatchDataset
+
 
 @pytest.fixture
 def sample_dir():
@@ -35,7 +38,7 @@ def test_load_df(sample_dir):
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
 
-def test_create_datsets_default_transforms(load_annots):
+def test_create_datasets_default_transforms(load_annots):
     annots = load_annots
     annots.create_datasets(0.5, 0.3, 0.2)
     assert annots.dataset_sizes == {'train': 14, 'val': 9, 'test': 6}

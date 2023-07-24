@@ -5,7 +5,7 @@ Load
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``Load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
+MapReader's ``Load`` subpackage is used to load, visualize and patchify images (e.g. maps) saved locally. 
 
 Load images (and metadata)
 ----------------------------
@@ -28,7 +28,7 @@ or
 
     my_files = loader("./path/to/files/", file_ext="png")
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
 .. code-block:: python
 
@@ -81,7 +81,7 @@ For example, if you have downloaded your maps using the default settings of our 
 
     - ``index_col`` - By default, this is set to ``0`` so the first column of your csv/excel spreadsheet will be used as the index column when creating a pandas dataframe. If you would like to use a different column you can specify ``index_col``.
     - ``columns`` - By default, the ``.add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
-    - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metaadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
+    - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
     - ``delimiter`` - By default, this is set to ``|``. If your csv file is delimited using a different delimiter you should specify the delimiter argument.
 
 
@@ -107,7 +107,7 @@ To patchify your maps, use:
 
 By default, this slices images into 100 x 100 pixel patches which are saved as ``.png`` files in a newly created directory called ``./patches_100_pixel`` (here, ``100`` represents the ``patch_size`` and ``pixel`` represents the method used to slice your parent images). 
 
-If you are following our reccommended directory structure, after patchifying, your directory should look like this:
+If you are following our recommended directory structure, after patchifying, your directory should look like this:
 
 ::
 
@@ -254,7 +254,7 @@ By default, this will save all the metadata for your patches in a newly created 
 
 .. note:: The patch images are **not** saved within this file, only the metadata and patch coordinates.
 
-Visualise (optional)
+Visualize (optional)
 ---------------------
 
 To view a random sample of your images, use: 
@@ -333,11 +333,11 @@ This can be done using:
     Further usage of the ``.show_parent()`` method is detailed in :ref:`Further_analysis`.
     Please head there for guidance on advanced usage.
 
-.. todo:: Move 'Further analysis/visualisation' to a different page (e.g. as an appendix)
+.. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)
 
 .. _Further_analysis:
 
-Further analysis/visualisation (optional) 
+Further analysis/visualization (optional) 
 -------------------------------------------
 
 If you have loaded geographic coordinates into your ``MapImages`` object, you may want to calculate the central coordinates of your patches. 
@@ -358,7 +358,7 @@ i.e.:
 
 You will see that center coordinates of each patch have been added to your patch dataframe. 
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each of your patches:
+The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
 
 .. code-block:: python
 
@@ -407,4 +407,4 @@ e.g. to view "mean_pixel_R" on your patches:
     - ``cmap`` - By default, this is set to ``"viridis"```. Any of the color maps found `here <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`__ can be used instead.
     - ``plot_histogram`` - Setting this to ``True`` (by specifying ``plot_histogram=True``) will result in a histogram of the values found in ``column_to_plot`` being produced.
 
-.. todo:: Move 'Further analysis/visualisation' to a different page (e.g. as an appendix)
+.. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)
