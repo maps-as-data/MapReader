@@ -529,7 +529,7 @@ def prepare_annotation(
                 metadata=annot_file,
                 index_col=0,
                 ignore_mismatch=True,
-                delimiter="\t",
+                delimiter=",",
                 tree_level=tree_level,
             )
 
@@ -584,7 +584,7 @@ def prepare_annotation(
                 metadata=annot_file,
                 index_col=0,
                 ignore_mismatch=True,
-                delimiter="\t",
+                delimiter=",",
                 tree_level=tree_level,
             )
         # convert images to dataframe
@@ -659,7 +659,7 @@ def save_annotation(
 
     # Read an existing annotation file (for the same task and userID)
     try:
-        image_df = pd.read_csv(annot_file, sep="\t", index_col=0)
+        image_df = pd.read_csv(annot_file, index_col=0)
     except:
         image_df = pd.DataFrame(columns=["image_id", "image_path", "label"])
 
@@ -684,7 +684,7 @@ def save_annotation(
 
     if len(image_df) > 0:
         #image_df = image_df.set_index("image_id")
-        image_df.to_csv(annot_file, mode="w", sep="\t")
+        image_df.to_csv(annot_file, mode="w")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")
         print(f"[INFO] Total number of saved annotations: {len(image_df)}")

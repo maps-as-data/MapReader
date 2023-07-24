@@ -52,7 +52,8 @@ def matching_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_color = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
+    metadata_df.to_csv(f"{test_path}/metadata_df.tsv", sep="\t")
     metadata_df.to_excel(f"{test_path}/metadata_df.xlsx")
     return test_path
 
@@ -64,7 +65,7 @@ def extra_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_color = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
     return test_path 
 
 @pytest.fixture
@@ -75,7 +76,7 @@ def missing_metadata_dir(tmp_path, metadata_df):
     for file in files:
         rand_color = (randint(0,255), randint(0,255), randint(0,255))
         Image.new("RGB",(9,9), color = rand_color).save(f"{test_path}/{file}")
-    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep="\t")
+    metadata_df.to_csv(f"{test_path}/metadata_df.csv", sep=",")
     return test_path
 
 
@@ -95,6 +96,14 @@ def test_loader_add_metadata(sample_dir):
     image_ID = "cropped_74488689.png"
     ts_map = loader(f"{sample_dir}/{image_ID}")
     ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    assert "coordinates" in ts_map.images["parent"][image_ID].keys()
+    assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
+    #metadata tsv
+    image_ID = "cropped_74488689.png"
+    ts_map = loader(f"{sample_dir}/{image_ID}")
+    ts_map.add_metadata(f"{sample_dir}/ts_downloaded_maps.tsv", delimiter="\t")
     assert "coordinates" in ts_map.images["parent"][image_ID].keys()
     assert ts_map.images["parent"][image_ID]["coordinates"] == approx(
         (-4.83, 55.80, -4.21, 56.059), rel=1e-2
@@ -190,7 +199,7 @@ def test_metadata_missing_name_or_image_id(matching_metadata_dir):
     my_files=loader(f"{matching_metadata_dir}/*png")
     assert len(my_files)==3
     incomplete_metadata_df = pd.DataFrame({"coord":[(1.1,1.5),(2.1,1.0),(3.1,4.5)], "other":[1,2,3]})
-    incomplete_metadata_df.to_csv(f"{matching_metadata_dir}/incomplete_metadata_df.csv", sep="|")
+    incomplete_metadata_df.to_csv(f"{matching_metadata_dir}/incomplete_metadata_df.csv", sep=",")
     with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):
         my_files.add_metadata(incomplete_metadata_df)
     with pytest.raises(ValueError, match = "'name' or 'image_id' should be one of the columns"):

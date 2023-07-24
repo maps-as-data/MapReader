@@ -28,7 +28,7 @@ class PatchDataset(Dataset):
         self,
         patch_df: Union[pd.DataFrame, str],
         transform: Union[str, transforms.Compose, Callable],
-        delimiter: str = "\t",
+        delimiter: str = ",",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
@@ -47,7 +47,7 @@ class PatchDataset(Dataset):
             and performs image transformations can be used.
             At minimum, transform should be ``torchvision.transforms.ToTensor()``.
         delimiter : str, optional
-            The delimiter to use when reading the dataframe. By default ``"\t"``.
+            The delimiter to use when reading the dataframe. By default ``","``.
         patch_paths_col : str, optional
             The name of the column in the DataFrame containing the image paths. Default is "image_path".
         label_col : str, optional
@@ -329,7 +329,7 @@ class PatchContextDataset(PatchDataset):
         patch_df: Union[pd.DataFrame, str],
         transform1: str,
         transform2: str,
-        delimiter: str = "\t",
+        delimiter: str = ",",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
@@ -356,7 +356,7 @@ class PatchContextDataset(PatchDataset):
             Torchvision transform to be applied to target images.
             Either "train" or "val".
         delimiter : str
-            The delimiter to use when reading the csv file. By default ``"\t"``.
+            The delimiter to use when reading the csv file. By default ``","``.
         patch_paths_col : str, optional
             The name of the column in the DataFrame containing the image paths. Default is "image_path".
         label_col : str, optional
