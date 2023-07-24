@@ -40,7 +40,7 @@ If you're new to virtual environments in Python, this tutorial provides a good i
 Jupyter notebooks
 ------------------
 
-A Jupyter notebook is an interactive computational environment that allows you to write and run code, visualise data, and write narrative text all in the same place. 
+A Jupyter notebook is an interactive computational environment that allows you to write and run code, visualize data, and write narrative text all in the same place. 
 It's a popular tool among data scientists and is commonly used for data analysis, machine learning, and scientific computing. 
 
 If you're new to Jupyter notebooks, here's a great place to start: 

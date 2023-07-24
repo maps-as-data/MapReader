@@ -3,14 +3,14 @@
 import logging
 import os
 import urllib.request
+from typing import Union
 
 from joblib import Parallel, delayed
 from tqdm import tqdm
-from typing import Union
+
+from .data_structures import GridBoundingBox, GridIndex
 
 logger = logging.getLogger(__name__)
-
-from .data_structures import GridIndex, GridBoundingBox
 
 DEFAULT_TEMP_FOLDER = "_tile_cache/" # must end with a "/"
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"

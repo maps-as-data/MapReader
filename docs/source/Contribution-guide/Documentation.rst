@@ -13,7 +13,7 @@ Documentation dependencies
 
 If you would like to edit or add to the MapReader documentation, you will need to install ``sphinx`` along with the packages detailed in ``MapReader/docs/requirements.txt``.
 
-To do this (assuming you have installed MapReader from source, as per our `Installation instuctions <https://mapreader.readthedocs.io/en/latest/Install.html>`_), use:
+To do this (assuming you have installed MapReader from source, as per our `Installation instructions <https://mapreader.readthedocs.io/en/latest/Install.html>`_), use:
 
 .. code-block:: bash 
 

@@ -1,22 +1,24 @@
 import json
 import os
-from typing import Union, Optional
-from shapely.geometry import Polygon, LineString, Point, shape
-from shapely.ops import unary_union
-from .tile_loading import TileDownloader, DEFAULT_TEMP_FOLDER
-from .tile_merging import TileMerger
-from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
 import re
+import shutil
+from functools import reduce
+from typing import Optional, Union
+
+import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+
 # import cartopy.crs as ccrs - would be good to get this fixed (i think by conda package)
 import numpy as np
 import pandas as pd
-import shutil
-from functools import reduce
 from pyproj.crs import CRS
-import matplotlib.image as mpimg
+from shapely.geometry import LineString, Point, Polygon, shape
+from shapely.ops import unary_union
 from tqdm.auto import tqdm
 
+from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
+from .tile_loading import DEFAULT_TEMP_FOLDER, TileDownloader
+from .tile_merging import TileMerger
 
 
 class SheetDownloader:
@@ -30,7 +32,7 @@ class SheetDownloader:
         download_url: Union[str, list],
     ) -> None:
         """
-        Iniitalise SheetDownloader class
+        Initialize SheetDownloader class
 
         Parameters
         ----------
@@ -495,7 +497,7 @@ class SheetDownloader:
         Returns
         -------
         bool
-            True if map was downloaded sucessfully, False if not.
+            True if map was downloaded successfully, False if not.
         """
         map_name = str("map_" + feature["properties"]["IMAGE"])
         self.downloader.download_tiles(feature["grid_bb"])
@@ -670,7 +672,7 @@ class SheetDownloader:
         overwrite: Optional[bool] = False,
     ) -> None:
         """
-        Donwloads any map sheets which are found within or intersecting with a defined polygon.
+        Downloads any map sheets which are found within or intersecting with a defined polygon.
 
         Parameters
         ----------
@@ -714,7 +716,7 @@ class SheetDownloader:
             self.get_merged_polygon()
 
         if self.merged_polygon.disjoint(polygon):
-            raise ValueError(f"[ERROR] Polygon is out of map metadata bounds.")
+            raise ValueError("[ERROR] Polygon is out of map metadata bounds.")
 
         features = []
         for feature in self.features:
@@ -765,7 +767,7 @@ class SheetDownloader:
             self.get_merged_polygon()
 
         if self.merged_polygon.disjoint(coords):
-            raise ValueError(f"[ERROR] Coordinates are out of map metadata bounds.")
+            raise ValueError("[ERROR] Coordinates are out of map metadata bounds.")
 
         features = []
         for feature in self.features:
@@ -813,7 +815,7 @@ class SheetDownloader:
             self.get_merged_polygon()
 
         if self.merged_polygon.disjoint(line):
-            raise ValueError(f"[ERROR] Line is out of map metadata bounds.")
+            raise ValueError("[ERROR] Line is out of map metadata bounds.")
 
         features = []
         for feature in self.features:
@@ -1019,7 +1021,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                         color="r",
                     )
                 
-        except:
+        except ImportError:
             print("[WARNING] Cartopy is not installed. \
 If you would like to install it, please follow instructions at https://scitools.org.uk/cartopy/docs/latest/installing.html")
 

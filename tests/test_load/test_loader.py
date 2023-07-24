@@ -1,8 +1,11 @@
-from mapreader import loader
-import pytest
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
+
+import pytest
+
+from mapreader import loader
+
 
 @pytest.fixture
 def sample_dir():

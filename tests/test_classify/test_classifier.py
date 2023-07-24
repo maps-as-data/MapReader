@@ -139,13 +139,13 @@ def test_add_criterion(load_classifier):
     classifier.add_criterion(my_criterion)
     assert isinstance(classifier.criterion, torch.nn.L1Loss)
 
-def test_initialize_optimiser(load_classifier):
+def test_initialize_optimizer(load_classifier):
     classifier = load_classifier
     classifier.initialize_optimizer("sgd")
     assert isinstance(classifier.optimizer, torch.optim.SGD)
     
-    params2optimise = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
-    classifier.initialize_optimizer("adam", params2optimise)
+    params2optimize = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
+    classifier.initialize_optimizer("adam", params2optimize)
     assert isinstance(classifier.optimizer, torch.optim.Adam)
 
 def test_initialize_scheduler(load_classifier):
