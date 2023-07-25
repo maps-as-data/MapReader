@@ -592,7 +592,6 @@ Please check your image paths and update them if necessary.')
             label_col=self.label_col,
             label_index_col="label_index",
         )
-        
         if df_test is not None:
             test_dataset = PatchDataset(
                 df_test,
