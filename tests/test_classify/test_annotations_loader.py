@@ -16,7 +16,7 @@ def sample_dir():
 @pytest.fixture
 def load_annots(sample_dir):
     annots = AnnotationsLoader()
-    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True)
+    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True, remove_broken=False, ignore_broken=True)
     return annots
 
 @pytest.mark.dependency(name="load_annots_csv", scope="session")
@@ -25,7 +25,7 @@ def test_load_csv(load_annots, sample_dir):
     assert len(annots.annotations) == 29
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
-    annots.load(f"{sample_dir}/test_annots_append.csv", append=True) #test append
+    annots.load(f"{sample_dir}/test_annots_append.csv", append=True, remove_broken=False, ignore_broken=True) #test append
     assert len(annots.annotations) == 31
     assert annots.unique_labels == ["stuff", "nothing", "new"]
     assert annots.labels_map == {0: 'stuff', 1: 'nothing', 2: 'new'}
@@ -34,7 +34,7 @@ def test_load_csv(load_annots, sample_dir):
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
     df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep=",", index_col=0)
-    annots.load(df)
+    annots.load(df, remove_broken=False, ignore_broken=True)
     assert len(annots.annotations) == 29
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
@@ -83,10 +83,15 @@ def test_create_dataloaders_no_sampler(load_annots):
 
 #errors
 
-def test_load_csv_errors():
+def test_load_fake_csv_errors():
     annots=AnnotationsLoader()
     with pytest.raises(ValueError, match="cannot be found"):
         annots.load("a_fake_file.csv")
+    
+def test_load_csv_errors(sample_dir):
+    annots=AnnotationsLoader()
+    with pytest.raises(ValueError, match="No annotations remaining"):
+        annots.load(f"{sample_dir}/test_annots.csv")
 
 def test_create_datasets_errors(load_annots):
     annots = AnnotationsLoader()

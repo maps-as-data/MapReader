@@ -189,8 +189,8 @@ class PatchDataset(Dataset):
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
             )
 
         img = self.transform(img)
@@ -239,9 +239,8 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         return img
 
@@ -603,9 +602,8 @@ class PatchContextDataset(PatchDataset):
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         if not return_image:
             os.makedirs(self.context_save_path, exist_ok=True)
@@ -743,9 +741,8 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         if self.create_context:
             context_img = self.save_parents_idx(idx, return_image=True)

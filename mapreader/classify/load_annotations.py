@@ -33,6 +33,9 @@ class AnnotationsLoader:
         self,
         annotations: Union[str, pd.DataFrame],
         delimiter: Optional[str] =",",
+        images_dir: Optional[str] = None,
+        remove_broken: Optional[bool] = True,
+        ignore_broken: Optional[bool] = False,
         id_col: Optional[str] = "image_id",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = "label",
@@ -49,6 +52,19 @@ class AnnotationsLoader:
             Can either be the path to a csv file or a pandas.DataFrame.
         delimiter : Optional[str], optional
             The delimiter to use when loading the csv file as a dataframe, by default ",".
+        images_dir : Optional[str], optional
+            The path to the directory in which patches are stored.
+            This argument should be passed if image paths are different from the path saved in annotations dataframe/csv.
+            If None, no updates will be made to the image paths in the annotations dataframe/csv. 
+            By default None.
+        remove_broken : Optional[bool], optional
+            Whether to remove annotations with broken image paths.
+            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            By default True.
+        ignore_broken : Optional[bool], optional
+            Whether to ignore broken image paths (only valid if remove_broken=False).
+            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+            If False, annotations with broken paths will raise error. By default, False.
         id_col : Optional[str], optional
             The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
@@ -100,6 +116,10 @@ class AnnotationsLoader:
                 annotations, delimiter, scramble_frame, reset_index
             )
 
+        if images_dir:
+            abs_images_dir = os.path.abspath(images_dir)
+            annotations[self.patch_paths_col] = annotations[self.id_col].apply(lambda x: os.path.join(abs_images_dir, x))
+
         annotations = annotations.astype(
             {self.label_col: str}
         )  # ensure labels are interpreted as strings
@@ -108,6 +128,8 @@ class AnnotationsLoader:
             self.annotations = pd.concat([self.annotations, annotations])
         else:
             self.annotations = annotations
+
+        self._check_patch_paths(remove_broken=remove_broken, ignore_broken=ignore_broken)
 
         unique_labels = self.annotations[self.label_col].unique().tolist()
         self.unique_labels = unique_labels
@@ -165,6 +187,58 @@ class AnnotationsLoader:
         annotations.drop_duplicates(subset=self.id_col, inplace=True, keep="first")
         return annotations
 
+    def _check_patch_paths(
+            self,
+            remove_broken: Optional[bool] = True,
+            ignore_broken: Optional[bool] = False,
+        ) -> None:
+
+        """
+        Checks the file paths of annotations and manages broken paths.
+
+        Parameters
+        ----------
+        remove_broken : Optional[bool], optional
+            Whether to remove annotations with broken image paths.
+            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            By default True.
+        ignore_broken : Optional[bool], optional
+            Whether to ignore broken image paths (only valid if remove_broken=False).
+            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+        """
+
+        if len(self.annotations) == 0:
+            return
+
+        broken_paths = []
+        for i, patch_path in self.annotations[self.patch_paths_col].items():
+            if not os.path.exists(patch_path):
+                broken_paths.append(patch_path)
+                if remove_broken:
+                    self.annotations.drop(i, inplace=True)
+        
+        if len(broken_paths)!=0: # write broken paths to text file
+            with open('broken_files.txt', 'w') as f:
+                for broken_path in broken_paths:
+                    f.write(f"{broken_path}\n")
+
+            print(f"[WARNING] {len(broken_paths)} files cannot be found.\n\
+Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
+
+            if remove_broken:
+                if len(self.annotations)==0:
+                    raise ValueError("[ERROR] No annotations remaining. \
+Please check your files exist and, if possible, update your file paths using the 'images_dir' argument.")
+                else:
+                    print(f"[INFO] Annotations with broken file paths have been removed.\n\
+Number of annotations remaining: {len(self.annotations)}")
+            
+            else: # raise error for 'remove_broken=False'
+                if ignore_broken:
+                    print(f"[WARNING] Continuing with {len(broken_paths)} broken file paths.")
+                else:
+                    raise ValueError(f"[ERROR] {len(broken_paths)} files cannot be found.")
+
     def show_patch(self, patch_id: str) -> None:
         """
         Display a patch and its label.
@@ -185,7 +259,11 @@ class AnnotationsLoader:
         patch_row = self.annotations[self.annotations[self.id_col] == patch_id]
         patch_path = patch_row[self.patch_paths_col].values[0]
         patch_label = patch_row[self.label_col].values[0]
-        img = Image.open(patch_path)
+        try:
+            img = Image.open(patch_path)
+        except FileNotFoundError as e:
+            e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths in your annonations.csv file and update them if necessary.')
 
         plt.imshow(img)
         plt.axis("off")
@@ -295,7 +373,11 @@ class AnnotationsLoader:
                 # int(ceil(chunks / num_cols))
                 plt.subplot((chunks // num_cols), num_cols, counter)
                 patch_path = annots2review.iloc[image_idx][self.patch_paths_col]
-                img = Image.open(patch_path)
+                try:
+                    img = Image.open(patch_path)
+                except FileNotFoundError as e:
+                    e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.')
                 plt.imshow(img)
                 plt.xticks([])
                 plt.yticks([])
@@ -384,7 +466,11 @@ class AnnotationsLoader:
         for i in range(num_samples):
             plt.subplot(int(num_samples / 2.0), 3, i + 1)
             patch_path = annot2plot.iloc[i][self.patch_paths_col]
-            img = Image.open(patch_path)
+            try:
+                img = Image.open(patch_path)
+            except FileNotFoundError:
+                raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.')
             plt.imshow(img)
             plt.axis("off")
             plt.title(annot2plot.iloc[i][self.label_col])
@@ -489,7 +575,7 @@ class AnnotationsLoader:
 
         else:
             df_val = df_temp
-            df_test = pd.DataFrame(columns=self.annotations.columns)
+            df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
 
         train_dataset = PatchDataset(
@@ -506,15 +592,19 @@ class AnnotationsLoader:
             label_col=self.label_col,
             label_index_col="label_index",
         )
-        test_dataset = PatchDataset(
-            df_test,
-            test_transform,
-            patch_paths_col=self.patch_paths_col,
-            label_col=self.label_col,
-            label_index_col="label_index",
-            )
+        if df_test is not None:
+            test_dataset = PatchDataset(
+                df_test,
+                test_transform,
+                patch_paths_col=self.patch_paths_col,
+                label_col=self.label_col,
+                label_index_col="label_index",
+                )
+            datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
+        
+        else:
+            datasets = {"train": train_dataset, "val": val_dataset}
 
-        datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
         dataset_sizes = {
             set_name: len(datasets[set_name]) for set_name in datasets.keys()
         }
@@ -523,11 +613,9 @@ class AnnotationsLoader:
         self.dataset_sizes = dataset_sizes
 
         print(
-            f'[INFO] Number of annotations in each set:\n\
-        - Train:        {dataset_sizes["train"]}\n\
-        - Validate:     {dataset_sizes["val"]}\n\
-        - Test:         {dataset_sizes["test"]}'
-        )
+            f'[INFO] Number of annotations in each set:')
+        for set_name in datasets.keys():
+            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
 
     def create_dataloaders(
         self,
@@ -661,5 +749,5 @@ class AnnotationsLoader:
                 f'[INFO] Number of instances of each label (from column "{self.label_col}"):'
             )
             for label, count in value_counts.items():
-                print(f"        - {label}:      {count}")
+                print(f"    - {label}:  {count}")
         return ""
