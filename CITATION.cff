@@ -27,11 +27,7 @@ authors:
     orcid: 'https://orcid.org/0000-0002-4465-2284'
     affiliation: The Alan Turing Institute
     email: a.smith@turing.ac.uk
-  - given-names: Kalle
-    family-names: Westerling
-    affiliation: The Alan Turing Institute
-    orcid: 'https://orcid.org/0000-0002-2014-332X'
- - given-names: Daniel C. S.
+  - given-names: Daniel C. S.
     family-names: Wilson
     email: dwilson@turing.ac.uk
     affiliation: The Alan Turing Institute
@@ -41,6 +37,11 @@ authors:
     affiliation: The Alan Turing Institute
     email: rwood@turing.ac.uk
     orcid: 'https://orcid.org/0000-0003-1623-1949'
+  - given-names: Kalle
+    family-names: Westerling
+    email: kwesterling@turing.ac.uk
+    affiliation: The Alan Turing Institute
+    orcid: 'https://orcid.org/0000-0002-2014-332X'
 identifiers:
   - type: url
     value: >-
