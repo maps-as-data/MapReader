@@ -35,6 +35,7 @@ class AnnotationsLoader:
         delimiter: Optional[str] = "\t",
         images_dir: Optional[str] = None,
         remove_broken: Optional[bool] = True,
+        ignore_broken: Optional[bool] = False,
         id_col: Optional[str] = "image_id",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = "label",
@@ -60,6 +61,10 @@ class AnnotationsLoader:
             Whether to remove annotations with broken image paths.
             If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
             By default True.
+        ignore_broken : Optional[bool], optional
+            Whether to ignore broken image paths (only valid if remove_broken=False).
+            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+            If False, annotations with broken paths will raise error. By default, False.
         id_col : Optional[str], optional
             The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
@@ -124,7 +129,7 @@ class AnnotationsLoader:
         else:
             self.annotations = annotations
 
-        self._check_patch_paths(remove_broken=remove_broken)
+        self._check_patch_paths(remove_broken=remove_broken, ignore_broken=ignore_broken)
 
         unique_labels = self.annotations[self.label_col].unique().tolist()
         self.unique_labels = unique_labels
@@ -185,13 +190,28 @@ class AnnotationsLoader:
     def _check_patch_paths(
             self,
             remove_broken: Optional[bool] = True,
+            ignore_broken: Optional[bool] = False,
         ) -> None:
+
+        """
+        Checks the file paths of annotations and manages broken paths.
+
+        Parameters
+        ----------
+        remove_broken : Optional[bool], optional
+            Whether to remove annotations with broken image paths.
+            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            By default True.
+        ignore_broken : Optional[bool], optional
+            Whether to ignore broken image paths (only valid if remove_broken=False).
+            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+        """
 
         if len(self.annotations) == 0:
             return
 
         broken_paths = []
-        for i, patch_path in self.annotations[self.patch_paths_col].iteritems():
+        for i, patch_path in self.annotations[self.patch_paths_col].items():
             if not os.path.exists(patch_path):
                 broken_paths.append(patch_path)
                 if remove_broken:
@@ -214,7 +234,10 @@ Please check your files exist and, if possible, update your file paths using the
 Number of annotations remaining: {len(self.annotations)}")
             
             else: # raise error for 'remove_broken=False'
-                raise ValueError(f"[ERROR] {len(broken_paths)} files cannot be found.")
+                if ignore_broken:
+                    print(f"[WARNING] Continuing with {len(broken_paths)} broken file paths.")
+                else:
+                    raise ValueError(f"[ERROR] {len(broken_paths)} files cannot be found.")
 
     def show_patch(self, patch_id: str) -> None:
         """

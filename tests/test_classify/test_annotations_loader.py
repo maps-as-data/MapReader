@@ -16,7 +16,7 @@ def sample_dir():
 @pytest.fixture
 def load_annots(sample_dir):
     annots = AnnotationsLoader()
-    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True, remove_broken=False)
+    annots.load(f"{sample_dir}/test_annots.csv", reset_index=True, remove_broken=False, ignore_broken=True)
     return annots
 
 @pytest.mark.dependency(name="load_annots_csv", scope="session")
@@ -25,7 +25,7 @@ def test_load_csv(load_annots, sample_dir):
     assert len(annots.annotations) == 29
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
-    annots.load(f"{sample_dir}/test_annots_append.csv", append=True, remove_broken=False) #test append
+    annots.load(f"{sample_dir}/test_annots_append.csv", append=True, remove_broken=False, ignore_broken=True) #test append
     assert len(annots.annotations) == 31
     assert annots.unique_labels == ["stuff", "nothing", "new"]
     assert annots.labels_map == {0: 'stuff', 1: 'nothing', 2: 'new'}
@@ -34,7 +34,7 @@ def test_load_csv(load_annots, sample_dir):
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
     df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep="\t", index_col=0)
-    annots.load(df, remove_broken=False)
+    annots.load(df, remove_broken=False, ignore_broken=True)
     assert len(annots.annotations) == 29
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: 'stuff', 1: 'nothing'}
