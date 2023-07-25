@@ -113,7 +113,7 @@ class AnnotationsLoader:
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
-            annotations[self.patch_paths_col] = f"{abs_images_dir}/"+annotations[self.id_col]
+            annotations[self.patch_paths_col] = annotations[self.id_col].apply(lambda x: os.path.join(abs_images_dir, x))
 
         annotations = annotations.astype(
             {self.label_col: str}
