@@ -1,9 +1,12 @@
-from mapreader import load_patches
-import pytest
 import os
 import pathlib
-from PIL import Image
 from random import randint
+
+import pytest
+from PIL import Image
+
+from mapreader import load_patches
+
 
 @pytest.fixture
 def dirs(tmp_path):
@@ -12,8 +15,8 @@ def dirs(tmp_path):
     os.mkdir(parent_path)
     files = ["file1.png", "file2.png", "file3.png"]
     for file in files:
-        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
-        Image.new("RGB",(9,9), color = rand_colour).save(f"{parent_path}/{file}")
+        rand_color = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_color).save(f"{parent_path}/{file}")
     pathlib.Path(f"{parent_path}/file4.csv").touch()
     os.mkdir(patch_path)
     files = [
@@ -22,8 +25,8 @@ def dirs(tmp_path):
         "patch1-0-1-2-3-#file2.png#.png",
     ]
     for file in files:
-        rand_colour = (randint(0,255), randint(0,255), randint(0,255))
-        Image.new("RGB",(9,9), color = rand_colour).save(f"{patch_path}/{file}")
+        rand_color = (randint(0,255), randint(0,255), randint(0,255))
+        Image.new("RGB",(9,9), color = rand_color).save(f"{patch_path}/{file}")
     return parent_path, patch_path
 
 @pytest.fixture

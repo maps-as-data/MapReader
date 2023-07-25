@@ -3,30 +3,29 @@ try:
 except ImportError:
     pass
 
-import rasterio
-from glob import glob
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.image as mpimg
-import numpy as np
 import os
-import pandas as pd
-from PIL import Image, ImageStat
-import PIL
-from pyproj import Transformer
 import random
-from typing import Literal, Optional, Union, Dict, Tuple, List, Any
-from tqdm.auto import tqdm
+import warnings
+from glob import glob
+from typing import Dict, List, Literal, Optional, Tuple, Union
+
+import matplotlib.image as mpimg
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import PIL
 import rasterio
+from PIL import Image, ImageStat
+from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
 from shapely.geometry import box
+from tqdm.auto import tqdm
 
 os.environ['USE_PYGEOS'] = '0' #see here https://github.com/geopandas/geopandas/issues/2691
 import geopandas as geopd
 
 # Ignore warnings
-import warnings
-
 warnings.filterwarnings("ignore")
 
 
@@ -112,7 +111,7 @@ class MapImages:
         test_ext = files[0].split(".")[-1]
         if not all(file.split(".")[-1] == test_ext for file in files):
             raise ValueError(
-                "[ERROR] Directory with multiple file types detected - please specificy file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
+                "[ERROR] Directory with multiple file types detected - please specify file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
             )
         
         return files
@@ -261,7 +260,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         metadata: Union[str, pd.DataFrame],
         index_col: Optional[Union[int, str]] = 0,
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] = ",",
         columns: Optional[List[str]] = None,
         tree_level: Optional[str] = "parent",
         ignore_mismatch: Optional[bool] = False,
@@ -272,16 +271,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Parameters
         ----------
         metadata : str or pandas.DataFrame
-            Path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
+            Path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
         index_col : int or str, optional
             Column to use as the index when reading the file and converting into a panda.DataFrame.
             Accepts column indices or column names.
             By default ``0`` (first column).
 
             Only used if a file path is provided as the ``metadata`` parameter.
-            Ingored if ``columns`` parameter is passed.
+            Ignored if ``columns`` parameter is passed.
         delimiter : str, optional
-            Delimiter used in the ``csv`` file, by default ``"\t"``.
+            Delimiter used in the ``csv`` file, by default ``","``.
 
             Only used if a ``csv`` file path is provided as
             the ``metadata`` parameter.
@@ -324,7 +323,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         
         else: #if not df
             if os.path.isfile(metadata):
-                if metadata.endswith('csv'):
+                if metadata.endswith(('xls', 'xlsx')):
+                    if columns:
+                        metadata_df = pd.read_excel(
+                            metadata, usecols=columns,
+                            )
+                    else:
+                        metadata_df = pd.read_excel(
+                            metadata, index_col=index_col,
+                            )
+                        columns=list(metadata_df.columns)
+            
+                elif metadata.endswith('sv'): #csv, tsv, etc
                     if columns:
                         metadata_df = pd.read_csv(
                             metadata, usecols=columns, delimiter=delimiter
@@ -335,20 +345,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                             )
                         columns=list(metadata_df.columns)
                 
-                elif metadata.endswith(('xls', 'xlsx')):
-                    if columns:
-                        metadata_df = pd.read_excel(
-                            metadata, usecols=columns,
-                            )
-                    else:
-                        metadata_df = pd.read_excel(
-                            metadata, index_col=index_col,
-                            )
-                        columns=list(metadata_df.columns)
 
             else:
                 raise ValueError(
-                    "[ERROR] ``metadata`` should either be the path to a ``csv``, ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
+                    "[ERROR] ``metadata`` should either be the path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
                 )
 
         # identify image_id column
@@ -387,7 +387,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if not ignore_mismatch:
             if len(missing_metadata)!=0 and len(extra_metadata)!=0:
                 raise ValueError(f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
-[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+[ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}"
                 )
             elif len(missing_metadata)!=0: 
                 raise ValueError(
@@ -395,7 +395,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 )
             elif len(extra_metadata)!=0:
                 raise ValueError(
-                    f"[ERROR] Metadata contains information about non-existant images: {[*extra_metadata]}"
+                    f"[ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}"
                 )
 
         for key in self.images[tree_level].keys():
@@ -513,7 +513,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         The method runs
         :meth:`mapreader.load.images.MapImages._add_coord_increments_id`
         for each image present at the parent level, which calculates
-        pixel-wise delta longitute (``dlon``) and delta latititude (``dlat``)
+        pixel-wise delta longitude (``dlon``) and delta latitude (``dlat``)
         for the image and adds the data to it.
         """
         print("[INFO] Add coord-increments, tree level: parent")
@@ -647,7 +647,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self, image_id: Union[int, str], verbose: Optional[bool] = False
     ) -> None:
         """
-        Add pixel-wise delta longitute (``dlon``) and delta latititude
+        Add pixel-wise delta longitude (``dlon``) and delta latitude
         (``dlat``) to the metadata of the image with the specified ``image_id``
         in the parent tree level.
 
@@ -889,7 +889,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         else:
             raise NotImplementedError(
-                f'[ERROR] Method must be one of "great-circle", "great_cirlce", "gc", "geodesic" or "gd", not: {method}'
+                f'[ERROR] Method must be one of "great-circle", "great_circle", "gc", "geodesic" or "gd", not: {method}'
             )
 
         size_in_m = (left, bottom, right, top)  # anticlockwise order
@@ -1226,7 +1226,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         # Calculate std pixel values
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
 
-    def convert_images(self, save: Optional[bool] = False, save_format: Optional[str] ="csv") -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def convert_images(
+            self, 
+            save: Optional[bool] = False, 
+            save_format: Optional[str] ="csv",
+            delimiter: Optional[str]=",",
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the ``MapImages`` instance's ``images`` dictionary into pandas
         DataFrames for easy manipulation.
@@ -1240,6 +1245,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             If ``save = True``, the file format to use when saving the dataframes.
             Options of csv ("csv") or excel ("excel" or "xlsx"). 
             By default, "csv".
+        delimiter : str, optional
+            The delimiter to use when saving the dataframe. By default ``","``.
 
         Returns
         -------
@@ -1256,9 +1263,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if save:
 
             if save_format == "csv":
-                parent_df.to_csv("parent_df.csv", sep="\t")
+                parent_df.to_csv("parent_df.csv", sep=delimiter)
                 print('[INFO] Saved parent dataframe as "parent_df.csv"')
-                patch_df.to_csv("patch_df.csv", sep="\t")
+                patch_df.to_csv("patch_df.csv", sep=delimiter)
                 print('[INFO] Saved patch dataframe as "patch_df.csv"')
             elif save_format in ["excel", "xlsx"]:
                 parent_df.to_excel("parent_df.xlsx")
@@ -1353,9 +1360,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Transparency level for plotting ``value`` with floating point
             values ranging from 0.0 (transparent) to 1 (opaque), by default ``1.0``.
         cmap : str, optional
-            Colour map used to visualise chosen ``column_to_plot`` values, by default ``"viridis"``.
+            Color map used to visualize chosen ``column_to_plot`` values, by default ``"viridis"``.
         discrete_cmap : int, optional
-            Number of discrete colours to use in colour map, by default ``256``.
+            Number of discrete colors to use in color map, by default ``256``.
         plot_histogram : bool, optional
             If ``True``, plot histograms of the ``value`` of images. By default ``False``.
         save_kml_dir : str or bool, optional
@@ -1383,7 +1390,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if not isinstance(image_ids, list):
             raise ValueError(
-                f"[ERROR] Please pass image_ids as str or list of strings."
+                "[ERROR] Please pass image_ids as str or list of strings."
             )
 
         if all(self._get_tree_level(image_id) == "parent" for image_id in image_ids):
@@ -1873,6 +1880,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         clear_images: Optional[bool] = False,
         index_col_patch: Optional[int] = 0,
         index_col_parent: Optional[int] = 0,
+        delimiter: Optional[str] = ",",
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
@@ -1892,6 +1900,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Column to set as index for the patch DataFrame, by default ``0``.
         index_col_parent : int, optional
             Column to set as index for the parent DataFrame, by default ``0``.
+        delimiter : str, optional
+            The delimiter to use when reading the dataframe. By default ``","``.
 
         Returns
         -------
@@ -1906,12 +1916,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             raise ValueError("[ERROR] Please pass ``patch_path`` as string.")
 
         if os.path.isfile(parent_path):
-            parent_df = pd.read_csv(parent_path, index_col=index_col_parent)
+            parent_df = pd.read_csv(parent_path, index_col=index_col_parent, sep=delimiter)
         else:
             raise ValueError(f"[ERROR] {parent_path} cannot be found.")
                     
         if os.path.isfile(patch_path):
-            patch_df = pd.read_csv(patch_path, index_col=index_col_patch)
+            patch_df = pd.read_csv(patch_path, index_col=index_col_patch, sep=delimiter)
         else:
             raise ValueError(f"[ERROR] {patch_path} cannot be found.")
 

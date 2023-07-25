@@ -96,7 +96,7 @@ class Downloader:
         if success:
             print(f'[INFO] Downloaded "{map_name}.png"')
         else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessfull.')
+            print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
 
         shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return success
