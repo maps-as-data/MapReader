@@ -548,7 +548,7 @@ Please check your image paths and update them if necessary.')
             assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
 
         else:
-            df_val = labels_temp
+            df_val = df_temp
             df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
 
@@ -574,8 +574,11 @@ Please check your image paths and update them if necessary.')
                 label_col=self.label_col,
                 label_index_col="label_index",
             )
+            datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
+        
+        else:
+            datasets = {"train": train_dataset, "val": val_dataset}
 
-        datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
         dataset_sizes = {
             set_name: len(datasets[set_name]) for set_name in datasets.keys()
         }
@@ -584,11 +587,9 @@ Please check your image paths and update them if necessary.')
         self.dataset_sizes = dataset_sizes
 
         print(
-            f'[INFO] Number of annotations in each set:\n\
-        - Train:        {dataset_sizes["train"]}\n\
-        - Validate:     {dataset_sizes["val"]}\n\
-        - Test:         {dataset_sizes["test"]}'
-        )
+            f'[INFO] Number of annotations in each set:')
+        for set_name in datasets.keys():
+            print(f"    - {set_name}:{dataset_sizes[set_name]}")
 
     def create_dataloaders(
         self,
@@ -722,5 +723,5 @@ Please check your image paths and update them if necessary.')
                 f'[INFO] Number of instances of each label (from column "{self.label_col}"):'
             )
             for label, count in value_counts.items():
-                print(f"        - {label}:      {count}")
+                print(f"    - {label}:{count}")
         return ""
