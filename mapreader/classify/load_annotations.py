@@ -202,12 +202,12 @@ class AnnotationsLoader:
                 for broken_path in broken_paths:
                     f.write(f"{broken_path}\n")
             
-            print(f"[WARNING] {len(broken_paths)} files cannot be found.\
-Check '{os.path.abspath(broken_paths.txt)}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
+            print(f"[WARNING] {len(broken_paths)} files cannot be found.\n\
+Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
 
             if remove_broken:
                 if len(self.annotations)==0:
-                    raise ValueError("[ERROR] No annotations remaining.\
+                    raise ValueError("[ERROR] No annotations remaining. \
 Please check your files exist and, if possible, update your file paths using the 'images_dir' argument.")
                 else:
                     print(f"[INFO] Annotations with broken file paths have been removed.\n\
@@ -235,9 +235,9 @@ Number of annotations remaining: {len(self.annotations)}")
         patch_label = patch_row[self.label_col].values[0]
         try:
             img = Image.open(patch_path)
-        except FileNotFoundError:
-            raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
-Please check your image paths and update them if necessary.')
+        except FileNotFoundError as e:
+            e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths in your annonations.csv file and update them if necessary.')
 
         plt.imshow(img)
         plt.axis("off")
@@ -349,8 +349,8 @@ Please check your image paths and update them if necessary.')
                 patch_path = annots2review.iloc[image_idx][self.patch_paths_col]
                 try:
                     img = Image.open(patch_path)
-                except FileNotFoundError:
-                    raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
+                except FileNotFoundError as e:
+                    e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
 Please check your image paths and update them if necessary.')
                 plt.imshow(img)
                 plt.xticks([])
