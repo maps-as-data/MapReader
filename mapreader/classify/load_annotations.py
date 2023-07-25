@@ -203,7 +203,7 @@ class AnnotationsLoader:
                     f.write(f"{broken_path}\n")
             
             print(f"[WARNING] {len(broken_paths)} files cannot be found.\
-Check 'broken_paths.txt' for more details and, if possible, update your file paths using the 'images_dir' argument.")
+Check '{os.path.abspath(broken_paths.txt)}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
 
             if remove_broken:
                 if len(self.annotations)==0:
