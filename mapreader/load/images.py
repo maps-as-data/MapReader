@@ -9,7 +9,6 @@ import warnings
 from glob import glob
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
-import geopandas as geopd
 import matplotlib.image as mpimg
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
@@ -24,6 +23,7 @@ from shapely.geometry import box
 from tqdm.auto import tqdm
 
 os.environ['USE_PYGEOS'] = '0' #see here https://github.com/geopandas/geopandas/issues/2691
+import geopandas as geopd
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
