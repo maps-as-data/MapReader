@@ -201,7 +201,7 @@ class AnnotationsLoader:
             with open('broken_files.txt', 'w') as f:
                 for broken_path in broken_paths:
                     f.write(f"{broken_path}\n")
-            
+
             print(f"[WARNING] {len(broken_paths)} files cannot be found.\n\
 Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
 
@@ -212,6 +212,9 @@ Please check your files exist and, if possible, update your file paths using the
                 else:
                     print(f"[INFO] Annotations with broken file paths have been removed.\n\
 Number of annotations remaining: {len(self.annotations)}")
+            
+            else: # raise error for 'remove_broken=False'
+                raise ValueError(f"[ERROR] {len(broken_paths)} files cannot be found.")
 
     def show_patch(self, patch_id: str) -> None:
         """
@@ -589,7 +592,7 @@ Please check your image paths and update them if necessary.')
         print(
             f'[INFO] Number of annotations in each set:')
         for set_name in datasets.keys():
-            print(f"    - {set_name}:{dataset_sizes[set_name]}")
+            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
 
     def create_dataloaders(
         self,
@@ -723,5 +726,5 @@ Please check your image paths and update them if necessary.')
                 f'[INFO] Number of instances of each label (from column "{self.label_col}"):'
             )
             for label, count in value_counts.items():
-                print(f"    - {label}:{count}")
+                print(f"    - {label}:  {count}")
         return ""
