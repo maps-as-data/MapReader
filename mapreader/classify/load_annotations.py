@@ -32,7 +32,7 @@ class AnnotationsLoader:
     def load(
         self,
         annotations: Union[str, pd.DataFrame],
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] =",",
         images_dir: Optional[str] = None,
         remove_broken: Optional[bool] = True,
         ignore_broken: Optional[bool] = False,
@@ -51,10 +51,10 @@ class AnnotationsLoader:
             The annotations.
             Can either be the path to a csv file or a pandas.DataFrame.
         delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+            The delimiter to use when loading the csv file as a dataframe, by default ",".
         images_dir : Optional[str], optional
             The path to the directory in which patches are stored.
-            This argument should be passed if image paths are different from the path saved in annoations dataframe/csv.
+            This argument should be passed if image paths are different from the path saved in annotations dataframe/csv.
             If None, no updates will be made to the image paths in the annotations dataframe/csv. 
             By default None.
         remove_broken : Optional[bool], optional
@@ -145,7 +145,7 @@ class AnnotationsLoader:
     def _load_annotations_csv(
         self,
         annotations: str,
-        delimiter: Optional[str] = "\t",
+        delimiter: Optional[str] = ",",
         scramble_frame: Optional[bool] = False,
         reset_index: Optional[bool] = False,
     ) -> pd.DataFrame:
@@ -156,7 +156,7 @@ class AnnotationsLoader:
         annotations : str
             The path to the annotations csv file.
         delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default "\t".
+            The delimiter to use when loading the csv file as a dataframe, by default ",".
         scramble_frame : Optional[bool], optional
             Whether to shuffle the rows of the dataframe, by default False.
         reset_index : Optional[bool], optional
@@ -592,13 +592,12 @@ Please check your image paths and update them if necessary.')
             label_col=self.label_col,
             label_index_col="label_index",
         )
-        if df_test is not None:
-            test_dataset = PatchDataset(
-                df_test,
-                test_transform,
-                patch_paths_col=self.patch_paths_col,
-                label_col=self.label_col,
-                label_index_col="label_index",
+        test_dataset = PatchDataset(
+            df_test,
+            test_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
             )
             datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
         
