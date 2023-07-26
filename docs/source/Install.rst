@@ -162,3 +162,13 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
 
       brew install openblas
       OPENBLAS="$(brew --prefix openblas)" pip install mapreader
+
+Cartopy
+~~~~~~~~
+
+`Cartopy <https://scitools.org.uk/cartopy/docs/latest/>`__ is used by MapReader's download subpackage to plot maps and geospatial data.
+It is not essential to the functioning of MapReader and so is not listed as a dependancy.
+
+If you would like to use MapReader's plotting functions, you should download cartopy by following the instructions `here <https://scitools.org.uk/cartopy/docs/latest/installing.html>`__. 
+
+.. note:: There are some required dependencies which you may need to install first. These are listed `here <https://scitools.org.uk/cartopy/docs/latest/installing.html#required-dependencies>`__.
