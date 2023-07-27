@@ -4,6 +4,11 @@ Project CV
 Peer-reviewed publications 
 ---------------------------
 
+Non-Peer-reviewed publications 
+---------------------------
+
+
+
 Presentations and workshops
 ----------------------------
 
@@ -50,4 +55,7 @@ Other outputs
 Research Using MapReader
 --------------
 
-"Beyond The Tracks"
+Kaspar Beelen, Katherine McDonough, Jon Lawrence, Josh Rhodes, Daniel C.S. Wilson
+"Beyond the Tracks: connecting people, places and stations to re-assess the impact of rail in Victorian Britain"
+
+Long Presentation at DH2022, Tokyo; forthcoming book chapter.
