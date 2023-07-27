@@ -28,8 +28,9 @@ Presentations and workshops
 
 ## MapReader Invited Workshop at SCAI Paris 27 June 2023
 
-- MapReader team takeover of Sorbonne Centre for AI Summer School in Paris
+- MapReader team takeover of [Sorbonne Centre for AI](https://scai.sorbonne-universite.fr/) Summer School in Paris
 - Ran participatory workshop for students and researchers demonstrating MapReader to international audience
+- 
 
 
 Add links to slides (always add to mapreader.team@gmail.com drive)
@@ -45,3 +46,4 @@ Visualizations
 
 Other outputs
 --------------
+
