@@ -16,6 +16,7 @@
     <a href="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
         <img alt="Integration Tests badge" src="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
     </a>
+    <a href="https://zenodo.org/badge/latestdoi/430661738"><img src="https://zenodo.org/badge/430661738.svg" alt="DOI"></a>
     <br/>
 </p>
 
