@@ -86,8 +86,9 @@ Various **plotting and analysis** functionalities are also included (based on pa
 
 ## How to cite MapReader
 
-If you use MapReader in your work, please consider acknowledging us by citing [our SIGSPATIAL paper](https://dl.acm.org/doi/10.1145/3557919.3565812):
+If you use MapReader in your work, please cite both the MapReader repo and [our SIGSPATIAL paper](https://dl.acm.org/doi/10.1145/3557919.3565812):
 
+- Kasra Hosseini, Rosie Wood, Andy Smith, Katie McDonough, Daniel C.S. Wilson, Christina Last, Kalle Westerling, and Evangeline Mae Corcoran. “Living-with-machines/mapreader: End of Lwm”. Zenodo, July 27, 2023. https://doi.org/10.5281/zenodo.8189653.
 - Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
 
 ## Acknowledgements
