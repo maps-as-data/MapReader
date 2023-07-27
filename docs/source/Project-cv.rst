@@ -4,13 +4,36 @@ Project CV
 Peer-reviewed publications 
 ---------------------------
 
+Kasra Hosseini and others, "Maps of a Nation? The Digitized Ordnance Survey for New Historical Research," Journal of Victorian Culture, Volume 26, Issue 2, April 2021, Pages 284–299, https://doi.org/10.1093/jvcult/vcab009
+
+Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
+- Data (training and inferred): https://zenodo.org/record/7147906#.ZG3YD-zMI-Q
+- Models: https://huggingface.co/models?other=arxiv:2111.15592
+
 Non-Peer-reviewed publications 
 ---------------------------
 
+Hosseini, Kasra, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. ‘MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale’. arXiv, 30 November 2021. https://doi.org/10.48550/arXiv.2111.15592.
 
 
-Presentations and workshops
-----------------------------
+Data outputs
+-------------
+
+Training and inferred data for ACM SIGSPATIAL 2022 research experiments published on Zenodo: https://zenodo.org/record/7147906#.ZG3YD-zMI-Q
+
+Model outputs
+--------------
+
+Models fine-tuned for the ACM SIGSPATIAL 2022 research experiments shared on Hugging Face: https://huggingface.co/models?other=arxiv:2111.15592 
+
+Visualizations
+---------------
+
+National Library of Scotland [MapReader Railway and Building Dataset Viewer](https://maps.nls.uk/projects/mapreader/#zoom=6.0&lat=56.00000&lon=-4.00000)
+
+
+Workshops
+---------
 
 ## Maps as Data Workshop 13-14 March 2003
 
@@ -38,19 +61,49 @@ Presentations and workshops
 - 
 
 
-Add links to slides (always add to mapreader.team@gmail.com drive)
+Tutorials
+---------
 
-Data outputs
--------------
+Programming Historian Lessons
 
-Model outputs
---------------
+.. Add links to slides (always add to mapreader.team@gmail.com drive)
 
-Visualizations
----------------
+Talks
+-----
+Katherine McDonough, “How to Ask Maps Questions,” “Historians Among the Machines: From Reproducible Computational Experiments to Persuasive Historical Arguments” session, American Historical Association Annual Meeting, San Francisco, CA 4-7 Jan. 
 
-Other outputs
---------------
+Katherine McDonough, “Maps as Data for Open Historical Research,” Roundtable on AI and the Historical Profession: Applications and Implications, American Historical Association Annual Meeting, San Francisco, CA 4-7 Jan.
+
+
+Katherine McDonough, Keynote, “[Living with Machines: MapReader](https://www.niso.org/events/2023-niso-humanities-roundtable),” 2023 NISO (National Information Standards Organization) Humanities Roundtable, 20 June 2023
+
+Obtic séminaire
+
+Kasra Hosseini and Katherine McDonough, AIUK 2022
+
+Kaspar Beelen and Katherine McDonough, University of Aberdeen
+
+Katherine McDonough, “Building Collaborations for Historical Research,” Digitization and accessibility of cultural heritage collections DIGARV Seminar (Swedish Research Council), [virtual] 29 Oct. 2021
+
+Katherine McDonough, “Maps as [Open] [Humanities] Data: From Access to Analysis,” Reimagining Industry/Academic/Cultural Heritage Partnerships in AI Workshop, AEOLIAN Network (Artificial Intelligence for Cultural Organisations), [virtual] 25 Oct 2021
+
+Kaspar Beelen, Kasra Hosseini, Katherine McDonough, Daniel Wilson, Deep Learning approaches in GIScience, ROyal Geographical Society Annual Conference
+
+O. Vane, K. Hosseini, DCS Wilson, “Maps in Time: Visualising the Historical Ordnance Survey,” Information+, [virtual] 27 Sept-2 Oct. 2021
+
+Katherine McDonough, Vision with Machines, Unlocking Historical Maps of Southeast Asia, Yale-NUS
+
+Kaspar Beelen, Kasra Hosseini, Katherine McDonough, Daniel van Strien, Olivia Vane, Daniel Wilson, IHR Digital History Seminar
+
+Katherine McDonough, Daniel van Strien, 21st Century Curatorship Talk, British Library
+
+Katherine McDonough, Daniel van Strien, Fantastic Futures 2019
+
+Katherine McDonough, University of Manchester DH Seminar
+
+Jon Lawrence, Katherine McDonough, University of Exeter DH Seminar
+
+Katherine McDonough, The Association for Geographic Information-Scotland
 
 Research Using MapReader
 --------------
