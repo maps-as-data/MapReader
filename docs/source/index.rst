@@ -12,6 +12,8 @@ MapReader
    :maxdepth: 1
 
    About
+   Events
+   Project-cv
    Beginners-info
    Install
    Input-guidance
