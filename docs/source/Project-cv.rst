@@ -14,9 +14,9 @@ Kasra Hosseini, Katherine McDonough, Daniel van Strien, Olivia Vane, Daniel C.S.
 Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough, "MapReader: a computer vision pipeline for the semantic exploration of maps at scale." In _Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22)_. Association for Computing Machinery, New York, NY, USA (2022), 8–19. https://doi.org/10.1145/3557919.3565812
 
 Non-Peer-reviewed publications 
----------------------------
+--------------------------------
 
-Hosseini, Kasra, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. ‘MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale’. arXiv, 30 November 2021. https://doi.org/10.48550/arXiv.2111.15592.
+Hosseini, Kasra, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. "MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale." arXiv, 30 November 2021. https://doi.org/10.48550/arXiv.2111.15592.
 
 
 Data outputs
@@ -39,16 +39,14 @@ National Library of Scotland [MapReader Railway and Building Dataset Viewer](htt
 Workshops
 ---------
 
-## Maps as Data Workshop 13-14 March 2003
+**Maps as Data Workshop 13-14 March 2003**
 
 - Two-Day workshop held at the BMA in London
 - c.25 invited international participants
 - First public presentation of the library/tool, together with research presentations
 - Extensive user testing and evaluation of the library by possible users in digital mapping and academic communities
 
------
-
-## MapReader Public Launch Event 7-8 June 2023
+**MapReader Public Launch Event 7-8 June 2023**
 
 - Two-Day launch held at the Alan Turing Institute in London
 - Included research presentations by MapReader team
@@ -56,9 +54,7 @@ Workshops
 - Hands-on workshop to demonstrate and experiment with MapReader to academic and other users
 - https://livingwithmachines.ac.uk/event/mapreader-launch/
 
------
-
-## MapReader Invited Workshop at SCAI Paris 27 June 2023
+**MapReader Invited Workshop at SCAI Paris 27 June 2023**
 
 - MapReader invited to [Sorbonne Centre for AI](https://scai.sorbonne-universite.fr/) Summer School: École d’été en analyse de l’histoire de la mer et des océans - [ANHIMO 2023](https://sciences.sorbonne-universite.fr/evenements/ecole-dete-en-analyse-de-lhistoire-de-la-mer-et-des-oceans-anhimo-2023)
 - Ran participatory workshop for students and researchers demonstrating MapReader to international audience
@@ -67,13 +63,16 @@ Workshops
 Tutorials
 ---------
 
-Programming Historian Lessons
-- Daniel van Strien, Kaspar Beelen, Melvin Wevers, Thomas Smits, and Katherine McDonough, Computer Vision for the Humanities: An Introduction to Deep Learning for Image Classification (Part 1), https://doi.org/10.46430/phen0101
-- Daniel van Strien, Kaspar Beelen, Melvin Wevers, Thomas Smits, and Katherine McDonough, Computer Vision for the Humanities: An Introduction to Deep Learning for Image Classification (Part 2), https://doi.org/10.46430/phen0102
+**Programming Historian Lessons**
+
+Daniel van Strien, Kaspar Beelen, Melvin Wevers, Thomas Smits, and Katherine McDonough, Computer Vision for the Humanities: An Introduction to Deep Learning for Image Classification (Part 1), https://doi.org/10.46430/phen0101
+
+Daniel van Strien, Kaspar Beelen, Melvin Wevers, Thomas Smits, and Katherine McDonough, Computer Vision for the Humanities: An Introduction to Deep Learning for Image Classification (Part 2), https://doi.org/10.46430/phen0102
 
 
 Talks
 -----
+
 Katherine McDonough, “How to Ask Maps Questions,” “Historians Among the Machines: From Reproducible Computational Experiments to Persuasive Historical Arguments” session, American Historical Association Annual Meeting, San Francisco, CA 4-7 Jan. 2024.
 
 Katherine McDonough, “Maps as Data for Open Historical Research,” Roundtable on AI and the Historical Profession: Applications and Implications, American Historical Association Annual Meeting, San Francisco, CA 4-7 Jan. 2024.
@@ -110,7 +109,7 @@ Olivia Vane, Kasra Hosseini, Daniel CS Wilson, “Maps in Time: Visualising the 
 
 
 Research Using MapReader
---------------
+-------------------------
 
 Kaspar Beelen, Katherine McDonough, Jon Lawrence, Josh Rhodes, Daniel C.S. Wilson
 "Beyond the Tracks: connecting people, places and stations to re-assess the impact of rail in Victorian Britain, "Long Presentation at DH2022, Tokyo.
