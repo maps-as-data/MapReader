@@ -7,8 +7,6 @@ Peer-reviewed publications
 Kasra Hosseini and others, "Maps of a Nation? The Digitized Ordnance Survey for New Historical Research," Journal of Victorian Culture, Volume 26, Issue 2, April 2021, Pages 284–299, https://doi.org/10.1093/jvcult/vcab009
 
 Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
-- Data (training and inferred): https://zenodo.org/record/7147906#.ZG3YD-zMI-Q
-- Models: https://huggingface.co/models?other=arxiv:2111.15592
 
 Non-Peer-reviewed publications 
 ---------------------------
