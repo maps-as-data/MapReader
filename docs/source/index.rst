@@ -9,7 +9,8 @@ MapReader
 **A computer vision pipeline for exploring and analyzing images at scale** 
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 2
 
    About
    Events
@@ -20,6 +21,7 @@ MapReader
    User-guide/User-guide
    Worked-examples/Worked-examples
    api/index
+   Coc
    Contribution-guide/Contribution-guide
    Developers-guide
 
