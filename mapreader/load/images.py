@@ -124,14 +124,20 @@ class MapImages:
 
         print(f"\n#parents: {len(self.parents)}")
         for i, img in enumerate(self.parents):
-            print(os.path.relpath(img))
+            try:
+                print(os.path.relpath(img))
+            except ValueError: #if no rel path (e.g. mounted on different drives)
+                print(os.path.abspath(img))
             if i >= 10:
                 print("...")
                 break
 
         print(f"\n#patches: {len(self.patches)}")
         for i, img in enumerate(self.patches):
-            print(os.path.relpath(img))
+            try:
+                print(os.path.relpath(img))
+            except ValueError: #if no rel path (e.g. mounted on different drives)
+                print(os.path.abspath(img))
             if i >= 10:
                 print("...")
                 break
@@ -971,7 +977,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in tqdm(image_ids):
             image_path = self.images[tree_level][image_id]["image_path"]
 
-            self._print_if_verbose(f"[INFO] Patchifying {os.path.relpath(image_path)}", verbose)
+            try:
+                full_path = print(os.path.relpath(image_path))
+            except ValueError: #if no rel path (e.g. mounted on different drives)
+                full_path = print(os.path.abspath(image_path))
+
+            self._print_if_verbose(f"[INFO] Patchifying {full_path}", verbose)
 
             # make sure the dir exists
             self._make_dir(path_save)
