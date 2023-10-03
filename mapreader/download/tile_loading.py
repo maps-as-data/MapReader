@@ -1,4 +1,5 @@
 # Code adapted from https://github.com/baurls/TileStitcher.
+from __future__ import annotations
 
 import logging
 import os
@@ -12,7 +13,7 @@ from .data_structures import GridBoundingBox, GridIndex
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TEMP_FOLDER = "_tile_cache/" # must end with a "/"
+DEFAULT_TEMP_FOLDER = "_tile_cache/"  # must end with a "/"
 DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 
 

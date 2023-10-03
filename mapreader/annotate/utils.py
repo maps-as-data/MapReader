@@ -1,29 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
+import os
+import random
+import sys
+from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
-import random
 import requests
-import sys
 import yaml
-
-from mapreader import loader, load_patches
-
-from ipyannotate.toolbar import Toolbar
-from ipyannotate.tasks import Task, Tasks
-from ipyannotate.canvas import OutputCanvas
 from ipyannotate.annotation import Annotation
 from ipyannotate.buttons import (
-    ValueButton as Button,
-    NextButton as Next,
     BackButton as Back,
 )
-
+from ipyannotate.buttons import (
+    NextButton as Next,
+)
+from ipyannotate.buttons import (
+    ValueButton as Button,
+)
+from ipyannotate.canvas import OutputCanvas
+from ipyannotate.tasks import Task, Tasks
+from ipyannotate.toolbar import Toolbar
 from PIL import Image
-from typing import List, Optional, Union, Dict, Tuple
+
+from mapreader import load_patches, loader
 
 
 def display_record(record: Tuple[str, str, str, int, int]) -> None:
@@ -171,7 +175,7 @@ def display_record(record: Tuple[str, str, str, int, int]) -> None:
 
 def prepare_data(
     df: pd.DataFrame,
-    col_names: Optional[List[str]] = ["image_path", "parent_id"],
+    col_names: Optional[List[str]] = None,
     annotation_set: Optional[str] = "001",
     label_col_name: Optional[str] = "label",
     redo: Optional[bool] = False,
@@ -212,6 +216,8 @@ def prepare_data(
         counter.
     """
 
+    if col_names is None:
+        col_names = ["image_path", "parent_id"]
     if (label_col_name in list(df.columns)) and (not redo):
         already_annotated = len(df[~df[label_col_name].isnull()])
         print(f"Number of already annotated images: {already_annotated}")
@@ -261,7 +267,7 @@ def prepare_data(
 def annotation_interface(
     data: List,
     list_labels: List,
-    list_colors: Optional[List[str]] = ["red", "green", "blue", "green"],
+    list_colors: Optional[List[str]] = None,
     annotation_set: Optional[str] = "001",
     method: Optional[str] = "ipyannotate",
     list_shortcuts: Optional[List[str]] = None,
@@ -306,6 +312,8 @@ def annotation_interface(
     library, which is a browser-based tool for annotating data.
     """
 
+    if list_colors is None:
+        list_colors = ["red", "green", "blue", "green"]
     if method == "ipyannotate":
         if not list_shortcuts:
             list_shortcuts = [
@@ -371,7 +379,7 @@ def prepare_annotation(
     userID: str,
     task: str,
     annotation_tasks_file: str,
-    custom_labels: List[str] = [],
+    custom_labels: List[str] = None,
     annotation_set: Optional[str] = "001",
     redo_annotation: Optional[bool] = False,
     patch_paths: Optional[Union[str, bool]] = False,
@@ -478,6 +486,8 @@ def prepare_annotation(
     """
 
     # Specify global variables so they can be used in display_record function
+    if custom_labels is None:
+        custom_labels = []
     global annotation_tasks
     global x_offset
     global y_offset
@@ -683,7 +693,7 @@ def save_annotation(
                 new_labels += 1
 
     if len(image_df) > 0:
-        #image_df = image_df.set_index("image_id")
+        # image_df = image_df.set_index("image_id")
         image_df.to_csv(annot_file, mode="w")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")

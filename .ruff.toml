@@ -6,6 +6,8 @@ select = [
 ]
 ignore = [
   "E501",   # Line too long
+  "E722",   # Do not use bare 'except'
+  "B904",   # Within an 'except' clause ...
 ]
 unfixable = [
   "F841", # Removes unused variables

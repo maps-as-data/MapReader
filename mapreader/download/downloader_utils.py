@@ -1,15 +1,17 @@
-from shapely.geometry import Polygon, LineString, box
+from __future__ import annotations
 
 import math
 from typing import Tuple
 
-from .data_structures import Coordinate, GridIndex, GridBoundingBox
+from shapely.geometry import LineString, Polygon, box
+
+from .data_structures import Coordinate, GridBoundingBox, GridIndex
 
 
 def create_polygon_from_latlons(
-    min_lat: float, 
-    min_lon: float, 
-    max_lat: float, 
+    min_lat: float,
+    min_lon: float,
+    max_lat: float,
     max_lon: float,
 ) -> Polygon:
     """Creates a polygon from latitudes and longitudes.
@@ -24,7 +26,7 @@ def create_polygon_from_latlons(
         maximum latitude
     max_lon : float
         maximum longitude
-    
+
     Returns
     -------
     Polygon
@@ -35,6 +37,7 @@ def create_polygon_from_latlons(
 
     polygon = box(min_x, min_y, max_x, max_y)
     return polygon
+
 
 def create_line_from_latlons(
     lat1_lon1: tuple,
@@ -54,10 +57,11 @@ def create_line_from_latlons(
     LineString
         shapely LineString
     """
-    
-    y1,x1 = lat1,lon1 = lat1_lon1 # for clarity - can delete?
-    y2,x2 = lat2,lon2 = lat2_lon2 # for clarity - can delete?
-    return LineString([(x1,y1),(x2,y2)])
+
+    y1, x1 = lat1, lon1 = lat1_lon1  # for clarity - can delete?
+    y2, x2 = lat2, lon2 = lat2_lon2  # for clarity - can delete?
+    return LineString([(x1, y1), (x2, y2)])
+
 
 def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     """
@@ -81,6 +85,7 @@ def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     end_idx = get_index_from_coordinate(end, zoom_level)
     return GridBoundingBox(start_idx, end_idx)
 
+
 def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     """
     Create shapely.Polygon object from GridBoundingBox
@@ -96,7 +101,9 @@ def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     """
     lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
     upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
-    polygon = create_polygon_from_latlons(lower_corner.lat, lower_corner.lon, upper_corner.lat, upper_corner.lon)
+    polygon = create_polygon_from_latlons(
+        lower_corner.lat, lower_corner.lon, upper_corner.lat, upper_corner.lon
+    )
     return polygon
 
 
@@ -136,7 +143,7 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
     Coordinate
         The upper left corner of the tile.
 
-    
+
     """
     lon, lat = _get_coordinate_from_index(grid_index.x, grid_index.y, grid_index.z)
     return Coordinate(lat, lon)

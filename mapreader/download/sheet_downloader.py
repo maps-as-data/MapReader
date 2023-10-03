@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -73,10 +75,10 @@ class SheetDownloader:
             )
 
         self.tile_server = my_ts
-        
+
         crs_string = CRS(self.metadata["crs"]["properties"]["name"])
         self.crs = crs_string.to_string()
-        
+
     def __str__(self) -> str:
         info = f"[INFO] Metadata file has {self.__len__()} item(s)."
         return info
@@ -111,7 +113,9 @@ class SheetDownloader:
             self.get_polygons()
 
         if self.crs != "EPSG:4326":
-            raise NotImplementedError("[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets using coordinates in WGS1984 (aka EPSG:4326).")
+            raise NotImplementedError(
+                "[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets using coordinates in WGS1984 (aka EPSG:4326)."
+            )
 
         for feature in self.features:
             polygon = feature["polygon"]
@@ -197,7 +201,7 @@ class SheetDownloader:
         wfs_ids : Union[list, int]
             The WFS ID numbers of the maps to download.
         append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
+            Whether to append to current query results list or, if False, start a new list.
             By default False
         print: bool, optional
             Whether to print query results or not.
@@ -211,9 +215,7 @@ class SheetDownloader:
         elif isinstance(wfs_ids, int):
             requested_maps = [wfs_ids]
         else:
-            raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
-            )
+            raise ValueError("[ERROR] Please pass ``wfs_ids`` as int or list of ints.")
 
         if not append:
             self.found_queries = []  # reset each time
@@ -222,14 +224,18 @@ class SheetDownloader:
             wfs_id_no = feature["wfs_id_no"]
 
             if wfs_id_no in requested_maps:
-                if feature not in self.found_queries: #only append if new item
+                if feature not in self.found_queries:  # only append if new item
                     self.found_queries.append(feature)
 
         if print:
             self.print_found_queries()
 
     def query_map_sheets_by_polygon(
-        self, polygon: Polygon, mode: Optional[str] = "within", append: Optional[bool] = False, print: Optional[bool] = False,
+        self,
+        polygon: Polygon,
+        mode: Optional[str] = "within",
+        append: Optional[bool] = False,
+        print: Optional[bool] = False,
     ) -> None:
         """
         Find map sheets which are found within or intersecting with a defined polygon.
@@ -240,11 +246,11 @@ class SheetDownloader:
             shapely Polygon
         mode : str, optional
             The mode to use when finding maps.
-            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon,
             and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
             By default "within".
         append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
+            Whether to append to current query results list or, if False, start a new list.
             By default False
         print: bool, optional
             Whether to print query results or not.
@@ -255,11 +261,15 @@ class SheetDownloader:
         Use ``create_polygon_from_latlons()`` to create polygon.
         """
         if not isinstance(polygon, Polygon):
-            raise ValueError("[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon.")
+            raise ValueError(
+                "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+            )
 
-        if mode not in ["within","intersects"]: 
-            raise NotImplementedError('[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.')
+        if mode not in ["within", "intersects"]:
+            raise NotImplementedError(
+                '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+            )
 
         if not self.polygons:
             self.get_polygons()
@@ -272,18 +282,21 @@ class SheetDownloader:
 
             if mode == "within":
                 if map_polygon.within(polygon):
-                    if map_polygon not in self.found_queries: #only append if new item
+                    if map_polygon not in self.found_queries:  # only append if new item
                         self.found_queries.append(feature)
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
-                    if feature not in self.found_queries: #only append if new item
+                    if feature not in self.found_queries:  # only append if new item
                         self.found_queries.append(feature)
 
         if print:
             self.print_found_queries()
 
     def query_map_sheets_by_coordinates(
-        self, coords: tuple, append: Optional[bool] = False, print: Optional[bool] = False
+        self,
+        coords: tuple,
+        append: Optional[bool] = False,
+        print: Optional[bool] = False,
     ) -> None:
         """
         Find maps sheets which contain a defined set of coordinates.
@@ -294,15 +307,13 @@ class SheetDownloader:
         coords : tuple
             Coordinates in ``(x,y)`` format.
         append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
+            Whether to append to current query results list or, if False, start a new list.
             By default False
         print: bool, optional
             Whether to print query results or not.
             By default False
         """
-        if not isinstance(
-            coords, tuple
-        ):
+        if not isinstance(coords, tuple):
             raise ValueError("[ERROR] Please pass coords as a tuple in the form (x,y).")
 
         coords = Point(coords)
@@ -317,14 +328,17 @@ class SheetDownloader:
             map_polygon = feature["polygon"]
 
             if map_polygon.contains(coords):
-                if feature not in self.found_queries: #only append if new item
+                if feature not in self.found_queries:  # only append if new item
                     self.found_queries.append(feature)
 
         if print:
             self.print_found_queries()
 
     def query_map_sheets_by_line(
-        self, line: LineString, append: Optional[bool] = False, print: Optional[bool] = False
+        self,
+        line: LineString,
+        append: Optional[bool] = False,
+        print: Optional[bool] = False,
     ) -> None:
         """
         Find maps sheets which intersect with a line.
@@ -334,22 +348,22 @@ class SheetDownloader:
         line : LineString
             shapely LineString
         append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
+            Whether to append to current query results list or, if False, start a new list.
             By default False
         print: bool, optional
             Whether to print query results or not.
             By default False
-        
+
         Notes
         -----
         Use ``create_line_from_latlons()`` to create line.
         """
 
-        if not isinstance(
-            line, LineString
-        ): 
-            raise ValueError("[ERROR] Please pass line as shapely.geometry.LineString object.\n\
-[HINT] Use ``create_line_from_latlons()`` to create line.")
+        if not isinstance(line, LineString):
+            raise ValueError(
+                "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line."
+            )
 
         if not self.polygons:
             self.get_polygons()
@@ -361,7 +375,7 @@ class SheetDownloader:
             map_polygon = feature["polygon"]
 
             if map_polygon.intersects(line):
-                if feature not in self.found_queries: #only append if new item
+                if feature not in self.found_queries:  # only append if new item
                     self.found_queries.append(feature)
 
         if print:
@@ -380,17 +394,17 @@ class SheetDownloader:
         Parameters
         ----------
         string : str
-            The string to search for. 
+            The string to search for.
             Can be raw string and use regular expressions.
         keys : str or list, optional
             A key or list of keys used to get the metadata field to search in.
-            
+
             Key(s) will be passed to each features dictionary.
             i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"].
 
-            If ``None``, will search in all metadata fields. By default ``None``. 
+            If ``None``, will search in all metadata fields. By default ``None``.
         append : bool, optional
-            Whether to append to current query results list or, if False, start a new list. 
+            Whether to append to current query results list or, if False, start a new list.
             By default False
         print: bool, optional
             Whether to print query results or not.
@@ -402,7 +416,7 @@ class SheetDownloader:
         """
         if not isinstance(string, str):
             raise ValueError("[ERROR] Please pass ``string`` as a string.")
-        
+
         if keys is None:
             keys = []
         if isinstance(keys, str):
@@ -414,11 +428,13 @@ class SheetDownloader:
             self.found_queries = []  # reset each time
 
         for feature in self.features:
-            field_to_search = reduce(lambda d, key: d.get(key), keys, feature) # reduce(function, sequence to go through, initial)
+            field_to_search = reduce(
+                lambda d, key: d.get(key), keys, feature
+            )  # reduce(function, sequence to go through, initial)
             match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
 
             if match:
-                if feature not in self.found_queries: #only append if new item
+                if feature not in self.found_queries:  # only append if new item
                     self.found_queries.append(feature)
 
         if print:
@@ -460,7 +476,7 @@ class SheetDownloader:
             Path to save merged items (i.e. whole map sheets)
         """
         self.merger = TileMerger(output_folder=f"{path_save}/")
-    
+
     def _check_map_sheet_exists(self, feature: dict) -> bool:
         """
         Checks if a map sheet is already saved.
@@ -474,17 +490,18 @@ class SheetDownloader:
         bool
             True if file exists, False if not.
         """
-        map_name = str("map_" + feature["properties"]["IMAGE"])        
+        map_name = str("map_" + feature["properties"]["IMAGE"])
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
             try:
                 mpimg.imread(f"{path_save}{map_name}.png")
-                print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
+                print(
+                    f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.'
+                )
                 return True
             except OSError:
                 return False
         return False
-            
 
     def _download_map(self, feature: dict) -> bool:
         """
@@ -506,12 +523,12 @@ class SheetDownloader:
             print(f'[INFO] Downloaded "{map_name}.png"')
         else:
             print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
-        
+
         shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return success
 
     def _save_metadata(
-        self, 
+        self,
         feature: dict,
         out_filepath: str,
     ) -> None:
@@ -539,10 +556,10 @@ class SheetDownloader:
             self.extract_published_dates()
 
         published_date = feature["properties"]["published_date"]
-        
+
         grid_bb = feature["grid_bb"]
 
-        #use grid_bb to get coords of actually downloaded tiles
+        # use grid_bb to get coords of actually downloaded tiles
         polygon = get_polygon_from_grid_bb(grid_bb)
         coords = polygon.bounds
 
@@ -553,17 +570,25 @@ class SheetDownloader:
             metadata_to_save,
             index=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
         ).T
-        
+
         if os.path.exists(out_filepath):
             existing_metadata_df = pd.read_csv(out_filepath, sep=",", index_col=0)
-            metadata_df = pd.concat([existing_metadata_df, new_metadata_df], ignore_index=True)
+            metadata_df = pd.concat(
+                [existing_metadata_df, new_metadata_df], ignore_index=True
+            )
             metadata_df.drop_duplicates(subset=["grid_bb"], keep="first", inplace=True)
-        else: 
+        else:
             metadata_df = new_metadata_df
-        
+
         metadata_df.to_csv(out_filepath, sep=",")
 
-    def _download_map_sheets(self, features: list, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False):
+    def _download_map_sheets(
+        self,
+        features: list,
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
+    ):
         """Download map sheets from a list of features.
 
         Parameters
@@ -588,7 +613,10 @@ class SheetDownloader:
                 self._save_metadata(feature, metadata_path)
 
     def download_all_map_sheets(
-        self, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool] = False,
+        self,
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads all map sheets in metadata.
@@ -641,9 +669,7 @@ class SheetDownloader:
         elif isinstance(wfs_ids, int):
             requested_maps = [wfs_ids]
         else:
-            raise ValueError(
-                "[ERROR] Please pass ``wfs_ids`` as int or list of ints."
-            )
+            raise ValueError("[ERROR] Please pass ``wfs_ids`` as int or list of ints.")
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -655,7 +681,7 @@ class SheetDownloader:
         if set(wfs_id_list).isdisjoint(set(requested_maps)):
             raise ValueError("[ERROR] No map sheets with given WFS ID numbers found.")
 
-        features=[]
+        features = []
         for feature in self.features:
             wfs_id_no = feature["wfs_id_no"]
             if wfs_id_no in requested_maps:
@@ -684,7 +710,7 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         mode : str, optional
             The mode to use when finding maps.
-            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon, 
+            Options of ``"within"``, which returns all map sheets which are completely within the defined polygon,
             and ``"intersects""``, which returns all map sheets which intersect/overlap with the defined polygon.
             By default "within".
         overwrite : bool, optional
@@ -694,17 +720,19 @@ class SheetDownloader:
         -----
         Use ``create_polygon_from_latlons()`` to create polygon.
         """
-        if not isinstance(
-            polygon, Polygon
-        ):
-            raise ValueError("[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon.")
+        if not isinstance(polygon, Polygon):
+            raise ValueError(
+                "[ERROR] Please pass polygon as shapely.geometry.Polygon object.\n\
+[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+            )
 
         if mode not in [
             "within",
             "intersects",
         ]:
-            raise NotImplementedError('[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.')
+            raise NotImplementedError(
+                '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
+            )
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -728,11 +756,15 @@ class SheetDownloader:
             elif mode == "intersects":
                 if map_polygon.intersects(polygon):
                     features.append(feature)
-        
+
         self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_coordinates(
-        self, coords: tuple, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite: Optional[bool]= False,
+        self,
+        coords: tuple,
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads any maps sheets which contain a defined set of coordinates.
@@ -750,9 +782,7 @@ class SheetDownloader:
             Whether to overwrite existing maps, by default ``False``.
         """
 
-        if not isinstance(
-            coords, tuple
-        ): 
+        if not isinstance(coords, tuple):
             raise ValueError("[ERROR] Please pass coords as a tuple in the form (x,y).")
 
         coords = Point(coords)
@@ -778,7 +808,11 @@ class SheetDownloader:
         self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_line(
-        self, line: LineString, path_save: Optional[str] = "maps", metadata_fname: Optional[str] = "metadata.csv", overwrite : Optional[bool] = False,
+        self,
+        line: LineString,
+        path_save: Optional[str] = "maps",
+        metadata_fname: Optional[str] = "metadata.csv",
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Downloads any maps sheets which intersect with a line.
@@ -799,11 +833,11 @@ class SheetDownloader:
         Use ``create_line_from_latlons()`` to create line.
         """
 
-        if not isinstance(
-            line, LineString
-        ):
-            raise ValueError("[ERROR] Please pass line as shapely.geometry.LineString object.\n\
-[HINT] Use ``create_line_from_latlons()`` to create line.")
+        if not isinstance(line, LineString):
+            raise ValueError(
+                "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
+[HINT] Use ``create_line_from_latlons()`` to create line."
+            )
 
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -829,8 +863,8 @@ class SheetDownloader:
     def download_map_sheets_by_string(
         self,
         string: str,
-        keys: Union[str, list] = None, 
-        path_save: Optional[str] = "maps", 
+        keys: Union[str, list] = None,
+        path_save: Optional[str] = "maps",
         metadata_fname: Optional[str] = "metadata.csv",
         overwrite: Optional[bool] = False,
     ) -> None:
@@ -840,15 +874,15 @@ class SheetDownloader:
         Parameters
         ----------
         string : str
-            The string to search for. 
+            The string to search for.
             Can be raw string and use regular expressions.
         keys : str or list, optional
             A key or list of keys used to get the metadata field to search in.
-            
+
             Key(s) will be passed to each features dictionary. \
             i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
 
-            If ``None``, will search in all metadata fields. By default ``None``. 
+            If ``None``, will search in all metadata fields. By default ``None``.
         path_save : str, optional
             Path to save map sheets, by default "maps"
         metadata_fname : str, optional
@@ -862,7 +896,7 @@ class SheetDownloader:
         """
         if not isinstance(string, str):
             raise ValueError("[ERROR] Please pass ``string`` as a string.")
-        
+
         if keys is None:
             keys = []
         if isinstance(keys, str):
@@ -878,13 +912,15 @@ class SheetDownloader:
 
         features = []
         for feature in self.features:
-            field_to_search = reduce(lambda d, key: d.get(key), keys, feature) # reduce(function, sequence to go through, initial)
+            field_to_search = reduce(
+                lambda d, key: d.get(key), keys, feature
+            )  # reduce(function, sequence to go through, initial)
             match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
-            
+
             if match:
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)   
+        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
 
     def download_map_sheets_by_queries(
         self,
@@ -963,17 +999,19 @@ class SheetDownloader:
         ----------
         map_extent : Union[str, list, tuple, None], optional
             The extent of the underlying map to be plotted.
-            
-            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.
             If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
-            If None, the map extent will be set automatically. 
+            If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
         if self.crs != "EPSG:4326":
-            print("[WARNING] This method assumes your coordinates are projected using EPSG 4326. The plot may therefore be incorrect.")
-            
+            print(
+                "[WARNING] This method assumes your coordinates are projected using EPSG 4326. The plot may therefore be incorrect."
+            )
+
         if add_id:
             if not self.wfs_id_nos:
                 self.extract_wfs_id_nos()
@@ -982,7 +1020,7 @@ class SheetDownloader:
 
         try:
             import cartopy.crs as ccrs
-            
+
             ax = plt.axes(projection=ccrs.PlateCarree())
             ax.coastlines(resolution="10m", color="black", linewidth=1)
 
@@ -992,8 +1030,8 @@ class SheetDownloader:
                     ax.set_extent(extent)
                 else:
                     raise NotImplementedError(
-                        '[ERROR] Currently only UK is implemented. \
-Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to auto-set map extent.'
+                        "[ERROR] Currently only UK is implemented. \
+Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to auto-set map extent."
                     )
             elif isinstance(map_extent, (list, tuple)):
                 ax.set_extent(map_extent)
@@ -1020,10 +1058,12 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                         f"{text_id}",
                         color="r",
                     )
-                
+
         except ImportError:
-            print("[WARNING] Cartopy is not installed. \
-If you would like to install it, please follow instructions at https://scitools.org.uk/cartopy/docs/latest/installing.html")
+            print(
+                "[WARNING] Cartopy is not installed. \
+If you would like to install it, please follow instructions at https://scitools.org.uk/cartopy/docs/latest/installing.html"
+            )
 
             ax = plt.axes()
 
@@ -1055,16 +1095,16 @@ If you would like to install it, please follow instructions at https://scitools.
         ----------
         map_extent : Union[str, list, tuple, None], optional
             The extent of the underlying map to be plotted.
-            
-            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.
             If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
-            If None, the map extent will be set automatically. 
+            If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
 
-        features_to_plot=self.features
+        features_to_plot = self.features
         self.plot_features_on_map(features_to_plot, map_extent, add_id)
 
     def plot_queries_on_map(
@@ -1079,15 +1119,14 @@ If you would like to install it, please follow instructions at https://scitools.
         ----------
         map_extent : Union[str, list, tuple, None], optional
             The extent of the underlying map to be plotted.
-            
-            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``. 
+
+            If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.
             If a string, only ``"uk"``, ``"UK"`` or ``"United Kingdom"`` are accepted and will limit the map extent to the UK's boundaries.
-            If None, the map extent will be set automatically. 
+            If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
 
-        features_to_plot=self.found_queries
+        features_to_plot = self.found_queries
         self.plot_features_on_map(features_to_plot, map_extent, add_id)
-

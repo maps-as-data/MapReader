@@ -1,4 +1,5 @@
 # Code taken from https://github.com/baurls/TileStitcher.
+from __future__ import annotations
 
 
 class Coordinate:

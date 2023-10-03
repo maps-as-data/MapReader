@@ -1,11 +1,16 @@
-from typing import Union, Optional
-from shapely.geometry import Polygon
-from .data_structures import Coordinate, GridBoundingBox
-from .tile_loading import TileDownloader, DEFAULT_TEMP_FOLDER
-from .tile_merging import TileMerger
-from .downloader_utils import get_index_from_coordinate
-import shutil
+from __future__ import annotations
+
 import os
+import shutil
+from typing import Optional, Union
+
+from shapely.geometry import Polygon
+
+from .data_structures import Coordinate, GridBoundingBox
+from .downloader_utils import get_index_from_coordinate
+from .tile_loading import DEFAULT_TEMP_FOLDER, TileDownloader
+from .tile_merging import TileMerger
+
 
 class Downloader:
     """
@@ -70,13 +75,15 @@ class Downloader:
         bool
             True if file exists, False if not.
         """
-        map_name = self.merger._get_output_name(grid_bb)  
+        map_name = self.merger._get_output_name(grid_bb)
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
-            print(f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.')
-            return True 
+            print(
+                f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.'
+            )
+            return True
         return False
-    
+
     def _download_map(self, grid_bb: GridBoundingBox) -> bool:
         """
         Downloads a map contained within a grid bounding box.

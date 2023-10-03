@@ -1,4 +1,5 @@
 # Code adapted from https://github.com/baurls/TileStitcher.
+from __future__ import annotations
 
 import logging
 import os
@@ -133,7 +134,9 @@ class TileMerger:
         tile_size = img_size[0]
         return tile_size
 
-    def merge(self, grid_bb: GridBoundingBox, file_name: Union[str, None] = None) -> bool:
+    def merge(
+        self, grid_bb: GridBoundingBox, file_name: Union[str, None] = None
+    ) -> bool:
         """Merges cells contained within GridBoundingBox.
 
         Parameters
@@ -156,7 +159,7 @@ class TileMerger:
         )
 
         logger.info("Merging tiles to one file.")
-        
+
         for i, x, j, y in tqdm(
             [
                 (i, x, j, y)
@@ -184,11 +187,9 @@ class TileMerger:
         success = True if os.path.exists(out_path) else False
         if success:
             logger.info(
-            "Merge successful! The image has been stored at '{}'".format(out_path)
+                "Merge successful! The image has been stored at '{}'".format(out_path)
             )
         else:
-            logger.warning(
-            "Merge unsuccessful! '{}' not saved.".format(out_path)
-            )
-        
+            logger.warning("Merge unsuccessful! '{}' not saved.".format(out_path))
+
         return success

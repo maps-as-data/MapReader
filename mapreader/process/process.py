@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 try:
     import rasterio
     from rasterio.warp import (
+        Resampling,
         calculate_default_transform,
         reproject,
-        Resampling,
     )
     from rasterio.windows import get_data_window
 except ImportError:
     pass
 
+import distutils.spawn
 import os
 import subprocess
-import distutils.spawn
-
 from glob import glob
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
 
 def preprocess_all(

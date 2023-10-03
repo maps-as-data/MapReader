@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import copy
 import os
@@ -19,7 +20,7 @@ from .classifier import ClassifierContainer
 class ClassifierContextContainer(ClassifierContainer):
     def train(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
+        phases: Optional[List[str]] = None,
         num_epochs: Optional[int] = 25,
         save_model_dir: Optional[Union[str, None]] = "models",
         verbosity_level: Optional[int] = 1,
@@ -76,6 +77,8 @@ class ClassifierContextContainer(ClassifierContainer):
             file. If no temporary file is found, it continues without loading.
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         try:
             self.train_core(
                 phases,
@@ -96,7 +99,7 @@ class ClassifierContextContainer(ClassifierContainer):
 
     def train_core(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
+        phases: Optional[List[str]] = None,
         num_epochs: Optional[int] = 25,
         save_model_dir: Optional[Union[str, None]] = "models",
         verbosity_level: Optional[int] = 1,
@@ -157,6 +160,8 @@ class ClassifierContextContainer(ClassifierContainer):
         None
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         if self.criterion is None:
             raise ValueError(
                 "[ERROR] Criterion is not yet defined.\n\n\
@@ -228,7 +233,7 @@ Use ``add_criterion`` to define one."
                 total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs1, inputs2, labels, label_indices) in enumerate(
+                for batch_idx, (inputs1, inputs2, _labels, label_indices) in enumerate(
                     self.dataloaders[phase]
                 ):
                     inputs1 = inputs1.to(self.device)
@@ -502,7 +507,7 @@ Output will show batch number {num_batches}.'
         min_lr: float,
         max_lr: float,
         spacing: Optional[str] = "linspace",
-        sep_group_names: List[str] = ["features1", "features2"],
+        sep_group_names: List[str] = None,
     ) -> List[Dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -531,12 +536,14 @@ Output will show batch number {num_batches}.'
             A list of dictionaries containing the parameters and learning
             rates for each layer.
         """
+        if sep_group_names is None:
+            sep_group_names = ["features1", "features2"]
         params2optimize = []
 
         for group in range(len(sep_group_names)):
             # count number of layers in this group
             num_grp_layers = 0
-            for i, (name, params) in enumerate(self.model.named_parameters()):
+            for _i, (name, _) in enumerate(self.model.named_parameters()):
                 if sep_group_names[group] in name:
                     num_grp_layers += 1
 

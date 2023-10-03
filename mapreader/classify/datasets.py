@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import os
 from typing import Callable, Optional, Tuple, Union
@@ -15,6 +16,7 @@ from torchvision import transforms
 # Import parhugin
 try:
     from parhugin import multiFunc
+
     parhugin_installed = True
 except ImportError:
     print(
@@ -162,7 +164,9 @@ class PatchDataset(Dataset):
         """
         return len(self.patch_df)
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, str, int]:
+    def __getitem__(
+        self, idx: Union[int, torch.Tensor]
+    ) -> Tuple[torch.Tensor, str, int]:
         """
         Return the image, its label and the index of that label at the given index in the dataset.
 
@@ -240,7 +244,8 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         return img
 
@@ -603,7 +608,8 @@ class PatchContextDataset(PatchDataset):
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if not return_image:
             os.makedirs(self.context_save_path, exist_ok=True)
@@ -712,7 +718,9 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         plt.subplot(1, 2, 2)
         plt.show()
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, str, int]:
+    def __getitem__(
+        self, idx: Union[int, torch.Tensor]
+    ) -> Tuple[torch.Tensor, torch.Tensor, str, int]:
         """
         Retrieves the patch image, the context image and the label at the
         given index in the dataset (``idx``).
@@ -726,7 +734,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         -------
         Tuple(torch.Tensor, torch.Tensor, str, int)
             A tuple containing the transformed image, the context image, the image label the index of that label.
-            
+
         Notes
         ------
             The label is "" and has index -1 if it is not present in the DataFrame.
@@ -742,7 +750,8 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if self.create_context:
             context_img = self.save_parents_idx(idx, return_image=True)

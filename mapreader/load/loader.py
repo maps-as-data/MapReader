@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 from typing import Optional, Union
 
@@ -10,7 +11,7 @@ def loader(
     path_images: Optional[str] = None,
     tree_level: Optional[str] = "parent",
     parent_path: Optional[str] = None,
-    **kwargs: dict
+    **kwargs: dict,
 ) -> MapImages:
     """
     Creates a ``MapImages`` class to manage a collection of image paths and
@@ -42,7 +43,10 @@ def loader(
     :class:`mapreader.load.images.MapImages` class for more detail.
     """
     img = MapImages(
-        path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwargs
+        path_images=path_images,
+        tree_level=tree_level,
+        parent_path=parent_path,
+        **kwargs,
     )
     return img
 
