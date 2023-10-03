@@ -1,0 +1,17 @@
+select = [
+  "E", "F", "W", # flake8
+  "B",           # flake8-bugbear
+  "I",           # isort
+#  "N",           # pep8 naming
+]
+ignore = [
+  "E501",   # Line too long
+]
+unfixable = [
+  "F841", # Removes unused variables
+]
+flake8-unused-arguments.ignore-variadic-names = true
+isort.required-imports = ["from __future__ import annotations"]
+
+# Assume Python 3.8
+target-version = "py38"
