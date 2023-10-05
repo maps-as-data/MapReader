@@ -8,9 +8,9 @@ object-oriented, pythonic fashion.
 [![Maintainability](https://api.codeclimate.com/v1/badges/d37850d90592f9d628df/maintainability)](https://codeclimate.com/github/Princeton-CDH/piffle/maintainability)
 
 
-Piffle is tested on Python 3.6-3.8.
+Piffle is tested on Python 3.8—3.11.
 
-Piffle was originally developed by Rebecca Sutton Koeser at Emory University as a part of [Readux](https://github.com/ecds/readux>) and forked as a separate project under [emory-lits-labs](https://github.com/emory-lits-labs/). It was later transferred to Rebecca Sutton Koeser at the Center for Digital Humanities at Princeton.
+Piffle was originally developed by Rebecca Sutton Koeser at Emory University as a part of [Readux](https://github.com/ecds/readux) and forked as a separate project under [emory-lits-labs](https://github.com/emory-lits-labs/). It was later transferred to Rebecca Sutton Koeser at the Center for Digital Humanities at Princeton.
 
 ## Installation and example use:
 

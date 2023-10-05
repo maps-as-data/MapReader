@@ -2,7 +2,7 @@ import json
 import os.path
 import urllib
 
-from attrdict import AttrMap
+import addict
 
 import requests
 
@@ -19,8 +19,8 @@ def get_iiif_url(url):
     return requests.get(url, **request_options)
 
 
-class IIIFPresentation(AttrMap):
-    """:class:`attrdict.AttrMap` subclass for read access to IIIF Presentation
+class IIIFPresentation(addict.Dict):
+    """:class:`addict.Dict` subclass for read access to IIIF Presentation
     content"""
 
     # TODO: document sample use, e.g. @ fields
@@ -91,47 +91,43 @@ class IIIFPresentation(AttrMap):
         # split on slashes and return the last portion
         return uri.split("/")[-1]
 
-    def __getattr__(self, key):
-        """
-        Access an item as an attribute.
-        """
-        # override getattr to allow use of keys with leading @,
-        # which are otherwise not detected as present and not valid
-        at_key = self._handle_at_keys(key)
-        if (
-            key not in self
-            or (key not in self.at_fields and at_key not in self)
-            or not self._valid_name(key)
-        ):
-            raise AttributeError(
-                "'{cls}' instance has no attribute '{name}'".format(
-                    cls=self.__class__.__name__, name=key
-                )
-            )
-        return self._build(self[key])
+    def __missing__(self, key):
+        raise KeyError(self._key(key))
 
-    def _handle_at_keys(self, key):
+    def _key(self, key):
+        # convert key to @key if in the list of fields that requires it
         if key in self.at_fields:
             key = "@%s" % key
         return key
+
+    def __getattr__(self, key):
+        try:
+            # addict getattr just calls getitem
+            return super().__getattr__(self._key(key))
+        except KeyError:
+            # python hasattr checks for attribute error
+            # translate key error to attribute error,
+            # since in an attr dict it's kind of both
+            raise AttributeError
 
     def __getitem__(self, key):
         """
         Access a value associated with a key.
         """
-        return self._mapping[self._handle_at_keys(key)]
+        val = super().__getitem__(self._key(key))
+        return val
 
     def __setitem__(self, key, value):
         """
         Add a key-value pair to the instance.
         """
-        self._mapping[self._handle_at_keys(key)] = value
+        return super().__setitem__(self._key(key), value)
 
     def __delitem__(self, key):
         """
         Delete a key-value pair
         """
-        del self._mapping[self._handle_at_keys(key)]
+        super().__delitem__(self._key(key))
 
     @property
     def first_label(self):

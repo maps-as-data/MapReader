@@ -12,16 +12,17 @@ except FileNotFoundError:
     pass
 
 CLASSIFIERS = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
@@ -36,11 +37,11 @@ setup(
     url="https://github.com/princeton-cdh/piffle",
     license="Apache License, Version 2.0",
     packages=find_packages(),
-    install_requires=["requests", "cached-property", "attrdict"],
+    install_requires=["requests", "cached-property", "addict"],
     setup_requires=["pytest-runner"],
     tests_require=test_requirements,
     extras_require={"test": test_requirements, "dev": dev_requirements},
-    description="Python library for generating IIIF Image API urls",
+    description="Python library for workign with IIIF Image and Presentation APIs",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     classifiers=CLASSIFIERS,

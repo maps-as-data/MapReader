@@ -98,13 +98,13 @@ class TestIIIFPresentation:
 
     def test_nested_attrs(self):
         pres = IIIFPresentation.from_file(self.test_manifest)
-        assert isinstance(pres.sequences, tuple)
+        assert isinstance(pres.sequences, list)
         assert (
             pres.sequences[0].id
             == "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/sequence/normal"
         )
         assert pres.sequences[0].type == "sc:Sequence"
-        assert isinstance(pres.sequences[0].canvases, tuple)
+        assert isinstance(pres.sequences[0].canvases, list)
         assert (
             pres.sequences[0].canvases[0].id
             == "https://plum.princeton.edu/concern/scanned_resources/ph415q7581/manifest/canvas/p02871v98d"
@@ -123,6 +123,20 @@ class TestIIIFPresentation:
         del pres.type
         assert not hasattr(pres, "label")
         assert not hasattr(pres, "type")
+
+        # accessing missing keys as item vs accessing as attribute
+        # currently results in different errors
+        # (accurate, but potentially confusing?)
+
+        with pytest.raises(KeyError):
+            assert not pres["label"]
+        with pytest.raises(KeyError):
+            assert not pres["type"]
+
+        with pytest.raises(AttributeError):
+            assert not pres.label
+        with pytest.raises(AttributeError):
+            assert not pres.type
 
     def test_first_label(self):
         pres = IIIFPresentation.from_file(self.test_manifest)
