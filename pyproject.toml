@@ -1,7 +1,7 @@
 
 [project]
 name = "piffle"
-version = "0.5.0"
+version = "0.6.0-dev"
 description = "Python library for working with IIIF Image and Presentation APIs"
 readme = "README.md"
 authors = [
