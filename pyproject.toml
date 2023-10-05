@@ -1,0 +1,47 @@
+
+[project]
+name = "piffle"
+version = "0.5.0"
+description = "Python library for working with IIIF Image and Presentation APIs"
+readme = "README.md"
+authors = [
+    {name = "The Center for Digital Humanities at Princeton", email = "cdhdevteam@princeton.edu"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords =[
+    "iiif",
+]
+dependencies = [
+    "addict",
+    "cached-property",
+    "requests",
+]
+license = {text = "Apache License, Version 2.0"}
+requires-python = ">=3.8"
+
+[project.urls]
+homepage = "https://github.com/princeton-cdh/piffle"
+repository = "https://github.com/princeton-cdh/piffle"
+
+[project.optional-dependencies]
+test = [
+    "pytest-cov",
+    "pytest>=3.6",
+]
+dev = [
+    "pre-commit",
+    "piffle[test]"
+]

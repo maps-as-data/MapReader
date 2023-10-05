@@ -1,5 +1,12 @@
 # Change & Version Information
 
+## 0.5
+
+* Now supports python 3.8-3.11; dropped support for Python versions 3.6, 3.7
+* Converted setup.py to pyproject.toml
+* The alias for accessing `piffle.image` via `piffle.iiif` has been removed
+* Setup pre-commit hooks and adopted Ruff+Black style formatting
+
 ## 0.4
 
 * Dropped support for Python versions 2.7, 3.4, 3.5
