@@ -74,19 +74,37 @@ https://iiif.bodleian.ox.ac.uk/iiif/image/483ff8ec-347d-4070-8442-dbc15bc7b4de/f
 
 This project uses [git-flow](https://github.com/nvie/gitflow) branching conventions.
 
-Install locally for development (the use of virtualenv is recommended):
+Install locally for development (the use of a python virtualenv is recommended):
 
 `pip install -e .`
 
 Install test dependencies:
 
-`pip install -e ".[test]"`
+`pip install -e ".[dev]"`
 
 Run unit tests: `py.test` or `python setup.py test`
 
-## Publishing
+### Install pre-commit hooks
 
-To upload a tagged release to [PyPI](https://pypi.python.org/pypi) with
-a [wheel](http://pythonwheels.com/) package:
+Anyone who wants to contribute to this codebase should install the configured pre-commit hooks:
 
-  `python setup.py sdist bdist_wheel upload`
+```
+pre-commit install
+```
+
+This will configure a pre-commit hooks to automatically lint and format python code with [ruff](https://github.com/astral-sh/ruff) and [black](https://github.com/psf/black).
+
+Pre-commit hooks and formatting conventions were added at version 0.5, so ``git blame`` may not reflect the true author of a given change. To make ``git blame`` more accurate, ignore formatting revisions:
+
+```
+git blame <FILE> --ignore-revs-file .git-blame-ignore-revs
+```
+
+Or configure your git to always ignore styling revision commits:
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+## Publishing python packages
+
+A new python packages is automatically built and published to [PyPI](https://pypi.python.org/pypi) using a GitHub Actions workflow when a new release is created on GitHub.

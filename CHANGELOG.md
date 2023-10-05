@@ -1,5 +1,10 @@
 # Change & Version Information
 
+## 0.5
+
+* The alias for accessing `piffle.image` via `piffle.iiif` has been removed
+* Setup pre-commit hooks and adopted Ruff+Black style formatting
+
 ## 0.4
 
 * Dropped support for Python versions 2.7, 3.4, 3.5

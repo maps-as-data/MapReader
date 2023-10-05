@@ -12,21 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.6, 3.7, 3.8]
+        python: [3.7, 3.8]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
       # We base the python cache on the hash of all requirements files, so that
       # if any change, the cache is invalidated.
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: pip-${{ hashFiles('setup.py') }}
@@ -44,7 +44,7 @@ jobs:
         run: py.test --cov=piffle --cov-report=xml
 
       - name: Upload test coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
 
   # Set the color of the slack message used in the next step based on the
       # status of the build: "danger" for failure, "good" for success,
@@ -59,7 +59,7 @@ jobs:
       # at the organization level and available to all repositories. Only run on
       # scheduled builds & pushes, since PRs automatically report to Slack.
       - name: Report status to Slack
-        uses: rtCamp/action-slack-notify@master
+        uses: rtCamp/action-slack-notify@v2
         if: ${{ always() && (github.event_name == 'schedule' || github.event_name == 'push') }}
         continue-on-error: true
         env:
