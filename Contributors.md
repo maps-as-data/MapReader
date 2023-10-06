@@ -20,4 +20,6 @@ You can request contact information through the project members above, or tag th
 | Name | Community Role | Dates |
 |---|---|---|
 | Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Research Data Scientist | 2019 - 2022 |
-| Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | Research Data Scientist | 2022 - 2023 | - |
+| Jon Lawrence<br>([@jl106jml ](https://github.com/jl106jml)) | Historian/Advisor | 2019 - 2023 |
+| Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | Research Data Scientist | 2022 - 2023 |
+
