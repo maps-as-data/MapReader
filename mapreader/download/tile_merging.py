@@ -123,13 +123,15 @@ class TileMerger:
         tuple
             Size of tile
         """
-        for corner in [grid_bb.lower_corner, grid_bb.upper_corner]:
+        try:
+            start_image = self._load_image_to_grid_cell(grid_bb.lower_corner)
+        except FileNotFoundError:
+            logger.warning("Image has missing tiles in bottom left corner.")
             try:
-                start_image = self._load_image_to_grid_cell(corner)
-                break
-            except FileNotFoundError:
-                logger.warning("Image has missing tiles.")
-                continue
+                start_image = self._load_image_to_grid_cell(grid_bb.upper_corner)
+            except FileNotFoundError as err:
+                logger.warning("Image has missing tiles in upper right corner.")
+                raise FileNotFoundError("[ERROR] Image is missing tiles for both lower left and upper right corners.")
             
         img_size = start_image.size
         assert (
