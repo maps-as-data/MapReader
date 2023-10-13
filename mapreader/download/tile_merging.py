@@ -159,7 +159,11 @@ class TileMerger:
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
-        tile_size = self._load_tile_size(grid_bb)
+        try:
+            tile_size = self._load_tile_size(grid_bb)
+        except FileNotFoundError:
+            return False # unsuccessful
+
         merged_image = Image.new(
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)
         )
