@@ -75,8 +75,8 @@ def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     GridBoundingBox
     """
     min_x, min_y, max_x, max_y = polygon.bounds
-    start = Coordinate(min_y, max_x)  # (lat, lon)
-    end = Coordinate(max_y, min_x)  # (lat, lon)
+    start = Coordinate(min_y, min_x)  # (lat, lon), lower left
+    end = Coordinate(max_y, max_x)  # (lat, lon), upper right
     start_idx = get_index_from_coordinate(start, zoom_level)
     end_idx = get_index_from_coordinate(end, zoom_level)
     return GridBoundingBox(start_idx, end_idx)
@@ -94,9 +94,20 @@ def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     -------
     shapely.Polygon
     """
-    lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
-    upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
-    polygon = create_polygon_from_latlons(lower_corner.lat, lower_corner.lon, upper_corner.lat, upper_corner.lon)
+    lower_corner = grid_bb.lower_corner # SW
+    upper_corner = grid_bb.upper_corner # SW
+
+    # for NE corner of upper right tile, do x+1 and y+1
+    upper_corner_NE = GridIndex(
+        upper_corner.x + 1, 
+        upper_corner.y + 1, 
+        upper_corner.z
+        )
+
+    SW_coord = get_coordinate_from_index(lower_corner) 
+    NE_coord = get_coordinate_from_index(upper_corner_NE)
+    
+    polygon = create_polygon_from_latlons(SW_coord.lat, SW_coord.lon, NE_coord.lat, NE_coord.lon)
     return polygon
 
 
