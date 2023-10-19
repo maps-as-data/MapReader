@@ -557,7 +557,7 @@ class SheetDownloader:
         if os.path.exists(out_filepath):
             existing_metadata_df = pd.read_csv(out_filepath, sep=",", index_col=0)
             metadata_df = pd.concat([existing_metadata_df, new_metadata_df], ignore_index=True)
-            metadata_df.drop_duplicates(subset=["grid_bb"], keep="first", inplace=True)
+            metadata_df.drop_duplicates(keep="first", inplace=True)
         else: 
             metadata_df = new_metadata_df
         
