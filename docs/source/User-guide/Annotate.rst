@@ -1,6 +1,8 @@
 Annotate
 =========
 
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
+
 .. note:: You will need to update file paths to reflect your own machine's directory structure.
 
 MapReader's ``Annotate`` subpackage is used to interactively annotate images (e.g. maps).
