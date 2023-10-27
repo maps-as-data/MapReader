@@ -2,6 +2,7 @@ select = [
   "E", "F", "W", # flake8
   "B",           # flake8-bugbear
   "I",           # isort
+  "UP"           # pyupgrade
 #  "N",           # pep8 naming
 ]
 ignore = [
