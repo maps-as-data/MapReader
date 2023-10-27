@@ -565,9 +565,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 elif (layer[-1] != "*") and (layer == name):
                     param.requires_grad = True
 
-    def only_keep_layers(
-        self, only_keep_layers_list: list[str] | None = None
-    ) -> None:
+    def only_keep_layers(self, only_keep_layers_list: list[str] | None = None) -> None:
         """
         Only keep the specified layers (``only_keep_layers_list``) for
         gradient computation during the backpropagation.

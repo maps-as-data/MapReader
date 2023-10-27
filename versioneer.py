@@ -368,7 +368,9 @@ def get_root():
         vsr_dir = os.path.normcase(os.path.splitext(versioneer_py)[0])
         if me_dir != vsr_dir and "VERSIONEER_PEP518" not in globals():
             print(
-                "Warning: build in {} is using versioneer.py from {}".format(os.path.dirname(my_path), versioneer_py)
+                "Warning: build in {} is using versioneer.py from {}".format(
+                    os.path.dirname(my_path), versioneer_py
+                )
             )
     except NameError:
         pass
@@ -1444,7 +1446,9 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
 
     if verbose:
         print(
-            "Tried directories {} but none started with prefix {}".format(str(rootdirs), parentdir_prefix)
+            "Tried directories {} but none started with prefix {}".format(
+                str(rootdirs), parentdir_prefix
+            )
         )
     raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
 

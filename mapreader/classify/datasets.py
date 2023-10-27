@@ -163,9 +163,7 @@ class PatchDataset(Dataset):
         """
         return len(self.patch_df)
 
-    def __getitem__(
-        self, idx: int | torch.Tensor
-    ) -> tuple[torch.Tensor, str, int]:
+    def __getitem__(self, idx: int | torch.Tensor) -> tuple[torch.Tensor, str, int]:
         """
         Return the image, its label and the index of that label at the given index in the dataset.
 

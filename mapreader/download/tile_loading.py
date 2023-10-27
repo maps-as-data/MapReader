@@ -172,11 +172,7 @@ class TileDownloader:
 
         print(
             "\r",
-            f"{share * 100:3.0f}%"
-            + "|"
-            + "■" * visible
-            + "□" * invisible
-            + "|",
+            f"{share * 100:3.0f}%" + "|" + "■" * visible + "□" * invisible + "|",
             end="",
         )
 

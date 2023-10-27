@@ -129,7 +129,7 @@ class TileMerger:
             logger.warning("Image has missing tiles in bottom left corner.")
             try:
                 start_image = self._load_image_to_grid_cell(grid_bb.upper_corner)
-            except FileNotFoundError as err:
+            except FileNotFoundError:
                 logger.warning("Image has missing tiles in upper right corner.")
                 raise FileNotFoundError(
                     "[ERROR] Image is missing tiles for both lower left and upper right corners."
@@ -142,9 +142,7 @@ class TileMerger:
         tile_size = img_size[0]
         return tile_size
 
-    def merge(
-        self, grid_bb: GridBoundingBox, file_name: str | None = None
-    ) -> bool:
+    def merge(self, grid_bb: GridBoundingBox, file_name: str | None = None) -> bool:
         """Merges cells contained within GridBoundingBox.
 
         Parameters
@@ -196,9 +194,7 @@ class TileMerger:
         merged_image.save(out_path, self.img_output_format[1])
         success = True if os.path.exists(out_path) else False
         if success:
-            logger.info(
-                f"Merge successful! The image has been stored at '{out_path}'"
-            )
+            logger.info(f"Merge successful! The image has been stored at '{out_path}'")
         else:
             logger.warning(f"Merge unsuccessful! '{out_path}' not saved.")
 
