@@ -8,17 +8,17 @@ Before you begin
 
 If you are currently unfamiliar with using GitHub for collaboration, remember to take a look at our `GitHub guide <https://mapreader.readthedocs.io/en/latest/Contribution-guide/GitHub-guide.html>`__.
 
-Before you begin writing your tutorial, you should ensure your tutorial/worked example has a corresponding issue on the `MapReader repository <https://github.com/Living-with-machines/MapReader>`_ (or create one if needed). 
-You should then either assign yourself to the issue or comment on it saying you will be working on making this tutorial. 
+Before you begin writing your tutorial, you should ensure your tutorial/worked example has a corresponding issue on the `MapReader repository <https://github.com/Living-with-machines/MapReader>`_ (or create one if needed).
+You should then either assign yourself to the issue or comment on it saying you will be working on making this tutorial.
 This ensures that other people know what you are working on.
 
-You will then need to fork the `MapReader repository <https://github.com/Living-with-machines/MapReader>`_ in order to make your changes. 
+You will then need to fork the `MapReader repository <https://github.com/Living-with-machines/MapReader>`_ in order to make your changes.
 
 Writing your tutorial or worked example
 ----------------------------------------
 
 You can write your tutorial/worked example in any way you like but should save it in the ``worked_examples`` folder.
-We suggest using a `jupyter notebook <https://jupyter-notebook.readthedocs.io/en/latest/>`_. 
+We suggest using a `jupyter notebook <https://jupyter-notebook.readthedocs.io/en/latest/>`_.
 
 Take a look through our current `worked examples <https://mapreader.readthedocs.io/en/latest/Worked-examples.html>`_ for inspiration.
 

@@ -1,25 +1,32 @@
-import setuptools
-import versioneer
+from __future__ import annotations
 
+import setuptools
+
+import versioneer
 
 setuptools.setup(
     name="mapreader",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
-    author=u"MapReader team",
-    #author_email="",
+    author="MapReader team",
+    # author_email="",
     license="MIT License",
-    keywords=["Computer Vision", "Classification", "Deep Learning", "living with machines"],
-    long_description = open('README.md', encoding="utf8").read(),
-    long_description_content_type = 'text/markdown',
-    zip_safe = False,
+    keywords=[
+        "Computer Vision",
+        "Classification",
+        "Deep Learning",
+        "living with machines",
+    ],
+    long_description=open("README.md", encoding="utf8").read(),
+    long_description_content_type="text/markdown",
+    zip_safe=False,
     url="https://github.com/Living-with-machines/MapReader",
     download_url="https://github.com/Living-with-machines/MapReader/archive/refs/heads/main.zip",
-    packages = setuptools.find_packages(),
-    include_package_data = True,
+    packages=setuptools.find_packages(),
+    include_package_data=True,
     platforms="OS Independent",
-    python_requires='>=3.7, <3.11',
+    python_requires=">=3.7, <3.11",
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
@@ -78,11 +85,10 @@ setuptools.setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        ],
+    ],
     entry_points={
-        'console_scripts': [
-            'mapreader = mapreader.mapreader:main',
+        "console_scripts": [
+            "mapreader = mapreader.mapreader:main",
         ],
-    }
+    },
 )
-

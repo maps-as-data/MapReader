@@ -1,8 +1,8 @@
 # Code adapted from https://github.com/baurls/TileStitcher.
+from __future__ import annotations
 
 import logging
 import os
-from typing import Union
 
 from PIL import Image
 from tqdm import tqdm
@@ -19,9 +19,9 @@ DEFAULT_IMG_STORE_FORMAT = ("png", "PNG")
 class TileMerger:
     def __init__(
         self,
-        output_folder: Union[str, None] = None,
-        img_input_format: Union[str, None] = None,
-        img_output_format: Union[str, None] = None,
+        output_folder: str | None = None,
+        img_input_format: str | None = None,
+        img_output_format: str | None = None,
         show_progress=False,
     ):
         """TileMerger object.
@@ -129,20 +129,20 @@ class TileMerger:
             logger.warning("Image has missing tiles in bottom left corner.")
             try:
                 start_image = self._load_image_to_grid_cell(grid_bb.upper_corner)
-            except FileNotFoundError as err:
+            except FileNotFoundError:
                 logger.warning("Image has missing tiles in upper right corner.")
-                raise FileNotFoundError("[ERROR] Image is missing tiles for both lower left and upper right corners.")
-            
+                raise FileNotFoundError(
+                    "[ERROR] Image is missing tiles for both lower left and upper right corners."
+                )
+
         img_size = start_image.size
         assert (
             img_size[0] == img_size[1]
-        ), "Tiles must be quadratic. This tile, however, is rectangular: {}".format(
-            img_size
-        )
+        ), f"Tiles must be quadratic. This tile, however, is rectangular: {img_size}"
         tile_size = img_size[0]
         return tile_size
 
-    def merge(self, grid_bb: GridBoundingBox, file_name: Union[str, None] = None) -> bool:
+    def merge(self, grid_bb: GridBoundingBox, file_name: str | None = None) -> bool:
         """Merges cells contained within GridBoundingBox.
 
         Parameters
@@ -162,14 +162,14 @@ class TileMerger:
         try:
             tile_size = self._load_tile_size(grid_bb)
         except FileNotFoundError:
-            return False # unsuccessful
+            return False  # unsuccessful
 
         merged_image = Image.new(
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)
         )
 
         logger.info("Merging tiles to one file.")
-        
+
         for i, x, j, y in tqdm(
             [
                 (i, x, j, y)
@@ -190,18 +190,12 @@ class TileMerger:
         if file_name is None:
             file_name = self._get_output_name(grid_bb)
 
-        out_path = "{}{}.{}".format(
-            self.output_folder, file_name, self.img_output_format[0]
-        )
+        out_path = f"{self.output_folder}{file_name}.{self.img_output_format[0]}"
         merged_image.save(out_path, self.img_output_format[1])
         success = True if os.path.exists(out_path) else False
         if success:
-            logger.info(
-            "Merge successful! The image has been stored at '{}'".format(out_path)
-            )
+            logger.info(f"Merge successful! The image has been stored at '{out_path}'")
         else:
-            logger.warning(
-            "Merge unsuccessful! '{}' not saved.".format(out_path)
-            )
-        
+            logger.warning(f"Merge unsuccessful! '{out_path}' not saved.")
+
         return success

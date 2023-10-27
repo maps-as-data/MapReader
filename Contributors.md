@@ -25,4 +25,3 @@ You can request contact information through the project members above, or tag th
 | Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | Research Data Scientist (Turing) | 2022 - 2023 |
 | Daniel van Strien<br>([@davanstrien ](https://github.com/davanstrien)) | Data Librarian (British Library) | 2019-2021 |
 | Olivia Vane<br>([@ov212 ](https://github.com/ov212)) | Research Software Engineer (British Library) | 2019-2021 |
-
