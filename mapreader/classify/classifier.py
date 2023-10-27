@@ -777,13 +777,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         None
         """
 
-        if self.criterion is None:
-            raise ValueError(
-                "[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one."
-            )
-
-        print(f"[INFO] Each training step will pass: {phases}.")
+        print(f"[INFO] Each step will pass: {phases}.")
 
         for phase in phases:
             if phase not in self.dataloaders.keys():
@@ -873,6 +867,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             #     summing the final output and the auxiliary
                             #     output but in testing we only consider the
                             #     final output.
+                            if self.criterion is None:
+                                raise ValueError(
+                                    "[ERROR] Criterion is not yet defined.\n\n\
+Use ``add_criterion`` to define one."
+                                    )
+
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
                             ):
