@@ -126,7 +126,7 @@ class ClassifierContainer:
         if load_path:
             self.load(load_path=load_path, force_device=force_device)
         
-        elif isinstance((model, labels_map), None):
+        elif model is None or labels_map is None:
             raise ValueError(
                 "[ERROR] Unless passing ``load_path``, ``model`` and ``labels_map`` must be defined."
             )
