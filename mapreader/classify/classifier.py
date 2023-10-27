@@ -139,7 +139,7 @@ class ClassifierContainer:
         else:
             self.dataloaders = dataloaders if dataloaders else {}
         
-        for set_name, dataloader in dataloaders.items():
+        for set_name, dataloader in self.dataloaders.items():
             print(
                 f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
             )
