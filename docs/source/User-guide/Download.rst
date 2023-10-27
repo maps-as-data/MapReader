@@ -55,7 +55,7 @@ e.g. for the OS one-inch maps:
          download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
      )
 
-To help you visualise your metadata, the boundaries of the map sheets included in your metadata can be visualised using: 
+To help you visualize your metadata, the boundaries of the map sheets included in your metadata can be visualized using: 
 
 .. code-block:: python
 
@@ -87,7 +87,7 @@ Query guidance
 
 For all query methods, you should be aware of the following arguments:
 
-- ``append`` - By default, this is set to ``False`` and so a new query list is created each time you make a new query. Setting it to ``True`` (i.e. by specifying ``append=True``) will resulut in your newly query results being appended to your previous ones.
+- ``append`` - By default, this is set to ``False`` and so a new query list is created each time you make a new query. Setting it to ``True`` (i.e. by specifying ``append=True``) will result in your newly query results being appended to your previous ones.
 - ``print`` - By default, this is set to ``False`` and so query results will not be printed when you run the query method. Setting it to ``True`` will result in your query results being printed. 
 
 You should also be aware of:
@@ -191,7 +191,7 @@ Or, to find map sheets which intersect with this polygon, use:
 
      my_ts.query_map_sheets_by_polygon(my_polygon, mode="intersects")
 
-.. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 To download your query results, use:
 
@@ -239,7 +239,7 @@ e.g. :
      #EXAMPLE
      my_ts.query_map_sheets_by_coordinates((-2.2, 53.4))
 
-.. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 To download your query results, use:
 
@@ -295,7 +295,7 @@ Then, to find maps sheets which intersect with your line, use:
 
      my_ts.query_map_sheets_by_coordinates(my_line)
 
-.. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 To download your query results, use:
 
@@ -336,7 +336,7 @@ or
      #EXAMPLE
      my_ts.query_map_sheets_by_wfs_ids([2,15,31])
 
-.. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 To download your query results, use:
 
@@ -387,7 +387,7 @@ e.g. :
      #EXAMPLE
      my_ts.query_map_sheets_by_string("n?don")
 
-.. note:: Guidance on how to view/visualise your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 .. admonition:: Advanced usage
     :class: dropdown

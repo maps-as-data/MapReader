@@ -22,17 +22,17 @@ The MapReader pipeline consists of a linear sequence of tasks:
 
 .. image:: figures/pipeline_explained.png
 
-Together, these tasks can be used to train a computer vision (CV) classifier to recognise visual features within maps and identify patches containing these features across entire map collections.
+Together, these tasks can be used to train a computer vision (CV) classifier to recognize visual features within maps and identify patches containing these features across entire map collections.
 
 What kind of visual features can MapReader help me identify?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to train a CV classifier to recognise visual features within your maps, your features must have a homogeneous visual signal across your map collection (i.e. always be represented in the same way).
+In order to train a CV classifier to recognize visual features within your maps, your features must have a homogeneous visual signal across your map collection (i.e. always be represented in the same way).
 
 Why use MapReader?
 -------------------
 
-MapReader becomes useful when the number of maps you wish to analyse exceeds the number which you (or your team) are willing/capable of annotating manually.
+MapReader becomes useful when the number of maps you wish to analyze exceeds the number which you (or your team) are willing to/capable of annotating manually.
 
 This exact number will vary depending on:
 
@@ -40,7 +40,7 @@ This exact number will vary depending on:
 - the features you want to find,
 - the skills you (or your team) have,
 - the amount of time at your disposal.
- 
+
 Deciding to use MapReader, which uses deep learning computer vision (CV) models to predict the class of content on patches across many sheets, means weighing the pros and cons of working with the data output that is inferred by the model. 
 Inferred data can be evaluated against expert-annotated data to understand its general quality (are all instances of a feature of interest identified by the model? does the model apply the correct label to that feature?), but in the full dataset there *will necessarily be* some percentage of error. 
 

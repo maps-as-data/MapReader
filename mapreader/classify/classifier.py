@@ -211,17 +211,17 @@ class ClassifierContainer:
                 '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
             )
 
-        params2optimise = [
+        params2optimize = [
             {"params": params, "learning rate": lrs[i]}
             for i, (_, params) in enumerate(self.model.named_parameters())
         ]
 
-        return params2optimise
+        return params2optimize
 
     def initialize_optimizer(
         self,
         optim_type: Optional[str] = "adam",
-        params2optimise: Optional[Union[str, Iterable]] = "infer",
+        params2optimize: Optional[Union[str, Iterable]] = "infer",
         optim_param_dict: Optional[dict] = {"lr": 1e-3},
         add_optim: Optional[bool] = True,
     ) -> Union[torch.optim.Optimizer, None]:
@@ -234,7 +234,7 @@ class ClassifierContainer:
         optim_type : str, optional
             The type of optimizer to use. Can be set to ``"adam"`` (default),
             ``"adamw"``, or ``"sgd"``.
-        params2optimise : str or iterable, optional
+        params2optimize : str or iterable, optional
             The parameters to optimize. If set to ``"infer"``, all model
             parameters that require gradients will be optimized, by default
             ``"infer"``.
@@ -267,15 +267,15 @@ class ClassifierContainer:
 
             filter(lambda p: p.requires_grad, self.model.parameters())
         """
-        if params2optimise == "infer":
-            params2optimise = filter(lambda p: p.requires_grad, self.model.parameters())
+        if params2optimize == "infer":
+            params2optimize = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
-            optimizer = optim.Adam(params2optimise, **optim_param_dict)
+            optimizer = optim.Adam(params2optimize, **optim_param_dict)
         elif optim_type.lower() in ["adamw"]:
-            optimizer = optim.AdamW(params2optimise, **optim_param_dict)
+            optimizer = optim.AdamW(params2optimize, **optim_param_dict)
         elif optim_type.lower() in ["sgd"]:
-            optimizer = optim.SGD(params2optimise, **optim_param_dict)
+            optimizer = optim.SGD(params2optimize, **optim_param_dict)
         else:
             raise NotImplementedError(
                 '[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``.'

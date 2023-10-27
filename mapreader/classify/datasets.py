@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Callable, Optional, Union, Tuple
+from typing import Callable, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +15,6 @@ from torchvision import transforms
 # Import parhugin
 try:
     from parhugin import multiFunc
-
     parhugin_installed = True
 except ImportError:
     print(
@@ -29,7 +28,7 @@ class PatchDataset(Dataset):
         self,
         patch_df: Union[pd.DataFrame, str],
         transform: Union[str, transforms.Compose, Callable],
-        delimiter: str = "\t",
+        delimiter: str = ",",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
@@ -48,7 +47,7 @@ class PatchDataset(Dataset):
             and performs image transformations can be used.
             At minimum, transform should be ``torchvision.transforms.ToTensor()``.
         delimiter : str, optional
-            The delimiter to use when reading the dataframe. By default ``"\t"``.
+            The delimiter to use when reading the dataframe. By default ``","``.
         patch_paths_col : str, optional
             The name of the column in the DataFrame containing the image paths. Default is "image_path".
         label_col : str, optional
@@ -190,8 +189,8 @@ class PatchDataset(Dataset):
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
             )
 
         img = self.transform(img)
@@ -240,9 +239,8 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         return img
 
@@ -368,7 +366,7 @@ class PatchContextDataset(PatchDataset):
         patch_df: Union[pd.DataFrame, str],
         transform1: str,
         transform2: str,
-        delimiter: str = "\t",
+        delimiter: str = ",",
         patch_paths_col: Optional[str] = "image_path",
         label_col: Optional[str] = None,
         label_index_col: Optional[str] = None,
@@ -395,7 +393,7 @@ class PatchContextDataset(PatchDataset):
             Torchvision transform to be applied to target images.
             Either "train" or "val".
         delimiter : str
-            The delimiter to use when reading the csv file. By default ``"\t"``.
+            The delimiter to use when reading the csv file. By default ``","``.
         patch_paths_col : str, optional
             The name of the column in the DataFrame containing the image paths. Default is "image_path".
         label_col : str, optional
@@ -642,9 +640,8 @@ class PatchContextDataset(PatchDataset):
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         if not return_image:
             os.makedirs(self.context_save_path, exist_ok=True)
@@ -782,9 +779,8 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
             img = Image.open(img_path).convert(self.image_mode)
         else:
             raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\
-Please check the image exists and that ``.patch_paths_col`` is set to the correct column.'
-            )
+                f'[ERROR] "{img_path} cannot be found.\n\n\
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
 
         if self.create_context:
             context_img = self.save_parents_idx(idx, return_image=True)

@@ -531,7 +531,7 @@ Output will show batch number {num_batches}.'
             A list of dictionaries containing the parameters and learning
             rates for each layer.
         """
-        params2optimise = []
+        params2optimize = []
 
         for group in range(len(sep_group_names)):
             # count number of layers in this group
@@ -555,10 +555,10 @@ Output will show batch number {num_batches}.'
             for _, (name, params) in enumerate(self.model.named_parameters()):
                 if sep_group_names[group] not in name:
                     continue
-                params2optimise.append({"params": params, "lr": list_lrs[i_count]})
+                params2optimize.append({"params": params, "lr": list_lrs[i_count]})
                 i_count += 1
 
-        return params2optimise
+        return params2optimize
 
     def show_inference_sample_results(
         self,

@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import pytest
 from pytest import approx
+
 from mapreader.load import geo_utils, loader
-from pathlib import Path
+
 
 @pytest.fixture
 def sample_dir():
