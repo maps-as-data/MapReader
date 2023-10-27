@@ -322,7 +322,7 @@ Please check the image exists and that ``.patch_paths_col`` is set to the correc
         """
         return self.unique_labels.index(label)
 
-    def create_dataloader(
+    def create_dataloaders(
         self,
         set_name: str = "infer",
         batch_size: Optional[int] = 16,
