@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-from typing import Tuple
 
 from shapely.geometry import LineString, Polygon, box
 
@@ -99,19 +98,15 @@ def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     -------
     shapely.Polygon
     """
-    lower_corner = grid_bb.lower_corner # SW
-    upper_corner = grid_bb.upper_corner # SW
+    lower_corner = grid_bb.lower_corner  # SW
+    upper_corner = grid_bb.upper_corner  # SW
 
     # for NE corner of upper right tile, do x+1 and y+1
-    upper_corner_NE = GridIndex(
-        upper_corner.x + 1, 
-        upper_corner.y + 1, 
-        upper_corner.z
-        )
+    upper_corner_NE = GridIndex(upper_corner.x + 1, upper_corner.y + 1, upper_corner.z)
 
-    SW_coord = get_coordinate_from_index(lower_corner) 
+    SW_coord = get_coordinate_from_index(lower_corner)
     NE_coord = get_coordinate_from_index(upper_corner_NE)
-    
+
     polygon = create_polygon_from_latlons(
         SW_coord.lat, SW_coord.lon, NE_coord.lat, NE_coord.lon
     )
@@ -160,7 +155,7 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
     return Coordinate(lat, lon)
 
 
-def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, int)]:
+def _get_index_from_coordinate(lon: float, lat: float, z: int) -> tuple[(int, int)]:
     """Generate (x,y) tuple from Coordinate latitudes and longitudes.
 
     Returns
@@ -176,7 +171,7 @@ def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, in
     return x, y
 
 
-def _get_coordinate_from_index(x: int, y: int, z: int) -> Tuple[(float, float)]:
+def _get_coordinate_from_index(x: int, y: int, z: int) -> tuple[(float, float)]:
     """Generate (lon, lat) tuple from GridIndex x, y and zoom level (z).
 
     Returns

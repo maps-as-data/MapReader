@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import numpy as np
@@ -35,7 +34,7 @@ def extractGeoInfo(image_path):
         tiff_coord = tuple(tiff_src.bounds)
 
     print(f"[INFO] Shape: {tiff_shape}. \n[INFO] CRS: {tiff_proj}.")
-    print("[INFO] Coordinates: %.4f %.4f %.4f %.4f" % tiff_coord)
+    print("[INFO] Coordinates: {:.4f} {:.4f} {:.4f} {:.4f}".format(*tiff_coord))
 
     return tiff_shape, tiff_proj, tiff_coord
 
@@ -66,7 +65,7 @@ def reproject_geo_info(image_path, target_crs="EPSG:4326", calc_size_in_m=False)
     coord = (xmin, ymin, xmax, ymax)
 
     print(f"[INFO] New CRS: {target_crs}")
-    print("[INFO] Reprojected coordinates: %.4f %.4f %.4f %.4f" % coord)
+    print("[INFO] Reprojected coordinates: {:.4f} {:.4f} {:.4f} {:.4f}".format(*coord))
 
     height, width, _ = tiff_shape
 

@@ -20,7 +20,7 @@ class Coordinate:
         self.lon = lon
 
     def __str__(self):
-        return "({lat}, {lon})".format(lat=self.lat, lon=self.lon)
+        return f"({self.lat}, {self.lon})"
 
     def __repr__(self):
         return str(self)
@@ -45,7 +45,7 @@ class GridIndex:
         self.z = z
 
     def __str__(self):
-        return "({z}, {x}, {y})".format(z=self.z, x=self.x, y=self.y)
+        return f"({self.z}, {self.x}, {self.y})"
 
     def __repr__(self):
         return str(self)
@@ -85,7 +85,7 @@ class GridBoundingBox:
         return range(self.lower_corner.y, self.upper_corner.y + 1)
 
     def __str__(self):
-        return "[{p1}x{p2}]".format(p1=self.lower_corner, p2=self.upper_corner)
+        return f"[{self.lower_corner}x{self.upper_corner}]"
 
     def __repr__(self):
         return str(self)

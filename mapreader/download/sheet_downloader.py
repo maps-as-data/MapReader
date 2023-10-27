@@ -5,7 +5,6 @@ import os
 import re
 import shutil
 from functools import reduce
-from typing import Optional, Union
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
@@ -31,7 +30,7 @@ class SheetDownloader:
     def __init__(
         self,
         metadata_path: str,
-        download_url: Union[str, list],
+        download_url: str | list,
     ) -> None:
         """
         Initialize SheetDownloader class
@@ -57,7 +56,7 @@ class SheetDownloader:
         ), "[ERROR] Please pass metadata_path as string."
 
         if os.path.isfile(metadata_path):
-            with open(metadata_path, "r") as f:
+            with open(metadata_path) as f:
                 self.metadata = json.load(f)
                 self.features = self.metadata["features"]
                 print(self.__str__())
@@ -99,7 +98,7 @@ class SheetDownloader:
 
         self.polygons = True
 
-    def get_grid_bb(self, zoom_level: Optional[int] = 14) -> None:
+    def get_grid_bb(self, zoom_level: int | None = 14) -> None:
         """
         For each map in metadata, creates a grid bounding box from map polygons and saves to ``features`` dictionary.
 
@@ -189,9 +188,9 @@ class SheetDownloader:
     ## queries
     def query_map_sheets_by_wfs_ids(
         self,
-        wfs_ids: Union[list, int],
-        append: Optional[bool] = False,
-        print: Optional[bool] = False,
+        wfs_ids: list | int,
+        append: bool | None = False,
+        print: bool | None = False,
     ) -> None:
         """
         Find map sheets by WFS ID numbers.
@@ -233,9 +232,9 @@ class SheetDownloader:
     def query_map_sheets_by_polygon(
         self,
         polygon: Polygon,
-        mode: Optional[str] = "within",
-        append: Optional[bool] = False,
-        print: Optional[bool] = False,
+        mode: str | None = "within",
+        append: bool | None = False,
+        print: bool | None = False,
     ) -> None:
         """
         Find map sheets which are found within or intersecting with a defined polygon.
@@ -295,8 +294,8 @@ class SheetDownloader:
     def query_map_sheets_by_coordinates(
         self,
         coords: tuple,
-        append: Optional[bool] = False,
-        print: Optional[bool] = False,
+        append: bool | None = False,
+        print: bool | None = False,
     ) -> None:
         """
         Find maps sheets which contain a defined set of coordinates.
@@ -337,8 +336,8 @@ class SheetDownloader:
     def query_map_sheets_by_line(
         self,
         line: LineString,
-        append: Optional[bool] = False,
-        print: Optional[bool] = False,
+        append: bool | None = False,
+        print: bool | None = False,
     ) -> None:
         """
         Find maps sheets which intersect with a line.
@@ -384,9 +383,9 @@ class SheetDownloader:
     def query_map_sheets_by_string(
         self,
         string: str,
-        keys: Union[str, list] = None,
-        append: Optional[bool] = False,
-        print: Optional[bool] = False,
+        keys: str | list = None,
+        append: bool | None = False,
+        print: bool | None = False,
     ) -> None:
         """
         Find map sheets by searching for a string in a chosen metadata field.
@@ -585,9 +584,9 @@ class SheetDownloader:
     def _download_map_sheets(
         self,
         features: list,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ):
         """Download map sheets from a list of features.
 
@@ -614,9 +613,9 @@ class SheetDownloader:
 
     def download_all_map_sheets(
         self,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads all map sheets in metadata.
@@ -641,10 +640,10 @@ class SheetDownloader:
 
     def download_map_sheets_by_wfs_ids(
         self,
-        wfs_ids: Union[list, int],
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        wfs_ids: list | int,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads map sheets by WFS ID numbers.
@@ -692,10 +691,10 @@ class SheetDownloader:
     def download_map_sheets_by_polygon(
         self,
         polygon: Polygon,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        mode: Optional[str] = "within",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        mode: str | None = "within",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads any map sheets which are found within or intersecting with a defined polygon.
@@ -762,9 +761,9 @@ class SheetDownloader:
     def download_map_sheets_by_coordinates(
         self,
         coords: tuple,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads any maps sheets which contain a defined set of coordinates.
@@ -810,9 +809,9 @@ class SheetDownloader:
     def download_map_sheets_by_line(
         self,
         line: LineString,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads any maps sheets which intersect with a line.
@@ -863,10 +862,10 @@ class SheetDownloader:
     def download_map_sheets_by_string(
         self,
         string: str,
-        keys: Union[str, list] = None,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        keys: str | list = None,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Download map sheets by searching for a string in a chosen metadata field.
@@ -924,9 +923,9 @@ class SheetDownloader:
 
     def download_map_sheets_by_queries(
         self,
-        path_save: Optional[str] = "maps",
-        metadata_fname: Optional[str] = "metadata.csv",
-        overwrite: Optional[bool] = False,
+        path_save: str | None = "maps",
+        metadata_fname: str | None = "metadata.csv",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads map sheets saved as query results.
@@ -989,8 +988,8 @@ class SheetDownloader:
     def plot_features_on_map(
         self,
         features: list,
-        map_extent: Optional[Union[str, list, tuple]] = None,
-        add_id: Optional[bool] = True,
+        map_extent: str | (list | tuple) | None = None,
+        add_id: bool | None = True,
     ) -> None:
         """
         Plots boundaries of map sheets on a map using ``cartopy`` library, (if available).
@@ -1085,8 +1084,8 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_all_metadata_on_map(
         self,
-        map_extent: Optional[Union[str, list, tuple]] = None,
-        add_id: Optional[bool] = True,
+        map_extent: str | (list | tuple) | None = None,
+        add_id: bool | None = True,
     ) -> None:
         """
         Plots boundaries of all map sheets in metadata on a map using ``cartopy`` library (if available).
@@ -1109,8 +1108,8 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_queries_on_map(
         self,
-        map_extent: Optional[Union[str, list, tuple]] = None,
-        add_id: Optional[bool] = True,
+        map_extent: str | (list | tuple) | None = None,
+        add_id: bool | None = True,
     ) -> None:
         """
         Plots boundaries of query results on a map using ``cartopy`` library (if available).

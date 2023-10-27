@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import os
 import random
 import sys
-from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,7 +28,7 @@ from PIL import Image
 from mapreader import load_patches, loader
 
 
-def display_record(record: Tuple[str, str, str, int, int]) -> None:
+def display_record(record: tuple[str, str, str, int, int]) -> None:
     """
     Displays an image and optionally, a context image with a patch border.
 
@@ -175,13 +173,13 @@ def display_record(record: Tuple[str, str, str, int, int]) -> None:
 
 def prepare_data(
     df: pd.DataFrame,
-    col_names: Optional[List[str]] = None,
-    annotation_set: Optional[str] = "001",
-    label_col_name: Optional[str] = "label",
-    redo: Optional[bool] = False,
-    random_state: Optional[Union[int, str]] = "random",
-    num_samples: Optional[int] = 100,
-) -> List[List[Union[str, int]]]:
+    col_names: list[str] | None = None,
+    annotation_set: str | None = "001",
+    label_col_name: str | None = "label",
+    redo: bool | None = False,
+    random_state: int | str | None = "random",
+    num_samples: int | None = 100,
+) -> list[list[str | int]]:
     """
     Prepare data for image annotation by selecting a subset of images from a
     DataFrame.
@@ -265,12 +263,12 @@ def prepare_data(
 
 
 def annotation_interface(
-    data: List,
-    list_labels: List,
-    list_colors: Optional[List[str]] = None,
-    annotation_set: Optional[str] = "001",
-    method: Optional[str] = "ipyannotate",
-    list_shortcuts: Optional[List[str]] = None,
+    data: list,
+    list_labels: list,
+    list_colors: list[str] | None = None,
+    annotation_set: str | None = "001",
+    method: str | None = "ipyannotate",
+    list_shortcuts: list[str] | None = None,
 ) -> Annotation:
     """
     Create an annotation interface for a list of patches with corresponding
@@ -379,25 +377,25 @@ def prepare_annotation(
     userID: str,
     task: str,
     annotation_tasks_file: str,
-    custom_labels: List[str] = None,
-    annotation_set: Optional[str] = "001",
-    redo_annotation: Optional[bool] = False,
-    patch_paths: Optional[Union[str, bool]] = False,
-    parent_paths: Optional[str] = False,
-    tree_level: Optional[str] = "patch",
-    sortby: Optional[str] = None,
-    min_alpha_channel: Optional[float] = None,
-    min_mean_pixel: Optional[float] = None,
-    max_mean_pixel: Optional[float] = None,
-    min_std_pixel: Optional[float] = None,
-    max_std_pixel: Optional[float] = None,
-    context_image: Optional[bool] = False,
-    xoffset: Optional[int] = 500,
-    yoffset: Optional[int] = 500,
-    urlmain: Optional[str] = "https://maps.nls.uk/view/",
-    random_state: Optional[Union[str, int]] = "random",
-    list_shortcuts: Optional[List[tuple]] = None,
-) -> Dict:
+    custom_labels: list[str] = None,
+    annotation_set: str | None = "001",
+    redo_annotation: bool | None = False,
+    patch_paths: str | bool | None = False,
+    parent_paths: str | None = False,
+    tree_level: str | None = "patch",
+    sortby: str | None = None,
+    min_alpha_channel: float | None = None,
+    min_mean_pixel: float | None = None,
+    max_mean_pixel: float | None = None,
+    min_std_pixel: float | None = None,
+    max_std_pixel: float | None = None,
+    context_image: bool | None = False,
+    xoffset: int | None = 500,
+    yoffset: int | None = 500,
+    urlmain: str | None = "https://maps.nls.uk/view/",
+    random_state: str | int | None = "random",
+    list_shortcuts: list[tuple] | None = None,
+) -> dict:
     """Prepare image data for annotation and launch the annotation interface.
 
     Parameters

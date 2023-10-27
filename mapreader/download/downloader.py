@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import Optional, Union
 
 from shapely.geometry import Polygon
 
@@ -19,7 +18,7 @@ class Downloader:
 
     def __init__(
         self,
-        download_url: Union[str, list],
+        download_url: str | list,
     ):
         """Initialise Downloader object.
 
@@ -111,9 +110,9 @@ class Downloader:
     def download_map_by_polygon(
         self,
         polygon: Polygon,
-        zoom_level: Optional[int] = 14,
-        path_save: Optional[str] = "maps",
-        overwrite: Optional[bool] = False,
+        zoom_level: int | None = 14,
+        path_save: str | None = "maps",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Downloads a map contained within a polygon.

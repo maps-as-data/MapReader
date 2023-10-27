@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 import os
 import urllib.request
-from typing import Union
 
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -21,7 +20,7 @@ class TileDownloader:
     def __init__(
         self,
         tile_servers: list = None,
-        img_format: Union[str, None] = None,
+        img_format: str | None = None,
         show_progress: bool = False,
     ):
         """
@@ -99,15 +98,13 @@ class TileDownloader:
         os.makedirs(self.temp_folder, exist_ok=True)
         if not download_in_parallel:
             logger.info(
-                "Downloading {} tiles sequentially to disk ..".format(
-                    grid_bb.covered_cells
-                )
+                f"Downloading {grid_bb.covered_cells} tiles sequentially to disk .."
             )
             return self._download_tiles_sequentially(grid_bb)
 
         # download in parallel
         logger.info(
-            "Downloading {} tiles to disk (in parallel)..".format(grid_bb.covered_cells)
+            f"Downloading {grid_bb.covered_cells} tiles to disk (in parallel).."
         )
         delayed_downloads = [
             delayed(self._download_tile_in_parallel)(
@@ -175,7 +172,7 @@ class TileDownloader:
 
         print(
             "\r",
-            "{:3.0f}%".format(share * 100)
+            f"{share * 100:3.0f}%"
             + "|"
             + "■" * visible
             + "□" * invisible
