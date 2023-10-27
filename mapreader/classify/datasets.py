@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import os
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +15,7 @@ from torchvision import transforms
 # Import parhugin
 try:
     from parhugin import multiFunc
+
     parhugin_installed = True
 except ImportError:
     print(
@@ -26,13 +27,13 @@ except ImportError:
 class PatchDataset(Dataset):
     def __init__(
         self,
-        patch_df: Union[pd.DataFrame, str],
-        transform: Union[str, transforms.Compose, Callable],
+        patch_df: pd.DataFrame | str,
+        transform: str | (transforms.Compose | Callable),
         delimiter: str = ",",
-        patch_paths_col: Optional[str] = "image_path",
-        label_col: Optional[str] = None,
-        label_index_col: Optional[str] = None,
-        image_mode: Optional[str] = "RGB",
+        patch_paths_col: str | None = "image_path",
+        label_col: str | None = None,
+        label_index_col: str | None = None,
+        image_mode: str | None = "RGB",
     ):
         """A PyTorch Dataset class for loading image patches from a DataFrame.
 
@@ -162,7 +163,7 @@ class PatchDataset(Dataset):
         """
         return len(self.patch_df)
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, str, int]:
+    def __getitem__(self, idx: int | torch.Tensor) -> tuple[torch.Tensor, str, int]:
         """
         Return the image, its label and the index of that label at the given index in the dataset.
 
@@ -207,7 +208,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
 
         return img, image_label, image_label_index
 
-    def return_orig_image(self, idx: Union[int, torch.Tensor]) -> Image:
+    def return_orig_image(self, idx: int | torch.Tensor) -> Image:
         """
         Return the original image associated with the given index.
 
@@ -240,14 +241,15 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         return img
 
     def _default_transform(
         self,
-        t_type: Optional[str] = "train",
-        resize: Optional[Union[int, Tuple[int, int]]] = (224, 224),
+        t_type: str | None = "train",
+        resize: int | tuple[int, int] | None = (224, 224),
     ) -> transforms.Compose:
         """
         Returns the default image transformations for the train, test and validation sets as a transforms.Compose.
@@ -363,20 +365,20 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
 class PatchContextDataset(PatchDataset):
     def __init__(
         self,
-        patch_df: Union[pd.DataFrame, str],
+        patch_df: pd.DataFrame | str,
         transform1: str,
         transform2: str,
         delimiter: str = ",",
-        patch_paths_col: Optional[str] = "image_path",
-        label_col: Optional[str] = None,
-        label_index_col: Optional[str] = None,
-        image_mode: Optional[str] = "RGB",
-        context_save_path: Optional[str] = "./maps/maps_context",
-        create_context: Optional[bool] = False,
-        parent_path: Optional[str] = "./maps",
-        x_offset: Optional[float] = 1.0,
-        y_offset: Optional[float] = 1.0,
-        slice_method: Optional[str] = "scale",
+        patch_paths_col: str | None = "image_path",
+        label_col: str | None = None,
+        label_index_col: str | None = None,
+        image_mode: str | None = "RGB",
+        context_save_path: str | None = "./maps/maps_context",
+        create_context: bool | None = False,
+        parent_path: str | None = "./maps",
+        x_offset: float | None = 1.0,
+        y_offset: float | None = 1.0,
+        slice_method: str | None = "scale",
     ):
         """
         A PyTorch Dataset class for loading contextual information about image
@@ -537,12 +539,12 @@ class PatchContextDataset(PatchDataset):
 
     def save_parents(
         self,
-        processors: Optional[int] = 10,
-        sleep_time: Optional[float] = 0.001,
-        use_parhugin: Optional[bool] = True,
-        parent_delimiter: Optional[str] = "#",
-        loc_delimiter: Optional[str] = "-",
-        overwrite: Optional[bool] = False,
+        processors: int | None = 10,
+        sleep_time: float | None = 0.001,
+        use_parhugin: bool | None = True,
+        parent_delimiter: str | None = "#",
+        loc_delimiter: str | None = "-",
+        overwrite: bool | None = False,
     ) -> None:
         """
         Save parent patches for all patches in the patch_df.
@@ -603,10 +605,10 @@ class PatchContextDataset(PatchDataset):
     def save_parents_idx(
         self,
         idx: int,
-        parent_delimiter: Optional[str] = "#",
-        loc_delimiter: Optional[str] = "-",
-        overwrite: Optional[bool] = False,
-        return_image: Optional[bool] = False,
+        parent_delimiter: str | None = "#",
+        loc_delimiter: str | None = "-",
+        overwrite: bool | None = False,
+        return_image: bool | None = False,
     ) -> None:
         """
         Save the parents of a specific patch to the specified location.
@@ -641,7 +643,8 @@ class PatchContextDataset(PatchDataset):
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if not return_image:
             os.makedirs(self.context_save_path, exist_ok=True)
@@ -750,7 +753,9 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         plt.subplot(1, 2, 2)
         plt.show()
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, str, int]:
+    def __getitem__(
+        self, idx: int | torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, str, int]:
         """
         Retrieves the patch image, the context image and the label at the
         given index in the dataset (``idx``).
@@ -764,7 +769,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         -------
         Tuple(torch.Tensor, torch.Tensor, str, int)
             A tuple containing the transformed image, the context image, the image label the index of that label.
-            
+
         Notes
         ------
             The label is "" and has index -1 if it is not present in the DataFrame.
@@ -780,7 +785,8 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             raise ValueError(
                 f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.')
+Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+            )
 
         if self.create_context:
             context_img = self.save_parents_idx(idx, return_image=True)

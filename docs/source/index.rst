@@ -6,7 +6,7 @@
 MapReader
 =========
 
-**A computer vision pipeline for exploring and analyzing images at scale** 
+**A computer vision pipeline for exploring and analyzing images at scale**
 
 .. toctree::
    :hidden:
@@ -34,7 +34,7 @@ MapReader
 
 .. admonition:: To do list
    :class: dropdown
-   
+
    .. todolist::
 
 Indices and tables

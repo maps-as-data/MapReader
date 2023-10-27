@@ -28,7 +28,7 @@ Regardless of which class you will use to download your maps, you must know the 
 SheetDownloader
 ---------------
 
-To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets. 
+To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets.
 Guidance on what this metadata ``json`` should contain can be found in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__.
 
 .. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
@@ -55,7 +55,7 @@ e.g. for the OS one-inch maps:
          download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
      )
 
-To help you visualize your metadata, the boundaries of the map sheets included in your metadata can be visualized using: 
+To help you visualize your metadata, the boundaries of the map sheets included in your metadata can be visualized using:
 
 .. code-block:: python
 
@@ -67,7 +67,7 @@ To help you visualize your metadata, the boundaries of the map sheets included i
 
 
 
-The ``add_id`` argument can be used to add the WFS ID numbers of your map sheets on the resulting plot. 
+The ``add_id`` argument can be used to add the WFS ID numbers of your map sheets on the resulting plot.
 This can be helpful in identifying the map sheets you'd like to download.
 
 Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download map sheets using a number of methods:
@@ -88,7 +88,7 @@ Query guidance
 For all query methods, you should be aware of the following arguments:
 
 - ``append`` - By default, this is set to ``False`` and so a new query list is created each time you make a new query. Setting it to ``True`` (i.e. by specifying ``append=True``) will result in your newly query results being appended to your previous ones.
-- ``print`` - By default, this is set to ``False`` and so query results will not be printed when you run the query method. Setting it to ``True`` will result in your query results being printed. 
+- ``print`` - By default, this is set to ``False`` and so query results will not be printed when you run the query method. Setting it to ``True`` will result in your query results being printed.
 
 You should also be aware of:
 
@@ -133,7 +133,7 @@ If you would like to use a different zoom level, use the ``zoom_level`` argument
      my_ts.get_grid_bb(zoom_level=10)
 
 For all download methods, you should also be aware of the following arguments:
-   
+
 - ``path_save`` - By default, this is set to ``maps`` so that your map images and metadata are saved in a directory called "maps". You can change this to save your map images and metadata in a different directory (e.g. ``path_save="my_maps_directory"``).
 - ``metadata_fname`` - By default, this is set to ``metadata.csv``. You can change this to save your metadata with a different file name (e.g. ``metadata_fname="my_maps_metadata.csv"``).
 - ``overwrite`` - By default, this is set to ``False`` and so if a map image exists already, the download is skipped and map images are not overwritten. Setting it to ``True`` (i.e. by specifying ``overwrite=True``) will result in existing map images being overwritten.
@@ -144,7 +144,7 @@ Using the default ``path_save`` and ``metadata_fname`` arguments will result in 
 
     project
     ├──your_notebook.ipynb
-    └──maps        
+    └──maps
         ├── map1.png
         ├── map2.png
         ├── map3.png
@@ -203,7 +203,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_polygon()`` method. 
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_polygon()`` method.
 
 To download map sheets which fall within the bounds of this polygon, use:
 
@@ -219,7 +219,7 @@ Or, to find map sheets which intersect with this polygon, use:
 
 Again, by default, this will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
+.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
 1. Finding map sheets which contain a set of coordinates.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,7 +251,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_coordinates()`` method: 
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_coordinates()`` method:
 
 .. code-block:: python
 
@@ -266,7 +266,7 @@ e.g. :
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
+.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
 3. Finding map sheets which intersect with a line.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,7 +307,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_line()`` method: 
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_line()`` method:
 
 .. code-block:: python
 
@@ -315,7 +315,7 @@ Alternatively, you can bypass the querying step and download map sheets directly
 
 Again, by default, this will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
+.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
 4. Finding map sheets using their WFS ID numbers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,7 +329,7 @@ To find maps sheets using their WFS ID numbers, use:
      #EXAMPLE
      my_ts.query_map_sheets_by_wfs_ids(2)
 
-or 
+or
 
 .. code-block:: python
 
@@ -348,7 +348,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_wfs_ids()`` method: 
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_wfs_ids()`` method:
 
 .. code-block:: python
 
@@ -364,14 +364,14 @@ or
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
+.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
 5. Finding map sheets by searching for a string in their metadata.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``.query_map_sheets_by_string()`` and ``download_map_sheets_by_string()`` methods can be used find and download map sheets by searching for a string in their metadata.
 
-These methods use `regex string searching <https://docs.python.org/3/library/re.html>`__ to find map sheets whose metadata contains a given string. 
+These methods use `regex string searching <https://docs.python.org/3/library/re.html>`__ to find map sheets whose metadata contains a given string.
 Wildcards and regular expressions can therefore be used in the ``string`` argument.
 
 To find maps sheets whose metadata contains a given string, use:
@@ -392,9 +392,9 @@ e.g. :
 .. admonition:: Advanced usage
     :class: dropdown
 
-    By default the ``keys`` argument is set to ``None``, meaning that this method will search for your string in **all** metadata fields. 
-    
-    You can, however, specify the ``keys`` argument to search within a specific metadata field. 
+    By default the ``keys`` argument is set to ``None``, meaning that this method will search for your string in **all** metadata fields.
+
+    You can, however, specify the ``keys`` argument to search within a specific metadata field.
     e.g. to search in ``features["properties"]["WFS_TITLE"]``, you should use ``keys=["properties", "WFS_TITLE"]``.
 
 To download your query results, use:
@@ -407,7 +407,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_string()`` method: 
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_string()`` method:
 
 .. code-block:: python
 
@@ -422,7 +422,7 @@ e.g. :
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance. 
+.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
 .. _Downloader:
 

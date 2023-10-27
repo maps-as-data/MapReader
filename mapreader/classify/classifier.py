@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import copy
 import os
@@ -8,7 +8,7 @@ import socket
 import sys
 import time
 from datetime import datetime
-from typing import Any, Dict, Hashable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Hashable, Iterable
 
 import joblib
 import matplotlib.pyplot as plt
@@ -32,14 +32,14 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self,
-        model: Union[str, nn.Module, None],
-        labels_map: Union[Dict[int, str], None],
-        dataloaders: Union[Dict[str, DataLoader], None] = None,
-        device: Optional[str] = "default",
-        input_size: Optional[int] = (224, 224),
-        is_inception: Optional[bool] = False,
-        load_path: Optional[str] = None,
-        force_device: Optional[bool] = False,
+        model: str | (nn.Module | None),
+        labels_map: dict[int, str] | None,
+        dataloaders: dict[str, DataLoader] | None = None,
+        device: str | None = "default",
+        input_size: int | None = (224, 224),
+        is_inception: bool | None = False,
+        load_path: str | None = None,
+        force_device: bool | None = False,
         **kwargs,
     ):
         """
@@ -177,8 +177,8 @@ class ClassifierContainer:
         self,
         min_lr: float,
         max_lr: float,
-        spacing: Optional[str] = "linspace",
-    ) -> List[Dict]:
+        spacing: str | None = "linspace",
+    ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
         parameters.
@@ -220,11 +220,11 @@ class ClassifierContainer:
 
     def initialize_optimizer(
         self,
-        optim_type: Optional[str] = "adam",
-        params2optimize: Optional[Union[str, Iterable]] = "infer",
-        optim_param_dict: Optional[dict] = {"lr": 1e-3},
-        add_optim: Optional[bool] = True,
-    ) -> Union[torch.optim.Optimizer, None]:
+        optim_type: str | None = "adam",
+        params2optimize: str | Iterable | None = "infer",
+        optim_param_dict: dict | None = None,
+        add_optim: bool | None = True,
+    ) -> torch.optim.Optimizer | None:
         """
         Initializes an optimizer for the model and adds it to the classifier
         object.
@@ -267,6 +267,8 @@ class ClassifierContainer:
 
             filter(lambda p: p.requires_grad, self.model.parameters())
         """
+        if optim_param_dict is None:
+            optim_param_dict = {"lr": 0.001}
         if params2optimize == "infer":
             params2optimize = filter(lambda p: p.requires_grad, self.model.parameters())
 
@@ -303,10 +305,10 @@ class ClassifierContainer:
 
     def initialize_scheduler(
         self,
-        scheduler_type: Optional[str] = "steplr",
-        scheduler_param_dict: Optional[dict] = {"step_size": 10, "gamma": 0.1},
-        add_scheduler: Optional[bool] = True,
-    ) -> Union[torch.optim.lr_scheduler._LRScheduler, None]:
+        scheduler_type: str | None = "steplr",
+        scheduler_param_dict: dict | None = None,
+        add_scheduler: bool | None = True,
+    ) -> torch.optim.lr_scheduler._LRScheduler | None:
         """
         Initializes a learning rate scheduler for the optimizer and adds it to
         the classifier object.
@@ -334,6 +336,8 @@ class ClassifierContainer:
             The initialized learning rate scheduler. Only returned if
             ``add_scheduler`` is set to False.
         """
+        if scheduler_param_dict is None:
+            scheduler_param_dict = {"step_size": 10, "gamma": 0.1}
         if self.optimizer is None:
             raise ValueError(
                 "[ERROR] Optimizer is not yet defined. \n\n\
@@ -386,7 +390,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         self.scheduler = scheduler
 
     def add_criterion(
-        self, criterion: Optional[Union[str, nn.modules.loss._Loss]] = "cross entropy"
+        self, criterion: str | nn.modules.loss._Loss | None = "cross entropy"
     ) -> None:
         """
         Add a loss criterion to the classifier object.
@@ -436,8 +440,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def model_summary(
         self,
-        input_size: Optional[Union[tuple, list]] = None,
-        trainable_col: Optional[bool] = False,
+        input_size: tuple | list | None = None,
+        trainable_col: bool | None = False,
         **kwargs,
     ) -> None:
         """
@@ -493,7 +497,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         )
         print(model_summary)
 
-    def freeze_layers(self, layers_to_freeze: Optional[List[str]] = []) -> None:
+    def freeze_layers(self, layers_to_freeze: list[str] | None = None) -> None:
         """
         Freezes the specified layers in the neural network by setting
         ``requires_grad`` attribute to False for their parameters.
@@ -518,6 +522,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Wildcards are accepted in the ``layers_to_freeze`` parameter.
         """
 
+        if layers_to_freeze is None:
+            layers_to_freeze = []
         for layer in layers_to_freeze:
             for name, param in self.model.named_parameters():
                 if (layer[-1] == "*") and (layer.replace("*", "") in name):
@@ -525,7 +531,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 elif (layer[-1] != "*") and (layer == name):
                     param.requires_grad = False
 
-    def unfreeze_layers(self, layers_to_unfreeze: Optional[List[str]] = []):
+    def unfreeze_layers(self, layers_to_unfreeze: list[str] | None = None):
         """
         Unfreezes the specified layers in the neural network by setting
         ``requires_grad`` attribute to True for their parameters.
@@ -550,6 +556,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Wildcards are accepted in the ``layers_to_unfreeze`` parameter.
         """
 
+        if layers_to_unfreeze is None:
+            layers_to_unfreeze = []
         for layer in layers_to_unfreeze:
             for name, param in self.model.named_parameters():
                 if (layer[-1] == "*") and (layer.replace("*", "") in name):
@@ -557,7 +565,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 elif (layer[-1] != "*") and (layer == name):
                     param.requires_grad = True
 
-    def only_keep_layers(self, only_keep_layers_list: Optional[List[str]] = []) -> None:
+    def only_keep_layers(self, only_keep_layers_list: list[str] | None = None) -> None:
         """
         Only keep the specified layers (``only_keep_layers_list``) for
         gradient computation during the backpropagation.
@@ -574,6 +582,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             The function only modifies the ``requires_grad`` attribute of the
             specified parameters and does not return anything.
         """
+        if only_keep_layers_list is None:
+            only_keep_layers_list = []
         for name, param in self.model.named_parameters():
             if name in only_keep_layers_list:
                 param.requires_grad = True
@@ -582,9 +592,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def inference(
         self,
-        set_name: Optional[str] = "infer",
-        verbose: Optional[bool] = False,
-        print_info_batch_freq: Optional[int] = 5,
+        set_name: str | None = "infer",
+        verbose: bool | None = False,
+        print_info_batch_freq: int | None = 5,
     ):
         """
         Run inference on a specified dataset (``set_name``).
@@ -643,14 +653,14 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
-        num_epochs: Optional[int] = 25,
-        save_model_dir: Optional[Union[str, None]] = "models",
-        verbose: Optional[bool] = False,
-        tensorboard_path: Optional[Union[str, None]] = None,
-        tmp_file_save_freq: Optional[Union[int, None]] = 2,
-        remove_after_load: Optional[bool] = True,
-        print_info_batch_freq: Optional[Union[int, None]] = 5,
+        phases: list[str] | None = None,
+        num_epochs: int | None = 25,
+        save_model_dir: str | None | None = "models",
+        verbose: bool | None = False,
+        tensorboard_path: str | None | None = None,
+        tmp_file_save_freq: int | None | None = 2,
+        remove_after_load: bool | None = True,
+        print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
         Train the model on the specified phases for a given number of epochs.
@@ -702,6 +712,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         information.
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         try:
             self.train_core(
                 phases,
@@ -722,13 +734,13 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train_core(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
-        num_epochs: Optional[int] = 25,
-        save_model_dir: Optional[Union[str, None]] = "models",
-        verbose: Optional[bool] = False,
-        tensorboard_path: Optional[Union[str, None]] = None,
-        tmp_file_save_freq: Optional[Union[int, None]] = 2,
-        print_info_batch_freq: Optional[Union[int, None]] = 5,
+        phases: list[str] | None = None,
+        num_epochs: int | None = 25,
+        save_model_dir: str | None | None = "models",
+        verbose: bool | None = False,
+        tensorboard_path: str | None | None = None,
+        tmp_file_save_freq: int | None | None = 2,
+        print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
         Trains/fine-tunes a classifier for the specified number of epochs on
@@ -777,6 +789,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         None
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         print(f"[INFO] Each step will pass: {phases}.")
 
         for phase in phases:
@@ -842,7 +856,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs, labels, label_indices) in enumerate(
+                for batch_idx, (inputs, _labels, label_indices) in enumerate(
                     self.dataloaders[phase]
                 ):
                     inputs = inputs.to(self.device)
@@ -1040,7 +1054,7 @@ Use ``add_criterion`` to define one."
         y_pred,
         y_score,
         phase: str,
-        epoch: Optional[int] = -1,
+        epoch: int | None = -1,
         tboard_writer=None,
     ) -> None:
         """
@@ -1192,7 +1206,7 @@ Use ``add_criterion`` to define one."
         return epoch_msg
 
     def _add_metrics(
-        self, k: Hashable, v: Union[int, float, complex, np.number]
+        self, k: Hashable, v: int | (float | (complex | np.number))
     ) -> None:
         """
         Adds a metric value to a dictionary of metrics tracked during training.
@@ -1223,17 +1237,17 @@ Use ``add_criterion`` to define one."
 
     def plot_metric(
         self,
-        y_axis: List[str],
+        y_axis: list[str],
         y_label: str,
-        legends: List[str],
-        x_axis: Optional[str] = "epoch",
-        x_label: Optional[str] = "epoch",
-        colors: Optional[List[str]] = 5 * ["k", "tab:red"],
-        styles: Optional[List[str]] = 10 * ["-"],
-        markers: Optional[List[str]] = 10 * ["o"],
-        figsize: Optional[Tuple[int, int]] = (10, 5),
-        plt_yrange: Optional[Tuple[float, float]] = None,
-        plt_xrange: Optional[Tuple[float, float]] = None,
+        legends: list[str],
+        x_axis: str | None = "epoch",
+        x_label: str | None = "epoch",
+        colors: list[str] | None = 5 * ["k", "tab:red"],
+        styles: list[str] | None = 10 * ["-"],
+        markers: list[str] | None = 10 * ["o"],
+        figsize: tuple[int, int] | None = (10, 5),
+        plt_yrange: tuple[float, float] | None = None,
+        plt_xrange: tuple[float, float] | None = None,
     ):
         """
         Plot the metrics of the classifier object.
@@ -1343,9 +1357,9 @@ Use ``add_criterion`` to define one."
     def _initialize_model(
         self,
         model_name: str,
-        pretrained: Optional[bool] = True,
-        last_layer_num_classes: Optional[Union[str, int]] = "default",
-    ) -> Tuple[Any, int, bool]:
+        pretrained: bool | None = True,
+        last_layer_num_classes: str | int | None = "default",
+    ) -> tuple[Any, int, bool]:
         """
         Initializes a PyTorch model with the option to change the number of
         classes in the last layer (``last_layer_num_classes``).
@@ -1431,7 +1445,9 @@ Use ``add_criterion`` to define one."
             input_size = 299
 
         else:
-            raise NotImplementedError("[ERROR] Invalid model name. Try loading your model directly and this as the `model` argument instead.")
+            raise NotImplementedError(
+                "[ERROR] Invalid model name. Try loading your model directly and this as the `model` argument instead."
+            )
 
         self.model = model_dw.to(self.device)
         self.input_size = input_size
@@ -1439,10 +1455,10 @@ Use ``add_criterion`` to define one."
 
     def show_sample(
         self,
-        set_name: Optional[str] = "train",
-        batch_number: Optional[int] = 1,
-        print_batch_info: Optional[bool] = True,
-        figsize: Optional[Tuple[int, int]] = (15, 10),
+        set_name: str | None = "train",
+        batch_number: int | None = 1,
+        print_batch_info: bool | None = True,
+        figsize: tuple[int, int] | None = (15, 10),
     ):
         """
         Displays a sample of training or validation data in a grid format with
@@ -1511,7 +1527,7 @@ Output will show batch number {num_batches}.'
             figsize=figsize,
         )
 
-    def print_batch_info(self, set_name: Optional[str] = "train") -> None:
+    def print_batch_info(self, set_name: str | None = "train") -> None:
         """
         Print information about a dataset's batches, samples, and batch-size.
 
@@ -1544,8 +1560,8 @@ Output will show batch number {num_batches}.'
     @staticmethod
     def _imshow(
         inp: np.ndarray,
-        title: Optional[str] = None,
-        figsize: Optional[Tuple[int, int]] = (15, 10),
+        title: str | None = None,
+        figsize: tuple[int, int] | None = (15, 10),
     ) -> None:
         """
         Displays an image of a tensor using matplotlib.pyplot.
@@ -1584,11 +1600,11 @@ Output will show batch number {num_batches}.'
     def show_inference_sample_results(
         self,
         label: str,
-        num_samples: Optional[int] = 6,
-        set_name: Optional[str] = "test",
-        min_conf: Optional[Union[None, float]] = None,
-        max_conf: Optional[Union[None, float]] = None,
-        figsize: Optional[Tuple[int, int]] = (15, 15),
+        num_samples: int | None = 6,
+        set_name: str | None = "test",
+        min_conf: None | float | None = None,
+        max_conf: None | float | None = None,
+        figsize: tuple[int, int] | None = (15, 15),
     ) -> None:
         """
         Shows a sample of the results of the inference.
@@ -1629,9 +1645,9 @@ Output will show batch number {num_batches}.'
             )
 
         counter = 0
-        fig = plt.figure(figsize=figsize)
+        plt.figure(figsize=figsize)
         with torch.no_grad():
-            for inputs, labels, label_indices in iter(self.dataloaders[set_name]):
+            for inputs, _labels, label_indices in iter(self.dataloaders[set_name]):
                 inputs = inputs.to(self.device)
                 label_indices = label_indices.to(self.device)
 
@@ -1684,8 +1700,8 @@ Output will show batch number {num_batches}.'
 
     def save(
         self,
-        save_path: Optional[str] = "default.obj",
-        force: Optional[bool] = False,
+        save_path: str | None = "default.obj",
+        force: bool | None = False,
     ) -> None:
         """
         Save the object to a file.
@@ -1734,16 +1750,19 @@ Output will show batch number {num_batches}.'
             joblib.dump(obj2write, myfile)
 
         torch.save(mymodel, os.path.join(par_name, f"model_{base_name}"))
-        torch.save(mymodel.state_dict(), os.path.join(par_name, f"model_state_dict_{base_name}"))
+        torch.save(
+            mymodel.state_dict(),
+            os.path.join(par_name, f"model_state_dict_{base_name}"),
+        )
 
     def load_dataset(
         self,
         dataset: PatchDataset,
         set_name: str,
-        batch_size: Optional[int] = 16,
-        sampler: Optional[Union[Sampler, None]] = None,
-        shuffle: Optional[bool] = False,
-        num_workers: Optional[int] = 0,
+        batch_size: int | None = 16,
+        sampler: Sampler | None | None = None,
+        shuffle: bool | None = False,
+        num_workers: int | None = 0,
         **kwargs,
     ) -> None:
         """Creates a DataLoader from a PatchDataset and adds it to the ``dataloaders`` dictionary.
@@ -1780,7 +1799,7 @@ Output will show batch number {num_batches}.'
     def load(
         self,
         load_path: str,
-        force_device: Optional[bool] = False,
+        force_device: bool | None = False,
     ) -> None:
         """
         This function loads the state of a class instance from a saved file
@@ -1911,9 +1930,9 @@ Output will show batch number {num_batches}.'
 
     def update_progress(
         self,
-        progress: Union[float, int],
-        text: Optional[str] = "",
-        barLength: Optional[int] = 30,
+        progress: float | int,
+        text: str | None = "",
+        barLength: int | None = 30,
     ) -> None:
         """Update the progress bar.
 

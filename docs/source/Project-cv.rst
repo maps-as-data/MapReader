@@ -1,19 +1,19 @@
 Project CV
 ===========
 
-.. Notes to editors: 
+.. Notes to editors:
 .. 1. Add links to slides/videos (always add slides to mapreader.team@gmail.com drive)
 .. 2. Use Chicago style format for citations
 .. 3. entries requiring more info left commented out for now
 
-Peer-reviewed publications 
+Peer-reviewed publications
 ---------------------------
 
 Kasra Hosseini, Katherine McDonough, Daniel van Strien, Olivia Vane, Daniel C.S. Wilson, "Maps of a Nation? The Digitized Ordnance Survey for New Historical Research," Journal of Victorian Culture, Volume 26, Issue 2, April 2021, Pages 284–299, https://doi.org/10.1093/jvcult/vcab009
 
 Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough, "MapReader: a computer vision pipeline for the semantic exploration of maps at scale." In _Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22)_. Association for Computing Machinery, New York, NY, USA (2022), 8–19. https://doi.org/10.1145/3557919.3565812
 
-Non-Peer-reviewed publications 
+Non-Peer-reviewed publications
 --------------------------------
 
 Hosseini, Kasra, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. "MapReader: A Computer Vision Pipeline for the Semantic Exploration of Maps at Scale." arXiv, 30 November 2021. https://doi.org/10.48550/arXiv.2111.15592.
@@ -27,7 +27,7 @@ Training and inferred data for ACM SIGSPATIAL 2022 research experiments publishe
 Model outputs
 --------------
 
-Models fine-tuned for the ACM SIGSPATIAL 2022 research experiments shared on Hugging Face: https://huggingface.co/models?other=arxiv:2111.15592 
+Models fine-tuned for the ACM SIGSPATIAL 2022 research experiments shared on Hugging Face: https://huggingface.co/models?other=arxiv:2111.15592
 
 Visualizations
 ---------------
@@ -50,7 +50,7 @@ Workshops
 
 - Two-Day launch held at the Alan Turing Institute in London
 - Included research presentations by MapReader team
-- Invited keynote lectures by Chris Fleet (NLS) and Nicole Colman (Stanford) 
+- Invited keynote lectures by Chris Fleet (NLS) and Nicole Colman (Stanford)
 - Hands-on workshop to demonstrate and experiment with MapReader to academic and other users
 - https://livingwithmachines.ac.uk/event/mapreader-launch/
 

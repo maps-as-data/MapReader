@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import torch
 
@@ -29,7 +29,7 @@ class twoParallelModels(torch.nn.Module):
         fc_layer : nn.Linear
             The fully connected layer at the end of the model.
         """
-        super(twoParallelModels, self).__init__()
+        super().__init__()
         self.features1 = feature1
         self.features2 = feature2
         self.fc_layer = fc_layer
