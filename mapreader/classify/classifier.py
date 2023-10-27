@@ -125,53 +125,55 @@ class ClassifierContainer:
 
         if load_path:
             self.load(load_path=load_path, force_device=force_device)
-        elif model is None or labels_map is None:
+        
+        elif isinstance((model, labels_map), None):
             raise ValueError(
                 "[ERROR] Unless passing ``load_path``, ``model`` and ``labels_map`` must be defined."
             )
 
-        if labels_map:
-            self.labels_map = labels_map
-
-        if model:
-            print("[INFO] Initializing model.")
-
-            # set up model and move to device
-            if isinstance(model, nn.Module):
-                self.model = model.to(self.device)
-                self.input_size = input_size
-                self.is_inception = is_inception
-            elif isinstance(model, str):
-                self._initialize_model(model, **kwargs)
-
-            self.optimizer = None
-            self.scheduler = None
-            self.criterion = None
-
-            self.metrics = {}
-            self.last_epoch = 0
-            self.best_loss = torch.tensor(np.inf)
-            self.best_epoch = 0
-
-            # temp file to save checkpoints during training/validation
-            if not os.path.exists("./tmp_checkpoints"):
-                os.makedirs("./tmp_checkpoints")
-            self.tmp_save_filename = (
-                f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
-            )
-
-            # add colors for printing/logging
-            self._print_colors()
-
         # add dataloaders if passed
-        if dataloaders:
-            self.dataloaders = dataloaders
-            for set_name, dataloader in dataloaders.items():
-                print(
-                    f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
-                )
+        if load_path:
+            if dataloaders:
+                for set_name, dataloader in dataloaders.items():
+                    self.dataloaders[set_name]=dataloader
         else:
-            self.dataloaders = {}
+            self.dataloaders = dataloaders if dataloaders else {}
+        
+        for set_name, dataloader in dataloaders.items():
+            print(
+                f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
+            )
+        
+        self.labels_map = labels_map
+
+        print("[INFO] Initializing model.")
+
+        # set up model and move to device
+        if isinstance(model, nn.Module):
+            self.model = model.to(self.device)
+            self.input_size = input_size
+            self.is_inception = is_inception
+        elif isinstance(model, str):
+            self._initialize_model(model, **kwargs)
+
+        self.optimizer = None
+        self.scheduler = None
+        self.criterion = None
+
+        self.metrics = {}
+        self.last_epoch = 0
+        self.best_loss = torch.tensor(np.inf)
+        self.best_epoch = 0
+
+        # temp file to save checkpoints during training/validation
+        if not os.path.exists("./tmp_checkpoints"):
+            os.makedirs("./tmp_checkpoints")
+        self.tmp_save_filename = (
+            f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+        )
+
+        # add colors for printing/logging
+        self._print_colors()
 
     def generate_layerwise_lrs(
         self,
