@@ -50,7 +50,7 @@ class ClassifierContainer:
         model : str, nn.Module or None
             The PyTorch model to add to the object.
 
-            - If passed as a string, will run ``_initialize_model(model, **kwargs)``\. See https://pytorch.org/vision/0.8/models.html for options.
+            - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
 
         dataloaders: Dict or None
@@ -63,16 +63,16 @@ class ClassifierContainer:
             The device to be used for training and storing models.
             Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
         input_size : int, optional
-            The expected input size of the model. Default is ``(224,224)``\.
+            The expected input size of the model. Default is ``(224,224)``.
         is_inception : bool, optional
             Whether the model is an Inception-style model.
-            Default is ``False``\.
+            Default is ``False``.
         load_path : str, optional
-            The path to an ``\.obj`` file containing a
+            The path to an ``.obj`` file containing a
         force_device : bool, optional
             Whether to force the use of a specific device.
-            If set to ``True``\, the default device is used.
-            Defaults to ``False``\.
+            If set to ``True``, the default device is used.
+            Defaults to ``False``.
         kwargs : Dict
             Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
 
@@ -122,14 +122,14 @@ class ClassifierContainer:
         # check if loading an pre-existing object
         if model and load_path:
             raise ValueError(
-                "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``\."
+                "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``."
             )
         if (
             any(val is None for val in [model, dataloaders, labels_map])
             and not load_path
         ):
             raise ValueError(
-                "[ERROR] Unless passing ``load_path``\, ``model``\, ``dataloaders`` and ``labels_map`` must be defined."
+                "[ERROR] Unless passing ``load_path``, ``model``, ``dataloaders`` and ``labels_map`` must be defined."
             )
 
         if load_path:
@@ -194,10 +194,10 @@ class ClassifierContainer:
             The maximum learning rate to be used.
         spacing : str, optional
             The type of sequence to use for spacing the specified interval
-            learning rates. Can be either ``"linspace"`` or ``"geomspace"``\,
+            learning rates. Can be either ``"linspace"`` or ``"geomspace"``,
             where `"linspace"` uses evenly spaced learning rates over a
             specified interval and `"geomspace"` uses learning rates spaced
-            evenly on a log scale (a geometric progression). By default ``"linspace"``\.
+            evenly on a log scale (a geometric progression). By default ``"linspace"``.
 
         Returns
         -------
@@ -236,23 +236,23 @@ class ClassifierContainer:
         ----------
         optim_type : str, optional
             The type of optimizer to use. Can be set to ``"adam"`` (default),
-            ``"adamw"``\, or ``"sgd"``\.
+            ``"adamw"``, or ``"sgd"``.
         params2optimise : str or iterable, optional
-            The parameters to optimize. If set to ``"infer"``\, all model
+            The parameters to optimize. If set to ``"infer"``, all model
             parameters that require gradients will be optimized, by default
-            ``"infer"``\.
+            ``"infer"``.
         optim_param_dict : dict, optional
             The parameters to pass to the optimizer constructor as a
-            dictionary, by default ``{"lr": 1e-3}``\.
+            dictionary, by default ``{"lr": 1e-3}``.
         add_optim : bool, optional
-            If ``True``\, adds the optimizer to the classifier object, by
-            default ``True``\.
+            If ``True``, adds the optimizer to the classifier object, by
+            default ``True``.
 
         Returns
         -------
         optimizer : torch.optim.Optimizer
             The initialized optimizer. Only returned if ``add_optim`` is set to
-            ``False``\.
+            ``False``.
 
         Notes
         -----
@@ -261,8 +261,8 @@ class ClassifierContainer:
         Note that the first argument of an optimizer is parameters to optimize,
         e.g. ``params2optimize = model_ft.parameters()``:
 
-        - ``model_ft.parameters()``\: all parameters are being optimized
-        - ``model_ft.fc.parameters()``\: only parameters of final layer are being optimized
+        - ``model_ft.parameters()``: all parameters are being optimized
+        - ``model_ft.fc.parameters()``: only parameters of final layer are being optimized
 
         Here, we use:
 
@@ -281,7 +281,7 @@ class ClassifierContainer:
             optimizer = optim.SGD(params2optimise, **optim_param_dict)
         else:
             raise NotImplementedError(
-                '[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``\.'
+                '[ERROR] At present, only Adam ("adam"), AdamW ("adamw") and SGD ("sgd") are options for ``optim_type``.'
             )
 
         if add_optim:
@@ -318,13 +318,13 @@ class ClassifierContainer:
         ----------
         scheduler_type : str, optional
             The type of learning rate scheduler to use. Can be either
-            ``"steplr"`` (default) or ``"onecyclelr"``\.
+            ``"steplr"`` (default) or ``"onecyclelr"``.
         scheduler_param_dict : dict, optional
             The parameters to pass to the scheduler constructor, by default
-            ``{"step_size": 10, "gamma": 0.1}``\.
+            ``{"step_size": 10, "gamma": 0.1}``.
         add_scheduler : bool, optional
-            If ``True``\, adds the scheduler to the classifier object, by
-            default ``True``\.
+            If ``True``, adds the scheduler to the classifier object, by
+            default ``True``.
 
         Raises
         ------
@@ -450,10 +450,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         input_size : tuple or list, optional
             The size of the input data.
-            If None, input size is taken from "train" dataloader (``self.dataloaders["train"]``\).
+            If None, input size is taken from "train" dataloader (``self.dataloaders["train"]``).
         trainable_col : bool, optional
-            If ``True``\, adds a column showing which parameters are trainable.
-            Defaults to ``False``\.
+            If ``True``, adds a column showing which parameters are trainable.
+            Defaults to ``False``.
         **kwargs : Dict
             Keyword arguments to pass to ``torchinfo.summary()`` (see https://github.com/TylerYep/torchinfo).
 
@@ -505,7 +505,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             an asterisk (``"*"``), then all parameters whose name contains the
             layer name (excluding the asterisk) are frozen. Otherwise,
             only the parameters with an exact match to the layer name
-            are frozen. By default, ``[]``\.
+            are frozen. By default, ``[]``.
 
         Returns
         -------
@@ -537,7 +537,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             an asterisk (``"*"``), then all parameters whose name contains the
             layer name (excluding the asterisk) are unfrozen. Otherwise,
             only the parameters with an exact match to the layer name
-            are unfrozen. By default, ``[]``\.
+            are unfrozen. By default, ``[]``.
 
         Returns
         -------
@@ -566,7 +566,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         only_keep_layers_list : list, optional
             List of layer names to keep. All other layers will have their
-            gradient computation turned off. Default is ``[]``\.
+            gradient computation turned off. Default is ``[]``.
 
         Returns
         -------
@@ -593,11 +593,11 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         set_name : str, optional
             The name of the dataset to run inference on, by default
-            ``"infer"``\.
+            ``"infer"``.
         verbose : bool, optional
            Whether to print verbose outputs, by default False.
         print_info_batch_freq : int, optional
-            The frequency of printouts, by default ``5``\.
+            The frequency of printouts, by default ``5``.
 
         Returns
         -------
@@ -664,27 +664,27 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         phases : list of str, optional
             The phases to run through during each training iteration. Default is
-            ``["train", "val"]``\.
+            ``["train", "val"]``.
         num_epochs : int, optional
-            The number of epochs to train the model for. Default is ``25``\.
+            The number of epochs to train the model for. Default is ``25``.
         save_model_dir : str or None, optional
-            The directory to save the model in. Default is ``"models"``\. If
-            set to ``None``\, the model is not saved.
+            The directory to save the model in. Default is ``"models"``. If
+            set to ``None``, the model is not saved.
         verbose : int, optional
-            Whether to print verbose outputs, by default ``False``\.
+            Whether to print verbose outputs, by default ``False``.
         tensorboard_path : str or None, optional
             The path to the directory to save TensorBoard logs in. If set to
-            ``None``\, no TensorBoard logs are saved. Default is ``None``\.
+            ``None``, no TensorBoard logs are saved. Default is ``None``.
         tmp_file_save_freq : int, optional
             The frequency (in epochs) to save a temporary file of the model.
-            Default is ``2``\. If set to ``0`` or ``None``\, no temporary file
+            Default is ``2``. If set to ``0`` or ``None``, no temporary file
             is saved.
         remove_after_load : bool, optional
             Whether to remove the temporary file after loading it. Default is
-            ``True``\.
+            ``True``.
         print_info_batch_freq : int, optional
             The frequency (in batches) to print training information. Default
-            is ``5``\. If set to ``0`` or ``None``\, no training information is
+            is ``5``. If set to ``0`` or ``None``, no training information is
             printed.
 
         Returns
@@ -692,7 +692,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         None
             The function saves the model to the ``save_model_dir`` directory,
             and optionally to a temporary file. If interrupted with a
-            ``KeyboardInterrupt``\, the function tries to load the temporary
+            ``KeyboardInterrupt``, the function tries to load the temporary
             file. If no temporary file is found, it continues without loading.
 
         Notes
@@ -738,24 +738,24 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         ----------
         phases : list of str, optional
             The phases to run through during each training iteration. Default is
-            ``["train", "val"]``\.
+            ``["train", "val"]``.
         num_epochs : int, optional
-            The number of epochs to train the model for. Default is ``25``\.
+            The number of epochs to train the model for. Default is ``25``.
         save_model_dir : str or None, optional
-            The directory to save the model in. Default is ``"models"``\. If
-            set to ``None``\, the model is not saved.
+            The directory to save the model in. Default is ``"models"``. If
+            set to ``None``, the model is not saved.
         verbose : bool, optional
-            Whether to print verbose outputs, by default ``False``\.
+            Whether to print verbose outputs, by default ``False``.
         tensorboard_path : str or None, optional
             The path to the directory to save TensorBoard logs in. If set to
-            ``None``\, no TensorBoard logs are saved. Default is ``None``\.
+            ``None``, no TensorBoard logs are saved. Default is ``None``.
         tmp_file_save_freq : int, optional
             The frequency (in epochs) to save a temporary file of the model.
-            Default is ``2``\. If set to ``0`` or ``None``\, no temporary file
+            Default is ``2``. If set to ``0`` or ``None``, no temporary file
             is saved.
         print_info_batch_freq : int, optional
             The frequency (in batches) to print training information. Default
-            is ``5``\. If set to ``0`` or ``None``\, no training information is
+            is ``5``. If set to ``0`` or ``None``, no training information is
             printed.
 
         Raises
@@ -1061,15 +1061,15 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             ``y_pred`` is not binary.
 
         phase : str
-            Name of the current phase, typically ``"train"`` or ``"val"``\. See
+            Name of the current phase, typically ``"train"`` or ``"val"``. See
             ``train`` function.
 
         epoch : int, optional
-            Current epoch number. Default is ``-1``\.
+            Current epoch number. Default is ``-1``.
 
         tboard_writer : object, optional
             TensorBoard SummaryWriter object to write the metrics. Default is
-            ``None``\.
+            ``None``.
 
         Returns
         -------
@@ -1080,7 +1080,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         This method uses both the
         ``sklearn.metrics.precision_recall_fscore_support`` and
         ``sklearn.metrics.roc_auc_score`` functions from ``scikit-learn`` to
-        calculate the metrics for each average type (``"micro"``\, ``"macro"``
+        calculate the metrics for each average type (``"micro"``, ``"macro"``
         and ``"weighted"``). The results are then added to the ``metrics``
         dictionary. It also writes the metrics to the TensorBoard
         SummaryWriter, if ``tboard_writer`` is not None.
@@ -1171,7 +1171,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         Parameters
         ----------
         phase : str
-            The training phase, either ``"train"`` or ``"val"``\.
+            The training phase, either ``"train"`` or ``"val"``.
         epoch_msg : str
             The message string to be modified with the epoch metrics.
 
@@ -1214,7 +1214,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         key-value pair is created with ``k`` as the key and a new list
         containing the value ``v`` as the value. If the key ``k`` already
         exists in the dictionary of metrics, the value `v` is appended to the
-        list associated with the key ``k``\.
+        list associated with the key ``k``.
         """
         if k not in self.metrics.keys():
             self.metrics[k] = [v]
@@ -1250,24 +1250,24 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
             The metric to be used as the x-axis. Can be ``"epoch"`` (default)
             or any other metric name present in the dataset.
         x_label : str, optional
-            The label for the x-axis. Defaults to ``"epoch"``\.
+            The label for the x-axis. Defaults to ``"epoch"``.
         colors : list of str, optional
             The colors to be used for the lines of each metric. It must be at
-            least the same size as ``y_axis``\. Defaults to
-            ``5 * ["k", "tab:red"]``\.
+            least the same size as ``y_axis``. Defaults to
+            ``5 * ["k", "tab:red"]``.
         styles : list of str, optional
             The line styles to be used for the lines of each metric. It must
-            be at least the same size as ``y_axis``\. Defaults to
-            ``10 * ["-"]``\.
+            be at least the same size as ``y_axis``. Defaults to
+            ``10 * ["-"]``.
         markers : list of str, optional
             The markers to be used for the lines of each metric. It must be at
-            least the same size as ``y_axis``\. Defaults to ``10 * ["o"]``\.
+            least the same size as ``y_axis``. Defaults to ``10 * ["o"]``.
         figsize : tuple of int, optional
-            The size of the figure in inches. Defaults to ``(10, 5)``\.
+            The size of the figure in inches. Defaults to ``(10, 5)``.
         plt_yrange : tuple of float, optional
-            The range of values for the y-axis. Defaults to ``None``\.
+            The range of values for the y-axis. Defaults to ``None``.
         plt_xrange : tuple of float, optional
-            The range of values for the x-axis. Defaults to ``None``\.
+            The range of values for the x-axis. Defaults to ``None``.
 
         Returns
         -------
@@ -1357,8 +1357,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         pretrained : bool, optional
             Use pretrained version, by default ``True``
         last_layer_num_classes : str or int, optional
-            Number of elements in the last layer. If ``"default"``\, sets it to
-            the number of classes. By default, ``"default"``\.
+            Number of elements in the last layer. If ``"default"``, sets it to
+            the number of classes. By default, ``"default"``.
 
         Returns
         -------
@@ -1376,8 +1376,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
         Notes
         -----
-        Inception v3 requires the input size to be ``(299, 299)``\, whereas all
-        of the other models expect ``(224, 224)``\.
+        Inception v3 requires the input size to be ``(299, 299)``, whereas all
+        of the other models expect ``(224, 224)``.
 
         See https://pytorch.org/vision/0.8/models.html.
         """
@@ -1452,14 +1452,14 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
         ----------
         set_name : str, optional
             Name of the dataset (``"train"``/``"validation"``) to display the
-            sample from, by default ``"train"``\.
+            sample from, by default ``"train"``.
         batch_number : int, optional
-            Which batch to display, by default ``1``\.
+            Which batch to display, by default ``1``.
         print_batch_info : bool, optional
             Whether to print information about the batch size, by default
-            ``True``\.
+            ``True``.
         figsize : tuple, optional
-            Figure size (width, height) in inches, by default ``(15, 10)``\.
+            Figure size (width, height) in inches, by default ``(15, 10)``.
 
         Returns
         -------
@@ -1555,10 +1555,10 @@ Output will show batch number {num_batches}.'
         inp : numpy.ndarray
             Input image to be displayed.
         title : str, optional
-            Title of the plot, default is ``None``\.
+            Title of the plot, default is ``None``.
         figsize : tuple, optional
             Figure size in inches as a tuple of (width, height), default is
-            ``(15, 10)``\.
+            ``(15, 10)``.
 
         Returns
         -------
@@ -1598,21 +1598,21 @@ Output will show batch number {num_batches}.'
         label : str, optional
             The label for which to display results.
         num_samples : int, optional
-            The number of sample results to display. Defaults to ``6``\.
+            The number of sample results to display. Defaults to ``6``.
         set_name : str, optional
             The name of the dataset split to use for inference. Defaults to
-            ``"test"``\.
+            ``"test"``.
         min_conf : float, optional
             The minimum confidence score for a sample result to be displayed.
             Samples with lower confidence scores will be skipped. Defaults to
-            ``None``\.
+            ``None``.
         max_conf : float, optional
             The maximum confidence score for a sample result to be displayed.
             Samples with higher confidence scores will be skipped. Defaults to
-            ``None``\.
+            ``None``.
         figsize : tuple[int, int], optional
             Figure size (width, height) in inches, displaying the sample
-            results. Defaults to ``(15, 15)``\.
+            results. Defaults to ``(15, 15)``.
 
         Returns
         -------
@@ -1689,16 +1689,16 @@ Output will show batch number {num_batches}.'
         ----------
         save_path : str, optional
             The path to the file to write.
-            If the file already exists and ``force`` is not ``True``\, a ``FileExistsError`` is raised.
-            Defaults to ``"default.obj"``\.
+            If the file already exists and ``force`` is not ``True``, a ``FileExistsError`` is raised.
+            Defaults to ``"default.obj"``.
         force : bool, optional
             Whether to overwrite the file if it already exists. Defaults to
-            ``False``\.
+            ``False``.
 
         Raises
         ------
         FileExistsError
-            If the file already exists and ``force`` is not ``True``\.
+            If the file already exists and ``force`` is not ``True``.
 
         Notes
         -----
@@ -1706,7 +1706,7 @@ Output will show batch number {num_batches}.'
         object's dictionary is written to the specified file using the
         ``joblib.dump`` function. The object's ``model`` attribute is excluded
         from this dictionary and saved separately using the ``torch.save``
-        function, with a filename derived from the original ``save_path``\.
+        function, with a filename derived from the original ``save_path``.
         """
         if os.path.isfile(save_path):
             if force:
@@ -1789,8 +1789,8 @@ Output will show batch number {num_batches}.'
             Path to the saved file to load.
         force_device : bool or str, optional
             Whether to force the use of a specific device, or the name of the
-            device to use. If set to ``True``\, the default device is used.
-            Defaults to ``False``\.
+            device to use. If set to ``True``, the default device is used.
+            Defaults to ``False``.
 
         Raises
         ------
@@ -1915,15 +1915,15 @@ Output will show batch number {num_batches}.'
         Parameters
         ----------
         progress : float or int
-            The progress value to display, between ``0`` and ``1``\.
+            The progress value to display, between ``0`` and ``1``.
             If an integer is provided, it will be converted to a float.
             If a value outside the range ``[0, 1]`` is provided, it will be
             clamped to the nearest valid value.
         text : str, optional
             Additional text to display after the progress bar, defaults to
-            ``""``\.
+            ``""``.
         barLength : int, optional
-            The length of the progress bar in characters, defaults to ``30``\.
+            The length of the progress bar in characters, defaults to ``30``.
 
         Raises
         ------
