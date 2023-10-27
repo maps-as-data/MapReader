@@ -1,11 +1,5 @@
-Classify
-=========
-
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
-
-.. note:: You will need to update file paths to reflect your own machines directory structure.
-
-MapReader's ``Classify`` subpackage is used to train or fine-tune a CV (computer vision) model and use it to predict the labels of patches.
+Train/fine-tune a classifier
+==============================
 
 If you are new to computer vision/ machine learning, `see this tutorial for details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__.
 This will help you get to grips with the basic steps needed to train/fine-tune a model.

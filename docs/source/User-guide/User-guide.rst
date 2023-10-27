@@ -18,5 +18,5 @@ Please read this User Guide **before** looking through the worked examples.
    Download
    Load
    Annotate
-   Classify
+   Classify/Classify
    Post-process
