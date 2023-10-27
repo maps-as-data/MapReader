@@ -34,7 +34,7 @@ class ClassifierContainer:
         self,
         model: Union[str, nn.Module, None],
         labels_map: Union[Dict[int, str], None],
-        dataloaders: Union[Dict[str, DataLoader], None],
+        dataloaders: Union[Dict[str, DataLoader], None] = None,
         device: Optional[str] = "default",
         input_size: Optional[int] = (224, 224),
         is_inception: Optional[bool] = False,
