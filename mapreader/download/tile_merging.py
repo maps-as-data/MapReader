@@ -124,7 +124,16 @@ class TileMerger:
         tuple
             Size of tile
         """
-        start_image = self._load_image_to_grid_cell(grid_bb.lower_corner)
+        try:
+            start_image = self._load_image_to_grid_cell(grid_bb.lower_corner)
+        except FileNotFoundError:
+            logger.warning("Image has missing tiles in bottom left corner.")
+            try:
+                start_image = self._load_image_to_grid_cell(grid_bb.upper_corner)
+            except FileNotFoundError as err:
+                logger.warning("Image has missing tiles in upper right corner.")
+                raise FileNotFoundError("[ERROR] Image is missing tiles for both lower left and upper right corners.")
+            
         img_size = start_image.size
         assert (
             img_size[0] == img_size[1]
@@ -153,7 +162,11 @@ class TileMerger:
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
-        tile_size = self._load_tile_size(grid_bb)
+        try:
+            tile_size = self._load_tile_size(grid_bb)
+        except FileNotFoundError:
+            return False # unsuccessful
+
         merged_image = Image.new(
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)
         )
@@ -172,7 +185,7 @@ class TileMerger:
             try:
                 current_tile = Image.open(self._generate_tile_name(current_cell))
                 merged_image.paste(current_tile, (tile_size * i, tile_size * j))
-            except:
+            except FileNotFoundError:
                 logger.info(f"Cannot find tile with grid_index = {current_cell}")
 
         logger.info("Writing file..")

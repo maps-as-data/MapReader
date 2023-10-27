@@ -576,7 +576,7 @@ class SheetDownloader:
             metadata_df = pd.concat(
                 [existing_metadata_df, new_metadata_df], ignore_index=True
             )
-            metadata_df.drop_duplicates(subset=["grid_bb"], keep="first", inplace=True)
+            metadata_df.drop_duplicates(keep="first", inplace=True)
         else:
             metadata_df = new_metadata_df
 

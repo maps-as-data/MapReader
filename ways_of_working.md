@@ -1,5 +1,7 @@
 # MapReader Ways of Working
 
+This document outlines expectations and responsibilities with regard to working on the project.
+
 ## Commitments
 
 All MapReader project members commit to:
