@@ -51,6 +51,8 @@ To see how your labels map to their label indices, call the ``annotated_images.l
 
     annotated_images.labels_map
 
+.. note:: This ``labels_map`` will be needed later.
+
 To view a sample of your annotated images use the ``show_sample()`` method.
 The ``label_to_show`` argument specifies which label you would like to show.
 
@@ -214,31 +216,17 @@ Train
 Initialize ``ClassifierContainer()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MapReader's ``ClassifierContainer()`` class is used to:
+To initialize your ``ClassifierContainer()`` for training, you will need to define:
 
-- Load models.
-- Set up labels map.
-- Load datasets and dataloaders.
-- Define a criterion (loss function), optimizer and scheduler.
-- Train and evaluate models using already annotated images.
-- Predict labels of un-annotated images (model inference).
-- Visualize datasets and predictions.
-
-You can initialize a ``ClassifierContainer()`` object (``my_classifier``) using:
-
-.. code-block:: python
-
-    from mapreader import ClassifierContainer
-
-    my_classifier = ClassifierContainer(model, labels_map, dataloaders)
-
-Your labels map (``annotated_images.labels_map``) and dataloaders should be passed as the ``labels_map`` and ``dataloaders`` arguments respectively.
+- ``model`` - The model (classifier) you would like to train.
+- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_rail_space", 1: "rail_space"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
+- ``dataloaders`` - The dataloaders containing your train, test and val datasets.
 
 There are a number of options for the ``model`` argument:
 
     **1.  To load a model from** `torchvision.models <https://pytorch.org/vision/stable/models.html>`__\ **, pass one of the model names as the ``model`` argument.**
 
-        e.g. To load "resnet18":
+        e.g. To load "resnet18", pass ``"resnet18"`` as the model argument:
 
         .. code-block:: python
 
@@ -580,7 +568,7 @@ This will save your ``ClassifierContainer()`` as ``classifier.pkl`` and your mod
 Infer (predict)
 ----------------
 
-Once you are happy with your model's predictions, you can then use it to predict labels on the rest of your (un-annotated) patches.
+Once you are happy with your model's predictions, you can then use it to predict labels on the rest of your (unannotated) patches.
 
 To do this, you will need to create a new dataset containing your patches:
 

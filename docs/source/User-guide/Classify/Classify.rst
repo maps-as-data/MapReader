@@ -7,8 +7,18 @@ Classify
 
 MapReader's ``Classify`` subpackage is used to:
 
-- Train or fine-tune a CV (computer vision) classifier.
-- Use a classifier to infer/predict the labels of patches.
+- Train or fine-tune a classifier on annotated patches.
+- Use a classifier to infer/predict the labels of unannotated patches.
+
+This is all done within MapReader's ``ClassifierContainer()`` class, which is used to:
+
+- Load models (classifiers).
+- Define a labels map.
+- Load datasets and dataloaders.
+- Define a criterion (loss function), optimizer and scheduler.
+- Train and evaluate models using already annotated images.
+- Predict labels of unannotated images (model inference).
+- Visualize datasets and predictions.
 
 If you already have a fine-tuned model, you can skip to the `Infer labels using a fine-tuned model <https://mapreader.readthedocs.io/en/latest/Classify/Infer.html>`_ page.
 
