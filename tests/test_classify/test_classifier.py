@@ -195,7 +195,7 @@ def test_init_models_timm(inputs):
         assert isinstance(classifier.model, model_type)
         assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
         classifier = ClassifierContainer(
-            model, labels_map=annots.labels_map
+            my_model, labels_map=annots.labels_map
         )
         assert isinstance(classifier.model, model_type)
         assert classifier.dataloaders == {}
