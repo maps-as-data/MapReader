@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import os
 from decimal import Decimal
-from typing import Callable, Optional, Union
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,17 +31,17 @@ class AnnotationsLoader:
 
     def load(
         self,
-        annotations: Union[str, pd.DataFrame],
-        delimiter: Optional[str] =",",
-        images_dir: Optional[str] = None,
-        remove_broken: Optional[bool] = True,
-        ignore_broken: Optional[bool] = False,
-        id_col: Optional[str] = "image_id",
-        patch_paths_col: Optional[str] = "image_path",
-        label_col: Optional[str] = "label",
-        append: Optional[bool] = True,
-        scramble_frame: Optional[bool] = False,
-        reset_index: Optional[bool] = False,
+        annotations: str | pd.DataFrame,
+        delimiter: str | None = ",",
+        images_dir: str | None = None,
+        remove_broken: bool | None = True,
+        ignore_broken: bool | None = False,
+        id_col: str | None = "image_id",
+        patch_paths_col: str | None = "image_path",
+        label_col: str | None = "label",
+        append: bool | None = True,
+        scramble_frame: bool | None = False,
+        reset_index: bool | None = False,
     ):
         """Loads annotations from a csv file or dataframe and can be used to set the ``id_col``, ``patch_paths_col`` and ``label_col`` attributes.
 
@@ -55,7 +55,7 @@ class AnnotationsLoader:
         images_dir : Optional[str], optional
             The path to the directory in which patches are stored.
             This argument should be passed if image paths are different from the path saved in annotations dataframe/csv.
-            If None, no updates will be made to the image paths in the annotations dataframe/csv. 
+            If None, no updates will be made to the image paths in the annotations dataframe/csv.
             By default None.
         remove_broken : Optional[bool], optional
             Whether to remove annotations with broken image paths.
@@ -118,7 +118,9 @@ class AnnotationsLoader:
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
-            annotations[self.patch_paths_col] = annotations[self.id_col].apply(lambda x: os.path.join(abs_images_dir, x))
+            annotations[self.patch_paths_col] = annotations[self.id_col].apply(
+                lambda x: os.path.join(abs_images_dir, x)
+            )
 
         annotations = annotations.astype(
             {self.label_col: str}
@@ -129,7 +131,9 @@ class AnnotationsLoader:
         else:
             self.annotations = annotations
 
-        self._check_patch_paths(remove_broken=remove_broken, ignore_broken=ignore_broken)
+        self._check_patch_paths(
+            remove_broken=remove_broken, ignore_broken=ignore_broken
+        )
 
         unique_labels = self.annotations[self.label_col].unique().tolist()
         self.unique_labels = unique_labels
@@ -145,9 +149,9 @@ class AnnotationsLoader:
     def _load_annotations_csv(
         self,
         annotations: str,
-        delimiter: Optional[str] = ",",
-        scramble_frame: Optional[bool] = False,
-        reset_index: Optional[bool] = False,
+        delimiter: str | None = ",",
+        scramble_frame: bool | None = False,
+        reset_index: bool | None = False,
     ) -> pd.DataFrame:
         """Loads annotations from a csv file.
 
@@ -188,11 +192,10 @@ class AnnotationsLoader:
         return annotations
 
     def _check_patch_paths(
-            self,
-            remove_broken: Optional[bool] = True,
-            ignore_broken: Optional[bool] = False,
-        ) -> None:
-
+        self,
+        remove_broken: bool | None = True,
+        ignore_broken: bool | None = False,
+    ) -> None:
         """
         Checks the file paths of annotations and manages broken paths.
 
@@ -216,28 +219,38 @@ class AnnotationsLoader:
                 broken_paths.append(patch_path)
                 if remove_broken:
                     self.annotations.drop(i, inplace=True)
-        
-        if len(broken_paths)!=0: # write broken paths to text file
-            with open('broken_files.txt', 'w') as f:
+
+        if len(broken_paths) != 0:  # write broken paths to text file
+            with open("broken_files.txt", "w") as f:
                 for broken_path in broken_paths:
                     f.write(f"{broken_path}\n")
 
-            print(f"[WARNING] {len(broken_paths)} files cannot be found.\n\
-Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument.")
+            print(
+                f"[WARNING] {len(broken_paths)} files cannot be found.\n\
+Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument."
+            )
 
             if remove_broken:
-                if len(self.annotations)==0:
-                    raise ValueError("[ERROR] No annotations remaining. \
-Please check your files exist and, if possible, update your file paths using the 'images_dir' argument.")
+                if len(self.annotations) == 0:
+                    raise ValueError(
+                        "[ERROR] No annotations remaining. \
+Please check your files exist and, if possible, update your file paths using the 'images_dir' argument."
+                    )
                 else:
-                    print(f"[INFO] Annotations with broken file paths have been removed.\n\
-Number of annotations remaining: {len(self.annotations)}")
-            
-            else: # raise error for 'remove_broken=False'
+                    print(
+                        f"[INFO] Annotations with broken file paths have been removed.\n\
+Number of annotations remaining: {len(self.annotations)}"
+                    )
+
+            else:  # raise error for 'remove_broken=False'
                 if ignore_broken:
-                    print(f"[WARNING] Continuing with {len(broken_paths)} broken file paths.")
+                    print(
+                        f"[WARNING] Continuing with {len(broken_paths)} broken file paths."
+                    )
                 else:
-                    raise ValueError(f"[ERROR] {len(broken_paths)} files cannot be found.")
+                    raise ValueError(
+                        f"[ERROR] {len(broken_paths)} files cannot be found."
+                    )
 
     def show_patch(self, patch_id: str) -> None:
         """
@@ -262,8 +275,10 @@ Number of annotations remaining: {len(self.annotations)}")
         try:
             img = Image.open(patch_path)
         except FileNotFoundError as e:
-            e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
-Please check your image paths in your annonations.csv file and update them if necessary.')
+            e.add_note(
+                f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths in your annonations.csv file and update them if necessary.'
+            )
 
         plt.imshow(img)
         plt.axis("off")
@@ -285,12 +300,12 @@ Please check your image paths in your annonations.csv file and update them if ne
 
     def review_labels(
         self,
-        label_to_review: Optional[str] = None,
-        chunks: Optional[int] = 8 * 3,
-        num_cols: Optional[int] = 8,
-        exclude_df: Optional[pd.DataFrame] = None,
-        include_df: Optional[pd.DataFrame] = None,
-        deduplicate_col: Optional[str] = "image_id",
+        label_to_review: str | None = None,
+        chunks: int | None = 8 * 3,
+        num_cols: int | None = 8,
+        exclude_df: pd.DataFrame | None = None,
+        include_df: pd.DataFrame | None = None,
+        deduplicate_col: str | None = "image_id",
     ) -> None:
         """
         Perform image review on annotations and update labels for a given
@@ -376,8 +391,10 @@ Please check your image paths in your annonations.csv file and update them if ne
                 try:
                     img = Image.open(patch_path)
                 except FileNotFoundError as e:
-                    e.add_note(f'[ERROR] File could not be found: "{patch_path}".\n\n\
-Please check your image paths and update them if necessary.')
+                    e.add_note(
+                        f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.'
+                    )
                 plt.imshow(img)
                 plt.xticks([])
                 plt.yticks([])
@@ -438,7 +455,7 @@ Please check your image paths and update them if necessary.')
 
         print("[INFO] Exited.")
 
-    def show_sample(self, label_to_show: str, num_samples: Optional[int] = 9) -> None:
+    def show_sample(self, label_to_show: str, num_samples: int | None = 9) -> None:
         """Show a random sample of images with the specified label (tar_label).
 
         Parameters
@@ -469,8 +486,10 @@ Please check your image paths and update them if necessary.')
             try:
                 img = Image.open(patch_path)
             except FileNotFoundError:
-                raise FileNotFoundError(f'[ERROR] File could not be found: "{patch_path}".\n\n\
-Please check your image paths and update them if necessary.')
+                raise FileNotFoundError(
+                    f'[ERROR] File could not be found: "{patch_path}".\n\n\
+Please check your image paths and update them if necessary.'
+                )
             plt.imshow(img)
             plt.axis("off")
             plt.title(annot2plot.iloc[i][self.label_col])
@@ -478,13 +497,13 @@ Please check your image paths and update them if necessary.')
 
     def create_datasets(
         self,
-        frac_train: Optional[float] = 0.70,
-        frac_val: Optional[float] = 0.15,
-        frac_test: Optional[float] = 0.15,
-        random_state: Optional[int] = 1364,
-        train_transform: Optional[Union[str, Compose, Callable]] = "train",
-        val_transform: Optional[Union[str, Compose, Callable]] = "val",
-        test_transform: Optional[Union[str, Compose, Callable]] = "test",
+        frac_train: float | None = 0.70,
+        frac_val: float | None = 0.15,
+        frac_test: float | None = 0.15,
+        random_state: int | None = 1364,
+        train_transform: str | (Compose | Callable) | None = "train",
+        val_transform: str | (Compose | Callable) | None = "val",
+        test_transform: str | (Compose | Callable) | None = "test",
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -599,9 +618,13 @@ Please check your image paths and update them if necessary.')
                 patch_paths_col=self.patch_paths_col,
                 label_col=self.label_col,
                 label_index_col="label_index",
-                )
-            datasets = {"train": train_dataset, "val": val_dataset, "test": test_dataset}
-        
+            )
+            datasets = {
+                "train": train_dataset,
+                "val": val_dataset,
+                "test": test_dataset,
+            }
+
         else:
             datasets = {"train": train_dataset, "val": val_dataset}
 
@@ -612,17 +635,16 @@ Please check your image paths and update them if necessary.')
         self.datasets = datasets
         self.dataset_sizes = dataset_sizes
 
-        print(
-            f'[INFO] Number of annotations in each set:')
+        print("[INFO] Number of annotations in each set:")
         for set_name in datasets.keys():
             print(f"    - {set_name}:   {dataset_sizes[set_name]}")
 
     def create_dataloaders(
         self,
-        batch_size: Optional[int] = 16,
-        sampler: Optional[Union[Sampler, str, None]] = "default",
-        shuffle: Optional[bool] = False,
-        num_workers: Optional[int] = 0,
+        batch_size: int | None = 16,
+        sampler: Sampler | (str | None) | None = "default",
+        shuffle: bool | None = False,
+        num_workers: int | None = 0,
         **kwargs,
     ) -> None:
         """Creates a dictionary containing PyTorch dataloaders

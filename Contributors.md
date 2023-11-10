@@ -19,7 +19,9 @@ You can request contact information through the project members above, or tag th
 
 | Name | Community Role | Dates |
 |---|---|---|
-| Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Research Data Scientist | 2019 - 2022 |
-| Jon Lawrence<br>([@jl106jml ](https://github.com/jl106jml)) | Historian/Advisor | 2019 - 2023 |
-| Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | Research Data Scientist | 2022 - 2023 |
-
+| Kasra Hosseini<br>([@kasra-hosseini](https://github.com/kasra-hosseini)) | Research Data Scientist (Turing) | 2019 - 2022 |
+| Jon Lawrence<br>([@jl106jml ](https://github.com/jl106jml)) | Historian/Advisor (Exeter) | 2019 - 2023 |
+| Ruth Ahnert<br>([@ruthahnert ](https://github.com/ruthahnert)) | Living with Machines PI (QMUL) |2019-2023|
+| Andy Smith<br>([@andrewphilipsmith](https://github.com/andrewphilipsmith)) | Research Data Scientist (Turing) | 2022 - 2023 |
+| Daniel van Strien<br>([@davanstrien ](https://github.com/davanstrien)) | Data Librarian (British Library) | 2019-2021 |
+| Olivia Vane<br>([@ov212 ](https://github.com/ov212)) | Research Software Engineer (British Library) | 2019-2021 |

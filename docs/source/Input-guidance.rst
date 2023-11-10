@@ -20,10 +20,10 @@ Instructions for accessing tile layers from one example collection is below:
 
 - National Library of Scotland tile layers
 
-If you want to download maps from a TileServer using MapReader's ``Download`` subpackage, you will need to begin with the 'Download' task. 
+If you want to download maps from a TileServer using MapReader's ``Download`` subpackage, you will need to begin with the 'Download' task.
 For this, you will need:
 
-* A ``json`` file containing metadata for each map sheet you would like to query/download. 
+* A ``json`` file containing metadata for each map sheet you would like to query/download.
 * The URL of the XYZ tile layer which you would like to access.
 
 At a minimum, for each map sheet, your ``json`` file should contain information on:
@@ -84,22 +84,22 @@ If you are using non-georeferenced image files (e.g. PNG files) plus a separate 
 
     project
     ├──your_notebook.ipynb
-    └──maps        
+    └──maps
         ├── map1.png
         ├── map2.png
         ├── map3.png
         ├── ...
         └── metadata.csv
-    
+
 This is the directory structure created by default when downloading maps using MapReader's ``Download`` subpackage.
 
-Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), your will not need a metadata file, and so your files can be set up as follows: 
+Alternatively, if you are using geo-referenced image files (eg. geoTIFF files), your will not need a metadata file, and so your files can be set up as follows:
 
 ::
 
     project
     ├──your_notebook.ipynb
-    └──maps        
+    └──maps
         ├── map1.tif
         ├── map2.tif
         ├── map3.tif
@@ -157,7 +157,7 @@ To do this, you will need to use python to:
 2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
 3. Pass your dataframe to MapReader.
 
-Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary. 
+Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary.
 A conversation with the collection curator is always a good idea to check what formats metadata may already be available in/or easily made available in using existing workflows.
 
 Accessing Maps via TileServers
@@ -166,14 +166,14 @@ Accessing Maps via TileServers
 National Library of Scotland
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is possible to bring in any other georeferenced layers from the National Library of Scotland into MapReader. 
+It is possible to bring in any other georeferenced layers from the National Library of Scotland into MapReader.
 To do this, you would need to create a TileServer object and specify the metadata_path (the path to your metadata.json file) and the download_url (the WMTS or XYZ URL for your tileset) for your chosen tilelayer.
 
 `This page <https://maps.nls.uk/guides/georeferencing/layers-list/>`__ lists some of the NLS's most popular georeferenced layers and provides links to their WMTS and XYZ URLs.
 If, for example, you wanted to use the "Ordnance Survey - 10 mile, General, 1955 - 1:633,600" in MapReader, you would need to look up its XYZ URL (https://mapseries-tilesets.s3.amazonaws.com/ten_mile/general/{z}/{x}/{y}.png) and insert it your MapReader code as shown below:
 
 .. code-block:: python
-    
+
     from mapreader import TileServer
 
     my_ts = TileServer(
@@ -183,5 +183,5 @@ If, for example, you wanted to use the "Ordnance Survey - 10 mile, General, 1955
 
 .. note:: You would need to generate the corresponding `metadata.json` before running this code.
 
-More information about using NLS georeferenced layers is available `here <https://maps.nls.uk/guides/georeferencing/layers-urls/>`__, including details about accessing metadata for each layer. 
+More information about using NLS georeferenced layers is available `here <https://maps.nls.uk/guides/georeferencing/layers-urls/>`__, including details about accessing metadata for each layer.
 Please note the Re-use terms for each layer, as these vary.
