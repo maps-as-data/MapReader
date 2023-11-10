@@ -575,7 +575,9 @@ class SheetDownloader:
             metadata_df = pd.concat(
                 [existing_metadata_df, new_metadata_df], ignore_index=True
             )
-            metadata_df = metadata_df.loc[metadata_df.astype(str).drop_duplicates().index] # https://stackoverflow.com/questions/43855462/pandas-drop-duplicates-method-not-working-on-dataframe-containing-lists
+            metadata_df = metadata_df.loc[
+                metadata_df.astype(str).drop_duplicates().index
+            ]  # https://stackoverflow.com/questions/43855462/pandas-drop-duplicates-method-not-working-on-dataframe-containing-lists
         else:
             metadata_df = new_metadata_df
 
