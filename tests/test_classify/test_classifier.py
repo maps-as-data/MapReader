@@ -70,16 +70,22 @@ def test_init_models_string(inputs, infer_inputs):
     ]:
         model, model_type = model2test
         classifier = ClassifierContainer(
-            model, dataloaders=dataloaders, labels_map=annots.labels_map
+            model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
         assert isinstance(classifier.model, model_type)
+        assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+        classifier = ClassifierContainer(
+            model, labels_map=annots.labels_map
+        )
+        assert isinstance(classifier.model, model_type)
+        assert classifier.dataloaders == {}
 
 
 def test_init_models_string_errors(inputs):
     annots, dataloaders = inputs
     with pytest.raises(NotImplementedError, match="Invalid model name"):
         ClassifierContainer(
-            "resnext101_32x8d", dataloaders=dataloaders, labels_map=annots.labels_map
+            "resnext101_32x8d", labels_map=annots.labels_map,  dataloaders=dataloaders
         )
 
 
@@ -93,9 +99,15 @@ def test_init_resnet18_torch(inputs):
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
     classifier = ClassifierContainer(
-        my_model, dataloaders, annots.labels_map
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )  # resnet18 as nn.Module
     assert isinstance(classifier.model, models.ResNet)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = ClassifierContainer(
+        my_model, labels_map=annots.labels_map
+    )
+    assert isinstance(classifier.model, models.ResNet)
+    assert classifier.dataloaders == {}
 
 
 # test loading model from pickle file using torch load
@@ -106,9 +118,15 @@ def test_init_resnet18_pickle(inputs, sample_dir):
     my_model = torch.load(f"{sample_dir}/model_test.pkl")
     assert isinstance(my_model, models.ResNet)  # sanity check
     classifier = ClassifierContainer(
-        my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )  # resnet18 as pkl (from sample files)
     assert isinstance(classifier.model, models.ResNet)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = ClassifierContainer(
+        my_model, labels_map=annots.labels_map
+    )
+    assert isinstance(classifier.model, models.ResNet)
+    assert classifier.dataloaders == {}
 
 
 # test loading model from hugging face
@@ -122,9 +140,15 @@ def test_init_resnet18_hf(inputs):
     model_type = transformers.models.resnet.ResNetForImageClassification
     assert isinstance(my_model, model_type)  # sanity check
     classifier = ClassifierContainer(
-        my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )
     assert isinstance(classifier.model, model_type)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = ClassifierContainer(
+        my_model, labels_map=annots.labels_map
+    )
+    assert isinstance(classifier.model, model_type)
+    assert classifier.dataloaders == {}
 
 
 # test loading model using timm
@@ -137,9 +161,15 @@ def test_init_resnet18_timm(inputs):
     )
     assert isinstance(my_model, timm.models.ResNet)  # sanity check
     classifier = ClassifierContainer(
-        my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )
     assert isinstance(classifier.model, timm.models.ResNet)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = ClassifierContainer(
+        my_model, labels_map=annots.labels_map
+    )
+    assert isinstance(classifier.model, timm.models.ResNet)
+    assert classifier.dataloaders == {}
 
 
 @pytest.mark.dependency(name="timm_models", scope="session")
@@ -160,18 +190,57 @@ def test_init_models_timm(inputs):
         )
         assert isinstance(my_model, model_type)
         classifier = ClassifierContainer(
-            my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
         assert isinstance(classifier.model, model_type)
+        assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+        classifier = ClassifierContainer(
+            my_model, labels_map=annots.labels_map
+        )
+        assert isinstance(classifier.model, model_type)
+        assert classifier.dataloaders == {}
 
 
 # test loading object from pickle file
 
 
+def test_load_no_dataloaders(inputs, sample_dir):
+    annots, dataloaders = inputs
+    classifier = ClassifierContainer(
+        None, None, None, load_path=f"{sample_dir}/test.pkl"
+    )
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    assert classifier.labels_map == annots.labels_map
+    assert isinstance(classifier.model, models.ResNet)
+    
+    # without explicitly passing dataloaders as None
+    classifier = ClassifierContainer(
+        None, None, load_path=f"{sample_dir}/test.pkl"
+    )
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    assert classifier.labels_map == annots.labels_map
+    assert isinstance(classifier.model, models.ResNet)
+
+
+def test_load_w_dataloaders(inputs, sample_dir):
+    annots, dataloaders = inputs
+    # rename keys
+    dataloaders["new_train"]= dataloaders.pop("train")
+    dataloaders["new_val"]= dataloaders.pop("val")
+    dataloaders["new_test"]= dataloaders.pop("test")
+
+    classifier = ClassifierContainer(
+        None, None, dataloaders=dataloaders, load_path=f"{sample_dir}/test.pkl"
+    )
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val", "new_train", "new_test", "new_val"])
+    assert classifier.labels_map == annots.labels_map
+    assert isinstance(classifier.model, models.ResNet)
+
+
 def test_init_load(inputs, load_classifier):
     annots, dataloaders = inputs
     classifier = load_classifier
-    assert list(classifier.dataloaders.keys()) == list(dataloaders.keys())
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
     assert classifier.labels_map == annots.labels_map
     assert isinstance(classifier.model, models.ResNet)
 
@@ -284,7 +353,7 @@ def test_infer_models_by_string(inputs, infer_inputs):
         "inception_v3",
     ]:
         classifier = ClassifierContainer(
-            model, dataloaders=dataloaders, labels_map=annots.labels_map
+            model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
         classifier.add_criterion()
         classifier.initialize_optimizer()
@@ -299,7 +368,7 @@ def test_infer_hf_models(inputs, infer_inputs):
     AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
     my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
     classifier = ClassifierContainer(
-        my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+        my_model, labels_map=annots.labels_map,  dataloaders=dataloaders
     )
     classifier.add_criterion()
     classifier.initialize_optimizer()
@@ -324,7 +393,7 @@ def test_infer_timm_models(inputs, infer_inputs):
             model, pretrained=True, num_classes=len(annots.labels_map)
         )
         classifier = ClassifierContainer(
-            my_model, dataloaders=dataloaders, labels_map=annots.labels_map
+            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
         classifier.add_criterion()
         classifier.initialize_optimizer()

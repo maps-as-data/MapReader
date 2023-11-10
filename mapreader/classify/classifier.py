@@ -33,8 +33,8 @@ class ClassifierContainer:
     def __init__(
         self,
         model: str | (nn.Module | None),
-        dataloaders: dict[str, DataLoader] | None,
         labels_map: dict[int, str] | None,
+        dataloaders: dict[str, DataLoader] | None = None,
         device: str | None = "default",
         input_size: int | None = (224, 224),
         is_inception: bool | None = False,
@@ -52,13 +52,11 @@ class ClassifierContainer:
 
             - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
-
-        dataloaders: Dict or None
-            A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
-            Can only be ``None`` if ``load_path`` is specified as dataloaders will be loaded from file.
         labels_map: Dict or None
             A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
             Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
+        dataloaders: Dict or None
+            A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
         device : str, optional
             The device to be used for training and storing models.
             Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
@@ -120,36 +118,34 @@ class ClassifierContainer:
         print(f"[INFO] Device is set to {self.device}")
 
         # check if loading an pre-existing object
-        if model and load_path:
-            raise ValueError(
-                "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``."
-            )
-        if (
-            any(val is None for val in [model, dataloaders, labels_map])
-            and not load_path
-        ):
-            raise ValueError(
-                "[ERROR] Unless passing ``load_path``, ``model``, ``dataloaders`` and ``labels_map`` must be defined."
-            )
-
         if load_path:
+            if model:
+                raise ValueError(
+                    "[ERROR] ``model`` and ``load_path`` cannot be used together - please set one to ``None``."
+                )
+            if labels_map:
+                raise ValueError(
+                    "[ERROR] ``labels_map`` and ``load_path`` cannot be used together - please set one to ``None``."
+                )
+            
+            # load object
             self.load(load_path=load_path, force_device=force_device)
-
-        # add dataloaders
-        if dataloaders:
-            self.dataloaders = dataloaders
-            for set_name, dataloader in dataloaders.items():
-                print(
-                    f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
+            
+            # add any extra dataloaders
+            if dataloaders:
+                for set_name, dataloader in dataloaders.items():
+                    self.dataloaders[set_name]=dataloader
+        
+        else:
+            if model is None or labels_map is None:
+                raise ValueError(
+                    "[ERROR] Unless passing ``load_path``, ``model`` and ``labels_map`` must be defined."
                 )
 
-        if labels_map:
             self.labels_map = labels_map
 
-        if model:
+            # set up model and move to device  
             print("[INFO] Initializing model.")
-
-            # set up model and move to device
             if isinstance(model, nn.Module):
                 self.model = model.to(self.device)
                 self.input_size = input_size
@@ -175,6 +171,14 @@ class ClassifierContainer:
 
             # add colors for printing/logging
             self._print_colors()
+
+            # add dataloaders and labels_map
+            self.dataloaders = dataloaders if dataloaders else {}
+        
+        for set_name, dataloader in self.dataloaders.items():
+            print(
+                f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
+            )
 
     def generate_layerwise_lrs(
         self,
@@ -483,9 +487,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 print(name, param.requires_grad)
         """
         if not input_size:
-            batch_size = self.dataloaders["train"].batch_size
-            channels = len(self.dataloaders["train"].dataset.image_mode)
-            input_size = (batch_size, channels, *self.input_size)
+            if "train" in self.dataloaders.keys():
+                batch_size = self.dataloaders["train"].batch_size
+                channels = len(self.dataloaders["train"].dataset.image_mode)
+                input_size = (batch_size, channels, *self.input_size)
+            else:
+                raise ValueError("[ERROR] Please pass an input size.")
 
         if trainable_col:
             col_names = ["num_params", "output_size", "trainable"]
@@ -791,13 +798,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         if phases is None:
             phases = ["train", "val"]
-        if self.criterion is None:
-            raise ValueError(
-                "[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one."
-            )
-
-        print(f"[INFO] Each training step will pass: {phases}.")
+        print(f"[INFO] Each step will pass: {phases}.")
 
         for phase in phases:
             if phase not in self.dataloaders.keys():
@@ -887,6 +888,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             #     summing the final output and the auxiliary
                             #     output but in testing we only consider the
                             #     final output.
+                            if self.criterion is None:
+                                raise ValueError(
+                                    "[ERROR] Criterion is not yet defined.\n\n\
+Use ``add_criterion`` to define one."
+                                    )
+
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
                             ):
@@ -1638,6 +1645,11 @@ Output will show batch number {num_batches}.'
         # eval mode, keep track of the current mode
         was_training = self.model.training
         self.model.eval()
+
+        if set_name not in self.dataloaders.keys():
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
 
         counter = 0
         plt.figure(figsize=figsize)

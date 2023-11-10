@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image, ImageOps
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
 # Import parhugin
@@ -322,6 +322,44 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         """
         return self.unique_labels.index(label)
 
+    def create_dataloaders(
+        self,
+        set_name: str = "infer",
+        batch_size: Optional[int] = 16,
+        shuffle: Optional[bool] = False,
+        num_workers: Optional[int] = 0,
+        **kwargs,
+    ) -> None:
+        """Creates a dictionary containing a PyTorch dataloader.
+
+        Parameters
+        ----------
+        set_name : str, optional
+            The name to use for the dataloader.
+        batch_size : int, optional
+            The batch size to use for the dataloader. By default ``16``.
+        shuffle : Optional[bool], optional
+            Whether to shuffle the PatchDataset, by default False
+        num_workers : int, optional
+            The number of worker threads to use for loading data. By default ``0``.
+        **kwargs :
+            Additional keyword arguments to pass to PyTorch's ``DataLoader`` constructor.
+
+        Returns
+        --------
+        Dict
+            Dictionary containing dataloaders.
+        """
+
+        dataloaders = {set_name: DataLoader(
+            self,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            **kwargs,
+        )}
+
+        return dataloaders
 
 # --- Dataset that returns an image, its context and its label
 class PatchContextDataset(PatchDataset):
