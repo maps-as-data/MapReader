@@ -1,4 +1,4 @@
-Developers Guide
+Developer's Guide
 ================
 
 Managing version numbers

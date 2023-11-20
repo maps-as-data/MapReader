@@ -1,4 +1,4 @@
-Input guidance
+Input Guidance
 ===============
 
 .. contents:: Table of Contents
@@ -160,7 +160,7 @@ To do this, you will need to use python to:
 Depending on the structure/format of your metadata, this may end up being a fairly complex task and so is not recommended unless absolutely necessary.
 A conversation with the collection curator is always a good idea to check what formats metadata may already be available in/or easily made available in using existing workflows.
 
-Accessing Maps via TileServers
+Accessing maps via TileServers
 ------------------------------
 
 National Library of Scotland

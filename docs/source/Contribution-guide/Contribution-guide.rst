@@ -1,4 +1,4 @@
-Contribution guide
+Contribution Guide
 ===================
 
 Welcome! We are pleased to know that you're interested in contributing to MapReader!
