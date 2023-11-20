@@ -147,9 +147,10 @@ class SheetDownloader:
         ----------
             date_col : str or list, optional
                 A key or list of keys which map to the metadata field containing the publication date.
+                Multilayer keys should be passed as a list. e.g.:
 
                 - "key1" will extract ``self.features[i]["key1"]``
-                - ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+                - ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]``
 
                 If  None, ["properties"]["WFS_TITLE"] will be used as keys. Date will then be extracted by regex searching for "Published: XXX".
                 By default None.
@@ -449,7 +450,7 @@ class SheetDownloader:
             A key or list of keys used to get the metadata field to search in.
 
             Key(s) will be passed to each features dictionary.
-            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"].
+            Multilayer keys should be passed as a list. e.g. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]``.
 
             If ``None``, will search in all metadata fields. By default ``None``.
         append : bool, optional
@@ -586,7 +587,8 @@ class SheetDownloader:
         self,
         feature: dict,
         out_filepath: str,
-        **kwargs,
+        metadata_to_save: dict | None = None,
+        **kwargs: dict | None,
     ) -> None:
         """
         Creates list of selected metadata items and saves to a csv file.
@@ -598,35 +600,67 @@ class SheetDownloader:
             The feature for which to extract the metadata from
         out_filepath : str
             The path to save metadata csv.
-        kwargs: keyword arguments to pass to the ``extract_published_dates()`` method.
+        metadata_to_save : dict, optional
+            A dictionary containing column names (str) and metadata keys (str or list) to save to metadata csv.
+            Multilayer keys should be passed as a list, i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]``.
+
+            e.g. ``{"county": ["properties", "COUNTY"], "id": "id"}``
+        **kwargs: dict, optional
+            Keyword arguments to pass to the ``extract_published_dates()`` method.
 
         Returns
         -------
         list
             List of selected metadata (to be saved)
+
+        Notes
+        -----
+        Default metadata items are: name, url, coordinates, crs, published_date, grid_bb.
+        Additional items can be added using ``metadata_to_save``.
         """
+        metadata_cols = [
+            "name",
+            "url",
+            "coordinates",
+            "crs",
+            "published_date",
+            "grid_bb",
+        ]
+        metadata_dict = {col: None for col in metadata_cols}
 
-        map_name = str("map_" + feature["properties"]["IMAGE"] + ".png")
-        map_url = str(feature["properties"]["IMAGEURL"])
-
+        # get default metadata
+        metadata_dict["name"] = str("map_" + feature["properties"]["IMAGE"] + ".png")
+        metadata_dict["url"] = str(feature["properties"]["IMAGEURL"])
         if not self.published_dates:
-            self.extract_published_dates(**kwargs)
+            date_col = kwargs.get("date_col", None)
+            self.extract_published_dates(date_col=date_col)
+        metadata_dict["published_date"] = feature["properties"]["published_date"]
+        metadata_dict["grid_bb"] = feature["grid_bb"]
+        polygon = get_polygon_from_grid_bb(
+            metadata_dict["grid_bb"]
+        )  # use grid_bb to get coords of actually downloaded tiles
+        metadata_dict["coordinates"] = polygon.bounds
+        metadata_dict["crs"] = self.crs
 
-        published_date = feature["properties"]["published_date"]
+        if metadata_to_save:
+            for col, metadata_key in metadata_to_save.items():
+                if isinstance(metadata_key, str):
+                    metadata_key = [metadata_key]
+                if not isinstance(metadata_key, list):
+                    raise ValueError(
+                        "[ERROR] Please pass ``metadata_to_save`` metadata key(s) as a string or list of strings."
+                    )
 
-        grid_bb = feature["grid_bb"]
+                try:
+                    metadatum = reduce(lambda d, key: d[key], metadata_key, feature)
+                except KeyError as err:
+                    raise KeyError(
+                        f"[ERROR] {metadata_key} not found in features dictionary."
+                    ) from err
 
-        # use grid_bb to get coords of actually downloaded tiles
-        polygon = get_polygon_from_grid_bb(grid_bb)
-        coords = polygon.bounds
+                metadata_dict[col] = metadatum
 
-        crs = self.crs
-
-        metadata_to_save = [map_name, map_url, coords, crs, published_date, grid_bb]
-        new_metadata_df = pd.DataFrame(
-            metadata_to_save,
-            index=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
-        ).T
+        new_metadata_df = pd.DataFrame.from_dict(metadata_dict, orient="index").T
 
         if os.path.exists(out_filepath):
             existing_metadata_df = pd.read_csv(out_filepath, sep=",", index_col=0)
@@ -634,7 +668,7 @@ class SheetDownloader:
                 [existing_metadata_df, new_metadata_df], ignore_index=True
             )
             metadata_df = metadata_df.loc[
-                metadata_df.astype(str).drop_duplicates().index
+                metadata_df.astype(str).drop_duplicates(subset=metadata_cols).index
             ]  # https://stackoverflow.com/questions/43855462/pandas-drop-duplicates-method-not-working-on-dataframe-containing-lists
         else:
             metadata_df = new_metadata_df
@@ -647,6 +681,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ):
         """Download map sheets from a list of features.
 
@@ -660,6 +695,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_save_metadata()`` method.
         """
 
         for feature in tqdm(features):
@@ -669,13 +706,16 @@ class SheetDownloader:
             success = self._download_map(feature)
             if success:
                 metadata_path = f"{path_save}/{metadata_fname}"
-                self._save_metadata(feature, metadata_path)
+                self._save_metadata(
+                    feature=feature, out_filepath=metadata_path, **kwargs
+                )
 
     def download_all_map_sheets(
         self,
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads all map sheets in metadata.
@@ -688,6 +728,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -696,7 +738,9 @@ class SheetDownloader:
         self._initialise_merger(path_save)
 
         features = self.features
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_wfs_ids(
         self,
@@ -704,6 +748,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads map sheets by WFS ID numbers.
@@ -718,6 +763,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
 
         if not self.wfs_id_nos:
@@ -746,7 +793,9 @@ class SheetDownloader:
             if wfs_id_no in requested_maps:
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_polygon(
         self,
@@ -755,6 +804,7 @@ class SheetDownloader:
         metadata_fname: str | None = "metadata.csv",
         mode: str | None = "within",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads any map sheets which are found within or intersecting with a defined polygon.
@@ -774,6 +824,8 @@ class SheetDownloader:
             By default "within".
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
         Notes
         -----
@@ -816,7 +868,9 @@ class SheetDownloader:
                 if map_polygon.intersects(polygon):
                     features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_coordinates(
         self,
@@ -824,6 +878,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads any maps sheets which contain a defined set of coordinates.
@@ -839,6 +894,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
 
         if not isinstance(coords, tuple):
@@ -864,7 +921,9 @@ class SheetDownloader:
             if map_polygon.contains(coords):
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_line(
         self,
@@ -872,6 +931,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads any maps sheets which intersect with a line.
@@ -886,6 +946,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
         Notes
         -----
@@ -917,7 +979,9 @@ class SheetDownloader:
             if map_polygon.intersects(line):
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_string(
         self,
@@ -926,6 +990,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Download map sheets by searching for a string in a chosen metadata field.
@@ -938,8 +1003,8 @@ class SheetDownloader:
         keys : str or list, optional
             A key or list of keys used to get the metadata field to search in.
 
-            Key(s) will be passed to each features dictionary. \
-            i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+            Key(s) will be passed to each features dictionary.
+            Multilayer keys should be passed as a list. e.g. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]``.
 
             If ``None``, will search in all metadata fields. By default ``None``.
         path_save : str, optional
@@ -948,6 +1013,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
         Notes
         -----
@@ -979,13 +1046,16 @@ class SheetDownloader:
             if match:
                 features.append(feature)
 
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def download_map_sheets_by_queries(
         self,
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        **kwargs: dict | None,
     ) -> None:
         """
         Downloads map sheets saved as query results.
@@ -998,6 +1068,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        **kwargs : dict, optional
+            Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -1009,7 +1081,9 @@ class SheetDownloader:
             raise ValueError("[ERROR] No query results found/saved.")
 
         features = self.found_queries
-        self._download_map_sheets(features, path_save, metadata_fname, overwrite)
+        self._download_map_sheets(
+            features, path_save, metadata_fname, overwrite, **kwargs
+        )
 
     def hist_published_dates(self, **kwargs) -> None:
         """
@@ -1017,7 +1091,8 @@ class SheetDownloader:
 
         Parameters
         ----------
-        kwargs : A dictionary containing keyword arguments to pass to plotting function.
+        **kwargs : dict, optional
+            A dictionary containing keyword arguments to pass to plotting function.
             See matplotlib.pyplot.hist() for acceptable values.
 
             e.g. ``**dict(fc='c', ec='k')``
