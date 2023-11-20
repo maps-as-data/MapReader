@@ -136,26 +136,76 @@ class SheetDownloader:
 
         self.wfs_id_nos = True
 
-    def extract_published_dates(self) -> None:
+    def extract_published_dates(
+        self,
+        date_col: str | list | None = None,
+    ) -> None:
         """
-        For each map in metadata, extracts publication date from WFS title and saves to ``features`` dictionary.
+        For each map in metadata, extracts publication date and saves to ``features`` dictionary.
+
+        Parameters
+        ----------
+            date_col : str or list, optional
+                A key or list of keys which map to the metadata field containing the publication date.
+
+                - "key1" will extract ``self.features[i]["key1"]``
+                - ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]
+
+                If  None, ["properties"]["WFS_TITLE"] will be used as keys. Date will then be extracted by regex searching for "Published: XXX".
+                By default None.
         """
         for feature in self.features:
-            wfs_title = feature["properties"]["WFS_TITLE"]
-            published_date = re.findall(
-                r"Published.*[\D]([\d]+)", wfs_title, flags=re.IGNORECASE
-            )
-            if len(published_date) > 0:
-                feature["properties"]["published_date"] = eval(published_date[0])
-                if len(published_date) != 1:
-                    map_name = feature["properties"]["IMAGE"]
-                    print(
-                        f"[WARNING] Multiple published dates detected in {map_name}. Using first date."
+            map_name = feature["properties"]["IMAGE"]
+
+            if date_col:
+                if isinstance(date_col, str):
+                    date_col = [date_col]
+                if not isinstance(date_col, list):
+                    raise ValueError(
+                        "[ERROR] Please pass ``date_col`` as string or list of strings."
                     )
+
+                try:
+                    published_date = reduce(
+                        lambda d, key: d[key], date_col, feature
+                    )  # reduce(function, sequence to go through, initial)
+                except KeyError as err:
+                    raise KeyError(
+                        f"[ERROR] {date_col} not found in features dictionary."
+                    ) from err
+
+                if published_date == "":  # missing date is fine
+                    print(f"[WARNING] No published date detected in {map_name}.")
+                    feature["properties"]["published_date"] = []
+
+                else:
+                    try:
+                        feature["properties"]["published_date"] = int(published_date)
+                    except (
+                        ValueError,
+                        TypeError,
+                    ) as err:  # suggests there is something wrong with the choice of date_col
+                        raise ValueError(
+                            f"[ERROR] Published date is not an integer for map {map_name}. Check your ``date_col`` is correct."
+                        ) from err
+
             else:
-                feature["properties"]["published_date"] = []
-                map_name = feature["properties"]["IMAGE"]
-                print(f"[WARNING] No published date detected in {map_name}.")
+                wfs_title = feature["properties"]["WFS_TITLE"]
+                published_date = re.findall(
+                    r"Published.*[\D]([\d]+)", wfs_title, flags=re.IGNORECASE
+                )
+
+                if len(published_date) > 0:  # if date is found
+                    if len(published_date) > 1:
+                        print(
+                            f"[WARNING] Multiple published dates detected in map {map_name}. Using first date."
+                        )
+
+                    feature["properties"]["published_date"] = int(published_date[0])
+
+                else:
+                    print(f"[WARNING] No published date detected in map {map_name}.")
+                    feature["properties"]["published_date"] = []
 
         self.published_dates = True
 
@@ -383,7 +433,7 @@ class SheetDownloader:
     def query_map_sheets_by_string(
         self,
         string: str,
-        keys: str | list = None,
+        keys: str | list | None = None,
         append: bool | None = False,
         print: bool | None = False,
     ) -> None:
@@ -427,9 +477,15 @@ class SheetDownloader:
             self.found_queries = []  # reset each time
 
         for feature in self.features:
-            field_to_search = reduce(
-                lambda d, key: d.get(key), keys, feature
-            )  # reduce(function, sequence to go through, initial)
+            try:
+                field_to_search = reduce(
+                    lambda d, key: d[key], keys, feature
+                )  # reduce(function, sequence to go through, initial)
+            except KeyError as err:
+                raise KeyError(
+                    f"[ERROR] {keys} not found in features dictionary."
+                ) from err
+
             match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
 
             if match:
@@ -530,6 +586,7 @@ class SheetDownloader:
         self,
         feature: dict,
         out_filepath: str,
+        **kwargs,
     ) -> None:
         """
         Creates list of selected metadata items and saves to a csv file.
@@ -541,6 +598,7 @@ class SheetDownloader:
             The feature for which to extract the metadata from
         out_filepath : str
             The path to save metadata csv.
+        kwargs: keyword arguments to pass to the ``extract_published_dates()`` method.
 
         Returns
         -------
@@ -552,7 +610,7 @@ class SheetDownloader:
         map_url = str(feature["properties"]["IMAGEURL"])
 
         if not self.published_dates:
-            self.extract_published_dates()
+            self.extract_published_dates(**kwargs)
 
         published_date = feature["properties"]["published_date"]
 
@@ -969,7 +1027,7 @@ class SheetDownloader:
         bins and range already set when plotting so are invalid kwargs.
         """
         if not self.published_dates:
-            self.extract_published_dates()
+            raise ValueError("[ERROR] Please first run ``extract_published_dates()``")
 
         published_dates = [
             feature["properties"]["published_date"] for feature in self.features
