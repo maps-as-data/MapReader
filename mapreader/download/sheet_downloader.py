@@ -1038,9 +1038,15 @@ class SheetDownloader:
 
         features = []
         for feature in self.features:
-            field_to_search = reduce(
-                lambda d, key: d.get(key), keys, feature
-            )  # reduce(function, sequence to go through, initial)
+            try:
+                field_to_search = reduce(
+                    lambda d, key: d[key], keys, feature
+                )  # reduce(function, sequence to go through, initial)
+            except KeyError as err:
+                raise KeyError(
+                    f"[ERROR] {keys} not found in features dictionary."
+                ) from err
+
             match = bool(re.search(string, str(field_to_search), re.IGNORECASE))
 
             if match:
