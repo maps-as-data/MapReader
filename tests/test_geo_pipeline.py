@@ -29,7 +29,7 @@ def test_pipeline(tmp_path, sample_dir):
 
     my_ts.extract_wfs_id_nos()
     my_ts.get_grid_bb(14)
-    my_ts.download_map_sheets_by_wfs_ids([1, 2], path_save=f"{tmp_path}/maps")
+    my_ts.download_map_sheets_by_wfs_ids([131, 132], path_save=f"{tmp_path}/maps")
 
     # Load
     my_files = loader(f"{tmp_path}/maps/*png")
@@ -78,8 +78,8 @@ def test_pipeline(tmp_path, sample_dir):
 
     # Classify - Inference
     my_maps = load_patches(
-        f"{tmp_path}/patches_300_pixel/*74487492*png",
-        parent_paths=f"{tmp_path}/maps/map_74487492.png",
+        f"{tmp_path}/patches_300_pixel/*102352861*png",
+        parent_paths=f"{tmp_path}/maps/map_102352861.png",
     )
 
     my_maps.add_metadata(f"{tmp_path}/maps/metadata.csv", ignore_mismatch=True)
