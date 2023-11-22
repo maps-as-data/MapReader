@@ -1,1 +1,228 @@
-{"type": "FeatureCollection", "totalFeatures": 4, "features": [{"type": "Feature", "id": "OS_One_Inch_GB_WFS.1", "geometry": {"type": "MultiPolygon", "coordinates": [[[[-4.79999994, 54.48000003], [-5.39999994, 54.48000003], [-5.40999994, 54.74000003], [-4.80999994, 54.75000003], [-4.79999994, 54.48000003]]]]}, "geometry_name": "the_geom", "properties": {"IMAGE": "74487492", "WFS_TITLE": "Kirkmaiden  & Whithorn (1), Revised: 1895, Published: 1896", "IMAGEURL": "https://maps.nls.uk/view/74487492"}}, {"type": "Feature", "id": "OS_One_Inch_GB_WFS.2", "geometry": {"type": "MultiPolygon", "coordinates": [[[[-4.19999994, 54.49000003], [-4.79999994, 54.48000003], [-4.80999994, 54.75000003], [-4.20999994, 54.75000003], [-4.19999994, 54.49000003]]]]}, "geometry_name": "the_geom", "properties": {"IMAGE": "74488550", "WFS_TITLE": "Kirkmaiden  & Whithorn (2), Revised: 1895, Published: 1896", "IMAGEURL": "https://maps.nls.uk/view/74488550"}}, {"type": "Feature", "id": "Six_Inch_GB_WFS.131", "geometry": {"type": "MultiPolygon", "coordinates": [[[[-2.6262171, 54.14935172], [-2.62837527, 54.20716287], [-2.48042189, 54.2089733], [-2.4784698, 54.15115834], [-2.6262171, 54.14935172]]]]}, "geometry_name": "the_geom", "properties": {"SERIES": "OS 6 Inch to the Mile - England & Wales", "COUNTRY": "ENG", "COUNTY": "Yorkshire", "SHEET_MAP": "XCV", "SHEET_NO": "095", "EDITION": "2", "SURV_END": "1893", "PUB_END": "1896", "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1023/5286/102352861.4.jpg", "IMAGEURL": "https://maps.nls.uk/view/102352861", "SHEET": "Yorkshire XCV", "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Surveyed: 1892 to 1893<br>Published: 1896", "PARISH": "Burrow with Burrow; Burton in Lonsdale; Cantsfield; Casterton; Ireby; Leck; Thornton in Lonsdale; Tunstal; Whittington", "YEAR": 1896, "IMAGE": "102352861", "WFS_TITLE": "Yorkshire XCV, Surveyed: 1892 to 1893, Published: 1896"}}, {"type": "Feature", "id": "Six_Inch_GB_WFS.132", "geometry": {"type": "MultiPolygon", "coordinates": [[[[-0.23045502, 51.49344796], [-0.23053988, 51.52237709], [-0.16097999, 51.52243594], [-0.16093917, 51.49350674], [-0.23045502, 51.49344796]]]]}, "geometry_name": "the_geom", "properties": {"SERIES": "OS 6 Inch to the Mile - England & Wales", "COUNTRY": "ENG", "COUNTY": "London", "SHEET_MAP": "VI.SE", "SHEET_NO": "006_SE", "EDITION": "2", "SURV_END": "1894", "PUB_END": "1896", "IMAGETHUMB": "https://deriv.nls.uk/dcn4/9161/91617032.4.jpg", "IMAGEURL": "https://maps.nls.uk/view/91617032", "SHEET": "London VI.SE", "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1893 to 1894<br>Published: 1894 to 1896", "PARISH": "City Of Westminster; Hammersmith; Kensington; Paddington", "YEAR": 1894, "IMAGE": "91617032", "WFS_TITLE": "London VI.SE, Revised: 1893 to 1894, Published: 1894 to 1896"}}], "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::4326"}}}
+{
+    "type": "FeatureCollection",
+    "totalFeatures": 4,
+    "features": [
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.16320",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -0.98078243,
+                                53.45664144
+                            ],
+                            [
+                                -0.9806354,
+                                53.48556079
+                            ],
+                            [
+                                -0.90790637,
+                                53.48540701
+                            ],
+                            [
+                                -0.90810282,
+                                53.45648782
+                            ],
+                            [
+                                -0.98078243,
+                                53.45664144
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "COUNTRY": "ENG",
+                "COUNTY": "Nottinghamshire",
+                "SHEET_MAP": "III.NE",
+                "SHEET_NO": "003_NE",
+                "EDITION": "2",
+                "SURV_END": "1898",
+                "PUB_END": "1900",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1016/0202/101602026.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/101602026",
+                "SHEET": "Nottinghamshire III.NE",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1898<br>Published: 1900",
+                "PARISH": "Misson",
+                "YEAR": 2023,
+                "IMAGE": "101602026",
+                "WFS_TITLE": "Nottinghamshire III.NE, Revised: 1898, Published: 1900",
+                "test": "test"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.16321",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -1.05355991,
+                                53.42783125
+                            ],
+                            [
+                                -1.05346248,
+                                53.45675085
+                            ],
+                            [
+                                -0.98078243,
+                                53.45664144
+                            ],
+                            [
+                                -0.98092919,
+                                53.42772195
+                            ],
+                            [
+                                -1.05355991,
+                                53.42783125
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "COUNTRY": "ENG",
+                "COUNTY": "Nottinghamshire",
+                "SHEET_MAP": "III.SW",
+                "SHEET_NO": "003_SW",
+                "EDITION": "2",
+                "SURV_END": "1898",
+                "PUB_END": "1901",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1016/0203/101602038.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/101602038",
+                "SHEET": "Nottinghamshire III.SW",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1897 to 1898<br>Published: 1901",
+                "PARISH": "Austerfield; Bawtry; Harworth; Misson; Scaftworth",
+                "YEAR": 1901,
+                "IMAGE": "101602038",
+                "WFS_TITLE": "Nottinghamshire III.SW, Revised: 1897 to 1898, Published: 1901",
+                "test": "test"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.131",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -2.6262171,
+                                54.14935172
+                            ],
+                            [
+                                -2.62837527,
+                                54.20716287
+                            ],
+                            [
+                                -2.48042189,
+                                54.2089733
+                            ],
+                            [
+                                -2.4784698,
+                                54.15115834
+                            ],
+                            [
+                                -2.6262171,
+                                54.14935172
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "COUNTRY": "ENG",
+                "COUNTY": "Yorkshire",
+                "SHEET_MAP": "XCV",
+                "SHEET_NO": "095",
+                "EDITION": "2",
+                "SURV_END": "1893",
+                "PUB_END": "1896",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1023/5286/102352861.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/102352861",
+                "SHEET": "Yorkshire XCV",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Surveyed: 1892 to 1893<br>Published: 1896",
+                "PARISH": "Burrow with Burrow; Burton in Lonsdale; Cantsfield; Casterton; Ireby; Leck; Thornton in Lonsdale; Tunstal; Whittington",
+                "YEAR": 1896,
+                "IMAGE": "102352861",
+                "WFS_TITLE": "Yorkshire XCV, Surveyed: 1892 to 1893, Published: 1896",
+                "test": "test"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.132",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -0.23045502,
+                                51.49344796
+                            ],
+                            [
+                                -0.23053988,
+                                51.52237709
+                            ],
+                            [
+                                -0.16097999,
+                                51.52243594
+                            ],
+                            [
+                                -0.16093917,
+                                51.49350674
+                            ],
+                            [
+                                -0.23045502,
+                                51.49344796
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "COUNTRY": "ENG",
+                "COUNTY": "London",
+                "SHEET_MAP": "VI.SE",
+                "SHEET_NO": "006_SE",
+                "EDITION": "2",
+                "SURV_END": "1894",
+                "PUB_END": "1896",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/9161/91617032.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/91617032",
+                "SHEET": "London VI.SE",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1893 to 1894<br>Published: 1894 to 1896",
+                "PARISH": "City Of Westminster; Hammersmith; Kensington; Paddington",
+                "YEAR": 1894,
+                "IMAGE": "91617032",
+                "WFS_TITLE": "London VI.SE, Revised: 1893 to 1894, Published: 1894 to 1896",
+                "test": "test"
+            }
+        }
+    ],
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:EPSG::4326"
+        }
+    }
+}

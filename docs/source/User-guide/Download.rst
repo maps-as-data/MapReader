@@ -30,6 +30,29 @@ SheetDownloader
 
 To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets.
 Guidance on what this metadata ``json`` should contain can be found in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__.
+An example is shown below:
+
+.. code-block:: javascript
+
+    {
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "geometry": {
+                "geometry_name": "the_geom",
+                "coordinates": [...]
+            },
+            "properties": {
+                "IMAGE": "101602026",
+                "WFS_TITLE": "Nottinghamshire III.NE, Revised: 1898, Published: 1900",
+                "IMAGEURL": "https://maps.nls.uk/view/101602026",
+                "YEAR": 1900
+            },
+        }],
+        "crs": {
+            "name": "EPSG:4326"
+            },
+    }
 
 .. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
@@ -70,13 +93,38 @@ To help you visualize your metadata, the boundaries of the map sheets included i
 The ``add_id`` argument can be used to add the WFS ID numbers of your map sheets on the resulting plot.
 This can be helpful in identifying the map sheets you'd like to download.
 
+It can also be helpful to know the range of publication dates for your map sheets.
+This can be done using the ``.extract_published_dates()`` method:
+
+.. code-block:: python
+
+     my_ts.extract_published_dates()
+
+By default, this will extract publication dates from the ``"WFS_TITLE"`` field of your metadata (see example metadata.json above).
+If you would like to extract the dates from elsewhere, you can specify the ``date_col`` argument:
+
+.. code-block:: python
+
+     my_ts.extract_published_dates(date_col=["properties", "YEAR"])
+
+This will extract published dates from the ``"YEAR"`` field of your metadata (again, see example metadata.json above).
+
+.. note:: If your metadata.json is a multilayer dictionary, you will need to pass the key for each layer as a separate item in list form.
+
+These dates can then be visualized, as a histogram, using:
+
+.. code-block:: python
+
+     my_ts.hist_published_dates()
+
+
 Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download map sheets using a number of methods:
 
 **1. Any which are within or intersect/overlap with a polygon.
-2. Any which contain a set of given coordinates.
-3. Any which intersect with a line.
-4. By WFS ID numbers.
-5. By searching for a string within a metadata field.**
+1. Any which contain a set of given coordinates.
+2. Any which intersect with a line.
+3. By WFS ID numbers.
+4. By searching for a string within a metadata field.**
 
 These methods can be used to either directly download maps, or to create a list of queries which can interacted with and downloaded subsequently.
 
@@ -137,6 +185,8 @@ For all download methods, you should also be aware of the following arguments:
 - ``path_save`` - By default, this is set to ``maps`` so that your map images and metadata are saved in a directory called "maps". You can change this to save your map images and metadata in a different directory (e.g. ``path_save="my_maps_directory"``).
 - ``metadata_fname`` - By default, this is set to ``metadata.csv``. You can change this to save your metadata with a different file name (e.g. ``metadata_fname="my_maps_metadata.csv"``).
 - ``overwrite`` - By default, this is set to ``False`` and so if a map image exists already, the download is skipped and map images are not overwritten. Setting it to ``True`` (i.e. by specifying ``overwrite=True``) will result in existing map images being overwritten.
+- ``date_col`` - The key(s) to use when extracting the publication dates from your metadata.json.
+- ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your metadata.json to your metadata.csv. See below for further details.
 
 Using the default ``path_save`` and ``metadata_fname`` arguments will result in the following directory structure:
 
@@ -151,6 +201,44 @@ Using the default ``path_save`` and ``metadata_fname`` arguments will result in 
         ├── ...
         └── metadata.csv
 
+By default, your metadata.csv file will only contain the following columns:
+
+- "name"
+- "url"
+- "coordinates"
+- "crs"
+- "published_date"
+- "grid_bb"
+
+If you would like to transfer additional data from your metadata.json to you metadata.csv, you should create a dictionary containing the names of the fields you would like to save and pass this as the ``metadata_to_save`` keyword argument in each download method.
+
+This should be in the form of:
+
+.. code-block:: python
+
+     metadata_to_save = {
+          "new_column_name_1": ["metadata_key_layer_1"],
+          "new_column_name_2": ["metadata_key_layer_1", "metadata_key_layer_2"],
+          ...
+     }
+
+For example, to save the "WFS_TITLE" field from the example metadata.json above, you would use:
+
+.. code-block:: python
+
+     metadata_to_save = {
+          "wfs_title": ["properties", "WFS_TITLE"],
+     }
+
+This would result in a metadata.csv with the following columns:
+
+- "name"
+- "url"
+- "coordinates"
+- "crs"
+- "published_date"
+- "grid_bb"
+- "wfs_title"
 
 1. Finding map sheets which overlap or intersect with a polygon.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
