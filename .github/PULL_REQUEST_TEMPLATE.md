@@ -14,6 +14,7 @@ Describe changes/updates you have made to the code.
 - [ ] Self-review code
 - [ ] Ensure submission passes current tests
 - [ ] Add tests
+- [ ] Update relevant docs
 
 ### Reviewer checklist
 
