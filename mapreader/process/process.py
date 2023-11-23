@@ -59,12 +59,12 @@ def preprocess_all(
 def preprocess(
     image_path: str,
     save_preproc_dir: str,
-    dst_crs: str | None = "EPSG:3857",
-    crop_prefix: str | None = "preproc_",
-    reproj_prefix: str | None = "preproc_tmp_",
-    resample_prefix: str | None = "preproc_resample_",
-    resize_percent: int | None = 40,
-    remove_reproj_file: bool | None = True,
+    dst_crs: str = "EPSG:3857",
+    crop_prefix: str = "preproc_",
+    reproj_prefix: str = "preproc_tmp_",
+    resample_prefix: str = "preproc_resample_",
+    resize_percent: int = 40,
+    remove_reproj_file: bool = True,
 ) -> str:
     """
     Preprocesses an image file by reprojecting it to a new coordinate
