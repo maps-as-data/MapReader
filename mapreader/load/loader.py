@@ -6,7 +6,7 @@ from mapreader.load.images import MapImages
 
 def loader(
     path_images: str | None = None,
-    tree_level: str | None = "parent",
+    tree_level: str = "parent",
     parent_path: str | None = None,
     **kwargs: dict,
 ) -> MapImages:
@@ -50,11 +50,11 @@ def loader(
 
 def load_patches(
     patch_paths: str,
-    patch_file_ext: str | bool | None = False,
-    parent_paths: str | bool | None = False,
-    parent_file_ext: str | bool | None = False,
-    add_geo_info: bool | None = False,
-    clear_images: bool | None = False,
+    patch_file_ext: str | bool = False,
+    parent_paths: str | bool = False,
+    parent_file_ext: str | bool = False,
+    add_geo_info: bool = False,
+    clear_images: bool = False,
 ) -> MapImages:
     """
     Creates a ``MapImages`` class to manage a collection of image paths and

@@ -67,8 +67,8 @@ class MapImages:
     def __init__(
         self,
         path_images: str | None = None,
-        file_ext: str | bool | None = False,
-        tree_level: str | None = "parent",
+        file_ext: str | bool = False,
+        tree_level: str = "parent",
         parent_path: str | None = None,
         **kwargs: dict,
     ):
@@ -151,7 +151,7 @@ class MapImages:
         self,
         image_path: str,
         parent_path: str | None = None,
-        tree_level: str | None = "parent",
+        tree_level: str = "parent",
         **kwargs: dict,
     ) -> None:
         """
@@ -272,10 +272,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         metadata: str | pd.DataFrame,
         index_col: int | str | None = 0,
-        delimiter: str | None = ",",
+        delimiter: str = ",",
         columns: list[str] | None = None,
-        tree_level: str | None = "parent",
-        ignore_mismatch: bool | None = False,
+        tree_level: str = "parent",
+        ignore_mismatch: bool = False,
     ) -> None:
         """
         Add metadata information to the images dictionary.
@@ -426,8 +426,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def show_sample(
         self,
         num_samples: int,
-        tree_level: str | None = "patch",
-        random_seed: int | None = 65,
+        tree_level: str = "patch",
+        random_seed: int = 65,
         **kwargs: dict,
     ) -> None:
         """
@@ -483,7 +483,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """Return list of all patches"""
         return list(self.patches.keys())
 
-    def add_shape(self, tree_level: str | None = "parent") -> None:
+    def add_shape(self, tree_level: str = "parent") -> None:
         """
         Add a shape to each image in the specified level of the image
         hierarchy.
@@ -509,7 +509,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in image_ids:
             self._add_shape_id(image_id=image_id)
 
-    def add_coord_increments(self, verbose: bool | None = False) -> None:
+    def add_coord_increments(self, verbose: bool = False) -> None:
         """
         Adds coordinate increments to each image at the parent level.
 
@@ -572,7 +572,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self._add_patch_polygons_id(patch_id, verbose)
 
     def add_center_coord(
-        self, tree_level: str | None = "patch", verbose: bool | None = False
+        self, tree_level: str = "patch", verbose: bool = False
     ) -> None:
         """
         Adds center coordinates to each image at the specified tree level.
@@ -662,7 +662,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
 
     def _add_coord_increments_id(
-        self, image_id: int | str, verbose: bool | None = False
+        self, image_id: int | str, verbose: bool = False
     ) -> None:
         """
         Add pixel-wise delta longitude (``dlon``) and delta latitude
@@ -802,7 +802,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def _add_center_coord_id(
         self,
         image_id: int | str,
-        verbose: bool | None = False,
+        verbose: bool = False,
     ) -> None:
         """
         Calculates and adds center coordinates (longitude as ``center_lon``
@@ -846,8 +846,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def _calc_pixel_height_width(
         self,
         parent_id: int | str,
-        method: str | None = "great-circle",
-        verbose: bool | None = False,
+        method: str = "great-circle",
+        verbose: bool = False,
     ) -> tuple[tuple, float, float]:
         """
         Calculate the height and width of each pixel in a given image in meters.
@@ -930,16 +930,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def patchify_all(
         self,
-        method: str | None = "pixel",
-        patch_size: int | None = 100,
-        tree_level: str | None = "parent",
+        method: str = "pixel",
+        patch_size: int = 100,
+        tree_level: str = "parent",
         path_save: str | None = None,
-        add_to_parents: bool | None = True,
-        square_cuts: bool | None = False,
-        resize_factor: bool | None = False,
-        output_format: str | None = "png",
-        rewrite: bool | None = False,
-        verbose: bool | None = False,
+        add_to_parents: bool = True,
+        square_cuts: bool = False,
+        resize_factor: bool = False,
+        output_format: str = "png",
+        rewrite: bool = False,
+        verbose: bool = False,
     ) -> None:
         """
         Patchify all images in the specified ``tree_level`` and (if ``add_to_parents=True``) add the patches to the MapImages instance's ``images`` dictionary.
@@ -1029,12 +1029,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         image_id: str,
         patch_size: int,
         path_save: str,
-        add_to_parents: bool | None = True,
-        square_cuts: bool | None = False,
-        resize_factor: bool | None = False,
-        output_format: str | None = "png",
-        rewrite: bool | None = False,
-        verbose: bool | None = False,
+        add_to_parents: bool = True,
+        square_cuts: bool = False,
+        resize_factor: bool = False,
+        output_format: str = "png",
+        rewrite: bool = False,
+        verbose: bool = False,
     ):
         """Patchify one image and (if ``add_to_parents=True``) add the patch to the MapImages instance's ``images`` dictionary.
 
@@ -1154,7 +1154,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if patch_id not in self.parents[patch_parent]["patches"]:
                 self.parents[patch_parent]["patches"].append(patch_id)
 
-    def _make_dir(self, path_make: str, exists_ok: bool | None = True) -> None:
+    def _make_dir(self, path_make: str, exists_ok: bool = True) -> None:
         """
         Helper method to make directories.
 
@@ -1166,9 +1166,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def calc_pixel_stats(
         self,
         parent_id: str | None = None,
-        calc_mean: bool | None = True,
-        calc_std: bool | None = True,
-        verbose: bool | None = False,
+        calc_mean: bool = True,
+        calc_std: bool = True,
+        verbose: bool = False,
     ) -> None:
         """
         Calculate the mean and standard deviation of pixel values for all
@@ -1254,9 +1254,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def convert_images(
         self,
-        save: bool | None = False,
-        save_format: str | None = "csv",
-        delimiter: str | None = ",",
+        save: bool = False,
+        save_format: str = "csv",
+        delimiter: str = ",",
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the ``MapImages`` instance's ``images`` dictionary into pandas
@@ -1344,17 +1344,17 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         image_ids: str | list[str],
         column_to_plot: str | None = None,
-        figsize: tuple | None = (10, 10),
-        plot_parent: bool | None = True,
-        patch_border: bool | None = True,
-        border_color: str | None = "r",
+        figsize: tuple = (10, 10),
+        plot_parent: bool = True,
+        patch_border: bool = True,
+        border_color: str = "r",
         vmin: float | None = None,
         vmax: float | None = None,
-        alpha: float | None = 1.0,
-        cmap: str | None = "viridis",
-        discrete_cmap: int | None = 256,
-        plot_histogram: bool | None = False,
-        save_kml_dir: bool | str | None = False,
+        alpha: float = 1.0,
+        cmap: str = "viridis",
+        discrete_cmap: int = 256,
+        plot_histogram: bool = False,
+        save_kml_dir: bool | str = False,
         image_width_resolution: int | None = None,
         kml_dpi_image: int | None = None,
     ) -> None:
@@ -1589,7 +1589,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         kml_out_path: str,
         column_to_plot: str,
         coords: list | tuple,
-        counter: int | None = -1,
+        counter: int = -1,
     ) -> None:
         """Create a KML file.
 
@@ -1653,11 +1653,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def load_patches(
         self,
         patch_paths: str,
-        patch_file_ext: str | bool | None = False,
-        parent_paths: str | bool | None = False,
-        parent_file_ext: str | bool | None = False,
-        add_geo_info: bool | None = False,
-        clear_images: bool | None = False,
+        patch_file_ext: str | bool = False,
+        parent_paths: str | bool = False,
+        parent_file_ext: str | bool = False,
+        add_geo_info: bool = False,
+        clear_images: bool = False,
     ) -> None:
         """
         Loads patch images from the given paths and adds them to the ``images``
@@ -1737,7 +1737,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     @staticmethod
     def detect_parent_id_from_path(
-        image_id: int | str, parent_delimiter: str | None = "#"
+        image_id: int | str, parent_delimiter: str = "#"
     ) -> str:
         """
         Detect parent IDs from ``image_id``.
@@ -1792,11 +1792,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def load_parents(
         self,
-        parent_paths: str | bool | None = False,
-        parent_ids: list[str] | (str | bool) | None = False,
-        parent_file_ext: str | bool | None = False,
-        overwrite: bool | None = False,
-        add_geo_info: bool | None = False,
+        parent_paths: str | bool = False,
+        parent_ids: list[str] | (str | bool) = False,
+        parent_file_ext: str | bool = False,
+        overwrite: bool = False,
+        add_geo_info: bool = False,
     ) -> None:
         """
         Load parent images from file paths (``parent_paths``).
@@ -1869,7 +1869,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         parent_df: pd.DataFrame | None = None,
         patch_df: pd.DataFrame | None = None,
-        clear_images: bool | None = True,
+        clear_images: bool = True,
     ) -> None:
         """
         Create ``MapImages`` instance by loading data from pandas DataFrame(s).
@@ -1906,9 +1906,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         parent_path: str | None = None,
         patch_path: str | None = None,
-        clear_images: bool | None = False,
-        index_col_patch: int | None = 0,
-        index_col_parent: int | None = 0,
+        clear_images: bool = False,
+        index_col_patch: int | str | None = 0,
+        index_col_parent: int | str | None = 0,
         delimiter: str | None = ",",
     ) -> None:
         """
@@ -1960,8 +1960,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def add_geo_info(
         self,
-        target_crs: str | None = "EPSG:4326",
-        verbose: bool | None = True,
+        target_crs: str = "EPSG:4326",
+        verbose: bool = True,
     ) -> None:
         """
         Add coordinates (reprojected to EPSG:4326) to all parents images using image metadata.
@@ -1989,8 +1989,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def _add_geo_info_id(
         self,
         image_id: str,
-        target_crs: str | None = "EPSG:4326",
-        verbose: bool | None = True,
+        target_crs: str = "EPSG:4326",
+        verbose: bool = True,
     ) -> None:
         """
         Add coordinates (reprojected to EPSG:4326) to an image.
@@ -2078,8 +2078,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def save_patches_as_geotiffs(
         self,
-        rewrite: bool | None = False,
-        verbose: bool | None = False,
+        rewrite: bool = False,
+        verbose: bool = False,
         crs: str | None = None,
     ) -> None:
         """Save all patches in MapImages instance as geotiffs.
@@ -2104,8 +2104,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def _save_patch_as_geotiff(
         self,
         patch_id: str,
-        rewrite: bool | None = False,
-        verbose: bool | None = False,
+        rewrite: bool = False,
+        verbose: bool = False,
         crs: str | None = None,
     ) -> None:
         """Save a patch as a geotiff.
@@ -2183,8 +2183,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def save_patches_to_geojson(
         self,
-        geojson_fname: str | None = "patches.geojson",
-        rewrite: bool | None = False,
+        geojson_fname: str = "patches.geojson",
+        rewrite: bool = False,
         crs: str | None = None,
     ) -> None:
         """Saves patches to a geojson file.
