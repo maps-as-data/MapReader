@@ -20,10 +20,10 @@ class ClassifierContextContainer(ClassifierContainer):
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbosity_level: int | None = 1,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
-        remove_after_load: bool | None = True,
+        remove_after_load: bool = True,
         print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
@@ -42,14 +42,8 @@ class ClassifierContextContainer(ClassifierContainer):
         save_model_dir : str or None, optional
             The directory to save the model in. Default is ``"models"``. If
             set to ``None``, the model is not saved.
-        verbosity_level : int, optional
-            The level of verbosity during training:
-
-            - ``0`` is silent,
-            - ``1`` is progress bar and metrics,
-            - ``2`` is detailed information.
-
-            Default is ``1``.
+        verbose : int, optional
+            Whether to print verbose outputs, by default ``False``.
         tensorboard_path : str or None, optional
             The path to the directory to save TensorBoard logs in. If set to
             ``None``, no TensorBoard logs are saved. Default is ``None``.
@@ -81,7 +75,7 @@ class ClassifierContextContainer(ClassifierContainer):
                 phases,
                 num_epochs,
                 save_model_dir,
-                verbosity_level,
+                verbose,
                 tensorboard_path,
                 tmp_file_save_freq,
                 print_info_batch_freq=print_info_batch_freq,
@@ -99,7 +93,7 @@ class ClassifierContextContainer(ClassifierContainer):
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbosity_level: int | None = 1,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
         print_info_batch_freq: int | None | None = 5,
@@ -118,14 +112,8 @@ class ClassifierContextContainer(ClassifierContainer):
         save_model_dir : str or None, optional
             The directory to save the model in. Default is ``"models"``. If
             set to ``None``, the model is not saved.
-        verbosity_level : int, optional
-            The level of verbosity during training:
-
-            - ``0`` is silent,
-            - ``1`` is progress bar and metrics,
-            - ``2`` is detailed information.
-
-            Default is ``1``.
+        verbose : bool, optional
+            Whether to print verbose outputs, by default ``False``.
         tensorboard_path : str or None, optional
             The path to the directory to save TensorBoard logs in. If set to
             ``None``, no TensorBoard logs are saved. Default is ``None``.
@@ -174,7 +162,7 @@ Use ``add_criterion`` to define one."
     Valid options for ``phases`` argument are: {self.dataloaders.keys()}'  # noqa
                 )
 
-        if verbosity_level >= 1:
+        if verbose:
             self.train_component_summary()
 
         since = time.time()
