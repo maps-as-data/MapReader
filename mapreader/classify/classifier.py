@@ -127,15 +127,15 @@ class ClassifierContainer:
                 raise ValueError(
                     "[ERROR] ``labels_map`` and ``load_path`` cannot be used together - please set one to ``None``."
                 )
-            
+
             # load object
             self.load(load_path=load_path, force_device=force_device)
-            
+
             # add any extra dataloaders
             if dataloaders:
                 for set_name, dataloader in dataloaders.items():
-                    self.dataloaders[set_name]=dataloader
-        
+                    self.dataloaders[set_name] = dataloader
+
         else:
             if model is None or labels_map is None:
                 raise ValueError(
@@ -144,7 +144,7 @@ class ClassifierContainer:
 
             self.labels_map = labels_map
 
-            # set up model and move to device  
+            # set up model and move to device
             print("[INFO] Initializing model.")
             if isinstance(model, nn.Module):
                 self.model = model.to(self.device)
@@ -174,11 +174,9 @@ class ClassifierContainer:
 
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
-        
+
         for set_name, dataloader in self.dataloaders.items():
-            print(
-                f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
-            )
+            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
 
     def generate_layerwise_lrs(
         self,
@@ -640,7 +638,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train_component_summary(self) -> None:
         """
-        Print a summary of the optimizer, criterion and trainable model
+        Print a summary of the optimizer, criterion, and trainable model
         components.
 
         Returns:
@@ -656,17 +654,17 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         print(str(self.criterion))
         print(divider)
         print("* Model:")
-        self.model_summary(only_trainable=True)
+        self.model_summary(trainable_col=True)
 
     def train(
         self,
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbose: bool | None = False,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
-        remove_after_load: bool | None = True,
+        remove_after_load: bool = True,
         print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
@@ -744,7 +742,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbose: bool | None = False,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
         print_info_batch_freq: int | None | None = 5,
@@ -892,7 +890,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 raise ValueError(
                                     "[ERROR] Criterion is not yet defined.\n\n\
 Use ``add_criterion`` to define one."
-                                    )
+                                )
 
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
