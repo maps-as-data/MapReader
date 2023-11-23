@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image, ImageOps
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
 # Import parhugin
@@ -30,10 +30,10 @@ class PatchDataset(Dataset):
         patch_df: pd.DataFrame | str,
         transform: str | (transforms.Compose | Callable),
         delimiter: str = ",",
-        patch_paths_col: str | None = "image_path",
+        patch_paths_col: str = "image_path",
         label_col: str | None = None,
         label_index_col: str | None = None,
-        image_mode: str | None = "RGB",
+        image_mode: str = "RGB",
     ):
         """A PyTorch Dataset class for loading image patches from a DataFrame.
 
@@ -248,8 +248,8 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
 
     def _default_transform(
         self,
-        t_type: str | None = "train",
-        resize: int | tuple[int, int] | None = (224, 224),
+        t_type: str = "train",
+        resize: int | tuple[int, int] = (224, 224),
     ) -> transforms.Compose:
         """
         Returns the default image transformations for the train, test and validation sets as a transforms.Compose.
@@ -325,9 +325,9 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
     def create_dataloaders(
         self,
         set_name: str = "infer",
-        batch_size: Optional[int] = 16,
-        shuffle: Optional[bool] = False,
-        num_workers: Optional[int] = 0,
+        batch_size: int = 16,
+        shuffle: bool = False,
+        num_workers: int = 0,
         **kwargs,
     ) -> None:
         """Creates a dictionary containing a PyTorch dataloader.
@@ -351,15 +351,18 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
             Dictionary containing dataloaders.
         """
 
-        dataloaders = {set_name: DataLoader(
-            self,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            num_workers=num_workers,
-            **kwargs,
-        )}
+        dataloaders = {
+            set_name: DataLoader(
+                self,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                num_workers=num_workers,
+                **kwargs,
+            )
+        }
 
         return dataloaders
+
 
 # --- Dataset that returns an image, its context and its label
 class PatchContextDataset(PatchDataset):
@@ -369,16 +372,16 @@ class PatchContextDataset(PatchDataset):
         transform1: str,
         transform2: str,
         delimiter: str = ",",
-        patch_paths_col: str | None = "image_path",
+        patch_paths_col: str = "image_path",
         label_col: str | None = None,
         label_index_col: str | None = None,
-        image_mode: str | None = "RGB",
-        context_save_path: str | None = "./maps/maps_context",
-        create_context: bool | None = False,
-        parent_path: str | None = "./maps",
-        x_offset: float | None = 1.0,
-        y_offset: float | None = 1.0,
-        slice_method: str | None = "scale",
+        image_mode: str = "RGB",
+        context_save_path: str = "./maps/maps_context",
+        create_context: bool = False,
+        parent_path: str = "./maps",
+        x_offset: float = 1.0,
+        y_offset: float = 1.0,
+        slice_method: str = "scale",
     ):
         """
         A PyTorch Dataset class for loading contextual information about image
@@ -539,12 +542,12 @@ class PatchContextDataset(PatchDataset):
 
     def save_parents(
         self,
-        processors: int | None = 10,
-        sleep_time: float | None = 0.001,
-        use_parhugin: bool | None = True,
-        parent_delimiter: str | None = "#",
-        loc_delimiter: str | None = "-",
-        overwrite: bool | None = False,
+        processors: int = 10,
+        sleep_time: float = 0.001,
+        use_parhugin: bool = True,
+        parent_delimiter: str = "#",
+        loc_delimiter: str = "-",
+        overwrite: bool = False,
     ) -> None:
         """
         Save parent patches for all patches in the patch_df.
@@ -605,10 +608,10 @@ class PatchContextDataset(PatchDataset):
     def save_parents_idx(
         self,
         idx: int,
-        parent_delimiter: str | None = "#",
-        loc_delimiter: str | None = "-",
-        overwrite: bool | None = False,
-        return_image: bool | None = False,
+        parent_delimiter: str = "#",
+        loc_delimiter: str = "-",
+        overwrite: bool = False,
+        return_image: bool = False,
     ) -> None:
         """
         Save the parents of a specific patch to the specified location.

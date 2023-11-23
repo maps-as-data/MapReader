@@ -18,13 +18,13 @@ class ClassifierContextContainer(ClassifierContainer):
     def train(
         self,
         phases: list[str] | None = None,
-        num_epochs: int | None = 25,
-        save_model_dir: str | None | None = "models",
-        verbosity_level: int | None = 1,
-        tensorboard_path: str | None | None = None,
-        tmp_file_save_freq: int | None | None = 2,
-        remove_after_load: bool | None = True,
-        print_info_batch_freq: int | None | None = 5,
+        num_epochs: int = 25,
+        save_model_dir: str | None = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: str | None = None,
+        tmp_file_save_freq: int | None = 2,
+        remove_after_load: bool = True,
+        print_info_batch_freq: int | None = 5,
     ) -> None:
         """
         Train the model on the specified phases for a given number of epochs.
@@ -97,12 +97,12 @@ class ClassifierContextContainer(ClassifierContainer):
     def train_core(
         self,
         phases: list[str] | None = None,
-        num_epochs: int | None = 25,
-        save_model_dir: str | None | None = "models",
-        verbosity_level: int | None = 1,
-        tensorboard_path: str | None | None = None,
-        tmp_file_save_freq: int | None | None = 2,
-        print_info_batch_freq: int | None | None = 5,
+        num_epochs: int = 25,
+        save_model_dir: str | None = "models",
+        verbosity_level: int = 1,
+        tensorboard_path: str | None = None,
+        tmp_file_save_freq: int | None = 2,
+        print_info_batch_freq: int | None = 5,
     ) -> None:
         """
         Trains/fine-tunes a classifier for the specified number of epochs on
@@ -420,10 +420,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
     def show_sample(
         self,
-        set_name: str | None = "train",
-        batch_number: int | None = 1,
-        print_batch_info: bool | None = True,
-        figsize: tuple[int, int] | None = (15, 10),
+        set_name: str = "train",
+        batch_number: int = 1,
+        print_batch_info: bool = True,
+        figsize: tuple[int, int] = (15, 10),
     ) -> None:
         """
         Displays a sample of training or validation data in a grid format with
@@ -503,8 +503,8 @@ Output will show batch number {num_batches}.'
         self,
         min_lr: float,
         max_lr: float,
-        spacing: str | None = "linspace",
-        sep_group_names: list[str] = None,
+        spacing: str = "linspace",
+        sep_group_names: list[str] | None = None,
     ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -567,11 +567,11 @@ Output will show batch number {num_batches}.'
     def show_inference_sample_results(
         self,
         label: str,
-        num_samples: int | None = 6,
-        set_name: str | None = "train",
-        min_conf: None | float | None = None,
-        max_conf: None | float | None = None,
-        figsize: tuple[int, int] | None = (15, 15),
+        num_samples: int = 6,
+        set_name: str = "train",
+        min_conf: float | None = None,
+        max_conf: float | None = None,
+        figsize: tuple[int, int] = (15, 15),
     ) -> None:
         """
         Shows a sample of the results of the inference.

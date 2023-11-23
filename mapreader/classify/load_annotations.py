@@ -32,16 +32,16 @@ class AnnotationsLoader:
     def load(
         self,
         annotations: str | pd.DataFrame,
-        delimiter: str | None = ",",
+        delimiter: str = ",",
         images_dir: str | None = None,
-        remove_broken: bool | None = True,
-        ignore_broken: bool | None = False,
-        id_col: str | None = "image_id",
-        patch_paths_col: str | None = "image_path",
-        label_col: str | None = "label",
-        append: bool | None = True,
-        scramble_frame: bool | None = False,
-        reset_index: bool | None = False,
+        remove_broken: bool = True,
+        ignore_broken: bool = False,
+        id_col: str = "image_id",
+        patch_paths_col: str = "image_path",
+        label_col: str = "label",
+        append: bool = True,
+        scramble_frame: bool = False,
+        reset_index: bool = False,
     ):
         """Loads annotations from a csv file or dataframe and can be used to set the ``id_col``, ``patch_paths_col`` and ``label_col`` attributes.
 
@@ -149,9 +149,9 @@ class AnnotationsLoader:
     def _load_annotations_csv(
         self,
         annotations: str,
-        delimiter: str | None = ",",
-        scramble_frame: bool | None = False,
-        reset_index: bool | None = False,
+        delimiter: str = ",",
+        scramble_frame: bool = False,
+        reset_index: bool = False,
     ) -> pd.DataFrame:
         """Loads annotations from a csv file.
 
@@ -193,8 +193,8 @@ class AnnotationsLoader:
 
     def _check_patch_paths(
         self,
-        remove_broken: bool | None = True,
-        ignore_broken: bool | None = False,
+        remove_broken: bool = True,
+        ignore_broken: bool = False,
     ) -> None:
         """
         Checks the file paths of annotations and manages broken paths.
@@ -301,11 +301,11 @@ Please check your image paths in your annonations.csv file and update them if ne
     def review_labels(
         self,
         label_to_review: str | None = None,
-        chunks: int | None = 8 * 3,
-        num_cols: int | None = 8,
+        chunks: int = 8 * 3,
+        num_cols: int = 8,
         exclude_df: pd.DataFrame | None = None,
         include_df: pd.DataFrame | None = None,
-        deduplicate_col: str | None = "image_id",
+        deduplicate_col: str = "image_id",
     ) -> None:
         """
         Perform image review on annotations and update labels for a given
@@ -497,13 +497,13 @@ Please check your image paths and update them if necessary.'
 
     def create_datasets(
         self,
-        frac_train: float | None = 0.70,
-        frac_val: float | None = 0.15,
-        frac_test: float | None = 0.15,
-        random_state: int | None = 1364,
-        train_transform: str | (Compose | Callable) | None = "train",
-        val_transform: str | (Compose | Callable) | None = "val",
-        test_transform: str | (Compose | Callable) | None = "test",
+        frac_train: float = 0.70,
+        frac_val: float = 0.15,
+        frac_test: float = 0.15,
+        random_state: int = 1364,
+        train_transform: str | (Compose | Callable) = "train",
+        val_transform: str | (Compose | Callable) = "val",
+        test_transform: str | (Compose | Callable) = "test",
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -641,10 +641,10 @@ Please check your image paths and update them if necessary.'
 
     def create_dataloaders(
         self,
-        batch_size: int | None = 16,
-        sampler: Sampler | (str | None) | None = "default",
-        shuffle: bool | None = False,
-        num_workers: int | None = 0,
+        batch_size: int = 16,
+        sampler: Sampler | str | None = "default",
+        shuffle: bool = False,
+        num_workers: int = 0,
         **kwargs,
     ) -> None:
         """Creates a dictionary containing PyTorch dataloaders
