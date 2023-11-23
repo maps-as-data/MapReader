@@ -19,7 +19,7 @@ DEFAULT_IMG_DOWNLOAD_FORMAT = "png"
 class TileDownloader:
     def __init__(
         self,
-        tile_servers: list = None,
+        tile_servers: list | None = None,
         img_format: str | None = None,
         show_progress: bool = False,
     ):
@@ -30,7 +30,7 @@ class TileDownloader:
         ----------
         tile_servers : list
             Download urls for tileservers.
-        img_format : Union[str, None], optional
+        img_format : str or None, optional
             Image format used when saving tiles.
             If None, ``png`` will be used.
             By default None.

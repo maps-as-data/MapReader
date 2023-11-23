@@ -110,9 +110,9 @@ class Downloader:
     def download_map_by_polygon(
         self,
         polygon: Polygon,
-        zoom_level: int | None = 14,
-        path_save: str | None = "maps",
-        overwrite: bool | None = False,
+        zoom_level: int = 14,
+        path_save: str = "maps",
+        overwrite: bool = False,
     ) -> None:
         """
         Downloads a map contained within a polygon.
