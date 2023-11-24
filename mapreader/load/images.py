@@ -2118,7 +2118,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to rewrite files if they already exist, by default False
         verbose : bool, optional
             Whether to print verbose outputs, by default False
-        crs : Optional[str], optional
+        crs : str or None, optional
             The CRS of the coordinates.
             If None, the method will first look for ``crs`` in the patches dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
             By default None.
@@ -2191,11 +2191,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        geojson_fname : Optional[str], optional
+        geojson_fname : str, optional
             The name of the geojson file, by default "patches.geojson"
-        rewrite : Optional[bool], optional
+        rewrite : bool, optional
             Whether to overwrite an existing file, by default False.
-        crs : Optional[str], optional
+        crs : str or None, optional
             The CRS to use when writing the geojson.
             If None, the method will look for "crs" in the patches dictionary and, if found, will use that. Otherwise it will set the crs to the default value of "EPSG:4326".
             By default None

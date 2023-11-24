@@ -1778,13 +1778,13 @@ Output will show batch number {num_batches}.'
             The dataset to add
         set_name : str
             The name to use for the dataset
-        batch_size : Optional[int], optional
+        batch_size : int, optional
             The batch size to use when creating the DataLoader, by default 16
-        sampler : Optional[Union[Sampler, None]], optional
+        sampler : Sampler or None, optional
             The sampler to use when creating the DataLoader, by default None
-        shuffle : Optional[bool], optional
+        shuffle : bool, optional
             Whether to shuffle the PatchDataset, by default False
-        num_workers : Optional[int], optional
+        num_workers : int, optional
             The number of worker threads to use for loading data, by default 0.
         """
         if sampler and shuffle:

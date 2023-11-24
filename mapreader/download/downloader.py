@@ -24,7 +24,7 @@ class Downloader:
 
         Parameters
         ----------
-        download_url : Union[str, list]
+        download_url : str or list
             The base URL pattern used to download tiles from the server. This
             should contain placeholders for the x coordinate (``x``), the y
             coordinate (``y``) and the zoom level (``z``).

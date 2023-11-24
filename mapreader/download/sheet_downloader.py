@@ -39,7 +39,7 @@ class SheetDownloader:
         ----------
         metadata_path : str
             path to metadata.json
-        download_url : Union[str, list]
+        download_url : str or list
             The base URL pattern used to download tiles from the server. This
             should contain placeholders for the x coordinate (``x``), the y
             coordinate (``y``) and the zoom level (``z``).
@@ -248,7 +248,7 @@ class SheetDownloader:
 
         Parameters
         ----------
-        wfs_ids : Union[list, int]
+        wfs_ids : list or int
             The WFS ID numbers of the maps to download.
         append : bool, optional
             Whether to append to current query results list or, if False, start a new list.
@@ -755,7 +755,7 @@ class SheetDownloader:
 
         Parameters
         ----------
-        wfs_ids : Union[list, int]
+        wfs_ids : list or int
             The WFS ID numbers of the maps to download.
         path_save : str, optional
             Path to save map sheets, by default "maps"
@@ -1129,7 +1129,7 @@ class SheetDownloader:
     def plot_features_on_map(
         self,
         features: list,
-        map_extent: str | (list | tuple) | None = None,
+        map_extent: str | list | tuple | None = None,
         add_id: bool = True,
     ) -> None:
         """
@@ -1137,7 +1137,7 @@ class SheetDownloader:
 
         Parameters
         ----------
-        map_extent : Union[str, list, tuple, None], optional
+        map_extent : str, list, tuple or None, optional
             The extent of the underlying map to be plotted.
 
             If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.
@@ -1225,7 +1225,7 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_all_metadata_on_map(
         self,
-        map_extent: str | (list | tuple) | None = None,
+        map_extent: str | list | tuple | None = None,
         add_id: bool = True,
     ) -> None:
         """
@@ -1233,7 +1233,7 @@ If you would like to install it, please follow instructions at https://scitools.
 
         Parameters
         ----------
-        map_extent : Union[str, list, tuple, None], optional
+        map_extent : str, list, tuple or None, optional
             The extent of the underlying map to be plotted.
 
             If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.
@@ -1249,7 +1249,7 @@ If you would like to install it, please follow instructions at https://scitools.
 
     def plot_queries_on_map(
         self,
-        map_extent: str | (list | tuple) | None = None,
+        map_extent: str | list | tuple | None = None,
         add_id: bool = True,
     ) -> None:
         """
@@ -1257,7 +1257,7 @@ If you would like to install it, please follow instructions at https://scitools.
 
         Parameters
         ----------
-        map_extent : Union[str, list, tuple, None], optional
+        map_extent : str, list, tuple or None, optional
             The extent of the underlying map to be plotted.
 
             If a tuple or list, must be of the format ``[lon_min, lon_max, lat_min, lat_max]``.

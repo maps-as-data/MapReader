@@ -47,37 +47,37 @@ class AnnotationsLoader:
 
         Parameters
         ----------
-        annotations : Union[str, pd.DataFrame]
+        annotations : str or pd.DataFrame
             The annotations.
             Can either be the path to a csv file or a pandas.DataFrame.
-        delimiter : Optional[str], optional
+        delimiter : str, optional
             The delimiter to use when loading the csv file as a dataframe, by default ",".
-        images_dir : Optional[str], optional
+        images_dir : str or None, optional
             The path to the directory in which patches are stored.
             This argument should be passed if image paths are different from the path saved in annotations dataframe/csv.
             If None, no updates will be made to the image paths in the annotations dataframe/csv.
             By default None.
-        remove_broken : Optional[bool], optional
+        remove_broken : bool, optional
             Whether to remove annotations with broken image paths.
             If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
             By default True.
-        ignore_broken : Optional[bool], optional
+        ignore_broken : bool, optional
             Whether to ignore broken image paths (only valid if remove_broken=False).
             If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
             If False, annotations with broken paths will raise error. By default, False.
-        id_col : Optional[str], optional
+        id_col : str, optional
             The name of the column which contains the image IDs, by default "image_id".
-        patch_paths_col : Optional[str], optional
+        patch_paths_col : str, optional
             The name of the column containing the image paths, by default "image_path".
-        label_col : Optional[str], optional
+        label_col : str, optional
             The name of the column containing the image labels, by default "label".
-        append : Optional[bool], optional
+        append : bool, optional
             Whether to append the annotations to a pre-existing ``annotations`` dataframe.
             If False, existing dataframe will be overwritten.
             By default True.
-        scramble_frame : Optional[bool], optional
+        scramble_frame : bool, optional
             Whether to shuffle the rows of the dataframe, by default False.
-        reset_index : Optional[bool], optional
+        reset_index : bool, optional
             Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
 
         Raises
@@ -159,11 +159,11 @@ class AnnotationsLoader:
         ----------
         annotations : str
             The path to the annotations csv file.
-        delimiter : Optional[str], optional
+        delimiter : str, optional
             The delimiter to use when loading the csv file as a dataframe, by default ",".
-        scramble_frame : Optional[bool], optional
+        scramble_frame : bool, optional
             Whether to shuffle the rows of the dataframe, by default False.
-        reset_index : Optional[bool], optional
+        reset_index : bool, optional
             Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
 
         Returns
@@ -201,11 +201,11 @@ class AnnotationsLoader:
 
         Parameters
         ----------
-        remove_broken : Optional[bool], optional
+        remove_broken : bool, optional
             Whether to remove annotations with broken image paths.
             If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
             By default True.
-        ignore_broken : Optional[bool], optional
+        ignore_broken : bool, optional
             Whether to ignore broken image paths (only valid if remove_broken=False).
             If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
         """

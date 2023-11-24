@@ -28,7 +28,7 @@ class PatchDataset(Dataset):
     def __init__(
         self,
         patch_df: pd.DataFrame | str,
-        transform: str | (transforms.Compose | Callable),
+        transform: str | transforms.Compose | Callable,
         delimiter: str = ",",
         patch_paths_col: str = "image_path",
         label_col: str | None = None,
@@ -41,7 +41,7 @@ class PatchDataset(Dataset):
         ----------
         patch_df : pandas.DataFrame or str
             DataFrame or path to csv file containing the paths to image patches and their labels.
-        transform : Union[str, transforms.Compose, Callable]
+        transform : str, transforms.Compose or Callable
             The transform to use on the image.
             A string can be used to call default transforms - options are "train", "test" or "val".
             Alternatively, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose) that takes in an image
@@ -338,7 +338,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
             The name to use for the dataloader.
         batch_size : int, optional
             The batch size to use for the dataloader. By default ``16``.
-        shuffle : Optional[bool], optional
+        shuffle : bool, optional
             Whether to shuffle the PatchDataset, by default False
         num_workers : int, optional
             The number of worker threads to use for loading data. By default ``0``.

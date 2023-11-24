@@ -28,15 +28,15 @@ class TileMerger:
 
         Parameters
         ----------
-        output_folder : Union[str, None], optional
+        output_folder : str or None, optional
             Path to save map images.
             If None, "./" will be used (i.e. map images will be saved in current directory).
             By default None
-        img_input_format : Union[str, None], optional
+        img_input_format : str or None, optional
             Image format of tiles.
             If None, ``png`` will be assumed.
             By default None.
-        img_output_format : Union[str, None], optional
+        img_output_format : str or None, optional
             Image format used when saving map images.
             If None, ``png`` will be used.
             By default None.
@@ -149,7 +149,7 @@ class TileMerger:
         ----------
         grid_bb : GridBoundingBox
             GridBoundingBox containing tiles to merge
-        file_name : Union[str, None], optional
+        file_name : str or None, optional
             Name to use when saving map
 
         Returns
