@@ -170,7 +170,7 @@ class ClassifierContainer:
             )
 
             # add colors for printing/logging
-            self._print_colors()
+            self._set_up_print_colors()
 
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
@@ -610,7 +610,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             The name of the dataset to run inference on, by default
             ``"infer"``.
         verbose : bool, optional
-           Whether to print verbose outputs, by default False.
+            Whether to print verbose outputs, by default False.
         print_info_batch_freq : int, optional
             The frequency of printouts, by default ``5``.
 
@@ -965,12 +965,12 @@ Use ``add_criterion`` to define one."
 
                         if phase.lower() in valid_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.__color_dred, epoch_msg)
+                            self.cprint("[INFO]", "dred", epoch_msg)
                         elif phase.lower() in train_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                         else:
-                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                     # --- END: one batch
 
                 # scheduler
@@ -1003,9 +1003,9 @@ Use ``add_criterion`` to define one."
                     epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", self.__color_dred, epoch_msg + "\n")
+                        self.cprint("[INFO]", "dred", epoch_msg + "\n")
                     else:
-                        self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                        self.cprint("[INFO]", "dgreen", epoch_msg)
 
                 # labels/confidence
                 self.pred_conf.extend(running_pred_conf)
@@ -1021,7 +1021,11 @@ Use ``add_criterion`` to define one."
                 if phase.lower() in valid_phase_names:
                     if epoch % tmp_file_save_freq == 0:
                         tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
-                        print(self.__color_lgrey + tmp_str + self.__color_reset)
+                        print(
+                            self._print_colors["lgrey"]
+                            + tmp_str
+                            + self._print_colors["reset"]
+                        )
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
@@ -1861,38 +1865,39 @@ Output will show batch number {num_batches}.'
         except:
             pass
 
-    def _print_colors(self):
+    def _set_up_print_colors(self):
         """Private function, setting color attributes on the object."""
+        self._print_colors = {}
+
         # color
-        self.__color_lgrey = "\033[1;90m"
-        self.__color_grey = "\033[90m"  # boring information
-        self.__color_yellow = "\033[93m"  # FYI
-        self.__color_orange = "\033[0;33m"  # Warning
+        self._print_colors["lgrey"] = "\033[1;90m"
+        self._print_colors["grey"] = "\033[90m"  # boring information
+        self._print_colors["yellow"] = "\033[93m"  # FYI
+        self._print_colors["orange"] = "\033[0;33m"  # Warning
 
-        self.__color_lred = "\033[1;31m"  # there is smoke
-        self.__color_red = "\033[91m"  # fire!
-        self.__color_dred = "\033[2;31m"  # Everything is on fire
+        self._print_colors["lred"] = "\033[1;31m"  # there is smoke
+        self._print_colors["red"] = "\033[91m"  # fire!
+        self._print_colors["dred"] = "\033[2;31m"  # Everything is on fire
 
-        self.__color_lblue = "\033[1;34m"
-        self.__color_blue = "\033[94m"
-        self.__color_dblue = "\033[2;34m"
+        self._print_colors["lblue"] = "\033[1;34m"
+        self._print_colors["blue"] = "\033[94m"
+        self._print_colors["dblue"] = "\033[2;34m"
 
-        self.__color_lgreen = "\033[1;32m"  # all is normal
-        self.__color_green = "\033[92m"  # something else
-        self.__color_dgreen = "\033[2;32m"  # even more interesting
+        self._print_colors["lgreen"] = "\033[1;32m"  # all is normal
+        self._print_colors["green"] = "\033[92m"  # something else
+        self._print_colors["dgreen"] = "\033[2;32m"  # even more interesting
 
-        self.__color_lmagenta = "\033[1;35m"
-        self.__color_magenta = "\033[95m"  # for title
-        self.__color_dmagenta = "\033[2;35m"
+        self._print_colors["lmagenta"] = "\033[1;35m"
+        self._print_colors["magenta"] = "\033[95m"  # for title
+        self._print_colors["dmagenta"] = "\033[2;35m"
 
-        self.__color_cyan = "\033[96m"  # system time
-        self.__color_white = "\033[97m"  # final time
+        self._print_colors["cyan"] = "\033[96m"  # system time
+        self._print_colors["white"] = "\033[97m"  # final time
+        self._print_colors["black"] = "\033[0;30m"
 
-        self.__color_black = "\033[0;30m"
-
-        self.__color_reset = "\033[0m"
-        self.__color_bold = "\033[1m"
-        self.__color_under = "\033[4m"
+        self._print_colors["reset"] = "\033[0m"
+        self._print_colors["bold"] = "\033[1m"
+        self._print_colors["under"] = "\033[4m"
 
     def _get_dtime(self) -> str:
         """
@@ -1927,10 +1932,15 @@ Output will show batch number {num_batches}.'
         host_name = socket.gethostname().split(".")[0][:10]
 
         print(
-            self.__color_green + self._get_dtime() + self.__color_reset,
-            self.__color_magenta + host_name + self.__color_reset,
-            self.__color_bold + self.__color_grey + type_info + self.__color_reset,
-            bc_color + text + self.__color_reset,
+            self._print_colors["green"]
+            + self._get_dtime()
+            + self._print_colors["reset"],
+            self._print_colors["magenta"] + host_name + self._print_colors["reset"],
+            self._print_colors["bold"]
+            + self._print_colors["grey"]
+            + type_info
+            + self._print_colors["reset"],
+            self._print_colors[bc_color] + text + self._print_colors["reset"],
         )
 
     def update_progress(

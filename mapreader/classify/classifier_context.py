@@ -172,8 +172,8 @@ Use ``add_criterion`` to define one."
         valid_phase_names = ["val", "validation", "eval", "evaluation"]
         best_model_wts = copy.deepcopy(self.model.state_dict())
         self.pred_conf = []
-        self.pred_label = []
-        self.orig_label = []
+        self.pred_label_indices = []
+        self.orig_label_indices = []
         if save_model_dir is not None:
             save_model_dir = os.path.abspath(save_model_dir)
 
@@ -317,12 +317,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
                         if phase.lower() in valid_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.color_dred, epoch_msg)
+                            self.cprint("[INFO]", "dred", epoch_msg)
                         elif phase.lower() in train_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                         else:
-                            self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                     # --- END: one batch
 
                 # scheduler
@@ -352,12 +352,12 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                     )
 
                     epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
-                    epoch_msg = self.gen_epoch_msg(phase, epoch_msg)
+                    epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", self.color_dred, epoch_msg + "\n")
+                        self.cprint("[INFO]", "dred", epoch_msg + "\n")
                     else:
-                        self.cprint("[INFO]", self.color_dgreen, epoch_msg)
+                        self.cprint("[INFO]", "dgreen", epoch_msg)
 
                 # labels/confidence
                 self.pred_conf.extend(running_pred_conf)
@@ -373,7 +373,11 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                 if phase.lower() in valid_phase_names:
                     if epoch % tmp_file_save_freq == 0:
                         tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
-                        print(self.color_lgrey + tmp_str + self.color_reset)
+                        print(
+                            self._print_colors["lgrey"]
+                            + tmp_str
+                            + self._print_colors["reset"]
+                        )
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
