@@ -1,4 +1,4 @@
-GitHub guide
+GitHub Guide
 ============
 
 `Git <https://git-scm.com/>`_ is a tool used to keep track of changes to files stored in a repository (version control).
