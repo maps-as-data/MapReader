@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image, ImageOps
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
 # Import parhugin
@@ -163,7 +163,9 @@ class PatchDataset(Dataset):
         """
         return len(self.patch_df)
 
-    def __getitem__(self, idx: int | torch.Tensor) -> tuple[torch.Tensor, str, int]:
+    def __getitem__(
+        self, idx: int | torch.Tensor
+    ) -> tuple[tuple[torch.Tensor], str, int]:
         """
         Return the image, its label and the index of that label at the given index in the dataset.
 
@@ -206,7 +208,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             image_label_index = -1
 
-        return img, image_label, image_label_index
+        return (img,), image_label, image_label_index
 
     def return_orig_image(self, idx: int | torch.Tensor) -> Image:
         """
@@ -325,9 +327,9 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
     def create_dataloaders(
         self,
         set_name: str = "infer",
-        batch_size: Optional[int] = 16,
-        shuffle: Optional[bool] = False,
-        num_workers: Optional[int] = 0,
+        batch_size: int = 16,
+        shuffle: bool = False,
+        num_workers: int = 0,
         **kwargs,
     ) -> None:
         """Creates a dictionary containing a PyTorch dataloader.
@@ -338,7 +340,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
             The name to use for the dataloader.
         batch_size : int, optional
             The batch size to use for the dataloader. By default ``16``.
-        shuffle : Optional[bool], optional
+        shuffle : bool, optional
             Whether to shuffle the PatchDataset, by default False
         num_workers : int, optional
             The number of worker threads to use for loading data. By default ``0``.
@@ -351,15 +353,18 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
             Dictionary containing dataloaders.
         """
 
-        dataloaders = {set_name: DataLoader(
-            self,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            num_workers=num_workers,
-            **kwargs,
-        )}
+        dataloaders = {
+            set_name: DataLoader(
+                self,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                num_workers=num_workers,
+                **kwargs,
+            )
+        }
 
         return dataloaders
+
 
 # --- Dataset that returns an image, its context and its label
 class PatchContextDataset(PatchDataset):
@@ -755,7 +760,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
 
     def __getitem__(
         self, idx: int | torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, str, int]:
+    ) -> tuple[tuple[torch.Tensor, torch.Tensor], str, int]:
         """
         Retrieves the patch image, the context image and the label at the
         given index in the dataset (``idx``).
@@ -808,4 +813,4 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             image_label_index = -1
 
-        return img, context_img, image_label, image_label_index
+        return (img, context_img), image_label, image_label_index
