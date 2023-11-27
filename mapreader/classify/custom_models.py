@@ -13,8 +13,8 @@ class twoParallelModels(torch.nn.Module):
 
     def __init__(
         self,
-        feature1: torch.nn.Module,
-        feature2: torch.nn.Module,
+        patch_model: torch.nn.Module,
+        context_model: torch.nn.Module,
         fc_layer: torch.nn.Linear,
     ):
         """
@@ -22,16 +22,18 @@ class twoParallelModels(torch.nn.Module):
 
         Parameters:
         -----------
-        feature1 : nn.Module
-            The feature extractor module for the first input pipeline.
-        feature2 : nn.Module
-            The feature extractor module for the second input pipeline.
+        patch_model : nn.Module
+            The feature extractor module for the first patch only pipeline.
+        context_model : nn.Module
+            The feature extractor module for the second context pipeline.
         fc_layer : nn.Linear
             The fully connected layer at the end of the model.
+            Input size should be output size of patch_model + output size of context_model.
+            Output size should be number of classes (labels).
         """
         super().__init__()
-        self.features1 = feature1
-        self.features2 = feature2
+        self.patch_model = patch_model
+        self.context_model = context_model
         self.fc_layer = fc_layer
 
     def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
@@ -44,9 +46,9 @@ class twoParallelModels(torch.nn.Module):
         Parameters:
         -----------
         x1 : torch.Tensor
-            The input tensor for the first input pipeline.
+            The input tensor for the patch only pipeline.
         x2 : torch.Tensor
-            The input tensor for the second input pipeline.
+            The input tensor for the context pipeline.
 
         Returns:
         --------
@@ -54,10 +56,10 @@ class twoParallelModels(torch.nn.Module):
             The output tensor of the model.
         """
 
-        x1 = self.features1(x1)
+        x1 = self.patch_model(x1)
         x1 = x1.view(x1.size(0), -1)
 
-        x2 = self.features2(x2)
+        x2 = self.context_model(x2)
         x2 = x2.view(x2.size(0), -1)
 
         # Concatenate in dim1 (feature dimension)
