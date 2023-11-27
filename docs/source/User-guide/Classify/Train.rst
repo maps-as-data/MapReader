@@ -368,7 +368,7 @@ In order to train/fine-tune your model, will need to define:
     You should change this to suit your needs.
 
     The ``params2optimize`` argument can be used to select which parameters to optimize during training.
-    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimized.
+    By default, this is set to ``"default"``, meaning that all trainable parameters will be optimized.
 
     When training/fine-tuning your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network).
     Normally, when fine-tuning pre-trained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers and larger learning rates assigned to later layers.

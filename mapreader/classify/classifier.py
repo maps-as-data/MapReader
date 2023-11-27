@@ -226,7 +226,7 @@ class ClassifierContainer:
     def initialize_optimizer(
         self,
         optim_type: str | None = "adam",
-        params2optimize: str | Iterable | None = "infer",
+        params2optimize: str | Iterable | None = "default",
         optim_param_dict: dict | None = None,
         add_optim: bool | None = True,
     ) -> torch.optim.Optimizer | None:
@@ -240,9 +240,9 @@ class ClassifierContainer:
             The type of optimizer to use. Can be set to ``"adam"`` (default),
             ``"adamw"``, or ``"sgd"``.
         params2optimize : str or iterable, optional
-            The parameters to optimize. If set to ``"infer"``, all model
-            parameters that require gradients will be optimized, by default
-            ``"infer"``.
+            The parameters to optimize. If set to ``"default"``, all model
+            parameters that require gradients will be optimized.
+            Default is ``"default"``.
         optim_param_dict : dict, optional
             The parameters to pass to the optimizer constructor as a
             dictionary, by default ``{"lr": 1e-3}``.
