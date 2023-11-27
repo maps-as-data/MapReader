@@ -183,6 +183,7 @@ class ClassifierContainer:
         min_lr: float,
         max_lr: float,
         spacing: str | None = "linspace",
+        parameter_groups: bool = False,
     ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -200,6 +201,10 @@ class ClassifierContainer:
             where `"linspace"` uses evenly spaced learning rates over a
             specified interval and `"geomspace"` uses learning rates spaced
             evenly on a log scale (a geometric progression). By default ``"linspace"``.
+        parameter_groups : bool, optional
+            When using context mode, whether to consider parameters belonging to the patch model and context model as separate groups.
+            If True, layers belonging to each group will be assigned the same learning rate.
+            Defaults to ``False``.
 
         Returns
         -------
@@ -207,19 +212,48 @@ class ClassifierContainer:
             A list of dictionaries containing the parameters and learning
             rates for each layer.
         """
-        if spacing.lower() == "linspace":
-            lrs = np.linspace(min_lr, max_lr, len(list(self.model.named_parameters())))
-        elif spacing.lower() in ["log", "geomspace"]:
-            lrs = np.geomspace(min_lr, max_lr, len(list(self.model.named_parameters())))
-        else:
+
+        if spacing.lower() not in ["linspace", "geomspace"]:
             raise NotImplementedError(
                 '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
             )
 
-        params2optimize = [
-            {"params": params, "learning rate": lrs[i]}
-            for i, (_, params) in enumerate(self.model.named_parameters())
-        ]
+        if parameter_groups:
+            params2optimize = []
+
+            for group in ["patch_model", "context_model"]:
+                group_params = [
+                    params
+                    for (name, params) in self.model.named_parameters()
+                    if group in name
+                ]
+
+                if spacing.lower() == "linspace":
+                    lrs = np.linspace(min_lr, max_lr, len(group_params))
+                elif spacing.lower() in ["log", "geomspace"]:
+                    lrs = np.geomspace(min_lr, max_lr, len(group_params))
+
+                params2optimize.extend(
+                    [
+                        {"params": params, "learning rate": lr}
+                        for params, lr in zip(group_params, lrs)
+                    ]
+                )
+
+        else:
+            if spacing.lower() == "linspace":
+                lrs = np.linspace(
+                    min_lr, max_lr, len(list(self.model.named_parameters()))
+                )
+            elif spacing.lower() in ["log", "geomspace"]:
+                lrs = np.geomspace(
+                    min_lr, max_lr, len(list(self.model.named_parameters()))
+                )
+
+            params2optimize = [
+                {"params": params, "learning rate": lr}
+                for (_, params), lr in zip(self.model.named_parameters(), lrs)
+            ]
 
         return params2optimize
 
@@ -274,7 +308,7 @@ class ClassifierContainer:
         """
         if optim_param_dict is None:
             optim_param_dict = {"lr": 0.001}
-        if params2optimize == "infer":
+        if params2optimize == "default":
             params2optimize = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
