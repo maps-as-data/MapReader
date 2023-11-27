@@ -32,7 +32,7 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self,
-        model: str | (nn.Module | None),
+        model: str | nn.Module | None,
         labels_map: dict[int, str] | None,
         dataloaders: dict[str, DataLoader] | None = None,
         device: str | None = "default",
@@ -864,7 +864,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 for batch_idx, (inputs, _labels, label_indices) in enumerate(
                     self.dataloaders[phase]
                 ):
-                    inputs = inputs.to(self.device)
+                    inputs = tuple(input.to(self.device) for input in inputs)
                     label_indices = label_indices.to(self.device)
 
                     if self.optimizer is None:
@@ -895,7 +895,7 @@ Use ``add_criterion`` to define one."
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
                             ):
-                                outputs, aux_outputs = self.model(inputs)
+                                outputs, aux_outputs = self.model(*inputs)
 
                                 if not all(
                                     isinstance(out, torch.Tensor)
@@ -913,7 +913,7 @@ Use ``add_criterion`` to define one."
                                 loss = loss1 + 0.4 * loss2
 
                             else:
-                                outputs = self.model(inputs)
+                                outputs = self.model(*inputs)
 
                                 if not isinstance(outputs, torch.Tensor):
                                     try:
@@ -930,13 +930,13 @@ Use ``add_criterion`` to define one."
                                 self.optimizer.step()
 
                         # XXX (why multiply?)
-                        running_loss += loss.item() * inputs.size(0)
+                        running_loss += loss.item() * inputs[0].size(0)
 
                         # TQDM
                         # batch_loop.set_postfix(loss=loss.data)
                         # batch_loop.refresh()
                     else:
-                        outputs = self.model(inputs)
+                        outputs = self.model(*inputs)
 
                         if not isinstance(outputs, torch.Tensor):
                             try:
@@ -1529,12 +1529,13 @@ Output will show batch number {num_batches}.'
             inputs, labels, label_indices = next(dl_iter)
 
         # Make a grid from batch
-        out = torchvision.utils.make_grid(inputs)
-        self._imshow(
-            out,
-            title=f"{labels}\n{label_indices.tolist()}",
-            figsize=figsize,
-        )
+        for input in inputs:
+            out = torchvision.utils.make_grid(input)
+            self._imshow(
+                out,
+                title=f"{labels}\n{label_indices.tolist()}",
+                figsize=figsize,
+            )
 
     def print_batch_info(self, set_name: str | None = "train") -> None:
         """
@@ -1657,10 +1658,10 @@ Output will show batch number {num_batches}.'
         plt.figure(figsize=figsize)
         with torch.no_grad():
             for inputs, _labels, label_indices in iter(self.dataloaders[set_name]):
-                inputs = inputs.to(self.device)
+                inputs = tuple(input.to(self.device) for input in inputs)
                 label_indices = label_indices.to(self.device)
 
-                outputs = self.model(inputs)
+                outputs = self.model(*inputs)
 
                 if not isinstance(outputs, torch.Tensor):
                     try:
@@ -1695,7 +1696,7 @@ Output will show batch number {num_batches}.'
                     ax.axis("off")
                     ax.set_title(f"{label} | {conf_score:.3f}")
 
-                    inp = inputs.cpu().data[j].numpy().transpose((1, 2, 0))
+                    inp = inputs[0].cpu().data[j].numpy().transpose((1, 2, 0))
                     inp = np.clip(inp, 0, 1)
                     plt.imshow(inp)
 
