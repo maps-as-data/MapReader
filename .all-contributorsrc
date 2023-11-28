@@ -17,6 +17,25 @@
       ]
     },
     {
+      "login": "kmcdono2",
+      "name": "Katie McDonough",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20363927?v=4",
+      "profile": "https://www.turing.ac.uk/people/researchers/katherine-mcdonough",
+      "contributions": [
+        "research",
+        "ideas"
+      ]
+    },
+    {
+      "login": "dcsw2",
+      "name": "Daniel C.S. Wilson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34318222?v=4",
+      "profile": "http://danielwilson.info",
+      "contributions": [
+        "research"
+      ]
+    },
+    {
       "login": "kasra-hosseini",
       "name": "Kasra Hosseini",
       "avatar_url": "https://avatars.githubusercontent.com/u/1899856?v=4",
