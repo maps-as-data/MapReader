@@ -8,16 +8,6 @@
   "commitConvention": "angular",
   "contributors": [
     {
-      "login": "rwood-97",
-      "name": "Rosie Wood",
-      "avatar_url": "https://avatars.githubusercontent.com/u/72076688?v=4",
-      "profile": "https://github.com/rwood-97",
-      "contributions": [
-        "code",
-        "doc"
-      ]
-    },
-    {
       "login": "kmcdono2",
       "name": "Katie McDonough",
       "avatar_url": "https://avatars.githubusercontent.com/u/20363927?v=4",
@@ -43,6 +33,16 @@
       "profile": "https://github.com/kasra-hosseini",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "rwood-97",
+      "name": "Rosie Wood",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72076688?v=4",
+      "profile": "https://github.com/rwood-97",
+      "contributions": [
+        "code",
+        "doc"
       ]
     }
   ],

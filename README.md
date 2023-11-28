@@ -1,7 +1,4 @@
 <div align="center">
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
     <br>
     <p align="center">
     <h1>MapReader</h1>
@@ -22,6 +19,7 @@
     <a href="https://zenodo.org/badge/latestdoi/430661738"><img src="https://zenodo.org/badge/430661738.svg" alt="DOI"></a>
     <br/>
 </p>
+
 
 ## What is MapReader?
 
@@ -105,12 +103,19 @@ Maps above reproduced with the permission of the National Library of Scotland ht
 
 ## Contributors
 
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
   <tbody>
     <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.turing.ac.uk/people/researchers/katherine-mcdonough"><img src="https://avatars.githubusercontent.com/u/20363927?v=4?s=100" width="100px;" alt="Katie McDonough"/><br /><sub><b>Katie McDonough</b></sub></a><br /><a href="#research-kmcdono2" title="Research">🔬</a> <a href="#ideas-kmcdono2" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://danielwilson.info"><img src="https://avatars.githubusercontent.com/u/34318222?v=4?s=100" width="100px;" alt="Daniel C.S. Wilson"/><br /><sub><b>Daniel C.S. Wilson</b></sub></a><br /><a href="#research-dcsw2" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kasra-hosseini"><img src="https://avatars.githubusercontent.com/u/1899856?v=4?s=100" width="100px;" alt="Kasra Hosseini"/><br /><sub><b>Kasra Hosseini</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=kasra-hosseini" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rwood-97"><img src="https://avatars.githubusercontent.com/u/72076688?v=4?s=100" width="100px;" alt="Rosie Wood"/><br /><sub><b>Rosie Wood</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Code">💻</a> <a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Documentation">📖</a></td>
     </tr>
   </tbody>
