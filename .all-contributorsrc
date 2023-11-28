@@ -34,6 +34,15 @@
       "contributions": [
         "research"
       ]
+    },
+    {
+      "login": "kasra-hosseini",
+      "name": "Kasra Hosseini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1899856?v=4",
+      "profile": "https://github.com/kasra-hosseini",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
