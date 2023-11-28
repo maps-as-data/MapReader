@@ -7,6 +7,9 @@
 </div>
 
 <p align="center">
+    <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
     <a href="https://pypi.org/project/mapreader/">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/MapReader">
     </a>
