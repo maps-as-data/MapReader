@@ -25,6 +25,15 @@
         "research",
         "ideas"
       ]
+    },
+    {
+      "login": "dcsw2",
+      "name": "Daniel C.S. Wilson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34318222?v=4",
+      "profile": "http://danielwilson.info",
+      "contributions": [
+        "research"
+      ]
     }
   ],
   "contributorsPerLine": 7,
