@@ -104,7 +104,7 @@ Maps above reproduced with the permission of the National Library of Scotland ht
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -117,6 +117,7 @@ Maps above reproduced with the permission of the National Library of Scotland ht
       <td align="center" valign="top" width="14.28%"><a href="http://danielwilson.info"><img src="https://avatars.githubusercontent.com/u/34318222?v=4?s=100" width="100px;" alt="Daniel C.S. Wilson"/><br /><sub><b>Daniel C.S. Wilson</b></sub></a><br /><a href="#research-dcsw2" title="Research">🔬</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kasra-hosseini"><img src="https://avatars.githubusercontent.com/u/1899856?v=4?s=100" width="100px;" alt="Kasra Hosseini"/><br /><sub><b>Kasra Hosseini</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=kasra-hosseini" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rwood-97"><img src="https://avatars.githubusercontent.com/u/72076688?v=4?s=100" width="100px;" alt="Rosie Wood"/><br /><sub><b>Rosie Wood</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Code">💻</a> <a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.westerling.nu"><img src="https://avatars.githubusercontent.com/u/7298727?v=4?s=100" width="100px;" alt="Kalle Westerling"/><br /><sub><b>Kalle Westerling</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=kallewesterling" title="Code">💻</a> <a href="https://github.com/Living-with-machines/MapReader/commits?author=kallewesterling" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
