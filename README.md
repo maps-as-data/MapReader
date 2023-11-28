@@ -7,9 +7,6 @@
 </div>
 
 <p align="center">
-    <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
     <a href="https://pypi.org/project/mapreader/">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/MapReader">
     </a>
@@ -22,6 +19,7 @@
     <a href="https://zenodo.org/badge/latestdoi/430661738"><img src="https://zenodo.org/badge/430661738.svg" alt="DOI"></a>
     <br/>
 </p>
+
 
 ## What is MapReader?
 
@@ -104,6 +102,10 @@ Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic 
 Maps above reproduced with the permission of the National Library of Scotland https://maps.nls.uk/index.html
 
 ## Contributors
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
