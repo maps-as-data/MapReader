@@ -15,6 +15,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "kmcdono2",
+      "name": "Katie McDonough",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20363927?v=4",
+      "profile": "https://www.turing.ac.uk/people/researchers/katherine-mcdonough",
+      "contributions": [
+        "research",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
