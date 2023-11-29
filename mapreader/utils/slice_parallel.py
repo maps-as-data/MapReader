@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
-from argparse import ArgumentParser
 import glob
 import os
+from argparse import ArgumentParser
 
 from mapreader import loader
-from parhugin import multiFunc
 
 
 # Serial version fo the Func to be run in parallel

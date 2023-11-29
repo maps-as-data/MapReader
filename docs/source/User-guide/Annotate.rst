@@ -66,7 +66,7 @@ To help with annotating, you can set the annotation interface to show a context 
 By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``.
 
 # TODO: This is not currently an option
-You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you. 
+You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you.
 This is particularly useful if your images (e.g. maps) have collars or margins that you would like to avoid.
 
 e.g. :
@@ -75,6 +75,7 @@ e.g. :
 
     annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
 
+    annotation
     annotation
 
 .. _Save_annotations:
@@ -92,12 +93,13 @@ If you need to know the name of the annotations file, you may refer to a propert
 
 The file will be located in the ``annotations_dir`` that you may have passed as a keyword argument when you set up the ``Annotator`` instance. If you didn't provide a keyword argument, it will be in the ``./annotations`` directory.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
 
 ::
 
     project
     ├──your_notebook.ipynb
+    └──maps
     └──maps
     │   ├── map1.png
     │   ├── map2.png

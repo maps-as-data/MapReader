@@ -1,25 +1,32 @@
-import setuptools
-import versioneer
+from __future__ import annotations
 
+import setuptools
+
+import versioneer
 
 setuptools.setup(
     name="mapreader",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="A computer vision pipeline for the semantic exploration of maps/images at scale",
-    author=u"MapReader team",
-    #author_email="",
+    author="MapReader team",
+    # author_email="",
     license="MIT License",
-    keywords=["Computer Vision", "Classification", "Deep Learning", "living with machines"],
-    long_description = open('README.md', encoding="utf8").read(),
-    long_description_content_type = 'text/markdown',
-    zip_safe = False,
+    keywords=[
+        "Computer Vision",
+        "Classification",
+        "Deep Learning",
+        "living with machines",
+    ],
+    long_description=open("README.md", encoding="utf8").read(),
+    long_description_content_type="text/markdown",
+    zip_safe=False,
     url="https://github.com/Living-with-machines/MapReader",
     download_url="https://github.com/Living-with-machines/MapReader/archive/refs/heads/main.zip",
-    packages = setuptools.find_packages(),
-    include_package_data = True,
+    packages=setuptools.find_packages(),
+    include_package_data=True,
     platforms="OS Independent",
-    python_requires='>=3.7',
+    python_requires=">=3.7, <3.11",
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
@@ -27,7 +34,7 @@ setuptools.setup(
         "pyproj>=3.2.0,<4.0.0",
         "azure-storage-blob>=12.9.0,<13.0.0",
         "aiohttp>=3.8.1,<4.0.0",
-        "Shapely>=1.8.0,<2.0.0",
+        "Shapely>=2.0.0,<3.0.0",
         "nest-asyncio>=1.5.1,<2.0.0",
         "scikit-image>=0.18.3",
         "scikit-learn>=1.0.1,<2.0.0",
@@ -47,10 +54,20 @@ setuptools.setup(
         "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
         "versioneer>=0.28",
-        "tqdm",
-	    "openpyxl",
+        "tqdm<5.0.0",
+        "torchinfo<2.0.0",
+        "openpyxl<4.0.0",
     ],
-    
+    extras_require={
+        "dev": [
+            "pytest<8.0.0",
+            "pytest-cov>=4.1.0,<5.0.0",
+            "timm<1.0.0",
+            "transformers<5.0.0",
+            "black>=23.7.0,<24.0.0",
+            "flake8>=6.0.0,<7.0.0",
+        ]
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
@@ -68,12 +85,10 @@ setuptools.setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        ],
-
+    ],
     entry_points={
-        'console_scripts': [
-            'mapreader = mapreader.mapreader:main',
+        "console_scripts": [
+            "mapreader = mapreader.mapreader:main",
         ],
-    }
+    },
 )
-

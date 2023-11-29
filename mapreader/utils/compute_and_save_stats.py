@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
-from glob import glob
 import os
+from glob import glob
+
+from parhugin import multiFunc
 
 from mapreader import load_patches
-from parhugin import multiFunc
 
 
 def save_stats(one_dir):

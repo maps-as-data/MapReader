@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import os
 import random
 import sys
-from typing import Dict, List, Literal, Optional, Tuple, Union
+
+# Ignore warnings
+import warnings
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,9 +25,6 @@ from PIL import Image
 
 from mapreader import load_patches, loader
 
-# Ignore warnings
-import warnings
-
 warnings.filterwarnings("ignore")
 # warnings.filterwarnings(
 #     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
@@ -32,13 +32,13 @@ warnings.filterwarnings("ignore")
 
 def prepare_data(
     df: pd.DataFrame,
-    col_names: Optional[List[str]] = ["image_path", "parent_id"],
-    annotation_set: Optional[str] = "001",
-    label_col_name: Optional[str] = "label",
-    redo: Optional[bool] = False,
-    random_state: Optional[Union[int, str]] = "random",
-    num_samples: Optional[int] = 100,
-) -> List[List[Union[str, int]]]:
+    col_names: list[str] | None = None,
+    annotation_set: str | None = "001",
+    label_col_name: str | None = "label",
+    redo: bool | None = False,
+    random_state: int | str | None = "random",
+    num_samples: int | None = 100,
+) -> list[list[str | int]]:
     """
     Prepare data for image annotation by selecting a subset of images from a
     DataFrame.
@@ -73,6 +73,8 @@ def prepare_data(
         counter.
     """
 
+    if col_names is None:
+        col_names = ["image_path", "parent_id"]
     if (label_col_name in list(df.columns)) and (not redo):
         already_annotated = len(df[~df[label_col_name].isnull()])
         print(f"Number of already annotated images: {already_annotated}")
@@ -120,12 +122,12 @@ def prepare_data(
 
 
 def annotation_interface(
-    data: List,
-    list_labels: List,
-    list_colors: Optional[List[str]] = ["red", "green", "blue", "green"],
-    annotation_set: Optional[str] = "001",
-    method: Optional[Literal["ipyannotate", "pigeonxt"]] = "ipyannotate",
-    list_shortcuts: Optional[List[str]] = None,
+    data: list,
+    list_labels: list,
+    list_colors: list[str] | None = None,
+    annotation_set: str | None = "001",
+    method: Literal["ipyannotate", "pigeonxt"] | None = "ipyannotate",
+    list_shortcuts: list[str] | None = None,
 ) -> Annotation:
     """
     Create an annotation interface for a list of patches with corresponding
@@ -167,9 +169,11 @@ def annotation_interface(
     library, which is a browser-based tool for annotating data.
     """
 
+    if list_colors is None:
+        list_colors = ["red", "green", "blue", "green"]
     if method.lower() == "ipyannotate":
 
-        def display_record(record: Tuple[str, str, str, int, int]) -> None:
+        def display_record(record: tuple[str, str, str, int, int]) -> None:
             """
             Displays an image and optionally, a context image with a patch
             border.
@@ -377,26 +381,26 @@ def prepare_annotation(
     userID: str,
     task: str,
     annotation_tasks_file: str,
-    custom_labels: List[str] = [],
-    annotation_set: Optional[str] = "001",
-    redo_annotation: Optional[bool] = False,
-    patch_paths: Optional[Union[str, bool]] = False,
-    parent_paths: Optional[str] = False,
-    tree_level: Optional[str] = "patch",
-    sortby: Optional[str] = None,
-    min_alpha_channel: Optional[float] = None,
-    min_mean_pixel: Optional[float] = None,
-    max_mean_pixel: Optional[float] = None,
-    min_std_pixel: Optional[float] = None,
-    max_std_pixel: Optional[float] = None,
-    context_image: Optional[bool] = False,
-    xoffset: Optional[int] = 500,
-    yoffset: Optional[int] = 500,
-    urlmain: Optional[str] = "https://maps.nls.uk/view/",
-    random_state: Optional[Union[str, int]] = "random",
-    list_shortcuts: Optional[List[tuple]] = None,
-    method: Optional[Literal["ipyannotate", "pigeonxt"]] = "ipyannotate",
-) -> Dict:
+    custom_labels: list[str] = None,
+    annotation_set: str | None = "001",
+    redo_annotation: bool | None = False,
+    patch_paths: str | bool | None = False,
+    parent_paths: str | None = False,
+    tree_level: str | None = "patch",
+    sortby: str | None = None,
+    min_alpha_channel: float | None = None,
+    min_mean_pixel: float | None = None,
+    max_mean_pixel: float | None = None,
+    min_std_pixel: float | None = None,
+    max_std_pixel: float | None = None,
+    context_image: bool | None = False,
+    xoffset: int | None = 500,
+    yoffset: int | None = 500,
+    urlmain: str | None = "https://maps.nls.uk/view/",
+    random_state: str | int | None = "random",
+    list_shortcuts: list[tuple] | None = None,
+    method: Literal["ipyannotate", "pigeonxt"] | None = "ipyannotate",
+) -> dict:
     """Prepare image data for annotation and launch the annotation interface.
 
     Parameters
@@ -488,6 +492,10 @@ def prepare_annotation(
     """
 
     # Specify global variables so they can be used in display_record function
+    if custom_labels is None:
+        custom_labels = []
+    if custom_labels is None:
+        custom_labels = []
     global annotation_tasks
     global x_offset
     global y_offset
@@ -537,21 +545,15 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=-1,
+                index_col=0,
+                ignore_mismatch=True,
                 delimiter=",",
                 tree_level=tree_level,
             )
 
-        calc_mean = calc_std = False
+        calc_mean = True
+        calc_std = False
         # Calculate mean before converting to pandas so the dataframe contains information about mean pixel intensity
-        if (
-            sortby == "mean"
-            or isinstance(min_alpha_channel, float)
-            or isinstance(min_mean_pixel, float)
-            or isinstance(max_mean_pixel, float)
-        ):
-            calc_mean = True
-
         if isinstance(min_std_pixel, float) or isinstance(max_std_pixel, float):
             calc_std = True
 
@@ -559,38 +561,38 @@ def prepare_annotation(
             mymaps.calc_pixel_stats(calc_mean=calc_mean, calc_std=calc_std)
 
         # convert images to dataframe
-        _, patch_df = mymaps.convertImages()
+        _, patch_df = mymaps.convert_images()
 
         if sortby == "mean":
-            patch_df.sort_values("mean_pixel_RGB", inplace=True)
+            patch_df.sort_values("mean_pixel_R", inplace=True)
 
         if isinstance(min_alpha_channel, float):
             if "mean_pixel_A" in patch_df.columns:
                 patch_df = patch_df[patch_df["mean_pixel_A"] >= min_alpha_channel]
 
         if isinstance(min_mean_pixel, float):
-            if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["mean_pixel_RGB"] >= min_mean_pixel]
+            if "mean_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_R"] >= min_mean_pixel]
 
         if isinstance(max_mean_pixel, float):
-            if "mean_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["mean_pixel_RGB"] <= max_mean_pixel]
+            if "mean_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["mean_pixel_R"] <= max_mean_pixel]
 
         if isinstance(min_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] >= min_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] >= min_std_pixel]
 
         if isinstance(max_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] <= max_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] <= max_std_pixel]
 
         if isinstance(min_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] >= min_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] >= min_std_pixel]
 
         if isinstance(max_std_pixel, float):
-            if "std_pixel_RGB" in patch_df.columns:
-                patch_df = patch_df[patch_df["std_pixel_RGB"] <= max_std_pixel]
+            if "std_pixel_R" in patch_df.columns:
+                patch_df = patch_df[patch_df["std_pixel_R"] <= max_std_pixel]
 
         col_names = ["image_path", "parent_id"]
     else:
@@ -598,12 +600,13 @@ def prepare_annotation(
         if os.path.isfile(annot_file):
             mymaps.add_metadata(
                 metadata=annot_file,
-                index_col=-1,
+                index_col=0,
+                ignore_mismatch=True,
                 delimiter=",",
                 tree_level=tree_level,
             )
         # convert images to dataframe
-        patch_df, _ = mymaps.convertImages()
+        patch_df, _ = mymaps.convert_images()
         col_names = ["image_path"]
 
     # prepare data for annotation
@@ -675,9 +678,9 @@ def save_annotation(
 
     # Read an existing annotation file (for the same task and userID)
     try:
-        image_df = pd.read_csv(annot_file)
+        image_df = pd.read_csv(annot_file, index_col=0)
     except:
-        image_df = pd.DataFrame(columns=["image_id", "label"])
+        image_df = pd.DataFrame(columns=["image_id", "image_path", "label"])
 
     new_labels = 0
     newly_annotated = 0
@@ -685,12 +688,13 @@ def save_annotation(
         if annotation.tasks[i].value is not None:
             newly_annotated += 1
             if (
-                not annotation.tasks[i].output[0]
-                in image_df["image_id"].values.tolist()
+                annotation.tasks[i].output[0]
+                not in image_df["image_id"].values.tolist()
             ):
                 image_df = image_df.append(
                     {
                         "image_id": annotation.tasks[i].output[0],
+                        "image_path": annotation.tasks[i].output[1],
                         "label": annotation.tasks[i].value,
                     },
                     ignore_index=True,
@@ -698,12 +702,10 @@ def save_annotation(
                 new_labels += 1
 
     if len(image_df) > 0:
-        image_df = image_df.set_index("image_id")
+        # image_df = image_df.set_index("image_id")
         image_df.to_csv(annot_file, mode="w")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")
-        print(f"[INFO] Total number of annotations: {len(image_df)}")
+        print(f"[INFO] Total number of saved annotations: {len(image_df)}")
     else:
         print("[INFO] No annotations to save!")
-
-

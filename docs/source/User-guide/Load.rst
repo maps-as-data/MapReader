@@ -1,18 +1,18 @@
-Load & Patchify
-===============
+Load
+=====
 
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-MapReader's ``Load`` subpackage is used to load, visualise and patchify images (e.g. maps) saved locally. 
+MapReader's ``Load`` subpackage is used to load, visualize and patchify images (e.g. maps) saved locally.
 
 Load images (and metadata)
 ----------------------------
 
-First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using MapReader's ``loader()`` function. 
+First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using MapReader's ``loader()`` function.
 
-This can be done using: 
+This can be done using:
 
 .. code-block:: python
 
@@ -22,15 +22,13 @@ This can be done using:
 
 or
 
-This can be done using: 
-
 .. code-block:: python
 
     from mapreader import loader
 
     my_files = loader("./path/to/files/", file_ext="png")
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
 .. code-block:: python
 
@@ -41,89 +39,100 @@ or
 
 .. code-block:: python
 
-    #EXAMPLE 
+    #EXAMPLE
     my_files = loader("./maps", file_ext="png")
 
-The ``loader`` function creates a ``mapImages`` object (``my_files``) which contains information about your map images. 
-To see the contents of this object, use: 
+The ``loader`` function creates a ``MapImages`` object (``my_files``) which contains information about your map images.
+To see the contents of this object, use:
 
 .. code-block:: python
 
     print(my_files)
 
-You will see that your mapImages object contains the files you have loaded and that these are labelled as 'parents'. 
+You will see that your ``MapImages`` object contains the files you have loaded and that these are labelled as 'parents'.
 
-If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``mapImages`` object using:
+If your image files are georeferenced and already contain metadata (e.g. geoTIFFs), you can add this metadata into your ``MapImages`` object using:
 
 .. code-block:: python
 
-    my_files.addGeoInfo()
+    my_files.add_geo_info()
 
 .. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``target_crs``.
 
-Or, if you have a separate metadata file (e.g. a ``.csv`` file or a pandas dataframe), use: 
+Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, a pandas dataframe), use:
 
 .. code-block:: python
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
-.. note:: Specific guidance on preparing your metadata files can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
+.. note:: Specific guidance on preparing your metadata file/dataframe can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
 
 .. code-block:: python
 
     #EXAMPLE
     my_files.add_metadata(metadata="./maps/metadata.csv")
 
+.. admonition:: Advanced usage
+    :class: dropdown
 
-Patchify 
+    Other arguments you may want to specify when adding metadata to your images include:
+
+    - ``index_col`` - By default, this is set to ``0`` so the first column of your csv/excel spreadsheet will be used as the index column when creating a pandas dataframe. If you would like to use a different column you can specify ``index_col``.
+    - ``columns`` - By default, the ``.add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
+    - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
+    - ``delimiter`` - By default, this is set to ``|``. If your csv file is delimited using a different delimiter you should specify the delimiter argument.
+
+
+Patchify
 ----------
 
 Once you've loaded in all your data, you'll then need to `'patchify' <https://mapreader.readthedocs.io/en/latest/About.html>`__ your images.
 
-Creating patches from your parent images is a core intellectual and technical task within MapReader. 
+Creating patches from your parent images is a core intellectual and technical task within MapReader.
 Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important decision and will depend upon the research question you are trying to answer:
 
 - Smaller patches (e.g. 50m x 50m) tend to work well on very large-scale maps (like the 25- or 6-inch Ordnance Survey maps of Britain).
 - Larger patches (500m x 500m) will be better suited to slightly smaller-scale maps (for example, 1-inch Ordnance Survey maps).
 
-In any case, the patch size you choose should roughly match the size of the visual feature(s) you want to label. 
-Ideally your features should be smaller (in any dimension) than your patch size and therefore fully contained within a patch. 
+In any case, the patch size you choose should roughly match the size of the visual feature(s) you want to label.
+Ideally your features should be smaller (in any dimension) than your patch size and therefore fully contained within a patch.
 
-To patchify your maps, use: 
+To patchify your maps, use:
 
 .. code-block:: python
 
-    my_files.patchifyAll()
+    my_files.patchify_all()
 
-By default, this slices images into 100 x 100 pixel patches which are saved in a newly created directory called ``./patches``. 
-If you are following our reccommended directory structure, after patchifying, your directory should look like this:
+By default, this slices images into 100 x 100 pixel patches which are saved as ``.png`` files in a newly created directory called ``./patches_100_pixel`` (here, ``100`` represents the ``patch_size`` and ``pixel`` represents the method used to slice your parent images).
+
+If you are following our recommended directory structure, after patchifying, your directory should look like this:
 
 ::
 
     project
     ├──your_notebook.ipynb
-    └──maps        
+    └──maps
     │   ├── map1.png
     │   ├── map2.png
     │   ├── map3.png
     │   ├── ...
     │   └── metadata.csv
-    └──patches
+    └──patches_100_pixel
         ├── patch-0-100-#map1.png#.png
         ├── patch-100-200-#map1.png#.png
         ├── patch-200-300-#map1.png#.png
         └── ...
 
-.. TODO: change default save name!
+If you would like to change where your patches are saved, you can change this by specifying ``path_save``.
 
-This save directory can be changed by specifying ``path_save``:
+e.g:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_files.patchifyAll(path_save="./maps/patches")
+    my_files.patchify_all(path_save="./maps/my_patches_dir")
 
 This will create the following directory structure:
 
@@ -131,13 +140,13 @@ This will create the following directory structure:
 
     project
     ├──your_notebook.ipynb
-    └──maps        
+    └──maps
         ├── map1.png
         ├── map2.png
         ├── map3.png
         ├── ...
         ├── metadata.csv
-        └── patches
+        └── my_patches_dir
              ├── patch-0-100-#map1.png#.png
              ├── patch-100-200-#map1.png#.png
              ├── patch-200-300-#map1.png#.png
@@ -151,19 +160,43 @@ e.g. to slice your maps into 500 x 500 pixel patches:
 .. code-block:: python
 
     #EXAMPLE
-    my_files.patchifyAll(patch_size=500)
+    my_files.patchify_all(patch_size=500)
 
-Or, if you have loaded geographic coordinates into your ``mapImages`` object, you can specify ``method = "meters"`` to slice your images by meters instead of pixels.
+This will save your patches as ``.png`` files in a directory called ``patches_500_pixel``.
+
+.. note:: You can combine the above options to change both the directory name in which patches are saved and patch size.
+
+Providing you have loaded geographic coordinates into your ``MapImages`` object, you can also specify ``method = "meters"`` to slice your images by meters instead of pixels.
 
 e.g. to slice your maps into 50 x 50 meter patches:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_files.patchifyAll(method="meters", patch_size=50)
+    my_files.patchify_all(method="meters", patch_size=50)
 
-After patchifying, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
-To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods: 
+This will save your patches as ``.png`` files in a directory called ``patches_50_meters``.
+As above, you can use the ``path_save`` argument to change where these patches are saved.
+
+.. admonition:: Advanced usage
+    :class: dropdown
+
+    Other arguments you may want to specify when patchifying your images include:
+
+    - ``square_cuts`` - By default, this is set to ``False``. Thus, if your ``patch_size`` is not a factor of your image size (e.g. if you are trying to slice a 100x100 pixel image into 8x8 pixel patches), you will end up with some rectangular patches at the edges of your image. If you set ``square_cuts=True``, then all your patches will be square, however there will be some overlap between edge patches. Using ``square_cuts=True`` is useful if you need square images for model training, and don't want to warp your rectangular images by resizing them at a later stage.
+    - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``.patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
+    - ``rewrite`` - By default, this is set to ``False`` so that if your patches already exist they are not overwritten. Setting it to ``True`` (by specifying ``rewrite=True``) will mean already existing patches are recreated and overwritten.
+
+If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), use:
+
+.. code-block:: python
+
+    my_files.save_patches_as_geotiffs()
+
+This will save each patch in your ``MapImages`` object as a ``.geotiff`` file in your patches directory.
+
+After running the ``.patchify_all()`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
+To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods:
 
 .. code-block:: python
 
@@ -173,19 +206,58 @@ To view an iterable list of these, you can use the ``.list_parents()`` and ``.li
     print(parent_list)
     print(patch_list[0:5])  # too many to print them all!
 
-Or, to view these in a dataframe, use:
+Having these list saved as variables can be useful later on in the pipeline.
+
+It can also be useful to create dataframes from your ``MapImages`` objects.
+To do this, use:
 
 .. code-block:: python
 
-    parent_df, patch_df = my_files.convertImages()
-    patch_df.head()
+    parent_df, patch_df = my_files.convert_images()
 
-.. note:: Parent and patch dataframes **will not** automatically update so you may want to run this command again if you add new information into your ``mapImages`` object.
+Then, to view these, use:
 
-Visualise
-----------
+.. code-block:: python
 
-To view a random sample of your images, use: 
+    parent_df
+
+or
+
+.. code-block:: python
+
+    patch_df
+
+.. note:: These parent and patch dataframes **will not** automatically update so you will want to run this command again if you add new information into your ``MapImages`` object.
+
+At any point, you can also save these dataframes by passing the ``save`` argument to the ``.convert_images()`` method:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images(save=True)
+
+By default, this will save your parent and patch dataframes as ``parent_df.csv`` and ``patch_df.csv`` respectively.
+
+If instead, you'd like to save them as excel files, add ``save_format="excel"`` to your command:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images(save=True, save_format="excel")
+
+Alternatively, you can save your patch metadata in a georeferenced json (i.e. geojson) file.
+To do this, use:
+
+.. code-block:: python
+
+    my_files.save_patches_to_geojson()
+
+By default, this will save all the metadata for your patches in a newly created ``patches.geojson`` file.
+
+.. note:: The patch images are **not** saved within this file, only the metadata and patch coordinates.
+
+Visualize (optional)
+---------------------
+
+To view a random sample of your images, use:
 
 .. code-block:: python
 
@@ -196,7 +268,8 @@ To view a random sample of your images, use:
 
 
 By default, this will show you a random sample of your parent images.
-To see a random sample of your patches use the ``tree_level="patch"`` argument: 
+
+If, however, you want to see a random sample of your patches use the ``tree_level="patch"`` argument:
 
 .. code-block:: python
 
@@ -206,25 +279,27 @@ To see a random sample of your patches use the ``tree_level="patch"`` argument:
     :width: 400px
 
 
-It can also be helpful to see your patches in the context of their parent image. 
-To do this use the ``.show()`` method. 
+It can also be helpful to see your patches in the context of their parent image.
+To do this use the ``.show()`` method.
 
 e.g. :
 
 .. code-block:: python
 
     #EXAMPLE
+    patch_list = my_files.list_patches()
     my_files.show(patch_list[250:300])
 
 .. image:: ../figures/show.png
     :width: 400px
 
 
-or 
+or
 
 .. code-block:: python
 
     #EXAMPLE
+    patch_list = my_files.list_patches()
     files_to_show = [patch_list[0], patch_list[350], patch_list[400]]
     my_files.show(files_to_show)
 
@@ -232,71 +307,104 @@ or
     :width: 400px
 
 
-This will show you your chosen patches, by default highlighted with red borders, in the context of their parent image. 
+This will show you your chosen patches, by default highlighted with red borders, in the context of their parent image.
+
+.. admonition:: Advanced usage
+    :class: dropdown
+
+    Further usage of the ``.show()`` method is detailed in :ref:`Further_analysis`.
+    Please head there for guidance on advanced usage.
 
 You may also want to see all the patches created from one of your parent images.
-This can be done using: 
+This can be done using:
 
 .. code-block:: python
 
-    my_files.show_par(parent_list[0])
+    parent_list = my_files.list_parents()
+    my_files.show_parent(parent_list[0])
 
 .. image:: ../figures/show_par.png
     :width: 400px
 
 
-Further analysis/visualisation  
---------------------------------
+.. admonition:: Advanced usage
+    :class: dropdown
 
-If you have loaded geographic coordinates into your ``mapImages`` object, you may want to calculate the coordinates of your patches. The ``.add_center_coord()`` method can used to do this:
+    Further usage of the ``.show_parent()`` method is detailed in :ref:`Further_analysis`.
+    Please head there for guidance on advanced usage.
+
+.. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)
+
+.. _Further_analysis:
+
+Further analysis/visualization (optional)
+-------------------------------------------
+
+If you have loaded geographic coordinates into your ``MapImages`` object, you may want to calculate the central coordinates of your patches.
+The ``.add_center_coord()`` method can used to do this:
 
 .. code-block:: python
 
     my_files.add_center_coord()
 
-    parent_df, patch_df = my_files.convertImages()
+You can then rerun the ``.convert_images()`` method to see your results.
+
+i.e.:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images()
     patch_df.head()
 
-After converting your images into dataframes, you will see that center coordinates have been added to your patch dataframe. 
+You will see that center coordinates of each patch have been added to your patch dataframe.
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensites of each of your patches:
+The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
 
 .. code-block:: python
 
     my_files.calc_pixel_stats()
 
-    parent_df, patch_df = my_files.convertImages()
-    patch_df.head()
+After rerunning the ``.convert_images()`` method (as above), you will see that mean and standard pixel intensities have been added to your patch dataframe.
 
-After converting your images into dataframes, you will see that mean and standard pixel intensities (R,G,B and, if present, Alpha) have been added to your patch dataframe. 
+The ``.show()`` and ``.show_parent()`` methods can be used to plot these values ontop of your patches.
+This is done by specifying the ``column_to_plot`` argument.
 
-Specific values (e.g. 'mean_pixel_RGB') can be visualised using the ``.show()`` and ``.show_par()`` methods by specifying the ``value``, ``vmin`` and ``vmax`` arguments.
-
-e.g. :
+e.g. to view "mean_pixel_R" on your patches:
 
 .. code-block:: python
 
     #EXAMPLE
-    value = "mean_pixel_RGB"
-    vmin = patch_df[value].min()
-    vmax = patch_df[value].max()
-
-    my_files.show_par(parent_list[0], value=value, vmin=vmin, vmax=vmax)
+    parent_list = my_files.list_parents()
+    my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R")
 
 .. image:: ../figures/show_par_RGB.png
     :width: 400px
 
-You may also want to specify the ``alpha`` argument, which sets the transparency of your plotted values. Lower ``alpha`` values allow you to see the parent image underneath.
+If you want to see your image underneath, you can specify the ``alpha`` argument, which sets the transparency of your plotted values.
+``alpha`` can range between 0 and 1, with lower ``alpha`` values allowing you to see the more of the image underneath.
 
-e.g.:
+e.g. to view "mean_pixel_R" on your patches:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_files.show_par(parent_list[0], value=value, vmin=vmin, vmax=vmax, alpha=0.5)
+    parent_list = my_files.list_parents()
+    my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R", alpha=0.5)
 
 .. image:: ../figures/show_par_RGB_0.5.png
     :width: 400px
 
-To change the colormap used when plotting these values, you can also specify ``colorbar``.
-This will accept any matplotlib colormap as an argument. 
+.. note:: The ``column_to_plot`` argument can also be used with the ``.show()`` method.
+
+.. admonition:: Advanced usage
+    :class: dropdown
+
+    Other arguments you may want to specify when showing your images (for both the ``.show()`` and ``.show_parent()`` methods):
+
+    - ``plot_parent`` - By default, this is set to ``True`` so that the parent image is shown. If you would like to remove the parent image, e.g. if you are plotting column values, you can set ``plot_parent=False``. This should speed up the code for plotting.
+    - ``patch_border`` - By default, this is set to ``True`` so that borders are plotted around each patch. Setting ``patch_border`` to ``False`` (by specifying ``patch_border=False``) will stop patch borders being shown.
+    - ``border_color`` - By default, this is set to ``"r"`` (red). Any of the colors found `here <https://matplotlib.org/stable/gallery/color/named_colors.html>`__ can be used instead.
+    - ``cmap`` - By default, this is set to ``"viridis"```. Any of the color maps found `here <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`__ can be used instead.
+    - ``plot_histogram`` - Setting this to ``True`` (by specifying ``plot_histogram=True``) will result in a histogram of the values found in ``column_to_plot`` being produced.
+
+.. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)

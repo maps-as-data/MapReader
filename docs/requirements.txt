@@ -1,8 +1,8 @@
-sphinx_rtd_theme
 myst-parser
-sphinx-autoapi
-sphinx-copybutton
 nbsphinx
 pandoc
-sphinxcontrib-napoleon
+sphinx-autoapi
+sphinx-copybutton
 sphinx-togglebutton
+sphinx_rtd_theme
+sphinxcontrib-napoleon
