@@ -21,7 +21,8 @@ import rasterio
 from PIL import Image, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
+from shapely import wkt
 from tqdm.auto import tqdm
 
 os.environ[
@@ -2212,6 +2213,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "polygon" not in patch_df.columns:
             self.add_patch_polygons()
             _, patch_df = self.convert_images()
+        
+        patch_df["polygon"]=patch_df["polygon"].apply(lambda x: x if isinstance(x, Polygon) else wkt.loads(x))
 
         if not crs:
             if "crs" in patch_df.columns:
@@ -2220,14 +2223,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             else:
                 crs = "EPSG:4326"
 
+        if "image_id" in patch_df.columns:
+            patch_df.drop(columns=["image_id"], inplace=True)
         patch_df.reset_index(names="image_id", inplace=True)
 
         # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
-        # drop tuple columns - cause errors
+        # change tuple columns to strings
         for col in patch_df.columns:
             if isinstance(patch_df[col][0], tuple):
-                patch_df.drop(columns=col, inplace=True)
+                patch_df[col]=patch_df[col].apply(str)
 
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
