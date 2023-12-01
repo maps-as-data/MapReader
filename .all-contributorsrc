@@ -97,6 +97,18 @@
         "review",
         "research"
       ]
+    },
+    {
+      "login": "andrewphilipsmith",
+      "name": "Andy Smith",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5346065?v=4",
+      "profile": "https://github.com/andrewphilipsmith",
+      "contributions": [
+        "code",
+        "doc",
+        "mentoring",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,
