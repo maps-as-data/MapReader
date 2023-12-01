@@ -104,7 +104,7 @@ Maps above reproduced with the permission of the National Library of Scotland ht
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -119,6 +119,7 @@ Maps above reproduced with the permission of the National Library of Scotland ht
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rwood-97"><img src="https://avatars.githubusercontent.com/u/72076688?v=4?s=100" width="100px;" alt="Rosie Wood"/><br /><sub><b>Rosie Wood</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Code">💻</a> <a href="https://github.com/Living-with-machines/MapReader/commits?author=rwood-97" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://www.westerling.nu"><img src="https://avatars.githubusercontent.com/u/7298727?v=4?s=100" width="100px;" alt="Kalle Westerling"/><br /><sub><b>Kalle Westerling</b></sub></a><br /><a href="https://github.com/Living-with-machines/MapReader/commits?author=kallewesterling" title="Code">💻</a> <a href="https://github.com/Living-with-machines/MapReader/commits?author=kallewesterling" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://maps.nls.uk"><img src="https://avatars.githubusercontent.com/u/3666702?v=4?s=100" width="100px;" alt="Chris Fleet"/><br /><sub><b>Chris Fleet</b></sub></a><br /><a href="#data-ChrisFleet" title="Data">🔣</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kasparvonbeelen"><img src="https://avatars.githubusercontent.com/u/11618160?v=4?s=100" width="100px;" alt="Kaspar Beelen"/><br /><sub><b>Kaspar Beelen</b></sub></a><br /><a href="#ideas-kasparvonbeelen" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/Living-with-machines/MapReader/pulls?q=is%3Apr+reviewed-by%3Akasparvonbeelen" title="Reviewed Pull Requests">👀</a> <a href="#research-kasparvonbeelen" title="Research">🔬</a></td>
     </tr>
   </tbody>
 </table>
