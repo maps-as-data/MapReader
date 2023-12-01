@@ -5,6 +5,7 @@ try:
 except ImportError:
     pass
 
+from ast import literal_eval
 import os
 import random
 import warnings
@@ -17,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import PIL
-import rasterio
+import rasterio 
 from PIL import Image, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
@@ -420,7 +421,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 data_series = metadata_df[metadata_df[image_id_col] == key].squeeze()
                 for column, item in data_series.items():
                     try:
-                        self.images[tree_level][key][column] = eval(item)
+                        self.images[tree_level][key][column] = literal_eval(item)
                     except:
                         self.images[tree_level][key][column] = item
 
@@ -715,9 +716,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 verbose,
             )
             return
+        if isinstance(self.parents[image_id]["coordinates"], str):
+            self.parents[image_id]["coordinates"] = literal_eval(self.parents[image_id]["coordinates"])
 
         if "shape" not in self.parents[image_id].keys():
             self._add_shape_id(image_id)
+        if isinstance(self.parents[image_id]["shape"], str):
+            self.parents[image_id]["shape"] = literal_eval(self.parents[image_id]["shape"])
 
         image_height, image_width, _ = self.parents[image_id]["shape"]
 
@@ -754,6 +759,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 verbose,
             )
             return
+        if isinstance(self.parents[parent_id]["coordinates"], str):
+            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
 
         else:
             if not all([k in self.parents[parent_id].keys() for k in ["dlat", "dlon"]]):
@@ -766,6 +773,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             dlat = self.parents[parent_id]["dlat"]
 
             # get patch bounds
+            if isinstance(self.patches[image_id]["pixel_bounds"], str):
+                self.patches[image_id]["pixel_bounds"] = literal_eval(self.patches[image_id]["pixel_bounds"])
+            
             pixel_bounds = self.patches[image_id]["pixel_bounds"]
 
             # get patch coords
@@ -797,6 +807,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self._add_patch_coords_id(image_id, verbose)
 
         if "coordinates" in self.patches[image_id].keys():
+            if isinstance(self.patches[image_id]["coordinates"], str):
+                self.patches[image_id]["coordinates"] = literal_eval(self.patches[image_id]["coordinates"])
+            
             coords = self.patches[image_id]["coordinates"]
             self.patches[image_id]["polygon"] = box(*coords)
 
@@ -835,9 +848,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._add_patch_coords_id(image_id, verbose)
 
         if "coordinates" in self.images[tree_level][image_id].keys():
+            if isinstance(self.images[tree_level][image_id]["coordinates"], str):
+                self.images[tree_level][image_id]["coordinates"] = literal_eval(self.images[tree_level][image_id]["coordinates"])
+            
             self._print_if_verbose(
                 f"[INFO] Reading 'coordinates' from {image_id}.", verbose
             )
+            
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
@@ -888,9 +905,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 f"[WARNING] 'coordinates' could not be found in {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
             )
             return
+        if isinstance(self.parents[parent_id]["coordinates"], str):
+            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
 
         if "shape" not in self.parents[parent_id].keys():
             self._add_shape_id(parent_id)
+        if isinstance(self.parents[parent_id]["shape"], str):
+            self.parents[parent_id]["shape"] = literal_eval(self.parents[parent_id]["shape"])
 
         height, width, _ = self.parents[parent_id]["shape"]
         xmin, ymin, xmax, ymax = self.parents[parent_id]["coordinates"]
@@ -2153,12 +2174,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             verbose,
         )
 
+        # get shape
         if "shape" not in self.patches[patch_id].keys():
             self._add_shape_id(patch_id)
+        if isinstance(self.patches[patch_id]["shape"], str):
+            self.patches[patch_id]["shape"] = literal_eval(self.patches[patch_id]["shape"])
         height, width, channels = self.patches[patch_id]["shape"]
 
+        # get coords
         if "coordinates" not in self.patches[patch_id].keys():
             self._add_patch_coords_id(patch_id)
+        if isinstance(self.patches[patch_id]["coordinates"], str):
+            self.patches[patch_id]["coordinates"] = literal_eval(self.patches[patch_id]["coordinates"])
         coords = self.patches[patch_id]["coordinates"]
 
         if not crs:
@@ -2213,7 +2240,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "polygon" not in patch_df.columns:
             self.add_patch_polygons()
             _, patch_df = self.convert_images()
-        
+
         patch_df["polygon"]=patch_df["polygon"].apply(lambda x: x if isinstance(x, Polygon) else wkt.loads(x))
 
         if not crs:
