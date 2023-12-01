@@ -54,6 +54,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "ChrisFleet",
+      "name": "Chris Fleet",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3666702?v=4",
+      "profile": "https://maps.nls.uk",
+      "contributions": [
+        "data"
+      ]
     }
   ],
   "contributorsPerLine": 7,
