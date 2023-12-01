@@ -63,6 +63,17 @@
       "contributions": [
         "data"
       ]
+    },
+    {
+      "login": "kasparvonbeelen",
+      "name": "Kaspar Beelen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11618160?v=4",
+      "profile": "https://github.com/kasparvonbeelen",
+      "contributions": [
+        "ideas",
+        "review",
+        "research"
+      ]
     }
   ],
   "contributorsPerLine": 7,
