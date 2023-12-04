@@ -28,204 +28,211 @@ _CENTER_LAYOUT = widgets.Layout(
 
 
 class Annotator(pd.DataFrame):
-    def __init__(self, *args, **kwargs):
-        # Untangle args and kwargs
-        patch_df = None
-        if len(args) == 1:
-            patch_df = args.pop(0)
-        elif len(args) == 2:
-            patch_df = args.pop(0)
-            parent_df = args.pop(1)
-        elif isinstance(
-            kwargs.get("data"), (str, dict, list, type(None), pd.DataFrame)
-        ):
-            patch_df = kwargs.get("data")
-        elif kwargs.get("data") is not None:
-            raise SyntaxError(f"Cannot interpret data of type {type(patch_df)}")
+    def __init__(
+        self,
+        patch_df: str | pd.DataFrame | None = None,
+        parent_df: str | pd.DataFrame | None = None,
+        labels: list = None,
+        patch_paths: str | None = None,
+        parent_paths: str | None = None,
+        metadata_path: str | None = "./maps/metadata.csv",
+        annotations_dir: str = "./annotations",
+        patch_paths_col: str = "image_path",
+        label_col: str = "label",
+        show_context: bool = False,
+        auto_save: bool = True,
+        delimiter: str = ",",
+        **kwargs,
+    ):
+        if labels is None:
+            labels = []
+        if patch_df is not None:
+            if isinstance(patch_df, str):
+                if os.path.exists(patch_df):
+                    patch_df = pd.read_csv(
+                        patch_df,
+                        index_col=0,
+                        sep=delimiter,
+                        converters={
+                            "shape": eval,
+                            "pixel_bounds": eval,
+                            "coordinates": eval,
+                        },
+                    )
+                else:
+                    raise FileNotFoundError(f"[ERROR] Could not find {patch_df}.")
+            if not isinstance(patch_df, pd.DataFrame):
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a csv or a pandas DataFrame."
+                )
 
-        if isinstance(
-            kwargs.get("metadata"), (str, dict, list, type(None), pd.DataFrame)
-        ):
-            parent_df = kwargs.get("metadata")
+        if parent_df is not None:
+            if isinstance(parent_df, str):
+                if os.path.exists(parent_df):
+                    parent_df = pd.read_csv(
+                        parent_df,
+                        index_col=0,
+                        sep=delimiter,
+                        converters={"shape": eval, "coordinates": eval},
+                    )
+                else:
+                    raise FileNotFoundError(f"[ERROR] Could not find {parent_df}.")
+            if not isinstance(parent_df, pd.DataFrame):
+                raise ValueError(
+                    "[ERROR] ``parent_df`` must be a path to a csv or a pandas DataFrame."
+                )
 
-        kwargs["patches"] = kwargs.get("patches", "./patches/patch-*.png")
-        kwargs["parents"] = kwargs.get("parents", "./maps/*.png")
-        kwargs["annotations_dir"] = kwargs.get("annotations_dir", "./annotations")
+        if patch_df is None:
+            # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
+            if patch_paths:
+                parent_paths_df, patch_df = self._load_frames(
+                    patch_paths=patch_paths,
+                    parent_paths=parent_paths,
+                    metadata_path=metadata_path,
+                    delimiter=delimiter,
+                    label_col=label_col,
+                )
 
-        kwargs["metadata"] = kwargs.get("metadata", "./maps/metadata.csv")
-        kwargs["username"] = kwargs.get(
+                # only take this dataframe if parent_df is None
+                if parent_df is None:
+                    parent_df = parent_paths_df
+            else:
+                raise ValueError(
+                    "[ERROR] Please specify one of ``patch_df`` or ``patch_paths``."
+                )
+
+        # Check for metadata + data
+        if not len(patch_df):
+            raise ValueError("[ERROR] No patch data available.")
+        if not len(parent_df):
+            raise ValueError("[ERROR] No metadata (parent data) available.")
+
+        # Check for url column and add to patch dataframe
+        if "url" in parent_df.columns:
+            patch_df = patch_df.join(parent_df["url"], on="parent_id")
+        else:
+            raise ValueError(
+                "[ERROR] Metadata (parent data) should contain a 'url' column."
+            )
+
+        # Add label column if not present
+        if label_col not in patch_df.columns:
+            patch_df[label_col] = None
+        patch_df["changed"] = False
+
+        # Check for image paths column
+        if patch_paths_col not in patch_df.columns:
+            raise ValueError(
+                f"[ERROR] Your DataFrame does not have the image paths column: {patch_paths_col}."
+            )
+
+        # Sort by sortby column if provided
+        if kwargs.get("sortby"):
+            patch_df = patch_df.sort_values(kwargs["sortby"])
+
+        image_list = json.dumps(
+            sorted(patch_df[patch_paths_col].to_list()), sort_keys=True
+        )
+
+        # Set up annotations file
+        username = kwargs.get(
             "username",
             "".join(
                 [random.choice(string.ascii_letters + string.digits) for n in range(30)]
             ),
         )
-        kwargs["task_name"] = kwargs.get("task_name", "task")
-        kwargs["image_column"] = kwargs.get("image_column", "image_path")
-        kwargs["label_column"] = kwargs.get("label_column", "label")
-        kwargs["labels"] = kwargs.get("labels", [])
-        kwargs["scramble_frame"] = kwargs.get("scramble_frame", True)
-        kwargs["buttons_per_row"] = kwargs.get("buttons_per_row", None)
-        kwargs["auto_save"] = kwargs.get("auto_save", True)
-        kwargs["stop_at_last_example"] = kwargs.get("stop_at_last_example", True)
-        kwargs["show_context"] = kwargs.get("show_context", True)
-        kwargs["min_values"] = kwargs.get("min_values", {})
-        kwargs["max_values"] = kwargs.get("max_values", {})
-        kwargs["metadata_delimiter"] = kwargs.get("metadata_delimiter", "|")
+        task_name = kwargs.get("task_name", "task")
+        id = hashlib.md5(image_list.encode("utf-8")).hexdigest()
 
-        # Check metadata
-        if isinstance(parent_df, str):
-            # we have data as string = assume it's a path to a
-            parent_df = pd.read_csv(parent_df, delimiter=kwargs["metadata_delimiter"])
+        annotations_file = task_name.replace(" ", "_") + f"_#{username}#-{id}.csv"
+        annotations_file = os.path.join(annotations_dir, annotations_file)
 
-        if isinstance(parent_df, (dict, list)):
-            # we have data as string = assume it's a path to a
-            parent_df = pd.DataFrame(parent_df)
+        # Ensure labels are of type list
+        if not isinstance(labels, list):
+            raise SyntaxError("[ERROR] Labels provided must be as a list")
 
-        # Check data
-        if isinstance(patch_df, str):
-            # we have data as string = assume it's a path to a
-            patch_df = pd.read_csv(patch_df)
-
-        if isinstance(patch_df, (dict, list)):
-            # we have data as string = assume it's a path to a
-            patch_df = pd.DataFrame(patch_df)
-
-        if isinstance(patch_df, type(None)):
-            # If we don't get data provided, we'll use the patches and parents to
-            # load up the patches
-            try:
-                parent_df, patch_df = self._load_frames(**kwargs)
-                try:
-                    patch_df = patch_df.join(parent_df["url"], on="parent_id")
-                except Exception as e:
-                    raise RuntimeError(
-                        f"Could not join the URL column from the metadata with the data: {e}"
-                    )
-            except NameError:
-                raise SyntaxError(
-                    "Data must be provided or class must have a _load_frames method."
-                )
-
-        # Last check for metadata + data
-        if not len(patch_df):
-            raise RuntimeError("No data available.")
-
-        if not len(parent_df):
-            raise RuntimeError("No metadata available.")
-
-        # Test for columns
-        if kwargs["label_column"] not in patch_df.columns:
-            raise SyntaxError(
-                f"Your DataFrame does not have the label column ({kwargs['label_column']})"
-            )
-
-        if kwargs["image_column"] not in patch_df.columns:
-            raise SyntaxError(
-                f"Your DataFrame does not have the image column ({kwargs['image_column']})"
-            )
-
-        if kwargs.get("sortby"):
-            patch_df = patch_df.sort_values(kwargs["sortby"])
-
-        image_list = json.dumps(
-            sorted(patch_df[kwargs["image_column"]].to_list()), sort_keys=True
-        )
-
-        kwargs["id"] = hashlib.md5(image_list.encode("utf-8")).hexdigest()
-
-        annotations_file = (
-            kwargs["task_name"].replace(" ", "_")
-            + f"_#{kwargs['username']}#-{kwargs['id']}.csv"
-        )
-        kwargs["annotations_file"] = os.path.join(
-            kwargs["annotations_dir"], annotations_file
-        )
+        # Ensure unique values in list
+        labels = list(set(labels))
 
         # Test for existing file
-        if os.path.exists(kwargs["annotations_file"]):
-            print(
-                f"[INFO] Existing annotations for {kwargs['username']} being loaded..."
+        if os.path.exists(annotations_file):
+            print(f"[INFO] Loading existing annotations for {kwargs['username']}.")
+            existing_annotations = pd.read_csv(
+                annotations_file, index_col=0, sep=delimiter
             )
-            existing_annotations = pd.read_csv(kwargs["annotations_file"], index_col=0)
-            try:
-                existing_annotations[kwargs["label_column"]] = existing_annotations[
-                    kwargs["label_column"]
-                ].apply(lambda x: kwargs["labels"][x])
-            except TypeError:
-                # We will assume the label column now contains the label value and not the indices for the labels
-                pass
+
+            if label_col not in existing_annotations.columns:
+                raise ValueError(
+                    f"[ERROR] Your existing annotations do not have the label column: {label_col}."
+                )
+
+            print(existing_annotations[label_col].dtype)
+
+            if existing_annotations[label_col].dtype == int:
+                # convert label indices (ints) to labels (strings)
+                # this is to convert old annotations format to new annotations format
+                existing_annotations[label_col] = existing_annotations[label_col].apply(
+                    lambda x: labels[x]
+                )
 
             patch_df = patch_df.join(
                 existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
             )
-            patch_df[kwargs["label_column"]] = patch_df["label_y"].fillna(
-                patch_df[f"{kwargs['label_column']}_x"]
-            )
+            patch_df[label_col] = patch_df["label_y"].fillna(patch_df[f"{label_col}_x"])
             patch_df = patch_df.drop(
                 columns=[
-                    f"{kwargs['label_column']}_x",
-                    f"{kwargs['label_column']}_y",
+                    f"{label_col}_x",
+                    f"{label_col}_y",
                 ]
             )
-            patch_df["changed"] = patch_df[kwargs["label_column"]].apply(
+            patch_df["changed"] = patch_df[label_col].apply(
                 lambda x: True if x else False
             )
 
-            try:
-                patch_df[kwargs["image_column"]] = patch_df[
-                    f"{kwargs['image_column']}_x"
+            patch_df[patch_paths_col] = patch_df[f"{patch_paths_col}_x"]
+            patch_df = patch_df.drop(
+                columns=[
+                    f"{patch_paths_col}_x",
+                    f"{patch_paths_col}_y",
                 ]
-                patch_df = patch_df.drop(
-                    columns=[
-                        f"{kwargs['image_column']}_x",
-                        f"{kwargs['image_column']}_y",
-                    ]
-                )
-            except:
-                pass
+            )
 
         # initiate as a DataFrame
         super().__init__(patch_df)
 
-        # pixel_bounds = x0, y0, x1, y1 # TODO: verify this is the correct order
+        ## pixel_bounds = x0, y0, x1, y1
         self["min_x"] = self.pixel_bounds.apply(lambda x: x[0])
         self["min_y"] = self.pixel_bounds.apply(lambda x: x[1])
         self["max_x"] = self.pixel_bounds.apply(lambda x: x[2])
         self["max_y"] = self.pixel_bounds.apply(lambda x: x[3])
 
-        self._buttons = []
-        self._labels = kwargs["labels"]
-        self.label_column = kwargs["label_column"]
-        self.image_column = kwargs["image_column"]
-        self.buttons_per_row = kwargs["buttons_per_row"]
-        self.auto_save = kwargs["auto_save"]
-        self.annotations_dir = kwargs["annotations_dir"]
-        self.task_name = kwargs["task_name"]
-        self.id = kwargs["id"]
-        self.annotations_file = kwargs["annotations_file"]
-        self.username = kwargs["username"]
-        self.stop_at_last_example = kwargs["stop_at_last_example"]
-        self.show_context = kwargs["show_context"]
-        self._min_values = kwargs["min_values"]
-        self._max_values = kwargs["max_values"]
-        self.metadata = parent_df
+        self._labels = labels
+        self.label_col = label_col
+        self.patch_paths_col = patch_paths_col
+        self.annotations_file = annotations_file
+        self.show_context = show_context
+        self.auto_save = auto_save
+        self.username = username
+        self.task_name = task_name
+
+        # set up for the annotator
+        self.buttons_per_row = kwargs.get("buttons_per_row", None)
+        self.stop_at_last_example = kwargs.get("stop_at_last_example", True)
+        self._min_values = kwargs.get("min_values", {})
+        self._max_values = kwargs.get("max_values", {})  # pixel_bounds = x0, y0, x1, y1
+
         self.patch_width, self.patch_height = self.get_patch_size()
-        self.metadata_delimiter = kwargs["metadata_delimiter"]
 
         # Create annotations_dir
-        Path(self.annotations_dir).mkdir(parents=True, exist_ok=True)
+        Path(annotations_dir).mkdir(parents=True, exist_ok=True)
 
         # Set up standards for context display
         self.surrounding = 1
         self.margin = 1
         self.max_size = MAX_SIZE
 
-        # Ensure labels are of type list
-        if not isinstance(self._labels, list):
-            raise SyntaxError("Labels provided must be as a list")
-
-        # Ensure unique values in list
-        self._labels = sorted(list(set(self._labels)))
+        # set up buttons
+        self._buttons = []
 
         # Set max buttons
         if not self.buttons_per_row:
@@ -253,8 +260,12 @@ class Annotator(pd.DataFrame):
         # Setup queue
         self._queue = self.get_queue()
 
-    @classmethod
-    def _load_frames(cls, *_, **kwargs) -> tuple[pd.DataFrame, pd.DataFrame]:
+    @staticmethod
+    def _load_frames(
+        patch_paths: str | None = None,
+        parent_paths: str | None = None,
+        **kwargs,
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Loads patches and parents data from given paths and returns the
         corresponding dataframes.
@@ -266,7 +277,7 @@ class Annotator(pd.DataFrame):
 
             Needs to contain "metadata" and "metadata_delimiter"
 
-            Needs to contain "label_column"
+            Needs to contain "label_col"
 
             Needs to contain "scramble_frame"
 
@@ -275,33 +286,24 @@ class Annotator(pd.DataFrame):
         Tuple[pd.DataFrame, pd.DataFrame]
             Parents and patches dataframes.
         """
-        print(
-            f"[INFO] Loading patches and parents data from {kwargs['patches']}\
-                and {kwargs['parents']}"
-        )
-        patches = load_patches(
-            patch_paths=kwargs["patches"], parent_paths=kwargs["parents"]
-        )
+        if patch_paths:
+            print(f"[INFO] Loading patches from {patch_paths}.")
+        if parent_paths:
+            print(f"[INFO] Loading parents from {parent_paths}.")
 
+        maps = load_patches(patch_paths=patch_paths, parent_paths=parent_paths)
         # Add pixel stats
-        patches.calc_pixel_stats()
+        maps.calc_pixel_stats()
 
-        print(
-            f"[INFO] Adding metadata from {kwargs['metadata']} (delimiter {kwargs['metadata_delimiter']})"
-        )
-        patches.add_metadata(kwargs["metadata"], delimiter=kwargs["metadata_delimiter"])
+        try:
+            maps.add_metadata(kwargs["metadata_path"], delimiter=kwargs["delimiter"])
+            print(f"[INFO] Adding metadata from {kwargs['metadata_path']}.")
+        except FileNotFoundError:
+            print("[INFO] Metadata file not found. Continuing without metadata.")
 
-        parents, patches = patches.convert_images()
+        parent_df, patch_df = maps.convert_images()
 
-        if kwargs["label_column"] not in patches.columns:
-            patches[kwargs["label_column"]] = None
-        patches["changed"] = False
-
-        if kwargs["scramble_frame"]:
-            # Scramble them!
-            patches = patches.sample(frac=1)
-
-        return parents, patches
+        return parent_df, patch_df
 
     def get_patch_size(self):
         """
@@ -516,7 +518,7 @@ class Annotator(pd.DataFrame):
 
     def annotate(
         self,
-        show_context: bool | None = None,
+        show_context: bool = False,
         min_values: dict | None = None,
         max_values: dict | None = None,
         surrounding: int | None = 1,
@@ -560,9 +562,6 @@ class Annotator(pd.DataFrame):
         self.current_index = -1
         for button in self._buttons:
             button.disabled = False
-
-        if show_context is not None:
-            self.show_context = show_context
 
         self._min_values = min_values
         self._max_values = max_values
@@ -609,7 +608,7 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        img_path = self.at[ix, self.image_column]
+        img_path = self.at[ix, self.patch_paths_col]
 
         self.render()
         return self.previous_index, self.current_index, img_path
@@ -641,7 +640,7 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        img_path = self.at[ix, self.image_column]
+        img_path = self.at[ix, self.patch_paths_col]
 
         self.render()
         return self.previous_index, self.current_index, img_path
@@ -677,7 +676,7 @@ class Annotator(pd.DataFrame):
                 # disable skip button when at last example
                 button.disabled = self.current_index >= len(self) - 1
             elif button.description != "submit":
-                if self.at[ix, self.label_column] == button.description:
+                if self.at[ix, self.label_col] == button.description:
                     button.icon = "check"
                 else:
                     button.icon = ""
@@ -731,7 +730,7 @@ class Annotator(pd.DataFrame):
         ipywidgets.Image
             A widget displaying the image at the given index.
         """
-        image_path = self.at[ix, self.image_column]
+        image_path = self.at[ix, self.patch_paths_col]
         with open(image_path, "rb") as f:
             image = f.read()
 
@@ -752,7 +751,7 @@ class Annotator(pd.DataFrame):
         """
         # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
-        self.at[ix, self.label_column] = annotation
+        self.at[ix, self.label_col] = annotation
         self.at[ix, "changed"] = True
         if self.auto_save:
             self._auto_save()
@@ -770,9 +769,9 @@ class Annotator(pd.DataFrame):
 
     def get_labelled_data(
         self,
-        sort: bool | None = True,
-        index_labels: bool | None = False,
-        include_paths: bool | None = True,
+        sort: bool = True,
+        index_labels: bool = False,
+        include_paths: bool = True,
     ) -> pd.DataFrame:
         """
         Returns the annotations made so far.
@@ -797,16 +796,14 @@ class Annotator(pd.DataFrame):
             label index.
         """
         if index_labels:
-            col1 = self.filtered[self.label_column].apply(
-                lambda x: self._labels.index(x)
-            )
+            col1 = self.filtered[self.label_col].apply(lambda x: self._labels.index(x))
         else:
-            col1 = self.filtered[self.label_column]
+            col1 = self.filtered[self.label_col]
 
         if include_paths:
-            col2 = self.filtered[self.image_column]
+            col2 = self.filtered[self.patch_paths_col]
             df = pd.DataFrame(
-                {self.image_column: col2, self.label_column: col1},
+                {self.patch_paths_col: col2, self.label_col: col1},
                 index=pd.Index(col1.index, name="image_id"),
             )
         else:
@@ -822,7 +819,7 @@ class Annotator(pd.DataFrame):
 
     @property
     def filtered(self) -> pd.DataFrame:
-        _filter = ~self[self.label_column].isna()
+        _filter = ~self[self.label_col].isna()
         return self[_filter]
 
     def render_complete(self):
