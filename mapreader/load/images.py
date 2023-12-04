@@ -11,6 +11,7 @@ import warnings
 from ast import literal_eval
 from glob import glob
 from typing import Literal
+import re
 
 import matplotlib.image as mpimg
 import matplotlib.patches as patches
@@ -25,6 +26,9 @@ from rasterio.plot import reshape_as_raster
 from shapely import wkt
 from shapely.geometry import Polygon, box
 from tqdm.auto import tqdm
+
+from mapreader.download.data_structures import GridIndex, GridBoundingBox
+from mapreader.download.downloader_utils import get_polygon_from_grid_bb
 
 os.environ[
     "USE_PYGEOS"
@@ -511,6 +515,21 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in image_ids:
             self._add_shape_id(image_id=image_id)
 
+    def add_coords_from_grid_bb(self, verbose: bool = False) -> None:
+        
+        print("[INFO] Adding coordinates, tree level: parent")
+
+        parent_list = self.list_parents()
+
+        for parent_id in parent_list:
+            if "grid_bb" not in self.parents[parent_id].keys():
+                print(
+                    f"[WARNING] No grid bounding box found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+                )
+                continue
+
+            self._add_coords_from_grid_bb_id(image_id=parent_id, verbose=verbose)
+
     def add_coord_increments(self, verbose: bool | None = False) -> None:
         """
         Adds coordinate increments to each image at the parent level.
@@ -662,6 +681,31 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             raise ValueError(
                 f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.'
             )
+    
+    def _add_coords_from_grid_bb_id(
+        self, image_id: int | str, verbose: bool = False
+    ) -> None:
+        
+        grid_bb = self.parents[image_id]["grid_bb"]
+
+        if isinstance(grid_bb, str):
+            cell1, cell2 = re.findall("\(.*?\)", grid_bb)
+        
+            z1, x1, y1 = literal_eval(cell1)
+            z2, x2, y2 = literal_eval(cell2)
+
+            cell1 = GridIndex(x1, y1, z1)
+            cell2 = GridIndex(x2, y2, z2)
+
+            grid_bb = GridBoundingBox(cell1, cell2)
+
+        if isinstance(grid_bb, GridBoundingBox):
+            polygon = get_polygon_from_grid_bb(grid_bb)
+            coordinates = polygon.bounds
+            self.parents[image_id]["coordinates"] = coordinates
+
+        else:
+            raise ValueError(f"[ERROR] Unexpected grid_bb format for {image_id}.")        
 
     def _add_coord_increments_id(
         self, image_id: int | str, verbose: bool | None = False
