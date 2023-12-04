@@ -5,10 +5,10 @@ try:
 except ImportError:
     pass
 
-from ast import literal_eval
 import os
 import random
 import warnings
+from ast import literal_eval
 from glob import glob
 from typing import Literal
 
@@ -18,12 +18,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import PIL
-import rasterio 
+import rasterio
 from PIL import Image, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
-from shapely.geometry import box, Polygon
 from shapely import wkt
+from shapely.geometry import Polygon, box
 from tqdm.auto import tqdm
 
 os.environ[
@@ -717,12 +717,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
             return
         if isinstance(self.parents[image_id]["coordinates"], str):
-            self.parents[image_id]["coordinates"] = literal_eval(self.parents[image_id]["coordinates"])
+            self.parents[image_id]["coordinates"] = literal_eval(
+                self.parents[image_id]["coordinates"]
+            )
 
         if "shape" not in self.parents[image_id].keys():
             self._add_shape_id(image_id)
         if isinstance(self.parents[image_id]["shape"], str):
-            self.parents[image_id]["shape"] = literal_eval(self.parents[image_id]["shape"])
+            self.parents[image_id]["shape"] = literal_eval(
+                self.parents[image_id]["shape"]
+            )
 
         image_height, image_width, _ = self.parents[image_id]["shape"]
 
@@ -760,29 +764,34 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
             return
         if isinstance(self.parents[parent_id]["coordinates"], str):
-            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
+            self.parents[parent_id]["coordinates"] = literal_eval(
+                self.parents[parent_id]["coordinates"]
+            )
 
         else:
             if not all([k in self.parents[parent_id].keys() for k in ["dlat", "dlon"]]):
                 self._add_coord_increments_id(parent_id)
 
             # get min_x and min_y and pixel-wise dlon and dlat for parent image
-            parent_min_x = self.parents[parent_id]["coordinates"][0]
-            parent_min_y = self.parents[parent_id]["coordinates"][1]
+            parent_min_x, parent_min_y, parent_max_x, parent_max_y = self.parents[
+                parent_id
+            ]["coordinates"]
             dlon = self.parents[parent_id]["dlon"]
             dlat = self.parents[parent_id]["dlat"]
 
             # get patch bounds
             if isinstance(self.patches[image_id]["pixel_bounds"], str):
-                self.patches[image_id]["pixel_bounds"] = literal_eval(self.patches[image_id]["pixel_bounds"])
-            
+                self.patches[image_id]["pixel_bounds"] = literal_eval(
+                    self.patches[image_id]["pixel_bounds"]
+                )
+
             pixel_bounds = self.patches[image_id]["pixel_bounds"]
 
             # get patch coords
             min_x = (pixel_bounds[0] * dlon) + parent_min_x
-            min_y = (pixel_bounds[1] * dlat) + parent_min_y
+            min_y = parent_max_y - (pixel_bounds[3] * dlat)
             max_x = (pixel_bounds[2] * dlon) + parent_min_x
-            max_y = (pixel_bounds[3] * dlat) + parent_min_y
+            max_y = parent_max_y - (pixel_bounds[1] * dlat)
 
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
             self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
@@ -808,8 +817,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if "coordinates" in self.patches[image_id].keys():
             if isinstance(self.patches[image_id]["coordinates"], str):
-                self.patches[image_id]["coordinates"] = literal_eval(self.patches[image_id]["coordinates"])
-            
+                self.patches[image_id]["coordinates"] = literal_eval(
+                    self.patches[image_id]["coordinates"]
+                )
+
             coords = self.patches[image_id]["coordinates"]
             self.patches[image_id]["polygon"] = box(*coords)
 
@@ -849,12 +860,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if "coordinates" in self.images[tree_level][image_id].keys():
             if isinstance(self.images[tree_level][image_id]["coordinates"], str):
-                self.images[tree_level][image_id]["coordinates"] = literal_eval(self.images[tree_level][image_id]["coordinates"])
-            
+                self.images[tree_level][image_id]["coordinates"] = literal_eval(
+                    self.images[tree_level][image_id]["coordinates"]
+                )
+
             self._print_if_verbose(
                 f"[INFO] Reading 'coordinates' from {image_id}.", verbose
             )
-            
+
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
@@ -906,12 +919,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
             return
         if isinstance(self.parents[parent_id]["coordinates"], str):
-            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
+            self.parents[parent_id]["coordinates"] = literal_eval(
+                self.parents[parent_id]["coordinates"]
+            )
 
         if "shape" not in self.parents[parent_id].keys():
             self._add_shape_id(parent_id)
         if isinstance(self.parents[parent_id]["shape"], str):
-            self.parents[parent_id]["shape"] = literal_eval(self.parents[parent_id]["shape"])
+            self.parents[parent_id]["shape"] = literal_eval(
+                self.parents[parent_id]["shape"]
+            )
 
         height, width, _ = self.parents[parent_id]["shape"]
         xmin, ymin, xmax, ymax = self.parents[parent_id]["coordinates"]
@@ -2100,7 +2117,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def save_parents_as_geotiffs(
         self,
-        rewrite: bool = False, 
+        rewrite: bool = False,
         verbose: bool = False,
         crs: str | None = None,
     ) -> None:
@@ -2119,14 +2136,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
 
         parents_list = self.list_parents()
-        
+
         for parent_id in tqdm(parents_list):
             self._save_parent_as_geotiff(parent_id, rewrite, verbose, crs)
 
     def _save_parent_as_geotiff(
         self,
-        parent_id: str, 
-        rewrite: bool = False, 
+        parent_id: str,
+        rewrite: bool = False,
         verbose: bool = False,
         crs: str | None = None,
     ) -> None:
@@ -2165,8 +2182,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if os.path.isfile(f"{geotiff_path}"):
             if not rewrite:
                 self._print_if_verbose(
-                    f'[INFO] File already exists: {geotiff_path}.', verbose
-                    )
+                    f"[INFO] File already exists: {geotiff_path}.", verbose
+                )
                 return
 
         self._print_if_verbose(
@@ -2177,14 +2194,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "shape" not in self.parents[parent_id].keys():
             self._add_shape_id(parent_id)
         if isinstance(self.parents[parent_id]["shape"], str):
-            self.parents[parent_id]["shape"] = literal_eval(self.parents[parent_id]["shape"])
+            self.parents[parent_id]["shape"] = literal_eval(
+                self.parents[parent_id]["shape"]
+            )
         height, width, channels = self.parents[parent_id]["shape"]
 
         if "coordinates" not in self.parents[parent_id].keys():
             print(self.parents[parent_id].keys())
             raise ValueError(f"[ERROR] Cannot locate coordinates for {parent_id}")
         if isinstance(self.parents[parent_id]["coordinates"], str):
-            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
+            self.parents[parent_id]["coordinates"] = literal_eval(
+                self.parents[parent_id]["coordinates"]
+            )
         coords = self.parents[parent_id]["coordinates"]
 
         if not crs:
@@ -2196,17 +2217,17 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         with rasterio.open(
             f"{geotiff_path}",
-            'w',
+            "w",
             driver="GTiff",
             height=parent.height,
             width=parent.width,
             count=channels,
             transform=parent_affine,
-            dtype='uint8',
+            dtype="uint8",
             nodata=0,
             crs=crs,
         ) as dst:
-            dst.write(parent_array)   
+            dst.write(parent_array)
 
     def save_patches_as_geotiffs(
         self,
@@ -2288,14 +2309,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "shape" not in self.patches[patch_id].keys():
             self._add_shape_id(patch_id)
         if isinstance(self.patches[patch_id]["shape"], str):
-            self.patches[patch_id]["shape"] = literal_eval(self.patches[patch_id]["shape"])
+            self.patches[patch_id]["shape"] = literal_eval(
+                self.patches[patch_id]["shape"]
+            )
         height, width, channels = self.patches[patch_id]["shape"]
 
         # get coords
         if "coordinates" not in self.patches[patch_id].keys():
             self._add_patch_coords_id(patch_id)
         if isinstance(self.patches[patch_id]["coordinates"], str):
-            self.patches[patch_id]["coordinates"] = literal_eval(self.patches[patch_id]["coordinates"])
+            self.patches[patch_id]["coordinates"] = literal_eval(
+                self.patches[patch_id]["coordinates"]
+            )
         coords = self.patches[patch_id]["coordinates"]
 
         if not crs:
@@ -2351,7 +2376,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.add_patch_polygons()
             _, patch_df = self.convert_images()
 
-        patch_df["polygon"]=patch_df["polygon"].apply(lambda x: x if isinstance(x, Polygon) else wkt.loads(x))
+        patch_df["polygon"] = patch_df["polygon"].apply(
+            lambda x: x if isinstance(x, Polygon) else wkt.loads(x)
+        )
 
         if not crs:
             if "crs" in patch_df.columns:
@@ -2369,7 +2396,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         # change tuple columns to strings
         for col in patch_df.columns:
             if isinstance(patch_df[col][0], tuple):
-                patch_df[col]=patch_df[col].apply(str)
+                patch_df[col] = patch_df[col].apply(str)
 
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
