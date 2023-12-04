@@ -2098,6 +2098,116 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
         return tree_level
 
+    def save_parents_as_geotiffs(
+        self,
+        rewrite: bool = False, 
+        verbose: bool = False,
+        crs: str | None = None,
+    ) -> None:
+        """Save all parents in MapImages instance as geotiffs.
+
+        Parameters
+        ----------
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : str, optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``crs`` in the parents dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+        """
+
+        parents_list = self.list_parents()
+        
+        for parent_id in tqdm(parents_list):
+            self._save_parent_as_geotiff(parent_id, rewrite, verbose, crs)
+
+    def _save_parent_as_geotiff(
+        self,
+        parent_id: str, 
+        rewrite: bool = False, 
+        verbose: bool = False,
+        crs: str | None = None,
+    ) -> None:
+        """Save a parent image as a geotiff.
+
+        Parameters
+        ----------
+        parent_id : str
+            The ID of the parent to write.
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : Optional[str], optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``crs`` in the parents dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+
+        Raises
+        ------
+        ValueError
+            If parent directory does not exist.
+        """
+
+        parent_path = self.parents[parent_id]["image_path"]
+        parent_dir = os.path.dirname(parent_path)
+
+        if not os.path.exists(parent_dir):
+            raise ValueError(f'[ERROR] Parent directory "{parent_dir}" does not exist.')
+
+        parent_id_no_ext = os.path.splitext(parent_id)[0]
+        geotiff_path = f"{parent_dir}/{parent_id_no_ext}.tif"
+
+        self.parents[parent_id]["geotiff_path"] = geotiff_path
+
+        if os.path.isfile(f"{geotiff_path}"):
+            if not rewrite:
+                self._print_if_verbose(
+                    f'[INFO] File already exists: {geotiff_path}.', verbose
+                    )
+                return
+
+        self._print_if_verbose(
+            f"[INFO] Creating: {geotiff_path}.",
+            verbose,
+        )
+
+        if "shape" not in self.parents[parent_id].keys():
+            self._add_shape_id(parent_id)
+        if isinstance(self.parents[parent_id]["shape"], str):
+            self.parents[parent_id]["shape"] = literal_eval(self.parents[parent_id]["shape"])
+        height, width, channels = self.parents[parent_id]["shape"]
+
+        if "coordinates" not in self.parents[parent_id].keys():
+            print(self.parents[parent_id].keys())
+            raise ValueError(f"[ERROR] Cannot locate coordinates for {parent_id}")
+        if isinstance(self.parents[parent_id]["coordinates"], str):
+            self.parents[parent_id]["coordinates"] = literal_eval(self.parents[parent_id]["coordinates"])
+        coords = self.parents[parent_id]["coordinates"]
+
+        if not crs:
+            crs = self.parents[parent_id].get("crs", "EPSG:4326")
+
+        parent_affine = rasterio.transform.from_bounds(*coords, width, height)
+        parent = Image.open(parent_path)
+        parent_array = reshape_as_raster(parent)
+
+        with rasterio.open(
+            f"{geotiff_path}",
+            'w',
+            driver="GTiff",
+            height=parent.height,
+            width=parent.width,
+            count=channels,
+            transform=parent_affine,
+            dtype='uint8',
+            nodata=0,
+            crs=crs,
+        ) as dst:
+            dst.write(parent_array)   
+
     def save_patches_as_geotiffs(
         self,
         rewrite: bool | None = False,
