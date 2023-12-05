@@ -56,6 +56,7 @@ setuptools.setup(
         "tqdm<5.0.0",
         "torchinfo<2.0.0",
         "openpyxl<4.0.0",
+        "geopandas<1.0.0",
     ],
     extras_require={
         "dev": [
