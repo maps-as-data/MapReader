@@ -7,6 +7,7 @@ import os
 import random
 import string
 import warnings
+from ast import literal_eval
 from itertools import product
 from pathlib import Path
 
@@ -53,11 +54,6 @@ class Annotator(pd.DataFrame):
                         patch_df,
                         index_col=0,
                         sep=delimiter,
-                        converters={
-                            "shape": eval,
-                            "pixel_bounds": eval,
-                            "coordinates": eval,
-                        },
                     )
                 else:
                     raise FileNotFoundError(f"[ERROR] Could not find {patch_df}.")
@@ -65,6 +61,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a csv or a pandas DataFrame."
                 )
+            self._eval_df(patch_df)  # eval tuples/lists in df
 
         if parent_df is not None:
             if isinstance(parent_df, str):
@@ -73,7 +70,6 @@ class Annotator(pd.DataFrame):
                         parent_df,
                         index_col=0,
                         sep=delimiter,
-                        converters={"shape": eval, "coordinates": eval},
                     )
                 else:
                     raise FileNotFoundError(f"[ERROR] Could not find {parent_df}.")
@@ -81,6 +77,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a csv or a pandas DataFrame."
                 )
+            self._eval_df(parent_df)  # eval tuples/lists in df
 
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
@@ -304,6 +301,13 @@ class Annotator(pd.DataFrame):
         parent_df, patch_df = maps.convert_images()
 
         return parent_df, patch_df
+
+    def _eval_df(self, df):
+        for col in df.columns:
+            try:
+                df[col] = df[col].apply(literal_eval)
+            except (ValueError, TypeError, SyntaxError):
+                pass
 
     def get_patch_size(self):
         """
