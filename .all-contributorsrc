@@ -14,7 +14,12 @@
       "profile": "https://www.turing.ac.uk/people/researchers/katherine-mcdonough",
       "contributions": [
         "research",
-        "ideas"
+        "ideas",
+        "doc",
+        "projectManagement",
+        "review",
+        "talk",
+        "tutorial"
       ]
     },
     {
@@ -23,7 +28,10 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/34318222?v=4",
       "profile": "http://danielwilson.info",
       "contributions": [
-        "research"
+        "research",
+        "ideas",
+        "talk",
+        "doc",
       ]
     },
     {
@@ -32,7 +40,11 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1899856?v=4",
       "profile": "https://github.com/kasra-hosseini",
       "contributions": [
-        "code"
+        "code",
+        "ideas",
+        "research",
+        "review",
+        "talk"
       ]
     },
     {
@@ -42,7 +54,13 @@
       "profile": "https://github.com/rwood-97",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "ideas",
+        "talk",
+        "tutorial",
+        "review",
+        "maintenance",
+        "research"
       ]
     },
     {
@@ -52,7 +70,42 @@
       "profile": "http://www.westerling.nu",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "maintenance",
+        "review",
+        "talk"
+      ]
+    },
+    {
+      "login": "ChrisFleet",
+      "name": "Chris Fleet",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3666702?v=4",
+      "profile": "https://maps.nls.uk",
+      "contributions": [
+        "data"
+      ]
+    },
+    {
+      "login": "kasparvonbeelen",
+      "name": "Kaspar Beelen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11618160?v=4",
+      "profile": "https://github.com/kasparvonbeelen",
+      "contributions": [
+        "ideas",
+        "review",
+        "research"
+      ]
+    },
+    {
+      "login": "andrewphilipsmith",
+      "name": "Andy Smith",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5346065?v=4",
+      "profile": "https://github.com/andrewphilipsmith",
+      "contributions": [
+        "code",
+        "doc",
+        "mentoring",
+        "review"
       ]
     }
   ],
