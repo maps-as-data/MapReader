@@ -13,31 +13,56 @@ Annotate your images
 .. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
 
 
-To prepare your annotations, you must specify a number of parameters when initializing the Annotator class. The example below demonstrates how to do this for a 'rail_space' annotation task:
+To prepare your annotations, you must specify a number of parameters when initializing the Annotator class.
+We will use a 'rail_space' annotation task to demonstrate how to set up the annotator.
+
+The simplest way to initialize your annotator is to provide file paths for your patches and parent images using the ``patch_paths`` and ``parent_paths`` arguments, respectively.
+e.g. :
 
 .. code-block:: python
-    # Example
-    from mapreader.annotate import Annotator
 
+    from mapreader import Annotator
+
+    # EXAMPLE
     annotator = Annotator(
+        patch_paths="./patches_100_pixel/*.png",
+        parent_paths="./maps/*.png",
+        annotations_dir="./annotations"
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
-        patches="./patches/patch-*.png",
-        parents="./maps/*.png",
-        annotations_dir="./annotations"
     )
 
-In the above example, the following parameters are specified:
+Alternatively, if you have created/saved a ``patch_df`` and ``parent_df`` from MapReader's Load subpackage, you can replace the ``patch_paths`` and ``parent_paths`` arguments with ``patch_df`` and ``parent_df`` arguments, respectively.
+e.g. :
 
-#. ``task_name``: The specific annotation task you want to perform, in this case ``"railspace"``.
-#. ``labels``: A list of labels for the annotation task, such as ``"no_rail_space"`` and ``"rail_space"``.
-#. ``username``: Your unique identifier, which can be any string (e.g., ``"rosie"``).
-#. ``patches``: The file path pattern to access patch images for annotation (e.g., ``"./patches/patch-*.png"``).
-#. ``parents``: The file path pattern to access the corresponding parent images (e.g., ``"./maps/*.png"``).
-#. ``annotations_dir``: The directory where your annotations will be saved (e.g., ``"./annotations"``).
+.. code-block:: python
 
-These are only a few of the settings that you can provide the annotator. We will cover a few more below, but a full inventory of settings can be found in the API documentation.
+    from mapreader import Annotator
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"
+        task_name="railspace",
+        labels=["no_rail_space", "rail_space"],
+        username="rosie",
+    )
+
+.. note:: You can pass either a pandas DataFrame or the path to a csv file as the ``patch_df`` and ``parent_df`` arguments.
+
+In the above examples, the following parameters are also specified:
+
+- ``annotations_dir``: The directory where your annotations will be saved (e.g., ``"./annotations"``).
+- ``task_name``: The specific annotation task you want to perform, in this case ``"railspace"``.
+- ``labels``: A list of labels for the annotation task, such as ``"no_rail_space"`` and ``"rail_space"``.
+- ``username``: Your unique identifier, which can be any string (e.g., ``"rosie"``).
+
+Other arguments that you may want to be aware of when initializing the ``Annotator`` instance include:
+
+- ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
+- ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
 
 After setting up the ``Annotator`` instance, you can interactively annotate a sample of your images using:
 
@@ -45,38 +70,78 @@ After setting up the ``Annotator`` instance, you can interactively annotate a sa
 
     annotator.annotate()
 
-To help with annotating, you can set the annotation interface to show a context image using ``show_context=True``. This creates a panel of patches in the annotation interface, highlighting your patch in the middle of its surrounding immediate images. This is how you would pass the ``show_context`` argument:
+Context
+~~~~~~~
+
+To help with annotating, you can set the annotation interface to show a context image using ``show_context=True``.
+This creates a panel of patches in the annotation interface, highlighting your patch in the middle of its surrounding immediate images.
+You can either pass the ``show_context`` argument when initializing the ``Annotator`` instance:
 
 .. code-block:: python
 
-	#EXAMPLE
+    # EXAMPLE
     annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
-        patches="./patches/patch-*.png"
-        parents="./maps/*.png"
-        annotations_dir="./annotations",
-        show_context=True
+        show_context=True,
     )
 
     annotator.annotate()
 
-# TODO: This is not currently an option
-By default, your patches will be shown to you in a random order but, to help with annotating, can be sorted by their mean pixel intesities using ``sorby="mean"``.
+Or, you can pass the ``show_context`` argument when calling the ``annotate`` method:
 
-# TODO: This is not currently an option
-You can also specify ``min_mean_pixel`` and ``max_mean_pixel`` to limit the range of mean pixel intensities shown to you and ``min_std_pixel`` and ``max_std_pixel`` to limit the range of standard deviations within the mean pixel intensities shown to you.
-This is particularly useful if your images (e.g. maps) have collars or margins that you would like to avoid.
+.. code-block:: python
 
+    annotator.annotate(show_context=True)
+
+This will overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+
+Sort order
+~~~~~~~~~~
+
+By default, your patches will be shown to you in a random order but, to help with annotating, they can be sorted using the ``sortby`` argument.
+This argument takes the name of a column in your patch DataFrame and sorts the patches by the values in that column.
 e.g. :
 
 .. code-block:: python
 
-    annotation=prepare_annotation(userID="rosie", annotation_tasks_file="annotation_tasks.yaml", task="rail_space", annotation_set="set_001", context_image=True, xoffset=100, yoffset=100, min_mean_pixel=0.5, max_mean_pixel=0.9)
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"
+        task_name="railspace",
+        labels=["no_rail_space", "rail_space"],
+        username="rosie",
+        sortby="mean_pixel_R",
+    )
 
-    annotation
-    annotation
+This will sort your patches by the mean red pixel intensity in each patch, by default, in ascending order.
+This is particularly useful if your images (e.g. maps) have collars, margins or blank regions that you would like to avoid.
+
+.. note:: If you would like to sort in descending order, you can also pass ``ascending=False``.
+
+You can also specify ``min_values`` and ``max_values`` to limit the range of values shown to you.
+e.g. To sort your patches by the mean red pixel intensity in each patch but only show you patches with a mean blue pixel intensity between 0.5 and 0.9.
+
+.. code-block:: python
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"
+        task_name="railspace",
+        labels=["no_rail_space", "rail_space"],
+        username="rosie",
+        sortby="mean_pixel_R",
+        min_values={"mean_pixel_B": 0.5},
+        max_values={"mean_pixel_B": 0.9},
+    )
 
 .. _Save_annotations:
 
@@ -91,7 +156,8 @@ If you need to know the name of the annotations file, you may refer to a propert
 
     annotator.annotations_file
 
-The file will be located in the ``annotations_dir`` that you may have passed as a keyword argument when you set up the ``Annotator`` instance. If you didn't provide a keyword argument, it will be in the ``./annotations`` directory.
+The file will be located in the ``annotations_dir`` that you may have passed as a keyword argument when you set up the ``Annotator`` instance.
+If you didn't provide a keyword argument, it will be in the ``./annotations`` directory.
 
 For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
 
