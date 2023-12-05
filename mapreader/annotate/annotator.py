@@ -29,6 +29,68 @@ _CENTER_LAYOUT = widgets.Layout(
 
 
 class Annotator(pd.DataFrame):
+    """
+    Annotator class for annotating patches with labels.
+
+    Parameters
+    ----------
+    patch_df : str or pd.DataFrame or None, optional
+        Path to a CSV file or a pandas DataFrame containing patch data, by default None
+    parent_df : str or pd.DataFrame or None, optional
+        Path to a CSV file or a pandas DataFrame containing parent data, by default None
+    labels : list, optional
+        List of labels for annotation, by default None
+    patch_paths : str or None, optional
+        Path to patch images, by default None
+        Ignored if patch_df is provided.
+    parent_paths : str or None, optional
+        Path to parent images, by default None
+        Ignored if parent_df is provided.
+    metadata_path : str or None, optional
+        Path to metadata CSV file, by default "./maps/metadata.csv"
+    annotations_dir : str, optional
+        Directory to store annotations, by default "./annotations"
+    patch_paths_col : str, optional
+        Name of the column in which image paths are stored in patch DataFrame, by default "image_path"
+    label_col : str, optional
+        Name of the column in which labels are stored in patch DataFrame, by default "label"
+    show_context : bool, optional
+        Whether to show context when loading patches, by default False
+    auto_save : bool, optional
+        Whether to automatically save annotations, by default True
+    delimiter : str, optional
+        Delimiter used in CSV files, by default ","
+    sortby : str or None, optional
+        Name of the column to use to sort the patch DataFrame, by default None.
+        Default sort order is ``ascending=True``. Pass ``ascending=False`` keyword argument to sort in descending order.
+    **kwargs
+        Additional keyword arguments
+
+    Raises
+    ------
+    FileNotFoundError
+        If the provided patch_df or parent_df file path does not exist
+    ValueError
+        If patch_df or parent_df is not a valid path to a CSV file or a pandas DataFrame
+        If patch_df or patch_paths is not provided
+        If the DataFrame does not have the required columns
+        If sortby is not a string or None
+        If labels provided are not in the form of a list
+    SyntaxError
+        If labels provided are not in the form of a list
+
+    Notes
+    -----
+
+    Additional kwargs:
+
+    - ``username``: Username to use when saving annotations file. Default: Randomly generated string.
+    - ``task_name``: Name of the annotation task. Default: "task".
+    - ``min_values``: A dictionary consisting of column names (keys) and minimum values as floating point values (values). Default: {}.
+    - ``max_values``: A dictionary consisting of column names (keys) and maximum values as floating point values (values). Default: {}.
+    - ``buttons_per_row``: Number of buttons to display per row. Default: None.
+    """
+
     def __init__(
         self,
         patch_df: str | pd.DataFrame | None = None,
@@ -43,6 +105,7 @@ class Annotator(pd.DataFrame):
         show_context: bool = False,
         auto_save: bool = True,
         delimiter: str = ",",
+        sortby: str | None = None,
         **kwargs,
     ):
         if labels is None:
@@ -82,7 +145,7 @@ class Annotator(pd.DataFrame):
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
             if patch_paths:
-                parent_paths_df, patch_df = self._load_frames(
+                parent_paths_df, patch_df = self._load_dataframes(
                     patch_paths=patch_paths,
                     parent_paths=parent_paths,
                     metadata_path=metadata_path,
@@ -124,8 +187,12 @@ class Annotator(pd.DataFrame):
             )
 
         # Sort by sortby column if provided
-        if kwargs.get("sortby"):
-            patch_df = patch_df.sort_values(kwargs["sortby"])
+        if isinstance(sortby, str):
+            patch_df = patch_df.sort_values(
+                sortby, ascending=kwargs.get("ascending", True)
+            )
+        elif sortby is not None:
+            raise ValueError("[ERROR] ``sortby`` must be a string or None.")
 
         image_list = json.dumps(
             sorted(patch_df[patch_paths_col].to_list()), sort_keys=True
@@ -153,7 +220,7 @@ class Annotator(pd.DataFrame):
 
         # Test for existing file
         if os.path.exists(annotations_file):
-            print(f"[INFO] Loading existing annotations for {kwargs['username']}.")
+            print(f"[INFO] Loading existing annotations for {username}.")
             existing_annotations = pd.read_csv(
                 annotations_file, index_col=0, sep=delimiter
             )
@@ -214,7 +281,6 @@ class Annotator(pd.DataFrame):
 
         # set up for the annotator
         self.buttons_per_row = kwargs.get("buttons_per_row", None)
-        self.stop_at_last_example = kwargs.get("stop_at_last_example", True)
         self._min_values = kwargs.get("min_values", {})
         self._max_values = kwargs.get("max_values", {})  # pixel_bounds = x0, y0, x1, y1
 
@@ -258,7 +324,7 @@ class Annotator(pd.DataFrame):
         self._queue = self.get_queue()
 
     @staticmethod
-    def _load_frames(
+    def _load_dataframes(
         patch_paths: str | None = None,
         parent_paths: str | None = None,
         **kwargs,
@@ -522,7 +588,7 @@ class Annotator(pd.DataFrame):
 
     def annotate(
         self,
-        show_context: bool = False,
+        show_context: bool | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
         surrounding: int | None = 1,
@@ -559,16 +625,18 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
-        if max_values is None:
-            max_values = {}
-        if min_values is None:
-            min_values = {}
+        if min_values is not None:
+            self._min_values = min_values
+        if max_values is not None:
+            self._max_values = max_values
+
         self.current_index = -1
         for button in self._buttons:
             button.disabled = False
 
-        self._min_values = min_values
-        self._max_values = max_values
+        if show_context is not None:
+            self.show_context = show_context
+
         self.surrounding = surrounding
         self.margin = margin
         self.max_size = max_size
@@ -576,7 +644,7 @@ class Annotator(pd.DataFrame):
         # re-set up queue
         self._queue = self.get_queue()
 
-        self.out = widgets.Output()
+        self.out = widgets.Output(layout=_CENTER_LAYOUT)
         display(self.box)
         display(self.navbox)
         display(self.out)
@@ -662,10 +730,7 @@ class Annotator(pd.DataFrame):
         """
         # Check whether we have reached the end
         if self.current_index >= len(self) - 1:
-            if self.stop_at_last_example:
-                self.render_complete()
-            else:
-                self._prev_example()
+            self.render_complete()
             return
 
         # ix = self.iloc[self.current_index].name
