@@ -207,7 +207,7 @@ class Annotator(pd.DataFrame):
             raise SyntaxError("[ERROR] Labels provided must be as a list")
 
         # Ensure unique values in list
-        labels = list(set(labels))
+        labels = sorted(set(labels), key=labels.index)
 
         # Test for existing file
         if os.path.exists(annotations_file):
