@@ -27,7 +27,8 @@ e.g. :
     annotator = Annotator(
         patch_paths="./patches_100_pixel/*.png",
         parent_paths="./maps/*.png",
-        annotations_dir="./annotations"
+        metadata="./maps/metadata.csv",
+        annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
@@ -44,7 +45,7 @@ e.g. :
     annotator = Annotator(
         patch_df="./patch_df.csv",
         parent_df="./parent_df.csv",
-        annotations_dir="./annotations"
+        annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
@@ -83,7 +84,7 @@ You can either pass the ``show_context`` argument when initializing the ``Annota
     annotator = Annotator(
         patch_df="./patch_df.csv",
         parent_df="./parent_df.csv",
-        annotations_dir="./annotations"
+        annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
@@ -113,7 +114,7 @@ e.g. :
     annotator = Annotator(
         patch_df="./patch_df.csv",
         parent_df="./parent_df.csv",
-        annotations_dir="./annotations"
+        annotations_dir="./annotations"m
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
@@ -134,7 +135,7 @@ e.g. To sort your patches by the mean red pixel intensity in each patch but only
     annotator = Annotator(
         patch_df="./patch_df.csv",
         parent_df="./parent_df.csv",
-        annotations_dir="./annotations"
+        annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_rail_space", "rail_space"],
         username="rosie",
@@ -165,7 +166,6 @@ For example, if you have downloaded your maps using the default settings of our 
 
     project
     ├──your_notebook.ipynb
-    └──maps
     └──maps
     │   ├── map1.png
     │   ├── map2.png

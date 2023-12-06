@@ -47,7 +47,7 @@ class Annotator(pd.DataFrame):
         Path to parent images, by default None
         Ignored if parent_df is provided.
     metadata_path : str or None, optional
-        Path to metadata CSV file, by default "./maps/metadata.csv"
+        Path to metadata CSV file, by default None
     annotations_dir : str, optional
         Directory to store annotations, by default "./annotations"
     patch_paths_col : str, optional
@@ -98,7 +98,7 @@ class Annotator(pd.DataFrame):
         labels: list = None,
         patch_paths: str | None = None,
         parent_paths: str | None = None,
-        metadata_path: str | None = "./maps/metadata.csv",
+        metadata_path: str | None = None,
         annotations_dir: str = "./annotations",
         patch_paths_col: str = "image_path",
         label_col: str = "label",
@@ -150,7 +150,6 @@ class Annotator(pd.DataFrame):
                     parent_paths=parent_paths,
                     metadata_path=metadata_path,
                     delimiter=delimiter,
-                    label_col=label_col,
                 )
 
                 # only take this dataframe if parent_df is None
@@ -162,9 +161,9 @@ class Annotator(pd.DataFrame):
                 )
 
         # Check for metadata + data
-        if not len(patch_df):
+        if not isinstance(patch_df, pd.DataFrame):
             raise ValueError("[ERROR] No patch data available.")
-        if not len(parent_df):
+        if not isinstance(parent_df, pd.DataFrame):
             raise ValueError("[ERROR] No metadata (parent data) available.")
 
         # Check for url column and add to patch dataframe
@@ -185,14 +184,6 @@ class Annotator(pd.DataFrame):
             raise ValueError(
                 f"[ERROR] Your DataFrame does not have the image paths column: {patch_paths_col}."
             )
-
-        # Sort by sortby column if provided
-        if isinstance(sortby, str):
-            patch_df = patch_df.sort_values(
-                sortby, ascending=kwargs.get("ascending", True)
-            )
-        elif sortby is not None:
-            raise ValueError("[ERROR] ``sortby`` must be a string or None.")
 
         image_list = json.dumps(
             sorted(patch_df[patch_paths_col].to_list()), sort_keys=True
@@ -270,6 +261,17 @@ class Annotator(pd.DataFrame):
         self["max_x"] = self.pixel_bounds.apply(lambda x: x[2])
         self["max_y"] = self.pixel_bounds.apply(lambda x: x[3])
 
+        # Sort by sortby column if provided
+        if isinstance(sortby, str):
+            if sortby in self.columns:
+                self.sort_values(
+                    sortby, ascending=kwargs.get("ascending", True), inplace=True
+                )
+            else:
+                raise ValueError(f"[ERROR] {sortby} is not a column in the DataFrame.")
+        elif sortby is not None:
+            raise ValueError("[ERROR] ``sortby`` must be a string or None.")
+
         self._labels = labels
         self.label_col = label_col
         self.patch_paths_col = patch_paths_col
@@ -327,6 +329,7 @@ class Annotator(pd.DataFrame):
     def _load_dataframes(
         patch_paths: str | None = None,
         parent_paths: str | None = None,
+        metadata_path: str | None = None,
         **kwargs,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -339,10 +342,6 @@ class Annotator(pd.DataFrame):
             Needs to contain "patches" and "parents"
 
             Needs to contain "metadata" and "metadata_delimiter"
-
-            Needs to contain "label_col"
-
-            Needs to contain "scramble_frame"
 
         Returns
         -------
@@ -359,10 +358,12 @@ class Annotator(pd.DataFrame):
         maps.calc_pixel_stats()
 
         try:
-            maps.add_metadata(kwargs["metadata_path"], delimiter=kwargs["delimiter"])
-            print(f"[INFO] Adding metadata from {kwargs['metadata_path']}.")
-        except FileNotFoundError:
-            print("[INFO] Metadata file not found. Continuing without metadata.")
+            maps.add_metadata(metadata_path, delimiter=kwargs["delimiter"])
+            print(f"[INFO] Adding metadata from {metadata_path}.")
+        except ValueError:
+            raise FileNotFoundError(
+                f"[INFO] Metadata file at {metadata_path} not found. Please specify the correct file path using the ``metadata_path`` argument."
+            )
 
         parent_df, patch_df = maps.convert_images()
 
