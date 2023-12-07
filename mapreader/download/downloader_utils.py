@@ -1,15 +1,16 @@
-from shapely.geometry import Polygon, LineString, box
+from __future__ import annotations
 
 import math
-from typing import Tuple
 
-from .data_structures import Coordinate, GridIndex, GridBoundingBox
+from shapely.geometry import LineString, Polygon, box
+
+from .data_structures import Coordinate, GridBoundingBox, GridIndex
 
 
 def create_polygon_from_latlons(
-    min_lat: float, 
-    min_lon: float, 
-    max_lat: float, 
+    min_lat: float,
+    min_lon: float,
+    max_lat: float,
     max_lon: float,
 ) -> Polygon:
     """Creates a polygon from latitudes and longitudes.
@@ -24,7 +25,7 @@ def create_polygon_from_latlons(
         maximum latitude
     max_lon : float
         maximum longitude
-    
+
     Returns
     -------
     Polygon
@@ -35,6 +36,7 @@ def create_polygon_from_latlons(
 
     polygon = box(min_x, min_y, max_x, max_y)
     return polygon
+
 
 def create_line_from_latlons(
     lat1_lon1: tuple,
@@ -54,10 +56,11 @@ def create_line_from_latlons(
     LineString
         shapely LineString
     """
-    
-    y1,x1 = lat1,lon1 = lat1_lon1 # for clarity - can delete?
-    y2,x2 = lat2,lon2 = lat2_lon2 # for clarity - can delete?
-    return LineString([(x1,y1),(x2,y2)])
+
+    y1, x1 = lat1, lon1 = lat1_lon1  # for clarity - can delete?
+    y2, x2 = lat2, lon2 = lat2_lon2  # for clarity - can delete?
+    return LineString([(x1, y1), (x2, y2)])
+
 
 def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     """
@@ -75,11 +78,12 @@ def get_grid_bb_from_polygon(polygon: Polygon, zoom_level: int):
     GridBoundingBox
     """
     min_x, min_y, max_x, max_y = polygon.bounds
-    start = Coordinate(min_y, max_x)  # (lat, lon)
-    end = Coordinate(max_y, min_x)  # (lat, lon)
+    start = Coordinate(min_y, min_x)  # (lat, lon), lower left
+    end = Coordinate(max_y, max_x)  # (lat, lon), upper right
     start_idx = get_index_from_coordinate(start, zoom_level)
     end_idx = get_index_from_coordinate(end, zoom_level)
     return GridBoundingBox(start_idx, end_idx)
+
 
 def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     """
@@ -94,9 +98,18 @@ def get_polygon_from_grid_bb(grid_bb: GridBoundingBox):
     -------
     shapely.Polygon
     """
-    lower_corner = get_coordinate_from_index(grid_bb.lower_corner)
-    upper_corner = get_coordinate_from_index(grid_bb.upper_corner)
-    polygon = create_polygon_from_latlons(lower_corner.lat, lower_corner.lon, upper_corner.lat, upper_corner.lon)
+    lower_corner = grid_bb.lower_corner  # SW
+    upper_corner = grid_bb.upper_corner  # SW
+
+    # for NE corner of upper right tile, do x+1 and y+1
+    upper_corner_NE = GridIndex(upper_corner.x + 1, upper_corner.y + 1, upper_corner.z)
+
+    SW_coord = get_coordinate_from_index(lower_corner)
+    NE_coord = get_coordinate_from_index(upper_corner_NE)
+
+    polygon = create_polygon_from_latlons(
+        SW_coord.lat, SW_coord.lon, NE_coord.lat, NE_coord.lon
+    )
     return polygon
 
 
@@ -136,13 +149,13 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
     Coordinate
         The upper left corner of the tile.
 
-    
+
     """
     lon, lat = _get_coordinate_from_index(grid_index.x, grid_index.y, grid_index.z)
     return Coordinate(lat, lon)
 
 
-def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, int)]:
+def _get_index_from_coordinate(lon: float, lat: float, z: int) -> tuple[(int, int)]:
     """Generate (x,y) tuple from Coordinate latitudes and longitudes.
 
     Returns
@@ -158,7 +171,7 @@ def _get_index_from_coordinate(lon: float, lat: float, z: int) -> Tuple[(int, in
     return x, y
 
 
-def _get_coordinate_from_index(x: int, y: int, z: int) -> Tuple[(float, float)]:
+def _get_coordinate_from_index(x: int, y: int, z: int) -> tuple[(float, float)]:
     """Generate (lon, lat) tuple from GridIndex x, y and zoom level (z).
 
     Returns

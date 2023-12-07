@@ -1,10 +1,10 @@
-Contribution guide
+Contribution Guide
 ===================
 
 Welcome! We are pleased to know that you're interested in contributing to MapReader!
 
 MapReader is a collaborative project, now expanding its community beyond the initial group in the `Living with Machines <https://livingwithmachines.ac.uk/>`_ project (The Alan Turing Institute).
-We welcome all contributions but **please** follow these guidelines to make sure your contributions can be easily integrated into the project. 
+We welcome all contributions but **please** follow these guidelines to make sure your contributions can be easily integrated into the project.
 
 .. contents:: Table of Contents
     :local:
@@ -45,13 +45,13 @@ We welcome contributions from community members of all skill levels and so have 
 
 ----------
 
-Guides 
+Guides
 ------
 
-.. toctree:: 
+.. toctree::
     :maxdepth: 1
 
     GitHub-guide
     Worked-examples
     Documentation
-    Code 
+    Code

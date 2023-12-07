@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 try:
     from geopy.distance import geodesic, great_circle
 except ImportError:
@@ -7,7 +9,7 @@ import os
 import random
 import warnings
 from glob import glob
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Literal
 
 import matplotlib.image as mpimg
 import matplotlib.patches as patches
@@ -22,8 +24,10 @@ from rasterio.plot import reshape_as_raster
 from shapely.geometry import box
 from tqdm.auto import tqdm
 
-os.environ['USE_PYGEOS'] = '0' #see here https://github.com/geopandas/geopandas/issues/2691
-import geopandas as geopd
+os.environ[
+    "USE_PYGEOS"
+] = "0"  # see here https://github.com/geopandas/geopandas/issues/2691
+import geopandas as geopd  # noqa: E402
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
@@ -62,11 +66,11 @@ class MapImages:
 
     def __init__(
         self,
-        path_images: Optional[str] = None,
-        file_ext: Optional[Union[str, bool]] = False,
-        tree_level: Optional[str] = "parent",
-        parent_path: Optional[str] = None,
-        **kwargs: Dict,
+        path_images: str | None = None,
+        file_ext: str | bool | None = False,
+        tree_level: str | None = "parent",
+        parent_path: str | None = None,
+        **kwargs: dict,
     ):
         """Initializes the MapImages class."""
 
@@ -91,13 +95,13 @@ class MapImages:
             )
 
     @staticmethod
-    def _resolve_file_path(file_path, file_ext = None):
+    def _resolve_file_path(file_path, file_ext=None):
         if file_ext:
             if os.path.isdir(file_path):
                 files = glob(os.path.abspath(f"{file_path}/*.{file_ext}"))
-            else: #if not dir
+            else:  # if not dir
                 files = glob(os.path.abspath(file_path))
-                files = [file for file in files if file.split(".")[-1] == file_ext] 
+                files = [file for file in files if file.split(".")[-1] == file_ext]
 
         else:
             if os.path.isdir(file_path):
@@ -105,7 +109,7 @@ class MapImages:
             else:
                 files = glob(os.path.abspath(file_path))
 
-        #check for issues
+        # check for issues
         if len(files) == 0:
             raise ValueError("[ERROR] No files found!")
         test_ext = files[0].split(".")[-1]
@@ -113,7 +117,7 @@ class MapImages:
             raise ValueError(
                 "[ERROR] Directory with multiple file types detected - please specify file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
             )
-        
+
         return files
 
     def __len__(self) -> int:
@@ -126,7 +130,7 @@ class MapImages:
         for i, img in enumerate(self.parents):
             try:
                 print(os.path.relpath(img))
-            except ValueError: #if no rel path (e.g. mounted on different drives)
+            except ValueError:  # if no rel path (e.g. mounted on different drives)
                 print(os.path.abspath(img))
             if i >= 10:
                 print("...")
@@ -136,7 +140,7 @@ class MapImages:
         for i, img in enumerate(self.patches):
             try:
                 print(os.path.relpath(img))
-            except ValueError: #if no rel path (e.g. mounted on different drives)
+            except ValueError:  # if no rel path (e.g. mounted on different drives)
                 print(os.path.abspath(img))
             if i >= 10:
                 print("...")
@@ -146,9 +150,9 @@ class MapImages:
     def _images_constructor(
         self,
         image_path: str,
-        parent_path: Optional[str] = None,
-        tree_level: Optional[str] = "parent",
-        **kwargs: Dict,
+        parent_path: str | None = None,
+        tree_level: str | None = "parent",
+        **kwargs: dict,
     ) -> None:
         """
         Constructs image data from the given image path and parent path and adds it to the ``MapImages`` instance's ``images`` attribute.
@@ -211,7 +215,7 @@ class MapImages:
                 self._add_geo_info_id(image_id, verbose=False)
             except:
                 pass
-        
+
         self._add_shape_id(image_id)
         for k, v in kwargs.items():
             self.images[tree_level][image_id][k] = v
@@ -230,20 +234,22 @@ class MapImages:
     @staticmethod
     def _check_image_mode(image_path):
         try:
-            img = Image.open(image_path)       
+            img = Image.open(image_path)
         except PIL.UnidentifiedImageError:
-            raise PIL.UnidentifiedImageError(f"[ERROR] {image_path} is not an image file.\n\n\
+            raise PIL.UnidentifiedImageError(
+                f"[ERROR] {image_path} is not an image file.\n\n\
 See https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.open for more information."
-                                             )
-       
+            )
+
         if img.mode not in ["1", "L", "LA", "I", "P", "RGB", "RGBA"]:
-            raise NotImplementedError(f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
+            raise NotImplementedError(
+                f"[ERROR] Image mode '{img.mode}' not currently accepted.\n\n\
 Please save your image(s) as one the following image modes: 1, L, LA, I, P, RGB or RGBA.\n\
 See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for more information."
-                                      )
+            )
 
     @staticmethod
-    def _convert_image_path(inp_path: str) -> Tuple[str, str, str]:
+    def _convert_image_path(inp_path: str) -> tuple[str, str, str]:
         """
         Convert an image path into an absolute path and find basename and directory name.
 
@@ -264,12 +270,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def add_metadata(
         self,
-        metadata: Union[str, pd.DataFrame],
-        index_col: Optional[Union[int, str]] = 0,
-        delimiter: Optional[str] = ",",
-        columns: Optional[List[str]] = None,
-        tree_level: Optional[str] = "parent",
-        ignore_mismatch: Optional[bool] = False,
+        metadata: str | pd.DataFrame,
+        index_col: int | str | None = 0,
+        delimiter: str | None = ",",
+        columns: list[str] | None = None,
+        tree_level: str | None = "parent",
+        ignore_mismatch: bool | None = False,
     ) -> None:
         """
         Add metadata information to the images dictionary.
@@ -298,9 +304,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Determines which images dictionary (``"parent"`` or ``"patch"``)
             to add the metadata to, by default ``"parent"``.
         ignore_mismatch : bool, optional
-            Whether to error if metadata with mismatching information is passed. 
+            Whether to error if metadata with mismatching information is passed.
             By default ``False``.
-        
+
         Raises
         ------
         ValueError
@@ -322,35 +328,36 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if isinstance(metadata, pd.DataFrame):
             if columns:
-                metadata_df=metadata[columns].copy()
+                metadata_df = metadata[columns].copy()
             else:
-                metadata_df=metadata.copy()
-                columns=list(metadata_df.columns)
-        
-        else: #if not df
+                metadata_df = metadata.copy()
+                columns = list(metadata_df.columns)
+
+        else:  # if not df
             if os.path.isfile(metadata):
-                if metadata.endswith(('xls', 'xlsx')):
+                if metadata.endswith(("xls", "xlsx")):
                     if columns:
                         metadata_df = pd.read_excel(
-                            metadata, usecols=columns,
-                            )
+                            metadata,
+                            usecols=columns,
+                        )
                     else:
                         metadata_df = pd.read_excel(
-                            metadata, index_col=index_col,
-                            )
-                        columns=list(metadata_df.columns)
-            
-                elif metadata.endswith('sv'): #csv, tsv, etc
+                            metadata,
+                            index_col=index_col,
+                        )
+                        columns = list(metadata_df.columns)
+
+                elif metadata.endswith("sv"):  # csv, tsv, etc
                     if columns:
                         metadata_df = pd.read_csv(
                             metadata, usecols=columns, delimiter=delimiter
-                            )
+                        )
                     else:
                         metadata_df = pd.read_csv(
                             metadata, index_col=index_col, delimiter=delimiter
-                            )
-                        columns=list(metadata_df.columns)
-                
+                        )
+                        columns = list(metadata_df.columns)
 
             else:
                 raise ValueError(
@@ -391,15 +398,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         )
 
         if not ignore_mismatch:
-            if len(missing_metadata)!=0 and len(extra_metadata)!=0:
-                raise ValueError(f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
+            if len(missing_metadata) != 0 and len(extra_metadata) != 0:
+                raise ValueError(
+                    f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
 [ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}"
                 )
-            elif len(missing_metadata)!=0: 
+            elif len(missing_metadata) != 0:
                 raise ValueError(
                     f"[ERROR] Metadata is missing information for: {[*missing_metadata]}"
                 )
-            elif len(extra_metadata)!=0:
+            elif len(extra_metadata) != 0:
                 raise ValueError(
                     f"[ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}"
                 )
@@ -413,14 +421,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     try:
                         self.images[tree_level][key][column] = eval(item)
                     except:
-                        self.images[tree_level][key][column]=item
+                        self.images[tree_level][key][column] = item
 
     def show_sample(
         self,
         num_samples: int,
-        tree_level: Optional[str] = "patch",
-        random_seed: Optional[int] = 65,
-        **kwargs: Dict,
+        tree_level: str | None = "patch",
+        random_seed: int | None = 65,
+        **kwargs: dict,
     ) -> None:
         """
         Display a sample of images from a particular level in the image
@@ -467,15 +475,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         plt.tight_layout()
         plt.show()
 
-    def list_parents(self) -> List[str]:
+    def list_parents(self) -> list[str]:
         """Return list of all parents"""
         return list(self.parents.keys())
 
-    def list_patches(self) -> List[str]:
+    def list_patches(self) -> list[str]:
         """Return list of all patches"""
         return list(self.patches.keys())
 
-    def add_shape(self, tree_level: Optional[str] = "parent") -> None:
+    def add_shape(self, tree_level: str | None = "parent") -> None:
         """
         Add a shape to each image in the specified level of the image
         hierarchy.
@@ -501,7 +509,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for image_id in image_ids:
             self._add_shape_id(image_id=image_id)
 
-    def add_coord_increments(self, verbose: Optional[bool] = False) -> None:
+    def add_coord_increments(self, verbose: bool | None = False) -> None:
         """
         Adds coordinate increments to each image at the parent level.
 
@@ -563,7 +571,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for patch_id in tqdm(patch_list):
             self._add_patch_polygons_id(patch_id, verbose)
 
-    def add_center_coord(self, tree_level: Optional[str] = "patch", verbose: Optional[bool] = False) -> None:
+    def add_center_coord(
+        self, tree_level: str | None = "patch", verbose: bool | None = False
+    ) -> None:
         """
         Adds center coordinates to each image at the specified tree level.
 
@@ -617,7 +627,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def _add_shape_id(
         self,
-        image_id: Union[int, str],
+        image_id: int | str,
     ) -> None:
         """
         Add shape (image_height, image_width, image_channels) of the image
@@ -641,16 +651,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         tree_level = self._get_tree_level(image_id)
 
-        try: 
+        try:
             myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
             # shape = (hwc)
             myimg_shape = myimg.shape
             self.images[tree_level][image_id]["shape"] = myimg_shape
         except OSError:
-            raise ValueError(f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.')
+            raise ValueError(
+                f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.'
+            )
 
     def _add_coord_increments_id(
-        self, image_id: Union[int, str], verbose: Optional[bool] = False
+        self, image_id: int | str, verbose: bool | None = False
     ) -> None:
         """
         Add pixel-wise delta longitude (``dlon``) and delta latitude
@@ -779,18 +791,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
-        
+
         if "coordinates" not in self.patches[image_id].keys():
             self._add_patch_coords_id(image_id, verbose)
-        
+
         if "coordinates" in self.patches[image_id].keys():
             coords = self.patches[image_id]["coordinates"]
             self.patches[image_id]["polygon"] = box(*coords)
 
     def _add_center_coord_id(
         self,
-        image_id: Union[int, str],
-        verbose: Optional[bool] = False,
+        image_id: int | str,
+        verbose: bool | None = False,
     ) -> None:
         """
         Calculates and adds center coordinates (longitude as ``center_lon``
@@ -822,7 +834,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._add_patch_coords_id(image_id, verbose)
 
         if "coordinates" in self.images[tree_level][image_id].keys():
-            self._print_if_verbose(f"[INFO] Reading 'coordinates' from {image_id}.", verbose)
+            self._print_if_verbose(
+                f"[INFO] Reading 'coordinates' from {image_id}.", verbose
+            )
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
@@ -831,10 +845,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def _calc_pixel_height_width(
         self,
-        parent_id: Union[int, str],
-        method: Optional[str] = "great-circle",
-        verbose: Optional[bool] = False,
-    ) -> Tuple[Tuple, float, float]:
+        parent_id: int | str,
+        method: str | None = "great-circle",
+        verbose: bool | None = False,
+    ) -> tuple[tuple, float, float]:
         """
         Calculate the height and width of each pixel in a given image in meters.
 
@@ -916,16 +930,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def patchify_all(
         self,
-        method: Optional[str] = "pixel",
-        patch_size: Optional[int] = 100,
-        tree_level: Optional[str] = "parent",
-        path_save: Optional[str] = None,
-        add_to_parents: Optional[bool] = True,
-        square_cuts: Optional[bool] = False,
-        resize_factor: Optional[bool] = False,
-        output_format: Optional[str] = "png",
-        rewrite: Optional[bool] = False,
-        verbose: Optional[bool] = False,
+        method: str | None = "pixel",
+        patch_size: int | None = 100,
+        tree_level: str | None = "parent",
+        path_save: str | None = None,
+        add_to_parents: bool | None = True,
+        square_cuts: bool | None = False,
+        resize_factor: bool | None = False,
+        output_format: str | None = "png",
+        rewrite: bool | None = False,
+        verbose: bool | None = False,
     ) -> None:
         """
         Patchify all images in the specified ``tree_level`` and (if ``add_to_parents=True``) add the patches to the MapImages instance's ``images`` dictionary.
@@ -971,7 +985,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if path_save is None:
             path_save = f"patches_{patch_size}_{method}"
-        
+
         print(f'[INFO] Saving patches in directory named "{path_save}".')
 
         for image_id in tqdm(image_ids):
@@ -979,7 +993,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             try:
                 full_path = print(os.path.relpath(image_path))
-            except ValueError: #if no rel path (e.g. mounted on different drives)
+            except ValueError:  # if no rel path (e.g. mounted on different drives)
                 full_path = print(os.path.abspath(image_path))
 
             self._print_if_verbose(f"[INFO] Patchifying {full_path}", verbose)
@@ -1015,12 +1029,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         image_id: str,
         patch_size: int,
         path_save: str,
-        add_to_parents: Optional[bool] = True,
-        square_cuts: Optional[bool] = False,
-        resize_factor: Optional[bool] = False,
-        output_format: Optional[str] = "png",
-        rewrite: Optional[bool] = False,
-        verbose: Optional[bool] = False,
+        add_to_parents: bool | None = True,
+        square_cuts: bool | None = False,
+        resize_factor: bool | None = False,
+        output_format: str | None = "png",
+        rewrite: bool | None = False,
+        verbose: bool | None = False,
     ):
         """Patchify one image and (if ``add_to_parents=True``) add the patch to the MapImages instance's ``images`` dictionary.
 
@@ -1087,7 +1101,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     self._print_if_verbose(
                         f"[INFO] File already exists: {patch_path}.", verbose
                     )
-                
+
                 else:
                     self._print_if_verbose(
                         f'[INFO] Creating "{patch_id}". Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.',
@@ -1133,14 +1147,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if patch_parent not in self.parents.keys():
             self.load_parents(parent_ids=patch_parent)
-        
+
         if "patches" not in self.parents[patch_parent].keys():
             self.parents[patch_parent]["patches"] = [patch_id]
         else:
             if patch_id not in self.parents[patch_parent]["patches"]:
                 self.parents[patch_parent]["patches"].append(patch_id)
 
-    def _make_dir(self, path_make: str, exists_ok: Optional[bool] = True) -> None:
+    def _make_dir(self, path_make: str, exists_ok: bool | None = True) -> None:
         """
         Helper method to make directories.
 
@@ -1151,10 +1165,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def calc_pixel_stats(
         self,
-        parent_id: Optional[str] = None,
-        calc_mean: Optional[bool] = True,
-        calc_std: Optional[bool] = True,
-        verbose: Optional[bool] = False,
+        parent_id: str | None = None,
+        calc_mean: bool | None = True,
+        calc_std: bool | None = True,
+        verbose: bool | None = False,
     ) -> None:
         """
         Calculate the mean and standard deviation of pixel values for all
@@ -1201,7 +1215,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         for parent_id in tqdm(parent_ids):
             self._print_if_verbose(
-                f"\n[INFO] Calculating pixel stats for patches of image: {parent_id}", verbose
+                f"\n[INFO] Calculating pixel stats for patches of image: {parent_id}",
+                verbose,
             )
 
             if "patches" not in self.parents[parent_id]:
@@ -1238,11 +1253,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
 
     def convert_images(
-            self, 
-            save: Optional[bool] = False, 
-            save_format: Optional[str] ="csv",
-            delimiter: Optional[str]=",",
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        self,
+        save: bool | None = False,
+        save_format: str | None = "csv",
+        delimiter: str | None = ",",
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the ``MapImages`` instance's ``images`` dictionary into pandas
         DataFrames for easy manipulation.
@@ -1254,7 +1269,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to save the dataframes as files. By default ``False``.
         save_format : str, optional
             If ``save = True``, the file format to use when saving the dataframes.
-            Options of csv ("csv") or excel ("excel" or "xlsx"). 
+            Options of csv ("csv") or excel ("excel" or "xlsx").
             By default, "csv".
         delimiter : str, optional
             The delimiter to use when saving the dataframe. By default ``","``.
@@ -1272,7 +1287,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_df.index.set_names("image_id", inplace=True)
 
         if save:
-
             if save_format == "csv":
                 parent_df.to_csv("parent_df.csv", sep=delimiter)
                 print('[INFO] Saved parent dataframe as "parent_df.csv"')
@@ -1285,15 +1299,17 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 print('[INFO] Saved patch dataframe as "patch_df.xslx"')
 
             else:
-                raise ValueError(f'[ERROR] ``save_format`` should be one of "csv", "excel" or "xlsx". Not {save_format}.')
+                raise ValueError(
+                    f'[ERROR] ``save_format`` should be one of "csv", "excel" or "xlsx". Not {save_format}.'
+                )
 
         return parent_df, patch_df
 
     def show_parent(
         self,
         parent_id: str,
-        column_to_plot: Optional[str] = None,
-        **kwargs: Dict,
+        column_to_plot: str | None = None,
+        **kwargs: dict,
     ) -> None:
         """
         A wrapper method for `.show()` which plots all patches of a
@@ -1321,26 +1337,26 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         patch_ids = self.parents[parent_id]["patches"]
         figures = self.show(patch_ids, column_to_plot=column_to_plot, **kwargs)
-        
+
         return figures
 
     def show(
         self,
-        image_ids: Union[str, List[str]],
-        column_to_plot: Optional[str] = None,
-        figsize: Optional[tuple] = (10,10),
-        plot_parent: Optional[bool] = True,
-        patch_border: Optional[bool] = True,
-        border_color: Optional[str] = "r",
-        vmin: Optional[float] = None,
-        vmax: Optional[float] = None,
-        alpha: Optional[float] = 1.0,
-        cmap: Optional[str] = "viridis",
-        discrete_cmap: Optional[int] = 256,
-        plot_histogram: Optional[bool] = False,
-        save_kml_dir: Optional[Union[bool, str]] = False,
-        image_width_resolution: Optional[int] = None,
-        kml_dpi_image: Optional[int] = None,
+        image_ids: str | list[str],
+        column_to_plot: str | None = None,
+        figsize: tuple | None = (10, 10),
+        plot_parent: bool | None = True,
+        patch_border: bool | None = True,
+        border_color: str | None = "r",
+        vmin: float | None = None,
+        vmax: float | None = None,
+        alpha: float | None = 1.0,
+        cmap: str | None = "viridis",
+        discrete_cmap: int | None = 256,
+        plot_histogram: bool | None = False,
+        save_kml_dir: bool | str | None = False,
+        image_width_resolution: int | None = None,
+        kml_dpi_image: int | None = None,
     ) -> None:
         """
         Plot images from a list of `image_ids`.
@@ -1389,7 +1405,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             The resolution, in dots per inch, to create KML images when
             ``save_kml_dir`` is specified (as either ``True`` or with path).
             By default ``None``.
-        
+
         Returns
         -------
         list
@@ -1400,9 +1416,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             image_ids = [image_ids]
 
         if not isinstance(image_ids, list):
-            raise ValueError(
-                "[ERROR] Please pass image_ids as str or list of strings."
-            )
+            raise ValueError("[ERROR] Please pass image_ids as str or list of strings.")
 
         if all(self._get_tree_level(image_id) == "parent" for image_id in image_ids):
             tree_level = "parent"
@@ -1537,7 +1551,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         vmax=vmax,
                         alpha=alpha,
                     )
-                    
+
                     fig.colorbar(values_plot, shrink=0.8)
 
                 if plot_parent:
@@ -1574,8 +1588,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         self,
         kml_out_path: str,
         column_to_plot: str,
-        coords: Union[List, Tuple],
-        counter: Optional[int] = -1,
+        coords: list | tuple,
+        counter: int | None = -1,
     ) -> None:
         """Create a KML file.
 
@@ -1639,11 +1653,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def load_patches(
         self,
         patch_paths: str,
-        patch_file_ext: Optional[Union[str, bool]] = False,
-        parent_paths: Optional[Union[str, bool]] = False,
-        parent_file_ext: Optional[Union[str, bool]] = False,
-        add_geo_info: Optional[bool] = False,
-        clear_images: Optional[bool] = False,
+        patch_file_ext: str | bool | None = False,
+        parent_paths: str | bool | None = False,
+        parent_file_ext: str | bool | None = False,
+        add_geo_info: bool | None = False,
+        clear_images: bool | None = False,
     ) -> None:
         """
         Loads patch images from the given paths and adds them to the ``images``
@@ -1681,8 +1695,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
-            self.parents = {} #are these needed?
-            self.patches = {} #are these needed?
+            self.parents = {}  # are these needed?
+            self.patches = {}  # are these needed?
 
         if parent_paths:
             # Add parents
@@ -1692,7 +1706,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 overwrite=False,
                 add_geo_info=add_geo_info,
             )
-        
+
         for patch_file in tqdm(patch_files):
             if not os.path.isfile(patch_file):
                 print(f"[WARNING] File does not exist: {patch_file}")
@@ -1723,7 +1737,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     @staticmethod
     def detect_parent_id_from_path(
-        image_id: Union[int, str], parent_delimiter: Optional[str] = "#"
+        image_id: int | str, parent_delimiter: str | None = "#"
     ) -> str:
         """
         Detect parent IDs from ``image_id``.
@@ -1745,9 +1759,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     @staticmethod
     def detect_pixel_bounds_from_path(
-        image_id: Union[int, str],
+        image_id: int | str,
         # border_delimiter="-" # <-- not in use in this method
-    ) -> Tuple[int, int, int, int]:
+    ) -> tuple[int, int, int, int]:
         """
         Detects borders from the path assuming patch is named using the
         following format: ``...-min_x-min_y-max_x-max_y-...``
@@ -1778,11 +1792,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def load_parents(
         self,
-        parent_paths: Optional[Union[str, bool]] = False,
-        parent_ids: Optional[Union[List[str], str, bool]] = False,
-        parent_file_ext: Optional[Union[str, bool]] = False,
-        overwrite: Optional[bool] = False,
-        add_geo_info: Optional[bool] = False,
+        parent_paths: str | bool | None = False,
+        parent_ids: list[str] | (str | bool) | None = False,
+        parent_file_ext: str | bool | None = False,
+        overwrite: bool | None = False,
+        add_geo_info: bool | None = False,
     ) -> None:
         """
         Load parent images from file paths (``parent_paths``).
@@ -1811,7 +1825,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
-        
+
         if parent_paths:
             files = self._resolve_file_path(parent_paths, parent_file_ext)
 
@@ -1826,32 +1840,36 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._check_image_mode(file)
 
                 parent_id = os.path.basename(file)
-                
+
                 if not self.parents.get(parent_id, False):
                     self.parents[parent_id] = {}
-                self.parents[parent_id]["parent_id"] = None 
-                self.parents[parent_id]["image_path"] = os.path.abspath(file) if os.path.isfile(file) else None
+                self.parents[parent_id]["parent_id"] = None
+                self.parents[parent_id]["image_path"] = (
+                    os.path.abspath(file) if os.path.isfile(file) else None
+                )
                 if add_geo_info:
                     self.add_geo_info()
 
         elif parent_ids:
             if not isinstance(parent_ids, list):
                 parent_ids = [parent_ids]
-            
+
             for parent_id in parent_ids:
                 if not self.parents.get(parent_id, False):
                     self.parents[parent_id] = {}
                 self.parents[parent_id]["parent_id"] = None
                 self.parents[parent_id]["image_path"] = None
-        
+
         else:
-            raise ValueError("[ERROR] Please pass one of ``parent_paths`` or ``parent_ids``.")
+            raise ValueError(
+                "[ERROR] Please pass one of ``parent_paths`` or ``parent_ids``."
+            )
 
     def load_df(
         self,
-        parent_df: Optional[pd.DataFrame] = None,
-        patch_df: Optional[pd.DataFrame] = None,
-        clear_images: Optional[bool] = True,
+        parent_df: pd.DataFrame | None = None,
+        patch_df: pd.DataFrame | None = None,
+        clear_images: bool | None = True,
     ) -> None:
         """
         Create ``MapImages`` instance by loading data from pandas DataFrame(s).
@@ -1886,12 +1904,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def load_csv(
         self,
-        parent_path: Optional[str] = None,
-        patch_path: Optional[str] = None,
-        clear_images: Optional[bool] = False,
-        index_col_patch: Optional[int] = 0,
-        index_col_parent: Optional[int] = 0,
-        delimiter: Optional[str] = ",",
+        parent_path: str | None = None,
+        patch_path: str | None = None,
+        clear_images: bool | None = False,
+        index_col_patch: int | None = 0,
+        index_col_parent: int | None = 0,
+        delimiter: str | None = ",",
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
@@ -1927,10 +1945,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             raise ValueError("[ERROR] Please pass ``patch_path`` as string.")
 
         if os.path.isfile(parent_path):
-            parent_df = pd.read_csv(parent_path, index_col=index_col_parent, sep=delimiter)
+            parent_df = pd.read_csv(
+                parent_path, index_col=index_col_parent, sep=delimiter
+            )
         else:
             raise ValueError(f"[ERROR] {parent_path} cannot be found.")
-                    
+
         if os.path.isfile(patch_path):
             patch_df = pd.read_csv(patch_path, index_col=index_col_patch, sep=delimiter)
         else:
@@ -1938,11 +1958,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         self.load_df(parent_df=parent_df, patch_df=patch_df, clear_images=clear_images)
 
-
     def add_geo_info(
         self,
-        target_crs: Optional[str] = "EPSG:4326",
-        verbose: Optional[bool] = True,
+        target_crs: str | None = "EPSG:4326",
+        verbose: bool | None = True,
     ) -> None:
         """
         Add coordinates (reprojected to EPSG:4326) to all parents images using image metadata.
@@ -1970,8 +1989,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def _add_geo_info_id(
         self,
         image_id: str,
-        target_crs: Optional[str] = "EPSG:4326",
-        verbose: Optional[bool] = True,
+        target_crs: str | None = "EPSG:4326",
+        verbose: bool | None = True,
     ) -> None:
         """
         Add coordinates (reprojected to EPSG:4326) to an image.
@@ -2056,12 +2075,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
         return tree_level
-    
+
     def save_patches_as_geotiffs(
-        self, 
-        rewrite: Optional[bool] = False, 
-        verbose: Optional[bool] = False,
-        crs: Optional[str] = None,
+        self,
+        rewrite: bool | None = False,
+        verbose: bool | None = False,
+        crs: str | None = None,
     ) -> None:
         """Save all patches in MapImages instance as geotiffs.
 
@@ -2078,16 +2097,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
 
         patches_list = self.list_patches()
-        
+
         for patch_id in tqdm(patches_list):
             self._save_patch_as_geotiff(patch_id, rewrite, verbose, crs)
 
     def _save_patch_as_geotiff(
-        self, 
-        patch_id: str, 
-        rewrite: Optional[bool] = False, 
-        verbose: Optional[bool] = False,
-        crs: Optional[str] = None,
+        self,
+        patch_id: str,
+        rewrite: bool | None = False,
+        verbose: bool | None = False,
+        crs: str | None = None,
     ) -> None:
         """Save a patch as a geotiff.
 
@@ -2115,19 +2134,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if not os.path.exists(patch_dir):
             raise ValueError(f'[ERROR] Patch directory "{patch_dir}" does not exist.')
-        
+
         patch_id_no_ext = os.path.splitext(patch_id)[0]
         geotiff_path = f"{patch_dir}/{patch_id_no_ext}.tif"
-        
+
         self.patches[patch_id]["geotiff_path"] = geotiff_path
-        
+
         if os.path.isfile(f"{geotiff_path}"):
             if not rewrite:
                 self._print_if_verbose(
-                    f'[INFO] File already exists: {geotiff_path}.', verbose
-                    )
+                    f"[INFO] File already exists: {geotiff_path}.", verbose
+                )
                 return
-            
+
         self._print_if_verbose(
             f"[INFO] Creating: {geotiff_path}.",
             verbose,
@@ -2140,7 +2159,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if "coordinates" not in self.patches[patch_id].keys():
             self._add_patch_coords_id(patch_id)
         coords = self.patches[patch_id]["coordinates"]
-        
+
         if not crs:
             crs = self.patches[patch_id].get("crs", "EPSG:4326")
 
@@ -2150,23 +2169,23 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         with rasterio.open(
             f"{geotiff_path}",
-            'w',
+            "w",
             driver="GTiff",
             height=patch.height,
             width=patch.width,
             count=channels,
             transform=patch_affine,
-            dtype='uint8',
+            dtype="uint8",
             nodata=0,
             crs=crs,
         ) as dst:
-            dst.write(patch_array)    
+            dst.write(patch_array)
 
     def save_patches_to_geojson(
-        self, 
-        geojson_fname: Optional[str] = "patches.geojson",
-        rewrite: Optional[bool] = False, 
-        crs: Optional[str] = None,
+        self,
+        geojson_fname: str | None = "patches.geojson",
+        rewrite: bool | None = False,
+        crs: str | None = None,
     ) -> None:
         """Saves patches to a geojson file.
 
@@ -2183,9 +2202,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         if os.path.isfile(geojson_fname):
             if not rewrite:
-                print(f'[WARNING] File already exists: {geojson_fname}. Use ``rewrite=True`` to overwrite.')
+                print(
+                    f"[WARNING] File already exists: {geojson_fname}. Use ``rewrite=True`` to overwrite."
+                )
                 return
-    
+
         _, patch_df = self.convert_images()
 
         if "polygon" not in patch_df.columns:
@@ -2200,14 +2221,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 crs = "EPSG:4326"
 
         patch_df.reset_index(names="image_id", inplace=True)
-        
-        #drop pixel stats columns
+
+        # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
-        #drop tuple columns - cause errors
+        # drop tuple columns - cause errors
         for col in patch_df.columns:
             if isinstance(patch_df[col][0], tuple):
                 patch_df.drop(columns=col, inplace=True)
-        
+
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
 
@@ -2316,7 +2337,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         for one_img in self.images[tree_level].keys():
             process_paths.append(self.images[tree_level][one_img]["image_path"])
         self.process_paths = process_paths
-        
+
     def prepare4inference(self, fmt="dataframe"):
         """Convert images to the specified format (fmt)
             Keyword Arguments:

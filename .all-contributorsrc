@@ -1,0 +1,118 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "kmcdono2",
+      "name": "Katie McDonough",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20363927?v=4",
+      "profile": "https://www.turing.ac.uk/people/researchers/katherine-mcdonough",
+      "contributions": [
+        "research",
+        "ideas",
+        "doc",
+        "projectManagement",
+        "review",
+        "talk",
+        "tutorial"
+      ]
+    },
+    {
+      "login": "dcsw2",
+      "name": "Daniel C.S. Wilson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34318222?v=4",
+      "profile": "http://danielwilson.info",
+      "contributions": [
+        "research",
+        "ideas",
+        "talk",
+        "doc",
+      ]
+    },
+    {
+      "login": "kasra-hosseini",
+      "name": "Kasra Hosseini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1899856?v=4",
+      "profile": "https://github.com/kasra-hosseini",
+      "contributions": [
+        "code",
+        "ideas",
+        "research",
+        "review",
+        "talk"
+      ]
+    },
+    {
+      "login": "rwood-97",
+      "name": "Rosie Wood",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72076688?v=4",
+      "profile": "https://github.com/rwood-97",
+      "contributions": [
+        "code",
+        "doc",
+        "ideas",
+        "talk",
+        "tutorial",
+        "review",
+        "maintenance",
+        "research"
+      ]
+    },
+    {
+      "login": "kallewesterling",
+      "name": "Kalle Westerling",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7298727?v=4",
+      "profile": "http://www.westerling.nu",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance",
+        "review",
+        "talk"
+      ]
+    },
+    {
+      "login": "ChrisFleet",
+      "name": "Chris Fleet",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3666702?v=4",
+      "profile": "https://maps.nls.uk",
+      "contributions": [
+        "data"
+      ]
+    },
+    {
+      "login": "kasparvonbeelen",
+      "name": "Kaspar Beelen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11618160?v=4",
+      "profile": "https://github.com/kasparvonbeelen",
+      "contributions": [
+        "ideas",
+        "review",
+        "research"
+      ]
+    },
+    {
+      "login": "andrewphilipsmith",
+      "name": "Andy Smith",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5346065?v=4",
+      "profile": "https://github.com/andrewphilipsmith",
+      "contributions": [
+        "code",
+        "doc",
+        "mentoring",
+        "review"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "MapReader",
+  "projectOwner": "Living-with-machines"
+}

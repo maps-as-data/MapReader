@@ -5,42 +5,46 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+from __future__ import annotations
 
-project = 'MapReader'
-copyright = '2023, RW'
-author = 'RW'
+import sphinx_rtd_theme
 
 import mapreader
+
+project = "MapReader"
+copyright = "2023, RW"
+author = "RW"
+
 release = mapreader.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx_rtd_theme',
-    'myst_parser',
-    'autoapi.extension',
-    'sphinx_copybutton',
-    'nbsphinx',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.todo',
-    'sphinx_togglebutton'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx_rtd_theme",
+    "myst_parser",
+    "autoapi.extension",
+    "sphinx_copybutton",
+    "nbsphinx",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx_togglebutton",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
 
 # -- autoapi configuration -----
 
-autoapi_dirs = ['../../mapreader']
+autoapi_dirs = ["../../mapreader"]
 autoapi_type = "python"
 autoapi_root = "api"
 
@@ -63,14 +67,12 @@ napoleon_include_private_with_doc = True
 napoleon_include_special_with_doc = True
 
 # -- todo --
-todo_include_todos=False
+todo_include_todos = False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-import sphinx_rtd_theme
-
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_static_path = ['_static']
+html_static_path = ["_static"]

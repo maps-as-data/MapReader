@@ -1,18 +1,18 @@
 # ---------------------------------------
 # Define an annotation task
-# This includes: 
+# This includes:
 # 1. a name (e.g., building_simple or rail_space, see below)
 # 2. a list of labels to be used for this task
 # ---------------------------------------
 tasks:
   rail_space:
     labels: ["No", "RS"]
-    
+
 # ---------------------------------------
-# paths 
+# paths
 # You need to specify:
 # 1. a name (e.g., task_test_one_inch_maps_001, see below)
-# 2. patch_paths: path to all the patches to be annotated 
+# 2. patch_paths: path to all the patches to be annotated
 # 3. parent_paths: path to the original/parent maps/images (which were patchified)
 # 4. annot_dir: directory in which the outputs will be stored
 # ---------------------------------------
@@ -21,4 +21,3 @@ paths:
     patch_paths: "./test_tifs_patch_500/patch-*png"
     parent_paths: "./test_tifs/*tif"
     annot_dir: "./test_tifs_annotations"
-

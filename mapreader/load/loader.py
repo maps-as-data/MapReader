@@ -1,16 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from typing import Optional, Union
+from __future__ import annotations
 
 from mapreader.load.images import MapImages
 
 
 def loader(
-    path_images: Optional[str] = None,
-    tree_level: Optional[str] = "parent",
-    parent_path: Optional[str] = None,
-    **kwargs: dict
+    path_images: str | None = None,
+    tree_level: str | None = "parent",
+    parent_path: str | None = None,
+    **kwargs: dict,
 ) -> MapImages:
     """
     Creates a ``MapImages`` class to manage a collection of image paths and
@@ -42,18 +40,21 @@ def loader(
     :class:`mapreader.load.images.MapImages` class for more detail.
     """
     img = MapImages(
-        path_images=path_images, tree_level=tree_level, parent_path=parent_path, **kwargs
+        path_images=path_images,
+        tree_level=tree_level,
+        parent_path=parent_path,
+        **kwargs,
     )
     return img
 
 
 def load_patches(
     patch_paths: str,
-    patch_file_ext: Optional[Union[str, bool]] = False,
-    parent_paths: Optional[Union[str, bool]] = False,
-    parent_file_ext: Optional[Union[str, bool]] = False,
-    add_geo_info: Optional[bool] = False,
-    clear_images: Optional[bool] = False,
+    patch_file_ext: str | bool | None = False,
+    parent_paths: str | bool | None = False,
+    parent_file_ext: str | bool | None = False,
+    add_geo_info: bool | None = False,
+    clear_images: bool | None = False,
 ) -> MapImages:
     """
     Creates a ``MapImages`` class to manage a collection of image paths and
