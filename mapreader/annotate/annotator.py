@@ -333,20 +333,21 @@ class Annotator(pd.DataFrame):
         **kwargs,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Loads patches and parents data from given paths and returns the
-        corresponding dataframes.
+        Load parent and patch dataframes by loading images from file paths.
 
         Parameters
         ----------
-        **kwargs :
-            Needs to contain "patches" and "parents"
-
-            Needs to contain "metadata" and "metadata_delimiter"
+        patch_paths : str | None, optional
+            Path to the patches, by default None
+        parent_paths : str | None, optional
+            Path to the parent images, by default None
+        metadata_path : str | None, optional
+            Path to the parent metadata file, by default None
 
         Returns
         -------
-        Tuple[pd.DataFrame, pd.DataFrame]
-            Parents and patches dataframes.
+        tuple[pd.DataFrame, pd.DataFrame]
+            A tuple containing the parent dataframe and patch dataframe.
         """
         if patch_paths:
             print(f"[INFO] Loading patches from {patch_paths}.")
@@ -601,24 +602,24 @@ class Annotator(pd.DataFrame):
 
         Parameters
         ----------
-        show_context : bool, optional
+        show_context : bool or None, optional
             Whether or not to display the surrounding context for each image.
-            Default: None.
-        min_values : dict, optional
+            Default is None.
+        min_values : dict or None, optional
             Minimum values for each property to filter images for annotation.
             It should be provided as a dictionary consisting of column names
             (keys) and minimum values as floating point values (values).
-            Default: {}.
-        max_values : dict, optional
+            Default is None.
+        max_values : dict or None, optional
             Maximum values for each property to filter images for annotation.
             It should be provided as a dictionary consisting of column names
             (keys) and minimum values as floating point values (values).
-            Default: {}.
-        surrounding : int, optional
+            Default is None
+        surrounding : int or None, optional
             The number of surrounding images to show for context. Default: 1.
-        margin : int, optional
+        margin : int or None, optional
             The margin to use for the context images. Default: 0.
-        max_size : int, optional
+        max_size : int or None, optional
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
 
