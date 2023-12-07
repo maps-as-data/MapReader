@@ -101,6 +101,6 @@ def reproject_geo_info(image_path, target_crs="EPSG:4326", calc_size_in_m=False)
         )  # noqa
 
     else:
-        size_in_m = False
+        size_in_m = None
 
     return tiff_shape, tiff_proj, target_crs, coord, size_in_m
