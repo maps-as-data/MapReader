@@ -64,6 +64,7 @@ Other arguments that you may want to be aware of when initializing the ``Annotat
 
 - ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
+- ``delimiter``: The delimiter to use when reading your data files (default: ``","`` for csv).
 
 After setting up the ``Annotator`` instance, you can interactively annotate a sample of your images using:
 

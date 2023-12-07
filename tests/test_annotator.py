@@ -65,6 +65,21 @@ def test_init_with_fpaths(load_dfs, sample_dir):
     assert "mean_pixel_R" in annotator.columns
 
 
+def test_init_with_fpaths_tsv(load_dfs, sample_dir):
+    _, _, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_paths=f"{tmp_path}/patches/*png",
+        parent_paths=f"{sample_dir}/cropped_74488689.png",
+        metadata_path=f"{sample_dir}/ts_downloaded_maps.tsv",
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+        delimiter="\t",
+    )
+    assert len(annotator) == 9
+    assert "mean_pixel_R" in annotator.columns
+
+
 def test_no_labels(load_dfs):
     parent_df, patch_df, tmp_path = load_dfs
     annotator = Annotator(
@@ -169,6 +184,16 @@ def test_incorrect_csv_paths(load_dfs):
         Annotator(
             patch_df=f"{tmp_path}/patch_df.csv",
             parent_df="fake_df.csv",
+        )
+
+
+def test_incorrect_delimiter(load_dfs):
+    _, _, tmp_path = load_dfs
+    with pytest.raises(ValueError):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df=f"{tmp_path}/parent_df.csv",
+            delimiter="|",
         )
 
 
