@@ -285,6 +285,7 @@ class Annotator(pd.DataFrame):
         self.buttons_per_row = kwargs.get("buttons_per_row", None)
         self._min_values = kwargs.get("min_values", {})
         self._max_values = kwargs.get("max_values", {})  # pixel_bounds = x0, y0, x1, y1
+        self._filter_for = kwargs.get("filter_for", {})
 
         self.patch_width, self.patch_height = self.get_patch_size()
 
@@ -467,9 +468,14 @@ class Annotator(pd.DataFrame):
             if row.label is not None:
                 return False
 
-            test = [
-                row[col] >= min_value for col, min_value in self._min_values.items()
-            ] + [row[col] <= max_value for col, max_value in self._max_values.items()]
+            test = (
+                [row[col] >= min_value for col, min_value in self._min_values.items()]
+                + [row[col] <= max_value for col, max_value in self._max_values.items()]
+                + [
+                    row[col] == filter_for
+                    for col, filter_for in self._filter_for.items()
+                ]
+            )
 
             if not all(test):
                 return False
