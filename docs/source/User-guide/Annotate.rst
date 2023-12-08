@@ -63,6 +63,7 @@ In the above examples, the following parameters are also specified:
 Other arguments that you may want to be aware of when initializing the ``Annotator`` instance include:
 
 - ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
+- ``surrounding``: How many surrounding patches to show in the context image (default: ``1``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
 - ``delimiter``: The delimiter to use when reading your data files (default: ``","`` for csv).
 
@@ -101,6 +102,15 @@ Or, you can pass the ``show_context`` argument when calling the ``annotate`` met
     annotator.annotate(show_context=True)
 
 This will overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+
+By default, your ``Annotator`` will show one surrounding patch in the context image.
+You can change this by passing the ``surrounding`` argument when initializing the ``Annotator`` instance and/or when calling the ``annotate`` method.
+
+e.g. to show two surrounding patches in the context image:
+
+.. code-block:: python
+
+    annotator.annotate(show_context=True, surrounding=2)
 
 Sort order
 ~~~~~~~~~~

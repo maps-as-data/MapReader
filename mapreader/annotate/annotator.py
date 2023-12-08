@@ -89,6 +89,9 @@ class Annotator(pd.DataFrame):
     - ``min_values``: A dictionary consisting of column names (keys) and minimum values as floating point values (values). Default: {}.
     - ``max_values``: A dictionary consisting of column names (keys) and maximum values as floating point values (values). Default: {}.
     - ``buttons_per_row``: Number of buttons to display per row. Default: None.
+    - ``ascending``: Whether to sort the DataFrame in ascending order. Default: True.
+    - ``surrounding``: The number of surrounding images to show for context. Default: 1.
+    - ``max_size``: The size in pixels for the longest side to which constrain each patch image. Default: 100.
     """
 
     def __init__(
@@ -292,9 +295,9 @@ class Annotator(pd.DataFrame):
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
 
         # Set up standards for context display
-        self.surrounding = 1
+        self.surrounding = kwargs.get("surrounding", 1)
+        self.max_size = kwargs.get("max_size", MAX_SIZE)
         self.margin = 1
-        self.max_size = MAX_SIZE
 
         # set up buttons
         self._buttons = []
@@ -595,8 +598,8 @@ class Annotator(pd.DataFrame):
         show_context: bool | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
-        surrounding: int | None = 1,
-        margin: int | None = 0,
+        surrounding: int | None = None,
+        margin: int | None = None,
         max_size: int | None = None,
     ) -> None:
         """
@@ -640,10 +643,10 @@ class Annotator(pd.DataFrame):
 
         if show_context is not None:
             self.show_context = show_context
-
-        self.surrounding = surrounding
-        self.margin = margin
-
+        if surrounding is not None:
+            self.surrounding = surrounding
+        if margin is not None:
+            self.margin = margin
         if max_size is not None:
             self.max_size = max_size
 
