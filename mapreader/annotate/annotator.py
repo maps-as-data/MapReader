@@ -330,7 +330,7 @@ class Annotator(pd.DataFrame):
         patch_paths: str | None = None,
         parent_paths: str | None = None,
         metadata_path: str | None = None,
-        **kwargs,
+        delimiter: str = ",",
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Load parent and patch dataframes by loading images from file paths.
@@ -343,6 +343,8 @@ class Annotator(pd.DataFrame):
             Path to the parent images, by default None
         metadata_path : str | None, optional
             Path to the parent metadata file, by default None
+        delimiter : str, optional
+            Delimiter used in CSV files, by default ","
 
         Returns
         -------
@@ -359,7 +361,7 @@ class Annotator(pd.DataFrame):
         maps.calc_pixel_stats()
 
         try:
-            maps.add_metadata(metadata_path, delimiter=kwargs["delimiter"])
+            maps.add_metadata(metadata_path, delimiter=delimiter)
             print(f"[INFO] Adding metadata from {metadata_path}.")
         except ValueError:
             raise FileNotFoundError(
@@ -595,7 +597,7 @@ class Annotator(pd.DataFrame):
         max_values: dict | None = None,
         surrounding: int | None = 1,
         margin: int | None = 0,
-        max_size: int | None = MAX_SIZE,
+        max_size: int | None = None,
     ) -> None:
         """
         Renders the annotation interface for the first image.
@@ -641,7 +643,9 @@ class Annotator(pd.DataFrame):
 
         self.surrounding = surrounding
         self.margin = margin
-        self.max_size = max_size
+
+        if max_size is not None:
+            self.max_size = max_size
 
         # re-set up queue
         self._queue = self.get_queue()
