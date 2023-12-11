@@ -73,12 +73,44 @@ After setting up the ``Annotator`` instance, you can interactively annotate a sa
 
     annotator.annotate()
 
+Patch size
+~~~~~~~~~~
+
+By default, your patches will be shown to you as their original size in pixels.
+This can make annotating difficult if your patches are very small.
+To resize your patches when viewing them in the annotation interface, you can pass the ``resize_to`` keyword argument when initializing the ``Annotator`` instance or when calling the ``annotate()`` method.
+
+e.g. to resize your patches so that their largest edge is 300 pixels:
+
+.. code-block:: python
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations",
+        task_name="railspace",
+        labels=["no_rail_space", "rail_space"],
+        username="rosie",
+        resize_to=300,
+    )
+
+Or, equivalently, :
+
+.. code-block:: python
+
+    annotator.annotate(resize_to=300)
+
+.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+
 Context
 ~~~~~~~
 
-To help with annotating, you can set the annotation interface to show a context image using ``show_context=True``.
+As well as resizing your patches, you can also set the annotation interface to show a context image using ``show_context=True``.
 This creates a panel of patches in the annotation interface, highlighting your patch in the middle of its surrounding immediate images.
-You can either pass the ``show_context`` argument when initializing the ``Annotator`` instance:
+As above, you can either pass the ``show_context`` argument when initializing the ``Annotator`` instance or when calling the ``annotate`` method.
+
+e.g. :
 
 .. code-block:: python
 
@@ -95,13 +127,13 @@ You can either pass the ``show_context`` argument when initializing the ``Annota
 
     annotator.annotate()
 
-Or, you can pass the ``show_context`` argument when calling the ``annotate`` method:
+Or, equivalently, :
 
 .. code-block:: python
 
     annotator.annotate(show_context=True)
 
-This will overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``show_context`` argument when calling the ``annotate()`` method overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
 
 By default, your ``Annotator`` will show one surrounding patch in the context image.
 You can change this by passing the ``surrounding`` argument when initializing the ``Annotator`` instance and/or when calling the ``annotate`` method.
