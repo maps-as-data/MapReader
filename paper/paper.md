@@ -2,12 +2,13 @@
 title: 'MapReader: v1.xxx' # check version number at time of submission
 tags:
   - Python
-  - computational humanities
-  - maps
-  - computer vision
-  - history
-  - digital humanities
   - image classification
+  - computer vision
+  - deep learning
+  - computational humanities
+  - digital humanities
+  - maps
+  - history
 authors:
   - name: Katherine McDonough
     orcid: 0000-0001-7506-1025
@@ -40,7 +41,7 @@ affiliations:
    index: 3
  - name: Zalando SE, Germany
    index: 4
-date: 4 December 2023
+date: 11 December 2023
 bibliography: paper.bib
 
 
@@ -48,7 +49,9 @@ bibliography: paper.bib
 
 # Summary
 
-MapReader is an interdisciplinary software library for processing digitized maps, but also other types of images, by 'patching' then into small, custom-sized cells, which are then classified according to the user's needs. MapReader thus offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for Computer Vision-based inference of large collections. Its approach was inspired by methods in biomedical imaging, which were adapted for use by historians, and it is suitable for a wide range of applications in image analysis: it has, for example, been applied to an image classification problem in plant phenotype research `[@Corcoran]`. This cross-pollination between the humanities and the natural sciences was made possible by the open and reproducible research methods at the heart of MapReader.
+MapReader is an interdisciplinary software library for processing digitized maps `[@Hosseini_mapreader]`, but also other types of images, by 'patching' them into small, custom-sized cells, which are then classified according to the user's needs. MapReader thus offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for Computer Vision-based inference of large collections. As an example, in `@Hosseini_mapreader`, we utilized MapReader's interface to manually annotate 62,020 patches, used its functionalities to train a suite of computer vision models and performed model inference on approximately 30.5 million patches. 
+
+MapReader's approach was inspired by methods in biomedical imaging, which were adapted for use by historians, and it is suitable for a wide range of applications in image analysis: it has, for example, been applied to an image classification problem in plant phenotype research `[@Corcoran]`. This cross-pollination between the humanities and the natural sciences was made possible by the open and reproducible research methods at the heart of MapReader.
 
 MapReader pioneers a methodological shift in how historians interact with maps as primary sources. Sustained engagement with big collections of maps rarely moves beyond analysis of cartographic history. To change this, MapReader encourages historians to reflect on the content of maps and is designed to facilitate linking datasets representing visual map content with other historical geospatial data.
 
