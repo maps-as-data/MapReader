@@ -74,7 +74,7 @@ MapReader is among the first end-to-end pipeline for processing historical maps 
 
 # Documentation
 
-MapReader aims to build computational skills among historians. Our extensive work on documentation and training, including substantial updates to MapReader since `@Hosseini_mapreader`, reflect this commitment. As historians explore the possibilities of computational methods for novel historical research, MapReader models how computational tools can unlock difficult to use primary sources and how we can embrace open research practices as a way to encourage learning. We welcome contributions and requests for new documentation or tutorials.
+MapReader aims to build computational skills among historians. Our extensive work on documentation and training, including substantial updates to MapReader since `@Hosseini_mapreader`, reflect this commitment. As historians explore the possibilities of computational methods for novel historical research, MapReader models how computational tools can unlock difficult-to-use primary sources and how we can embrace open research practices as a way to encourage learning. We welcome contributions and requests for new documentation or tutorials.
 
 Our documentation includes:
 - About MapReader: A basic introduction to the software and its origins
