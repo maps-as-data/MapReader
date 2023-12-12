@@ -22,7 +22,7 @@ from ..load.loader import load_patches
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-MAX_SIZE = 100
+MAX_SIZE = 1000
 
 _CENTER_LAYOUT = widgets.Layout(
     display="flex", flex_flow="column", align_items="center"
@@ -92,7 +92,7 @@ class Annotator(pd.DataFrame):
     - ``buttons_per_row``: Number of buttons to display per row. Default: None.
     - ``ascending``: Whether to sort the DataFrame in ascending order. Default: True.
     - ``surrounding``: The number of surrounding images to show for context. Default: 1.
-    - ``max_size``: The size in pixels for the longest side to which constrain each patch image. Default: 100.
+    - ``max_size``: The size in pixels for the longest side to which constrain each patch image. Default: 1000.
     - ``resize_to``: The size in pixels for the longest side to which resize each patch image. Default: None.
     """
 
@@ -510,10 +510,6 @@ class Annotator(pd.DataFrame):
         def get_path(image_path, dim=True):
             # Resize the image
             im = Image.open(image_path)
-            if max(im.size) > self.max_size:
-                print(f"[DEBUG] Resizing {image_path} to {self.max_size}")
-                im = ImageOps.contain(im, (self.max_size, self.max_size))
-                print(f"[DEBUG] --> {im.size}")
 
             # Dim the image
             if dim is True or dim == "True":
@@ -591,6 +587,12 @@ class Annotator(pd.DataFrame):
             context_image = ImageOps.contain(
                 context_image, (self.resize_to, self.resize_to)
             )
+        # only constrain to max size if not resize_to
+        elif max(context_image.size) > self.max_size:
+            context_image = ImageOps.contain(
+                context_image, (self.max_size, self.max_size)
+            )
+
         return context_image
 
     def annotate(
@@ -812,6 +814,9 @@ class Annotator(pd.DataFrame):
 
         if self.resize_to is not None:
             image = ImageOps.contain(image, (self.resize_to, self.resize_to))
+        # only constrain to max size if not resize_to
+        elif max(image.size) > self.max_size:
+            image = ImageOps.contain(image, (self.max_size, self.max_size))
 
         return image
 
