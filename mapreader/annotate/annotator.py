@@ -12,6 +12,7 @@ from itertools import product
 from pathlib import Path
 
 import ipywidgets as widgets
+import numpy as np
 import pandas as pd
 from IPython.display import clear_output, display
 from numpy import array_split
@@ -89,6 +90,10 @@ class Annotator(pd.DataFrame):
     - ``min_values``: A dictionary consisting of column names (keys) and minimum values as floating point values (values). Default: {}.
     - ``max_values``: A dictionary consisting of column names (keys) and maximum values as floating point values (values). Default: {}.
     - ``buttons_per_row``: Number of buttons to display per row. Default: None.
+    - ``ascending``: Whether to sort the DataFrame in ascending order. Default: True.
+    - ``surrounding``: The number of surrounding images to show for context. Default: 1.
+    - ``max_size``: The size in pixels for the longest side to which constrain each patch image. Default: 100.
+    - ``resize_to``: The size in pixels for the longest side to which resize each patch image. Default: None.
     """
 
     def __init__(
@@ -293,9 +298,9 @@ class Annotator(pd.DataFrame):
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
 
         # Set up standards for context display
-        self.surrounding = 1
-        self.margin = 1
-        self.max_size = MAX_SIZE
+        self.surrounding = kwargs.get("surrounding", 1)
+        self.max_size = kwargs.get("max_size", MAX_SIZE)
+        self.resize_to = kwargs.get("resize_to", None)
 
         # set up buttons
         self._buttons = []
@@ -331,7 +336,7 @@ class Annotator(pd.DataFrame):
         patch_paths: str | None = None,
         parent_paths: str | None = None,
         metadata_path: str | None = None,
-        **kwargs,
+        delimiter: str = ",",
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Load parent and patch dataframes by loading images from file paths.
@@ -344,6 +349,8 @@ class Annotator(pd.DataFrame):
             Path to the parent images, by default None
         metadata_path : str | None, optional
             Path to the parent metadata file, by default None
+        delimiter : str, optional
+            Delimiter used in CSV files, by default ","
 
         Returns
         -------
@@ -360,7 +367,7 @@ class Annotator(pd.DataFrame):
         maps.calc_pixel_stats()
 
         try:
-            maps.add_metadata(metadata_path, delimiter=kwargs["delimiter"])
+            maps.add_metadata(metadata_path, delimiter=delimiter)
             print(f"[INFO] Adding metadata from {metadata_path}.")
         except ValueError:
             raise FileNotFoundError(
@@ -516,21 +523,10 @@ class Annotator(pd.DataFrame):
 
             # Dim the image
             if dim is True or dim == "True":
-                alpha = Image.new("L", im.size, 60)
-                im.putalpha(alpha)
-
-            # Save temp image
-            image_path = ".temp.png"
-            im.save(image_path)
-
-            # Read as bytes
-            with open(image_path, "rb") as f:
-                im = f.read()
-
-            Path(image_path).unlink()
-
-            layout = widgets.Layout(margin=f"{self.margin}px")
-            return widgets.Image(value=im, layout=layout)
+                im_array = np.array(im)
+                im_array = 256 - (256 - im_array) * 0.4  # lighten image
+                im = Image.fromarray(im_array.astype(np.uint8))
+            return im
 
         def get_empty_square():
             im = Image.new(
@@ -538,13 +534,7 @@ class Annotator(pd.DataFrame):
                 mode="RGB",
                 color="white",
             )
-            image_path = ".temp.png"
-            im.save(image_path)
-
-            with open(image_path, "rb") as f:
-                im = f.read()
-
-            return widgets.Image(value=im)
+            return im
 
         if self.surrounding > 3:
             display(
@@ -576,32 +566,47 @@ class Annotator(pd.DataFrame):
         ids = [x != ix for x in ids]
 
         # derive images from items
-        images = [
+        image_paths = [
             x.at[x.index[0], "image_path"] if len(x.index) == 1 else None for x in items
         ]
 
         # zip them
-        images = list(zip(images, ids))
+        image_list = list(zip(image_paths, ids))
 
         # split them into rows
         per_row = len(deltas)
-        image_widgets = [
+        images = [
             [get_path(x[0], dim=x[1]) if x[0] else get_empty_square() for x in lst]
-            for lst in array_split(images, per_row)
+            for lst in array_split(image_list, per_row)
         ]
 
-        h_boxes = [widgets.HBox(x) for x in image_widgets]
+        total_width = (2 * self.surrounding + 1) * self.patch_width
+        total_height = (2 * self.surrounding + 1) * self.patch_height
 
-        return widgets.VBox(h_boxes, layout=_CENTER_LAYOUT)
+        context_image = Image.new("RGB", (total_width, total_height))
+
+        y_offset = 0
+        for row in images:
+            x_offset = 0
+            for image in row:
+                context_image.paste(image, (x_offset, y_offset))
+                x_offset += self.patch_width
+            y_offset += self.patch_height
+
+        if self.resize_to is not None:
+            context_image = ImageOps.contain(
+                context_image, (self.resize_to, self.resize_to)
+            )
+        return context_image
 
     def annotate(
         self,
         show_context: bool | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
-        surrounding: int | None = 1,
-        margin: int | None = 0,
-        max_size: int | None = MAX_SIZE,
+        surrounding: int | None = None,
+        resize_to: int | None = None,
+        max_size: int | None = None,
     ) -> None:
         """
         Renders the annotation interface for the first image.
@@ -623,8 +628,6 @@ class Annotator(pd.DataFrame):
             Default is None
         surrounding : int or None, optional
             The number of surrounding images to show for context. Default: 1.
-        margin : int or None, optional
-            The margin to use for the context images. Default: 0.
         max_size : int or None, optional
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
@@ -644,10 +647,12 @@ class Annotator(pd.DataFrame):
 
         if show_context is not None:
             self.show_context = show_context
-
-        self.surrounding = surrounding
-        self.margin = margin
-        self.max_size = max_size
+        if surrounding is not None:
+            self.surrounding = surrounding
+        if resize_to is not None:
+            self.resize_to = resize_to
+        if max_size is not None:
+            self.max_size = max_size
 
         # re-set up queue
         self._queue = self.get_queue()
@@ -764,9 +769,10 @@ class Annotator(pd.DataFrame):
             image = self.get_patch_image(ix)
             if self.show_context:
                 context = self.get_context()
-                display(context)
+                self._context_image = context
+                display(context.convert("RGB"))
             else:
-                display(image)
+                display(image.convert("RGB"))
             add_ins = []
             if self.at[ix, "url"]:
                 url = self.at[ix, "url"]
@@ -793,7 +799,7 @@ class Annotator(pd.DataFrame):
                 )
             )
 
-    def get_patch_image(self, ix: int) -> widgets.Image:
+    def get_patch_image(self, ix: int) -> Image:
         """
         Returns the image at the given index.
 
@@ -804,14 +810,16 @@ class Annotator(pd.DataFrame):
 
         Returns
         -------
-        ipywidgets.Image
-            A widget displaying the image at the given index.
+        PIL.Image
+            A PIL.Image object of the image at the given index.
         """
         image_path = self.at[ix, self.patch_paths_col]
-        with open(image_path, "rb") as f:
-            image = f.read()
+        image = Image.open(image_path)
 
-        return widgets.Image(value=image)
+        if self.resize_to is not None:
+            image = ImageOps.contain(image, (self.resize_to, self.resize_to))
+
+        return image
 
     def _add_annotation(self, annotation: str) -> None:
         """
