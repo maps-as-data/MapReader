@@ -101,7 +101,7 @@ Or, equivalently, :
 
     annotator.annotate(resize_to=300)
 
-.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator`` instance.
 
 Context
 ~~~~~~~
