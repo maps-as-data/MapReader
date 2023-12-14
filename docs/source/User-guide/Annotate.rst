@@ -101,7 +101,7 @@ Or, equivalently, :
 
     annotator.annotate(resize_to=300)
 
-.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator`` instance.
 
 Context
 ~~~~~~~
@@ -133,7 +133,7 @@ Or, equivalently, :
 
     annotator.annotate(show_context=True)
 
-.. note:: Passing the ``show_context`` argument when calling the ``annotate()`` method overwrite the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``show_context`` argument when calling the ``annotate()`` method overrides the ``show_context`` argument passed when initializing the ``Annotator`` instance.
 
 By default, your ``Annotator`` will show one surrounding patch in the context image.
 You can change this by passing the ``surrounding`` argument when initializing the ``Annotator`` instance and/or when calling the ``annotate`` method.
