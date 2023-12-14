@@ -1,5 +1,5 @@
 ---
-title: 'MapReader: v1.xxx' # check version number at time of submission
+title: 'MapReader: v1.1.0'
 tags:
   - Python
   - image classification
@@ -41,7 +41,7 @@ affiliations:
    index: 3
  - name: Zalando SE, Germany
    index: 4
-date: 11 December 2023
+date: 14 December 2023
 bibliography: paper.bib
 
 
@@ -49,7 +49,7 @@ bibliography: paper.bib
 
 # Summary
 
-MapReader is an interdisciplinary software library for processing digitized maps `[@Hosseini_mapreader]`, but also other types of images, by 'patching' them into small, custom-sized cells, which are then classified according to the user's needs. MapReader thus offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for Computer Vision-based inference of large collections. As an example, in `@Hosseini_mapreader`, we utilized MapReader's interface to manually annotate 62,020 patches, used its functionalities to train a suite of computer vision models and performed model inference on approximately 30.5 million patches. 
+MapReader is an interdisciplinary software library for processing digitized maps `[@Hosseini_mapreader]`, but also other types of images, by 'patching' them into small, custom-sized cells, which are then classified according to the user's needs. MapReader thus offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for Computer Vision-based inference of large collections. As an example, in `@Hosseini_mapreader`, we utilized MapReader's interface to manually annotate 62,020 patches, used its functionalities to train a suite of computer vision models and performed model inference on approximately 30.5 million patches.
 
 MapReader's approach was inspired by methods in biomedical imaging, which were adapted for use by historians, and it is suitable for a wide range of applications in image analysis: it has, for example, been applied to an image classification problem in plant phenotype research `[@Corcoran]`. This cross-pollination between the humanities and the natural sciences was made possible by the open and reproducible research methods at the heart of MapReader.
 
@@ -79,7 +79,7 @@ MapReader aims to build computational skills among historians. Our extensive wor
 Our documentation includes:
 - About MapReader: A basic introduction to the software and its origins
 - Events: Activities where the community can engage with MapReader
-- Project CV: Papers, talks, workshops, etc. delivered by the MapReader team
+- Project Curriculum Vitae: Papers, talks, workshops, etc. delivered by the MapReader team
 - Coding Basics: Skills and tools that are useful for getting started with MapReader
 - Installation Instructions: How to install MapReader
 - Input Guidance: What kind of maps and which formats work well in MapReader
