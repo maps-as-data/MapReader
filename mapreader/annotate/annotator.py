@@ -659,6 +659,9 @@ class Annotator(pd.DataFrame):
         # re-set up queue
         self._queue = self.get_queue()
 
+        if self._filter_for is not None:
+            print(f"[INFO] Filtering for: {self._filter_for}")
+
         self.out = widgets.Output(layout=_CENTER_LAYOUT)
         display(self.box)
         display(self.navbox)
