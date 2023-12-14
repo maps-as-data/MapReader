@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+from ast import literal_eval
 from pathlib import Path
 
 import pandas as pd
 import pytest
+from pytest import approx
 from shapely.geometry import LineString, MultiPolygon, Polygon
 
 from mapreader import SheetDownloader
@@ -304,9 +306,8 @@ def test_download_all(sheet_downloader, tmp_path):
         "map_91617032.png",
     ]
     # test coords
-    assert (
-        df.loc[0, "coordinates"]
-        == "(-1.0546875, 53.33087298301705, -0.703125, 53.54030739150021)"
+    assert literal_eval(df.loc[0, "coordinates"]) == approx(
+        (-1.0546875, 53.33087298301705, -0.703125, 53.54030739150021), rel=1e-6
     )
 
     sd.get_grid_bb(14)
@@ -332,9 +333,9 @@ def test_download_all(sheet_downloader, tmp_path):
         "map_91617032.png",
     ]
     # test coords
-    assert (
-        df.loc[0, "coordinates"]
-        == "(-0.98876953125, 53.448806835427575, -0.90087890625, 53.48804553605621)"
+    assert literal_eval(df.loc[0, "coordinates"]) == approx(
+        (-0.98876953125, 53.448806835427575, -0.90087890625, 53.48804553605621),
+        rel=1e-6,
     )
 
 
