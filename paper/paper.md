@@ -55,14 +55,14 @@ MapReader's approach was inspired by methods in biomedical imaging, which were a
 
 MapReader pioneers a methodological shift in how historians interact with maps as primary sources. Sustained engagement with big collections of maps rarely moves beyond analysis of cartographic history. To change this, MapReader encourages historians to reflect on the content of maps and is designed to facilitate linking datasets representing visual map content with other historical geospatial data.
 
-In this paper, we present the MapReader release at the conclusion of the Living with Machines project, which supported the development of the software and associated research. This release represents the culmination of extensive work to improve MapReader's usability, especially through clear documentation and tutorials.
+In this paper, we present the MapReader release at the conclusion of the Living with Machines project, which supported the development of the software and associated historical research. This release represents the culmination of extensive work to improve MapReader's usability, especially through clear documentation and tutorials.
 
 ![MapReader modules and input-outputs. Credit: Rosie Wood.\label{fig:modules}](https://hackmd.io/_uploads/HJWJatQEa.png)
 
 
 # Statement of need
 
-Since the 1990s, map libraries have been scanning maps and creating digital collections of these images. In 2023, there are more than a million images of maps in digital libraries and archives around the world, and yet it is very difficult for anyone to do more than browse them in a web viewer.
+Since the 1990s, map libraries have been scanning maps and creating digital collections of these images `[@Hosseini_maps]`. In 2023, there are more than a million images of maps in digital libraries and archives around the world, and yet it is very difficult for anyone to do more than browse them in a web viewer.
 
 MapReader makes it possible to ask questions of thousands of digitized maps at a time, a fundamentally different intellectual experience from both the traditional manner of viewing a few maps at a time on a reading room table and the act of visually scanning digital files sequentially. As an example, we used MapReader to process a collection of ~16K nineteenth-century Ordnance Survey map sheets (~30.5M patches) covering England, Wales and Scotland `[@Hosseini_mapreader]`. Inspired by the possibility of seeing series maps stitched together in seamless layers, such as the National Library of Scotland Ordnance Survey map viewing interface, MapReader takes the next step by transforming the experience of working with maps from surface exploration to critical investigation `[Hosseini_maps]`.
 
@@ -92,7 +92,7 @@ Our documentation includes:
 
 # Conclusion
 
-MapReader enables researchers to ask questions of large collections of maps. It represents a novel approach to digitizing map content, one which intentionally prevents the collection of overly precise data from cartographic documents. MapReader embraces a humanistic approach to data creation and curation, offering an alternative or complement to pixel-level image segmentation.
+Through its conceptual approach, modular structure, documentation, and worked examples, MapReader enables researchers to ask questions of large collections of maps. It represents a novel approach to digitizing map content, one which intentionally prevents the collection of overly precise data from cartographic documents. MapReader embraces a humanistic approach to data creation and curation, offering an alternative or complement to pixel-level image segmentation.
 
 # Acknowledgements
 
@@ -100,6 +100,6 @@ This work was supported by Data/Culture (AHRC grant AH/XXXXX), Living with Machi
 
 # Contribution Statement
 
-Katherine McDonough wrote and revised this article, with substantial contributions from Daniel C.S. Wilson and Rosie Wood. Please see complete and ongoing documentation of contributions to the MapReader software library at https://github.com/Living-with-machines/MapReader#contributors, including work from all named authors.
+Katherine McDonough wrote and revised this article, with substantial contributions from Daniel C.S. Wilson and Rosie Wood. Andy Smith, Kalle Westerling, Kaspar Beelen and Kasra Hosseini reviewed the final manuscript. Please see contributions to the MapReader software library at https://github.com/Living-with-machines/MapReader#contributors, including work from all named authors.
 
 # References
