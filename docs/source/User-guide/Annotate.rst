@@ -65,6 +65,7 @@ Other arguments that you may want to be aware of when initializing the ``Annotat
 - ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
 - ``surrounding``: How many surrounding patches to show in the context image (default: ``1``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
+- ``filter_for``: A dictionary containing the name of the column to use for filtering and the value to filter for within this column. (e.g. ``{"predicted_label":"railspace"}``)
 - ``delimiter``: The delimiter to use when reading your data files (default: ``","`` for csv).
 
 After setting up the ``Annotator`` instance, you can interactively annotate a sample of your images using:
