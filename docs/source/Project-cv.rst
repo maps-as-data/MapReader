@@ -1,4 +1,4 @@
-Project CV
+Project Curriculum Vitae
 ===========
 
 .. Notes to editors:

@@ -42,7 +42,7 @@ setuptools.setup(
         "torchvision>=0.11.1,<0.12.1",
         "jupyter>=1.0.0,<2.0.0",
         "ipykernel>=6.5.1,<7.0.0",
-        "ipywidgets>=7.7.3,<8.0.0",
+        "ipywidgets>=8.0.0,<9.0.0",
         "ipyannotate==0.1.0-beta.0",
         "Cython>=0.29.24,<0.30.0",
         # "proj>=0.2.0,<0.3.0",
@@ -51,12 +51,12 @@ setuptools.setup(
         "parhugin>=0.0.3,<0.0.4",
         "geopy==2.1.0",
         "rasterio>=1.2.10,<2.0.0",
-        "keplergl>=0.3.2,<0.4.0",
         "simplekml>=1.3.6,<2.0.0",
         "versioneer>=0.28",
         "tqdm<5.0.0",
         "torchinfo<2.0.0",
         "openpyxl<4.0.0",
+        "geopandas<1.0.0",
     ],
     extras_require={
         "dev": [
