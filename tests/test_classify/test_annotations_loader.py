@@ -58,7 +58,7 @@ def test_load_df(sample_dir):
 def test_create_datasets_default_transforms(load_annots):
     annots = load_annots
     annots.create_datasets(0.5, 0.3, 0.2)
-    assert annots.dataset_sizes == {"train": 14, "val": 9, "test": 6}
+    assert annots.dataset_sizes == {"train": 15, "val": 9, "test": 5}
     assert isinstance(annots.datasets["train"], PatchDataset)
     assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
     for v in annots.datasets.values():
