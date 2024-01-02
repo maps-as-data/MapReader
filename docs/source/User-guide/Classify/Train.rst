@@ -1,11 +1,5 @@
-Classify
-=========
-
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
-
-.. note:: You will need to update file paths to reflect your own machines directory structure.
-
-MapReader's ``Classify`` subpackage is used to train or fine-tune a CV (computer vision) model and use it to predict the labels of patches.
+Train/fine-tune a classifier
+==============================
 
 If you are new to computer vision/ machine learning, `see this tutorial for details on fine-tuning torchvision models <https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html>`__.
 This will help you get to grips with the basic steps needed to train/fine-tune a model.
@@ -25,7 +19,7 @@ First, load in your annotations using:
     annotated_images = AnnotationsLoader()
     annotated_images.load(annotations = "./path/to/annotations.csv")
 
-For example, if you have set up your directory as reccommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
+For example, if you have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
 
 .. code-block:: python
 
@@ -40,7 +34,7 @@ For example, if you have set up your directory as reccommended in our `Input Gui
 
     - ``delimiter`` - By default, this is set to "\t" so will assume your ``csv`` file is tab delimited. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
-    - ``append`` - By default, this is ``False`` and so each call to the ``.load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``. 
+    - ``append`` - By default, this is ``False`` and so each call to the ``.load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
 
 To view the data loaded in from your ``csv`` as a dataframe, use:
 
@@ -48,7 +42,7 @@ To view the data loaded in from your ``csv`` as a dataframe, use:
 
     annotated_images.annotations
 
-You will note a ``label_index`` column has been added to your dataframe. 
+You will note a ``label_index`` column has been added to your dataframe.
 This column contains a numerical reference number for each label, which is needed when training your model.
 
 To see how your labels map to their label indices, call the ``annotated_images.labels_map`` attribute:
@@ -57,8 +51,10 @@ To see how your labels map to their label indices, call the ``annotated_images.l
 
     annotated_images.labels_map
 
+.. note:: This ``labels_map`` will be needed later.
+
 To view a sample of your annotated images use the ``show_sample()`` method.
-The ``label_to_show`` argument specifies which label you would like to show. 
+The ``label_to_show`` argument specifies which label you would like to show.
 
 For example, to show your "rail_space" label:
 
@@ -69,11 +65,11 @@ For example, to show your "rail_space" label:
 
 .. todo:: update this pic
 
-.. image:: ../figures/show_image_labels_10.png
+.. image:: ../../figures/show_image_labels_10.png
     :width: 400px
 
 
-By default, this will show you a sample of 9 images, but this can be changed by specifying ``num_sample``. 
+By default, this will show you a sample of 9 images, but this can be changed by specifying ``num_sample``.
 
 When viewing your annotations, you may notice that you have mislabelled one of your images.
 The ``.review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
@@ -82,7 +78,7 @@ The ``.review_labels()`` method, which returns an interactive tool for adjusting
 
     annotated_images.review_labels()
 
-.. image:: ../figures/review_labels.png
+.. image:: ../../figures/review_labels.png
     :width: 400px
 
 
@@ -109,11 +105,11 @@ Before using your annotated images to train your model, you will first need to:
 
     .. admonition:: Stratified example
         :class: dropdown
-        
+
         If you have twenty annotated images:
 
         - labels: ``"a","a","b","a","a","b","a","a","a","a","a","b","a","a","a","b","b","a","b","a"`` (14 ``"a"``\s and 6 ``"b"``\s)
-        
+
         Your train, test and val datasets will contain:
 
         - train labels: ``"a","a","b","a","a","a","a","a","b","a","a","a","b","b"`` (10 ``"a"``\s and 4 ``"b"``\s)
@@ -123,16 +119,16 @@ Before using your annotated images to train your model, you will first need to:
 .. _transforms:
 
 **2.  Define some** `transforms <https://pytorch.org/vision/stable/transforms.html>`__ **which will be applied to your images to ensure your they are in the right format.**
-    
+
     Some default image transforms, generated using `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, are predefined in the ``PatchDataset`` class.
-    
+
     .. admonition:: See default transforms
         :class: dropdown
-        
+
         **default transforms for training dataset**
-        
+
         .. code-block:: python
-            
+
             transforms.Compose(
                 [
                     transforms.Resize((224,224)),
@@ -141,11 +137,11 @@ Before using your annotated images to train your model, you will first need to:
                     transforms.Normalize(normalize_mean, normalize_std),
                 ]
             )
-            
+
         **default transforms for val and test datasets**
-        
+
         .. code-block:: python
-            
+
             transforms.Compose(
                 [
                     transforms.Resize((224,224)),
@@ -153,7 +149,7 @@ Before using your annotated images to train your model, you will first need to:
                     transforms.Normalize(normalize_mean, normalize_std),
                 ]
             )
-    
+
     You can access these by calling the ``.transform`` attribute on any dataset or from the ``PatchDataset`` API documentation.
 
 .. _sampler:
@@ -164,7 +160,7 @@ Before using your annotated images to train your model, you will first need to:
     This requires a `sampler <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__ with weights inversely proportional to the number of instances of each label within each dataset.
 
     By default, MapReader creates a sampler with weights inversely proportional to the number of instances of each label within the "train" dataset.
-    
+
     .. admonition:: Sampler example
         :class: dropdown
 
@@ -176,10 +172,10 @@ Before using your annotated images to train your model, you will first need to:
 
         - ``"a"`` weights: 1/10 (one in ten chance of picking an ``"a"`` when creating a batch)
         - ``"b"`` weights: 1/4 (one in four chance of picking an ``"b"`` when creating a batch)
-    
-    Using a sampler to create representative batches is particularly important for inbalanced datasets (i.e. those which contain different numbers of each label). 
 
-To split your annotated images and create your dataloaders, use: 
+    Using a sampler to create representative batches is particularly important for imbalanced datasets (i.e. those which contain different numbers of each label).
+
+To split your annotated images and create your dataloaders, use:
 
 .. code-block:: python
 
@@ -210,51 +206,38 @@ To change the batch size used when creating your dataloaders, use the ``batch_si
     Other arguments you may want to specify when adding metadata to your images include:
 
     - ``sampler`` - By default, this is set to ``default`` and so the :ref:`default sampler<sampler>` will be used when creating your dataloaders and batches. You can choose not to use a sampler by specifying ``sampler=None`` or, you can define a custom sampler using `pytorch's sampler class <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__.
-    - ``shuffle`` - If your datasets are ordered (e.g. ``"a","a","a","a","b","c"``), you can use ``shuffle=True`` to create dataloaders which contain shuffled batches of data. This cannot be used in conjunction with a sampler and so, by default, ``shuffle=False``. 
-    - ``train_transform``, ``val_transform`` and ``test_transform`` - By default, these are set to "train", "val" and "test" respectively and so the :ref:`default image transforms<transforms>` for each of these sets are applied to the images. You can define your own transforms, using  `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, and apply these to your datasets by specifying the ``train_transform``, ``val_transform`` and ``test_transform`` arguments. 
+    - ``shuffle`` - If your datasets are ordered (e.g. ``"a","a","a","a","b","c"``), you can use ``shuffle=True`` to create dataloaders which contain shuffled batches of data. This cannot be used in conjunction with a sampler and so, by default, ``shuffle=False``.
+    - ``train_transform``, ``val_transform`` and ``test_transform`` - By default, these are set to "train", "val" and "test" respectively and so the :ref:`default image transforms<transforms>` for each of these sets are applied to the images. You can define your own transforms, using  `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, and apply these to your datasets by specifying the ``train_transform``, ``val_transform`` and ``test_transform`` arguments.
 
 
 Train
 ------
 
-Initialise ``ClassifierContainer()``
+Initialize ``ClassifierContainer()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MapReader's ``ClassifierContainer()`` class is used to:
+To initialize your ``ClassifierContainer()`` for training, you will need to define:
 
-- Load models.
-- Load dataloaders and labels map.
-- Define a criterion (loss function), optimizer and scheduler.
-- Train and evaluate models using already annotated images.
-- Predict labels of un-annotated images (model inference).
-- Visualise datasets and predictions.
-
-You can initialise a ``ClassifierContainer()`` object (``my_classifier``) using:
-
-.. code-block:: python
-
-    from mapreader import ClassiferContainer
-
-    my_classifier = ClassiferContainer(model, dataloaders, labels_map)
-
-Your dataloaders and labels map (``annotated_images.labels_map``) should be passed as the ``dataloaders`` and ``labels_map`` arguments respectively.
+- ``model`` - The model (classifier) you would like to train.
+- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_rail_space", 1: "rail_space"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
+- ``dataloaders`` - The dataloaders containing your train, test and val datasets.
 
 There are a number of options for the ``model`` argument:
 
     **1.  To load a model from** `torchvision.models <https://pytorch.org/vision/stable/models.html>`__\ **, pass one of the model names as the ``model`` argument.**
 
-        e.g. To load "resnet18":
+        e.g. To load "resnet18", pass ``"resnet18"`` as the model argument:
 
         .. code-block:: python
-        
+
             #EXAMPLE
-            my_classifier = ClassiferContainer("resnet18", dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer("resnet18", annotated_images.labels_map, dataloaders)
 
         By default, this will load a pretrained form of the model and reshape the last layer to output the same number of nodes as labels in your dataset.
         You can load an untrained model by specifying ``pretrained=False``.
 
-    **2.  To load a customised model, define a** `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ **and pass this as the ``model`` argument.**
-        
+    **2.  To load a customized model, define a** `torch.nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`__ **and pass this as the ``model`` argument.**
+
         e.g. To load a pretrained "resnet18" and reshape the last layer:
 
         .. code-block:: python
@@ -269,9 +252,9 @@ There are a number of options for the ``model`` argument:
             num_input_features = my_model.fc.in_features
             my_model.fc = nn.Linear(num_input_features, len(annotated_images.labels_map))
 
-            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
 
-        This is equivalent to passing ``model="resnet18"`` (as above) but further customisations are, of course, possible. 
+        This is equivalent to passing ``model="resnet18"`` (as above) but further customizations are, of course, possible.
         See `here <https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html>`__ for more details of how to do this.
 
     **3.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.**
@@ -289,28 +272,28 @@ There are a number of options for the ``model`` argument:
 
             my_model = torch.load("./models/model_checkpoint_6.pkl")
 
-            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
 
         .. admonition:: Advanced usage
             :class: dropdown
-        
+
             The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer()``.
             If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer()``.
-        
-            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initialising your ``ClassifierContainer()``:
-        
+
+            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer()``:
+
             .. code-block:: python
-            
+
                 #EXAMPLE
-                my_classifier = ClassifierContainer(None, None, None, load_path="./models/checkpoint_6.pkl")        
-            
+                my_classifier = ClassifierContainer(None, None, None, load_path="./models/checkpoint_6.pkl")
+
             This will also load the corresponding model file (in this case "./models/model_checkpoint_6.pkl").
 
-            If you use this option, your optimizer, scheduler and criterion will be loaded from last time.       
+            If you use this option, your optimizer, scheduler and criterion will be loaded from last time.
 
     **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" or "Use in timm" instructions to load it and then pass this as the ``model`` argument.**
 
-        e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__. 
+        e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__.
         It can be loaded using the `transformers <https://github.com/huggingface/transformers>`__ library:
 
         .. code-block:: python
@@ -321,11 +304,11 @@ There are a number of options for the ``model`` argument:
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
 
-            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
 
-        .. note:: You will need to install the `transformers <https://github.com/huggingface/transformers>`__ library to do this (``pip install transformers``).  
+        .. note:: You will need to install the `transformers <https://github.com/huggingface/transformers>`__ library to do this (``pip install transformers``).
 
-        e.g. `This model <https://huggingface.co/timm/resnest101e.in1k>`__ is an example of one which uses the `timm <https://huggingface.co/docs/timm/index>`__ library. 
+        e.g. `This model <https://huggingface.co/timm/resnest101e.in1k>`__ is an example of one which uses the `timm <https://huggingface.co/docs/timm/index>`__ library.
         It can be loaded as follows:
 
         .. code-block:: python
@@ -335,9 +318,9 @@ There are a number of options for the ``model`` argument:
 
             my_model = timm.create_model("hf_hub:timm/resnest101e.in1k", pretrained=True, num_classes=len(annotated_images.labels_map))
 
-            my_classifier = ClassifierContainer(my_model, dataloaders, annotated_images.labels_map)
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
 
-        .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).  
+        .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).
 
 
 Define criterion, optimizer and scheduler
@@ -349,26 +332,26 @@ In order to train/fine-tune your model, will need to define:
 
     To add a criterion, use ``.add_criterion()``.
     This method accepts any of "cross-entropy", "binary cross-entropy" and "mean squared error" as its ``criterion`` argument:
-    
+
     .. code-block:: python
-    
+
         #EXAMPLE
         my_classifier.add_criterion("cross-entropy")
-    
-    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`__ as our criterion. 
+
+    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`__ as our criterion.
     You should change this to suit your needs.
-    
+
     .. admonition:: Advanced usage
         :class: dropdown
-    
+
         If you would like to use a loss function other than those implemented, you can pass any `torch.nn loss function <https://pytorch.org/docs/stable/nn.html#loss-functions>`__ as the ``criterion`` argument.
-    
+
         e.g. to use the mean absolute error as your loss function:
-    
+
         .. code-block:: python
-        
+
             from torch import nn
-    
+
             criterion = nn.L1Loss()
             my_classifier.add_criterion(criterion)
 
@@ -380,41 +363,41 @@ In order to train/fine-tune your model, will need to define:
 
         my_classifier.initialize_optimizer()
 
-    The ``optim_type`` argument can be used to select the `optimisation algorithm <https://pytorch.org/docs/stable/optim.html#algorithms>`__.
+    The ``optim_type`` argument can be used to select the `optimization algorithm <https://pytorch.org/docs/stable/optim.html#algorithms>`__.
     By default, this is set to `"adam" <https://pytorch.org/docs/stable/generated/torch.optim.Adam.html#torch.optim.Adam>`__, one of the  most commonly used algorithms.
-    You should change this to suit your needs. 
+    You should change this to suit your needs.
 
-    The ``params2optimise`` argument can be used to select which parameters to optimise during training.
-    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimised.
+    The ``params2optimize`` argument can be used to select which parameters to optimize during training.
+    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimized.
 
-    When training/fine-tuning your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network). 
+    When training/fine-tuning your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network).
     Normally, when fine-tuning pre-trained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers and larger learning rates assigned to later layers.
 
-    To define a list of parameters to optimise within each layer, with learning rates defined for each parameter, use:
-
-    .. code-block:: python 
-
-        #EXAMPLE
-        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
-
-    By default, a linear function is used to distribute the learning rates (using ``min_lr`` for the first layer and ``max_lr`` for the last layer). 
-    This can be changed to a logarithmic function by specifying ``spacing="geomspace"``:
-
-    .. code-block:: python 
-
-        #EXAMPLE
-        params2optimise = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
-
-    You should then pass your ``params2optimise`` list to the ``.initialize_optimizer()`` method:
+    To define a list of parameters to optimize within each layer, with learning rates defined for each parameter, use:
 
     .. code-block:: python
 
-        my_classifier.initialize_optimizer(params2optimise=params2optimise)
+        #EXAMPLE
+        params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
+
+    By default, a linear function is used to distribute the learning rates (using ``min_lr`` for the first layer and ``max_lr`` for the last layer).
+    This can be changed to a logarithmic function by specifying ``spacing="geomspace"``:
+
+    .. code-block:: python
+
+        #EXAMPLE
+        params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
+
+    You should then pass your ``params2optimize`` list to the ``.initialize_optimizer()`` method:
+
+    .. code-block:: python
+
+        my_classifier.initialize_optimizer(params2optimize=params2optimize)
 
 **3.  A scheduler - This defines how to adjust your learning rates during training.**
 
     To add a scheduler, use the ``.initialize_scheduler()`` method:
-    
+
     .. code-block:: python
 
         my_classifier.initialize_scheduler()
@@ -422,7 +405,7 @@ In order to train/fine-tune your model, will need to define:
     .. admonition:: Advanced usage
         :class: dropdown
 
-        By default, your scheduler be set up to decrease your learning rates by 10% every 10 epochs. 
+        By default, your scheduler be set up to decrease your learning rates by 10% every 10 epochs.
         These numbers can be adjusted by specifying the ``scheduler_param_dict`` argument.
 
         e.g. To reduce your learning rates by 2% every 5 epochs:
@@ -441,8 +424,8 @@ To begin training/fine-tuning your model, use:
 
     my_classifier.train()
 
-By default, this will run through 25 training iterations. 
-Each iteration will pass one epoch of training data (forwards step), adjust the model parameters (backwards step) and then calculate the loss using your validation dataset. 
+By default, this will run through 25 training iterations.
+Each iteration will pass one epoch of training data (forwards step), adjust the model parameters (backwards step) and then calculate the loss using your validation dataset.
 The model with the least loss will then be saved in a newly created ``./models`` directory.
 
 The ``num_epochs`` argument can be specified to change the number of training iterations (i.e. passes through your training dataset).
@@ -467,7 +450,7 @@ e.g. to pass through 10 epochs of training data:
 Plot metrics
 ^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accesible via the ``.metrics`` attribute. 
+Metrics are stored in a dictionary accessible via the ``.metrics`` attribute.
 To list these, use:
 
 .. code-block:: python
@@ -476,7 +459,7 @@ To list these, use:
 
 .. todo:: Explain what these metrics are/mean
 
-To help visualise the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
+To help visualize the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
 
 The name of the metrics you would like to plot should be passed as the ``y_axis`` argument.
 This can take any number/combination of metrics.
@@ -492,27 +475,27 @@ e.g. to plot the loss during each epoch of training and validation:
         legends=["Train", "Valid"],
     )
 
-.. image:: ../figures/loss.png
+.. image:: ../../figures/loss.png
     :width: 400px
 
 
-Testing 
+Testing
 --------
 
-The "test" dataset can be used to test your model. 
+The "test" dataset can be used to test your model.
 This can be done using the ``.inference()`` method:
 
 .. code-block:: python
 
     my_classifier.inference(set_name="test")
 
-To see a sample of your predictions, use: 
+To see a sample of your predictions, use:
 
 .. code-block:: python
 
     my_classifier.show_inference_sample_results(label="rail_space")
 
-.. image:: ../figures/inference_sample_results.png
+.. image:: ../../figures/inference_sample_results.png
     :width: 400px
 
 
@@ -521,8 +504,8 @@ To see a sample of your predictions, use:
 By default, the ``.show_inference_sample_results()`` method will show you six samples of your "test" dataset.
 To change the number of samples shown, specify the ``num_samples`` argument.
 
-It can be useful to see instances where your model is struggling to classify your images. 
-This can be done using the ``min_conf`` and ``max_conf`` arguments. 
+It can be useful to see instances where your model is struggling to classify your images.
+This can be done using the ``min_conf`` and ``max_conf`` arguments.
 
 e.g. To view samples where the model is less than 80% confident about its prediction:
 
@@ -531,12 +514,12 @@ e.g. To view samples where the model is less than 80% confident about its predic
     #EXAMPLE
     my_classifier.inference_sample_results("railspace", max_conf=80)
 
-This can help you identify images that might need to be brought into your training data for further optimisation of your model.
+This can help you identify images that might need to be brought into your training data for further optimization of your model.
 
 By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``.metrics`` attribute.
-Instead, they must be added using the ``.calculate_add_metrics()``. 
+Instead, they must be added using the ``.calculate_add_metrics()``.
 
-e.g. to add metrics for the 'test' dataset: 
+e.g. to add metrics for the 'test' dataset:
 
 .. code-block:: python
 
@@ -565,7 +548,7 @@ Saving your work
 
 Each time you train your model, MapReader will save the best version of your model (that with the least loss) in the ``./models/`` directory.
 
-If you wouild like to explicitly save your work, use:
+If you would like to explicitly save your work, use:
 
 .. code-block:: python
 
@@ -573,7 +556,7 @@ If you wouild like to explicitly save your work, use:
 
 This will save both your ``ClassifierContainer()`` and your model as `pickle <https://docs.python.org/3/library/pickle.html>`__ files.
 
-e.g. : 
+e.g. :
 
 .. code-block:: python
 
@@ -585,7 +568,7 @@ This will save your ``ClassifierContainer()`` as ``classifier.pkl`` and your mod
 Infer (predict)
 ----------------
 
-Once you are happy with your model's predictions, you can then use it to predict labels on the rest of your (un-annotated) patches.
+Once you are happy with your model's predictions, you can then use it to predict labels on the rest of your (unannotated) patches.
 
 To do this, you will need to create a new dataset containing your patches:
 
@@ -606,9 +589,9 @@ You should then add this dataset to your ``ClassifierContainer()`` (``my_classif
 
     my_classifier.load_dataset(infer, set_name="infer")
 
-This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute. 
+This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute.
 
-By default, the ``.load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler. 
+By default, the ``.load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
 You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
 See :ref:`this section<sampler>` for more information on samplers.
 
@@ -618,7 +601,7 @@ After loading your dataset, you can then simply run the ``.inference()`` method 
 
     my_classifier.inference(set_name="infer")
 
-As with the "test" dataset, to see a sample of your predictions, use: 
+As with the "test" dataset, to see a sample of your predictions, use:
 
 .. code-block:: python
 
@@ -627,7 +610,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 Add predictions to metadata and save
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To add your predictions to your patch metadata (saved in ``patch_df.csv``), you will need to add your predictions and confidence values to your ``infer`` dataset's dataframe. 
+To add your predictions to your patch metadata (saved in ``patch_df.csv``), you will need to add your predictions and confidence values to your ``infer`` dataset's dataframe.
 
 This dataframe is saved as the datasets ``patch_df`` attribute.
 To view it, use:
@@ -638,7 +621,7 @@ To view it, use:
 
 To add your predictions and confidence values to this dataframe use:
 
-.. code-block:: python 
+.. code-block:: python
 
     import numpy as np
 
@@ -650,18 +633,18 @@ If you view your dataframe again (by running ``infer.patch_df`` as above), you w
 
 From here, you can either save your results using:
 
-.. code-block:: python 
+.. code-block:: python
 
     infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
 
-Or, you can use the ``MapImages`` object to create some visualisations of your results:
+Or, you can use the ``MapImages`` object to create some visualizations of your results:
 
 .. code-block:: python
 
     from mapreader import load_patches
-    
+
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
-    
+
     infer_df = infer.patch_df.reset_index(names="image_id") # ensure image_id is one of the columns
     my_maps.add_metadata(infer_df, tree_level='patch') # add dataframe as metadata
     my_maps.add_shape()
@@ -670,5 +653,3 @@ Or, you can use the ``MapImages`` object to create some visualisations of your r
     my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
 
 Refer to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance for further details on how these methods work.
-
-

@@ -1,28 +1,26 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 try:
     import rasterio
     from rasterio.warp import (
+        Resampling,
         calculate_default_transform,
         reproject,
-        Resampling,
     )
     from rasterio.windows import get_data_window
 except ImportError:
     pass
 
+import distutils.spawn
 import os
 import subprocess
-import distutils.spawn
-
 from glob import glob
-from typing import Union, List, Optional
 
 
 def preprocess_all(
-    image_paths: Union[List[str], str], save_preproc_dir: str, **kwds
-) -> List[str]:
+    image_paths: list[str] | str, save_preproc_dir: str, **kwds
+) -> list[str]:
     """
     Preprocess all images in a list of file paths or a directory using the
     ``preprocess`` function and save them to the specified directory.
@@ -61,12 +59,12 @@ def preprocess_all(
 def preprocess(
     image_path: str,
     save_preproc_dir: str,
-    dst_crs: Optional[str] = "EPSG:3857",
-    crop_prefix: Optional[str] = "preproc_",
-    reproj_prefix: Optional[str] = "preproc_tmp_",
-    resample_prefix: Optional[str] = "preproc_resample_",
-    resize_percent: Optional[int] = 40,
-    remove_reproj_file: Optional[bool] = True,
+    dst_crs: str | None = "EPSG:3857",
+    crop_prefix: str | None = "preproc_",
+    reproj_prefix: str | None = "preproc_tmp_",
+    resample_prefix: str | None = "preproc_resample_",
+    resize_percent: int | None = 40,
+    remove_reproj_file: bool | None = True,
 ) -> str:
     """
     Preprocesses an image file by reprojecting it to a new coordinate

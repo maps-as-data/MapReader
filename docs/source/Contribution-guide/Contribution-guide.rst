@@ -1,13 +1,13 @@
-Contribution guide
+Contribution Guide
 ===================
 
 Welcome! We are pleased to know that you're interested in contributing to MapReader!
 
 MapReader is a collaborative project, now expanding its community beyond the initial group in the `Living with Machines <https://livingwithmachines.ac.uk/>`_ project (The Alan Turing Institute).
-We welcome all contributions but **please** follow these guidelines to make sure your contributions can be easily integrated into the project. 
+We welcome all contributions but **please** follow these guidelines to make sure your contributions can be easily integrated into the project.
 
 .. contents:: Table of Contents
-    :local:
+        :local:
 
 Joining the community
 ----------------------
@@ -16,29 +16,13 @@ Before you begin contributing to MapReader, we would love for you to join our co
 
 - Star the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_.
 - Start creating Github issues and/or pull requests on our repository.
-- Join our `Slack workspace <https://mapreader.slack.com>`_.
+- Join our `Slack workspace <https://forms.gle/dXjECHZQkwrZ3Xpt9>`_.
 
 You can also get in touch with the MapReader team personally by:
 
 - Tagging us on Github (find our Github handles `here <https://github.com/Living-with-machines/MapReader/blob/main/ways_of_working.md>`__).
 - Messaging us on Slack.
 - Emailing Katie McDonough at k.mcdonough@lancaster.ac.uk.
-  
-Code of Conduct and inclusivity
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We are currently in the process of developing a Code of Conduct. 
-In the meantime, we look to the `Code of Conduct <https://github.com/alan-turing-institute/the-turing-way/blob/main/CODE_OF_CONDUCT.md>`_ from The Turing Way as a model.
-
-We aim to be inclusive of people from all walks of life and all research fields. 
-These intentions must be reflected in the contributions that we make.
-
-We therefore encourage intentional, inclusive actions from contributors to MapReader. 
-Here are a few examples of such actions:
-
-- Use respectful, gender-neutral and inclusive language (learn more about inclusive writing on page 22 of University of Leicester Study Skills pdf, also available as a zipped html).
-- Aim to include perspectives of researchers from different research backgrounds such as science, humanities and social sciences by not limiting the scope to only scientific domains.
-- Make sure that colour palettes used throughout figures are accessible to colour-blind readers and contributors.
 
 Pre-requisites
 --------------
@@ -47,7 +31,7 @@ Regardless of how you will be contributing to MapReader, you will need to:
 
 1. Ensure you have a `GitHub account <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_ set up.
 2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our `GitHub guide <https://mapreader.readthedocs.io/en/latest/Contribution-guide/GitHub-guide.html>`__ before continuing.
-3. Set up a virtual python environment and install MapReader (as per our `Installation instuctions <https://mapreader.readthedocs.io/en/latest/Install.html>`_).
+3. Set up a virtual python environment and install MapReader (as per our `Installation instructions <https://mapreader.readthedocs.io/en/latest/Install.html>`_).
 4. Have read this guide.
 
 Ways to contribute
@@ -59,15 +43,77 @@ We welcome contributions from community members of all skill levels and so have 
 - `Add to or update the MapReader documentation <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Documentation.html>`_ - For those who are familiar with using MapReader and either already comfortable with using Sphinx to write documentation or feel able to have a go at to learning it.
 - `Add to or update the MapReader code <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Code.html>`_ - For those who are familiar with using MapReader and either already comfortable with writing code in Python or feel able to have a go at learning it.
 
+How to add yourself as a contributor
+------------------------------------
+
+We use the `all-contributors <https://allcontributors.org/>`__ bot to keep a record of contributors to the MapReader repo.
+To add yourself as a contributor to MapReader, comment on your issue or PR with the following:
+
+``@all-contributors please add @your_username_here for A, B, C``
+
+.. note:: Remember to change this to your GitHub username!
+
+for example, to add Katie McDonough for research, ideas and docs, you would write:
+
+``@all-contributors please add @kmcdono2 for research, ideas, docs``
+
+Types of contribution
+~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 30 30 40
+    :header-rows: 1
+
+    * - Emoji/Type
+      - Represents
+      - Comments
+    * - 💻 ``code``
+      - Code
+      -
+    * - 🔣 ``data``
+      - Data
+      -
+    * - 📖 ``doc``
+      - Documentation
+      - e.g. ReadtheDocs, Wiki, or other source of documentation
+    * - 🤔 ``ideas``
+      - Ideas & Planning
+      -
+    * - 🚧 ``maintenance``
+      - Maintenance
+      - People who are actively maintaining the repo
+    * - 🧑‍🏫 ``mentoring``
+      - Mentoring
+      - People who mentor new contributors
+    * - 📆 ``projectManagement``
+      - Project Management
+      -
+    * - 🔬 ``research``
+      - Research
+      -
+    * - 👀 ``review``
+      - Reviewed Pull Requests
+      -
+    * - 🌍 ``translation``
+      - Translation
+      -
+    * - ✅ ``tutorial``
+      - Tutorials
+      - e.g. ``worked_examples`` or external tutorials.
+    * - 📢 ``talk``
+      - Talks
+      -
+
+
 ----------
 
-Guides 
+Guides
 ------
 
-.. toctree:: 
+.. toctree::
     :maxdepth: 1
 
     GitHub-guide
     Worked-examples
     Documentation
-    Code 
+    Code

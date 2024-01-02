@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import copy
 import os
 import time
 
 # from tqdm.autonotebook import tqdm
-from typing import Dict, List, Optional, Tuple, Union
-
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -19,14 +17,14 @@ from .classifier import ClassifierContainer
 class ClassifierContextContainer(ClassifierContainer):
     def train(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
-        num_epochs: Optional[int] = 25,
-        save_model_dir: Optional[Union[str, None]] = "models",
-        verbosity_level: Optional[int] = 1,
-        tensorboard_path: Optional[Union[str, None]] = None,
-        tmp_file_save_freq: Optional[Union[int, None]] = 2,
-        remove_after_load: Optional[bool] = True,
-        print_info_batch_freq: Optional[Union[int, None]] = 5,
+        phases: list[str] | None = None,
+        num_epochs: int | None = 25,
+        save_model_dir: str | None | None = "models",
+        verbosity_level: int | None = 1,
+        tensorboard_path: str | None | None = None,
+        tmp_file_save_freq: int | None | None = 2,
+        remove_after_load: bool | None = True,
+        print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
         Train the model on the specified phases for a given number of epochs.
@@ -76,6 +74,8 @@ class ClassifierContextContainer(ClassifierContainer):
             file. If no temporary file is found, it continues without loading.
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         try:
             self.train_core(
                 phases,
@@ -96,13 +96,13 @@ class ClassifierContextContainer(ClassifierContainer):
 
     def train_core(
         self,
-        phases: Optional[List[str]] = ["train", "val"],
-        num_epochs: Optional[int] = 25,
-        save_model_dir: Optional[Union[str, None]] = "models",
-        verbosity_level: Optional[int] = 1,
-        tensorboard_path: Optional[Union[str, None]] = None,
-        tmp_file_save_freq: Optional[Union[int, None]] = 2,
-        print_info_batch_freq: Optional[Union[int, None]] = 5,
+        phases: list[str] | None = None,
+        num_epochs: int | None = 25,
+        save_model_dir: str | None | None = "models",
+        verbosity_level: int | None = 1,
+        tensorboard_path: str | None | None = None,
+        tmp_file_save_freq: int | None | None = 2,
+        print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
         Trains/fine-tunes a classifier for the specified number of epochs on
@@ -157,6 +157,8 @@ class ClassifierContextContainer(ClassifierContainer):
         None
         """
 
+        if phases is None:
+            phases = ["train", "val"]
         if self.criterion is None:
             raise ValueError(
                 "[ERROR] Criterion is not yet defined.\n\n\
@@ -228,7 +230,7 @@ Use ``add_criterion`` to define one."
                 total_inp_counts = len(self.dataloaders[phase].dataset)
 
                 # --- loop, batches
-                for batch_idx, (inputs1, inputs2, labels, label_indices) in enumerate(
+                for batch_idx, (inputs1, inputs2, _labels, label_indices) in enumerate(
                     self.dataloaders[phase]
                 ):
                     inputs1 = inputs1.to(self.device)
@@ -418,10 +420,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
 
     def show_sample(
         self,
-        set_name: Optional[str] = "train",
-        batch_number: Optional[int] = 1,
-        print_batch_info: Optional[bool] = True,
-        figsize: Optional[Tuple[int, int]] = (15, 10),
+        set_name: str | None = "train",
+        batch_number: int | None = 1,
+        print_batch_info: bool | None = True,
+        figsize: tuple[int, int] | None = (15, 10),
     ) -> None:
         """
         Displays a sample of training or validation data in a grid format with
@@ -501,9 +503,9 @@ Output will show batch number {num_batches}.'
         self,
         min_lr: float,
         max_lr: float,
-        spacing: Optional[str] = "linspace",
-        sep_group_names: List[str] = ["features1", "features2"],
-    ) -> List[Dict]:
+        spacing: str | None = "linspace",
+        sep_group_names: list[str] = None,
+    ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
         parameters.
@@ -531,12 +533,14 @@ Output will show batch number {num_batches}.'
             A list of dictionaries containing the parameters and learning
             rates for each layer.
         """
-        params2optimise = []
+        if sep_group_names is None:
+            sep_group_names = ["features1", "features2"]
+        params2optimize = []
 
         for group in range(len(sep_group_names)):
             # count number of layers in this group
             num_grp_layers = 0
-            for i, (name, params) in enumerate(self.model.named_parameters()):
+            for _i, (name, _) in enumerate(self.model.named_parameters()):
                 if sep_group_names[group] in name:
                     num_grp_layers += 1
 
@@ -555,19 +559,19 @@ Output will show batch number {num_batches}.'
             for _, (name, params) in enumerate(self.model.named_parameters()):
                 if sep_group_names[group] not in name:
                     continue
-                params2optimise.append({"params": params, "lr": list_lrs[i_count]})
+                params2optimize.append({"params": params, "lr": list_lrs[i_count]})
                 i_count += 1
 
-        return params2optimise
+        return params2optimize
 
     def show_inference_sample_results(
         self,
         label: str,
-        num_samples: Optional[int] = 6,
-        set_name: Optional[str] = "train",
-        min_conf: Optional[Union[None, float]] = None,
-        max_conf: Optional[Union[None, float]] = None,
-        figsize: Optional[Tuple[int, int]] = (15, 15),
+        num_samples: int | None = 6,
+        set_name: str | None = "train",
+        min_conf: None | float | None = None,
+        max_conf: None | float | None = None,
+        figsize: tuple[int, int] | None = (15, 15),
     ) -> None:
         """
         Shows a sample of the results of the inference.

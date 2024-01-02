@@ -1,183 +1,44 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
+
+import os
+import random
+import sys
+
+# Ignore warnings
+import warnings
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
-import random
 import requests
-import sys
 import yaml
-
-from mapreader import loader, load_patches
-
-from ipyannotate.toolbar import Toolbar
-from ipyannotate.tasks import Task, Tasks
-from ipyannotate.canvas import OutputCanvas
 from ipyannotate.annotation import Annotation
-from ipyannotate.buttons import (
-    ValueButton as Button,
-    NextButton as Next,
-    BackButton as Back,
-)
-
+from ipyannotate.buttons import BackButton as Back
+from ipyannotate.buttons import NextButton as Next
+from ipyannotate.buttons import ValueButton as Button
+from ipyannotate.canvas import OutputCanvas
+from ipyannotate.tasks import Task, Tasks
+from ipyannotate.toolbar import Toolbar
 from PIL import Image
-from typing import List, Optional, Union, Dict, Tuple
 
+from mapreader import load_patches, loader
 
-def display_record(record: Tuple[str, str, str, int, int]) -> None:
-    """
-    Displays an image and optionally, a context image with a patch border.
-
-    Parameters
-    ----------
-    record : tuple
-        A tuple containing the following elements:
-            - str : The name of the patch.
-            - str : The path to the image to be displayed.
-            - str : The path to the parent image, if any.
-            - int : The index of the task, if any.
-            - int : The number of times this patch has been displayed.
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    This function should be called from ``prepare_annotation``, there are
-    several global variables that are being set in the function.
-
-    This function uses ``matplotlib`` to display images. If the context image
-    is displayed, the border of the patch is highlighted in red.
-
-    Refer to ``ipyannotate`` and ``matplotlib`` for more info.
-    """
-
-    # setup the images
-    gridsize = (5, 1)
-    plt.clf()
-    plt.figure(figsize=(12, 12))
-    if treelevel == "patch" and contextimage:
-        plt.subplot2grid(gridsize, (2, 0))
-    else:
-        plt.subplot2grid(gridsize, (0, 0), rowspan=2)
-    plt.imshow(Image.open(record[1]))
-    plt.xticks([])
-    plt.yticks([])
-    plt.title(f"{record[0]}", size=20)
-
-    if treelevel == "patch" and contextimage:
-        parent_path = os.path.dirname(
-            annotation_tasks["paths"][record[3]]["parent_paths"]
-        )
-        # Here, we assume that min_x, min_y, max_x and max_y are in the patch
-        # name
-        split_path = record[0].split("-")
-        min_x, min_y, max_x, max_y = (
-            int(split_path[1]),
-            int(split_path[2]),
-            int(split_path[3]),
-            int(split_path[4]),
-        )
-
-        # context image
-        plt.subplot2grid(gridsize, (0, 0), rowspan=2)
-
-        # ---
-        path = os.path.join(parent_path, record[2])
-        par_img = Image.open(path).convert("RGB")
-        min_y_par = max(0, min_y - y_offset)
-        min_x_par = max(0, min_x - x_offset)
-        max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
-        max_y_par = min(max_y + y_offset, np.shape(par_img)[0])
-
-        # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
-        par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
-
-        plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
-        # ---
-
-        plt.xticks([])
-        plt.yticks([])
-
-        # plot the patch border on the context image
-        plt.plot([min_x, min_x], [min_y, max_y], lw=2, zorder=10, color="r")
-        plt.plot([min_x, max_x], [min_y, min_y], lw=2, zorder=10, color="r")
-        plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
-        plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
-
-        """
-        # context image
-        plt.subplot2grid(gridsize, (3, 0), rowspan=2)
-        min_y_par = 0
-        min_x_par = 0
-        max_x_par = par_img.shape[1]
-        max_y_par = par_img.shape[0]
-        plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
-                    extent=(min_x_par, max_x_par, max_y_par, min_y_par))
-        plt.plot([min_x_par, min_x_par],
-                    [min_y_par, max_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([min_x_par, max_x_par],
-                    [min_y_par, min_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([max_x_par, max_x_par],
-                    [max_y_par, min_y_par],
-                    lw=2, zorder=10, color="k")
-        plt.plot([max_x_par, min_x_par],
-                    [max_y_par, max_y_par],
-                    lw=2, zorder=10, color="k")
-
-        plt.xticks([])
-        plt.yticks([])
-
-        # plot the patch border on the context image
-        plt.plot([min_x, min_x],
-                    [min_y, max_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([min_x, max_x],
-                    [min_y, min_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([max_x, max_x],
-                    [max_y, min_y],
-                    lw=2, zorder=10, color="r")
-        plt.plot([max_x, min_x],
-                    [max_y, max_y],
-                    lw=2, zorder=10, color="r")
-        """
-
-    plt.tight_layout()
-    plt.show()
-
-    print(20 * "-")
-    print("Additional info:")
-    print(f"Counter: {record[-1]}")
-    if url_main:
-        try:
-            map_id = record[2].split("_")[-1].split(".")[0]
-            url = f"{url_main}/{map_id}"
-            # stream=True so we don't download the whole page, only check if
-            # the page exists
-            response = requests.get(url, stream=True)
-            assert response.status_code < 400
-            print()
-            print(f"URL: {url}")
-        except:
-            url = False
-            pass
+warnings.filterwarnings("ignore")
+# warnings.filterwarnings(
+#     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
 
 
 def prepare_data(
     df: pd.DataFrame,
-    col_names: Optional[List[str]] = ["image_path", "parent_id"],
-    annotation_set: Optional[str] = "001",
-    label_col_name: Optional[str] = "label",
-    redo: Optional[bool] = False,
-    random_state: Optional[Union[int, str]] = "random",
-    num_samples: Optional[int] = 100,
-) -> List[List[Union[str, int]]]:
+    col_names: list[str] | None = None,
+    annotation_set: str | None = "001",
+    label_col_name: str | None = "label",
+    redo: bool | None = False,
+    random_state: int | str | None = "random",
+    num_samples: int | None = 100,
+) -> list[list[str | int]]:
     """
     Prepare data for image annotation by selecting a subset of images from a
     DataFrame.
@@ -212,6 +73,8 @@ def prepare_data(
         counter.
     """
 
+    if col_names is None:
+        col_names = ["image_path", "parent_id"]
     if (label_col_name in list(df.columns)) and (not redo):
         already_annotated = len(df[~df[label_col_name].isnull()])
         print(f"Number of already annotated images: {already_annotated}")
@@ -223,7 +86,7 @@ def prepare_data(
         # annotate all patches in the pandas dataframe
         pass
 
-    tar_param = "mean_pixel_R"
+    tar_param = "mean_pixel_RGB"
     if tar_param in df.columns:
         try:
             pd.options.mode.chained_assignment = None
@@ -259,12 +122,12 @@ def prepare_data(
 
 
 def annotation_interface(
-    data: List,
-    list_labels: List,
-    list_colors: Optional[List[str]] = ["red", "green", "blue", "green"],
-    annotation_set: Optional[str] = "001",
-    method: Optional[str] = "ipyannotate",
-    list_shortcuts: Optional[List[str]] = None,
+    data: list,
+    list_labels: list,
+    list_colors: list[str] | None = None,
+    annotation_set: str | None = "001",
+    method: Literal["ipyannotate", "pigeonxt"] | None = "ipyannotate",
+    list_shortcuts: list[str] | None = None,
 ) -> Annotation:
     """
     Create an annotation interface for a list of patches with corresponding
@@ -282,7 +145,7 @@ def annotation_interface(
     annotation_set : str, optional
         String representing the annotation set, specified in the yaml file or
         via function argument, by default ``"001"``.
-    method : str, optional
+    method : Literal["ipyannotate", "pigeonxt"], optional
         String representing the method for annotation, by default
         ``"ipyannotate"``.
     list_shortcuts : list, optional
@@ -298,7 +161,7 @@ def annotation_interface(
     Raises
     ------
     SystemExit
-        If ``method`` parameter is not ``"ipyannotate"``.
+        If ``method`` parameter is not ``"ipyannotate"`` or ``pigeonxt``.
 
     Notes
     -----
@@ -306,7 +169,154 @@ def annotation_interface(
     library, which is a browser-based tool for annotating data.
     """
 
-    if method == "ipyannotate":
+    if list_colors is None:
+        list_colors = ["red", "green", "blue", "green"]
+    if method.lower() == "ipyannotate":
+
+        def display_record(record: tuple[str, str, str, int, int]) -> None:
+            """
+            Displays an image and optionally, a context image with a patch
+            border.
+
+            Parameters
+            ----------
+            record : tuple
+                A tuple containing the following elements:
+                    - str : The name of the patch.
+                    - str : The path to the image to be displayed.
+                    - str : The path to the parent image, if any.
+                    - int : The index of the task, if any.
+                    - int : The number of times this patch has been displayed.
+
+            Returns
+            -------
+            None
+
+            Notes
+            -----
+            This function should be called from ``prepare_annotation``, there
+            are several global variables that are being set in the function.
+
+            This function uses ``matplotlib`` to display images. If the
+            context image is displayed, the border of the patch is highlighted
+            in red.
+
+            Refer to ``ipyannotate`` and ``matplotlib`` for more info.
+            """
+
+            # setup the images
+            gridsize = (5, 1)
+            plt.clf()
+            plt.figure(figsize=(12, 12))
+            if treelevel == "patch" and contextimage:
+                plt.subplot2grid(gridsize, (2, 0))
+            else:
+                plt.subplot2grid(gridsize, (0, 0), rowspan=2)
+            plt.imshow(Image.open(record[1]))
+            plt.xticks([])
+            plt.yticks([])
+            plt.title(f"{record[0]}", size=20)
+
+            if treelevel == "patch" and contextimage:
+                parent_path = os.path.dirname(
+                    annotation_tasks["paths"][record[3]]["parent_paths"]
+                )
+                # Here, we assume that min_x, min_y, max_x and max_y are in the patch
+                # name
+                split_path = record[0].split("-")
+                min_x, min_y, max_x, max_y = (
+                    int(split_path[1]),
+                    int(split_path[2]),
+                    int(split_path[3]),
+                    int(split_path[4]),
+                )
+
+                # context image
+                plt.subplot2grid(gridsize, (0, 0), rowspan=2)
+
+                # ---
+                path = os.path.join(parent_path, record[2])
+                par_img = Image.open(path).convert("RGB")
+                min_y_par = max(0, min_y - y_offset)
+                min_x_par = max(0, min_x - x_offset)
+                max_x_par = min(max_x + x_offset, np.shape(par_img)[1])
+                max_y_par = min(max_y + y_offset, np.shape(par_img)[0])
+
+                # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
+                par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
+
+                plt.imshow(par_img, extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+                # ---
+
+                plt.xticks([])
+                plt.yticks([])
+
+                # plot the patch border on the context image
+                plt.plot([min_x, min_x], [min_y, max_y], lw=2, zorder=10, color="r")
+                plt.plot([min_x, max_x], [min_y, min_y], lw=2, zorder=10, color="r")
+                plt.plot([max_x, max_x], [max_y, min_y], lw=2, zorder=10, color="r")
+                plt.plot([max_x, min_x], [max_y, max_y], lw=2, zorder=10, color="r")
+
+                """
+                # context image
+                plt.subplot2grid(gridsize, (3, 0), rowspan=2)
+                min_y_par = 0
+                min_x_par = 0
+                max_x_par = par_img.shape[1]
+                max_y_par = par_img.shape[0]
+                plt.imshow(par_img[min_y_par:max_y_par, min_x_par:max_x_par],
+                            extent=(min_x_par, max_x_par, max_y_par, min_y_par))
+                plt.plot([min_x_par, min_x_par],
+                            [min_y_par, max_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([min_x_par, max_x_par],
+                            [min_y_par, min_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([max_x_par, max_x_par],
+                            [max_y_par, min_y_par],
+                            lw=2, zorder=10, color="k")
+                plt.plot([max_x_par, min_x_par],
+                            [max_y_par, max_y_par],
+                            lw=2, zorder=10, color="k")
+
+                plt.xticks([])
+                plt.yticks([])
+
+                # plot the patch border on the context image
+                plt.plot([min_x, min_x],
+                            [min_y, max_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([min_x, max_x],
+                            [min_y, min_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([max_x, max_x],
+                            [max_y, min_y],
+                            lw=2, zorder=10, color="r")
+                plt.plot([max_x, min_x],
+                            [max_y, max_y],
+                            lw=2, zorder=10, color="r")
+                """
+
+            plt.tight_layout()
+            plt.show()
+
+            print(20 * "-")
+            print("Additional info:")
+            print(f"Counter: {record[-1]}")
+            if url_main:
+                try:
+                    map_id = record[2].split("_")[-1].split(".")[0]
+                    url = f"{url_main}/{map_id}"
+                    # stream=True so we don't download the whole page, only check if
+                    # the page exists
+                    response = requests.get(url, stream=True)
+                    assert response.status_code < 400
+                    print()
+                    print(f"URL: {url}")
+                except:
+                    url = False
+                    pass
+
         if not list_shortcuts:
             list_shortcuts = [
                 "1",
@@ -363,7 +373,7 @@ def annotation_interface(
         return annotation
 
     sys.exit(
-        f"method: {method} is not implemented. Currently, we support: ipyannotate"  # noqa
+        f"method: {method} is not implemented. Currently, we support: ipyannotate and pigeonxt"  # noqa
     )
 
 
@@ -371,25 +381,26 @@ def prepare_annotation(
     userID: str,
     task: str,
     annotation_tasks_file: str,
-    custom_labels: List[str] = [],
-    annotation_set: Optional[str] = "001",
-    redo_annotation: Optional[bool] = False,
-    patch_paths: Optional[Union[str, bool]] = False,
-    parent_paths: Optional[str] = False,
-    tree_level: Optional[str] = "patch",
-    sortby: Optional[str] = None,
-    min_alpha_channel: Optional[float] = None,
-    min_mean_pixel: Optional[float] = None,
-    max_mean_pixel: Optional[float] = None,
-    min_std_pixel: Optional[float] = None,
-    max_std_pixel: Optional[float] = None,
-    context_image: Optional[bool] = False,
-    xoffset: Optional[int] = 500,
-    yoffset: Optional[int] = 500,
-    urlmain: Optional[str] = "https://maps.nls.uk/view/",
-    random_state: Optional[Union[str, int]] = "random",
-    list_shortcuts: Optional[List[tuple]] = None,
-) -> Dict:
+    custom_labels: list[str] = None,
+    annotation_set: str | None = "001",
+    redo_annotation: bool | None = False,
+    patch_paths: str | bool | None = False,
+    parent_paths: str | None = False,
+    tree_level: str | None = "patch",
+    sortby: str | None = None,
+    min_alpha_channel: float | None = None,
+    min_mean_pixel: float | None = None,
+    max_mean_pixel: float | None = None,
+    min_std_pixel: float | None = None,
+    max_std_pixel: float | None = None,
+    context_image: bool | None = False,
+    xoffset: int | None = 500,
+    yoffset: int | None = 500,
+    urlmain: str | None = "https://maps.nls.uk/view/",
+    random_state: str | int | None = "random",
+    list_shortcuts: list[tuple] | None = None,
+    method: Literal["ipyannotate", "pigeonxt"] | None = "ipyannotate",
+) -> dict:
     """Prepare image data for annotation and launch the annotation interface.
 
     Parameters
@@ -463,6 +474,9 @@ def prepare_annotation(
     list_shortcuts : list of tuples, optional
         A list of tuples containing shortcut key assignments for label names.
         Default is ``None``.
+    method : Literal["ipyannotate", "pigeonxt"], optional
+        String representing the method for annotation, by default
+        ``"ipyannotate"``.
 
     Returns
     -------
@@ -478,6 +492,10 @@ def prepare_annotation(
     """
 
     # Specify global variables so they can be used in display_record function
+    if custom_labels is None:
+        custom_labels = []
+    if custom_labels is None:
+        custom_labels = []
     global annotation_tasks
     global x_offset
     global y_offset
@@ -529,7 +547,7 @@ def prepare_annotation(
                 metadata=annot_file,
                 index_col=0,
                 ignore_mismatch=True,
-                delimiter="\t",
+                delimiter=",",
                 tree_level=tree_level,
             )
 
@@ -584,7 +602,7 @@ def prepare_annotation(
                 metadata=annot_file,
                 index_col=0,
                 ignore_mismatch=True,
-                delimiter="\t",
+                delimiter=",",
                 tree_level=tree_level,
             )
         # convert images to dataframe
@@ -608,6 +626,7 @@ def prepare_annotation(
             list_labels=list_labels,
             annotation_set=annotation_set,
             list_shortcuts=list_shortcuts,
+            method=method,
         )
         return annotation
 
@@ -659,7 +678,7 @@ def save_annotation(
 
     # Read an existing annotation file (for the same task and userID)
     try:
-        image_df = pd.read_csv(annot_file, sep="\t", index_col=0)
+        image_df = pd.read_csv(annot_file, index_col=0)
     except:
         image_df = pd.DataFrame(columns=["image_id", "image_path", "label"])
 
@@ -683,8 +702,8 @@ def save_annotation(
                 new_labels += 1
 
     if len(image_df) > 0:
-        #image_df = image_df.set_index("image_id")
-        image_df.to_csv(annot_file, mode="w", sep="\t")
+        # image_df = image_df.set_index("image_id")
+        image_df.to_csv(annot_file, mode="w")
         print(f"[INFO] Save {newly_annotated} new annotations to {annot_file}")
         print(f"[INFO] {new_labels} labels were not already stored")
         print(f"[INFO] Total number of saved annotations: {len(image_df)}")

@@ -1,7 +1,12 @@
-Installation instructions
+Installation Instructions
 =========================
 
 .. note:: Run these commands from your terminal.
+
+There are three steps to setting up MapReader.
+You should choose one method within each step and follow the instructions for that method.
+
+.. note:: You do not need to use the same method between steps. i.e. It is completely fine to follow Method 1 for Step 1 and Method 2 for Step 2.
 
 .. contents:: Table of Contents
    :depth: 2
@@ -12,7 +17,7 @@ Installation instructions
 Step 1: Set up a virtual python environment
 ----------------------------------------------
 
-MapReader requires python version 3.7+. 
+MapReader requires python version 3.7+.
 
 Method 1: Using conda (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,7 +33,7 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
       conda create -n mapreader python=3.8
 
-   This will create a conda enviroment which uses python version 3.8. 
+   This will create a conda enviroment which uses python version 3.8.
 
 -  Activate your conda environment:
 
@@ -49,21 +54,21 @@ For example, if you would like to use venv, open your terminal and use the follo
 
       python3 --version
 
-   If this returns a version below 3.7, you will need download an updated python version. 
-   You can do this by donwloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
+   If this returns a version below 3.7, you will need download an updated python version.
+   You can do this by downloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
 
    You should then run the above command again to check your python version has updated.
 
 -  Create a new virtual python environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
 
    .. code-block:: bash
-      
+
       python3 -m venv mapreader
 
 -  Activate your virtual environment:
-   
+
    .. code-block:: bash
-      
+
       source mapreader/bin/activate
 
 Step 2: Install MapReader
@@ -72,22 +77,28 @@ Step 2: Install MapReader
 Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+If you want to use the latest stable release of MapReader and do not want/need access to the worked examples or MapReader code, we recommend installing from PyPI.
+This is probably the easiest way to install MapReader.
+
 -  Install ``mapreader``:
 
    .. code-block:: bash
 
-      pip install mapreader 
+      pip install mapreader
 
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. todo:: You will need to install git on windows (can be done via conda - but need to look for alternatives)
+If you want to keep up with the latest changes to MapReader, or want/need easy access to the worked examples or MapReader code, we reccommend installing from source.
+This method will create a ``MapReader`` directory on your machine which will contain all the MapReader code, docs and worked examples.
+
+.. note:: You will need to have `git <https://git-scm.com/>`__ installed to use this method. If you are using conda, this can be done by running ``conda install git``. Otherwise, you should install git by following the instructions on `their website <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
 
 -  Clone the ``mapreader`` source code from the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_:
 
    .. code-block:: bash
 
-      git clone https://github.com/Living-with-machines/MapReader.git 
+      git clone https://github.com/Living-with-machines/MapReader.git
 
 -  Install ``mapreader``:
 
@@ -98,6 +109,9 @@ Method 2: Install from source
 
 Method 3: Install via conda (**EXPERIMENTAL**)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If neither of the above methods work, you can try installing MapReader using conda.
+This method is still in development so should be avoided for now.
 
 - Install MapReader directly from the conda package:
 
@@ -113,10 +127,10 @@ Step 3: Add virtual python environment to notebooks
 - To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
 
 .. code-block:: bash
-   
+
       python -m ipykernel install --user --name mapreader --display-name "Python (mr_py)"
 
-.. note:: if you have used a differe nt name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
+.. note:: if you have used a different name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
 
 Troubleshooting
 ----------------
@@ -127,7 +141,7 @@ M1 mac
 If you are using an M1 mac and are having issues installing MapReader due to an error when installing numpy or scikit-image:
 
 -  Try separately installing the problem packages (edit as needed) and then installing MapReader:
-   
+
    .. code-block:: bash
 
       pip install numpy==1.21.5
@@ -148,3 +162,13 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
 
       brew install openblas
       OPENBLAS="$(brew --prefix openblas)" pip install mapreader
+
+Cartopy
+~~~~~~~~
+
+`Cartopy <https://scitools.org.uk/cartopy/docs/latest/>`__ is used by MapReader's download subpackage to plot maps and geospatial data.
+It is not essential to the functioning of MapReader and so is not listed as a dependancy.
+
+If you would like to use MapReader's plotting functions, you should download cartopy by following the instructions `here <https://scitools.org.uk/cartopy/docs/latest/installing.html>`__.
+
+.. note:: There are some required dependencies which you may need to install first. These are listed `here <https://scitools.org.uk/cartopy/docs/latest/installing.html#required-dependencies>`__.
