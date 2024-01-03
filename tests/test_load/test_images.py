@@ -31,7 +31,7 @@ def init_maps(sample_dir, image_id, tmp_path):
 
     Returns
     -------
-    list
+    tuple
         maps (MapImages object), parent_list (== image_id) and patch_list (list of patches).
     """
     maps = MapImages(f"{sample_dir}/{image_id}")
@@ -41,6 +41,28 @@ def init_maps(sample_dir, image_id, tmp_path):
     patch_list = maps.list_patches()
 
     return maps, parent_list, patch_list
+
+
+@pytest.fixture
+def init_dataframes(sample_dir, image_id, tmp_path):
+    """Initializes MapImages object (with metadata from csv and patches) and creates parent and patch dataframes.
+
+    Returns
+    -------
+    tuple
+        path to parent and patch dataframes
+    """
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)  # gives 9 patches
+    maps.add_center_coord(tree_level="parent")
+    maps.add_patch_polygons()
+    maps.calc_pixel_stats()
+    _, _ = maps.convert_images(save=True)
+    assert os.path.isfile("./parent_df.csv")
+    assert os.path.isfile("./patch_df.csv")
+
+    return "./parent_df.csv", "./patch_df.csv"
 
 
 @pytest.fixture
@@ -128,13 +150,32 @@ def test_init_geotiff(sample_dir):
     assert isinstance(geotiffs, MapImages)
 
 
-def test_init_tiff_32bit(sample_dir):
+def test_init_parent_path(sample_dir, image_id, capfd):
+    maps = MapImages(
+        f"{sample_dir}/{image_id}",
+        tree_level="patch",
+        parent_path=f"{sample_dir}/{image_id}",
+    )
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 1
+
+    # without passing tree level should get warning
+    maps = MapImages(f"{sample_dir}/{image_id}", parent_path=f"{sample_dir}/{image_id}")
+    out, _ = capfd.readouterr()
+    assert (
+        "[WARNING] Ignoring `parent_path` as `tree_level`  is set to 'parent'." in out
+    )
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+
+
+def test_init_tiff_32bit_error(sample_dir):
     image_id = "cropped_32bit.tif"
     with pytest.raises(NotImplementedError, match="Image mode"):
         MapImages(f"{sample_dir}/{image_id}")
 
 
-def test_init_non_image(sample_dir):
+def test_init_non_image_error(sample_dir):
     file_name = "ts_downloaded_maps.csv"
     with pytest.raises(PIL.UnidentifiedImageError, match="not an image"):
         MapImages(f"{sample_dir}/{file_name}")
@@ -269,6 +310,46 @@ def test_add_metadata_columns(matching_metadata_dir, metadata_df):
             assert isinstance(my_files.parents[parent_id]["coord"], tuple)
 
 
+def test_add_metadata_parent(sample_dir, image_id, init_dataframes, ts_metadata_keys):
+    parent_df, _ = init_dataframes
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(parent_df, tree_level="parent")
+    assert all(
+        [
+            x in maps.parents[image_id].keys()
+            for x in [*ts_metadata_keys, "center_lat", "center_lon"]
+        ]
+    )
+    assert isinstance(maps.parents[image_id]["shape"], tuple)
+    assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+
+
+def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
+    parent_df, patch_df = init_dataframes
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    maps.add_metadata(parent_df, tree_level="parent")  # add this too just in case
+    maps.add_metadata(patch_df, tree_level="patch")
+    patch_id = maps.list_patches()[0]
+    expected_cols = [
+        "parent_id",
+        "shape",
+        "pixel_bounds",
+        "coordinates",
+        "polygon",
+        "mean_pixel_R",
+        "mean_pixel_A",
+        "std_pixel_R",
+        "std_pixel_A",
+    ]
+    assert all([x in maps.patches[patch_id].keys() for x in expected_cols])
+    for k in ["shape", "pixel_bounds", "coordinates"]:
+        assert isinstance(maps.patches[patch_id][k], tuple)
+    assert isinstance(
+        "polygon", str
+    )  # expect this to be a string, reformed into polygon later
+
+
 # other ``add_metadata`` errors
 
 
@@ -315,10 +396,10 @@ def test_loader_add_geo_info(sample_dir):
 
     # check nothing happens for png/tiff (no metadata)
     image_id = "cropped_74488689.png"
-    ts_map = MapImages(f"{sample_dir}/{image_id}")
-    keys = list(ts_map.parents[image_id].keys())
-    ts_map.add_geo_info()
-    assert list(ts_map.parents[image_id].keys()) == keys
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    keys = list(maps.parents[image_id].keys())
+    maps.add_geo_info()
+    assert list(maps.parents[image_id].keys()) == keys
 
     image_id = "cropped_non_geo.tif"
     tiff = MapImages(f"{sample_dir}/{image_id}")
@@ -409,19 +490,39 @@ def test_add_shape(init_maps, image_id):
 
 
 def test_calc_coords_from_grid_bb(sample_dir, image_id):
-    ts_map = MapImages(f"{sample_dir}/{image_id}")
-    ts_map.add_metadata(
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
         f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "grid_bb", "crs"]
     )
-    assert "coordinates" not in ts_map.parents[image_id]
-    ts_map.add_coords_from_grid_bb()
-    assert "coordinates" in ts_map.parents[image_id]
-    assert ts_map.parents[image_id]["coordinates"] == approx(
+    assert "coordinates" not in maps.parents[image_id]
+    maps.add_coords_from_grid_bb()
+    assert "coordinates" in maps.parents[image_id]
+    assert maps.parents[image_id]["coordinates"] == approx(
         (-4.83, 55.80, -4.21, 56.059), rel=1e-2
     )
 
 
-def test_coord_functions(init_maps, image_id, sample_dir):
+def test_calc_coords_from_grid_bb_warning(sample_dir, image_id, capfd):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    assert all([x not in maps.parents[image_id] for x in ["coordinates", "grid_bb"]])
+    maps.add_coords_from_grid_bb()
+    out, _ = capfd.readouterr()
+    assert "[WARNING] No grid bounding box" in out
+    assert "coordinates" not in maps.parents[image_id]
+
+
+def test_calc_coords_from_grid_bb_error(sample_dir, image_id, capfd):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "grid_bb", "crs"]
+    )
+    assert "coordinates" not in maps.parents[image_id]
+    maps.parents[image_id]["grid_bb"] = 123
+    with pytest.raises(ValueError, match="Unexpected grid_bb"):
+        maps.add_coords_from_grid_bb()
+
+
+def test_coord_functions(init_maps, image_id, sample_dir, capfd):
     # test for png with added metadata
     maps, _, patch_list = init_maps
     maps.add_center_coord()
@@ -443,6 +544,8 @@ def test_coord_functions(init_maps, image_id, sample_dir):
     keys = list(tiffs.parents[image_id].keys())
     tiffs.add_coord_increments()
     tiffs.add_center_coord(tree_level="parent")
+    out, _ = capfd.readouterr()
+    assert "[WARNING] 'coordinates' could not be found" in out
     assert list(tiffs.parents[image_id].keys()) == keys
 
 
@@ -468,8 +571,44 @@ def test_save_patches_as_geotiffs(init_maps):
     maps.save_patches_as_geotiffs()
 
 
-def test_save_to_geojson(init_maps, tmp_path):
+def test_save_to_geojson(init_maps, tmp_path, capfd):
     maps, _, _ = init_maps
+    maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
+    assert os.path.exists(f"{tmp_path}/patches.geojson")
+    geo_df = geopd.read_file(f"{tmp_path}/patches.geojson")
+    assert "geometry" in geo_df.columns
+    assert str(geo_df.crs.to_string()) == "EPSG:4326"
+    assert isinstance(geo_df["geometry"][0], Polygon)
+
+    maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
+    out, _ = capfd.readouterr()
+    assert "[WARNING] File already exists" in out
+
+
+def test_save_to_geojson_missing_data(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "coordinates", "crs"]
+    )
+    maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
+    assert os.path.exists(f"{tmp_path}/patches.geojson")
+    geo_df = geopd.read_file(f"{tmp_path}/patches.geojson")
+    assert "geometry" in geo_df.columns
+    assert str(geo_df.crs.to_string()) == "EPSG:4326"
+    assert isinstance(geo_df["geometry"][0], Polygon)
+
+
+def test_save_to_geojson_polygon_strings(
+    sample_dir, image_id, init_dataframes, tmp_path
+):
+    parent_df, patch_df = init_dataframes
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    maps.add_metadata(parent_df, tree_level="parent")
+    maps.add_metadata(patch_df, tree_level="patch")
+    patch_id = maps.list_patches()[0]
+    assert isinstance(maps.patches[patch_id]["polygon"], str)
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
     geo_df = geopd.read_file(f"{tmp_path}/patches.geojson")
