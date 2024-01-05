@@ -13,7 +13,6 @@ from ast import literal_eval
 from glob import glob
 from typing import Literal
 
-import matplotlib.image as mpimg
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -472,9 +471,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             plt.subplot(num_samples // 3 + 1, 3, i + 1)
             img = Image.open(self.images[tree_level][image_id]["image_path"])
             plt.title(image_id, size=8)
-            plt.imshow(
-                img,
-            )
+
+            # check if grayscale
+            if len(img.getbands()) == 1:
+                plt.imshow(img, cmap="gray", vmin=0, vmax=255)
+            else:
+                plt.imshow(img)
             plt.xticks([])
             plt.yticks([])
 
@@ -672,10 +674,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level = self._get_tree_level(image_id)
 
         try:
-            myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
+            img = Image.open(self.images[tree_level][image_id]["image_path"])
             # shape = (hwc)
-            myimg_shape = myimg.shape
-            self.images[tree_level][image_id]["shape"] = myimg_shape
+            height = img.height
+            width = img.width
+            channels = len(img.getbands())
+
+            self.images[tree_level][image_id]["shape"] = (height, width, channels)
         except OSError:
             raise ValueError(
                 f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.'
@@ -1485,7 +1490,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
                 fig = plt.figure(figsize=figsize)
                 plt.axis("off")
-                plt.imshow(img, zorder=1)
+
+                # check if grayscale
+                if len(img.getbands()) == 1:
+                    plt.imshow(img, cmap="gray", vmin=0, vmax=255, zorder=1)
+                else:
+                    plt.imshow(img, zorder=1)
 
                 if column_to_plot:
                     print(
@@ -1603,7 +1613,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     parent_path = parent_images[parent_id]["image_path"]
                     parent_image = Image.open(parent_path)
 
-                    ax.imshow(parent_image)
+                    # check if grayscale
+                    if len(parent_image.getbands()) == 1:
+                        ax.imshow(parent_image, cmap="gray", vmin=0, vmax=255)
+                    else:
+                        ax.imshow(parent_image)
 
                 if save_kml_dir:
                     os.makedirs(save_kml_dir, exist_ok=True)
@@ -2322,7 +2336,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
         patch = Image.open(patch_path)
-        patch_array = reshape_as_raster(patch)
 
         with rasterio.open(
             f"{geotiff_path}",
@@ -2336,7 +2349,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             nodata=0,
             crs=crs,
         ) as dst:
-            dst.write(patch_array)
+            if len(patch.getbands()) == 1:
+                patch_array = np.array(patch)
+                dst.write(patch_array, indexes=1)
+            else:
+                patch_array = reshape_as_raster(patch)
+                dst.write(patch_array)
 
     def save_patches_to_geojson(
         self,
