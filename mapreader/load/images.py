@@ -2211,7 +2211,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         parent_affine = rasterio.transform.from_bounds(*coords, width, height)
         parent = Image.open(parent_path)
-        parent_array = reshape_as_raster(parent)
 
         with rasterio.open(
             f"{geotiff_path}",
@@ -2225,7 +2224,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             nodata=0,
             crs=crs,
         ) as dst:
-            dst.write(parent_array)
+            if len(parent.getbands()) == 1:
+                parent_array = np.array(parent)
+                dst.write(parent_array, indexes=1)
+            else:
+                parent_array = reshape_as_raster(parent)
+                dst.write(parent_array)
 
     def save_patches_as_geotiffs(
         self,
