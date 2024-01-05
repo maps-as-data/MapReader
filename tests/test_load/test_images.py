@@ -136,6 +136,16 @@ def test_init_png(sample_dir, image_id):
     len(maps)
 
 
+def test_init_png_grayscale(sample_dir):
+    image_id = "cropped_L.png"
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+    assert isinstance(maps, MapImages)
+    maps.add_shape()
+    assert maps.parents[image_id]["shape"] == (9, 9, 1)
+
+
 def test_init_tiff(sample_dir):
     image_id = "cropped_non_geo.tif"
     tiffs = MapImages(f"{sample_dir}/{image_id}")
@@ -429,6 +439,17 @@ def test_patchify_meters(sample_dir, image_id, tmp_path):
     assert len(maps.list_patches()) == 25
 
 
+def test_patchify_grayscale(sample_dir, tmp_path):
+    image_id = "cropped_L.png"
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    parent_list = maps.list_parents()
+    patch_list = maps.list_patches()
+    assert len(parent_list) == 1
+    assert len(patch_list) == 9
+    assert os.path.isfile(f"{tmp_path}/patch-0-0-3-3-#{image_id}#.png")
+
+
 def test_patchify_meters_errors(sample_dir, image_id, tmp_path):
     maps = MapImages(f"{sample_dir}/{image_id}")
     with pytest.raises(ValueError, match="add coordinate information"):
@@ -569,6 +590,22 @@ def test_add_patch_polygons(init_maps):
 def test_save_patches_as_geotiffs(init_maps):
     maps, _, _ = init_maps
     maps.save_patches_as_geotiffs()
+    patch_id = maps.list_patches()[0]
+    assert "geotiff_path" in maps.patches[patch_id].keys()
+    assert os.path.isfile(maps.patches[patch_id]["geotiff_path"])
+
+
+def test_save_patches_as_geotiffs_grayscale(sample_dir, tmp_path):
+    image_id = "cropped_L.png"
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    metadata = pd.read_csv(f"{sample_dir}/ts_downloaded_maps.csv", index_col=0)
+    metadata.loc[0, "name"] = "cropped_L.png"
+    maps.add_metadata(metadata)
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    maps.save_patches_as_geotiffs()
+    patch_id = maps.list_patches()[0]
+    assert "geotiff_path" in maps.patches[patch_id].keys()
+    assert os.path.isfile(maps.patches[patch_id]["geotiff_path"])
 
 
 def test_save_to_geojson(init_maps, tmp_path, capfd):
@@ -677,3 +714,14 @@ def test_save_parents_as_geotiffs(init_maps, sample_dir, image_id):
     maps.save_parents_as_geotiffs()
     image_id = image_id.split(".")[0]
     assert os.path.isfile(f"{sample_dir}/{image_id}.tif")
+
+
+def test_save_parents_as_geotiffs_grayscale(sample_dir, tmp_path):
+    image_id = "cropped_L.png"
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    metadata = pd.read_csv(f"{sample_dir}/ts_downloaded_maps.csv", index_col=0)
+    metadata.loc[0, "name"] = "cropped_L.png"
+    maps.add_metadata(metadata)
+    maps.save_parents_as_geotiffs()
+    assert "geotiff_path" in maps.parents[image_id].keys()
+    assert os.path.isfile(maps.parents[image_id]["geotiff_path"])
