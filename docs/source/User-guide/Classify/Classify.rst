@@ -20,13 +20,12 @@ This is all done within MapReader's ``ClassifierContainer()`` class, which is us
 - Predict labels of unannotated images (model inference).
 - Visualize datasets and predictions.
 
-If you already have a fine-tuned model, you can skip to the `Infer labels using a fine-tuned model <https://mapreader.readthedocs.io/en/latest/Classify/Infer.html>`_ page.
+If you already have a fine-tuned model, you can skip to the `Infer labels using a fine-tuned model <https://mapreader.readthedocs.io/en/latest/User-guide/Classify/Infer.html>`_ page.
 
-If not, you should proceed to the `Train/fine-tune a classifier <https://mapreader.readthedocs.io/en/latest/Classify/Train.html>`_ page.
+If not, you should proceed to the `Train/fine-tune a classifier <https://mapreader.readthedocs.io/en/latest/User-guide/Classify/Train.html>`_ page.
 
 .. toctree::
    :maxdepth: 1
 
    Train
    Infer
-
