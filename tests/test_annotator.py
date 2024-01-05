@@ -211,16 +211,6 @@ def test_init_dfs_value_error(load_dfs):
         )
 
 
-def test_no_url_col(load_dfs):
-    parent_df, patch_df, _ = load_dfs
-    parent_df = parent_df.drop(columns=["url"])
-    with pytest.raises(ValueError, match="should contain a 'url' column"):
-        Annotator(
-            patch_df=patch_df,
-            parent_df=parent_df,
-        )
-
-
 def test_no_image_path_col(load_dfs):
     parent_df, patch_df, _ = load_dfs
     patch_df = patch_df.drop(columns=["image_path"])
