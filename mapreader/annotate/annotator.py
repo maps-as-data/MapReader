@@ -22,8 +22,6 @@ from ..load.loader import load_patches
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-MAX_SIZE = 1000
-
 _CENTER_LAYOUT = widgets.Layout(
     display="flex", flex_flow="column", align_items="center"
 )
@@ -64,8 +62,23 @@ class Annotator(pd.DataFrame):
     sortby : str or None, optional
         Name of the column to use to sort the patch DataFrame, by default None.
         Default sort order is ``ascending=True``. Pass ``ascending=False`` keyword argument to sort in descending order.
-    **kwargs
-        Additional keyword arguments
+    ascending : bool, optional
+        Whether to sort the DataFrame in ascending order when using the ``sortby`` argument, by default True.
+    username : str or None, optional
+        Username to use when saving annotations file, by default None.
+        If not provided, a random string is generated.
+    task_name : str or None, optional
+        Name of the annotation task, by default None.
+    min_values : dict, optional
+        A dictionary consisting of column names (keys) and minimum values as floating point values (values), by default None.
+    max_values : dict, optional
+        A dictionary consisting of column names (keys) and maximum values as floating point values (values), by default None.
+    surrounding : int, optional
+        The number of surrounding images to show for context, by default 1.
+    max_size : int, optional
+        The size in pixels for the longest side to which constrain each patch image, by default 1000.
+    resize_to : int or None, optional
+        The size in pixels for the longest side to which resize each patch image, by default None.
 
     Raises
     ------
@@ -79,21 +92,6 @@ class Annotator(pd.DataFrame):
         If labels provided are not in the form of a list
     SyntaxError
         If labels provided are not in the form of a list
-
-    Notes
-    -----
-
-    Additional kwargs:
-
-    - ``username``: Username to use when saving annotations file. Default: Randomly generated string.
-    - ``task_name``: Name of the annotation task. Default: "task".
-    - ``min_values``: A dictionary consisting of column names (keys) and minimum values as floating point values (values). Default: {}.
-    - ``max_values``: A dictionary consisting of column names (keys) and maximum values as floating point values (values). Default: {}.
-    - ``buttons_per_row``: Number of buttons to display per row. Default: None.
-    - ``ascending``: Whether to sort the DataFrame in ascending order. Default: True.
-    - ``surrounding``: The number of surrounding images to show for context. Default: 1.
-    - ``max_size``: The size in pixels for the longest side to which constrain each patch image. Default: 1000.
-    - ``resize_to``: The size in pixels for the longest side to which resize each patch image. Default: None.
     """
 
     def __init__(
@@ -111,7 +109,14 @@ class Annotator(pd.DataFrame):
         auto_save: bool = True,
         delimiter: str = ",",
         sortby: str | None = None,
-        **kwargs,
+        ascending: bool = True,
+        username: str | None = None,
+        task_name: str | None = None,
+        min_values: dict | None = None,
+        max_values: dict | None = None,
+        surrounding: int = 1,
+        max_size: int = 1000,
+        resize_to: int | None = None,
     ):
         if labels is None:
             labels = []
@@ -174,10 +179,6 @@ class Annotator(pd.DataFrame):
         # Check for url column and add to patch dataframe
         if "url" in parent_df.columns:
             patch_df = patch_df.join(parent_df["url"], on="parent_id")
-        else:
-            raise ValueError(
-                "[ERROR] Metadata (parent data) should contain a 'url' column."
-            )
 
         # Add label column if not present
         if label_col not in patch_df.columns:
@@ -195,13 +196,12 @@ class Annotator(pd.DataFrame):
         )
 
         # Set up annotations file
-        username = kwargs.get(
-            "username",
-            "".join(
+        if not username:
+            username = "".join(
                 [random.choice(string.ascii_letters + string.digits) for n in range(30)]
-            ),
-        )
-        task_name = kwargs.get("task_name", "task")
+            )
+        if not task_name:
+            task_name = "task"
         id = hashlib.md5(image_list.encode("utf-8")).hexdigest()
 
         annotations_file = task_name.replace(" ", "_") + f"_#{username}#-{id}.csv"
@@ -269,9 +269,7 @@ class Annotator(pd.DataFrame):
         # Sort by sortby column if provided
         if isinstance(sortby, str):
             if sortby in self.columns:
-                self.sort_values(
-                    sortby, ascending=kwargs.get("ascending", True), inplace=True
-                )
+                self.sort_values(sortby, ascending=ascending, inplace=True)
             else:
                 raise ValueError(f"[ERROR] {sortby} is not a column in the DataFrame.")
         elif sortby is not None:
@@ -287,9 +285,8 @@ class Annotator(pd.DataFrame):
         self.task_name = task_name
 
         # set up for the annotator
-        self.buttons_per_row = kwargs.get("buttons_per_row", None)
-        self._min_values = kwargs.get("min_values", {})
-        self._max_values = kwargs.get("max_values", {})  # pixel_bounds = x0, y0, x1, y1
+        self._min_values = min_values or {}
+        self._max_values = max_values or {}
 
         self.patch_width, self.patch_height = self.get_patch_size()
 
@@ -297,25 +294,24 @@ class Annotator(pd.DataFrame):
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
 
         # Set up standards for context display
-        self.surrounding = kwargs.get("surrounding", 1)
-        self.max_size = kwargs.get("max_size", MAX_SIZE)
-        self.resize_to = kwargs.get("resize_to", None)
+        self.surrounding = surrounding
+        self.max_size = max_size
+        self.resize_to = resize_to
 
         # set up buttons
         self._buttons = []
 
         # Set max buttons
-        if not self.buttons_per_row:
-            if (len(self._labels) % 2) == 0:
-                if len(self._labels) > 4:
-                    self.buttons_per_row = 4
-                else:
-                    self.buttons_per_row = 2
+        if (len(self._labels) % 2) == 0:
+            if len(self._labels) > 4:
+                self.buttons_per_row = 4
             else:
-                if len(self._labels) == 3:
-                    self.buttons_per_row = 3
-                else:
-                    self.buttons_per_row = 5
+                self.buttons_per_row = 2
+        else:
+            if len(self._labels) == 3:
+                self.buttons_per_row = 3
+            else:
+                self.buttons_per_row = 5
 
         # Set indices
         self.current_index = -1
