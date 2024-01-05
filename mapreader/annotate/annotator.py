@@ -179,10 +179,6 @@ class Annotator(pd.DataFrame):
         # Check for url column and add to patch dataframe
         if "url" in parent_df.columns:
             patch_df = patch_df.join(parent_df["url"], on="parent_id")
-        else:
-            raise ValueError(
-                "[ERROR] Metadata (parent data) should contain a 'url' column."
-            )
 
         # Add label column if not present
         if label_col not in patch_df.columns:
