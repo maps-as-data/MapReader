@@ -18,6 +18,9 @@
     </a>
     <a href="https://zenodo.org/badge/latestdoi/430661738"><img src="https://zenodo.org/badge/430661738.svg" alt="DOI"></a>
     <br/>
+    <a href="https://codecov.io/github/Living-with-machines/MapReader" >
+    <img src="https://codecov.io/github/Living-with-machines/MapReader/graph/badge.svg?token=38GQ3O1GB5"/>
+    </a>
 </p>
 
 
