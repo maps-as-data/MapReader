@@ -725,3 +725,26 @@ def test_save_parents_as_geotiffs_grayscale(sample_dir, tmp_path):
     maps.save_parents_as_geotiffs()
     assert "geotiff_path" in maps.parents[image_id].keys()
     assert os.path.isfile(maps.parents[image_id]["geotiff_path"])
+
+
+def test_save_parents_as_geotiffs_error(sample_dir, image_id):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    assert "coordinates" not in maps.parents[image_id].keys()
+    with pytest.raises(ValueError, match="Cannot locate coordinates"):
+        maps.save_parents_as_geotiffs(rewrite=True)
+
+
+def test_show_sample_png(init_maps, monkeypatch):
+    maps, parent_list, patch_list = init_maps
+    monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
+    maps.show_sample(num_samples=1, tree_level="parent")
+    maps.show_sample(num_samples=1, tree_level="patch")
+
+
+def test_show_sample_grayscale(sample_dir, tmp_path, monkeypatch):
+    image_id = "cropped_L.png"
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
+    maps.show_sample(num_samples=1, tree_level="parent")
+    maps.show_sample(num_samples=1, tree_level="patch")

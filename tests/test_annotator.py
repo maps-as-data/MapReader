@@ -245,3 +245,13 @@ def test_fpaths_metadata_filenotfound_error(load_dfs, sample_dir):
             parent_paths=f"{sample_dir}/cropped_74488689.png",
             metadata_path="fake_df.csv",
         )
+
+
+def test_unknown_arg_error(load_dfs):
+    parent_df, patch_df, _ = load_dfs
+    with pytest.raises(TypeError):
+        Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            fake_arg=1,
+        )
