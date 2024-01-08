@@ -7,11 +7,12 @@ except ImportError:
 
 import os
 import random
+import re
 import warnings
+from ast import literal_eval
 from glob import glob
 from typing import Literal
 
-import matplotlib.image as mpimg
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,8 +22,12 @@ import rasterio
 from PIL import Image, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
-from shapely.geometry import box
+from shapely import wkt
+from shapely.geometry import Polygon, box
 from tqdm.auto import tqdm
+
+from mapreader.download.data_structures import GridBoundingBox, GridIndex
+from mapreader.download.downloader_utils import get_polygon_from_grid_bb
 
 os.environ[
     "USE_PYGEOS"
@@ -419,7 +424,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 data_series = metadata_df[metadata_df[image_id_col] == key].squeeze()
                 for column, item in data_series.items():
                     try:
-                        self.images[tree_level][key][column] = eval(item)
+                        self.images[tree_level][key][column] = literal_eval(item)
                     except:
                         self.images[tree_level][key][column] = item
 
@@ -466,9 +471,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             plt.subplot(num_samples // 3 + 1, 3, i + 1)
             img = Image.open(self.images[tree_level][image_id]["image_path"])
             plt.title(image_id, size=8)
-            plt.imshow(
-                img,
-            )
+
+            # check if grayscale
+            if len(img.getbands()) == 1:
+                plt.imshow(img, cmap="gray", vmin=0, vmax=255)
+            else:
+                plt.imshow(img)
             plt.xticks([])
             plt.yticks([])
 
@@ -508,6 +516,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         image_ids = list(self.images[tree_level].keys())
         for image_id in image_ids:
             self._add_shape_id(image_id=image_id)
+
+    def add_coords_from_grid_bb(self, verbose: bool = False) -> None:
+        print("[INFO] Adding coordinates, tree level: parent")
+
+        parent_list = self.list_parents()
+
+        for parent_id in parent_list:
+            if "grid_bb" not in self.parents[parent_id].keys():
+                print(
+                    f"[WARNING] No grid bounding box found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+                )
+                continue
+
+            self._add_coords_from_grid_bb_id(image_id=parent_id, verbose=verbose)
 
     def add_coord_increments(self, verbose: bool | None = False) -> None:
         """
@@ -652,14 +674,41 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level = self._get_tree_level(image_id)
 
         try:
-            myimg = mpimg.imread(self.images[tree_level][image_id]["image_path"])
+            img = Image.open(self.images[tree_level][image_id]["image_path"])
             # shape = (hwc)
-            myimg_shape = myimg.shape
-            self.images[tree_level][image_id]["shape"] = myimg_shape
+            height = img.height
+            width = img.width
+            channels = len(img.getbands())
+
+            self.images[tree_level][image_id]["shape"] = (height, width, channels)
         except OSError:
             raise ValueError(
                 f'[ERROR] Problem with "{image_id}". Please either redownload or remove from list of images to load.'
             )
+
+    def _add_coords_from_grid_bb_id(
+        self, image_id: int | str, verbose: bool = False
+    ) -> None:
+        grid_bb = self.parents[image_id]["grid_bb"]
+
+        if isinstance(grid_bb, str):
+            cell1, cell2 = re.findall(r"\(.*?\)", grid_bb)
+
+            z1, x1, y1 = literal_eval(cell1)
+            z2, x2, y2 = literal_eval(cell2)
+
+            cell1 = GridIndex(x1, y1, z1)
+            cell2 = GridIndex(x2, y2, z2)
+
+            grid_bb = GridBoundingBox(cell1, cell2)
+
+        if isinstance(grid_bb, GridBoundingBox):
+            polygon = get_polygon_from_grid_bb(grid_bb)
+            coordinates = polygon.bounds
+            self.parents[image_id]["coordinates"] = coordinates
+
+        else:
+            raise ValueError(f"[ERROR] Unexpected grid_bb format for {image_id}.")
 
     def _add_coord_increments_id(
         self, image_id: int | str, verbose: bool | None = False
@@ -759,19 +808,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._add_coord_increments_id(parent_id)
 
             # get min_x and min_y and pixel-wise dlon and dlat for parent image
-            parent_min_x = self.parents[parent_id]["coordinates"][0]
-            parent_min_y = self.parents[parent_id]["coordinates"][1]
+            parent_min_x, parent_min_y, parent_max_x, parent_max_y = self.parents[
+                parent_id
+            ]["coordinates"]
             dlon = self.parents[parent_id]["dlon"]
             dlat = self.parents[parent_id]["dlat"]
 
-            # get patch bounds
             pixel_bounds = self.patches[image_id]["pixel_bounds"]
 
             # get patch coords
             min_x = (pixel_bounds[0] * dlon) + parent_min_x
-            min_y = (pixel_bounds[1] * dlat) + parent_min_y
+            min_y = parent_max_y - (pixel_bounds[3] * dlat)
             max_x = (pixel_bounds[2] * dlon) + parent_min_x
-            max_y = (pixel_bounds[3] * dlat) + parent_min_y
+            max_y = parent_max_y - (pixel_bounds[1] * dlat)
 
             self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
             self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
@@ -837,6 +886,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self._print_if_verbose(
                 f"[INFO] Reading 'coordinates' from {image_id}.", verbose
             )
+
             min_x, min_y, max_x, max_y = self.images[tree_level][image_id][
                 "coordinates"
             ]
@@ -1440,7 +1490,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
                 fig = plt.figure(figsize=figsize)
                 plt.axis("off")
-                plt.imshow(img, zorder=1)
+
+                # check if grayscale
+                if len(img.getbands()) == 1:
+                    plt.imshow(img, cmap="gray", vmin=0, vmax=255, zorder=1)
+                else:
+                    plt.imshow(img, zorder=1)
 
                 if column_to_plot:
                     print(
@@ -1558,7 +1613,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     parent_path = parent_images[parent_id]["image_path"]
                     parent_image = Image.open(parent_path)
 
-                    ax.imshow(parent_image)
+                    # check if grayscale
+                    if len(parent_image.getbands()) == 1:
+                        ax.imshow(parent_image, cmap="gray", vmin=0, vmax=255)
+                    else:
+                        ax.imshow(parent_image)
 
                 if save_kml_dir:
                     os.makedirs(save_kml_dir, exist_ok=True)
@@ -2076,6 +2135,116 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level = "parent" if bool(self.parents.get(image_id)) else "patch"
         return tree_level
 
+    def save_parents_as_geotiffs(
+        self,
+        rewrite: bool = False,
+        verbose: bool = False,
+        crs: str | None = None,
+    ) -> None:
+        """Save all parents in MapImages instance as geotiffs.
+
+        Parameters
+        ----------
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : str, optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``crs`` in the parents dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+        """
+
+        parents_list = self.list_parents()
+
+        for parent_id in tqdm(parents_list):
+            self._save_parent_as_geotiff(parent_id, rewrite, verbose, crs)
+
+    def _save_parent_as_geotiff(
+        self,
+        parent_id: str,
+        rewrite: bool = False,
+        verbose: bool = False,
+        crs: str | None = None,
+    ) -> None:
+        """Save a parent image as a geotiff.
+
+        Parameters
+        ----------
+        parent_id : str
+            The ID of the parent to write.
+        rewrite : bool, optional
+            Whether to rewrite files if they already exist, by default False
+        verbose : bool, optional
+            Whether to print verbose outputs, by default False
+        crs : Optional[str], optional
+            The CRS of the coordinates.
+            If None, the method will first look for ``crs`` in the parents dictionary and use those. If ``crs`` cannot be found in the dictionary, the method will use "EPSG:4326".
+            By default None.
+
+        Raises
+        ------
+        ValueError
+            If parent directory does not exist.
+        """
+
+        parent_path = self.parents[parent_id]["image_path"]
+        parent_dir = os.path.dirname(parent_path)
+
+        if not os.path.exists(parent_dir):
+            raise ValueError(f'[ERROR] Parent directory "{parent_dir}" does not exist.')
+
+        parent_id_no_ext = os.path.splitext(parent_id)[0]
+        geotiff_path = f"{parent_dir}/{parent_id_no_ext}.tif"
+
+        self.parents[parent_id]["geotiff_path"] = geotiff_path
+
+        if os.path.isfile(f"{geotiff_path}"):
+            if not rewrite:
+                self._print_if_verbose(
+                    f"[INFO] File already exists: {geotiff_path}.", verbose
+                )
+                return
+
+        self._print_if_verbose(
+            f"[INFO] Creating: {geotiff_path}.",
+            verbose,
+        )
+
+        if "shape" not in self.parents[parent_id].keys():
+            self._add_shape_id(parent_id)
+        height, width, channels = self.parents[parent_id]["shape"]
+
+        if "coordinates" not in self.parents[parent_id].keys():
+            print(self.parents[parent_id].keys())
+            raise ValueError(f"[ERROR] Cannot locate coordinates for {parent_id}")
+        coords = self.parents[parent_id]["coordinates"]
+
+        if not crs:
+            crs = self.parents[parent_id].get("crs", "EPSG:4326")
+
+        parent_affine = rasterio.transform.from_bounds(*coords, width, height)
+        parent = Image.open(parent_path)
+
+        with rasterio.open(
+            f"{geotiff_path}",
+            "w",
+            driver="GTiff",
+            height=parent.height,
+            width=parent.width,
+            count=channels,
+            transform=parent_affine,
+            dtype="uint8",
+            nodata=0,
+            crs=crs,
+        ) as dst:
+            if len(parent.getbands()) == 1:
+                parent_array = np.array(parent)
+                dst.write(parent_array, indexes=1)
+            else:
+                parent_array = reshape_as_raster(parent)
+                dst.write(parent_array)
+
     def save_patches_as_geotiffs(
         self,
         rewrite: bool | None = False,
@@ -2152,10 +2321,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             verbose,
         )
 
+        # get shape
         if "shape" not in self.patches[patch_id].keys():
             self._add_shape_id(patch_id)
         height, width, channels = self.patches[patch_id]["shape"]
 
+        # get coords
         if "coordinates" not in self.patches[patch_id].keys():
             self._add_patch_coords_id(patch_id)
         coords = self.patches[patch_id]["coordinates"]
@@ -2165,7 +2336,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
         patch = Image.open(patch_path)
-        patch_array = reshape_as_raster(patch)
 
         with rasterio.open(
             f"{geotiff_path}",
@@ -2179,7 +2349,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             nodata=0,
             crs=crs,
         ) as dst:
-            dst.write(patch_array)
+            if len(patch.getbands()) == 1:
+                patch_array = np.array(patch)
+                dst.write(patch_array, indexes=1)
+            else:
+                patch_array = reshape_as_raster(patch)
+                dst.write(patch_array)
 
     def save_patches_to_geojson(
         self,
@@ -2213,6 +2388,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.add_patch_polygons()
             _, patch_df = self.convert_images()
 
+        patch_df["polygon"] = patch_df["polygon"].apply(
+            lambda x: x if isinstance(x, Polygon) else wkt.loads(x)
+        )
+
         if not crs:
             if "crs" in patch_df.columns:
                 if len(patch_df["crs"].unique()) == 1:
@@ -2220,14 +2399,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             else:
                 crs = "EPSG:4326"
 
+        if "image_id" in patch_df.columns:
+            patch_df.drop(columns=["image_id"], inplace=True)
         patch_df.reset_index(names="image_id", inplace=True)
 
         # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
-        # drop tuple columns - cause errors
+        # change tuple columns to strings
         for col in patch_df.columns:
             if isinstance(patch_df[col][0], tuple):
-                patch_df.drop(columns=col, inplace=True)
+                patch_df[col] = patch_df[col].apply(str)
 
         geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
         geo_patch_df.to_file(geojson_fname, driver="GeoJSON")

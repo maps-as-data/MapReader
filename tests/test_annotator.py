@@ -211,16 +211,6 @@ def test_init_dfs_value_error(load_dfs):
         )
 
 
-def test_no_url_col(load_dfs):
-    parent_df, patch_df, _ = load_dfs
-    parent_df = parent_df.drop(columns=["url"])
-    with pytest.raises(ValueError, match="should contain a 'url' column"):
-        Annotator(
-            patch_df=patch_df,
-            parent_df=parent_df,
-        )
-
-
 def test_no_image_path_col(load_dfs):
     parent_df, patch_df, _ = load_dfs
     patch_df = patch_df.drop(columns=["image_path"])
@@ -254,4 +244,14 @@ def test_fpaths_metadata_filenotfound_error(load_dfs, sample_dir):
             patch_paths=f"{tmp_path}/patches/*png",
             parent_paths=f"{sample_dir}/cropped_74488689.png",
             metadata_path="fake_df.csv",
+        )
+
+
+def test_unknown_arg_error(load_dfs):
+    parent_df, patch_df, _ = load_dfs
+    with pytest.raises(TypeError):
+        Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            fake_arg=1,
         )

@@ -65,6 +65,7 @@ Other arguments that you may want to be aware of when initializing the ``Annotat
 - ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
 - ``surrounding``: How many surrounding patches to show in the context image (default: ``1``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
+- ``ascending``: A boolean indicating whether to sort in ascending or descending order (default: ``True``).
 - ``delimiter``: The delimiter to use when reading your data files (default: ``","`` for csv).
 
 After setting up the ``Annotator`` instance, you can interactively annotate a sample of your images using:
@@ -78,7 +79,7 @@ Patch size
 
 By default, your patches will be shown to you as their original size in pixels.
 This can make annotating difficult if your patches are very small.
-To resize your patches when viewing them in the annotation interface, you can pass the ``resize_to`` keyword argument when initializing the ``Annotator`` instance or when calling the ``annotate()`` method.
+To resize your patches when viewing them in the annotation interface, you can pass the ``resize_to`` argument when initializing the ``Annotator`` or when calling the ``annotate()`` method.
 
 e.g. to resize your patches so that their largest edge is 300 pixels:
 
@@ -101,14 +102,14 @@ Or, equivalently, :
 
     annotator.annotate(resize_to=300)
 
-.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator``.
 
 Context
 ~~~~~~~
 
 As well as resizing your patches, you can also set the annotation interface to show a context image using ``show_context=True``.
 This creates a panel of patches in the annotation interface, highlighting your patch in the middle of its surrounding immediate images.
-As above, you can either pass the ``show_context`` argument when initializing the ``Annotator`` instance or when calling the ``annotate`` method.
+As above, you can either pass the ``show_context`` argument when initializing the ``Annotator`` or when calling the ``annotate`` method.
 
 e.g. :
 
@@ -192,7 +193,7 @@ e.g. To sort your patches by the mean red pixel intensity in each patch but only
 Save your annotations
 ----------------------
 
-Your annotations are automatically saved as you're making progress through the annotation task as a ``csv`` file (unless you've set the ``auto_save`` keyword argument to ``False`` when you set up the ``Annotator`` instance).
+Your annotations are automatically saved as you're making progress through the annotation task as a ``csv`` file (unless you've set ``auto_save=False`` when you set up the ``Annotator`` instance).
 
 If you need to know the name of the annotations file, you may refer to a property on your ``Annotator`` instance:
 
