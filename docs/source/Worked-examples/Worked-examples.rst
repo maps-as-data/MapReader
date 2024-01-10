@@ -1,4 +1,4 @@
-Worked examples
+Worked Examples
 ================
 
 .. todo:: Explain these different use cases

@@ -241,6 +241,8 @@ There are a number of options for the ``model`` argument:
         .. code-block:: python
 
             #EXAMPLE
+            from mapreader import ClassifierContainer
+
             my_classifier = ClassifierContainer("resnet18", annotated_images.labels_map, dataloaders)
 
         By default, this will load a pretrained form of the model and reshape the last layer to output the same number of nodes as labels in your dataset.
@@ -252,9 +254,12 @@ There are a number of options for the ``model`` argument:
 
         .. code-block:: python
 
+
             #EXAMPLE
             from torchvision import models
             from torch import nn
+
+            from mapreader import ClassifierContainer
 
             my_model = models.resnet18(pretrained=True)
 
@@ -280,6 +285,8 @@ There are a number of options for the ``model`` argument:
             #EXAMPLE
             import torch
 
+            from mapreader import ClassifierContainer
+
             my_model = torch.load("./models/model_checkpoint_6.pkl")
 
             my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
@@ -295,6 +302,8 @@ There are a number of options for the ``model`` argument:
             .. code-block:: python
 
                 #EXAMPLE
+                from mapreader import ClassifierContainer
+
                 my_classifier = ClassifierContainer(None, None, None, load_path="./models/checkpoint_6.pkl")
 
             This will also load the corresponding model file (in this case "./models/model_checkpoint_6.pkl").
@@ -311,6 +320,8 @@ There are a number of options for the ``model`` argument:
             #EXAMPLE
             from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 
+            from mapreader import ClassifierContainer
+
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
 
@@ -325,6 +336,8 @@ There are a number of options for the ``model`` argument:
 
             #EXAMPLE
             import timm
+
+            from mapreader import ClassifierContainer
 
             my_model = timm.create_model("hf_hub:timm/resnest101e.in1k", pretrained=True, num_classes=len(annotated_images.labels_map))
 

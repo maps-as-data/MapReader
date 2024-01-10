@@ -14,6 +14,8 @@ from mapreader.classify import custom_models
 
 from mapreader.process import process
 
+from mapreader.annotate.annotator import Annotator
+
 from . import _version
 
 __version__ = _version.get_versions()["version"]

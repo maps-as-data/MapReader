@@ -1,4 +1,4 @@
-Installation instructions
+Installation Instructions
 =========================
 
 .. note:: Run these commands from your terminal.
