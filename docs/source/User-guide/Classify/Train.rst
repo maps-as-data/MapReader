@@ -32,7 +32,7 @@ For example, if you have set up your directory as recommended in our `Input Guid
 
     Other arguments you may want to specify when adding metadata to your images include:
 
-    - ``delimiter`` - By default, this is set to "\t" so will assume your ``csv`` file is tab delimited. You will need to specify the ``delimiter`` argument if your file is saved in another format.
+    - ``delimiter`` - By default, this is set to "," so will assume your ``csv`` file is comma separated. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
     - ``append`` - By default, this is ``False`` and so each call to the ``.load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
 
@@ -589,7 +589,7 @@ To do this, you will need to create a new dataset containing your patches:
 
     from mapreader import PatchDataset
 
-    infer = PatchDataset("./patch_df.csv", delimiter="\t", transform="test")
+    infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
 .. note:: You should have created this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance).
 
@@ -648,7 +648,7 @@ From here, you can either save your results using:
 
 .. code-block:: python
 
-    infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
+    infer.patch_df.to_csv("predictions_patch_df.csv", sep=",")
 
 Or, you can use the ``MapImages`` object to create some visualizations of your results:
 
