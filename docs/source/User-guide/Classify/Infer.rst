@@ -90,7 +90,7 @@ This can be done by loading a dataframe containing the paths to your patches:
 
     from mapreader import PatchDataset
 
-    infer = PatchDataset("./patch_df.csv", delimiter="\t", transform="test")
+    infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
 .. note:: You can create this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance).
 
@@ -152,7 +152,7 @@ From here, you can either save your results using:
 
 .. code-block:: python
 
-    infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
+    infer.patch_df.to_csv("predictions_patch_df.csv", sep=",")
 
 Or, you can use the ``MapImages`` object to create some visualizations of your results:
 
