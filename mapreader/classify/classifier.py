@@ -127,15 +127,15 @@ class ClassifierContainer:
                 raise ValueError(
                     "[ERROR] ``labels_map`` and ``load_path`` cannot be used together - please set one to ``None``."
                 )
-            
+
             # load object
             self.load(load_path=load_path, force_device=force_device)
-            
+
             # add any extra dataloaders
             if dataloaders:
                 for set_name, dataloader in dataloaders.items():
-                    self.dataloaders[set_name]=dataloader
-        
+                    self.dataloaders[set_name] = dataloader
+
         else:
             if model is None or labels_map is None:
                 raise ValueError(
@@ -144,7 +144,7 @@ class ClassifierContainer:
 
             self.labels_map = labels_map
 
-            # set up model and move to device  
+            # set up model and move to device
             print("[INFO] Initializing model.")
             if isinstance(model, nn.Module):
                 self.model = model.to(self.device)
@@ -174,11 +174,9 @@ class ClassifierContainer:
 
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
-        
+
         for set_name, dataloader in self.dataloaders.items():
-            print(
-                f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
-            )
+            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
 
     def generate_layerwise_lrs(
         self,
@@ -892,7 +890,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 raise ValueError(
                                     "[ERROR] Criterion is not yet defined.\n\n\
 Use ``add_criterion`` to define one."
-                                    )
+                                )
 
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
@@ -1761,6 +1759,27 @@ Output will show batch number {num_batches}.'
             mymodel.state_dict(),
             os.path.join(par_name, f"model_state_dict_{base_name}"),
         )
+
+    def save_predictions(
+        self,
+        set_name: str,
+        save_path: str | None = None,
+        delimiter: str = ",",
+    ):
+        if set_name not in self.dataloaders.keys():
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
+
+        patch_df = self.dataloaders[set_name].dataset.patch_df
+        patch_df["predicted_label"] = self.pred_label
+        patch_df["pred"] = self.pred_label_indices
+        patch_df["conf"] = np.array(self.pred_conf).max(axis=1)
+
+        if save_path is None:
+            save_path = f"{set_name}_predictions_patch_df.csv"
+        patch_df.to_csv(save_path, sep=delimiter)
+        print(f"[INFO] Saved predictions to {save_path}.")
 
     def load_dataset(
         self,
