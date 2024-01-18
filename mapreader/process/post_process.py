@@ -9,6 +9,17 @@ from tqdm import tqdm
 
 
 class PatchDataFrame(pd.DataFrame):
+    """A class for storing patch dataframes.
+
+    Parameters
+    ----------
+    patch_df : pd.DataFrame
+        the DataFrame containing patches and predictions
+    labels_map : dict
+        the dictionary mapping label indices to their labels.
+        e.g. `{0: "no", 1: "railspace"}`.
+    """
+
     def __init__(
         self,
         patch_df: pd.DataFrame,
@@ -53,8 +64,15 @@ class PatchDataFrame(pd.DataFrame):
 
     def get_context(
         self,
-        labels: str or list,
+        labels: str | list,
     ):
+        """Get the context of the patches with the specified labels.
+
+        Parameters
+        ----------
+        labels : str | list
+            The label(s) to get context for.
+        """
         if isinstance(labels, str):
             labels = [labels]
         self._label_patches = self[self["predicted_label"].isin(labels)]
@@ -68,6 +86,7 @@ class PatchDataFrame(pd.DataFrame):
         self,
         ix,
     ):
+        """Get the context of the patch with the specified index."""
         parent_id = self.at[ix, "parent_id"]
         min_x = self.at[ix, "min_x"]
         min_y = self.at[ix, "min_y"]
@@ -96,7 +115,18 @@ class PatchDataFrame(pd.DataFrame):
         context_list = [x.image_id.values[0] for x in context_list if len(x)]
         return context_list
 
-    def update_preds(self, remap: dict, inplace: bool = False):
+    def update_preds(self, remap: dict, conf: float = 0.7, inplace: bool = False):
+        """Update the predictions of the chosen patches based on their context.
+
+        Parameters
+        ----------
+        remap : dict
+            A dictionary mapping the old labels to the new labels.
+        conf : float, optional
+            Patches with confidence scores below this value will be relabelled, by default 0.7.
+        inplace : bool, optional
+            Whether to relabel inplace or create new dataframe columns, by default False
+        """
         if self._label_patches is None:
             raise ValueError("[ERROR] You must run `get_context` first.")
         if len(self.context) == 0:
@@ -111,11 +141,14 @@ class PatchDataFrame(pd.DataFrame):
             )
 
         for ix in tqdm(self._label_patches.index):
-            self._update_preds_id(ix, labels=labels, remap=remap, inplace=inplace)
+            self._update_preds_id(
+                ix, labels=labels, remap=remap, conf=conf, inplace=inplace
+            )
 
     def _update_preds_id(
-        self, ix, labels: str or list, remap: dict, inplace: bool = False
+        self, ix, labels: str | list, remap: dict, conf: float, inplace: bool = False
     ):
+        """Update the predictions of the patch with the specified index."""
         context_list = self.context[ix]
 
         context_df = self[self["image_id"].isin(context_list)]
@@ -127,7 +160,7 @@ class PatchDataFrame(pd.DataFrame):
 
         prefix = "" if inplace else "new_"
         if (not any(context_df["predicted_label"].isin(labels))) & (
-            self.at[ix, "conf"] < 0.7
+            self.at[ix, "conf"] < conf
         ):
             self.at[ix, f"{prefix}predicted_label"] = remap[
                 self.at[ix, "predicted_label"]
