@@ -80,7 +80,9 @@ class PatchDataFrame(pd.DataFrame):
         for ix in tqdm(self._label_patches.index):
             if ix not in self.context:
                 context_list = self._get_context_id(ix)
-                self.context[ix] = context_list
+                # only add context if all surrounding patches are found
+                if len(context_list) == 9:
+                    self.context[ix] = context_list
 
     def _get_context_id(
         self,
@@ -140,7 +142,17 @@ class PatchDataFrame(pd.DataFrame):
                 f"[ERROR] You must specify a remap for each label in {labels}."
             )
 
-        for ix in tqdm(self._label_patches.index):
+        # add new label to labels_map if not already present (assume label index is next in sequence)
+        for new_label in remap.values():
+            if new_label not in self.labels_map.values():
+                print(
+                    [
+                        f"[INFO] Adding {new_label} to labels_map at index {len(self.labels_map)}."
+                    ]
+                )
+                self.labels_map[len(self.labels_map)] = new_label
+
+        for ix in tqdm(self.context):
             self._update_preds_id(
                 ix, labels=labels, remap=remap, conf=conf, inplace=inplace
             )
