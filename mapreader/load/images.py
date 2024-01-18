@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import PIL
 import rasterio
-from PIL import Image, ImageStat
+from PIL import Image, ImageOps, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
 from shapely import wkt
@@ -985,7 +985,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level: str | None = "parent",
         path_save: str | None = None,
         add_to_parents: bool | None = True,
-        square_cuts: bool | None = False,
         resize_factor: bool | None = False,
         output_format: str | None = "png",
         rewrite: bool | None = False,
@@ -1012,9 +1011,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         add_to_parents : bool, optional
             If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
-        square_cuts : bool, optional
-            If True, all patches will have the same number of pixels in
-            x and y, by default ``False``.
         resize_factor : bool, optional
             If True, resize the images before patchifying, by default ``False``.
         output_format : str, optional
@@ -1067,7 +1063,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 patch_size=patch_size,
                 path_save=path_save,
                 add_to_parents=add_to_parents,
-                square_cuts=square_cuts,
                 resize_factor=resize_factor,
                 output_format=output_format,
                 rewrite=rewrite,
@@ -1080,7 +1075,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_size: int,
         path_save: str,
         add_to_parents: bool | None = True,
-        square_cuts: bool | None = False,
         resize_factor: bool | None = False,
         output_format: str | None = "png",
         rewrite: bool | None = False,
@@ -1099,9 +1093,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         add_to_parents : bool, optional
             If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
-        square_cuts : bool, optional
-            If True, all patches will have the same number of pixels in
-            x and y, by default ``False``.
         resize_factor : bool, optional
             If True, resize the images before patchifying, by default ``False``.
         output_format : str, optional
@@ -1133,15 +1124,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 max_x = min(x + patch_size, width)
                 max_y = min(y + patch_size, height)
 
-                if (
-                    square_cuts
-                ):  # move min_x and min_y back a bit so the patch is square
-                    min_x = x - (patch_size - (max_x - x))
-                    min_y = y - (patch_size - (max_y - y))
-
-                else:
-                    min_x = x
-                    min_y = y
+                min_x = x
+                min_y = y
 
                 patch_id = f"patch-{min_x}-{min_y}-{max_x}-{max_y}-#{image_id}#.{output_format}"
                 patch_path = os.path.join(path_save, patch_id)
@@ -1153,12 +1137,22 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
                 else:
-                    self._print_if_verbose(
-                        f'[INFO] Creating "{patch_id}". Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.',
-                        verbose,
-                    )
-
                     patch = img.crop((min_x, min_y, max_x, max_y))
+                    if max_x == width:
+                        patch = ImageOps.pad(
+                            patch, (patch_size, patch.height), centering=(0, 0)
+                        )
+                    if max_y == height:
+                        patch = ImageOps.pad(
+                            patch, (patch.width, patch_size), centering=(0, 0)
+                        )
+
+                    # check patch size
+                    if patch.height != patch_size or patch.width != patch_size:
+                        raise ValueError(
+                            f"[ERROR] Patch size is {patch.height}x{patch.width} instead of {patch_size}x{patch_size}."
+                        )
+
                     patch.save(patch_path, output_format)
 
                 if add_to_parents:
