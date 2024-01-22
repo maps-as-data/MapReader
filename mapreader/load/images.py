@@ -2294,6 +2294,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         patch_path = self.patches[patch_id]["image_path"]
         patch_dir = os.path.dirname(patch_path)
+        patch = Image.open(patch_path)
 
         if not os.path.exists(patch_dir):
             raise ValueError(f'[ERROR] Patch directory "{patch_dir}" does not exist.')
@@ -2328,8 +2329,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if not crs:
             crs = self.patches[patch_id].get("crs", "EPSG:4326")
 
+        # for edge patches, crop the patch to the correct size first
+        min_x, min_y, max_x, max_y = self.patches[patch_id]["pixel_bounds"]
+        if width != max_x - min_x:
+            width = max_x - min_x
+            patch = patch.crop((0, 0, width, height))
+        if height != max_y - min_y:
+            height = max_y - min_y
+            patch = patch.crop((0, 0, width, height))
+
         patch_affine = rasterio.transform.from_bounds(*coords, width, height)
-        patch = Image.open(patch_path)
 
         with rasterio.open(
             f"{geotiff_path}",
