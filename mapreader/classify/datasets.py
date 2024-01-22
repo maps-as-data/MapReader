@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import os
+from ast import literal_eval
+from itertools import product
 from typing import Callable
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import torch
-from PIL import Image, ImageOps
+from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
@@ -105,6 +106,8 @@ class PatchDataset(Dataset):
             if os.path.isfile(patch_df):
                 print(f'[INFO] Reading "{patch_df}".')
                 patch_df = pd.read_csv(patch_df, sep=delimiter)
+                # ensure tuple/list columns are read as such
+                patch_df = self._eval_df(patch_df)
                 self.patch_df = patch_df
             else:
                 raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
@@ -113,6 +116,12 @@ class PatchDataset(Dataset):
             raise ValueError(
                 "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
             )
+
+        # force index to be integer
+        if self.patch_df.index.name == "image_id":
+            if "image_id" in self.patch_df.columns:
+                self.patch_df.drop(columns=["image_id"], inplace=True)
+            self.patch_df.reset_index(drop=False, names="image_id", inplace=True)
 
         self.label_col = label_col
         self.label_index_col = label_index_col
@@ -152,6 +161,15 @@ class PatchDataset(Dataset):
         else:
             self.transform = transform
 
+    @staticmethod
+    def _eval_df(df):
+        for col in df.columns:
+            try:
+                df[col] = df[col].apply(literal_eval)
+            except (ValueError, TypeError, SyntaxError):
+                pass
+        return df
+
     def __len__(self) -> int:
         """
         Return the length of the dataset.
@@ -186,7 +204,7 @@ class PatchDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
+        img_path = self.patch_df.at[idx, self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -199,12 +217,12 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         img = self.transform(img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
-            image_label = self.patch_df.iloc[idx][self.label_col]
+            image_label = self.patch_df.at[idx, self.label_col]
         else:
             image_label = ""
 
         if self.label_index_col in self.patch_df.iloc[idx].keys():
-            image_label_index = self.patch_df.iloc[idx][self.label_index_col]
+            image_label_index = self.patch_df.at[idx, self.label_index_col]
         else:
             image_label_index = -1
 
@@ -236,7 +254,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
+        img_path = self.patch_df.at, [idx, self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -378,12 +396,9 @@ class PatchContextDataset(PatchDataset):
         label_col: str | None = None,
         label_index_col: str | None = None,
         image_mode: str | None = "RGB",
-        context_save_path: str | None = "./maps/maps_context",
-        create_context: bool | None = False,
+        context_dir: str | None = "./maps/maps_context",
+        create_context: bool = False,
         parent_path: str | None = "./maps",
-        x_offset: float | None = 1.0,
-        y_offset: float | None = 1.0,
-        slice_method: str | None = "scale",
     ):
         """
         A PyTorch Dataset class for loading contextual information about image
@@ -409,22 +424,14 @@ class PatchContextDataset(PatchDataset):
             The name of the column containing the indices of the image labels. Default is None.
         image_mode : str, optional
             The color space of the images. Default is "RGB".
-        context_save_path : str, optional
-            The path to save context maps to. Default is "./maps/maps_context".
+        context_dir : str, optional
+            The path to context maps (or, where to save context if not created yet).
+            Default is "./maps/maps_context".
         create_context : bool, optional
             Whether or not to create context maps. Default is False.
         parent_path : str, optional
             The path to the directory containing parent images. Default is
             "./maps".
-        x_offset : float, optional
-            The size of the horizontal offset around objects, as a fraction of
-            the image width. Default is 1.0.
-        y_offset : float, optional
-            The size of the vertical offset around objects, as a fraction of
-            the image height. Default is 1.0.
-        slice_method : str, optional
-            The method used to slice images. Either "scale" or "absolute".
-            Default is "scale".
 
         Attributes
         ----------
@@ -442,21 +449,12 @@ class PatchContextDataset(PatchDataset):
             The color space of the images.
         parent_path : str
             The path to the directory containing parent images.
-        x_offset : float
-            The size of the horizontal offset around objects, as a fraction of
-            the image width.
-        y_offset : float
-            The size of the vertical offset around objects, as a fraction of
-            the image height.
-        slice_method : str
-            The method used to slice images.
         create_context : bool
             Whether or not to create context maps.
-        context_save_path : str
-            The path to save context maps to.
+        context_dir : str
+            The path to context maps.
         unique_labels : list or str
-            The unique labels in ``label_col``, or "NS" if ``label_col`` not in
-            ``patch_df``.
+            The unique labels in ``label_col``.
 
         Methods
         ----------
@@ -487,18 +485,19 @@ class PatchContextDataset(PatchDataset):
                 "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
             )
 
+        # force index to be integer
+        if self.patch_df.index.name in ["image_id", "name"]:
+            if "image_id" in self.patch_df.columns:
+                self.patch_df.drop(columns=["image_id"], inplace=True)
+            self.patch_df.reset_index(drop=False, names="image_id", inplace=True)
+
         self.label_col = label_col
         self.label_index_col = label_index_col
         self.image_mode = image_mode
         self.patch_paths_col = patch_paths_col
         self.parent_path = parent_path
-        self.x_offset = x_offset
-        self.y_offset = y_offset
-        self.slice_method = slice_method
         self.create_context = create_context
-        self.context_save_path = os.path.abspath(
-            context_save_path
-        )  # we need this either way I think?
+        self.context_dir = os.path.abspath(context_dir)
 
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
@@ -510,17 +509,12 @@ class PatchContextDataset(PatchDataset):
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
-                if self.label_col:
-                    print(
-                        f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
-                    )
-                    self.patch_df[self.label_index_col] = self.patch_df[
-                        self.label_col
-                    ].apply(self._get_label_index)
-                else:
-                    raise ValueError(
-                        f"[ERROR] Label index column ({label_index_col}) not in dataframe."
-                    )
+                print(
+                    f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                )
+                self.patch_df[self.label_index_col] = self.patch_df[
+                    self.label_col
+                ].apply(self._get_label_index)
 
         if isinstance(transform1, str):
             if transform1 in ["train", "val", "test"]:
@@ -542,17 +536,15 @@ class PatchContextDataset(PatchDataset):
         else:
             self.transform2 = transform2
 
-    def save_parents(
+    def save_context(
         self,
-        processors: int | None = 10,
-        sleep_time: float | None = 0.001,
-        use_parhugin: bool | None = True,
-        parent_delimiter: str | None = "#",
-        loc_delimiter: str | None = "-",
-        overwrite: bool | None = False,
+        processors: int = 10,
+        sleep_time: float = 0.001,
+        use_parhugin: bool = True,
+        overwrite: bool = False,
     ) -> None:
         """
-        Save parent patches for all patches in the patch_df.
+        Save context images for all patches in the patch_df.
 
         Parameters
         ----------
@@ -561,17 +553,9 @@ class PatchContextDataset(PatchDataset):
         sleep_time : float, optional
             The time to wait between jobs, by default 0.001.
         use_parhugin : bool, optional
-            Flag indicating whether to use Parhugin to parallelize the job, by
-            default True.
-        parent_delimiter : str, optional
-            The delimiter used to separate parent IDs in the patch filename, by
-            default "#".
-        loc_delimiter : str, optional
-            The delimiter used to separate patch pixel bounds in the patch
-            filename, by default "-".
+            Whether to use Parhugin to parallelize the job, by default True.
         overwrite : bool, optional
-            Flag indicating whether to overwrite existing parent files, by
-            default False.
+            Whether to overwrite existing parent files, by default False.
 
         Returns
         -------
@@ -583,37 +567,57 @@ class PatchContextDataset(PatchDataset):
         multiple CPU cores. The method uses Parhugin to parallelize the
         computation of saving parent patches to disk. When Parhugin is
         installed and ``use_parhugin`` is set to True, the method parallelizes
-        the calling of the ``save_parents_idx`` method and its corresponding
+        the calling of the ``get_context_id`` method and its corresponding
         arguments. If Parhugin is not installed or ``use_parhugin`` is set to
         False, the method executes the loop over patch indices sequentially
         instead.
         """
         if parhugin_installed and use_parhugin:
-            myproc = multiFunc(processors=processors, sleep_time=sleep_time)
+            my_proc = multiFunc(processors=processors, sleep_time=sleep_time)
             list_jobs = []
-            for idx in range(len(self.patch_df)):
+            for idx in self.patch_df.index:
                 list_jobs.append(
                     [
-                        self.save_parents_idx,
-                        (idx, parent_delimiter, loc_delimiter, overwrite),
+                        self.save_context_id(
+                            idx,
+                            overwrite=overwrite,
+                            save_context=True,
+                            return_image=False,
+                        ),
                     ]
                 )
 
             print(f"Total number of jobs: {len(list_jobs)}")
-            # and then adding them to myproc
-            myproc.add_list_jobs(list_jobs)
-            myproc.run_jobs()
+            # and then adding them to my_proc
+            my_proc.add_list_jobs(list_jobs)
+            my_proc.run_jobs()
         else:
-            for idx in range(len(self.patch_df)):
-                self.save_parents_idx(idx)
+            for idx in self.patch_df.index:
+                self.get_context_id(
+                    idx,
+                    overwrite=overwrite,
+                    save_context=True,
+                    return_image=False,
+                )
 
-    def save_parents_idx(
+    @staticmethod
+    def _get_empty_square(
+        patch_size: tuple[int, int],
+    ):
+        """Get an empty square image with size (width, height) equal to `patch_size`."""
+        im = Image.new(
+            size=patch_size,
+            mode="RGB",
+            color=None,
+        )
+        return im
+
+    def get_context_id(
         self,
         idx: int,
-        parent_delimiter: str | None = "#",
-        loc_delimiter: str | None = "-",
-        overwrite: bool | None = False,
-        return_image: bool | None = False,
+        overwrite: bool = False,
+        save_context: bool = False,
+        return_image: bool = True,
     ) -> None:
         """
         Save the parents of a specific patch to the specified location.
@@ -622,15 +626,13 @@ class PatchContextDataset(PatchDataset):
         ----------
             idx : int
                 Index of the patch in the dataset.
-            parent_delimiter : str, optional
-                Delimiter to split the parent names in the file path. Default
-                is "#".
-            loc_delimiter : str, optional
-                Delimiter to split the location of the patch in the file path.
-                Default is "-".
             overwrite : bool, optional
                 Whether to overwrite the existing parent files. Default is
                 False.
+            save_context : bool, optional
+                Whether to save the context image. Default is False.
+            return_image : bool, optional
+                Whether to return the context image. Default is True.
 
         Raises
         ------
@@ -641,84 +643,111 @@ class PatchContextDataset(PatchDataset):
         -------
         None
         """
-        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
+        patch_df = self.patch_df.copy(deep=True)
 
-        if os.path.exists(img_path):
-            img = Image.open(img_path).convert(self.image_mode)
-        else:
-            raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
+        if all(
+            [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
+        ):
+            print(
+                "[INFO] Using existing pixel bounds columns (min_x, min_y, max_x, max_y)."
             )
-
-        if not return_image:
-            os.makedirs(self.context_save_path, exist_ok=True)
-
-            path2save_context = os.path.join(
-                self.context_save_path, os.path.basename(img_path)
-            )
-
-            if os.path.isfile(path2save_context) and (not overwrite):
-                return
-
-        if self.slice_method in ["scale"]:
-            # size: (width, height)
-            tar_y_offset = int(img.size[1] * self.y_offset)
-            tar_x_offset = int(img.size[0] * self.x_offset)
         else:
-            tar_y_offset = self.y_offset
-            tar_x_offset = self.x_offset
+            patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df.pixel_bounds]
 
-        par_name = os.path.basename(img_path).split(parent_delimiter)[1]
-        split_path = os.path.basename(img_path).split(loc_delimiter)
-        min_x, min_y, max_x, max_y = (
-            int(split_path[1]),
-            int(split_path[2]),
-            int(split_path[3]),
-            int(split_path[4]),
+        patch_image = Image.open(patch_df.at[idx, self.patch_paths_col]).convert(
+            self.image_mode
         )
+        patch_width, patch_height = (patch_image.width, patch_image.height)
+        parent_id = patch_df.at[idx, "parent_id"]
+        min_x = patch_df.at[idx, "min_x"]
+        min_y = patch_df.at[idx, "min_y"]
+        max_x = patch_df.at[idx, "max_x"]
+        max_y = patch_df.at[idx, "max_y"]
 
-        if self.parent_path in ["dynamic"]:
-            parent_path2read = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(img_path))),
-                par_name,
+        # get a pixel bounds of context images
+        context_grid = [
+            *product(
+                [
+                    (patch_df["min_y"], min_y),
+                    (min_y, max_y),
+                    (max_y, patch_df["max_y"]),
+                ],
+                [
+                    (patch_df["min_x"], min_x),
+                    (min_x, max_x),
+                    (max_x, patch_df["max_x"]),
+                ],
             )
-        else:
-            parent_path2read = os.path.join(os.path.abspath(self.parent_path), par_name)
+        ]
+        # reshape to min_x, min_y, max_x, max_y
+        context_grid = [
+            (coord[1][0], coord[0][0], coord[1][1], coord[0][1])
+            for coord in context_grid
+        ]
 
-        par_img = Image.open(parent_path2read).convert(self.image_mode)
+        # get a list of context images
+        context_list = [
+            patch_df[
+                (patch_df["min_x"] == context_loc[0])
+                & (patch_df["min_y"] == context_loc[1])
+                & (patch_df["max_x"] == context_loc[2])
+                & (patch_df["max_y"] == context_loc[3])
+                & (patch_df["parent_id"] == parent_id)
+            ]
+            for context_loc in context_grid
+        ]
+        if any([len(context_patch) > 1 for context_patch in context_list]):
+            raise ValueError(f"[ERROR] Multiple context patches found for patch {idx}.")
+        if len(context_list) != 9:
+            raise ValueError(f"[ERROR] Missing context images for patch {idx}.")
 
-        min_y_par = max(0, min_y - tar_y_offset)
-        min_x_par = max(0, min_x - tar_x_offset)
-        max_x_par = min(max_x + tar_x_offset, np.shape(par_img)[1])
-        max_y_par = min(max_y + tar_y_offset, np.shape(par_img)[0])
+        context_paths = [
+            (
+                context_patch[self.patch_paths_col].values[0]
+                if len(context_patch)
+                else None
+            )
+            for context_patch in context_list
+        ]
+        context_images = [
+            (
+                Image.open(context_path).convert(self.image_mode)
+                if context_path is not None
+                else self._get_empty_square((patch_width, patch_height))
+            )
+            for context_path in context_paths
+        ]
 
-        pad_activate = False
-        top_pad = left_pad = right_pad = bottom_pad = 0
-        if (min_y - tar_y_offset) < 0:
-            top_pad = abs(min_y - tar_y_offset)
-            pad_activate = True
-        if (min_x - tar_x_offset) < 0:
-            left_pad = abs(min_x - tar_x_offset)
-            pad_activate = True
-        if (max_x + tar_x_offset) > np.shape(par_img)[1]:
-            right_pad = max_x + tar_x_offset - np.shape(par_img)[1]
-            pad_activate = True
-        if (max_y + tar_y_offset) > np.shape(par_img)[0]:
-            bottom_pad = max_y + tar_y_offset - np.shape(par_img)[0]
-            pad_activate = True
+        # split into rows (3x3 grid)
+        context_images = [
+            context_images[i : i + 3] for i in range(0, len(context_images), 3)
+        ]
 
-        # par_img = par_img[min_y_par:max_y_par, min_x_par:max_x_par]
-        par_img = par_img.crop((min_x_par, min_y_par, max_x_par, max_y_par))
+        total_width = 3 * patch_width
+        total_height = 3 * patch_height
+        context_image = Image.new(self.image_mode, (total_width, total_height))
 
-        if pad_activate:
-            padding = (left_pad, top_pad, right_pad, bottom_pad)
-            par_img = ImageOps.expand(par_img, padding)
+        y_offset = 0
+        for row in context_images:
+            x_offset = 0
+            for image in row:
+                context_image.paste(image, (x_offset, y_offset))
+                x_offset += patch_width
+            y_offset += patch_height
+
+        if save_context:
+            os.makedirs(self.context_dir, exist_ok=True)
+            context_path = os.path.join(
+                self.context_dir,
+                os.path.basename(patch_df.at[idx, self.patch_paths_col]),
+            )
+            if overwrite or not os.path.exists(context_path):
+                context_image.save(context_path)
 
         if return_image:
-            return par_img
-        elif not os.path.isfile(path2save_context):
-            par_img.save(path2save_context)
+            return context_image
+        else:
+            return
 
     def plot_sample(self, idx: int) -> None:
         """
@@ -745,13 +774,13 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         """
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
-        plt.imshow(transforms.ToPILImage()(self.__getitem__(idx)[0]))
+        plt.imshow(transforms.ToPILImage()(self.__getitem__(idx)[0][0]))
         plt.title("Patch", size=18)
         plt.xticks([])
         plt.yticks([])
 
         plt.subplot(1, 2, 2)
-        plt.imshow(transforms.ToPILImage()(self.__getitem__(idx)[1]))
+        plt.imshow(transforms.ToPILImage()(self.__getitem__(idx)[0][1]))
         plt.title("Context", size=18)
         plt.xticks([])
         plt.yticks([])
@@ -783,7 +812,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
+        img_path = self.patch_df.at[idx, self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -794,22 +823,22 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
             )
 
         if self.create_context:
-            context_img = self.save_parents_idx(idx, return_image=True)
+            context_img = self.get_context_id(idx, return_image=True)
         else:
             context_img = Image.open(
-                os.path.join(self.context_save_path, os.path.basename(img_path))
+                os.path.join(self.context_dir, os.path.basename(img_path))
             ).convert(self.image_mode)
 
         img = self.transform1(img)
         context_img = self.transform2(context_img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
-            image_label = self.patch_df.iloc[idx][self.label_col]
+            image_label = self.patch_df.at[idx, self.label_col]
         else:
             image_label = ""
 
         if self.label_index_col in self.patch_df.iloc[idx].keys():
-            image_label_index = self.patch_df.iloc[idx][self.label_index_col]
+            image_label_index = self.patch_df.at[idx, self.label_index_col]
         else:
             image_label_index = -1
 
