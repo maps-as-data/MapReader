@@ -134,7 +134,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a csv or a pandas DataFrame."
                 )
-            self._eval_df(patch_df)  # eval tuples/lists in df
+            patch_df = self._eval_df(patch_df)  # eval tuples/lists in df
 
         if parent_df is not None:
             if isinstance(parent_df, str):
@@ -150,7 +150,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a csv or a pandas DataFrame."
                 )
-            self._eval_df(parent_df)  # eval tuples/lists in df
+            parent_df = self._eval_df(parent_df)  # eval tuples/lists in df
 
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
@@ -373,12 +373,14 @@ class Annotator(pd.DataFrame):
 
         return parent_df, patch_df
 
-    def _eval_df(self, df):
+    @staticmethod
+    def _eval_df(df):
         for col in df.columns:
             try:
                 df[col] = df[col].apply(literal_eval)
             except (ValueError, TypeError, SyntaxError):
                 pass
+        return df
 
     def get_patch_size(self):
         """
