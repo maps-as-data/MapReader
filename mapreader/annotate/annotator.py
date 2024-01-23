@@ -283,6 +283,7 @@ class Annotator(pd.DataFrame):
         self.auto_save = auto_save
         self.username = username
         self.task_name = task_name
+        self._annotate_context = False
 
         # set up for the annotator
         self._min_values = min_values or {}
@@ -485,8 +486,12 @@ class Annotator(pd.DataFrame):
             # Resize the image
             im = Image.open(image_path)
 
+            # Never dim when annotating context
+            if self._annotate_context:
+                dim = False
+
             # Dim the image
-            if dim is True or dim == "True":
+            if dim in [True, "True"]:
                 im_array = np.array(im)
                 im_array = 256 - (256 - im_array) * 0.4  # lighten image
                 im = Image.fromarray(im_array.astype(np.uint8))
@@ -597,6 +602,102 @@ class Annotator(pd.DataFrame):
         resize_to: int | None = None,
         max_size: int | None = None,
     ) -> None:
+        """Annotate at the patch-level of the current patch.
+        Renders the annotation interface for the first image.
+
+        Parameters
+        ----------
+        show_context : bool or None, optional
+            Whether or not to display the surrounding context for each image.
+            Default is None.
+        min_values : dict or None, optional
+            Minimum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None.
+        max_values : dict or None, optional
+            Maximum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None
+        surrounding : int or None, optional
+            The number of surrounding images to show for context. Default: 1.
+        max_size : int or None, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
+
+        Notes
+        -----
+        This method is a wrapper for the ``_annotate`` method.
+        """
+        self._annotate_context = False
+
+        self._annotate(
+            show_context=show_context,
+            min_values=min_values,
+            max_values=max_values,
+            surrounding=surrounding,
+            resize_to=resize_to,
+            max_size=max_size,
+        )
+
+    def annotate_context(
+        self,
+        min_values: dict | None = None,
+        max_values: dict | None = None,
+        resize_to: int | None = None,
+        max_size: int | None = None,
+    ) -> None:
+        """Annotate at the context-level of the current patch.
+        Renders the annotation interface for the first image plus surrounding context.
+
+        Parameters
+        ----------
+        min_values : dict or None, optional
+            Minimum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None.
+        max_values : dict or None, optional
+            Maximum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None
+        surrounding : int or None, optional
+            The number of surrounding images to show for context. Default: 1.
+        max_size : int or None, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
+
+        Notes
+        -----
+        This method is a wrapper for the ``_annotate`` method.
+        """
+        self._annotate_context = True
+
+        if "context_label" not in self.columns:
+            self["context_label"] = None
+        if "context_changed" not in self.columns:
+            self["context_changed"] = False
+
+        self._annotate(
+            show_context=True,
+            min_values=min_values,
+            max_values=max_values,
+            surrounding=1,
+            resize_to=resize_to,
+            max_size=max_size,
+        )
+
+    def _annotate(
+        self,
+        show_context: bool | None = None,
+        min_values: dict | None = None,
+        max_values: dict | None = None,
+        surrounding: int | None = None,
+        resize_to: int | None = None,
+        max_size: int | None = None,
+    ):
         """
         Renders the annotation interface for the first image.
 
@@ -729,7 +830,8 @@ class Annotator(pd.DataFrame):
                 # disable skip button when at last example
                 button.disabled = self.current_index >= len(self) - 1
             elif button.description != "submit":
-                if self.at[ix, self.label_col] == button.description:
+                col = "context_label" if self._annotate_context else self.label_col
+                if self.at[ix, col] == button.description:
                     button.icon = "check"
                 else:
                     button.icon = ""
@@ -810,8 +912,12 @@ class Annotator(pd.DataFrame):
         """
         # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
-        self.at[ix, self.label_col] = annotation
-        self.at[ix, "changed"] = True
+        if self._annotate_context:
+            self.at[ix, "context_label"] = annotation
+            self.at[ix, "context_changed"] = True
+        else:
+            self.at[ix, self.label_col] = annotation
+            self.at[ix, "changed"] = True
         if self.auto_save:
             self._auto_save()
         self._next_example()
@@ -824,7 +930,12 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
-        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
+        save_name = (
+            f"{self.annotations_file[:-4]}_context.csv"
+            if self._annotate_context
+            else self.annotations_file
+        )
+        self.get_labelled_data(sort=True).to_csv(save_name)
 
     def get_labelled_data(
         self,
@@ -854,27 +965,31 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
+        filter_col = "context_label" if self._annotate_context else self.label_col
+        filtered_df = self[self[filter_col].notna()].copy(deep=True)
+
+        # force image_id to be index (incase of integer index)
+        # TODO: Force all indices to be integers so this is not needed
+        if "image_id" in filtered_df.columns:
+            filtered_df.set_index("image_id", drop=True, inplace=True)
+
         if index_labels:
-            col1 = self.filtered[self.label_col].apply(lambda x: self._labels.index(x))
-        else:
-            col1 = self.filtered[self.label_col]
+            filtered_df[filter_col] = filtered_df[filter_col].apply(
+                lambda x: self._labels.index(x)
+            )
 
         if include_paths:
-            col2 = self.filtered[self.patch_paths_col]
-            df = pd.DataFrame(
-                {self.patch_paths_col: col2, self.label_col: col1},
-                index=pd.Index(col1.index, name="image_id"),
-            )
+            filtered_df = filtered_df[[self.patch_paths_col, filter_col]]
         else:
-            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
-        if not sort:
-            return df
+            filtered_df = filtered_df[[filter_col]]
 
-        df["sort_value"] = df.index.to_list()
-        df["sort_value"] = df["sort_value"].apply(
+        if not sort:
+            return filtered_df
+        filtered_df["sort_value"] = filtered_df.index.to_list()
+        filtered_df["sort_value"] = filtered_df["sort_value"].apply(
             lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
         )
-        return df.sort_values("sort_value").drop(columns=["sort_value"])
+        return filtered_df.sort_values("sort_value").drop(columns=["sort_value"])
 
     @property
     def filtered(self) -> pd.DataFrame:
