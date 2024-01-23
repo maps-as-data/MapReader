@@ -92,6 +92,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] ID column was previously "{self.id_col}, but will now be set to {id_col}.'
             )
+            self.id_col = id_col
 
         if not self.patch_paths_col:
             self.patch_paths_col = patch_paths_col
@@ -99,6 +100,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] Patch paths column was previously "{self.patch_paths_col}, but will now be set to {patch_paths_col}.'
             )
+            self.patch_paths_col = patch_paths_col
 
         if not self.label_col:
             self.label_col = label_col
@@ -106,6 +108,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] Label column was previously "{self.label_col}, but will now be set to {label_col}.'
             )
+            self.label_col = label_col
 
         if not isinstance(annotations, (str, pd.DataFrame)):
             raise ValueError(
