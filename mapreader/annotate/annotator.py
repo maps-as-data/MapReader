@@ -1029,13 +1029,7 @@ class Annotator(pd.DataFrame):
                     lambda x: self._labels.index(x)
                 )
 
-        cols = [self.label_col]
-        if include_paths:
-            cols.insert(0, self.patch_paths_col)
-        if context:
-            cols.append("context_label")
-
-        return filtered_df[cols]
+        return filtered_df
 
     @property
     def filtered(self) -> pd.DataFrame:
