@@ -226,7 +226,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             image_label_index = -1
 
-        return (img,), image_label, image_label_index
+        return (img,), (image_label,), (image_label_index,)
 
     def return_orig_image(self, idx: int | torch.Tensor) -> Image:
         """
@@ -395,6 +395,8 @@ class PatchContextDataset(PatchDataset):
         patch_paths_col: str | None = "image_path",
         label_col: str | None = None,
         label_index_col: str | None = None,
+        context_label_col: str | None = None,
+        context_label_index_col: str | None = None,
         image_mode: str | None = "RGB",
         context_dir: str | None = "./maps/maps_context",
         create_context: bool = False,
@@ -422,6 +424,10 @@ class PatchContextDataset(PatchDataset):
             The name of the column containing the image labels. Default is None.
         label_index_col : str, optional
             The name of the column containing the indices of the image labels. Default is None.
+        context_label_col : str, optional
+            The name of the column containing the context labels. Default is None.
+        context_label_index_col : str, optional
+            The name of the column containing the indices of the context labels. Default is None.
         image_mode : str, optional
             The color space of the images. Default is "RGB".
         context_dir : str, optional
@@ -442,6 +448,10 @@ class PatchContextDataset(PatchDataset):
             The name of the column containing the image labels.
         label_index_col : str
             The name of the column containing the labels indices.
+        context_label_col : str
+            The name of the column containing the context labels.
+        context_label_index_col : str
+            The name of the column containing the context labels indices.
         patch_paths_col : str
             The name of the column in the DataFrame containing the image
             paths.
@@ -481,6 +491,8 @@ class PatchContextDataset(PatchDataset):
 
         self.label_col = label_col
         self.label_index_col = label_index_col
+        self.context_label_col = context_label_col
+        self.context_label_index_col = context_label_index_col
         self.image_mode = image_mode
         self.patch_paths_col = patch_paths_col
         self.parent_path = parent_path
@@ -490,8 +502,19 @@ class PatchContextDataset(PatchDataset):
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
                 raise ValueError(
-                    f"[ERROR] Label column ({label_col}) not in dataframe."
+                    f"[ERROR] Label column ({self.label_col}) not in dataframe."
                 )
+            if self.context_label_col:
+                if self.context_label_col not in self.patch_df.columns:
+                    raise ValueError(
+                        f"[ERROR] Context label column ({self.context_label_col}) not in dataframe."
+                    )
+                else:
+                    unique_labels = (
+                        self.patch_df[self.label_col].unique().tolist()
+                        + self.patch_df[self.context_label_col].unique().tolist()
+                    )
+                    self.unique_labels = list(set(unique_labels))
             else:
                 self.unique_labels = self.patch_df[self.label_col].unique().tolist()
 
@@ -503,6 +526,14 @@ class PatchContextDataset(PatchDataset):
                 self.patch_df[self.label_index_col] = self.patch_df[
                     self.label_col
                 ].apply(self._get_label_index)
+            if self.context_label_index_col:
+                if self.context_label_index_col not in self.patch_df.columns:
+                    print(
+                        f"[INFO] Context label index column ({context_label_index_col}) not in dataframe. Creating column."
+                    )
+                    self.patch_df[self.context_label_index_col] = self.patch_df[
+                        self.context_label_col
+                    ].apply(self._get_label_index)
 
         if isinstance(patch_transform, str):
             if patch_transform in ["train", "val", "test"]:
@@ -633,13 +664,9 @@ class PatchContextDataset(PatchDataset):
         """
         patch_df = self.patch_df.copy(deep=True)
 
-        if all(
+        if not all(
             [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
         ):
-            print(
-                "[INFO] Using existing pixel bounds columns (min_x, min_y, max_x, max_y)."
-            )
-        else:
             patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df.pixel_bounds]
 
         patch_image = Image.open(patch_df.iloc[idx][self.patch_paths_col]).convert(
@@ -825,9 +852,23 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             image_label = ""
 
+        if self.context_label_col in self.patch_df.iloc[idx].keys():
+            context_label = self.patch_df.iloc[idx][self.context_label_col]
+        else:
+            context_label = ""
+
         if self.label_index_col in self.patch_df.iloc[idx].keys():
             image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:
             image_label_index = -1
 
-        return (img, context_img), image_label, image_label_index
+        if self.context_label_index_col in self.patch_df.iloc[idx].keys():
+            context_label_index = self.patch_df.iloc[idx][self.context_label_index_col]
+        else:
+            context_label_index = -1
+
+        return (
+            (img, context_img),
+            (image_label, context_label),
+            (image_label_index, context_label_index),
+        )

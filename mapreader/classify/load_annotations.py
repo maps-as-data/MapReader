@@ -118,6 +118,7 @@ class AnnotationsLoader:
             annotations = self._load_annotations_csv(
                 annotations, delimiter, scramble_frame, reset_index
             )
+        context_labels = True if "context_label" in annotations.columns else False
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
@@ -125,8 +126,9 @@ class AnnotationsLoader:
                 lambda x: os.path.join(abs_images_dir, x)
             )
 
+        cols = [self.label_col, "context_label"] if context_labels else [self.label_col]
         annotations = annotations.astype(
-            {self.label_col: str}
+            {col: str for col in cols}
         )  # ensure labels are interpreted as strings
 
         if append:
@@ -139,13 +141,21 @@ class AnnotationsLoader:
         )
 
         unique_labels = self.annotations[self.label_col].unique().tolist()
+        if context_labels:
+            unique_labels.extend(self.annotations["context_label"].unique().tolist())
+            unique_labels = list(set(unique_labels))
         self.unique_labels = unique_labels
-        self.annotations["label_index"] = self.annotations[self.label_col].apply(
-            self._get_label_index
-        )
 
         labels_map = {i: label for i, label in enumerate(unique_labels)}
         self.labels_map = labels_map
+
+        self.annotations["label_index"] = self.annotations[self.label_col].apply(
+            self._get_label_index
+        )
+        if context_labels:
+            self.annotations["context_label_index"] = self.annotations[
+                "context_label"
+            ].apply(self._get_label_index)
 
         print(self)
 
@@ -681,6 +691,8 @@ Please check your image paths and update them if necessary.'
             patch_paths_col=self.patch_paths_col,
             label_col=self.label_col,
             label_index_col="label_index",
+            context_label_col="context_label",
+            context_label_index_col="context_label_index",
             create_context=True,
         )
         val_dataset = PatchContextDataset(
@@ -690,6 +702,8 @@ Please check your image paths and update them if necessary.'
             patch_paths_col=self.patch_paths_col,
             label_col=self.label_col,
             label_index_col="label_index",
+            context_label_col="context_label",
+            context_label_index_col="context_label_index",
             create_context=True,
         )
         if df_test is not None:
@@ -700,6 +714,8 @@ Please check your image paths and update them if necessary.'
                 patch_paths_col=self.patch_paths_col,
                 label_col=self.label_col,
                 label_index_col="label_index",
+                context_label_col="context_label",
+                context_label_index_col="context_label_index",
                 create_context=True,
             )
             datasets = {
