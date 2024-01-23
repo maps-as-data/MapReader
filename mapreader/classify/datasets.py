@@ -389,8 +389,8 @@ class PatchContextDataset(PatchDataset):
     def __init__(
         self,
         patch_df: pd.DataFrame | str,
-        transform1: str,
-        transform2: str,
+        patch_transform: str,
+        context_transform: str,
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
         label_col: str | None = None,
@@ -408,10 +408,10 @@ class PatchContextDataset(PatchDataset):
         ----------
         patch_df : pandas.DataFrame or str
             DataFrame or path to csv file containing the paths to image patches and their labels.
-        transform1 : str
+        patch_transform : str
             Torchvision transform to be applied to input images.
             Either "train" or "val".
-        transform2 : str
+        context_transform : str
             Torchvision transform to be applied to target images.
             Either "train" or "val".
         delimiter : str
@@ -455,18 +455,6 @@ class PatchContextDataset(PatchDataset):
             The path to context maps.
         unique_labels : list or str
             The unique labels in ``label_col``.
-
-        Methods
-        ----------
-        __getitem__(idx)
-            Retrieves the patch image, the context image and the label at the
-            given index in the dataset.
-        save_parents()
-            Saves parent images.
-        save_parents_idx(idx)
-            Saves parent image at index ``idx``.
-        return_orig_image(idx)
-            Return the original image associated with the given index.
         """
 
         if isinstance(patch_df, pd.DataFrame):
@@ -516,25 +504,25 @@ class PatchContextDataset(PatchDataset):
                     self.label_col
                 ].apply(self._get_label_index)
 
-        if isinstance(transform1, str):
-            if transform1 in ["train", "val", "test"]:
-                self.transform1 = self._default_transform(transform1)
+        if isinstance(patch_transform, str):
+            if patch_transform in ["train", "val", "test"]:
+                self.patch_transform = self._default_transform(patch_transform)
             else:
                 raise ValueError(
                     '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
-            self.transform1 = transform1
+            self.patch_transform = patch_transform
 
-        if isinstance(transform2, str):
-            if transform2 in ["train", "val", "test"]:
-                self.transform2 = self._default_transform(transform2)
+        if isinstance(context_transform, str):
+            if context_transform in ["train", "val", "test"]:
+                self.context_transform = self._default_transform(context_transform)
             else:
                 raise ValueError(
                     '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
-            self.transform2 = transform2
+            self.context_transform = context_transform
 
     def save_context(
         self,
@@ -829,8 +817,8 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
                 os.path.join(self.context_dir, os.path.basename(img_path))
             ).convert(self.image_mode)
 
-        img = self.transform1(img)
-        context_img = self.transform2(context_img)
+        img = self.patch_transform(img)
+        context_img = self.context_transform(context_img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
             image_label = self.patch_df.iloc[idx][self.label_col]
