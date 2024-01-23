@@ -204,7 +204,7 @@ class PatchDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.at[idx, self.patch_paths_col]
+        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -217,12 +217,12 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         img = self.transform(img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
-            image_label = self.patch_df.at[idx, self.label_col]
+            image_label = self.patch_df.iloc[idx][self.label_col]
         else:
             image_label = ""
 
         if self.label_index_col in self.patch_df.iloc[idx].keys():
-            image_label_index = self.patch_df.at[idx, self.label_index_col]
+            image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:
             image_label_index = -1
 
@@ -254,7 +254,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.at, [idx, self.patch_paths_col]
+        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -654,15 +654,15 @@ class PatchContextDataset(PatchDataset):
         else:
             patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df.pixel_bounds]
 
-        patch_image = Image.open(patch_df.at[idx, self.patch_paths_col]).convert(
+        patch_image = Image.open(patch_df.iloc[idx][self.patch_paths_col]).convert(
             self.image_mode
         )
         patch_width, patch_height = (patch_image.width, patch_image.height)
-        parent_id = patch_df.at[idx, "parent_id"]
-        min_x = patch_df.at[idx, "min_x"]
-        min_y = patch_df.at[idx, "min_y"]
-        max_x = patch_df.at[idx, "max_x"]
-        max_y = patch_df.at[idx, "max_y"]
+        parent_id = patch_df.iloc[idx]["parent_id"]
+        min_x = patch_df.iloc[idx]["min_x"]
+        min_y = patch_df.iloc[idx]["min_y"]
+        max_x = patch_df.iloc[idx]["max_x"]
+        max_y = patch_df.iloc[idx]["max_y"]
 
         # get a pixel bounds of context images
         context_grid = [
@@ -739,7 +739,7 @@ class PatchContextDataset(PatchDataset):
             os.makedirs(self.context_dir, exist_ok=True)
             context_path = os.path.join(
                 self.context_dir,
-                os.path.basename(patch_df.at[idx, self.patch_paths_col]),
+                os.path.basename(patch_df.iloc[idx][self.patch_paths_col]),
             )
             if overwrite or not os.path.exists(context_path):
                 context_image.save(context_path)
@@ -812,7 +812,7 @@ class PatchContextDataset(PatchDataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_path = self.patch_df.at[idx, self.patch_paths_col]
+        img_path = self.patch_df.iloc[idx][self.patch_paths_col]
 
         if os.path.exists(img_path):
             img = Image.open(img_path).convert(self.image_mode)
@@ -833,12 +833,12 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         context_img = self.transform2(context_img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
-            image_label = self.patch_df.at[idx, self.label_col]
+            image_label = self.patch_df.iloc[idx][self.label_col]
         else:
             image_label = ""
 
         if self.label_index_col in self.patch_df.iloc[idx].keys():
-            image_label_index = self.patch_df.at[idx, self.label_index_col]
+            image_label_index = self.patch_df.iloc[idx][self.label_index_col]
         else:
             image_label_index = -1
 
