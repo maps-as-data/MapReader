@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import copy
+
 import torch
 
 
-class twoParallelModels(torch.nn.Module):
+class PatchContextModel(torch.nn.Module):
     """
-    A class for building a model that contains two parallel branches, with
-    separate input pipelines, but shares a fully connected layer at the end.
+    Model that contains two parallel branches, with separate input pipelines, but one shared fully connected layer at the end.
     This class inherits from PyTorch's nn.Module.
     """
 
@@ -18,7 +19,7 @@ class twoParallelModels(torch.nn.Module):
         fc_layer: torch.nn.Linear,
     ):
         """
-        Initializes a new instance of the twoParallelModels class.
+        Initializes a new instance of the PatchContextModel class.
 
         Parameters:
         -----------
@@ -29,25 +30,28 @@ class twoParallelModels(torch.nn.Module):
         fc_layer : nn.Linear
             The fully connected layer at the end of the model.
             Input size should be output size of patch_model + output size of context_model.
-            Output size should be number of classes (labels).
+            Output size should be number of classes (labels) at the patch level.
         """
         super().__init__()
+
+        if patch_model is context_model:
+            context_model = copy.deepcopy(context_model)
+
         self.patch_model = patch_model
         self.context_model = context_model
         self.fc_layer = fc_layer
 
-    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
+    def forward(self, patch: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
         """
-        Defines the computation performed at every forward pass. Receives two
-        inputs, x1 and x2, and feeds them through the respective feature
-        extractor modules, then concatenates the output and passes it through
+        Defines the computation performed at every forward pass.
+        Receives two inputs, patch and context, and feeds them through the respective feature extractor modules, then concatenates the output and passes it through
         the fully connected layer.
 
         Parameters:
         -----------
-        x1 : torch.Tensor
-            The input tensor for the patch only pipeline.
-        x2 : torch.Tensor
+        patch : torch.Tensor
+            The input tensor for the patch pipeline.
+        context : torch.Tensor
             The input tensor for the context pipeline.
 
         Returns:
@@ -56,13 +60,10 @@ class twoParallelModels(torch.nn.Module):
             The output tensor of the model.
         """
 
-        x1 = self.patch_model(x1)
-        x1 = x1.view(x1.size(0), -1)
-
-        x2 = self.context_model(x2)
-        x2 = x2.view(x2.size(0), -1)
+        patch_output = self.patch_model(patch)
+        context_output = self.context_model(context)
 
         # Concatenate in dim1 (feature dimension)
-        x = torch.cat((x1, x2), 1)
-        x = self.fc_layer(x)
-        return x
+        out = torch.cat((patch_output, context_output), 1)
+        out = self.fc_layer(out)
+        return (patch_output, context_output), out

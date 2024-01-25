@@ -37,7 +37,8 @@ class ClassifierContainer:
         dataloaders: dict[str, DataLoader] | None = None,
         device: str | None = "default",
         input_size: int | None = (224, 224),
-        is_inception: bool | None = False,
+        is_inception: bool = False,
+        context: bool = False,
         load_path: str | None = None,
         force_device: bool | None = False,
         **kwargs,
@@ -65,6 +66,9 @@ class ClassifierContainer:
         is_inception : bool, optional
             Whether the model is an Inception-style model.
             Default is ``False``.
+        context : bool, optional
+            Whether the model is uses patch and context inputs.
+            Default is `False`.
         load_path : str, optional
             The path to an ``.obj`` file containing a
         force_device : bool, optional
@@ -88,8 +92,10 @@ class ClassifierContainer:
             The model.
         input_size : None or tuple of int
             The size of the input to the model.
-        is_inception : None or bool
+        is_inception : bool
             A flag indicating if the model is an Inception model.
+        context : bool
+            A flag indicating if the model uses patch and context as inputs.
         optimizer : None or torch.optim.Optimizer
             The optimizer being used for training the model.
         scheduler : None or torch.optim.lr_scheduler._LRScheduler
@@ -150,6 +156,7 @@ class ClassifierContainer:
                 self.model = model.to(self.device)
                 self.input_size = input_size
                 self.is_inception = is_inception
+                self.context = context
             elif isinstance(model, str):
                 self._initialize_model(model, **kwargs)
 
@@ -183,7 +190,6 @@ class ClassifierContainer:
         min_lr: float,
         max_lr: float,
         spacing: str | None = "linspace",
-        parameter_groups: bool = False,
     ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -201,16 +207,19 @@ class ClassifierContainer:
             where `"linspace"` uses evenly spaced learning rates over a
             specified interval and `"geomspace"` uses learning rates spaced
             evenly on a log scale (a geometric progression). By default ``"linspace"``.
-        parameter_groups : bool, optional
-            When using context mode, whether to consider parameters belonging to the patch model and context model as separate groups.
-            If True, layers belonging to each group will be assigned the same learning rate.
-            Defaults to ``False``.
 
         Returns
         -------
         list of dicts
             A list of dictionaries containing the parameters and learning
             rates for each layer.
+
+        Notes
+        -----
+        parameter_groups : bool, optional
+            When using context mode, whether to consider parameters belonging to the patch model and context model as separate groups.
+            If True, layers belonging to each group will be assigned the same learning rate.
+            Defaults to ``False``.
         """
 
         if spacing.lower() not in ["linspace", "geomspace"]:
@@ -218,10 +227,12 @@ class ClassifierContainer:
                 '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
             )
 
-        if parameter_groups:
+        if self.context:
             params2optimize = []
 
-            for group in ["patch_model", "context_model"]:
+            for group in set(
+                tuple[0].split(".")[0] for tuple in [*self.model.named_parameters()]
+            ):
                 group_params = [
                     params
                     for (name, params) in self.model.named_parameters()
@@ -309,6 +320,10 @@ class ClassifierContainer:
         if optim_param_dict is None:
             optim_param_dict = {"lr": 0.001}
         if params2optimize == "default":
+            if self.context:
+                raise ValueError(
+                    "[ERROR] When using context model, first call `params2optimize` cannot be set to `default`."
+                )
             params2optimize = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
@@ -899,7 +914,9 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                     self.dataloaders[phase]
                 ):
                     inputs = tuple(input.to(self.device) for input in inputs)
-                    label_indices = label_indices.to(self.device)
+                    label_indices = tuple(
+                        label_index.to(self.device) for label_index in label_indices
+                    )
 
                     if self.optimizer is None:
                         if phase.lower() in train_phase_names:
@@ -931,30 +948,42 @@ Use ``add_criterion`` to define one."
                             ):
                                 outputs, aux_outputs = self.model(*inputs)
 
-                                if not all(
-                                    isinstance(out, torch.Tensor)
-                                    for out in [outputs, aux_outputs]
-                                ):
-                                    try:
-                                        outputs = outputs.logits
-                                        aux_outputs = aux_outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
+                                if not isinstance(outputs, torch.Tensor):
+                                    outputs = self._get_logits(outputs)
+                                if not isinstance(aux_outputs, torch.Tensor):
+                                    aux_outputs = self._get_logits(aux_outputs)
 
-                                loss1 = self.criterion(outputs, label_indices)
-                                loss2 = self.criterion(aux_outputs, label_indices)
-                                # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
+                                loss1 = self.criterion(outputs, *label_indices)
+                                loss2 = self.criterion(aux_outputs, *label_indices)
+                                # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
                                 loss = loss1 + 0.4 * loss2
+
+                            elif self.context:
+                                (patch_outputs, context_outputs), outputs = self.model(
+                                    *inputs
+                                )
+
+                                if not isinstance(outputs, torch.Tensor):
+                                    outputs = self._get_logits(outputs)
+                                if not isinstance(patch_outputs, torch.Tensor):
+                                    patch_outputs = self._get_logits(patch_outputs)
+                                if not isinstance(context_outputs, torch.Tensor):
+                                    context_outputs = self._get_logits(context_outputs)
+
+                                loss1 = self.criterion(outputs, label_indices[0])
+                                loss2 = self.criterion(patch_outputs, label_indices[0])
+                                loss3 = self.criterion(outputs, label_indices[1])
+
+                                loss = loss1 + 0.4 * loss2 + 0.4 * loss3
 
                             else:
                                 outputs = self.model(*inputs)
 
                                 if not isinstance(outputs, torch.Tensor):
-                                    try:
-                                        outputs = outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
-                                loss = self.criterion(outputs, label_indices)
+                                    outputs = self._get_logits(outputs)
+
+                                loss = self.criterion(outputs, *label_indices)
+                                print(loss, type(loss))
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -970,13 +999,15 @@ Use ``add_criterion`` to define one."
                         # batch_loop.set_postfix(loss=loss.data)
                         # batch_loop.refresh()
                     else:
-                        outputs = self.model(*inputs)
+                        if self.context:
+                            (patch_outputs, context_outputs), outputs = self.model(
+                                *inputs
+                            )
+                        else:
+                            outputs = self.model(*inputs)
 
                         if not isinstance(outputs, torch.Tensor):
-                            try:
-                                outputs = outputs.logits
-                            except AttributeError as err:
-                                raise AttributeError(err.message)
+                            self._get_logits(outputs)
 
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -984,7 +1015,7 @@ Use ``add_criterion`` to define one."
                         torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
                     )
                     running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
-                    running_orig_label_indices.extend(label_indices.cpu().tolist())
+                    running_orig_label_indices.extend(label_indices[0].cpu().tolist())
 
                     if batch_idx % print_info_batch_freq == 0:
                         curr_inp_counts = min(
@@ -1089,7 +1120,15 @@ Use ``add_criterion`` to define one."
                 print(
                     f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
 [INFO] Path: {save_model_path}"
-                )  # noqa
+                )
+
+    @staticmethod
+    def _get_logits(out):
+        try:
+            out = out.logits
+        except AttributeError as err:
+            raise AttributeError(err.message)
+        return out
 
     def calculate_add_metrics(
         self,
@@ -1495,6 +1534,7 @@ Use ``add_criterion`` to define one."
         self.model = model_dw.to(self.device)
         self.input_size = input_size
         self.is_inception = is_inception
+        self.context = False
 
     def show_sample(
         self,
@@ -1567,7 +1607,7 @@ Output will show batch number {num_batches}.'
             out = torchvision.utils.make_grid(input)
             self._imshow(
                 out,
-                title=f"{labels}\n{label_indices.tolist()}",
+                title=f"{labels[0]}\n{label_indices[0].tolist()}",
                 figsize=figsize,
             )
 
@@ -1693,15 +1733,17 @@ Output will show batch number {num_batches}.'
         with torch.no_grad():
             for inputs, _labels, label_indices in iter(self.dataloaders[set_name]):
                 inputs = tuple(input.to(self.device) for input in inputs)
-                label_indices = label_indices.to(self.device)
+                label_indices = tuple(
+                    label_index.to(self.device) for label_index in label_indices
+                )
 
-                outputs = self.model(*inputs)
+                if self.context:
+                    _, outputs = self.model(*inputs)
+                else:
+                    outputs = self.model(*inputs)
 
                 if not isinstance(outputs, torch.Tensor):
-                    try:
-                        outputs = outputs.logits
-                    except AttributeError as err:
-                        raise AttributeError(err.message)
+                    self._get_logits(outputs)
 
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
