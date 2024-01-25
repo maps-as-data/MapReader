@@ -37,7 +37,7 @@ class ClassifierContainer:
         dataloaders: dict[str, DataLoader] | None = None,
         device: str | None = "default",
         input_size: int | None = (224, 224),
-        is_inception: bool | None = False,
+        is_inception: bool = False,
         load_path: str | None = None,
         force_device: bool | None = False,
         **kwargs,
@@ -88,7 +88,7 @@ class ClassifierContainer:
             The model.
         input_size : None or tuple of int
             The size of the input to the model.
-        is_inception : None or bool
+        is_inception : bool
             A flag indicating if the model is an Inception model.
         optimizer : None or torch.optim.Optimizer
             The optimizer being used for training the model.
@@ -183,7 +183,6 @@ class ClassifierContainer:
         min_lr: float,
         max_lr: float,
         spacing: str | None = "linspace",
-        parameter_groups: bool = False,
     ) -> list[dict]:
         """
         Calculates layer-wise learning rates for a given set of model
@@ -201,10 +200,6 @@ class ClassifierContainer:
             where `"linspace"` uses evenly spaced learning rates over a
             specified interval and `"geomspace"` uses learning rates spaced
             evenly on a log scale (a geometric progression). By default ``"linspace"``.
-        parameter_groups : bool, optional
-            When using context mode, whether to consider parameters belonging to the patch model and context model as separate groups.
-            If True, layers belonging to each group will be assigned the same learning rate.
-            Defaults to ``False``.
 
         Returns
         -------
@@ -218,42 +213,14 @@ class ClassifierContainer:
                 '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
             )
 
-        if parameter_groups:
-            params2optimize = []
-
-            for group in ["patch_model", "context_model"]:
-                group_params = [
-                    params
-                    for (name, params) in self.model.named_parameters()
-                    if group in name
-                ]
-
-                if spacing.lower() == "linspace":
-                    lrs = np.linspace(min_lr, max_lr, len(group_params))
-                elif spacing.lower() in ["log", "geomspace"]:
-                    lrs = np.geomspace(min_lr, max_lr, len(group_params))
-
-                params2optimize.extend(
-                    [
-                        {"params": params, "learning rate": lr}
-                        for params, lr in zip(group_params, lrs)
-                    ]
-                )
-
-        else:
-            if spacing.lower() == "linspace":
-                lrs = np.linspace(
-                    min_lr, max_lr, len(list(self.model.named_parameters()))
-                )
-            elif spacing.lower() in ["log", "geomspace"]:
-                lrs = np.geomspace(
-                    min_lr, max_lr, len(list(self.model.named_parameters()))
-                )
-
-            params2optimize = [
-                {"params": params, "learning rate": lr}
-                for (_, params), lr in zip(self.model.named_parameters(), lrs)
-            ]
+        if spacing.lower() == "linspace":
+            lrs = np.linspace(min_lr, max_lr, len(list(self.model.named_parameters())))
+        elif spacing.lower() in ["log", "geomspace"]:
+            lrs = np.geomspace(min_lr, max_lr, len(list(self.model.named_parameters())))
+        params2optimize = [
+            {"params": params, "learning rate": lr}
+            for (_, params), lr in zip(self.model.named_parameters(), lrs)
+        ]
 
         return params2optimize
 
@@ -931,29 +898,22 @@ Use ``add_criterion`` to define one."
                             ):
                                 outputs, aux_outputs = self.model(*inputs)
 
-                                if not all(
-                                    isinstance(out, torch.Tensor)
-                                    for out in [outputs, aux_outputs]
-                                ):
-                                    try:
-                                        outputs = outputs.logits
-                                        aux_outputs = aux_outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
+                                if not isinstance(outputs, torch.Tensor):
+                                    outputs = self._get_logits(outputs)
+                                if not isinstance(aux_outputs, torch.Tensor):
+                                    aux_outputs = self._get_logits(aux_outputs)
 
                                 loss1 = self.criterion(outputs, label_indices)
                                 loss2 = self.criterion(aux_outputs, label_indices)
-                                # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
+                                # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
                                 loss = loss1 + 0.4 * loss2
 
                             else:
                                 outputs = self.model(*inputs)
 
                                 if not isinstance(outputs, torch.Tensor):
-                                    try:
-                                        outputs = outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
+                                    outputs = self._get_logits(outputs)
+
                                 loss = self.criterion(outputs, label_indices)
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
@@ -973,10 +933,7 @@ Use ``add_criterion`` to define one."
                         outputs = self.model(*inputs)
 
                         if not isinstance(outputs, torch.Tensor):
-                            try:
-                                outputs = outputs.logits
-                            except AttributeError as err:
-                                raise AttributeError(err.message)
+                            self._get_logits(outputs)
 
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -1089,7 +1046,15 @@ Use ``add_criterion`` to define one."
                 print(
                     f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
 [INFO] Path: {save_model_path}"
-                )  # noqa
+                )
+
+    @staticmethod
+    def _get_logits(out):
+        try:
+            out = out.logits
+        except AttributeError as err:
+            raise AttributeError(err.message)
+        return out
 
     def calculate_add_metrics(
         self,
@@ -1698,10 +1663,7 @@ Output will show batch number {num_batches}.'
                 outputs = self.model(*inputs)
 
                 if not isinstance(outputs, torch.Tensor):
-                    try:
-                        outputs = outputs.logits
-                    except AttributeError as err:
-                        raise AttributeError(err.message)
+                    self._get_logits(outputs)
 
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)

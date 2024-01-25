@@ -138,14 +138,14 @@ class AnnotationsLoader:
             remove_broken=remove_broken, ignore_broken=ignore_broken
         )
 
-        unique_labels = self.annotations[self.label_col].unique().tolist()
-        self.unique_labels = unique_labels
+        self.unique_labels = self.annotations[self.label_col].unique().tolist()
+
+        labels_map = {i: label for i, label in enumerate(self.unique_labels)}
+        self.labels_map = labels_map
+
         self.annotations["label_index"] = self.annotations[self.label_col].apply(
             self._get_label_index
         )
-
-        labels_map = {i: label for i, label in enumerate(unique_labels)}
-        self.labels_map = labels_map
 
         print(self)
 

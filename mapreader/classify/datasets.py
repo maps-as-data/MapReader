@@ -490,10 +490,9 @@ class PatchContextDataset(PatchDataset):
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
                 raise ValueError(
-                    f"[ERROR] Label column ({label_col}) not in dataframe."
+                    f"[ERROR] Label column ({self.label_col}) not in dataframe."
                 )
-            else:
-                self.unique_labels = self.patch_df[self.label_col].unique().tolist()
+            self.unique_labels = self.patch_df[self.label_col].unique().tolist()
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
@@ -633,13 +632,9 @@ class PatchContextDataset(PatchDataset):
         """
         patch_df = self.patch_df.copy(deep=True)
 
-        if all(
+        if not all(
             [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
         ):
-            print(
-                "[INFO] Using existing pixel bounds columns (min_x, min_y, max_x, max_y)."
-            )
-        else:
             patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df.pixel_bounds]
 
         patch_image = Image.open(patch_df.iloc[idx][self.patch_paths_col]).convert(
@@ -830,4 +825,4 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         else:
             image_label_index = -1
 
-        return (img, context_img), image_label, image_label_index
+        return (context_img,), image_label, image_label_index
