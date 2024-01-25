@@ -906,7 +906,9 @@ class Annotator(pd.DataFrame):
 
         # force image_id to be index (incase of integer index)
         # TODO: Force all indices to be integers so this is not needed
-        if "image_id" in filtered_df.columns:
+        if ("image_id" in filtered_df.columns) and (
+            filtered_df.index.name != "image_id"
+        ):
             filtered_df.set_index("image_id", drop=True, inplace=True)
 
         if sort:

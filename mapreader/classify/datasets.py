@@ -117,11 +117,12 @@ class PatchDataset(Dataset):
                 "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
             )
 
-        # force index to be integer
-        if self.patch_df.index.name == "image_id":
-            if "image_id" in self.patch_df.columns:
-                self.patch_df.drop(columns=["image_id"], inplace=True)
-            self.patch_df.reset_index(drop=False, names="image_id", inplace=True)
+        # force index to be image_id
+        if (
+            "image_id" in self.patch_df.columns
+            and self.patch_df.index.name != "image_id"
+        ):
+            self.patch_df.set_index("image_id", drop=True, inplace=True)
 
         self.label_col = label_col
         self.label_index_col = label_index_col
@@ -562,11 +563,11 @@ class PatchContextDataset(PatchDataset):
         if parhugin_installed and use_parhugin:
             my_proc = multiFunc(processors=processors, sleep_time=sleep_time)
             list_jobs = []
-            for idx in self.patch_df.index:
+            for id in self.patch_df.index:
                 list_jobs.append(
                     [
                         self.save_context_id(
-                            idx,
+                            id,
                             overwrite=overwrite,
                             save_context=True,
                             return_image=False,
@@ -579,9 +580,9 @@ class PatchContextDataset(PatchDataset):
             my_proc.add_list_jobs(list_jobs)
             my_proc.run_jobs()
         else:
-            for idx in self.patch_df.index:
+            for id in self.patch_df.index:
                 self.get_context_id(
-                    idx,
+                    id,
                     overwrite=overwrite,
                     save_context=True,
                     return_image=False,
@@ -601,7 +602,7 @@ class PatchContextDataset(PatchDataset):
 
     def get_context_id(
         self,
-        idx: int,
+        id,
         overwrite: bool = False,
         save_context: bool = False,
         return_image: bool = True,
@@ -611,7 +612,7 @@ class PatchContextDataset(PatchDataset):
 
         Parameters
         ----------
-            idx : int
+            id
                 Index of the patch in the dataset.
             overwrite : bool, optional
                 Whether to overwrite the existing parent files. Default is
@@ -680,9 +681,9 @@ class PatchContextDataset(PatchDataset):
             for context_loc in context_grid
         ]
         if any([len(context_patch) > 1 for context_patch in context_list]):
-            raise ValueError(f"[ERROR] Multiple context patches found for patch {idx}.")
+            raise ValueError(f"[ERROR] Multiple context patches found for '{id}'.")
         if len(context_list) != 9:
-            raise ValueError(f"[ERROR] Missing context images for patch {idx}.")
+            raise ValueError(f"[ERROR] Missing context images for '{id}'.")
 
         context_paths = [
             (
@@ -795,25 +796,17 @@ class PatchContextDataset(PatchDataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
+        image_id = self.patch_df.iloc[idx].name
         img_path = self.patch_df.iloc[idx][self.patch_paths_col]
 
-        if os.path.exists(img_path):
-            img = Image.open(img_path).convert(self.image_mode)
-        else:
-            raise ValueError(
-                f'[ERROR] "{img_path} cannot be found.\n\n\
-Please check the image exists, your file paths are correct and that ``.patch_paths_col`` is set to the correct column.'
-            )
-
         if self.create_context:
-            context_img = self.get_context_id(idx, return_image=True)
+            context_img = self.get_context_id(image_id, return_image=True)
         else:
             context_img = Image.open(
                 os.path.join(self.context_dir, os.path.basename(img_path))
             ).convert(self.image_mode)
 
-        img = self.patch_transform(img)
-        context_img = self.context_transform(context_img)
+        context_img = self.transform(context_img)
 
         if self.label_col in self.patch_df.iloc[idx].keys():
             image_label = self.patch_df.iloc[idx][self.label_col]
