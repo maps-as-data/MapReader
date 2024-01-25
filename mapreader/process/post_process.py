@@ -25,8 +25,6 @@ class PatchDataFrame(pd.DataFrame):
         patch_df: pd.DataFrame,
         labels_map: dict,
     ):
-        super().__init__(patch_df)
-
         required_columns = [
             "parent_id",
             "pixel_bounds",
@@ -34,29 +32,31 @@ class PatchDataFrame(pd.DataFrame):
             "predicted_label",
             "conf",
         ]
-        if not all([col in self.columns for col in required_columns]):
+        if not all([col in patch_df.columns for col in required_columns]):
             raise ValueError(
                 f"[ERROR] Your dataframe must contain the following columns: {required_columns}."
             )
 
         # ensure lists/tuples are evaluated as such
-        for col in self.columns:
+        for col in patch_df.columns:
             try:
-                self[col] = self[col].apply(literal_eval)
+                patch_df[col] = patch_df[col].apply(literal_eval)
             except (ValueError, TypeError, SyntaxError):
                 pass
 
-        if self.index.name == "image_id":
-            if "image_id" in self.columns:
-                self.drop(columns=["image_id"], inplace=True)
-            self.reset_index(drop=False, names="image_id", inplace=True)
+        if patch_df.index.name != "image_id" and "image_id" in patch_df.columns:
+            self.set_index("image_id", drop=True, inplace=True)
 
-        if all([col in self.columns for col in ["min_x", "min_y", "max_x", "max_y"]]):
+        if all(
+            [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
+        ):
             print(
                 "[INFO] Using existing pixel bounds columns (min_x, min_y, max_x, max_y)."
             )
         else:
-            self[["min_x", "min_y", "max_x", "max_y"]] = [*self.pixel_bounds]
+            patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df["pixel_bounds"]]
+
+        super().__init__(patch_df)
 
         self.labels_map = labels_map
         self._label_patches = None
@@ -77,23 +77,23 @@ class PatchDataFrame(pd.DataFrame):
             labels = [labels]
         self._label_patches = self[self["predicted_label"].isin(labels)]
 
-        for ix in tqdm(self._label_patches.index):
-            if ix not in self.context:
-                context_list = self._get_context_id(ix)
+        for id in tqdm(self._label_patches.index):
+            if id not in self.context:
+                context_list = self._get_context_id(id)
                 # only add context if all surrounding patches are found
                 if len(context_list) == 9:
-                    self.context[ix] = context_list
+                    self.context[id] = context_list
 
     def _get_context_id(
         self,
-        ix,
+        id,
     ):
         """Get the context of the patch with the specified index."""
-        parent_id = self.at[ix, "parent_id"]
-        min_x = self.at[ix, "min_x"]
-        min_y = self.at[ix, "min_y"]
-        max_x = self.at[ix, "max_x"]
-        max_y = self.at[ix, "max_y"]
+        parent_id = self.loc[id, "parent_id"]
+        min_x = self.loc[id, "min_x"]
+        min_y = self.loc[id, "min_y"]
+        max_x = self.loc[id, "max_x"]
+        max_y = self.loc[id, "max_y"]
 
         context_grid = [
             *product(
@@ -114,7 +114,7 @@ class PatchDataFrame(pd.DataFrame):
             ]
             for context_loc in context_grid
         ]
-        context_list = [x.image_id.values[0] for x in context_list if len(x)]
+        context_list = [x.index[0] for x in context_list if len(x)]
         return context_list
 
     def update_preds(self, remap: dict, conf: float = 0.7, inplace: bool = False):
@@ -152,31 +152,31 @@ class PatchDataFrame(pd.DataFrame):
                 )
                 self.labels_map[len(self.labels_map)] = new_label
 
-        for ix in tqdm(self.context):
+        for id in tqdm(self.context):
             self._update_preds_id(
-                ix, labels=labels, remap=remap, conf=conf, inplace=inplace
+                id, labels=labels, remap=remap, conf=conf, inplace=inplace
             )
 
     def _update_preds_id(
-        self, ix, labels: str | list, remap: dict, conf: float, inplace: bool = False
+        self, id, labels: str | list, remap: dict, conf: float, inplace: bool = False
     ):
         """Update the predictions of the patch with the specified index."""
-        context_list = self.context[ix]
+        context_list = self.context[id]
 
-        context_df = self[self["image_id"].isin(context_list)]
+        context_df = self[self.index.isin(context_list)]
         # drop central patch from context
-        context_df.drop(index=ix, inplace=True)
+        context_df.drop(index=id, inplace=True)
 
         # reverse the labels_map dict
         label_index_dict = {v: k for k, v in self.labels_map.items()}
 
         prefix = "" if inplace else "new_"
         if (not any(context_df["predicted_label"].isin(labels))) & (
-            self.at[ix, "conf"] < conf
+            self.loc[id, "conf"] < conf
         ):
-            self.at[ix, f"{prefix}predicted_label"] = remap[
-                self.at[ix, "predicted_label"]
+            self.loc[id, f"{prefix}predicted_label"] = remap[
+                self.loc[id, "predicted_label"]
             ]
-            self.at[ix, f"{prefix}pred"] = label_index_dict[
-                self.at[ix, f"{prefix}predicted_label"]
+            self.loc[id, f"{prefix}pred"] = label_index_dict[
+                self.loc[id, f"{prefix}predicted_label"]
             ]
