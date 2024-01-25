@@ -390,8 +390,8 @@ class PatchContextDataset(PatchDataset):
     def __init__(
         self,
         patch_df: pd.DataFrame | str,
-        patch_transform: str,
-        context_transform: str,
+        total_df: pd.DataFrame | str,
+        transform: str,
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
         label_col: str | None = None,
@@ -409,11 +409,10 @@ class PatchContextDataset(PatchDataset):
         ----------
         patch_df : pandas.DataFrame or str
             DataFrame or path to csv file containing the paths to image patches and their labels.
-        patch_transform : str
-            Torchvision transform to be applied to input images.
-            Either "train" or "val".
-        context_transform : str
-            Torchvision transform to be applied to target images.
+        total_df : pandas.DataFrame or str
+            DataFrame or path to csv file containing the paths to all images and their labels.
+        transform : str
+            Torchvision transform to be applied to context  images.
             Either "train" or "val".
         delimiter : str
             The delimiter to use when reading the csv file. By default ``","``.
@@ -465,6 +464,7 @@ class PatchContextDataset(PatchDataset):
             if os.path.isfile(patch_df):
                 print(f'[INFO] Reading "{patch_df}".')
                 patch_df = pd.read_csv(patch_df, sep=delimiter)
+                patch_df = self._eval_df(patch_df)
                 self.patch_df = patch_df
             else:
                 raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
@@ -474,11 +474,26 @@ class PatchContextDataset(PatchDataset):
                 "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
             )
 
-        # force index to be integer
-        if self.patch_df.index.name in ["image_id", "name"]:
-            if "image_id" in self.patch_df.columns:
-                self.patch_df.drop(columns=["image_id"], inplace=True)
-            self.patch_df.reset_index(drop=False, names="image_id", inplace=True)
+        if isinstance(total_df, pd.DataFrame):
+            self.total_df = total_df
+
+        elif isinstance(total_df, str):
+            if os.path.isfile(total_df):
+                total_df = pd.read_csv(total_df, sep=delimiter)
+                total_df = self._eval_df(total_df)
+                self.total_df = total_df
+            else:
+                raise ValueError(f'[ERROR] "{total_df}" cannot be found.')
+
+        else:
+            raise ValueError(
+                "[ERROR] Please pass ``total_df`` as a string (path to csv file) or pd.DataFrame."
+            )
+
+        # force index to be image_id
+        for df in [self.patch_df, self.total_df]:
+            if "image_id" in df.columns and df.index.name != "image_id":
+                df.set_index("image_id", drop=True, inplace=True)
 
         self.label_col = label_col
         self.label_index_col = label_index_col
@@ -504,25 +519,15 @@ class PatchContextDataset(PatchDataset):
                     self.label_col
                 ].apply(self._get_label_index)
 
-        if isinstance(patch_transform, str):
-            if patch_transform in ["train", "val", "test"]:
-                self.patch_transform = self._default_transform(patch_transform)
+        if isinstance(transform, str):
+            if transform in ["train", "val", "test"]:
+                self.transform = self._default_transform(transform)
             else:
                 raise ValueError(
                     '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
                 )
         else:
-            self.patch_transform = patch_transform
-
-        if isinstance(context_transform, str):
-            if context_transform in ["train", "val", "test"]:
-                self.context_transform = self._default_transform(context_transform)
-            else:
-                raise ValueError(
-                    '[ERROR] ``transform`` can only be "train", "val" or "test" or, a transform.'
-                )
-        else:
-            self.context_transform = context_transform
+            self.transform = transform
 
     def save_context(
         self,
@@ -631,35 +636,35 @@ class PatchContextDataset(PatchDataset):
         -------
         None
         """
-        patch_df = self.patch_df.copy(deep=True)
+        total_df = self.total_df.copy(deep=True)
 
         if not all(
-            [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
+            [col in total_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
         ):
-            patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df.pixel_bounds]
+            total_df[["min_x", "min_y", "max_x", "max_y"]] = [*total_df.pixel_bounds]
 
-        patch_image = Image.open(patch_df.iloc[idx][self.patch_paths_col]).convert(
+        patch_image = Image.open(total_df.loc[id, self.patch_paths_col]).convert(
             self.image_mode
         )
         patch_width, patch_height = (patch_image.width, patch_image.height)
-        parent_id = patch_df.iloc[idx]["parent_id"]
-        min_x = patch_df.iloc[idx]["min_x"]
-        min_y = patch_df.iloc[idx]["min_y"]
-        max_x = patch_df.iloc[idx]["max_x"]
-        max_y = patch_df.iloc[idx]["max_y"]
+        parent_id = total_df.loc[id, "parent_id"]
+        min_x = total_df.loc[id, "min_x"]
+        min_y = total_df.loc[id, "min_y"]
+        max_x = total_df.loc[id, "max_x"]
+        max_y = total_df.loc[id, "max_y"]
 
         # get a pixel bounds of context images
         context_grid = [
             *product(
                 [
-                    (patch_df["min_y"], min_y),
+                    (total_df["min_y"], min_y),
                     (min_y, max_y),
-                    (max_y, patch_df["max_y"]),
+                    (max_y, total_df["max_y"]),
                 ],
                 [
-                    (patch_df["min_x"], min_x),
+                    (total_df["min_x"], min_x),
                     (min_x, max_x),
-                    (max_x, patch_df["max_x"]),
+                    (max_x, total_df["max_x"]),
                 ],
             )
         ]
@@ -671,12 +676,12 @@ class PatchContextDataset(PatchDataset):
 
         # get a list of context images
         context_list = [
-            patch_df[
-                (patch_df["min_x"] == context_loc[0])
-                & (patch_df["min_y"] == context_loc[1])
-                & (patch_df["max_x"] == context_loc[2])
-                & (patch_df["max_y"] == context_loc[3])
-                & (patch_df["parent_id"] == parent_id)
+            total_df[
+                (total_df["min_x"] == context_loc[0])
+                & (total_df["min_y"] == context_loc[1])
+                & (total_df["max_x"] == context_loc[2])
+                & (total_df["max_y"] == context_loc[3])
+                & (total_df["parent_id"] == parent_id)
             ]
             for context_loc in context_grid
         ]
@@ -723,7 +728,7 @@ class PatchContextDataset(PatchDataset):
             os.makedirs(self.context_dir, exist_ok=True)
             context_path = os.path.join(
                 self.context_dir,
-                os.path.basename(patch_df.iloc[idx][self.patch_paths_col]),
+                os.path.basename(total_df.loc[id, self.patch_paths_col]),
             )
             if overwrite or not os.path.exists(context_path):
                 context_image.save(context_path)
