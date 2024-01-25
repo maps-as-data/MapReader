@@ -224,17 +224,6 @@ class Annotator(pd.DataFrame):
                 delimiter=delimiter,
             )
 
-        # Test for existing context annotation file
-        if os.path.exists(f"{annotations_file[:-4]}_context.csv"):
-            print("[INFO] Loading existing context annotations.")
-            patch_df = self._load_annotations(
-                patch_df=patch_df,
-                annotations_file=f"{annotations_file[:-4]}_context.csv",
-                labels=labels,
-                col="context_label",
-                delimiter=delimiter,
-            )
-
         # initiate as a DataFrame
         super().__init__(patch_df)
 
@@ -261,7 +250,6 @@ class Annotator(pd.DataFrame):
         self.auto_save = auto_save
         self.username = username
         self.task_name = task_name
-        self._annotate_context = False
 
         # set up for the annotator
         self._min_values = min_values or {}
@@ -497,37 +485,6 @@ class Annotator(pd.DataFrame):
             return indices
         return queue_df
 
-    def get_context_queue(
-        self, as_type: str | None = "list"
-    ) -> list[int] | (pd.Index | pd.Series):
-        """
-        Gets the indices of rows which are eligible for annotation at the context-level.
-
-        Parameters
-        ----------
-        as_type : str, optional
-            The format in which to return the indices. Options: "list",
-            "index". Default is "list". If any other value is provided, it
-            returns a pandas.Series.
-
-        Returns
-        -------
-        List[int] or pandas.Index or pandas.Series
-            Depending on "as_type", returns either a list of indices, a
-            pd.Index object, or a pd.Series of legible rows.
-        """
-
-        queue_df = self.copy(deep=True)
-        queue_df = queue_df[queue_df["context_label"].isna()]  # only unlabelled
-        queue_df = queue_df[queue_df[self.label_col].notna()].sample(frac=1)  # shuffle
-
-        indices = queue_df.index
-        if as_type == "list":
-            return list(indices)
-        if as_type == "index":
-            return indices
-        return queue_df
-
     def get_context(self):
         """
         Provides the surrounding context for the patch to be annotated.
@@ -542,10 +499,6 @@ class Annotator(pd.DataFrame):
         def get_path(image_path, dim=True):
             # Resize the image
             im = Image.open(image_path)
-
-            # Never dim when annotating context
-            if self._annotate_context:
-                dim = False
 
             # Dim the image
             if dim in [True, "True"]:
@@ -688,8 +641,6 @@ class Annotator(pd.DataFrame):
         This method is a wrapper for the ``_annotate`` method.
         """
 
-        self._annotate_context = False
-
         if min_values is not None:
             self._min_values = min_values
         if max_values is not None:
@@ -701,51 +652,6 @@ class Annotator(pd.DataFrame):
         self._annotate(
             show_context=show_context,
             surrounding=surrounding,
-            resize_to=resize_to,
-            max_size=max_size,
-        )
-
-    def annotate_context(
-        self,
-        resize_to: int | None = None,
-        max_size: int | None = None,
-    ) -> None:
-        """Annotate at the context-level of the current patch.
-        Renders the annotation interface for the first image plus surrounding context.
-
-        Parameters
-        ----------
-        min_values : dict or None, optional
-            Minimum values for each property to filter images for annotation.
-            It should be provided as a dictionary consisting of column names
-            (keys) and minimum values as floating point values (values).
-            Default is None.
-        max_values : dict or None, optional
-            Maximum values for each property to filter images for annotation.
-            It should be provided as a dictionary consisting of column names
-            (keys) and minimum values as floating point values (values).
-            Default is None
-        surrounding : int or None, optional
-            The number of surrounding images to show for context. Default: 1.
-        max_size : int or None, optional
-            The size in pixels for the longest side to which constrain each
-            patch image. Default: 100.
-
-        Notes
-        -----
-        This method is a wrapper for the ``_annotate`` method.
-        """
-        self._annotate_context = True
-
-        if "context_label" not in self.columns:
-            self["context_label"] = None
-
-        # re-set up queue for context images
-        self._queue = self.get_context_queue()
-
-        self._annotate(
-            show_context=True,
-            surrounding=1,
             resize_to=resize_to,
             max_size=max_size,
         )
@@ -872,8 +778,7 @@ class Annotator(pd.DataFrame):
                 # disable skip button when at last example
                 button.disabled = self.current_index >= len(self) - 1
             elif button.description != "submit":
-                col = "context_label" if self._annotate_context else self.label_col
-                if self.at[ix, col] == button.description:
+                if self.at[ix, self.label_col] == button.description:
                     button.icon = "check"
                 else:
                     button.icon = ""
@@ -954,10 +859,7 @@ class Annotator(pd.DataFrame):
         """
         # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
-        if self._annotate_context:
-            self.at[ix, "context_label"] = annotation
-        else:
-            self.at[ix, self.label_col] = annotation
+        self.at[ix, self.label_col] = annotation
         if self.auto_save:
             self._auto_save()
         self._next_example()
@@ -970,16 +872,11 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
-        if self._annotate_context:
-            annotations_file = f"{self.annotations_file[:-4]}_context.csv"
-            self.get_labelled_data(sort=True, context=True).to_csv(annotations_file)
-        else:
-            self.get_labelled_data(sort=True).to_csv(self.annotations_file)
+        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
 
     def get_labelled_data(
         self,
         sort: bool = True,
-        context: bool = False,
         index_labels: bool = False,
         include_paths: bool = True,
     ) -> pd.DataFrame:
@@ -991,8 +888,6 @@ class Annotator(pd.DataFrame):
         sort : bool, optional
             Whether to sort the dataframe by the order of the images in the
             input data, by default True
-        context : bool, optional
-            Whether to save the context annotations or not, by default False
         index_labels : bool, optional
             Whether to return the label's index number (in the labels list
             provided in setting up the instance) or the human-readable label
@@ -1007,10 +902,7 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
-        if context:
-            filtered_df = self[self["context_label"].notna()].copy(deep=True)
-        else:
-            filtered_df = self[self[self.label_col].notna()].copy(deep=True)
+        filtered_df = self[self[self.label_col].notna()].copy(deep=True)
 
         # force image_id to be index (incase of integer index)
         # TODO: Force all indices to be integers so this is not needed
@@ -1024,10 +916,6 @@ class Annotator(pd.DataFrame):
             filtered_df[self.label_col] = filtered_df[self.label_col].apply(
                 lambda x: self._labels.index(x)
             )
-            if context:
-                filtered_df["context_label"] = filtered_df["context_label"].apply(
-                    lambda x: self._labels.index(x)
-                )
 
         return filtered_df
 
