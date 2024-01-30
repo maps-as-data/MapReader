@@ -28,7 +28,7 @@ or
 
     my_files = loader("./path/to/files/", file_ext="png")
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our :doc:`Input Guidance </Input-guidance>`:
 
 .. code-block:: python
 
@@ -65,9 +65,9 @@ Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, 
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
-.. note:: Specific guidance on preparing your metadata file/dataframe can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
+.. note:: Specific guidance on preparing your metadata file/dataframe can be found on our :doc:`Input Guidance </Input-guidance>` page.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance </Input-guidance>`:
 
 .. code-block:: python
 
@@ -90,7 +90,7 @@ For example, if you have downloaded your maps using the default settings of our 
 Patchify
 ----------
 
-Once you've loaded in all your data, you'll then need to `'patchify' <https://mapreader.readthedocs.io/en/latest/About.html>`__ your images.
+Once you've loaded in all your data, you'll then need to :doc:`'patchify' </About>` your images.
 
 Creating patches from your parent images is a core intellectual and technical task within MapReader.
 Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important decision and will depend upon the research question you are trying to answer:
