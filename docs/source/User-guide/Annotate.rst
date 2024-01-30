@@ -14,7 +14,7 @@ Annotate your images
 
 
 To prepare your annotations, you must specify a number of parameters when initializing the Annotator class.
-We will use a 'rail_space' annotation task to demonstrate how to set up the annotator.
+We will use a 'railspace' annotation task to demonstrate how to set up the annotator.
 
 The simplest way to initialize your annotator is to provide file paths for your patches and parent images using the ``patch_paths`` and ``parent_paths`` arguments, respectively.
 e.g. :
@@ -30,7 +30,7 @@ e.g. :
         metadata="./maps/metadata.csv",
         annotations_dir="./annotations",
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
     )
 
@@ -47,7 +47,7 @@ e.g. :
         parent_df="./parent_df.csv",
         annotations_dir="./annotations",
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
     )
 
@@ -57,7 +57,7 @@ In the above examples, the following parameters are also specified:
 
 - ``annotations_dir``: The directory where your annotations will be saved (e.g., ``"./annotations"``).
 - ``task_name``: The specific annotation task you want to perform, in this case ``"railspace"``.
-- ``labels``: A list of labels for the annotation task, such as ``"no_rail_space"`` and ``"rail_space"``.
+- ``labels``: A list of labels for the annotation task, such as ``"no_railspace"`` and ``"railspace"``.
 - ``username``: Your unique identifier, which can be any string (e.g., ``"rosie"``).
 
 Other arguments that you may want to be aware of when initializing the ``Annotator`` instance include:
@@ -91,7 +91,7 @@ e.g. to resize your patches so that their largest edge is 300 pixels:
         parent_df="./parent_df.csv",
         annotations_dir="./annotations",
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
         resize_to=300,
     )
@@ -121,7 +121,7 @@ e.g. :
         parent_df="./parent_df.csv",
         annotations_dir="./annotations",
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
         show_context=True,
     )
@@ -160,7 +160,7 @@ e.g. :
         parent_df="./parent_df.csv",
         annotations_dir="./annotations"m
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
         sortby="mean_pixel_R",
     )
@@ -181,7 +181,7 @@ e.g. To sort your patches by the mean red pixel intensity in each patch but only
         parent_df="./parent_df.csv",
         annotations_dir="./annotations",
         task_name="railspace",
-        labels=["no_rail_space", "rail_space"],
+        labels=["no_railspace", "railspace"],
         username="rosie",
         sortby="mean_pixel_R",
         min_values={"mean_pixel_B": 0.5},
@@ -204,7 +204,7 @@ If you need to know the name of the annotations file, you may refer to a propert
 The file will be located in the ``annotations_dir`` that you may have passed as a keyword argument when you set up the ``Annotator`` instance.
 If you didn't provide a keyword argument, it will be in the ``./annotations`` directory.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches using the default settings:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our :doc:`Input Guidance </Input-guidance>`, and then saved your patches using the default settings:
 
 ::
 
@@ -222,4 +222,4 @@ For example, if you have downloaded your maps using the default settings of our 
     │   ├── patch-200-300-#map1.png#.png
     │   └── ...
     └──annotations
-	    └──rail_space_#rosie#-123hjkfr298jIUHfs808da.csv
+	    └──railspace_#rosie#-123hjkfr298jIUHfs808da.csv

@@ -19,13 +19,13 @@ First, load in your annotations using:
     annotated_images = AnnotationsLoader()
     annotated_images.load(annotations = "./path/to/annotations.csv")
 
-For example, if you have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__, and then saved your patches and annotations using the default settings:
+For example, if you have set up your directory as recommended in our :doc:`Input Guidance </Input-guidance>`, and then saved your patches and annotations using the default settings:
 
 .. code-block:: python
 
     #EXAMPLE
     annotated_images = AnnotationsLoader()
-    annotated_images.load("./annotations/rail_space_#rosie#.csv")
+    annotated_images.load("./annotations/railspace_#rosie#.csv")
 
 .. admonition:: Advanced usage
     :class: dropdown
@@ -56,12 +56,12 @@ To see how your labels map to their label indices, call the ``annotated_images.l
 To view a sample of your annotated images use the ``show_sample()`` method.
 The ``label_to_show`` argument specifies which label you would like to show.
 
-For example, to show your "rail_space" label:
+For example, to show your "railspace" label:
 
 .. code-block:: python
 
     #EXAMPLE
-    annotated_images.show_image_labels("rail_space")
+    annotated_images.show_image_labels("railspace")
 
 .. todo:: update this pic
 
@@ -219,7 +219,7 @@ Initialize ``ClassifierContainer()``
 To initialize your ``ClassifierContainer()`` for training, you will need to define:
 
 - ``model`` - The model (classifier) you would like to train.
-- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_rail_space", 1: "rail_space"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
+- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_railspace", 1: "railspace"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
 - ``dataloaders`` - The dataloaders containing your train, test and val datasets.
 
 There are a number of options for the ``model`` argument:
@@ -506,7 +506,7 @@ To see a sample of your predictions, use:
 
 .. code-block:: python
 
-    my_classifier.show_inference_sample_results(label="rail_space")
+    my_classifier.show_inference_sample_results(label="railspace")
 
 .. image:: ../../figures/inference_sample_results.png
     :width: 400px
@@ -591,7 +591,7 @@ To do this, you will need to create a new dataset containing your patches:
 
     infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
-.. note:: You should have created this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance).
+.. note:: You should have created this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </User-guide/Load>` user guidance).
 
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
@@ -618,7 +618,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 
 .. code-block:: python
 
-    my_classifier.show_inference_sample_results(label="rail_space", set_name="infer")
+    my_classifier.show_inference_sample_results(label="railspace", set_name="infer")
 
 Add predictions to metadata and save
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -665,4 +665,4 @@ Or, you can use the ``MapImages`` object to create some visualizations of your r
     parent_list = my_maps.list_parents()
     my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
 
-Refer to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance for further details on how these methods work.
+Refer to the :doc:`Load </User-guide/Load>` user guidance for further details on how these methods work.

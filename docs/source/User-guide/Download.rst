@@ -8,7 +8,7 @@ Download
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
-.. note:: If you already have your maps stored locally, you can skip this section and proceed on to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ part of the User Guide.
+.. note:: If you already have your maps stored locally, you can skip this section and proceed on to the :doc:`Load </User-guide/Load>` part of the User Guide.
 
 MapReader's ``Download`` subpackage is used to download maps stored on as XYZ tile layers on a tile server.
 It contains two classes for downloading maps:
@@ -29,7 +29,7 @@ SheetDownloader
 ---------------
 
 To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets.
-Guidance on what this metadata ``json`` should contain can be found in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__.
+Guidance on what this metadata ``json`` should contain can be found in our :doc:`Input Guidance </Input-guidance>`.
 An example is shown below:
 
 .. code-block:: javascript
