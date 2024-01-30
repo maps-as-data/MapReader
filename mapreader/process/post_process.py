@@ -45,7 +45,7 @@ class PatchDataFrame(pd.DataFrame):
                 pass
 
         if patch_df.index.name != "image_id" and "image_id" in patch_df.columns:
-            self.set_index("image_id", drop=True, inplace=True)
+            patch_df.set_index("image_id", drop=True, inplace=True)
 
         if all(
             [col in patch_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
