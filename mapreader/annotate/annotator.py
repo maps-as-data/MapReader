@@ -483,6 +483,7 @@ class Annotator(pd.DataFrame):
 
         if self._sortby is not None:
             queue_df.sort_values(self._sortby, ascending=self._ascending, inplace=True)
+            queue_df = queue_df[queue_df.eligible]
         else:
             queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
 
