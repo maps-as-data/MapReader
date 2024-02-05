@@ -147,6 +147,7 @@ def test_min_values(load_dfs):
         annotations_dir=f"{tmp_path}/annotations/",
         auto_save=False,
         min_values={"min_x": 3},
+        sortby="min_x",  # no shuffle
     )
     queue = annotator.get_queue()
     assert len(queue) == 6
@@ -163,6 +164,7 @@ def test_max_values(load_dfs):
         annotations_dir=f"{tmp_path}/annotations/",
         auto_save=False,
         max_values={"min_x": 0},
+        sortby="min_x",  # no shuffle
     )
     queue = annotator.get_queue()
     assert len(queue) == 3
