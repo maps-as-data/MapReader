@@ -8,7 +8,7 @@ Input Guidance
 Input options
 --------------
 
-The MapReader pipeline is explained in detail `here <https://mapreader.readthedocs.io/en/latest/About.html>`__.
+The MapReader pipeline is explained in detail :doc:`here </About>`.
 The inputs you will need for MapReader will depend on where you begin within the pipeline.
 
 Option 1 - If the map(s) you want have been georeferenced and made available via a Tile Server

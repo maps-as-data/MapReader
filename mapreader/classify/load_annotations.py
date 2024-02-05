@@ -179,6 +179,8 @@ class AnnotationsLoader:
         if os.path.isfile(annotations):
             print(f'[INFO] Reading "{annotations}"')
             annotations = pd.read_csv(annotations, sep=delimiter, index_col=0)
+            if annotations.index.name in ["name", "image_id"]:
+                annotations.reset_index(inplace=True, drop=False)
         else:
             raise ValueError(f'[ERROR] "{annotations}" cannot be found.')
 

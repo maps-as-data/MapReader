@@ -1,4 +1,4 @@
-Infer using a fine-tuned model 
+Infer using a fine-tuned model
 ==================================
 
 You can use any classifier (model) to predict labels on unannotated patches.
@@ -9,7 +9,7 @@ Initialize ``ClassifierContainer()``
 To initialize your ``ClassifierContainer()`` for inference, you will need to define:
 
 - ``model`` - The model (classifier) you would like to use.
-- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_rail_space", 1: "rail_space"}``). This labels map should be the same as that used when training/fine-tuning the classifier.
+- ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_railspace", 1: "railspace"}``). This labels map should be the same as that used when training/fine-tuning the classifier.
 
 There are a number of options for the ``model`` argument:
 
@@ -27,7 +27,7 @@ There are a number of options for the ``model`` argument:
             import torch
 
             my_model = torch.load("./models/model_checkpoint_6.pkl")
-            labels_map = {0: "no_rail_space", 1: "rail_space"}
+            labels_map = {0: "no_railspace", 1: "railspace"}
 
             my_classifier = ClassifierContainer(my_model, labels_map)
 
@@ -60,7 +60,7 @@ There are a number of options for the ``model`` argument:
 
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
-            labels_map = {0: "no_rail_space", 1: "rail_space"}
+            labels_map = {0: "no_railspace", 1: "railspace"}
 
             my_classifier = ClassifierContainer(my_model, labels_map)
 
@@ -90,9 +90,9 @@ This can be done by loading a dataframe containing the paths to your patches:
 
     from mapreader import PatchDataset
 
-    infer = PatchDataset("./patch_df.csv", delimiter="\t", transform="test")
+    infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
-.. note:: You can create this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance).
+.. note:: You can create this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </User-guide/Load>` user guidance).
 
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
@@ -122,7 +122,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 
 .. code-block:: python
 
-    my_classifier.show_inference_sample_results(label="rail_space", set_name="infer")
+    my_classifier.show_inference_sample_results(label="railspace", set_name="infer")
 
 Add predictions to metadata and save
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -152,7 +152,7 @@ From here, you can either save your results using:
 
 .. code-block:: python
 
-    infer.patch_df.to_csv("predictions_patch_df.csv", sep="\t")
+    infer.patch_df.to_csv("predictions_patch_df.csv", sep=",")
 
 Or, you can use the ``MapImages`` object to create some visualizations of your results:
 
@@ -169,4 +169,4 @@ Or, you can use the ``MapImages`` object to create some visualizations of your r
     parent_list = my_maps.list_parents()
     my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
 
-Refer to the `Load <https://mapreader.readthedocs.io/en/latest/User-guide/Load.html>`__ user guidance for further details on how these methods work.
+Refer to the :doc:`Load </User-guide/Load>` user guidance for further details on how these methods work.
