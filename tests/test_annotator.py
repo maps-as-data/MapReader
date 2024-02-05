@@ -172,6 +172,23 @@ def test_max_values(load_dfs):
     assert queue[-1] == "patch-0-6-3-9-#cropped_74488689.png#.png"
 
 
+def test_filter_for(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+        filter_for={"min_y": 0},
+        sortby="min_x",  # no shuffle
+    )
+    queue = annotator.get_queue()
+    assert len(queue) == 3
+    assert queue[0] == "patch-0-0-3-3-#cropped_74488689.png#.png"
+    assert queue[-1] == "patch-6-0-9-3-#cropped_74488689.png#.png"
+
+
 # errors
 
 

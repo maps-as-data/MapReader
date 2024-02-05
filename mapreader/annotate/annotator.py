@@ -73,6 +73,8 @@ class Annotator(pd.DataFrame):
         A dictionary consisting of column names (keys) and minimum values as floating point values (values), by default None.
     max_values : dict, optional
         A dictionary consisting of column names (keys) and maximum values as floating point values (values), by default None.
+    filter_for : dict, optional
+        A dictionary consisting of column names (keys) and values to filter for (values), by default None.
     surrounding : int, optional
         The number of surrounding images to show for context, by default 1.
     max_size : int, optional
@@ -114,7 +116,7 @@ class Annotator(pd.DataFrame):
         task_name: str | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
-        filter_for: str | None = None,
+        filter_for: dict | None = None,
         surrounding: int = 1,
         max_size: int = 1000,
         resize_to: int | None = None,
