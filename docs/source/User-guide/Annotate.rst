@@ -66,6 +66,7 @@ Other arguments that you may want to be aware of when initializing the ``Annotat
 - ``surrounding``: How many surrounding patches to show in the context image (default: ``1``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
 - ``ascending``: A boolean indicating whether to sort in ascending or descending order (default: ``True``).
+- ``filter_for``: A dictionary containing the name of the column to use for filtering and the value to filter for within this column. (e.g. ``{"predicted_label":"railspace"}``)
 - ``delimiter``: The delimiter to use when reading your data files (default: ``","`` for csv).
 
 After setting up the ``Annotator`` instance, you can interactively annotate a sample of your images using:
@@ -187,6 +188,31 @@ e.g. To sort your patches by the mean red pixel intensity in each patch but only
         min_values={"mean_pixel_B": 0.5},
         max_values={"mean_pixel_B": 0.9},
     )
+
+Filtering
+~~~~~~~~~~
+
+You can use the ``filter_for`` argument to filter your patches based on a column in your patch DataFrame.
+This can be useful if you want to focus on a particular subset of your patches, or, to look at predictions made by a model.
+
+e.g. to filter for patches that have been predicted to be "railspace":
+
+.. code-block:: python
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"m
+        task_name="railspace",
+        labels=["no_railspace", "railspace"],
+        username="rosie",
+        filter_for={"predicted_label":"railspace"},
+    )
+
+This will only show you patches that have been predicted to be "railspace".
+
+You can filter for any column in your patch DataFrame, and you can filter for multiple values by passing multiple key-value pairs as your ``filter_for`` dictionary.
 
 .. _Save_annotations:
 

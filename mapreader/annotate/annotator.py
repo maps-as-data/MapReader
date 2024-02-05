@@ -73,6 +73,8 @@ class Annotator(pd.DataFrame):
         A dictionary consisting of column names (keys) and minimum values as floating point values (values), by default None.
     max_values : dict, optional
         A dictionary consisting of column names (keys) and maximum values as floating point values (values), by default None.
+    filter_for : dict, optional
+        A dictionary consisting of column names (keys) and values to filter for (values), by default None.
     surrounding : int, optional
         The number of surrounding images to show for context, by default 1.
     max_size : int, optional
@@ -114,6 +116,7 @@ class Annotator(pd.DataFrame):
         task_name: str | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
+        filter_for: dict | None = None,
         surrounding: int = 1,
         max_size: int = 1000,
         resize_to: int | None = None,
@@ -258,6 +261,7 @@ class Annotator(pd.DataFrame):
         # set up for the annotator
         self._min_values = min_values or {}
         self._max_values = max_values or {}
+        self._filter_for = filter_for or {}
 
         # Create annotations_dir
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
@@ -468,9 +472,14 @@ class Annotator(pd.DataFrame):
             if row.label not in [np.NaN, None]:
                 return False
 
-            test = [
-                row[col] >= min_value for col, min_value in self._min_values.items()
-            ] + [row[col] <= max_value for col, max_value in self._max_values.items()]
+            test = (
+                [row[col] >= min_value for col, min_value in self._min_values.items()]
+                + [row[col] <= max_value for col, max_value in self._max_values.items()]
+                + [
+                    row[col] == filter_for
+                    for col, filter_for in self._filter_for.items()
+                ]
+            )
 
             if not all(test):
                 return False
@@ -681,6 +690,9 @@ class Annotator(pd.DataFrame):
 
         # re-set up queue
         self._queue = self.get_queue()
+
+        if self._filter_for is not None:
+            print(f"[INFO] Filtering for: {self._filter_for}")
 
         self.out = widgets.Output(layout=_CENTER_LAYOUT)
         display(self.box)
