@@ -236,11 +236,15 @@ class Annotator(pd.DataFrame):
         # Sort by sortby column if provided
         if isinstance(sortby, str):
             if sortby in self.columns:
-                self.sort_values(sortby, ascending=ascending, inplace=True)
+                self._sortby = sortby
+                self._ascending = ascending
             else:
                 raise ValueError(f"[ERROR] {sortby} is not a column in the DataFrame.")
         elif sortby is not None:
             raise ValueError("[ERROR] ``sortby`` must be a string or None.")
+        else:
+            self._sortby = None
+            self._ascending = True
 
         self._labels = labels
         self.label_col = label_col
@@ -476,7 +480,11 @@ class Annotator(pd.DataFrame):
         queue_df = self.copy(deep=True)
         queue_df = queue_df[queue_df[self.label_col].isna()]  # only unlabelled
         queue_df["eligible"] = queue_df.apply(check_eligibility, axis=1)
-        queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
+
+        if self._sortby is not None:
+            queue_df.sort_values(self._sortby, ascending=self._ascending, inplace=True)
+        else:
+            queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
 
         indices = queue_df.index
         if as_type == "list":
@@ -606,6 +614,8 @@ class Annotator(pd.DataFrame):
     def annotate(
         self,
         show_context: bool | None = None,
+        sortby: str | None = None,
+        ascending: bool | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
         surrounding: int | None = None,
@@ -620,6 +630,11 @@ class Annotator(pd.DataFrame):
         show_context : bool or None, optional
             Whether or not to display the surrounding context for each image.
             Default is None.
+        sortby : str or None, optional
+            Name of the column to use to sort the patch DataFrame, by default None.
+            Default sort order is ``ascending=True``. Pass ``ascending=False`` keyword argument to sort in descending order.
+        ascending : bool, optional
+            Whether to sort the DataFrame in ascending order when using the ``sortby`` argument, by default True.
         min_values : dict or None, optional
             Minimum values for each property to filter images for annotation.
             It should be provided as a dictionary consisting of column names
@@ -640,6 +655,11 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
+        if sortby is not None:
+            self._sortby = sortby
+        if ascending is not None:
+            self._ascending = ascending
+
         if min_values is not None:
             self._min_values = min_values
         if max_values is not None:
