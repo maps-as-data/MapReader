@@ -32,12 +32,13 @@ from .datasets import PatchDataset
 class ClassifierContainer:
     def __init__(
         self,
-        model: str | (nn.Module | None),
+        model: str | nn.Module | None,
         labels_map: dict[int, str] | None,
         dataloaders: dict[str, DataLoader] | None = None,
         device: str | None = "default",
         input_size: int | None = (224, 224),
-        is_inception: bool | None = False,
+        is_inception: bool = False,
+        context: bool = False,
         load_path: str | None = None,
         force_device: bool | None = False,
         **kwargs,
@@ -65,6 +66,9 @@ class ClassifierContainer:
         is_inception : bool, optional
             Whether the model is an Inception-style model.
             Default is ``False``.
+        context : bool, optional
+            Whether the model is uses patch and context inputs.
+            Default is `False`.
         load_path : str, optional
             The path to an ``.obj`` file containing a
         force_device : bool, optional
@@ -88,8 +92,10 @@ class ClassifierContainer:
             The model.
         input_size : None or tuple of int
             The size of the input to the model.
-        is_inception : None or bool
+        is_inception : bool
             A flag indicating if the model is an Inception model.
+        context : bool
+            A flag indicating if the model uses patch and context as inputs.
         optimizer : None or torch.optim.Optimizer
             The optimizer being used for training the model.
         scheduler : None or torch.optim.lr_scheduler._LRScheduler
@@ -127,15 +133,15 @@ class ClassifierContainer:
                 raise ValueError(
                     "[ERROR] ``labels_map`` and ``load_path`` cannot be used together - please set one to ``None``."
                 )
-            
+
             # load object
             self.load(load_path=load_path, force_device=force_device)
-            
+
             # add any extra dataloaders
             if dataloaders:
                 for set_name, dataloader in dataloaders.items():
-                    self.dataloaders[set_name]=dataloader
-        
+                    self.dataloaders[set_name] = dataloader
+
         else:
             if model is None or labels_map is None:
                 raise ValueError(
@@ -144,12 +150,13 @@ class ClassifierContainer:
 
             self.labels_map = labels_map
 
-            # set up model and move to device  
+            # set up model and move to device
             print("[INFO] Initializing model.")
             if isinstance(model, nn.Module):
                 self.model = model.to(self.device)
                 self.input_size = input_size
                 self.is_inception = is_inception
+                self.context = context
             elif isinstance(model, str):
                 self._initialize_model(model, **kwargs)
 
@@ -170,15 +177,13 @@ class ClassifierContainer:
             )
 
             # add colors for printing/logging
-            self._print_colors()
+            self._set_up_print_colors()
 
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
-        
+
         for set_name, dataloader in self.dataloaders.items():
-            print(
-                f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.'
-            )
+            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
 
     def generate_layerwise_lrs(
         self,
@@ -208,27 +213,65 @@ class ClassifierContainer:
         list of dicts
             A list of dictionaries containing the parameters and learning
             rates for each layer.
+
+        Notes
+        -----
+        parameter_groups : bool, optional
+            When using context mode, whether to consider parameters belonging to the patch model and context model as separate groups.
+            If True, layers belonging to each group will be assigned the same learning rate.
+            Defaults to ``False``.
         """
-        if spacing.lower() == "linspace":
-            lrs = np.linspace(min_lr, max_lr, len(list(self.model.named_parameters())))
-        elif spacing.lower() in ["log", "geomspace"]:
-            lrs = np.geomspace(min_lr, max_lr, len(list(self.model.named_parameters())))
-        else:
+
+        if spacing.lower() not in ["linspace", "geomspace"]:
             raise NotImplementedError(
                 '[ERROR] ``spacing`` must be one of "linspace" or "geomspace"'
             )
 
-        params2optimize = [
-            {"params": params, "learning rate": lrs[i]}
-            for i, (_, params) in enumerate(self.model.named_parameters())
-        ]
+        if self.context:
+            params2optimize = []
+
+            for group in set(
+                tuple[0].split(".")[0] for tuple in [*self.model.named_parameters()]
+            ):
+                group_params = [
+                    params
+                    for (name, params) in self.model.named_parameters()
+                    if group in name
+                ]
+
+                if spacing.lower() == "linspace":
+                    lrs = np.linspace(min_lr, max_lr, len(group_params))
+                elif spacing.lower() in ["log", "geomspace"]:
+                    lrs = np.geomspace(min_lr, max_lr, len(group_params))
+
+                params2optimize.extend(
+                    [
+                        {"params": params, "learning rate": lr}
+                        for params, lr in zip(group_params, lrs)
+                    ]
+                )
+
+        else:
+            if spacing.lower() == "linspace":
+                lrs = np.linspace(
+                    min_lr, max_lr, len(list(self.model.named_parameters()))
+                )
+            elif spacing.lower() in ["log", "geomspace"]:
+                lrs = np.geomspace(
+                    min_lr, max_lr, len(list(self.model.named_parameters()))
+                )
+
+            params2optimize = [
+                {"params": params, "learning rate": lr}
+                for (_, params), lr in zip(self.model.named_parameters(), lrs)
+            ]
 
         return params2optimize
 
     def initialize_optimizer(
         self,
         optim_type: str | None = "adam",
-        params2optimize: str | Iterable | None = "infer",
+        params2optimize: str | Iterable | None = "default",
         optim_param_dict: dict | None = None,
         add_optim: bool | None = True,
     ) -> torch.optim.Optimizer | None:
@@ -242,9 +285,9 @@ class ClassifierContainer:
             The type of optimizer to use. Can be set to ``"adam"`` (default),
             ``"adamw"``, or ``"sgd"``.
         params2optimize : str or iterable, optional
-            The parameters to optimize. If set to ``"infer"``, all model
-            parameters that require gradients will be optimized, by default
-            ``"infer"``.
+            The parameters to optimize. If set to ``"default"``, all model
+            parameters that require gradients will be optimized.
+            Default is ``"default"``.
         optim_param_dict : dict, optional
             The parameters to pass to the optimizer constructor as a
             dictionary, by default ``{"lr": 1e-3}``.
@@ -276,7 +319,11 @@ class ClassifierContainer:
         """
         if optim_param_dict is None:
             optim_param_dict = {"lr": 0.001}
-        if params2optimize == "infer":
+        if params2optimize == "default":
+            if self.context:
+                raise ValueError(
+                    "[ERROR] When using context model, first call `params2optimize` cannot be set to `default`."
+                )
             params2optimize = filter(lambda p: p.requires_grad, self.model.parameters())
 
         if optim_type.lower() in ["adam"]:
@@ -612,7 +659,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
             The name of the dataset to run inference on, by default
             ``"infer"``.
         verbose : bool, optional
-           Whether to print verbose outputs, by default False.
+            Whether to print verbose outputs, by default False.
         print_info_batch_freq : int, optional
             The frequency of printouts, by default ``5``.
 
@@ -640,7 +687,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train_component_summary(self) -> None:
         """
-        Print a summary of the optimizer, criterion and trainable model
+        Print a summary of the optimizer, criterion, and trainable model
         components.
 
         Returns:
@@ -656,17 +703,17 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         print(str(self.criterion))
         print(divider)
         print("* Model:")
-        self.model_summary(only_trainable=True)
+        self.model_summary(trainable_col=True)
 
     def train(
         self,
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbose: bool | None = False,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
-        remove_after_load: bool | None = True,
+        remove_after_load: bool = True,
         print_info_batch_freq: int | None | None = 5,
     ) -> None:
         """
@@ -744,7 +791,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
         save_model_dir: str | None | None = "models",
-        verbose: bool | None = False,
+        verbose: bool = False,
         tensorboard_path: str | None | None = None,
         tmp_file_save_freq: int | None | None = 2,
         print_info_batch_freq: int | None | None = 5,
@@ -866,8 +913,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                 for batch_idx, (inputs, _labels, label_indices) in enumerate(
                     self.dataloaders[phase]
                 ):
-                    inputs = inputs.to(self.device)
-                    label_indices = label_indices.to(self.device)
+                    inputs = tuple(input.to(self.device) for input in inputs)
+                    label_indices = tuple(
+                        label_index.to(self.device) for label_index in label_indices
+                    )
 
                     if self.optimizer is None:
                         if phase.lower() in train_phase_names:
@@ -892,37 +941,49 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                                 raise ValueError(
                                     "[ERROR] Criterion is not yet defined.\n\n\
 Use ``add_criterion`` to define one."
-                                    )
+                                )
 
                             if self.is_inception and (
                                 phase.lower() in train_phase_names
                             ):
-                                outputs, aux_outputs = self.model(inputs)
-
-                                if not all(
-                                    isinstance(out, torch.Tensor)
-                                    for out in [outputs, aux_outputs]
-                                ):
-                                    try:
-                                        outputs = outputs.logits
-                                        aux_outputs = aux_outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
-
-                                loss1 = self.criterion(outputs, label_indices)
-                                loss2 = self.criterion(aux_outputs, label_indices)
-                                # XXX From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958 # noqa
-                                loss = loss1 + 0.4 * loss2
-
-                            else:
-                                outputs = self.model(inputs)
+                                outputs, aux_outputs = self.model(*inputs)
 
                                 if not isinstance(outputs, torch.Tensor):
-                                    try:
-                                        outputs = outputs.logits
-                                    except AttributeError as err:
-                                        raise AttributeError(err.message)
-                                loss = self.criterion(outputs, label_indices)
+                                    outputs = self._get_logits(outputs)
+                                if not isinstance(aux_outputs, torch.Tensor):
+                                    aux_outputs = self._get_logits(aux_outputs)
+
+                                loss1 = self.criterion(outputs, *label_indices)
+                                loss2 = self.criterion(aux_outputs, *label_indices)
+                                # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
+                                loss = loss1 + 0.4 * loss2
+
+                            elif self.context:
+                                (patch_outputs, context_outputs), outputs = self.model(
+                                    *inputs
+                                )
+
+                                if not isinstance(outputs, torch.Tensor):
+                                    outputs = self._get_logits(outputs)
+                                if not isinstance(patch_outputs, torch.Tensor):
+                                    patch_outputs = self._get_logits(patch_outputs)
+                                if not isinstance(context_outputs, torch.Tensor):
+                                    context_outputs = self._get_logits(context_outputs)
+
+                                loss1 = self.criterion(outputs, label_indices[0])
+                                loss2 = self.criterion(patch_outputs, label_indices[0])
+                                loss3 = self.criterion(outputs, label_indices[1])
+
+                                loss = loss1 + 0.4 * loss2 + 0.4 * loss3
+
+                            else:
+                                outputs = self.model(*inputs)
+
+                                if not isinstance(outputs, torch.Tensor):
+                                    outputs = self._get_logits(outputs)
+
+                                loss = self.criterion(outputs, *label_indices)
+                                print(loss, type(loss))
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -932,19 +993,21 @@ Use ``add_criterion`` to define one."
                                 self.optimizer.step()
 
                         # XXX (why multiply?)
-                        running_loss += loss.item() * inputs.size(0)
+                        running_loss += loss.item() * inputs[0].size(0)
 
                         # TQDM
                         # batch_loop.set_postfix(loss=loss.data)
                         # batch_loop.refresh()
                     else:
-                        outputs = self.model(inputs)
+                        if self.context:
+                            (patch_outputs, context_outputs), outputs = self.model(
+                                *inputs
+                            )
+                        else:
+                            outputs = self.model(*inputs)
 
                         if not isinstance(outputs, torch.Tensor):
-                            try:
-                                outputs = outputs.logits
-                            except AttributeError as err:
-                                raise AttributeError(err.message)
+                            self._get_logits(outputs)
 
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -952,7 +1015,7 @@ Use ``add_criterion`` to define one."
                         torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
                     )
                     running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
-                    running_orig_label_indices.extend(label_indices.cpu().tolist())
+                    running_orig_label_indices.extend(label_indices[0].cpu().tolist())
 
                     if batch_idx % print_info_batch_freq == 0:
                         curr_inp_counts = min(
@@ -967,12 +1030,12 @@ Use ``add_criterion`` to define one."
 
                         if phase.lower() in valid_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.__color_dred, epoch_msg)
+                            self.cprint("[INFO]", "dred", epoch_msg)
                         elif phase.lower() in train_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                         else:
-                            self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                            self.cprint("[INFO]", "dgreen", epoch_msg)
                     # --- END: one batch
 
                 # scheduler
@@ -1005,9 +1068,9 @@ Use ``add_criterion`` to define one."
                     epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", self.__color_dred, epoch_msg + "\n")
+                        self.cprint("[INFO]", "dred", epoch_msg + "\n")
                     else:
-                        self.cprint("[INFO]", self.__color_dgreen, epoch_msg)
+                        self.cprint("[INFO]", "dgreen", epoch_msg)
 
                 # labels/confidence
                 self.pred_conf.extend(running_pred_conf)
@@ -1023,7 +1086,11 @@ Use ``add_criterion`` to define one."
                 if phase.lower() in valid_phase_names:
                     if epoch % tmp_file_save_freq == 0:
                         tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
-                        print(self.__color_lgrey + tmp_str + self.__color_reset)
+                        print(
+                            self._print_colors["lgrey"]
+                            + tmp_str
+                            + self._print_colors["reset"]
+                        )
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
@@ -1053,7 +1120,15 @@ Use ``add_criterion`` to define one."
                 print(
                     f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
 [INFO] Path: {save_model_path}"
-                )  # noqa
+                )
+
+    @staticmethod
+    def _get_logits(out):
+        try:
+            out = out.logits
+        except AttributeError as err:
+            raise AttributeError(err.message)
+        return out
 
     def calculate_add_metrics(
         self,
@@ -1459,6 +1534,7 @@ Use ``add_criterion`` to define one."
         self.model = model_dw.to(self.device)
         self.input_size = input_size
         self.is_inception = is_inception
+        self.context = False
 
     def show_sample(
         self,
@@ -1527,12 +1603,13 @@ Output will show batch number {num_batches}.'
             inputs, labels, label_indices = next(dl_iter)
 
         # Make a grid from batch
-        out = torchvision.utils.make_grid(inputs)
-        self._imshow(
-            out,
-            title=f"{labels}\n{label_indices.tolist()}",
-            figsize=figsize,
-        )
+        for input in inputs:
+            out = torchvision.utils.make_grid(input)
+            self._imshow(
+                out,
+                title=f"{labels[0]}\n{label_indices[0].tolist()}",
+                figsize=figsize,
+            )
 
     def print_batch_info(self, set_name: str | None = "train") -> None:
         """
@@ -1655,16 +1732,18 @@ Output will show batch number {num_batches}.'
         plt.figure(figsize=figsize)
         with torch.no_grad():
             for inputs, _labels, label_indices in iter(self.dataloaders[set_name]):
-                inputs = inputs.to(self.device)
-                label_indices = label_indices.to(self.device)
+                inputs = tuple(input.to(self.device) for input in inputs)
+                label_indices = tuple(
+                    label_index.to(self.device) for label_index in label_indices
+                )
 
-                outputs = self.model(inputs)
+                if self.context:
+                    _, outputs = self.model(*inputs)
+                else:
+                    outputs = self.model(*inputs)
 
                 if not isinstance(outputs, torch.Tensor):
-                    try:
-                        outputs = outputs.logits
-                    except AttributeError as err:
-                        raise AttributeError(err.message)
+                    self._get_logits(outputs)
 
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
@@ -1693,7 +1772,7 @@ Output will show batch number {num_batches}.'
                     ax.axis("off")
                     ax.set_title(f"{label} | {conf_score:.3f}")
 
-                    inp = inputs.cpu().data[j].numpy().transpose((1, 2, 0))
+                    inp = inputs[0].cpu().data[j].numpy().transpose((1, 2, 0))
                     inp = np.clip(inp, 0, 1)
                     plt.imshow(inp)
 
@@ -1863,38 +1942,39 @@ Output will show batch number {num_batches}.'
         except:
             pass
 
-    def _print_colors(self):
+    def _set_up_print_colors(self):
         """Private function, setting color attributes on the object."""
+        self._print_colors = {}
+
         # color
-        self.__color_lgrey = "\033[1;90m"
-        self.__color_grey = "\033[90m"  # boring information
-        self.__color_yellow = "\033[93m"  # FYI
-        self.__color_orange = "\033[0;33m"  # Warning
+        self._print_colors["lgrey"] = "\033[1;90m"
+        self._print_colors["grey"] = "\033[90m"  # boring information
+        self._print_colors["yellow"] = "\033[93m"  # FYI
+        self._print_colors["orange"] = "\033[0;33m"  # Warning
 
-        self.__color_lred = "\033[1;31m"  # there is smoke
-        self.__color_red = "\033[91m"  # fire!
-        self.__color_dred = "\033[2;31m"  # Everything is on fire
+        self._print_colors["lred"] = "\033[1;31m"  # there is smoke
+        self._print_colors["red"] = "\033[91m"  # fire!
+        self._print_colors["dred"] = "\033[2;31m"  # Everything is on fire
 
-        self.__color_lblue = "\033[1;34m"
-        self.__color_blue = "\033[94m"
-        self.__color_dblue = "\033[2;34m"
+        self._print_colors["lblue"] = "\033[1;34m"
+        self._print_colors["blue"] = "\033[94m"
+        self._print_colors["dblue"] = "\033[2;34m"
 
-        self.__color_lgreen = "\033[1;32m"  # all is normal
-        self.__color_green = "\033[92m"  # something else
-        self.__color_dgreen = "\033[2;32m"  # even more interesting
+        self._print_colors["lgreen"] = "\033[1;32m"  # all is normal
+        self._print_colors["green"] = "\033[92m"  # something else
+        self._print_colors["dgreen"] = "\033[2;32m"  # even more interesting
 
-        self.__color_lmagenta = "\033[1;35m"
-        self.__color_magenta = "\033[95m"  # for title
-        self.__color_dmagenta = "\033[2;35m"
+        self._print_colors["lmagenta"] = "\033[1;35m"
+        self._print_colors["magenta"] = "\033[95m"  # for title
+        self._print_colors["dmagenta"] = "\033[2;35m"
 
-        self.__color_cyan = "\033[96m"  # system time
-        self.__color_white = "\033[97m"  # final time
+        self._print_colors["cyan"] = "\033[96m"  # system time
+        self._print_colors["white"] = "\033[97m"  # final time
+        self._print_colors["black"] = "\033[0;30m"
 
-        self.__color_black = "\033[0;30m"
-
-        self.__color_reset = "\033[0m"
-        self.__color_bold = "\033[1m"
-        self.__color_under = "\033[4m"
+        self._print_colors["reset"] = "\033[0m"
+        self._print_colors["bold"] = "\033[1m"
+        self._print_colors["under"] = "\033[4m"
 
     def _get_dtime(self) -> str:
         """
@@ -1929,10 +2009,15 @@ Output will show batch number {num_batches}.'
         host_name = socket.gethostname().split(".")[0][:10]
 
         print(
-            self.__color_green + self._get_dtime() + self.__color_reset,
-            self.__color_magenta + host_name + self.__color_reset,
-            self.__color_bold + self.__color_grey + type_info + self.__color_reset,
-            bc_color + text + self.__color_reset,
+            self._print_colors["green"]
+            + self._get_dtime()
+            + self._print_colors["reset"],
+            self._print_colors["magenta"] + host_name + self._print_colors["reset"],
+            self._print_colors["bold"]
+            + self._print_colors["grey"]
+            + type_info
+            + self._print_colors["reset"],
+            self._print_colors[bc_color] + text + self._print_colors["reset"],
         )
 
     def update_progress(

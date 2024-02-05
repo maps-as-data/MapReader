@@ -14,7 +14,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
 from torchvision.transforms import Compose
 
-from .datasets import PatchDataset
+from .datasets import PatchContextDataset, PatchDataset
 
 
 class AnnotationsLoader:
@@ -92,6 +92,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] ID column was previously "{self.id_col}, but will now be set to {id_col}.'
             )
+            self.id_col = id_col
 
         if not self.patch_paths_col:
             self.patch_paths_col = patch_paths_col
@@ -99,6 +100,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] Patch paths column was previously "{self.patch_paths_col}, but will now be set to {patch_paths_col}.'
             )
+            self.patch_paths_col = patch_paths_col
 
         if not self.label_col:
             self.label_col = label_col
@@ -106,6 +108,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] Label column was previously "{self.label_col}, but will now be set to {label_col}.'
             )
+            self.label_col = label_col
 
         if not isinstance(annotations, (str, pd.DataFrame)):
             raise ValueError(
@@ -115,6 +118,7 @@ class AnnotationsLoader:
             annotations = self._load_annotations_csv(
                 annotations, delimiter, scramble_frame, reset_index
             )
+        context_labels = True if "context_label" in annotations.columns else False
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
@@ -122,8 +126,9 @@ class AnnotationsLoader:
                 lambda x: os.path.join(abs_images_dir, x)
             )
 
+        cols = [self.label_col, "context_label"] if context_labels else [self.label_col]
         annotations = annotations.astype(
-            {self.label_col: str}
+            {col: str for col in cols}
         )  # ensure labels are interpreted as strings
 
         if append:
@@ -136,13 +141,21 @@ class AnnotationsLoader:
         )
 
         unique_labels = self.annotations[self.label_col].unique().tolist()
+        if context_labels:
+            unique_labels.extend(self.annotations["context_label"].unique().tolist())
+            unique_labels = list(set(unique_labels))
         self.unique_labels = unique_labels
-        self.annotations["label_index"] = self.annotations[self.label_col].apply(
-            self._get_label_index
-        )
 
         labels_map = {i: label for i, label in enumerate(unique_labels)}
         self.labels_map = labels_map
+
+        self.annotations["label_index"] = self.annotations[self.label_col].apply(
+            self._get_label_index
+        )
+        if context_labels:
+            self.annotations["context_label_index"] = self.annotations[
+                "context_label"
+            ].apply(self._get_label_index)
 
         print(self)
 
@@ -506,6 +519,7 @@ Please check your image paths and update them if necessary.'
         train_transform: str | (Compose | Callable) | None = "train",
         val_transform: str | (Compose | Callable) | None = "val",
         test_transform: str | (Compose | Callable) | None = "test",
+        context_datasets: bool = False,
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -535,6 +549,8 @@ Please check your image paths and update them if necessary.'
             The transform to use on the test dataset images.
             Options are "train", "test" or "val" or, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose).
             By default "test".
+        context_datasets: bool, optional
+            Whether to create context datasets or not. By default False.
 
 
         Raises
@@ -599,6 +615,39 @@ Please check your image paths and update them if necessary.'
             df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
 
+        if context_datasets:
+            datasets = self.create_patch_context_datasets(
+                train_transform,
+                val_transform,
+                test_transform,
+                df_train,
+                df_val,
+                df_test,
+            )
+        else:
+            datasets = self.create_patch_datasets(
+                train_transform,
+                val_transform,
+                test_transform,
+                df_train,
+                df_val,
+                df_test,
+            )
+
+        dataset_sizes = {
+            set_name: len(datasets[set_name]) for set_name in datasets.keys()
+        }
+
+        self.datasets = datasets
+        self.dataset_sizes = dataset_sizes
+
+        print("[INFO] Number of annotations in each set:")
+        for set_name in datasets.keys():
+            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
+
+    def create_patch_datasets(
+        self, train_transform, val_transform, test_transform, df_train, df_val, df_test
+    ):
         train_dataset = PatchDataset(
             df_train,
             train_transform,
@@ -630,16 +679,55 @@ Please check your image paths and update them if necessary.'
         else:
             datasets = {"train": train_dataset, "val": val_dataset}
 
-        dataset_sizes = {
-            set_name: len(datasets[set_name]) for set_name in datasets.keys()
-        }
+        return datasets
 
-        self.datasets = datasets
-        self.dataset_sizes = dataset_sizes
+    def create_patch_context_datasets(
+        self, train_transform, val_transform, test_transform, df_train, df_val, df_test
+    ):
+        train_dataset = PatchContextDataset(
+            df_train,
+            train_transform,
+            train_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
+            context_label_col="context_label",
+            context_label_index_col="context_label_index",
+            create_context=True,
+        )
+        val_dataset = PatchContextDataset(
+            df_val,
+            val_transform,
+            val_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
+            context_label_col="context_label",
+            context_label_index_col="context_label_index",
+            create_context=True,
+        )
+        if df_test is not None:
+            test_dataset = PatchContextDataset(
+                df_test,
+                test_transform,
+                test_transform,
+                patch_paths_col=self.patch_paths_col,
+                label_col=self.label_col,
+                label_index_col="label_index",
+                context_label_col="context_label",
+                context_label_index_col="context_label_index",
+                create_context=True,
+            )
+            datasets = {
+                "train": train_dataset,
+                "val": val_dataset,
+                "test": test_dataset,
+            }
 
-        print("[INFO] Number of annotations in each set:")
-        for set_name in datasets.keys():
-            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
+        else:
+            datasets = {"train": train_dataset, "val": val_dataset}
+
+        return datasets
 
     def create_dataloaders(
         self,

@@ -134,7 +134,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a csv or a pandas DataFrame."
                 )
-            self._eval_df(patch_df)  # eval tuples/lists in df
+            patch_df = self._eval_df(patch_df)  # eval tuples/lists in df
 
         if parent_df is not None:
             if isinstance(parent_df, str):
@@ -150,7 +150,7 @@ class Annotator(pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a csv or a pandas DataFrame."
                 )
-            self._eval_df(parent_df)  # eval tuples/lists in df
+            parent_df = self._eval_df(parent_df)  # eval tuples/lists in df
 
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
@@ -183,7 +183,6 @@ class Annotator(pd.DataFrame):
         # Add label column if not present
         if label_col not in patch_df.columns:
             patch_df[label_col] = None
-        patch_df["changed"] = False
 
         # Check for image paths column
         if patch_paths_col not in patch_df.columns:
@@ -214,47 +213,26 @@ class Annotator(pd.DataFrame):
         # Ensure unique values in list
         labels = sorted(set(labels), key=labels.index)
 
-        # Test for existing file
+        # Test for existing patch annotation file
         if os.path.exists(annotations_file):
-            print(f"[INFO] Loading existing annotations for {username}.")
-            existing_annotations = pd.read_csv(
-                annotations_file, index_col=0, sep=delimiter
+            print("[INFO] Loading existing patch annotations.")
+            patch_df = self._load_annotations(
+                patch_df=patch_df,
+                annotations_file=annotations_file,
+                labels=labels,
+                col=label_col,
+                delimiter=delimiter,
             )
 
-            if label_col not in existing_annotations.columns:
-                raise ValueError(
-                    f"[ERROR] Your existing annotations do not have the label column: {label_col}."
-                )
-
-            print(existing_annotations[label_col].dtype)
-
-            if existing_annotations[label_col].dtype == int:
-                # convert label indices (ints) to labels (strings)
-                # this is to convert old annotations format to new annotations format
-                existing_annotations[label_col] = existing_annotations[label_col].apply(
-                    lambda x: labels[x]
-                )
-
-            patch_df = patch_df.join(
-                existing_annotations, how="left", lsuffix="_x", rsuffix="_y"
-            )
-            patch_df[label_col] = patch_df["label_y"].fillna(patch_df[f"{label_col}_x"])
-            patch_df = patch_df.drop(
-                columns=[
-                    f"{label_col}_x",
-                    f"{label_col}_y",
-                ]
-            )
-            patch_df["changed"] = patch_df[label_col].apply(
-                lambda x: True if x else False
-            )
-
-            patch_df[patch_paths_col] = patch_df[f"{patch_paths_col}_x"]
-            patch_df = patch_df.drop(
-                columns=[
-                    f"{patch_paths_col}_x",
-                    f"{patch_paths_col}_y",
-                ]
+        # Test for existing context annotation file
+        if os.path.exists(f"{annotations_file[:-4]}_context.csv"):
+            print("[INFO] Loading existing context annotations.")
+            patch_df = self._load_annotations(
+                patch_df=patch_df,
+                annotations_file=f"{annotations_file[:-4]}_context.csv",
+                labels=labels,
+                col="context_label",
+                delimiter=delimiter,
             )
 
         # initiate as a DataFrame
@@ -283,12 +261,11 @@ class Annotator(pd.DataFrame):
         self.auto_save = auto_save
         self.username = username
         self.task_name = task_name
+        self._annotate_context = False
 
         # set up for the annotator
         self._min_values = min_values or {}
         self._max_values = max_values or {}
-
-        self.patch_width, self.patch_height = self.get_patch_size()
 
         # Create annotations_dir
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
@@ -324,7 +301,7 @@ class Annotator(pd.DataFrame):
         self._setup_box()
 
         # Setup queue
-        self._queue = self.get_queue()
+        self._queue = []
 
     @staticmethod
     def _load_dataframes(
@@ -373,32 +350,61 @@ class Annotator(pd.DataFrame):
 
         return parent_df, patch_df
 
-    def _eval_df(self, df):
+    @staticmethod
+    def _eval_df(df):
         for col in df.columns:
             try:
                 df[col] = df[col].apply(literal_eval)
             except (ValueError, TypeError, SyntaxError):
                 pass
+        return df
 
-    def get_patch_size(self):
+    @staticmethod
+    def _load_annotations(
+        patch_df: pd.DataFrame,
+        annotations_file: str,
+        labels: list,
+        col: str,
+        delimiter: str,
+    ):
+        """Load existing annotations from file.
+
+        Parameters
+        ----------
+        patch_df : pd.DataFrame
+            Current patch dataframe.
+        annotations_file : str
+            Name of the annotations file
+        labels : list
+            List of labels for annotation.
+        col : str
+            Name of the column in which labels are stored in annotations file
+        delimiter : str
+            Delimiter used in CSV files
+
         """
-        Calculate and return the width and height of the patches based on the
-        first patch of the DataFrame, assuming the same shape of patches
-        across the frame.
+        existing_annotations = pd.read_csv(annotations_file, index_col=0, sep=delimiter)
 
-        Returns
-        -------
-        Tuple[int, int]
-            Width and height of the patches.
-        """
-        patch_width = (
-            self.sort_values("min_x").max_x[0] - self.sort_values("min_x").min_x[0]
-        )
-        patch_height = (
-            self.sort_values("min_y").max_y[0] - self.sort_values("min_y").min_y[0]
-        )
+        if col not in existing_annotations.columns:
+            raise ValueError(
+                f"[ERROR] Your existing annotations do not have the label column: {col}."
+            )
 
-        return patch_width, patch_height
+        if existing_annotations[col].dtype == int:
+            # convert label indices (ints) to labels (strings)
+            # this is to convert old annotations format to new annotations format
+            existing_annotations[col] = existing_annotations[col].apply(
+                lambda x: labels[x]
+            )
+
+        patch_df = patch_df.join(
+            existing_annotations[col], how="left", rsuffix="_existing"
+        )
+        if f"{col}_existing" in patch_df.columns:
+            patch_df[col].fillna(patch_df[f"{col}_existing"], inplace=True)
+            patch_df.drop(columns=f"{col}_existing", inplace=True)
+
+        return patch_df
 
     def _setup_buttons(self) -> None:
         """
@@ -450,7 +456,7 @@ class Annotator(pd.DataFrame):
         self, as_type: str | None = "list"
     ) -> list[int] | (pd.Index | pd.Series):
         """
-        Gets the indices of rows which are legible for annotation.
+        Gets the indices of rows which are eligible for annotation.
 
         Parameters
         ----------
@@ -466,8 +472,8 @@ class Annotator(pd.DataFrame):
             pd.Index object, or a pd.Series of legible rows.
         """
 
-        def check_legibility(row):
-            if row.label is not None:
+        def check_eligibility(row):
+            if row.label not in [np.NaN, None]:
                 return False
 
             test = [
@@ -479,18 +485,48 @@ class Annotator(pd.DataFrame):
 
             return True
 
-        test = self.copy()
-        test["eligible"] = test.apply(check_legibility, axis=1)
-        test = test[
-            ["eligible"] + [col for col in test.columns if not col == "eligible"]
-        ]
+        queue_df = self.copy(deep=True)
+        queue_df = queue_df[queue_df[self.label_col].isna()]  # only unlabelled
+        queue_df["eligible"] = queue_df.apply(check_eligibility, axis=1)
+        queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
 
-        indices = test[test.eligible].index
+        indices = queue_df.index
         if as_type == "list":
             return list(indices)
         if as_type == "index":
             return indices
-        return test[test.eligible]
+        return queue_df
+
+    def get_context_queue(
+        self, as_type: str | None = "list"
+    ) -> list[int] | (pd.Index | pd.Series):
+        """
+        Gets the indices of rows which are eligible for annotation at the context-level.
+
+        Parameters
+        ----------
+        as_type : str, optional
+            The format in which to return the indices. Options: "list",
+            "index". Default is "list". If any other value is provided, it
+            returns a pandas.Series.
+
+        Returns
+        -------
+        List[int] or pandas.Index or pandas.Series
+            Depending on "as_type", returns either a list of indices, a
+            pd.Index object, or a pd.Series of legible rows.
+        """
+
+        queue_df = self.copy(deep=True)
+        queue_df = queue_df[queue_df["context_label"].isna()]  # only unlabelled
+        queue_df = queue_df[queue_df[self.label_col].notna()].sample(frac=1)  # shuffle
+
+        indices = queue_df.index
+        if as_type == "list":
+            return list(indices)
+        if as_type == "index":
+            return indices
+        return queue_df
 
     def get_context(self):
         """
@@ -507,16 +543,27 @@ class Annotator(pd.DataFrame):
             # Resize the image
             im = Image.open(image_path)
 
+            # Never dim when annotating context
+            if self._annotate_context:
+                dim = False
+
             # Dim the image
-            if dim is True or dim == "True":
+            if dim in [True, "True"]:
                 im_array = np.array(im)
                 im_array = 256 - (256 - im_array) * 0.4  # lighten image
                 im = Image.fromarray(im_array.astype(np.uint8))
             return im
 
-        def get_empty_square():
+        def get_empty_square(patch_size: tuple[int, int]):
+            """Generates an empty square image.
+
+            Parameters
+            ----------
+            patch_size : tuple[int, int]
+                Patch size in pixels as tuple of `(width, height)`.
+            """
             im = Image.new(
-                size=(self.patch_width, self.patch_height),
+                size=patch_size,
                 mode="RGB",
                 color="white",
             )
@@ -531,17 +578,26 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        x = self.at[ix, "min_x"]
-        y = self.at[ix, "min_y"]
-        current_parent = self.at[ix, "parent_id"]
+        min_x = self.at[ix, "min_x"]
+        min_y = self.at[ix, "min_y"]
 
+        # cannot assume all patches are same size
+        try:
+            height, width, _ = self.at[ix, "shape"]
+        except KeyError:
+            im_path = self.at[ix, self.patch_paths_col]
+            im = Image.open(im_path)
+            height = im.height
+            width = im.width
+
+        current_parent = self.at[ix, "parent_id"]
         parent_frame = self.query(f"parent_id=='{current_parent}'")
 
         deltas = list(range(-self.surrounding, self.surrounding + 1))
         y_and_x = list(
             product(
-                [y + y_delta * self.patch_height for y_delta in deltas],
-                [x + x_delta * self.patch_width for x_delta in deltas],
+                [min_y + y_delta * height for y_delta in deltas],
+                [min_x + x_delta * width for x_delta in deltas],
             )
         )
         queries = [f"min_x == {x} & min_y == {y}" for y, x in y_and_x]
@@ -562,12 +618,15 @@ class Annotator(pd.DataFrame):
         # split them into rows
         per_row = len(deltas)
         images = [
-            [get_path(x[0], dim=x[1]) if x[0] else get_empty_square() for x in lst]
+            [
+                get_path(x[0], dim=x[1]) if x[0] else get_empty_square((width, height))
+                for x in lst
+            ]
             for lst in array_split(image_list, per_row)
         ]
 
-        total_width = (2 * self.surrounding + 1) * self.patch_width
-        total_height = (2 * self.surrounding + 1) * self.patch_height
+        total_width = (2 * self.surrounding + 1) * width
+        total_height = (2 * self.surrounding + 1) * height
 
         context_image = Image.new("RGB", (total_width, total_height))
 
@@ -576,8 +635,8 @@ class Annotator(pd.DataFrame):
             x_offset = 0
             for image in row:
                 context_image.paste(image, (x_offset, y_offset))
-                x_offset += self.patch_width
-            y_offset += self.patch_height
+                x_offset += width
+            y_offset += height
 
         if self.resize_to is not None:
             context_image = ImageOps.contain(
@@ -600,7 +659,7 @@ class Annotator(pd.DataFrame):
         resize_to: int | None = None,
         max_size: int | None = None,
     ) -> None:
-        """
+        """Annotate at the patch-level of the current patch.
         Renders the annotation interface for the first image.
 
         Parameters
@@ -624,14 +683,98 @@ class Annotator(pd.DataFrame):
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
 
-        Returns
-        -------
-        None
+        Notes
+        -----
+        This method is a wrapper for the ``_annotate`` method.
         """
+
+        self._annotate_context = False
+
         if min_values is not None:
             self._min_values = min_values
         if max_values is not None:
             self._max_values = max_values
+
+        # re-set up queue using new min/max values
+        self._queue = self.get_queue()
+
+        self._annotate(
+            show_context=show_context,
+            surrounding=surrounding,
+            resize_to=resize_to,
+            max_size=max_size,
+        )
+
+    def annotate_context(
+        self,
+        resize_to: int | None = None,
+        max_size: int | None = None,
+    ) -> None:
+        """Annotate at the context-level of the current patch.
+        Renders the annotation interface for the first image plus surrounding context.
+
+        Parameters
+        ----------
+        min_values : dict or None, optional
+            Minimum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None.
+        max_values : dict or None, optional
+            Maximum values for each property to filter images for annotation.
+            It should be provided as a dictionary consisting of column names
+            (keys) and minimum values as floating point values (values).
+            Default is None
+        surrounding : int or None, optional
+            The number of surrounding images to show for context. Default: 1.
+        max_size : int or None, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
+
+        Notes
+        -----
+        This method is a wrapper for the ``_annotate`` method.
+        """
+        self._annotate_context = True
+
+        if "context_label" not in self.columns:
+            self["context_label"] = None
+
+        # re-set up queue for context images
+        self._queue = self.get_context_queue()
+
+        self._annotate(
+            show_context=True,
+            surrounding=1,
+            resize_to=resize_to,
+            max_size=max_size,
+        )
+
+    def _annotate(
+        self,
+        show_context: bool | None = None,
+        surrounding: int | None = None,
+        resize_to: int | None = None,
+        max_size: int | None = None,
+    ):
+        """
+        Renders the annotation interface for the first image.
+
+        Parameters
+        ----------
+        show_context : bool or None, optional
+            Whether or not to display the surrounding context for each image.
+            Default is None.
+        surrounding : int or None, optional
+            The number of surrounding images to show for context. Default: 1.
+        max_size : int or None, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
+
+        Returns
+        -------
+        None
+        """
 
         self.current_index = -1
         for button in self._buttons:
@@ -645,9 +788,6 @@ class Annotator(pd.DataFrame):
             self.resize_to = resize_to
         if max_size is not None:
             self.max_size = max_size
-
-        # re-set up queue
-        self._queue = self.get_queue()
 
         self.out = widgets.Output(layout=_CENTER_LAYOUT)
         display(self.box)
@@ -667,21 +807,12 @@ class Annotator(pd.DataFrame):
         Tuple[int, int, str]
             Previous index, current index, and path of the current image.
         """
-        if not len(self._queue):
+        if self.current_index == len(self._queue):
             self.render_complete()
             return
 
-        if isinstance(self.current_index, type(None)) or self.current_index == -1:
-            self.current_index = 0
-        else:
-            current_index = self.current_index + 1
-
-            try:
-                self._queue[current_index]
-                self.previous_index = self.current_index
-                self.current_index = current_index
-            except IndexError:
-                pass
+        self.previous_index = self.current_index
+        self.current_index += 1
 
         ix = self._queue[self.current_index]
 
@@ -699,21 +830,13 @@ class Annotator(pd.DataFrame):
         Tuple[int, int, str]
             Previous index, current index, and path of the current image.
         """
-        if not len(self._queue):
+        if self.current_index == len(self._queue):
             self.render_complete()
             return
 
-        current_index = self.current_index - 1
-
-        if current_index < 0:
-            current_index = 0
-
-        try:
-            self._queue[current_index]
-            self.previous_index = current_index - 1
-            self.current_index = current_index
-        except IndexError:
-            pass
+        if self.current_index > 0:
+            self.previous_index = self.current_index
+            self.current_index -= 1
 
         ix = self._queue[self.current_index]
 
@@ -738,7 +861,6 @@ class Annotator(pd.DataFrame):
             self.render_complete()
             return
 
-        # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
 
         # render buttons
@@ -750,7 +872,8 @@ class Annotator(pd.DataFrame):
                 # disable skip button when at last example
                 button.disabled = self.current_index >= len(self) - 1
             elif button.description != "submit":
-                if self.at[ix, self.label_col] == button.description:
+                col = "context_label" if self._annotate_context else self.label_col
+                if self.at[ix, col] == button.description:
                     button.icon = "check"
                 else:
                     button.icon = ""
@@ -791,13 +914,13 @@ class Annotator(pd.DataFrame):
                 )
             )
 
-    def get_patch_image(self, ix: int) -> Image:
+    def get_patch_image(self, ix) -> Image:
         """
         Returns the image at the given index.
 
         Parameters
         ----------
-        ix : int
+        ix : int | str
             The index of the image in the dataframe.
 
         Returns
@@ -831,8 +954,10 @@ class Annotator(pd.DataFrame):
         """
         # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
-        self.at[ix, self.label_col] = annotation
-        self.at[ix, "changed"] = True
+        if self._annotate_context:
+            self.at[ix, "context_label"] = annotation
+        else:
+            self.at[ix, self.label_col] = annotation
         if self.auto_save:
             self._auto_save()
         self._next_example()
@@ -845,11 +970,16 @@ class Annotator(pd.DataFrame):
         -------
         None
         """
-        self.get_labelled_data(sort=True).to_csv(self.annotations_file)
+        if self._annotate_context:
+            annotations_file = f"{self.annotations_file[:-4]}_context.csv"
+            self.get_labelled_data(sort=True, context=True).to_csv(annotations_file)
+        else:
+            self.get_labelled_data(sort=True).to_csv(self.annotations_file)
 
     def get_labelled_data(
         self,
         sort: bool = True,
+        context: bool = False,
         index_labels: bool = False,
         include_paths: bool = True,
     ) -> pd.DataFrame:
@@ -861,6 +991,8 @@ class Annotator(pd.DataFrame):
         sort : bool, optional
             Whether to sort the dataframe by the order of the images in the
             input data, by default True
+        context : bool, optional
+            Whether to save the context annotations or not, by default False
         index_labels : bool, optional
             Whether to return the label's index number (in the labels list
             provided in setting up the instance) or the human-readable label
@@ -875,27 +1007,29 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
+        if context:
+            filtered_df = self[self["context_label"].notna()].copy(deep=True)
+        else:
+            filtered_df = self[self[self.label_col].notna()].copy(deep=True)
+
+        # force image_id to be index (incase of integer index)
+        # TODO: Force all indices to be integers so this is not needed
+        if "image_id" in filtered_df.columns:
+            filtered_df.set_index("image_id", drop=True, inplace=True)
+
+        if sort:
+            filtered_df.sort_values(by=["parent_id", "min_x", "min_y"], inplace=True)
+
         if index_labels:
-            col1 = self.filtered[self.label_col].apply(lambda x: self._labels.index(x))
-        else:
-            col1 = self.filtered[self.label_col]
-
-        if include_paths:
-            col2 = self.filtered[self.patch_paths_col]
-            df = pd.DataFrame(
-                {self.patch_paths_col: col2, self.label_col: col1},
-                index=pd.Index(col1.index, name="image_id"),
+            filtered_df[self.label_col] = filtered_df[self.label_col].apply(
+                lambda x: self._labels.index(x)
             )
-        else:
-            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
-        if not sort:
-            return df
+            if context:
+                filtered_df["context_label"] = filtered_df["context_label"].apply(
+                    lambda x: self._labels.index(x)
+                )
 
-        df["sort_value"] = df.index.to_list()
-        df["sort_value"] = df["sort_value"].apply(
-            lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
-        )
-        return df.sort_values("sort_value").drop(columns=["sort_value"])
+        return filtered_df
 
     @property
     def filtered(self) -> pd.DataFrame:
