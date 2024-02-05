@@ -30,8 +30,8 @@ Pre-requisites
 Regardless of how you will be contributing to MapReader, you will need to:
 
 1. Ensure you have a `GitHub account <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_ set up.
-2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our `GitHub guide <https://mapreader.readthedocs.io/en/latest/Contribution-guide/GitHub-guide.html>`__ before continuing.
-3. Set up a virtual python environment and install MapReader (as per our `Installation instructions <https://mapreader.readthedocs.io/en/latest/Install.html>`_).
+2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our :doc:`GitHub guide <Contribution-guide/GitHub-guide>` before continuing.
+3. Set up a virtual python environment and install MapReader (as per our :doc:`Installation instructions </Install>`).
 4. Have read this guide.
 
 Ways to contribute
@@ -39,9 +39,9 @@ Ways to contribute
 
 We welcome contributions from community members of all skill levels and so have written three different guides for different types of contributions:
 
-- `Write a tutorial or worked example <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Worked-examples.html>`_ - For those who are familiar with using MapReader and would like to showcase an example of how to use it, but are not comfortable with using Sphinx to write documentation or writing code.
-- `Add to or update the MapReader documentation <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Documentation.html>`_ - For those who are familiar with using MapReader and either already comfortable with using Sphinx to write documentation or feel able to have a go at to learning it.
-- `Add to or update the MapReader code <https://mapreader.readthedocs.io/en/latest/Contribution-guide/Code.html>`_ - For those who are familiar with using MapReader and either already comfortable with writing code in Python or feel able to have a go at learning it.
+- :doc:`Write a tutorial or worked example </Contribution-guide/Worked-examples>` - For those who are familiar with using MapReader and would like to showcase an example of how to use it, but are not comfortable with using Sphinx to write documentation or writing code.
+- :doc:`Add to or update the MapReader documentation </Contribution-guide/Documentation>` - For those who are familiar with using MapReader and either already comfortable with using Sphinx to write documentation or feel able to have a go at to learning it.
+- :doc:`Add to or update the MapReader code </Contribution-guide/Code>` - For those who are familiar with using MapReader and either already comfortable with writing code in Python or feel able to have a go at learning it.
 
 How to add yourself as a contributor
 ------------------------------------

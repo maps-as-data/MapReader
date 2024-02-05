@@ -28,7 +28,7 @@ or
 
     my_files = loader("./path/to/files/", file_ext="png")
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our :doc:`Input Guidance </Input-guidance>`:
 
 .. code-block:: python
 
@@ -65,9 +65,9 @@ Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, 
 
     my_files.add_metadata(metadata="./path/to/metadata.csv")
 
-.. note:: Specific guidance on preparing your metadata file/dataframe can be found on our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__ page.
+.. note:: Specific guidance on preparing your metadata file/dataframe can be found on our :doc:`Input Guidance </Input-guidance>` page.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance <https://mapreader.readthedocs.io/en/latest/Input-guidance.html>`__:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance </Input-guidance>`:
 
 .. code-block:: python
 
@@ -80,15 +80,17 @@ For example, if you have downloaded your maps using the default settings of our 
     Other arguments you may want to specify when adding metadata to your images include:
 
     - ``index_col`` - By default, this is set to ``0`` so the first column of your csv/excel spreadsheet will be used as the index column when creating a pandas dataframe. If you would like to use a different column you can specify ``index_col``.
-    - ``columns`` - By default, the ``.add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
+    - ``columns`` - By default, the ``add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
     - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
     - ``delimiter`` - By default, this is set to ``|``. If your csv file is delimited using a different delimiter you should specify the delimiter argument.
 
 
+.. note:: In MapReader versions < 1.0.7, coordinates were miscalculated. To correct this, use the ``add_coords_from_grid_bb()`` method to calculate new, correct coordinates.
+
 Patchify
 ----------
 
-Once you've loaded in all your data, you'll then need to `'patchify' <https://mapreader.readthedocs.io/en/latest/About.html>`__ your images.
+Once you've loaded in all your data, you'll then need to :doc:`'patchify' </About>` your images.
 
 Creating patches from your parent images is a core intellectual and technical task within MapReader.
 Choosing the size of your patches (and whether you want to measure them in pixels or in meters) is an important decision and will depend upon the research question you are trying to answer:
@@ -184,7 +186,7 @@ As above, you can use the ``path_save`` argument to change where these patches a
     Other arguments you may want to specify when patchifying your images include:
 
     - ``square_cuts`` - By default, this is set to ``False``. Thus, if your ``patch_size`` is not a factor of your image size (e.g. if you are trying to slice a 100x100 pixel image into 8x8 pixel patches), you will end up with some rectangular patches at the edges of your image. If you set ``square_cuts=True``, then all your patches will be square, however there will be some overlap between edge patches. Using ``square_cuts=True`` is useful if you need square images for model training, and don't want to warp your rectangular images by resizing them at a later stage.
-    - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``.patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
+    - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
     - ``rewrite`` - By default, this is set to ``False`` so that if your patches already exist they are not overwritten. Setting it to ``True`` (by specifying ``rewrite=True``) will mean already existing patches are recreated and overwritten.
 
 If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), use:
@@ -193,10 +195,12 @@ If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), 
 
     my_files.save_patches_as_geotiffs()
 
-This will save each patch in your ``MapImages`` object as a ``.geotiff`` file in your patches directory.
+This will save each patch in your ``MapImages`` object as a georeferenced ``.tif`` file in your patches directory.
 
-After running the ``.patchify_all()`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
-To view an iterable list of these, you can use the ``.list_parents()`` and ``.list_patches()`` methods:
+.. note:: MapReader also has a ``save_parents_as_geotiff()`` method for saving parent images as geotiffs.
+
+After running the ``patchify_all()`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
+To view an iterable list of these, you can use the ``list_parents()`` and ``list_patches()`` methods:
 
 .. code-block:: python
 
@@ -229,7 +233,7 @@ or
 
 .. note:: These parent and patch dataframes **will not** automatically update so you will want to run this command again if you add new information into your ``MapImages`` object.
 
-At any point, you can also save these dataframes by passing the ``save`` argument to the ``.convert_images()`` method:
+At any point, you can also save these dataframes by passing the ``save`` argument to the ``convert_images()`` method:
 
 .. code-block:: python
 
@@ -280,7 +284,7 @@ If, however, you want to see a random sample of your patches use the ``tree_leve
 
 
 It can also be helpful to see your patches in the context of their parent image.
-To do this use the ``.show()`` method.
+To do this use the ``show()`` method.
 
 e.g. :
 
@@ -312,7 +316,7 @@ This will show you your chosen patches, by default highlighted with red borders,
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Further usage of the ``.show()`` method is detailed in :ref:`Further_analysis`.
+    Further usage of the ``show()`` method is detailed in :ref:`Further_analysis`.
     Please head there for guidance on advanced usage.
 
 You may also want to see all the patches created from one of your parent images.
@@ -330,7 +334,7 @@ This can be done using:
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Further usage of the ``.show_parent()`` method is detailed in :ref:`Further_analysis`.
+    Further usage of the ``show_parent()`` method is detailed in :ref:`Further_analysis`.
     Please head there for guidance on advanced usage.
 
 .. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)
@@ -341,13 +345,13 @@ Further analysis/visualization (optional)
 -------------------------------------------
 
 If you have loaded geographic coordinates into your ``MapImages`` object, you may want to calculate the central coordinates of your patches.
-The ``.add_center_coord()`` method can used to do this:
+The ``add_center_coord()`` method can used to do this:
 
 .. code-block:: python
 
     my_files.add_center_coord()
 
-You can then rerun the ``.convert_images()`` method to see your results.
+You can then rerun the ``convert_images()`` method to see your results.
 
 i.e.:
 
@@ -358,15 +362,15 @@ i.e.:
 
 You will see that center coordinates of each patch have been added to your patch dataframe.
 
-The ``.calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
+The ``calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
 
 .. code-block:: python
 
     my_files.calc_pixel_stats()
 
-After rerunning the ``.convert_images()`` method (as above), you will see that mean and standard pixel intensities have been added to your patch dataframe.
+After rerunning the ``convert_images()`` method (as above), you will see that mean and standard pixel intensities have been added to your patch dataframe.
 
-The ``.show()`` and ``.show_parent()`` methods can be used to plot these values ontop of your patches.
+The ``show()`` and ``show_parent()`` methods can be used to plot these values ontop of your patches.
 This is done by specifying the ``column_to_plot`` argument.
 
 e.g. to view "mean_pixel_R" on your patches:
@@ -394,12 +398,12 @@ e.g. to view "mean_pixel_R" on your patches:
 .. image:: ../figures/show_par_RGB_0.5.png
     :width: 400px
 
-.. note:: The ``column_to_plot`` argument can also be used with the ``.show()`` method.
+.. note:: The ``column_to_plot`` argument can also be used with the ``show()`` method.
 
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other arguments you may want to specify when showing your images (for both the ``.show()`` and ``.show_parent()`` methods):
+    Other arguments you may want to specify when showing your images (for both the ``show()`` and ``show_parent()`` methods):
 
     - ``plot_parent`` - By default, this is set to ``True`` so that the parent image is shown. If you would like to remove the parent image, e.g. if you are plotting column values, you can set ``plot_parent=False``. This should speed up the code for plotting.
     - ``patch_border`` - By default, this is set to ``True`` so that borders are plotted around each patch. Setting ``patch_border`` to ``False`` (by specifying ``patch_border=False``) will stop patch borders being shown.
