@@ -189,6 +189,31 @@ e.g. To sort your patches by the mean red pixel intensity in each patch but only
         max_values={"mean_pixel_B": 0.9},
     )
 
+Filtering
+~~~~~~~~~~
+
+You can use the ``filter_for`` argument to filter your patches based on a column in your patch DataFrame.
+This can be useful if you want to focus on a particular subset of your patches, or, to look at predictions made by a model.
+
+e.g. to filter for patches that have been predicted to be "railspace":
+
+.. code-block:: python
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations"m
+        task_name="railspace",
+        labels=["no_railspace", "railspace"],
+        username="rosie",
+        filter_for={"predicted_label":"railspace"},
+    )
+
+This will only show you patches that have been predicted to be "railspace".
+
+You can filter for any column in your patch DataFrame, and you can filter for multiple values by passing multiple key-value pairs as your ``filter_for`` dictionary.
+
 .. _Save_annotations:
 
 Save your annotations
