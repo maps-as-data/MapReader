@@ -2,8 +2,10 @@ Post-process
 =============
 
 MapReader post-processing's sub-package currently contains one method for post-processing the predictions from your model based on the idea that features such as railways, roads, coastlines, etc. are continuous and so patches with these labels should be found near to other patches also with these labels.
-
 For example, if a patch is predicted to be a railspace, but is surrounded by patches predicted to be non-railspace, then it is likely that the railspace patch is a false positive.
+
+To implement this, for a given patch, the code checks whether any of the 8 surrounding patches have the same label (e.g. 'railspace') and, if not, assumes the current patch's predicted label to be a false positive.
+The user can then choose how to relabel the patch (e.g. 'railspace' -> 'no').
 
 To run the post-processing code, you will need to have saved the predictions from your model in the format expected for the post-processing code.
 See the :doc:`/User-guide/Classify/Classify` docs for more on this.
