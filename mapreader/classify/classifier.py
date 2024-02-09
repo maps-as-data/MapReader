@@ -52,6 +52,7 @@ class ClassifierContainer:
 
             - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
+
         labels_map: Dict or None
             A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
             Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
