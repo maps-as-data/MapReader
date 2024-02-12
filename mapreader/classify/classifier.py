@@ -52,6 +52,7 @@ class ClassifierContainer:
 
             - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
             - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
+
         labels_map: Dict or None
             A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
             Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
@@ -1760,6 +1761,27 @@ Output will show batch number {num_batches}.'
             mymodel.state_dict(),
             os.path.join(par_name, f"model_state_dict_{base_name}"),
         )
+
+    def save_predictions(
+        self,
+        set_name: str,
+        save_path: str | None = None,
+        delimiter: str = ",",
+    ):
+        if set_name not in self.dataloaders.keys():
+            raise ValueError(
+                f"[ERROR] ``set_name`` must be one of {list(self.dataloaders.keys())}."
+            )
+
+        patch_df = self.dataloaders[set_name].dataset.patch_df
+        patch_df["predicted_label"] = self.pred_label
+        patch_df["pred"] = self.pred_label_indices
+        patch_df["conf"] = np.array(self.pred_conf).max(axis=1)
+
+        if save_path is None:
+            save_path = f"{set_name}_predictions_patch_df.csv"
+        patch_df.to_csv(save_path, sep=delimiter)
+        print(f"[INFO] Saved predictions to {save_path}.")
 
     def load_dataset(
         self,

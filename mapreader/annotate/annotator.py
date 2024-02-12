@@ -73,6 +73,8 @@ class Annotator(pd.DataFrame):
         A dictionary consisting of column names (keys) and minimum values as floating point values (values), by default None.
     max_values : dict, optional
         A dictionary consisting of column names (keys) and maximum values as floating point values (values), by default None.
+    filter_for : dict, optional
+        A dictionary consisting of column names (keys) and values to filter for (values), by default None.
     surrounding : int, optional
         The number of surrounding images to show for context, by default 1.
     max_size : int, optional
@@ -114,6 +116,7 @@ class Annotator(pd.DataFrame):
         task_name: str | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
+        filter_for: dict | None = None,
         surrounding: int = 1,
         max_size: int = 1000,
         resize_to: int | None = None,
@@ -220,7 +223,7 @@ class Annotator(pd.DataFrame):
                 patch_df=patch_df,
                 annotations_file=annotations_file,
                 labels=labels,
-                col=label_col,
+                label_col=label_col,
                 delimiter=delimiter,
             )
 
@@ -236,11 +239,15 @@ class Annotator(pd.DataFrame):
         # Sort by sortby column if provided
         if isinstance(sortby, str):
             if sortby in self.columns:
-                self.sort_values(sortby, ascending=ascending, inplace=True)
+                self._sortby = sortby
+                self._ascending = ascending
             else:
                 raise ValueError(f"[ERROR] {sortby} is not a column in the DataFrame.")
         elif sortby is not None:
             raise ValueError("[ERROR] ``sortby`` must be a string or None.")
+        else:
+            self._sortby = None
+            self._ascending = True
 
         self._labels = labels
         self.label_col = label_col
@@ -254,6 +261,7 @@ class Annotator(pd.DataFrame):
         # set up for the annotator
         self._min_values = min_values or {}
         self._max_values = max_values or {}
+        self._filter_for = filter_for or {}
 
         # Create annotations_dir
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
@@ -352,7 +360,7 @@ class Annotator(pd.DataFrame):
         patch_df: pd.DataFrame,
         annotations_file: str,
         labels: list,
-        col: str,
+        label_col: str,
         delimiter: str,
     ):
         """Load existing annotations from file.
@@ -365,7 +373,7 @@ class Annotator(pd.DataFrame):
             Name of the annotations file
         labels : list
             List of labels for annotation.
-        col : str
+        label_col : str
             Name of the column in which labels are stored in annotations file
         delimiter : str
             Delimiter used in CSV files
@@ -373,24 +381,24 @@ class Annotator(pd.DataFrame):
         """
         existing_annotations = pd.read_csv(annotations_file, index_col=0, sep=delimiter)
 
-        if col not in existing_annotations.columns:
+        if label_col not in existing_annotations.columns:
             raise ValueError(
-                f"[ERROR] Your existing annotations do not have the label column: {col}."
+                f"[ERROR] Your existing annotations do not have the label column: {label_col}."
             )
 
-        if existing_annotations[col].dtype == int:
+        if existing_annotations[label_col].dtype == int:
             # convert label indices (ints) to labels (strings)
             # this is to convert old annotations format to new annotations format
-            existing_annotations[col] = existing_annotations[col].apply(
+            existing_annotations[label_col] = existing_annotations[label_col].apply(
                 lambda x: labels[x]
             )
 
         patch_df = patch_df.join(
-            existing_annotations[col], how="left", rsuffix="_existing"
+            existing_annotations[label_col], how="left", rsuffix="_existing"
         )
-        if f"{col}_existing" in patch_df.columns:
-            patch_df[col].fillna(patch_df[f"{col}_existing"], inplace=True)
-            patch_df.drop(columns=f"{col}_existing", inplace=True)
+        if f"{label_col}_existing" in patch_df.columns:
+            patch_df[label_col].fillna(patch_df[f"{label_col}_existing"], inplace=True)
+            patch_df.drop(columns=f"{label_col}_existing", inplace=True)
 
         return patch_df
 
@@ -464,9 +472,14 @@ class Annotator(pd.DataFrame):
             if row.label not in [np.NaN, None]:
                 return False
 
-            test = [
-                row[col] >= min_value for col, min_value in self._min_values.items()
-            ] + [row[col] <= max_value for col, max_value in self._max_values.items()]
+            test = (
+                [row[col] >= min_value for col, min_value in self._min_values.items()]
+                + [row[col] <= max_value for col, max_value in self._max_values.items()]
+                + [
+                    row[col] == filter_for
+                    for col, filter_for in self._filter_for.items()
+                ]
+            )
 
             if not all(test):
                 return False
@@ -476,7 +489,12 @@ class Annotator(pd.DataFrame):
         queue_df = self.copy(deep=True)
         queue_df = queue_df[queue_df[self.label_col].isna()]  # only unlabelled
         queue_df["eligible"] = queue_df.apply(check_eligibility, axis=1)
-        queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
+
+        if self._sortby is not None:
+            queue_df.sort_values(self._sortby, ascending=self._ascending, inplace=True)
+            queue_df = queue_df[queue_df.eligible]
+        else:
+            queue_df = queue_df[queue_df.eligible].sample(frac=1)  # shuffle
 
         indices = queue_df.index
         if as_type == "list":
@@ -606,6 +624,8 @@ class Annotator(pd.DataFrame):
     def annotate(
         self,
         show_context: bool | None = None,
+        sortby: str | None = None,
+        ascending: bool | None = None,
         min_values: dict | None = None,
         max_values: dict | None = None,
         surrounding: int | None = None,
@@ -620,6 +640,11 @@ class Annotator(pd.DataFrame):
         show_context : bool or None, optional
             Whether or not to display the surrounding context for each image.
             Default is None.
+        sortby : str or None, optional
+            Name of the column to use to sort the patch DataFrame, by default None.
+            Default sort order is ``ascending=True``. Pass ``ascending=False`` keyword argument to sort in descending order.
+        ascending : bool, optional
+            Whether to sort the DataFrame in ascending order when using the ``sortby`` argument, by default True.
         min_values : dict or None, optional
             Minimum values for each property to filter images for annotation.
             It should be provided as a dictionary consisting of column names
@@ -640,6 +665,10 @@ class Annotator(pd.DataFrame):
         -----
         This method is a wrapper for the ``_annotate`` method.
         """
+        if sortby is not None:
+            self._sortby = sortby
+        if ascending is not None:
+            self._ascending = ascending
 
         if min_values is not None:
             self._min_values = min_values
@@ -694,6 +723,12 @@ class Annotator(pd.DataFrame):
             self.resize_to = resize_to
         if max_size is not None:
             self.max_size = max_size
+
+        # re-set up queue
+        self._queue = self.get_queue()
+
+        if self._filter_for is not None:
+            print(f"[INFO] Filtering for: {self._filter_for}")
 
         self.out = widgets.Output(layout=_CENTER_LAYOUT)
         display(self.box)

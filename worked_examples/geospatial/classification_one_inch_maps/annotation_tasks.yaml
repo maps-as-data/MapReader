@@ -1,13 +1,13 @@
 # ---------------------------------------
 # Define an annotation task
 # This includes:
-# 1. a name (e.g., building_simple or rail_space, see below)
+# 1. a name (e.g., building_simple or railspace, see below)
 # 2. a list of labels to be used for this task
 # ---------------------------------------
 tasks:
   building_simple:
     labels: ["No", "building"]
-  rail_space:
+  railspace:
     labels: ["No", "rail space"]
 
 # ---------------------------------------
