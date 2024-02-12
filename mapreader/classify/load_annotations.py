@@ -109,7 +109,7 @@ class AnnotationsLoader:
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
-            annotations[self.patch_paths_col] = annotations.index.apply(
+            annotations[self.patch_paths_col] = annotations.index.map(
                 lambda x: os.path.join(abs_images_dir, x)
             )
 
