@@ -934,7 +934,7 @@ Use ``add_criterion`` to define one."
                         outputs = self.model(*inputs)
 
                         if not isinstance(outputs, torch.Tensor):
-                            self._get_logits(outputs)
+                            outputs = self._get_logits(outputs)
 
                         _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -1664,7 +1664,7 @@ Output will show batch number {num_batches}.'
                 outputs = self.model(*inputs)
 
                 if not isinstance(outputs, torch.Tensor):
-                    self._get_logits(outputs)
+                    outputs = self._get_logits(outputs)
 
                 pred_conf = torch.nn.functional.softmax(outputs, dim=1) * 100.0
                 _, preds = torch.max(outputs, 1)
