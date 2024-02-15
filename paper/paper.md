@@ -33,13 +33,13 @@ authors:
     orcid: 0000-0003-4396-6019
     affiliation: "1, 4"
 affiliations:
- - name: The Alan Turing Institute, UK
+ - name: The Alan Turing Institute, Lodon, United Kingdom
    index: 1
- - name: Lancaster University, UK
+ - name: Lancaster University, Lancaster, United Kingdom
    index: 2
- - name: School of Advanced Study, University of London, UK
+ - name: School of Advanced Study, University of London, London, United Kingdom
    index: 3
- - name: Zalando SE, Germany
+ - name: Zalando SE, Berlin, Germany
    index: 4
 date: 14 December 2023
 bibliography: paper.bib
