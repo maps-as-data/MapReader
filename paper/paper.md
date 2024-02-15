@@ -33,7 +33,7 @@ authors:
     orcid: 0000-0003-4396-6019
     affiliation: "1, 4"
 affiliations:
- - name: The Alan Turing Institute, Lodon, United Kingdom
+ - name: The Alan Turing Institute, London, United Kingdom
    index: 1
  - name: Lancaster University, Lancaster, United Kingdom
    index: 2
