@@ -1,5 +1,5 @@
 ---
-title: 'MapReader: v1.1.0'
+title: 'MapReader: Open software for the visual analysis of maps'
 tags:
   - Python
   - image classification
