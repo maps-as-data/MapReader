@@ -177,7 +177,7 @@ class AnnotationsLoader:
         if scramble_frame:
             annotations = annotations.sample(frac=1)
         if reset_index:
-            annotations.reset_index(drop=True, inplace=True)
+            annotations.reset_index(drop=False, inplace=True)
 
         annotations = annotations[
             ~annotations.index.duplicated(keep="first")

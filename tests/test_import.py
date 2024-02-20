@@ -9,6 +9,7 @@ def test_import():
         loader,
         MapImages,
         PatchDataset,
+        PatchContextDataset,
         Downloader,
         SheetDownloader,
     )
