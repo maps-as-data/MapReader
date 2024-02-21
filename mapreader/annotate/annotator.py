@@ -967,7 +967,9 @@ class Annotator(pd.DataFrame):
                 lambda x: self._labels.index(x)
             )
 
-        return filtered_df
+        return filtered_df[
+            self.label_col, self.patch_paths_col, "parent_id", "pixel_bounds"
+        ]
 
     @property
     def filtered(self) -> pd.DataFrame:

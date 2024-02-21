@@ -1,82 +1,82 @@
-image_id,parent_id,image_path,shape,pixel_bounds,label
-patch-0-0-1-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-0-1-1-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 0, 1, 1)",no
-patch-0-1-1-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-1-1-2-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 1, 1, 2)",railspace
-patch-0-2-1-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-2-1-3-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 2, 1, 3)",no
-patch-0-3-1-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-3-1-4-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 3, 1, 4)",no
-patch-0-4-1-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-4-1-5-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 4, 1, 5)",no
-patch-0-5-1-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-5-1-6-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 5, 1, 6)",no
-patch-0-6-1-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-6-1-7-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 6, 1, 7)",no
-patch-0-7-1-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-7-1-8-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 7, 1, 8)",no
-patch-0-8-1-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-8-1-9-#cropped_74488689.png#.png,"(1, 1, 4)","(0, 8, 1, 9)",no
-patch-1-0-2-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-0-2-1-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 0, 2, 1)",no
-patch-1-1-2-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-1-2-2-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 1, 2, 2)",no
-patch-1-2-2-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-2-2-3-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 2, 2, 3)",no
-patch-1-3-2-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-3-2-4-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 3, 2, 4)",no
-patch-1-4-2-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-4-2-5-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 4, 2, 5)",railspace
-patch-1-5-2-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-5-2-6-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 5, 2, 6)",no
-patch-1-6-2-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-6-2-7-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 6, 2, 7)",no
-patch-1-7-2-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-7-2-8-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 7, 2, 8)",railspace
-patch-1-8-2-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-8-2-9-#cropped_74488689.png#.png,"(1, 1, 4)","(1, 8, 2, 9)",no
-patch-2-0-3-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-0-3-1-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 0, 3, 1)",no
-patch-2-1-3-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-1-3-2-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 1, 3, 2)",no
-patch-2-2-3-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-2-3-3-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 2, 3, 3)",no
-patch-2-3-3-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-3-3-4-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 3, 3, 4)",no
-patch-2-4-3-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-4-3-5-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 4, 3, 5)",no
-patch-2-5-3-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-5-3-6-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 5, 3, 6)",no
-patch-2-6-3-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-6-3-7-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 6, 3, 7)",no
-patch-2-7-3-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-7-3-8-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 7, 3, 8)",no
-patch-2-8-3-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-8-3-9-#cropped_74488689.png#.png,"(1, 1, 4)","(2, 8, 3, 9)",no
-patch-3-0-4-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-0-4-1-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 0, 4, 1)",no
-patch-3-1-4-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-1-4-2-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 1, 4, 2)",railspace
-patch-3-2-4-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-2-4-3-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 2, 4, 3)",no
-patch-3-3-4-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-3-4-4-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 3, 4, 4)",no
-patch-3-4-4-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-4-4-5-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 4, 4, 5)",no
-patch-3-5-4-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-5-4-6-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 5, 4, 6)",no
-patch-3-6-4-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-6-4-7-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 6, 4, 7)",no
-patch-3-7-4-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-7-4-8-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 7, 4, 8)",no
-patch-3-8-4-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-8-4-9-#cropped_74488689.png#.png,"(1, 1, 4)","(3, 8, 4, 9)",no
-patch-4-0-5-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-0-5-1-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 0, 5, 1)",no
-patch-4-1-5-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-1-5-2-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 1, 5, 2)",railspace
-patch-4-2-5-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-2-5-3-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 2, 5, 3)",no
-patch-4-3-5-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-3-5-4-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 3, 5, 4)",no
-patch-4-4-5-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-4-5-5-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 4, 5, 5)",railspace
-patch-4-5-5-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-5-5-6-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 5, 5, 6)",no
-patch-4-6-5-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-6-5-7-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 6, 5, 7)",no
-patch-4-7-5-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-7-5-8-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 7, 5, 8)",railspace
-patch-4-8-5-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-8-5-9-#cropped_74488689.png#.png,"(1, 1, 4)","(4, 8, 5, 9)",no
-patch-5-0-6-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-0-6-1-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 0, 6, 1)",no
-patch-5-1-6-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-1-6-2-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 1, 6, 2)",no
-patch-5-2-6-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-2-6-3-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 2, 6, 3)",no
-patch-5-3-6-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-3-6-4-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 3, 6, 4)",no
-patch-5-4-6-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-4-6-5-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 4, 6, 5)",railspace
-patch-5-5-6-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-5-6-6-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 5, 6, 6)",no
-patch-5-6-6-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-6-6-7-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 6, 6, 7)",no
-patch-5-7-6-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-7-6-8-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 7, 6, 8)",railspace
-patch-5-8-6-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-8-6-9-#cropped_74488689.png#.png,"(1, 1, 4)","(5, 8, 6, 9)",no
-patch-6-0-7-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-0-7-1-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 0, 7, 1)",railspace
-patch-6-1-7-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-1-7-2-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 1, 7, 2)",railspace
-patch-6-2-7-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-2-7-3-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 2, 7, 3)",railspace
-patch-6-3-7-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-3-7-4-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 3, 7, 4)",no
-patch-6-4-7-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-4-7-5-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 4, 7, 5)",no
-patch-6-5-7-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-5-7-6-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 5, 7, 6)",no
-patch-6-6-7-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-6-7-7-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 6, 7, 7)",no
-patch-6-7-7-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-7-7-8-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 7, 7, 8)",no
-patch-6-8-7-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-8-7-9-#cropped_74488689.png#.png,"(1, 1, 4)","(6, 8, 7, 9)",no
-patch-7-0-8-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-0-8-1-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 0, 8, 1)",railspace
-patch-7-1-8-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-1-8-2-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 1, 8, 2)",railspace
-patch-7-2-8-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-2-8-3-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 2, 8, 3)",railspace
-patch-7-3-8-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-3-8-4-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 3, 8, 4)",no
-patch-7-4-8-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-4-8-5-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 4, 8, 5)",no
-patch-7-5-8-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-5-8-6-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 5, 8, 6)",no
-patch-7-6-8-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-6-8-7-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 6, 8, 7)",no
-patch-7-7-8-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-7-8-8-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 7, 8, 8)",railspace
-patch-7-8-8-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-8-8-9-#cropped_74488689.png#.png,"(1, 1, 4)","(7, 8, 8, 9)",no
-patch-8-0-9-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-0-9-1-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 0, 9, 1)",railspace
-patch-8-1-9-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-1-9-2-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 1, 9, 2)",railspace
-patch-8-2-9-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-2-9-3-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 2, 9, 3)",railspace
-patch-8-3-9-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-3-9-4-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 3, 9, 4)",no
-patch-8-4-9-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-4-9-5-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 4, 9, 5)",railspace
-patch-8-5-9-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-5-9-6-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 5, 9, 6)",no
-patch-8-6-9-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-6-9-7-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 6, 9, 7)",no
-patch-8-7-9-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-7-9-8-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 7, 9, 8)",no
-patch-8-8-9-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-8-9-9-#cropped_74488689.png#.png,"(1, 1, 4)","(8, 8, 9, 9)",no
+image_id,parent_id,image_path,pixel_bounds,label
+patch-0-0-1-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-0-1-1-#cropped_74488689.png#.png,"(0, 0, 1, 1)",no
+patch-0-1-1-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-1-1-2-#cropped_74488689.png#.png,"(0, 1, 1, 2)",railspace
+patch-0-2-1-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-2-1-3-#cropped_74488689.png#.png,"(0, 2, 1, 3)",no
+patch-0-3-1-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-3-1-4-#cropped_74488689.png#.png,"(0, 3, 1, 4)",no
+patch-0-4-1-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-4-1-5-#cropped_74488689.png#.png,"(0, 4, 1, 5)",no
+patch-0-5-1-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-5-1-6-#cropped_74488689.png#.png,"(0, 5, 1, 6)",no
+patch-0-6-1-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-6-1-7-#cropped_74488689.png#.png,"(0, 6, 1, 7)",no
+patch-0-7-1-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-7-1-8-#cropped_74488689.png#.png,"(0, 7, 1, 8)",no
+patch-0-8-1-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-0-8-1-9-#cropped_74488689.png#.png,"(0, 8, 1, 9)",no
+patch-1-0-2-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-0-2-1-#cropped_74488689.png#.png,"(1, 0, 2, 1)",no
+patch-1-1-2-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-1-2-2-#cropped_74488689.png#.png,"(1, 1, 2, 2)",no
+patch-1-2-2-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-2-2-3-#cropped_74488689.png#.png,"(1, 2, 2, 3)",no
+patch-1-3-2-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-3-2-4-#cropped_74488689.png#.png,"(1, 3, 2, 4)",no
+patch-1-4-2-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-4-2-5-#cropped_74488689.png#.png,"(1, 4, 2, 5)",railspace
+patch-1-5-2-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-5-2-6-#cropped_74488689.png#.png,"(1, 5, 2, 6)",no
+patch-1-6-2-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-6-2-7-#cropped_74488689.png#.png,"(1, 6, 2, 7)",no
+patch-1-7-2-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-7-2-8-#cropped_74488689.png#.png,"(1, 7, 2, 8)",railspace
+patch-1-8-2-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-1-8-2-9-#cropped_74488689.png#.png,"(1, 8, 2, 9)",no
+patch-2-0-3-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-0-3-1-#cropped_74488689.png#.png,"(2, 0, 3, 1)",no
+patch-2-1-3-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-1-3-2-#cropped_74488689.png#.png,"(2, 1, 3, 2)",no
+patch-2-2-3-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-2-3-3-#cropped_74488689.png#.png,"(2, 2, 3, 3)",no
+patch-2-3-3-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-3-3-4-#cropped_74488689.png#.png,"(2, 3, 3, 4)",no
+patch-2-4-3-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-4-3-5-#cropped_74488689.png#.png,"(2, 4, 3, 5)",no
+patch-2-5-3-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-5-3-6-#cropped_74488689.png#.png,"(2, 5, 3, 6)",no
+patch-2-6-3-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-6-3-7-#cropped_74488689.png#.png,"(2, 6, 3, 7)",no
+patch-2-7-3-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-7-3-8-#cropped_74488689.png#.png,"(2, 7, 3, 8)",no
+patch-2-8-3-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-2-8-3-9-#cropped_74488689.png#.png,"(2, 8, 3, 9)",no
+patch-3-0-4-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-0-4-1-#cropped_74488689.png#.png,"(3, 0, 4, 1)",no
+patch-3-1-4-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-1-4-2-#cropped_74488689.png#.png,"(3, 1, 4, 2)",railspace
+patch-3-2-4-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-2-4-3-#cropped_74488689.png#.png,"(3, 2, 4, 3)",no
+patch-3-3-4-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-3-4-4-#cropped_74488689.png#.png,"(3, 3, 4, 4)",no
+patch-3-4-4-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-4-4-5-#cropped_74488689.png#.png,"(3, 4, 4, 5)",no
+patch-3-5-4-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-5-4-6-#cropped_74488689.png#.png,"(3, 5, 4, 6)",no
+patch-3-6-4-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-6-4-7-#cropped_74488689.png#.png,"(3, 6, 4, 7)",no
+patch-3-7-4-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-7-4-8-#cropped_74488689.png#.png,"(3, 7, 4, 8)",no
+patch-3-8-4-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-3-8-4-9-#cropped_74488689.png#.png,"(3, 8, 4, 9)",no
+patch-4-0-5-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-0-5-1-#cropped_74488689.png#.png,"(4, 0, 5, 1)",no
+patch-4-1-5-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-1-5-2-#cropped_74488689.png#.png,"(4, 1, 5, 2)",railspace
+patch-4-2-5-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-2-5-3-#cropped_74488689.png#.png,"(4, 2, 5, 3)",no
+patch-4-3-5-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-3-5-4-#cropped_74488689.png#.png,"(4, 3, 5, 4)",no
+patch-4-4-5-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-4-5-5-#cropped_74488689.png#.png,"(4, 4, 5, 5)",railspace
+patch-4-5-5-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-5-5-6-#cropped_74488689.png#.png,"(4, 5, 5, 6)",no
+patch-4-6-5-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-6-5-7-#cropped_74488689.png#.png,"(4, 6, 5, 7)",no
+patch-4-7-5-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-7-5-8-#cropped_74488689.png#.png,"(4, 7, 5, 8)",railspace
+patch-4-8-5-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-4-8-5-9-#cropped_74488689.png#.png,"(4, 8, 5, 9)",no
+patch-5-0-6-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-0-6-1-#cropped_74488689.png#.png,"(5, 0, 6, 1)",no
+patch-5-1-6-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-1-6-2-#cropped_74488689.png#.png,"(5, 1, 6, 2)",no
+patch-5-2-6-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-2-6-3-#cropped_74488689.png#.png,"(5, 2, 6, 3)",no
+patch-5-3-6-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-3-6-4-#cropped_74488689.png#.png,"(5, 3, 6, 4)",no
+patch-5-4-6-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-4-6-5-#cropped_74488689.png#.png,"(5, 4, 6, 5)",railspace
+patch-5-5-6-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-5-6-6-#cropped_74488689.png#.png,"(5, 5, 6, 6)",no
+patch-5-6-6-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-6-6-7-#cropped_74488689.png#.png,"(5, 6, 6, 7)",no
+patch-5-7-6-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-7-6-8-#cropped_74488689.png#.png,"(5, 7, 6, 8)",railspace
+patch-5-8-6-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-5-8-6-9-#cropped_74488689.png#.png,"(5, 8, 6, 9)",no
+patch-6-0-7-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-0-7-1-#cropped_74488689.png#.png,"(6, 0, 7, 1)",railspace
+patch-6-1-7-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-1-7-2-#cropped_74488689.png#.png,"(6, 1, 7, 2)",railspace
+patch-6-2-7-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-2-7-3-#cropped_74488689.png#.png,"(6, 2, 7, 3)",railspace
+patch-6-3-7-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-3-7-4-#cropped_74488689.png#.png,"(6, 3, 7, 4)",no
+patch-6-4-7-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-4-7-5-#cropped_74488689.png#.png,"(6, 4, 7, 5)",no
+patch-6-5-7-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-5-7-6-#cropped_74488689.png#.png,"(6, 5, 7, 6)",no
+patch-6-6-7-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-6-7-7-#cropped_74488689.png#.png,"(6, 6, 7, 7)",no
+patch-6-7-7-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-7-7-8-#cropped_74488689.png#.png,"(6, 7, 7, 8)",no
+patch-6-8-7-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-6-8-7-9-#cropped_74488689.png#.png,"(6, 8, 7, 9)",no
+patch-7-0-8-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-0-8-1-#cropped_74488689.png#.png,"(7, 0, 8, 1)",railspace
+patch-7-1-8-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-1-8-2-#cropped_74488689.png#.png,"(7, 1, 8, 2)",railspace
+patch-7-2-8-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-2-8-3-#cropped_74488689.png#.png,"(7, 2, 8, 3)",railspace
+patch-7-3-8-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-3-8-4-#cropped_74488689.png#.png,"(7, 3, 8, 4)",no
+patch-7-4-8-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-4-8-5-#cropped_74488689.png#.png,"(7, 4, 8, 5)",no
+patch-7-5-8-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-5-8-6-#cropped_74488689.png#.png,"(7, 5, 8, 6)",no
+patch-7-6-8-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-6-8-7-#cropped_74488689.png#.png,"(7, 6, 8, 7)",no
+patch-7-7-8-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-7-8-8-#cropped_74488689.png#.png,"(7, 7, 8, 8)",railspace
+patch-7-8-8-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-7-8-8-9-#cropped_74488689.png#.png,"(7, 8, 8, 9)",no
+patch-8-0-9-1-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-0-9-1-#cropped_74488689.png#.png,"(8, 0, 9, 1)",railspace
+patch-8-1-9-2-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-1-9-2-#cropped_74488689.png#.png,"(8, 1, 9, 2)",railspace
+patch-8-2-9-3-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-2-9-3-#cropped_74488689.png#.png,"(8, 2, 9, 3)",railspace
+patch-8-3-9-4-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-3-9-4-#cropped_74488689.png#.png,"(8, 3, 9, 4)",no
+patch-8-4-9-5-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-4-9-5-#cropped_74488689.png#.png,"(8, 4, 9, 5)",railspace
+patch-8-5-9-6-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-5-9-6-#cropped_74488689.png#.png,"(8, 5, 9, 6)",no
+patch-8-6-9-7-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-6-9-7-#cropped_74488689.png#.png,"(8, 6, 9, 7)",no
+patch-8-7-9-8-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-7-9-8-#cropped_74488689.png#.png,"(8, 7, 9, 8)",no
+patch-8-8-9-9-#cropped_74488689.png#.png,cropped_74488689.png,/Users/rwood/LwM/mapreader/MapReader/tests/patches_1_pixel/patch-8-8-9-9-#cropped_74488689.png#.png,"(8, 8, 9, 9)",no
