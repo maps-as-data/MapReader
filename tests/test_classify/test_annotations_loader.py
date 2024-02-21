@@ -109,6 +109,15 @@ def test_create_context_datasets_default_transforms(load_annots):
     assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
 
 
+def test_create_context_datasets_missing_cols(load_annots):
+    annots = load_annots
+    annotations = annots.annotations.drop(columns=["pixel_bounds", "parent_id"])
+    annots.create_datasets(0.5, 0.3, 0.2, context_datasets=True, context_df=annotations)
+    assert annots.dataset_sizes == {"train": 40, "val": 24, "test": 17}
+    assert isinstance(annots.datasets["train"], PatchContextDataset)
+    assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
+
+
 def test_create_datasets_custom_transforms(load_annots):
     annots = load_annots
     my_transform = transforms.Compose([transforms.ToTensor()])

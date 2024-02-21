@@ -133,6 +133,21 @@ def test_patch_context_dataset_init_annots(annots):
     assert patch_dataset.unique_labels == ["no", "railspace"]
 
 
+def test_patch_context_dataset_init_annots_missing_cols(annots):
+    annotations = annots.annotations.drop(columns=["pixel_bounds", "parent_id"])
+    patch_dataset = PatchContextDataset(
+        patch_df=annotations,
+        total_df=annotations,
+        transform="test",
+        label_col="label",
+        create_context=True,
+    )
+    assert isinstance(patch_dataset, PatchContextDataset)
+    assert patch_dataset.patch_df.equals(annotations)
+    assert patch_dataset.label_col == "label"
+    assert patch_dataset.unique_labels == ["no", "railspace"]
+
+
 def test_create_context_dataloaders(load_patch_df):
     patch_df, tmp_path = load_patch_df
     patch_dataset = PatchContextDataset(
