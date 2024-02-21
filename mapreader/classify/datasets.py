@@ -639,6 +639,15 @@ class PatchContextDataset(PatchDataset):
         """
         total_df = self.total_df.copy(deep=True)
 
+        # backwards compatibility with annotator without pixel_bounds and parent_id columns
+        if "pixel_bounds" not in total_df.columns:
+            total_df["pixel_bounds"] = total_df.index.map(
+                lambda x: str(tuple(x.split("-")[1:5]))
+            )
+        if "parent_id" not in total_df.columns:
+            total_df["parent_id"] = total_df.index.map(lambda x: x.split("#")[1])
+        total_df = self._eval_df(total_df)
+
         if not all(
             [col in total_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
         ):
