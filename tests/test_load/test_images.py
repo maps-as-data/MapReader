@@ -595,6 +595,24 @@ def test_save_patches_as_geotiffs(init_maps):
     assert os.path.isfile(maps.patches[patch_id]["geotiff_path"])
 
 
+def test_save_patches_as_geotiffs_edge_patches(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    maps.patchify_all(patch_size=8, path_save=tmp_path)
+    patch_list = maps.list_patches()
+    assert len(maps.list_patches()) == 4
+    maps.save_patches_as_geotiffs()
+    for patch in patch_list:
+        pixel_bounds = maps.patches[patch]["pixel_bounds"]
+        patch_width = pixel_bounds[2] - pixel_bounds[0]
+        patch_height = pixel_bounds[3] - pixel_bounds[1]
+        assert "geotiff_path" in maps.patches[patch].keys()
+        assert os.path.isfile(maps.patches[patch]["geotiff_path"])
+        img = Image.open(maps.patches[patch]["geotiff_path"])
+        assert img.height == patch_height
+        assert img.width == patch_width
+
+
 def test_save_patches_as_geotiffs_grayscale(sample_dir, tmp_path):
     image_id = "cropped_L.png"
     maps = MapImages(f"{sample_dir}/{image_id}")
