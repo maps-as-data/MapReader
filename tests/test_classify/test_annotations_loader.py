@@ -66,7 +66,7 @@ def test_init_images_dir(sample_dir):
     assert annots.annotations.iloc[0]["image_path"].startswith(str(sample_dir))
 
 
-def test_scramble_frame(sample_dir):
+def test_scramble_frame(sample_dir, load_annots):
     annots = AnnotationsLoader()
     annots.load(
         f"{sample_dir}/test_annots.csv",
@@ -76,7 +76,7 @@ def test_scramble_frame(sample_dir):
         ignore_broken=True,
     )
     assert len(annots.annotations) == 81
-    assert annots.annotations.index[0] != "patch-0-0-1-1-#cropped_74488689.png#.png"
+    assert not annots.annotations.index.equals(load_annots.annotations.index)
 
     # with reset_index
     annots = AnnotationsLoader()
