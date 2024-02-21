@@ -842,7 +842,7 @@ class Annotator(pd.DataFrame):
             else:
                 display(image.convert("RGB"))
             add_ins = []
-            if self.at[ix, "url"]:
+            if "url" in self.loc[ix].keys():
                 url = self.at[ix, "url"]
                 text = f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
                 add_ins += [widgets.HTML(text)]
