@@ -261,7 +261,7 @@ class Annotator(pd.DataFrame):
         # set up for the annotator
         self._min_values = min_values or {}
         self._max_values = max_values or {}
-        self._filter_for = filter_for or {}
+        self._filter_for = filter_for
 
         # Create annotations_dir
         Path(annotations_dir).mkdir(parents=True, exist_ok=True)
@@ -472,14 +472,27 @@ class Annotator(pd.DataFrame):
             if row.label not in [np.NaN, None]:
                 return False
 
-            test = (
-                [row[col] >= min_value for col, min_value in self._min_values.items()]
-                + [row[col] <= max_value for col, max_value in self._max_values.items()]
-                + [
-                    row[col] == filter_for
-                    for col, filter_for in self._filter_for.items()
+            if self._filter_for is None:
+                test = [
+                    row[col] >= min_value for col, min_value in self._min_values.items()
+                ] + [
+                    row[col] <= max_value for col, max_value in self._max_values.items()
                 ]
-            )
+            else:
+                test = (
+                    [
+                        row[col] >= min_value
+                        for col, min_value in self._min_values.items()
+                    ]
+                    + [
+                        row[col] <= max_value
+                        for col, max_value in self._max_values.items()
+                    ]
+                    + [
+                        row[col] == filter_for
+                        for col, filter_for in self._filter_for.items()
+                    ]
+                )
 
             if not all(test):
                 return False
