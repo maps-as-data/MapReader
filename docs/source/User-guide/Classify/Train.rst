@@ -346,30 +346,6 @@ There are a number of options for the ``model`` argument:
         .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).
 
 
-.. admonition:: Context models
-    :class: dropdown
-
-    If you have created context datasets, you will need to load two models (one for processing patches and one for processing patches plus context) using the methods above.
-    You should then pass these models to MapReaders ``twoParrallelModels`` class which combines their outputs through one fully connected layer:
-
-    .. code:: python
-
-        # define fc layer inputs and output
-        import torch
-
-        fc_layer = torch.nn.Linear(1004, len(annotated_images.labels_map))
-
-    The number of inputs to your fully connected layer should be the sum of the number of outputs from your two models and the number of outputs should be the number of classes (labels) you are using.
-
-    Your models and ``fc_layer`` should then be used to set up your custom model:
-
-    .. code:: python
-
-        from mapreader.classify.custom_models import twoParrallelModels
-
-        my_model = twoParrallelModels(patch_model, context_model, fc_layer)
-
-
 Define criterion, optimizer and scheduler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -435,7 +411,6 @@ In order to train/fine-tune your model, will need to define:
         #EXAMPLE
         params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
 
-    .. note:: If you are using a context model, you should also set ``parameter_groups=True`` when running the ``generate_layerwise_lrs()`` method. This will ensure the two branches of your models are optimized properly.
 
     You should then pass your ``params2optimize`` list to the ``.initialize_optimizer()`` method:
 
