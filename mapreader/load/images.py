@@ -1273,6 +1273,18 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 patch_data = self.patches[patch]
                 patch_keys = patch_data.keys()
                 img = Image.open(patch_data["image_path"])
+                height = img.height
+                width = img.width
+
+                # for edge patches, crop the patch image to the correct size first
+                min_x, min_y, max_x, max_y = self.patches[patch]["pixel_bounds"]
+                if width != max_x - min_x:
+                    width = max_x - min_x
+                img = img.crop((0, 0, width, height))
+                if height != max_y - min_y:
+                    height = max_y - min_y
+                img = img.crop((0, 0, width, height))
+
                 bands = img.getbands()
 
                 if calc_mean:
