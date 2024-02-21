@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
+from PIL import Image
 from torch.utils.data import DataLoader
 
 from mapreader import AnnotationsLoader, loader
@@ -24,7 +26,7 @@ def annots(sample_dir):
 
 
 @pytest.fixture
-def load_dfs(sample_dir, tmp_path):
+def load_patch_df(sample_dir, tmp_path):
     my_maps = loader(f"{sample_dir}/cropped_74488689.png")
     my_maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
     my_maps.patchify_all(
@@ -38,16 +40,16 @@ def load_dfs(sample_dir, tmp_path):
 # patch dataset
 
 
-def test_patch_dataset_init_df(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_patch_dataset_init_df(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchDataset(patch_df=patch_df, transform="test")
     assert isinstance(patch_dataset, PatchDataset)
     assert patch_dataset.patch_df.equals(patch_df)
     assert patch_dataset.label_col is None
 
 
-def test_patch_dataset_init_string(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_patch_dataset_init_string(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchDataset(
         patch_df=f"{tmp_path}/patch_df.csv",
         transform="test",
@@ -70,8 +72,8 @@ def test_patch_dataset_init_annots(annots):
     assert patch_dataset.unique_labels == ["no", "railspace"]
 
 
-def test_create_dataloaders(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_create_dataloaders(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchDataset(
         patch_df=patch_df,
         transform="test",
@@ -88,8 +90,8 @@ def test_create_dataloaders(load_dfs):
 # patch context dataset
 
 
-def test_patch_context_dataset_init_df(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_patch_context_dataset_init_df(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchContextDataset(
         patch_df=patch_df[:-3],
         total_df=patch_df,
@@ -101,8 +103,8 @@ def test_patch_context_dataset_init_df(load_dfs):
     assert patch_dataset.label_col is None
 
 
-def test_patch_context_dataset_init_string(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_patch_context_dataset_init_string(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchContextDataset(
         patch_df=f"{tmp_path}/patch_df.csv",
         total_df=f"{tmp_path}/patch_df.csv",
@@ -131,12 +133,13 @@ def test_patch_context_dataset_init_annots(annots):
     assert patch_dataset.unique_labels == ["no", "railspace"]
 
 
-def test_create_context_dataloaders(load_dfs):
-    patch_df, tmp_path = load_dfs
+def test_create_context_dataloaders(load_patch_df):
+    patch_df, tmp_path = load_patch_df
     patch_dataset = PatchContextDataset(
         patch_df=patch_df,
         total_df=patch_df,
         transform="test",
+        create_context=True,
     )
     dataloaders = patch_dataset.create_dataloaders(
         "a_test",
@@ -145,3 +148,44 @@ def test_create_context_dataloaders(load_dfs):
     )
     assert isinstance(dataloaders["a_test"], DataLoader)
     assert dataloaders["a_test"].batch_size == 2
+
+
+def test_save_context(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchContextDataset(
+        patch_df=patch_df,
+        total_df=patch_df,
+        transform="test",
+        create_context=True,
+        context_dir=f"{tmp_path}/context_patches/",
+    )
+    patch_dataset.save_context(use_parhugin=False)
+    assert os.path.exists(f"{tmp_path}/context_patches/")
+    assert len(list(tmp_path.glob("context_patches/*"))) == 9
+
+
+def test_save_context_parhugin(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchContextDataset(
+        patch_df=patch_df,
+        total_df=patch_df,
+        transform="test",
+        create_context=True,
+        context_dir=f"{tmp_path}/context_patches/",
+    )
+    patch_dataset.save_context(processors=5, use_parhugin=True)
+    assert os.path.exists(f"{tmp_path}/context_patches/")
+    assert len(list(tmp_path.glob("context_patches/*"))) == 9
+
+
+def test_get_context_id(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchContextDataset(
+        patch_df=patch_df,
+        total_df=patch_df,
+        transform="test",
+        create_context=True,
+    )
+    img = patch_dataset.get_context_id(patch_df.index[0], return_image=True)
+    assert isinstance(img, Image.Image)
+    assert img.size == (9, 9)

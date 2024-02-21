@@ -566,17 +566,18 @@ class PatchContextDataset(PatchDataset):
         instead.
         """
         if parhugin_installed and use_parhugin:
-            my_proc = multiFunc(processors=processors, sleep_time=sleep_time)
+            my_proc = multiFunc(num_req_p=processors, sleep_time=sleep_time)
             list_jobs = []
             for id in self.patch_df.index:
                 list_jobs.append(
                     [
-                        self.save_context_id(
+                        self.get_context_id(
                             id,
                             overwrite=overwrite,
                             save_context=True,
                             return_image=False,
                         ),
+                        {},
                     ]
                 )
 
