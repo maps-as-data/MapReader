@@ -30,7 +30,7 @@ For example, if you have set up your directory as recommended in our :doc:`Input
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other arguments you may want to specify when adding metadata to your images include:
+    Other arguments you may want to specify when loading your annotations include:
 
     - ``delimiter`` - By default, this is set to "," so will assume your ``csv`` file is comma separated. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
@@ -184,15 +184,6 @@ To split your annotated images and create your dataloaders, use:
 By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``.create_datasets()`` method.
 It will then create a dataloader for each dataset, using a batch size of 16 and the :ref:`default sampler<sampler>`.
 
-To change the ratios used to split your annotations, you can specify ``frac_train``, ``frac_val`` and ``frac_test``:
-
-.. code-block:: python
-
-    #EXAMPLE
-    dataloaders = annotated_images.create_dataloaders(frac_train=0.6, frac_val=0.3, frac_test=0.1)
-
-This will result in a split of 60% (train), 30% (val) and 10% (test).
-
 To change the batch size used when creating your dataloaders, use the ``batch_size`` argument:
 
 .. code-block:: python
@@ -203,12 +194,31 @@ To change the batch size used when creating your dataloaders, use the ``batch_si
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other arguments you may want to specify when adding metadata to your images include:
+    Other arguments you may want to specify when creating your dataloaders include:
 
     - ``sampler`` - By default, this is set to ``default`` and so the :ref:`default sampler<sampler>` will be used when creating your dataloaders and batches. You can choose not to use a sampler by specifying ``sampler=None`` or, you can define a custom sampler using `pytorch's sampler class <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__.
     - ``shuffle`` - If your datasets are ordered (e.g. ``"a","a","a","a","b","c"``), you can use ``shuffle=True`` to create dataloaders which contain shuffled batches of data. This cannot be used in conjunction with a sampler and so, by default, ``shuffle=False``.
-    - ``train_transform``, ``val_transform`` and ``test_transform`` - By default, these are set to "train", "val" and "test" respectively and so the :ref:`default image transforms<transforms>` for each of these sets are applied to the images. You can define your own transforms, using  `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, and apply these to your datasets by specifying the ``train_transform``, ``val_transform`` and ``test_transform`` arguments.
 
+
+If you would like to use custom settings when creating your datasets, you should call the ``create_datasets()`` method directly instead of via the ``create_dataloaders()`` method.
+You should then run the ``create_dataloaders()`` method afterwards to create your dataloaders as before.
+
+For example, to change the ratios used to split your annotations, you can specify ``frac_train``, ``frac_val`` and ``frac_test``:
+
+.. code-block:: python
+
+    #EXAMPLE
+    annotated_images.create_datasets(frac_train=0.6, frac_val=0.3, frac_test=0.1)
+    dataloaders = annotated_images.create_dataloaders()
+
+This will result in a split of 60% (train), 30% (val) and 10% (test).
+
+.. admonition:: Advanced usage
+
+    Other arguments you may want to specify when creating your datasets include:
+
+    - ``train_transform``, ``val_transform`` and ``test_transform`` - By default, these are set to "train", "val" and "test" respectively and so the :ref:`default image transforms<transforms>` for each of these sets are applied to the images. You can define your own transforms, using  `torchvision's transforms module <https://pytorch.org/vision/stable/transforms.html>`__, and apply these to your datasets by specifying the ``train_transform``, ``val_transform`` and ``test_transform`` arguments.
+    - ``context_dataset`` - By default, this is set to ``False`` and so only the patches themselves are used as inputs to the model. Setting ``context_dataset=True`` will result in datasets which return both the patches and their context as inputs for the model.
 
 Train
 ------
@@ -381,7 +391,7 @@ In order to train/fine-tune your model, will need to define:
     You should change this to suit your needs.
 
     The ``params2optimize`` argument can be used to select which parameters to optimize during training.
-    By default, this is set to ``"infer"``, meaning that all trainable parameters will be optimized.
+    By default, this is set to ``"default"``, meaning that all trainable parameters will be optimized.
 
     When training/fine-tuning your model, you can either use one learning rate for all layers in your neural network or define layerwise learning rates (i.e. different learning rates for each layer in your neural network).
     Normally, when fine-tuning pre-trained models, layerwise learning rates are favoured, with smaller learning rates assigned to the first layers and larger learning rates assigned to later layers.
@@ -400,6 +410,7 @@ In order to train/fine-tune your model, will need to define:
 
         #EXAMPLE
         params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
+
 
     You should then pass your ``params2optimize`` list to the ``.initialize_optimizer()`` method:
 

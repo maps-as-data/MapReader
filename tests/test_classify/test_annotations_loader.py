@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, RandomSampler
 from torchvision import transforms
 
 from mapreader import AnnotationsLoader
-from mapreader.classify.datasets import PatchDataset
+from mapreader.classify.datasets import PatchContextDataset, PatchDataset
 
 
 @pytest.fixture
@@ -31,18 +31,18 @@ def load_annots(sample_dir):
 @pytest.mark.dependency(name="load_annots_csv", scope="session")
 def test_load_csv(load_annots, sample_dir):
     annots = load_annots
-    assert len(annots.annotations) == 29
+    assert len(annots.annotations) == 81
     assert isinstance(annots.annotations, pd.DataFrame)
-    assert annots.labels_map == {0: "stuff", 1: "nothing"}
+    assert annots.labels_map == {0: "no", 1: "railspace"}
     annots.load(
         f"{sample_dir}/test_annots_append.csv",
         append=True,
         remove_broken=False,
         ignore_broken=True,
     )  # test append
-    assert len(annots.annotations) == 31
-    assert annots.unique_labels == ["stuff", "nothing", "new"]
-    assert annots.labels_map == {0: "stuff", 1: "nothing", 2: "new"}
+    assert len(annots.annotations) == 83
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "no", 1: "railspace", 2: "building"}
 
 
 @pytest.mark.dependency(name="load_annots_df", scope="session")
@@ -50,24 +50,72 @@ def test_load_df(sample_dir):
     annots = AnnotationsLoader()
     df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep=",", index_col=0)
     annots.load(df, remove_broken=False, ignore_broken=True)
-    assert len(annots.annotations) == 29
+    assert len(annots.annotations) == 81
     assert isinstance(annots.annotations, pd.DataFrame)
-    assert annots.labels_map == {0: "stuff", 1: "nothing"}
+    assert annots.labels_map == {0: "no", 1: "railspace"}
+
+
+def test_init_images_dir(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        remove_broken=False,
+        ignore_broken=True,
+        images_dir=sample_dir,
+    )
+    assert annots.annotations.iloc[0]["image_path"].startswith(str(sample_dir))
+
+
+def test_scramble_frame(sample_dir, load_annots):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        reset_index=False,
+        scramble_frame=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 81
+    assert not annots.annotations.index.equals(load_annots.annotations.index)
+
+    # with reset_index
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        reset_index=True,
+        scramble_frame=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 81
+    assert annots.annotations.index[0] == 0
 
 
 def test_create_datasets_default_transforms(load_annots):
     annots = load_annots
     annots.create_datasets(0.5, 0.3, 0.2)
-    assert annots.dataset_sizes == {"train": 14, "val": 9, "test": 6}
+    assert annots.dataset_sizes == {"train": 40, "val": 24, "test": 17}
     assert isinstance(annots.datasets["train"], PatchDataset)
     assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
-    for v in annots.datasets.values():
-        assert list(v.patch_df.columns) == [
-            "image_id",
-            "image_path",
-            "label",
-            "label_index",
-        ]
+
+
+def test_create_context_datasets_default_transforms(load_annots):
+    annots = load_annots
+    annots.create_datasets(
+        0.5, 0.3, 0.2, context_datasets=True, context_df=annots.annotations
+    )
+    assert annots.dataset_sizes == {"train": 40, "val": 24, "test": 17}
+    assert isinstance(annots.datasets["train"], PatchContextDataset)
+    assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
+
+
+def test_create_context_datasets_missing_cols(load_annots):
+    annots = load_annots
+    annotations = annots.annotations.drop(columns=["pixel_bounds", "parent_id"])
+    annots.create_datasets(0.5, 0.3, 0.2, context_datasets=True, context_df=annotations)
+    assert annots.dataset_sizes == {"train": 40, "val": 24, "test": 17}
+    assert isinstance(annots.datasets["train"], PatchContextDataset)
+    assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
 
 
 def test_create_datasets_custom_transforms(load_annots):
@@ -78,7 +126,7 @@ def test_create_datasets_custom_transforms(load_annots):
         val_transform=my_transform,
         test_transform=my_transform,
     )
-    assert annots.dataset_sizes == {"train": 20, "val": 4, "test": 5}
+    assert annots.dataset_sizes == {"train": 56, "val": 12, "test": 13}
     assert isinstance(annots.datasets["train"], PatchDataset)
     for v in annots.datasets.values():
         assert v.transform == my_transform

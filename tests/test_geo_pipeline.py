@@ -37,7 +37,6 @@ def test_pipeline(tmp_path, sample_dir):
 
     my_files.patchify_all(
         patch_size=300,  # in pixels
-        square_cuts=True,
         path_save=f"{tmp_path}/patches_300_pixel",
     )
 

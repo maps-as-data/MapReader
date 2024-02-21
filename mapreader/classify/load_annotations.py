@@ -14,7 +14,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
 from torchvision.transforms import Compose
 
-from .datasets import PatchDataset
+from .datasets import PatchContextDataset, PatchDataset
 
 
 class AnnotationsLoader:
@@ -24,7 +24,6 @@ class AnnotationsLoader:
         """
         self.annotations = pd.DataFrame()
         self.reviewed = pd.DataFrame()
-        self.id_col = None
         self.patch_paths_col = None
         self.label_col = None
         self.datasets = None
@@ -36,14 +35,13 @@ class AnnotationsLoader:
         images_dir: str | None = None,
         remove_broken: bool | None = True,
         ignore_broken: bool | None = False,
-        id_col: str | None = "image_id",
         patch_paths_col: str | None = "image_path",
         label_col: str | None = "label",
         append: bool | None = True,
         scramble_frame: bool | None = False,
         reset_index: bool | None = False,
     ):
-        """Loads annotations from a csv file or dataframe and can be used to set the ``id_col``, ``patch_paths_col`` and ``label_col`` attributes.
+        """Loads annotations from a csv file or dataframe and can be used to set the ``patch_paths_col`` and ``label_col`` attributes.
 
         Parameters
         ----------
@@ -65,8 +63,6 @@ class AnnotationsLoader:
             Whether to ignore broken image paths (only valid if remove_broken=False).
             If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
             If False, annotations with broken paths will raise error. By default, False.
-        id_col : Optional[str], optional
-            The name of the column which contains the image IDs, by default "image_id".
         patch_paths_col : Optional[str], optional
             The name of the column containing the image paths, by default "image_path".
         label_col : Optional[str], optional
@@ -86,19 +82,13 @@ class AnnotationsLoader:
             If ``annotations`` is passed as something other than a string or pd.DataFrame.
         """
 
-        if not self.id_col:
-            self.id_col = id_col
-        elif self.id_col != id_col:
-            print(
-                f'[WARNING] ID column was previously "{self.id_col}, but will now be set to {id_col}.'
-            )
-
         if not self.patch_paths_col:
             self.patch_paths_col = patch_paths_col
         elif self.patch_paths_col != patch_paths_col:
             print(
                 f'[WARNING] Patch paths column was previously "{self.patch_paths_col}, but will now be set to {patch_paths_col}.'
             )
+            self.patch_paths_col = patch_paths_col
 
         if not self.label_col:
             self.label_col = label_col
@@ -106,6 +96,7 @@ class AnnotationsLoader:
             print(
                 f'[WARNING] Label column was previously "{self.label_col}, but will now be set to {label_col}.'
             )
+            self.label_col = label_col
 
         if not isinstance(annotations, (str, pd.DataFrame)):
             raise ValueError(
@@ -118,7 +109,7 @@ class AnnotationsLoader:
 
         if images_dir:
             abs_images_dir = os.path.abspath(images_dir)
-            annotations[self.patch_paths_col] = annotations[self.id_col].apply(
+            annotations[self.patch_paths_col] = annotations.index.map(
                 lambda x: os.path.join(abs_images_dir, x)
             )
 
@@ -135,14 +126,14 @@ class AnnotationsLoader:
             remove_broken=remove_broken, ignore_broken=ignore_broken
         )
 
-        unique_labels = self.annotations[self.label_col].unique().tolist()
-        self.unique_labels = unique_labels
+        self.unique_labels = self.annotations[self.label_col].unique().tolist()
+
+        labels_map = {i: label for i, label in enumerate(self.unique_labels)}
+        self.labels_map = labels_map
+
         self.annotations["label_index"] = self.annotations[self.label_col].apply(
             self._get_label_index
         )
-
-        labels_map = {i: label for i, label in enumerate(unique_labels)}
-        self.labels_map = labels_map
 
         print(self)
 
@@ -180,17 +171,17 @@ class AnnotationsLoader:
         if os.path.isfile(annotations):
             print(f'[INFO] Reading "{annotations}"')
             annotations = pd.read_csv(annotations, sep=delimiter, index_col=0)
-            if annotations.index.name in ["name", "image_id"]:
-                annotations.reset_index(inplace=True, drop=False)
         else:
             raise ValueError(f'[ERROR] "{annotations}" cannot be found.')
 
         if scramble_frame:
             annotations = annotations.sample(frac=1)
         if reset_index:
-            annotations.reset_index(drop=True, inplace=True)
+            annotations.reset_index(drop=False, inplace=True)
 
-        annotations.drop_duplicates(subset=self.id_col, inplace=True, keep="first")
+        annotations = annotations[
+            ~annotations.index.duplicated(keep="first")
+        ]  # remove duplicates
         return annotations
 
     def _check_patch_paths(
@@ -271,9 +262,8 @@ Number of annotations remaining: {len(self.annotations)}"
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
 
-        patch_row = self.annotations[self.annotations[self.id_col] == patch_id]
-        patch_path = patch_row[self.patch_paths_col].values[0]
-        patch_label = patch_row[self.label_col].values[0]
+        patch_path = self.annotations.loc[patch_id, self.patch_paths_col]
+        patch_label = self.annotations.loc[patch_id, self.label_col]
         try:
             img = Image.open(patch_path)
         except FileNotFoundError as e:
@@ -351,10 +341,10 @@ Please check your image paths in your annonations.csv file and update them if ne
             annots2review = self.annotations[
                 self.annotations[self.label_col] == label_to_review
             ]
-            annots2review.reset_index(inplace=True, drop=True)
+            annots2review.reset_index(inplace=True, drop=False)
         else:
             annots2review = self.annotations
-            annots2review.reset_index(inplace=True, drop=True)
+            annots2review.reset_index(inplace=True, drop=False)
 
         if exclude_df is not None:
             if isinstance(exclude_df, pd.DataFrame):
@@ -477,7 +467,7 @@ Please check your image paths and update them if necessary.'
 
         annot2plot = self.annotations[self.annotations[self.label_col] == label_to_show]
         annot2plot = annot2plot.sample(frac=1)
-        annot2plot.reset_index(drop=True, inplace=True)
+        annot2plot.reset_index(drop=False, inplace=True)
 
         num_samples = min(len(annot2plot), num_samples)
 
@@ -506,6 +496,8 @@ Please check your image paths and update them if necessary.'
         train_transform: str | (Compose | Callable) | None = "train",
         val_transform: str | (Compose | Callable) | None = "val",
         test_transform: str | (Compose | Callable) | None = "test",
+        context_datasets: bool = False,
+        context_df: str | pd.DataFrame | None = None,
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -535,7 +527,11 @@ Please check your image paths and update them if necessary.'
             The transform to use on the test dataset images.
             Options are "train", "test" or "val" or, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose).
             By default "test".
-
+        context_datasets: bool, optional
+            Whether to create context datasets or not. By default False.
+        context_df: str or pandas.DataFrame, optional
+            The dataframe containing all patches if using context datasets.
+            Used to create context images. By default None.
 
         Raises
         ------
@@ -599,6 +595,40 @@ Please check your image paths and update them if necessary.'
             df_test = None
             assert len(self.annotations) == len(df_train) + len(df_val)
 
+        if context_datasets:
+            datasets = self.create_patch_context_datasets(
+                context_df,
+                train_transform,
+                val_transform,
+                test_transform,
+                df_train,
+                df_val,
+                df_test,
+            )
+        else:
+            datasets = self.create_patch_datasets(
+                train_transform,
+                val_transform,
+                test_transform,
+                df_train,
+                df_val,
+                df_test,
+            )
+
+        dataset_sizes = {
+            set_name: len(datasets[set_name]) for set_name in datasets.keys()
+        }
+
+        self.datasets = datasets
+        self.dataset_sizes = dataset_sizes
+
+        print("[INFO] Number of annotations in each set:")
+        for set_name in datasets.keys():
+            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
+
+    def create_patch_datasets(
+        self, train_transform, val_transform, test_transform, df_train, df_val, df_test
+    ):
         train_dataset = PatchDataset(
             df_train,
             train_transform,
@@ -630,16 +660,56 @@ Please check your image paths and update them if necessary.'
         else:
             datasets = {"train": train_dataset, "val": val_dataset}
 
-        dataset_sizes = {
-            set_name: len(datasets[set_name]) for set_name in datasets.keys()
-        }
+        return datasets
 
-        self.datasets = datasets
-        self.dataset_sizes = dataset_sizes
+    def create_patch_context_datasets(
+        self,
+        context_df,
+        train_transform,
+        val_transform,
+        test_transform,
+        df_train,
+        df_val,
+        df_test,
+    ):
+        train_dataset = PatchContextDataset(
+            df_train,
+            context_df,
+            transform=train_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
+            create_context=True,
+        )
+        val_dataset = PatchContextDataset(
+            df_val,
+            context_df,
+            transform=val_transform,
+            patch_paths_col=self.patch_paths_col,
+            label_col=self.label_col,
+            label_index_col="label_index",
+            create_context=True,
+        )
+        if df_test is not None:
+            test_dataset = PatchContextDataset(
+                df_test,
+                context_df,
+                transform=test_transform,
+                patch_paths_col=self.patch_paths_col,
+                label_col=self.label_col,
+                label_index_col="label_index",
+                create_context=True,
+            )
+            datasets = {
+                "train": train_dataset,
+                "val": val_dataset,
+                "test": test_dataset,
+            }
 
-        print("[INFO] Number of annotations in each set:")
-        for set_name in datasets.keys():
-            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
+        else:
+            datasets = {"train": train_dataset, "val": val_dataset}
+
+        return datasets
 
     def create_dataloaders(
         self,

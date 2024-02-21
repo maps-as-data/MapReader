@@ -216,7 +216,7 @@ class Annotator(pd.DataFrame):
         # Ensure unique values in list
         labels = sorted(set(labels), key=labels.index)
 
-        # Test for existing annotation file
+        # Test for existing patch annotation file
         if os.path.exists(annotations_file):
             print("[INFO] Loading existing patch annotations.")
             patch_df = self._load_annotations(
@@ -532,7 +532,7 @@ class Annotator(pd.DataFrame):
             im = Image.open(image_path)
 
             # Dim the image
-            if dim is True or dim == "True":
+            if dim in [True, "True"]:
                 im_array = np.array(im)
                 im_array = 256 - (256 - im_array) * 0.4  # lighten image
                 im = Image.fromarray(im_array.astype(np.uint8))
@@ -645,7 +645,7 @@ class Annotator(pd.DataFrame):
         resize_to: int | None = None,
         max_size: int | None = None,
     ) -> None:
-        """
+        """Annotate at the patch-level of the current patch.
         Renders the annotation interface for the first image.
 
         Parameters
@@ -674,9 +674,9 @@ class Annotator(pd.DataFrame):
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
 
-        Returns
-        -------
-        None
+        Notes
+        -----
+        This method is a wrapper for the ``_annotate`` method.
         """
         if sortby is not None:
             self._sortby = sortby
@@ -687,6 +687,42 @@ class Annotator(pd.DataFrame):
             self._min_values = min_values
         if max_values is not None:
             self._max_values = max_values
+
+        # re-set up queue using new min/max values
+        self._queue = self.get_queue()
+
+        self._annotate(
+            show_context=show_context,
+            surrounding=surrounding,
+            resize_to=resize_to,
+            max_size=max_size,
+        )
+
+    def _annotate(
+        self,
+        show_context: bool | None = None,
+        surrounding: int | None = None,
+        resize_to: int | None = None,
+        max_size: int | None = None,
+    ):
+        """
+        Renders the annotation interface for the first image.
+
+        Parameters
+        ----------
+        show_context : bool or None, optional
+            Whether or not to display the surrounding context for each image.
+            Default is None.
+        surrounding : int or None, optional
+            The number of surrounding images to show for context. Default: 1.
+        max_size : int or None, optional
+            The size in pixels for the longest side to which constrain each
+            patch image. Default: 100.
+
+        Returns
+        -------
+        None
+        """
 
         self.current_index = -1
         for button in self._buttons:
@@ -831,13 +867,13 @@ class Annotator(pd.DataFrame):
                 )
             )
 
-    def get_patch_image(self, ix: int) -> Image:
+    def get_patch_image(self, ix) -> Image:
         """
         Returns the image at the given index.
 
         Parameters
         ----------
-        ix : int
+        ix : int | str
             The index of the image in the dataframe.
 
         Returns
@@ -914,27 +950,26 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
+        filtered_df = self[self[self.label_col].notna()].copy(deep=True)
+
+        # force image_id to be index (incase of integer index)
+        # TODO: Force all indices to be integers so this is not needed
+        if ("image_id" in filtered_df.columns) and (
+            filtered_df.index.name != "image_id"
+        ):
+            filtered_df.set_index("image_id", drop=True, inplace=True)
+
+        if sort:
+            filtered_df.sort_values(by=["parent_id", "min_x", "min_y"], inplace=True)
+
         if index_labels:
-            col1 = self.filtered[self.label_col].apply(lambda x: self._labels.index(x))
-        else:
-            col1 = self.filtered[self.label_col]
-
-        if include_paths:
-            col2 = self.filtered[self.patch_paths_col]
-            df = pd.DataFrame(
-                {self.patch_paths_col: col2, self.label_col: col1},
-                index=pd.Index(col1.index, name="image_id"),
+            filtered_df[self.label_col] = filtered_df[self.label_col].apply(
+                lambda x: self._labels.index(x)
             )
-        else:
-            df = pd.DataFrame(col1, index=pd.Index(col1.index, name="image_id"))
-        if not sort:
-            return df
 
-        df["sort_value"] = df.index.to_list()
-        df["sort_value"] = df["sort_value"].apply(
-            lambda x: f"{x.split('#')[1]}-{x.split('#')[0]}"
-        )
-        return df.sort_values("sort_value").drop(columns=["sort_value"])
+        return filtered_df[
+            self.label_col, self.patch_paths_col, "parent_id", "pixel_bounds"
+        ]
 
     @property
     def filtered(self) -> pd.DataFrame:
