@@ -968,7 +968,7 @@ class Annotator(pd.DataFrame):
             )
 
         return filtered_df[
-            self.label_col, self.patch_paths_col, "parent_id", "pixel_bounds"
+            [self.label_col, self.patch_paths_col, "parent_id", "pixel_bounds"]
         ]
 
     @property
