@@ -1,5 +1,5 @@
 Project Curriculum Vitae
-===========
+=========================
 
 .. Notes to editors:
 .. 1. Add links to slides/videos (always add slides to mapreader.team@gmail.com drive)

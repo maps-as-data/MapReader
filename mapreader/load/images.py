@@ -1189,6 +1189,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         patch_parent = self.patches[patch_id]["parent_id"]
 
+        if patch_parent is None:
+            return
+
         if patch_parent not in self.parents.keys():
             self.load_parents(parent_ids=patch_parent)
 

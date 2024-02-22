@@ -1,5 +1,5 @@
 Developer's Guide
-================
+=================
 
 Managing version numbers
 ------------------------
