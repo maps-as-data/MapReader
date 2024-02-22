@@ -30,7 +30,7 @@ Pre-requisites
 Regardless of how you will be contributing to MapReader, you will need to:
 
 1. Ensure you have a `GitHub account <https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account>`_ set up.
-2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our :doc:`GitHub guide <Contribution-guide/GitHub-guide>` before continuing.
+2. Be able to use GitHub issues and pull requests - if you are unfamiliar with these, please look at our :doc:`GitHub guide </Contribution-guide/GitHub-guide>` before continuing.
 3. Set up a virtual python environment and install MapReader (as per our :doc:`Installation instructions </Install>`).
 4. Have read this guide.
 
