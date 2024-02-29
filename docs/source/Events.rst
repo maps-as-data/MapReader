@@ -2,7 +2,22 @@
 Events
 =======
 
-Upcoming Events
+Community Calls
+----------------
+We host online community calls every 2 months for friends of MapReader to meet up and discuss work in progress, feature requests, shared development tasks, or other issues and ideas. All are welcome. Details for joining are available in the Google notes doc for each call.
+
+*Upcoming calls*
+
+- April 18, 2024, 4-5pm UK time
+
+- June 20, 2024, 4-5pm UK time
+
+*Past calls*
+
+- February 15, 2024, 4-5pm UK time - `Notes <https://docs.google.com/document/d/155VlsYRbOEmmQDpDflWcTipFTfsKuPACWWmTKh6M820/edit#heading=h.t71vmryvuznf>`_
+
+
+Workshops
 ----------------
 
 Thanks to the new AHRC-supported project Data/Culture based at The Alan Turing Institute, we are offering a series of hands-on workshops to support a growing user community around MapReader during 2024.
