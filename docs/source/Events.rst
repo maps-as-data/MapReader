@@ -18,7 +18,6 @@ April 30-May 1, 2024 at The Alan Turing Institute, London, UK
 
 - Apply and find more details at https://www.turing.ac.uk/events/spring-dataculture-workshop-search-inside-maps-mapreader 
 
-
 **Summer Data/Culture Workshop: MapReader + Newspapers**
 
 June 5-7, 2024 in Lancaster, UK
