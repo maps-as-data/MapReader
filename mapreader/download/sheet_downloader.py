@@ -559,7 +559,7 @@ class SheetDownloader:
                 return False
         return False
 
-    def _download_map(self, feature: dict) -> bool:
+    def _download_map(self, feature: dict, download_in_parallel: bool = True) -> bool:
         """
         Downloads a single map sheet and saves as png file.
 
@@ -573,7 +573,9 @@ class SheetDownloader:
             True if map was downloaded successfully, False if not.
         """
         map_name = str("map_" + feature["properties"]["IMAGE"])
-        self.downloader.download_tiles(feature["grid_bb"])
+        self.downloader.download_tiles(
+            feature["grid_bb"], download_in_parallel=download_in_parallel
+        )
         success = self.merger.merge(feature["grid_bb"], map_name)
         if success:
             print(f'[INFO] Downloaded "{map_name}.png"')
@@ -681,6 +683,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ):
         """Download map sheets from a list of features.
@@ -695,6 +698,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_save_metadata()`` method.
         """
@@ -703,7 +708,9 @@ class SheetDownloader:
             if not overwrite:
                 if self._check_map_sheet_exists(feature):
                     continue
-            success = self._download_map(feature)
+            success = self._download_map(
+                feature, download_in_parallel=download_in_parallel
+            )
             if success:
                 metadata_path = f"{path_save}/{metadata_fname}"
                 self._save_metadata(
@@ -715,6 +722,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -728,6 +736,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
@@ -739,7 +749,12 @@ class SheetDownloader:
 
         features = self.features
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_wfs_ids(
@@ -748,6 +763,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -763,6 +779,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
@@ -794,7 +812,12 @@ class SheetDownloader:
                 features.append(feature)
 
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_polygon(
@@ -804,6 +827,7 @@ class SheetDownloader:
         metadata_fname: str | None = "metadata.csv",
         mode: str | None = "within",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -824,6 +848,8 @@ class SheetDownloader:
             By default "within".
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
@@ -869,7 +895,12 @@ class SheetDownloader:
                     features.append(feature)
 
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_coordinates(
@@ -878,6 +909,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -894,6 +926,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
@@ -922,7 +956,12 @@ class SheetDownloader:
                 features.append(feature)
 
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_line(
@@ -931,6 +970,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -946,6 +986,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
@@ -980,7 +1022,12 @@ class SheetDownloader:
                 features.append(feature)
 
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_string(
@@ -990,6 +1037,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -1013,6 +1061,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
 
@@ -1053,7 +1103,12 @@ class SheetDownloader:
                 features.append(feature)
 
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def download_map_sheets_by_queries(
@@ -1061,6 +1116,7 @@ class SheetDownloader:
         path_save: str | None = "maps",
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
+        download_in_parallel: bool = True,
         **kwargs: dict | None,
     ) -> None:
         """
@@ -1074,6 +1130,8 @@ class SheetDownloader:
             Name to use for metadata file, by default "metadata.csv"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
             Keyword arguments to pass to the ``_download_map_sheets()`` method.
         """
@@ -1088,7 +1146,12 @@ class SheetDownloader:
 
         features = self.found_queries
         self._download_map_sheets(
-            features, path_save, metadata_fname, overwrite, **kwargs
+            features,
+            path_save,
+            metadata_fname,
+            overwrite,
+            download_in_parallel=download_in_parallel,
+            **kwargs,
         )
 
     def hist_published_dates(self, **kwargs) -> None:
