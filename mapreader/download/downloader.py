@@ -61,20 +61,24 @@ class Downloader:
         """
         self.merger = TileMerger(output_folder=path_save, show_progress=False)
 
-    def _check_map_exists(self, grid_bb: GridBoundingBox) -> bool:
+    def _check_map_exists(self, grid_bb: GridBoundingBox, map_name: str | None) -> bool:
         """
         Checks if a map is already saved.
 
         Parameters
         ----------
         grid_bb : GridBoundingBox
+            The grid bounding box of the map
+        map_name : str, optional
+            Name to use when saving the map, by default None
 
         Returns
         -------
         bool
             True if file exists, False if not.
         """
-        map_name = self.merger._get_output_name(grid_bb)
+        if map_name is None:
+            map_name = self.merger._get_output_name(grid_bb)
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
             print(
@@ -83,22 +87,26 @@ class Downloader:
             return True
         return False
 
-    def _download_map(self, grid_bb: GridBoundingBox) -> bool:
+    def _download_map(self, grid_bb: GridBoundingBox, map_name: str | None) -> bool:
         """
         Downloads a map contained within a grid bounding box.
 
         Parameters
         ----------
         grid_bb : GridBoundingBox
+            The grid bounding box of the map
+        map_name : str, optional
+            Name to use when saving the map, by default None
 
         Returns
         -------
         bool
             True if map was successfully downloaded, False if not.
         """
-        map_name = self.merger._get_output_name(grid_bb)
+        if map_name is None:
+            map_name = self.merger._get_output_name(grid_bb)
         self.downloader.download_tiles(grid_bb, download_in_parallel=False)
-        success = self.merger.merge(grid_bb)
+        success = self.merger.merge(grid_bb, map_name)
         if success:
             print(f'[INFO] Downloaded "{map_name}.png"')
         else:
@@ -113,6 +121,7 @@ class Downloader:
         zoom_level: int | None = 14,
         path_save: str | None = "maps",
         overwrite: bool | None = False,
+        map_name: str | None = None,
     ) -> None:
         """
         Downloads a map contained within a polygon.
@@ -127,6 +136,8 @@ class Downloader:
             Path to save map sheets, by default "maps"
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        map_name : str, optional
+            Name to use when saving the map, by default None
         """
 
         assert isinstance(
@@ -147,6 +158,6 @@ Please pass polygon as shapely.geometry.Polygon object.\n\
         self._initialise_downloader()
         self._initialise_merger(f"{path_save}/")
         if not overwrite:
-            if self._check_map_exists(grid_bb):
+            if self._check_map_exists(grid_bb, map_name):
                 return
-        self._download_map(grid_bb)
+        self._download_map(grid_bb, map_name)
