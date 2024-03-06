@@ -107,19 +107,20 @@ This method will create a ``MapReader`` directory on your machine which will con
       cd MapReader
       pip install -v -e .
 
-Method 3: Install via conda (**EXPERIMENTAL**)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+..
+   Method 3: Install via conda (**EXPERIMENTAL**)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If neither of the above methods work, you can try installing MapReader using conda.
-This method is still in development so should be avoided for now.
+   If neither of the above methods work, you can try installing MapReader using conda.
+   This method is still in development so should be avoided for now.
 
-- Install MapReader directly from the conda package:
+   - Install MapReader directly from the conda package:
 
-.. code:: bash
+   .. code:: bash
 
-   conda install -c anothersmith -c conda-forge -c defaults --override-channels --strict-channel-priority mapreader
+      conda install -c anothersmith -c conda-forge -c defaults --override-channels --strict-channel-priority mapreader
 
-.. note:: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".
+   .. note:: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".
 
 Step 3: Add virtual python environment to notebooks
 ------------------------------------------------------
