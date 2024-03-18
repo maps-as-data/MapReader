@@ -57,6 +57,7 @@ setuptools.setup(
         "torchinfo<2.0.0",
         "openpyxl<4.0.0",
         "geopandas<1.0.0",
+        "pyogrio>=0.7.2",
     ],
     extras_require={
         "dev": [
