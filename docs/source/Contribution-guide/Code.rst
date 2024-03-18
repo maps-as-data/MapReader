@@ -19,6 +19,19 @@ In either case, before you begin working, either assign yourself to the issue or
 
 You will then need to fork the `MapReader repository <https://github.com/Living-with-machines/MapReader>`_ in order to make your changes.
 
+Installation in development mode
+--------------------------------
+
+To ensure you have all the required dependencies for development, in your development environment, please install MapReader using the following commands:
+
+.. code-block:: bash
+
+    git clone https://github.com/Living-with-machines/MapReader.git
+    cd MapReader
+    pip install -e ".[dev]"
+
+This will install MapReader in development mode, which means you can make changes to the code and see the effects without having to reinstall the package.
+
 Style guide
 -----------
 
@@ -35,6 +48,19 @@ When you are done making changes, please:
 
 - Run `black <https://black.readthedocs.io/en/stable/>` to reformat your code
 - Run `flake8 <https://flake8.pycqa.org/en/latest/index.html#>` to lint your code.
+
+
+Running tests
+-------------
+
+To run the tests, use the following command:
+
+.. code-block:: bash
+
+    python -m pytest .
+
+This will run all the tests in the MapReader package.
+
 
 When you are finished
 ----------------------
