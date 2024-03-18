@@ -67,7 +67,7 @@ The MapReader documentation can be found at https://mapreader.readthedocs.io/en/
 - Geospatial images (i.e. maps)
 - Non-geospatial images
 
- **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/api/index.html) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/Contribution-guide.html) for guidance on how to contribute to the MapReader package.
+ **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/api/index.html) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/Contribution-guide/Contribution-guide.html) for guidance on how to contribute to the MapReader package.
 
 **Join our Slack workspace!**
 Please fill out [this form](https://forms.gle/dXjECHZQkwrZ3Xpt9) to receive an invitation to the Slack workspace.
