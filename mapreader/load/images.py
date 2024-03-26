@@ -985,6 +985,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         tree_level: str | None = "parent",
         path_save: str | None = None,
         add_to_parents: bool | None = True,
+        square_cuts: bool | None = False,
         resize_factor: bool | None = False,
         output_format: str | None = "png",
         rewrite: bool | None = False,
@@ -1011,6 +1012,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         add_to_parents : bool, optional
             If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
+        square_cuts : bool, optional
+            If True, all patches will have the same number of pixels in
+            x and y, by default ``False``.
         resize_factor : bool, optional
             If True, resize the images before patchifying, by default ``False``.
         output_format : str, optional
@@ -1058,16 +1062,33 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     original_patch_size / mean_pixel_height
                 )  ## check this is correct - should patch be different size in x and y?
 
-            self._patchify_by_pixel(
-                image_id=image_id,
-                patch_size=patch_size,
-                path_save=path_save,
-                add_to_parents=add_to_parents,
-                resize_factor=resize_factor,
-                output_format=output_format,
-                rewrite=rewrite,
-                verbose=verbose,
-            )
+            if square_cuts:
+                print(
+                    "[WARNING] Square cuts is deprecated as of version 1.1.3 and will soon be removed."
+                )
+
+                self._patchify_by_pixel_square(
+                    image_id=image_id,
+                    patch_size=patch_size,
+                    path_save=path_save,
+                    add_to_parents=add_to_parents,
+                    resize_factor=resize_factor,
+                    output_format=output_format,
+                    rewrite=rewrite,
+                    verbose=verbose,
+                )
+
+            else:
+                self._patchify_by_pixel(
+                    image_id=image_id,
+                    patch_size=patch_size,
+                    path_save=path_save,
+                    add_to_parents=add_to_parents,
+                    resize_factor=resize_factor,
+                    output_format=output_format,
+                    rewrite=rewrite,
+                    verbose=verbose,
+                )
 
     def _patchify_by_pixel(
         self,
@@ -1153,6 +1174,94 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                             f"[ERROR] Patch size is {patch.height}x{patch.width} instead of {patch_size}x{patch_size}."
                         )
 
+                    patch.save(patch_path, output_format)
+
+                if add_to_parents:
+                    self._images_constructor(
+                        image_path=patch_path,
+                        parent_path=parent_path,
+                        tree_level="patch",
+                        pixel_bounds=(min_x, min_y, max_x, max_y),
+                    )
+                    self._add_patch_coords_id(patch_id)
+                    self._add_patch_polygons_id(patch_id)
+
+    def _patchify_by_pixel_square(
+        self,
+        image_id: str,
+        patch_size: int,
+        path_save: str,
+        add_to_parents: bool | None = True,
+        resize_factor: bool | None = False,
+        output_format: str | None = "png",
+        rewrite: bool | None = False,
+        verbose: bool | None = False,
+    ):
+        """Patchify one image and (if ``add_to_parents=True``) add the patch to the MapImages instance's ``images`` dictionary.
+        Use square cuts for patches at edges.
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the image to patchify
+        patch_size : int
+            Number of pixels in both x and y to use for slicing
+        path_save : str
+            Directory to save the patches.
+        add_to_parents : bool, optional
+            If True, patches will be added to the MapImages instance's
+            ``images`` dictionary, by default ``True``.
+        resize_factor : bool, optional
+            If True, resize the images before patchifying, by default ``False``.
+        output_format : str, optional
+            Format to use when writing image files, by default ``"png"``.
+        rewrite : bool, optional
+            If True, existing patches will be rewritten, by default ``False``.
+        verbose : bool, optional
+            If True, progress updates will be printed throughout, by default
+            ``False``.
+        """
+        tree_level = self._get_tree_level(image_id)
+
+        parent_path = self.images[tree_level][image_id]["image_path"]
+        img = Image.open(parent_path)
+
+        if resize_factor:
+            original_height, original_width = img.height, img.width
+            img = img.resize(
+                (
+                    int(original_width / resize_factor),
+                    int(original_height / resize_factor),
+                )
+            )
+
+        height, width = img.height, img.width
+
+        for x in range(0, width, patch_size):
+            for y in range(0, height, patch_size):
+                max_x = min(x + patch_size, width)
+                max_y = min(y + patch_size, height)
+
+                # move min_x and min_y back a bit so the patch is square
+                min_x = x - (patch_size - (max_x - x))
+                min_y = y - (patch_size - (max_y - y))
+
+                patch_id = f"patch-{min_x}-{min_y}-{max_x}-{max_y}-#{image_id}#.{output_format}"
+                patch_path = os.path.join(path_save, patch_id)
+                patch_path = os.path.abspath(patch_path)
+
+                if os.path.isfile(patch_path) and not rewrite:
+                    self._print_if_verbose(
+                        f"[INFO] File already exists: {patch_path}.", verbose
+                    )
+
+                else:
+                    self._print_if_verbose(
+                        f'[INFO] Creating "{patch_id}". Number of pixels in x,y: {max_x - min_x},{max_y - min_y}.',
+                        verbose,
+                    )
+
+                    patch = img.crop((min_x, min_y, max_x, max_y))
                     patch.save(patch_path, output_format)
 
                 if add_to_parents:
