@@ -1078,16 +1078,17 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     verbose=verbose,
                 )
 
-            self._patchify_by_pixel(
-                image_id=image_id,
-                patch_size=patch_size,
-                path_save=path_save,
-                add_to_parents=add_to_parents,
-                resize_factor=resize_factor,
-                output_format=output_format,
-                rewrite=rewrite,
-                verbose=verbose,
-            )
+            else:
+                self._patchify_by_pixel(
+                    image_id=image_id,
+                    patch_size=patch_size,
+                    path_save=path_save,
+                    add_to_parents=add_to_parents,
+                    resize_factor=resize_factor,
+                    output_format=output_format,
+                    rewrite=rewrite,
+                    verbose=verbose,
+                )
 
     def _patchify_by_pixel(
         self,
