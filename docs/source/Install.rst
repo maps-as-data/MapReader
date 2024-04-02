@@ -97,7 +97,7 @@ This is probably the easiest way to install MapReader.
       pip install mapreader
 
 
-.. note:: Replace `pip install mapreader` with `pip install "mapreader[geo]"` if you would like to install cartopy with your mapreader installation.
+.. note:: Replace ``pip install mapreader`` with ``pip install "mapreader[geo]"`` if you would like to install cartopy with your mapreader installation.
 
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,7 +121,7 @@ This method will create a ``MapReader`` directory on your machine which will con
       pip install -v -e .
 
 
-.. note:: Replace `pip install -v -e .` with `pip install -v -e ".[geo]" if you would like to install cartopy with your mapreader installation.
+.. note:: Replace ``pip install -v -e .`` with ``pip install -v -e ".[geo]"`` if you would like to install cartopy with your mapreader installation.
 
 ..
    Method 3: Install via conda (**EXPERIMENTAL**)
