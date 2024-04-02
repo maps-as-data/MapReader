@@ -68,7 +68,10 @@ setuptools.setup(
             "black>=23.7.0,<24.0.0",
             "flake8>=6.0.0,<7.0.0",
         ]
-    },
+        "geo": [
+            "cartopy>=0.20.0"
+        ]
+    },  
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
