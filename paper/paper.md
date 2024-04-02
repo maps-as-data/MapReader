@@ -10,12 +10,14 @@ tags:
   - maps
   - history
 authors:
-  - name: Katherine McDonough
-    orcid: 0000-0001-7506-1025
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-    corresponding: true # (This is how to denote the corresponding author)
-  - name: Daniel C.S. Wilson
-    orcid: 0000-0001-6886-775X
+  - name: Rosie Wood
+    orcid: 0000-0003-1623-1949
+    affiliation: 1
+  - name: Kasra Hosseini
+    orcid: 0000-0003-4396-6019
+    affiliation: "1, 4"
+  - name: Kalle Westerling
+    orcid: 0000-0002-2014-332X
     affiliation: 1
   - name: Andrew Smith
     orcid: 0000-0002-4465-2284
@@ -23,15 +25,13 @@ authors:
   - name: Kaspar Beelen
     orcid: 0000-0001-7331-1174
     affiliation: 3
-  - name: Kalle Westerling
-    orcid: 0000-0002-2014-332X
+  - name: Daniel C.S. Wilson
+    orcid: 0000-0001-6886-775X
     affiliation: 1
-  - name: Rosie Wood
-    orcid: 0000-0003-1623-1949
-    affiliation: 1
-  - name: Kasra Hosseini
-    orcid: 0000-0003-4396-6019
-    affiliation: "1, 4"
+  - name: Katherine McDonough
+    orcid: 0000-0001-7506-1025
+    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    corresponding: true # (This is how to denote the corresponding author)
 affiliations:
  - name: The Alan Turing Institute, London, United Kingdom
    index: 1
