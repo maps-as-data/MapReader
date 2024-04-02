@@ -26,7 +26,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     platforms="OS Independent",
-    python_requires=">=3.7, <3.11",
+    python_requires=">=3.8, <3.11",
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
@@ -67,8 +67,11 @@ setuptools.setup(
             "transformers<5.0.0",
             "black>=23.7.0,<24.0.0",
             "flake8>=6.0.0,<7.0.0",
-        ]
-    },
+        ],
+        "geo": [
+            "cartopy>=0.20.0"
+        ],
+    },  
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
