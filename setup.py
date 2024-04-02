@@ -26,7 +26,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     platforms="OS Independent",
-    python_requires=">=3.7, <3.11",
+    python_requires=">=3.8, <3.11",
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
