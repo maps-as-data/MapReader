@@ -61,7 +61,7 @@ setuptools.setup(
     ],
     extras_require={
         "dev": [
-            "pytest<8.0.0",
+            "pytest<9.0.0",
             "pytest-cov>=4.1.0,<5.0.0",
             "timm<1.0.0",
             "transformers<5.0.0",
