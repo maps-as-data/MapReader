@@ -66,7 +66,7 @@ setuptools.setup(
             "timm<1.0.0",
             "transformers<5.0.0",
             "black>=23.7.0,<25.0.0",
-            "flake8>=6.0.0,<7.0.0",
+            "flake8>=6.0.0,<8.0.0",
         ],
         "geo": [
             "cartopy>=0.20.0"
