@@ -17,7 +17,7 @@ You should choose one method within each step and follow the instructions for th
 Step 1: Set up a virtual python environment
 ----------------------------------------------
 
-MapReader supports python versions 3.8 to 3.10.
+MapReader supports python versions 3.9+.
 
 Method 1: Using conda (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,9 +31,9 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    .. code-block:: bash
 
-      conda create -n mapreader python=3.8
+      conda create -n mapreader python=3.9
 
-   This will create a conda enviroment which uses python version 3.8.
+   This will create a conda enviroment which uses python version 3.9.
 
 -  Activate your conda environment:
 
@@ -54,7 +54,7 @@ For example, if you would like to use venv, open your terminal and use the follo
 
       python3 --version
 
-   If this returns a version below 3.7, you will need download an updated python version.
+   If this returns a version below 3.9, you will need download an updated python version.
    You can do this by downloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
 
    You should then run the above command again to check your python version has updated.
