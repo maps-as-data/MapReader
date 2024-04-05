@@ -13,6 +13,4 @@ updates:
       - "rwood-97"
     labels:
       - "dependencies"
-    target-branch: 
-      - "dev_dependencies"
-    
+    target-branch: "dev_dependencies"
