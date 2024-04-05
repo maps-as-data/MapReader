@@ -65,7 +65,7 @@ setuptools.setup(
             "pytest-cov>=4.1.0,<5.0.0",
             "timm<1.0.0",
             "transformers<5.0.0",
-            "black>=23.7.0,<24.0.0",
+            "black>=23.7.0,<25.0.0",
             "flake8>=6.0.0,<7.0.0",
         ],
         "geo": [
