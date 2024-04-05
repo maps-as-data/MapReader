@@ -39,7 +39,7 @@ setuptools.setup(
         "scikit-image>=0.18.3",
         "scikit-learn>=1.0.1,<2.0.0",
         "torch>=1.10.0,<2.0.0",
-        "torchvision>=0.11.1,<0.12.1",
+        "torchvision>=0.11.1,<0.17.3",
         "jupyter>=1.0.0,<2.0.0",
         "ipykernel>=6.5.1,<7.0.0",
         "ipywidgets>=8.0.0,<9.0.0",
