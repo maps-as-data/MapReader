@@ -74,16 +74,6 @@ For example, if you would like to use venv, open your terminal and use the follo
 Step 2: Install MapReader
 --------------------------
 
-Cartopy
-~~~~~~~~
-
-`Cartopy <https://scitools.org.uk/cartopy/docs/latest/>`__ is used by MapReader's download subpackage to plot maps and geospatial data.
-It is not essential to the functioning of MapReader and so is not listed as a required dependancy.
-
-If you would like to use MapReader's plotting functions, you will need to ensure you have installed the `required dependencies <https://scitools.org.uk/cartopy/docs/latest/installing.html#required-dependencies>`__ for cartopy.
-
-Then, to install cartopy with your mapreader installation, you should install mapreader with the `geo` optional dependencies (see notes below).
-
 Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -96,8 +86,6 @@ This is probably the easiest way to install MapReader.
 
       pip install mapreader
 
-
-.. note:: Replace ``pip install mapreader`` with ``pip install "mapreader[geo]"`` if you would like to install cartopy with your mapreader installation.
 
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,8 +108,6 @@ This method will create a ``MapReader`` directory on your machine which will con
       cd MapReader
       pip install -v -e .
 
-
-.. note:: Replace ``pip install -v -e .`` with ``pip install -v -e ".[geo]"`` if you would like to install cartopy with your mapreader installation.
 
 ..
    Method 3: Install via conda (**EXPERIMENTAL**)
