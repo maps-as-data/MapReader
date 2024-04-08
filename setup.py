@@ -57,6 +57,7 @@ setuptools.setup(
         "openpyxl<4.0.0",
         "geopandas<1.0.0",
         "pyogrio>=0.7.2",
+        "cartopy>=0.22.0",
     ],
     extras_require={
         "dev": [
@@ -67,7 +68,6 @@ setuptools.setup(
             "black>=23.7.0,<25.0.0",
             "flake8>=6.0.0,<8.0.0",
         ],
-        "geo": ["cartopy>=0.20.0"],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
