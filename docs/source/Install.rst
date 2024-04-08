@@ -17,7 +17,7 @@ You should choose one method within each step and follow the instructions for th
 Step 1: Set up a virtual python environment
 ----------------------------------------------
 
-MapReader supports python versions 3.9+.
+The most recent version of MapReader supports python versions 3.9+.
 
 Method 1: Using conda (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
