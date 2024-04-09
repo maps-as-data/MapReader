@@ -31,9 +31,9 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    .. code-block:: bash
 
-      conda create -n mapreader python=3.9
+      conda create -n mapreader
 
-   This will create a conda enviroment which uses python version 3.9.
+   This will create a conda enviroment for you to install MapReader and its dependencies into.
 
 -  Activate your conda environment:
 
