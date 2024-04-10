@@ -206,12 +206,15 @@ class DeepSoloRunner:
 
     def run_all(
         self,
+        patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
     ) -> dict | pd.DataFrame:
         """Run the model on all images in the patch dataframe.
 
         Parameters
         ----------
+        patch_df : pd.DataFrame, optional
+            Dataframe containing patch information, by default None.
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
 
@@ -220,8 +223,12 @@ class DeepSoloRunner:
         dict or pd.DataFrame
             A dictionary of predictions for each patch image or a DataFrame if `as_dataframe` is True.
         """
-
-        img_paths = self.patch_df["image_path"].to_list()
+        if patch_df is None:
+            if self.patch_df is not None:
+                patch_df = self.patch_df
+            else:
+                raise ValueError("[ERROR] Please provide a `patch_df`")
+        img_paths = patch_df["image_path"].to_list()
 
         patch_predictions = self.run_on_images(
             img_paths, return_dataframe=return_dataframe
