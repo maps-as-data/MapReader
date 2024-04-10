@@ -12,7 +12,10 @@ from mapreader.classify.datasets import PatchContextDataset
 from mapreader.classify.classifier import ClassifierContainer
 from mapreader.classify import custom_models
 
-from mapreader.text_spot.runner import DeepSoloRunner
+try:
+    from mapreader.text_spot.runner import DeepSoloRunner
+except ImportError:
+    pass
 
 from mapreader.process import process
 
