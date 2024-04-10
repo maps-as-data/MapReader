@@ -95,7 +95,7 @@ def prepare_data(
             ).values
             if random_state in ["random"]:
                 df = df.groupby("pixel_groups").sample(
-                    n=10, random_state=random.randint(0, 1e6)
+                    n=10, random_state=random.randint(0, int(1e6))
                 )
             else:
                 df = df.groupby("pixel_groups").sample(n=10, random_state=random_state)
