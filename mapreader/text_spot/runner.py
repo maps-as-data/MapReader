@@ -21,6 +21,8 @@ try:
 except ImportError:
     raise ImportError("Please install Detectron2")
 
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 from PIL import Image
 from shapely import LineString, Polygon
 
@@ -530,6 +532,7 @@ class DeepSoloRunner:
             for k in preds.keys()
         )
         preds_df.index.name = "image_id"
+        preds_df.reset_index(inplace=True)  # reset index to get image_id as a column
         return preds_df
 
     def save_to_geojson(
@@ -552,3 +555,86 @@ class DeepSoloRunner:
 
         geo_df = geopd.GeoDataFrame(geo_df, geometry="polygon", crs=crs)
         geo_df.to_file(save_path, driver="GeoJSON")
+
+    def show(
+        self,
+        image_id: str,
+        figsize: tuple | None = (10, 10),
+        border_color: str | None = "r",
+        text_color: str | None = "b",
+        image_width_resolution: int | None = None,
+        return_fig: bool = False,
+    ) -> None:
+        """Show the predictions on an image.
+
+        Parameters
+        ----------
+        image_id : str
+            The image ID to show the predictions on.
+        figsize : tuple | None, optional
+            The size of the figure, by default (10, 10)
+        border_color : str | None, optional
+            The color of the border of the polygons, by default "r"
+        text_color : str | None, optional
+            The color of the text, by default "b"
+        image_width_resolution : int | None, optional
+            The maximum resolution of the image width, by default None
+        return_fig : bool, optional
+            Whether to return the figure, by default False
+
+        Returns
+        -------
+        fig
+            The matplotlib figure if `return_fig` is True.
+
+        Raises
+        ------
+        ValueError
+            If the image ID is not found in the patch or parent predictions.
+        """
+
+        if image_id in self.patch_predictions.keys():
+            preds = self.patch_predictions
+            image_path = self.patch_df.loc[image_id, "image_path"]
+
+        elif image_id in self.parent_predictions.keys():
+            preds = self.parent_predictions
+            image_path = self.parent_df.loc[image_id, "image_path"]
+
+        else:
+            raise ValueError(
+                f"[ERROR] {image_id} not found in patch or parent predictions."
+            )
+
+        img = Image.open(image_path)
+
+        # if image_width_resolution is specified, resize the image
+        if image_width_resolution:
+            new_width = int(image_width_resolution)
+            rescale_factor = new_width / img.width
+            new_height = int(img.height * rescale_factor)
+            img = img.resize((new_width, new_height), Image.LANCZOS)
+
+        fig = plt.figure(figsize=figsize)
+        ax = plt.gca()
+
+        # check if grayscale
+        if len(img.getbands()) == 1:
+            ax.imshow(img, cmap="gray", vmin=0, vmax=255, zorder=1)
+        else:
+            ax.imshow(img, zorder=1)
+
+        for instance in preds[image_id]:
+            polygon = np.array(instance[0].exterior.coords.xy)
+            center = instance[0].centroid.coords.xy
+            patch = patches.Polygon(polygon.T, edgecolor=border_color, facecolor="none")
+            ax.add_patch(patch)
+            ax.text(
+                center[0][0], center[1][0], instance[1], fontsize=8, color=text_color
+            )
+
+        plt.axis("off")
+        plt.title(image_id)
+
+        if return_fig:
+            return fig
