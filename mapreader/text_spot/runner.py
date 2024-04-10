@@ -4,14 +4,28 @@ import os
 import pathlib
 import pickle
 
-import adet
+try:
+    import adet
+except ImportError:
+    raise ImportError(
+        "Please install DeepSolo from the following link: https://github.com/rwood-97/DeepSolo"
+    )
+
 import geopandas as geopd
 import numpy as np
 import pandas as pd
 from adet.config import get_cfg
-from detectron2.engine import DefaultPredictor
+
+try:
+    from detectron2.engine import DefaultPredictor
+except ImportError:
+    raise ImportError("Please install Detectron2")
+
 from PIL import Image
 from shapely import LineString, Polygon
+
+# first assert we are using the deep solo version of adet
+assert adet.__version__ == "0.2.0-deepsolo"
 
 
 class DeepSoloRunner:
@@ -25,9 +39,6 @@ class DeepSoloRunner:
         | pathlib.Path = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth",
         device: str = "cpu",
     ) -> None:
-        # first assert we are using the deep solo version of adet
-        assert adet.__version__ == "0.2.0-deepsolo"
-
         # setup the dataframes
         self.patch_df = patch_df
         self.parent_df = parent_df
@@ -192,6 +203,30 @@ class DeepSoloRunner:
 
         # setup the predictor
         self.predictor = DefaultPredictor(cfg)
+
+    def run_all(
+        self,
+        return_dataframe: bool = False,
+    ) -> dict | pd.DataFrame:
+        """Run the model on all images in the patch dataframe.
+
+        Parameters
+        ----------
+        return_dataframe : bool, optional
+            Whether to return the predictions as a pandas DataFrame, by default False
+
+        Returns
+        -------
+        dict or pd.DataFrame
+            A dictionary of predictions for each patch image or a DataFrame if `as_dataframe` is True.
+        """
+
+        img_paths = self.patch_df["image_path"].to_list()
+
+        patch_predictions = self.run_on_images(
+            img_paths, return_dataframe=return_dataframe
+        )
+        return patch_predictions
 
     def run_on_images(
         self,
