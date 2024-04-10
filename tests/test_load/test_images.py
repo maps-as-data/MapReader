@@ -431,6 +431,18 @@ def test_patchify_pixels(sample_dir, image_id, tmp_path):
     assert os.path.isfile(f"{tmp_path}/patch-0-0-3-3-#{image_id}#.png")
 
 
+def test_patchify_pixels_square(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=5, path_save=f"{tmp_path}_square", square_cuts=True)
+    parent_list = maps.list_parents()
+    patch_list = maps.list_patches()
+    print(patch_list, flush=True)
+    assert len(parent_list) == 1
+    assert len(patch_list) == 4
+    assert os.path.isfile(f"{tmp_path}_square/patch-0-0-5-5-#{image_id}#.png")
+    assert os.path.isfile(f"{tmp_path}_square/patch-4-4-9-9-#{image_id}#.png")
+
+
 def test_patchify_meters(sample_dir, image_id, tmp_path):
     maps = MapImages(f"{sample_dir}/{image_id}")
     maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")

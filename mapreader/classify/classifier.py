@@ -7,8 +7,9 @@ import random
 import socket
 import sys
 import time
+from collections.abc import Hashable, Iterable
 from datetime import datetime
-from typing import Any, Hashable, Iterable
+from typing import Any
 
 import joblib
 import matplotlib.pyplot as plt
@@ -167,7 +168,7 @@ class ClassifierContainer:
             if not os.path.exists("./tmp_checkpoints"):
                 os.makedirs("./tmp_checkpoints")
             self.tmp_save_filename = (
-                f"./tmp_checkpoints/tmp_{random.randint(0, 1e10)}_checkpoint.pkl"
+                f"./tmp_checkpoints/tmp_{random.randint(0, int(1e10))}_checkpoint.pkl"
             )
 
             # add colors for printing/logging
