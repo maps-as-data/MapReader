@@ -25,8 +25,11 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from shapely import Polygon
 
-# first assert we are using the deep solo version of adet
-assert adet.__version__ == "0.2.0-dptext-detr"
+# first assert we are using the dptext detr version of adet
+if adet.__version__ != "0.2.0-dptext-detr":
+    raise ImportError(
+        "Please install DPText-DETR from the following link: https://github.com/rwood-97/DPText-DETR"
+    )
 
 
 class DPTextDETRRunner:
@@ -59,6 +62,37 @@ class DPTextDETRRunner:
 
         # setup the predictor
         self.predictor = DefaultPredictor(cfg)
+
+    def run_all(
+        self,
+        patch_df: pd.DataFrame = None,
+        return_dataframe: bool = False,
+    ) -> dict | pd.DataFrame:
+        """Run the model on all images in the patch dataframe.
+
+        Parameters
+        ----------
+        patch_df : pd.DataFrame, optional
+            Dataframe containing patch information, by default None.
+        return_dataframe : bool, optional
+            Whether to return the predictions as a pandas DataFrame, by default False
+
+        Returns
+        -------
+        dict or pd.DataFrame
+            A dictionary of predictions for each patch image or a DataFrame if `as_dataframe` is True.
+        """
+        if patch_df is None:
+            if self.patch_df is not None:
+                patch_df = self.patch_df
+            else:
+                raise ValueError("[ERROR] Please provide a `patch_df`")
+        img_paths = patch_df["image_path"].to_list()
+
+        patch_predictions = self.run_on_images(
+            img_paths, return_dataframe=return_dataframe
+        )
+        return patch_predictions
 
     def run_on_images(
         self,

@@ -27,7 +27,10 @@ from PIL import Image
 from shapely import LineString, Polygon
 
 # first assert we are using the deep solo version of adet
-assert adet.__version__ == "0.2.0-deepsolo"
+if adet.__version__ != "0.2.0-deepsolo":
+    raise ImportError(
+        "Please install DeepSolo from the following link: https://github.com/rwood-97/DeepSolo"
+    )
 
 
 class DeepSoloRunner:
