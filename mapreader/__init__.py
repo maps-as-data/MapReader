@@ -13,7 +13,12 @@ from mapreader.classify.classifier import ClassifierContainer
 from mapreader.classify import custom_models
 
 try:
-    from mapreader.text_spot.runner import DeepSoloRunner
+    from MapReader.mapreader.text_spot.deepsolo_runner import DeepSoloRunner
+except ImportError:
+    pass
+
+try:
+    from mapreader.text_spot.text_spot.dptext_detr_runner import DPTextDETRRunner
 except ImportError:
     pass
 
