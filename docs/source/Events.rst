@@ -8,7 +8,7 @@ We host online community calls every 2 months for friends of MapReader to meet u
 
 *Upcoming calls*
 
-- April 18, 2024, 4-5pm UK time
+- April 18, 2024, 4-5pm UK time - `Notes and zoom link <https://docs.google.com/document/d/1CJFzwQzg9ZgviKVr9T_yKAY_SIzC6tl-sEOyJlpWMnw/edit#heading=h.t71vmryvuznf>`_
 
 - June 20, 2024, 4-5pm UK time
 
