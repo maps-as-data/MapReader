@@ -30,7 +30,7 @@ setuptools.setup(
     install_requires=[
         "matplotlib>=3.5.0,<4.0.0",
         "numpy>=1.21.5,<2.0.0",
-        "pandas>=1.3.4,<2.0.0",
+        "pandas>=2.0.0",
         "pyproj>=3.2.0,<4.0.0",
         "azure-storage-blob>=12.9.0,<13.0.0",
         "aiohttp>=3.8.1,<4.0.0",
@@ -54,7 +54,7 @@ setuptools.setup(
         "versioneer>=0.28",
         "tqdm<5.0.0",
         "torchinfo<2.0.0",
-        "openpyxl<4.0.0",
+        "openpyxl>=3.1.2,<4.0.0",
         "geopandas<1.0.0",
         "pyogrio>=0.7.2",
         "cartopy>=0.22.0",
