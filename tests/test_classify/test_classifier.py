@@ -371,9 +371,9 @@ def test_infer_timm_models(inputs, infer_inputs):
     for model in [
         "resnest50d_4s2x40d",
         "resnest101e",
-        "swsl_resnext101_32x8d",
+        "resnext101_32x8d.fb_swsl_ig1b_ft_in1k",
         "resnet152",
-        "tf_efficientnet_b3_ns",
+        "tf_efficientnet_b3.ns_jft_in1k",
         "swin_base_patch4_window7_224",
         "vit_base_patch16_224",
     ]:  # these are models from 2021 paper
