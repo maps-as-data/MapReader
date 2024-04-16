@@ -58,6 +58,7 @@ setuptools.setup(
         "geopandas<1.0.0",
         "pyogrio>=0.7.2",
         "cartopy>=0.22.0",
+        "joblib>=1.4.0",
     ],
     extras_require={
         "dev": [
