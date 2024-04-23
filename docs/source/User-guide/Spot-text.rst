@@ -3,8 +3,8 @@ Spot text
 
 MapReader now contains two new methods of spotting text on maps:
 
-- ``DPTextDETRRunner`` - This is used to detect text on maps using `DPTextDETR<https://github.com/ymy-k/DPText-DETR/tree/main>`__ and outputs bounding boxes and scores.
-- ``DeepSoloRunner`` - This is used to detect and recognise text on maps using `DeepSolo<https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
+- ``DPTextDETRRunner`` - This is used to detect text on maps using `DPTextDETR <https://github.com/ymy-k/DPText-DETR/tree/main>`__ and outputs bounding boxes and scores.
+- ``DeepSoloRunner`` - This is used to detect and recognise text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
 
 Install dependencies
 --------------------
@@ -17,18 +17,18 @@ To run these, you will need to install the required dependencies.
 
 For DPTextDETR, you need to install the following:
 
-- Detectron2 - main repo available [here](https://github.com/facebookresearch/detectron2)
-- DPText-DETR - our fork available [here](https://github.com/rwood-97/DPText-DETR)
+- Detectron2 - main repo available `here <https://github.com/facebookresearch/detectron2>`__
+- DPText-DETR - our fork available `here <https://github.com/rwood-97/DPText-DETR>`__
 
 For DeepSolo, you need to install the following:
 
-- Detectron2 - main repo available [here](https://github.com/facebookresearch/detectron2)
-- DeepSolo - our fork available [here](https://github.com/rwood-97/DeepSolo)
+- Detectron2 - main repo available `here <https://github.com/facebookresearch/detectron2>`__
+- DeepSolo - our fork available `here <https://github.com/rwood-97/DeepSolo>`__
 
 
 .. note::
 
-    Since both the DPText-DETR and DeepSolo repos are built ontop of `AdelaiDet<https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install both at the same. To get around this, you can set up two different conda environments, one for each.
+    Since both the DPText-DETR and DeepSolo repos are built ontop of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install both at the same. To get around this, you can set up two different conda environments, one for each.
 
 
 Set-up the runner
@@ -42,7 +42,7 @@ You will need to choose a model configuration and download the corresponding mod
 - e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml", you should download the "ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth" model weights file from the DeepSolo repo.
 
 You will also need to load your patch and parent dataframes.
-Assuming you have saved them, as shown in the `Load </User-guide/Load>` user guide, you can load them like so:
+Assuming you have saved them, as shown in the :doc:`Load </User-guide/Load>` user guide, you can load them like so:
 
 .. code-block:: python
 
