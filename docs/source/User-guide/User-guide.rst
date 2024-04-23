@@ -20,3 +20,4 @@ Please read this User Guide **before** looking through the worked examples.
    Annotate
    Classify/Classify
    Post-process
+   Spot-text
