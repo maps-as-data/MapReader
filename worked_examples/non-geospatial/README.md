@@ -1,10 +1,8 @@
 # MapReader and non-geospatial images
 
-- [Tutorials](#tutorials)
-  - [classification_plant_phenotype](./classification_plant_phenotype)
-  - [classification_mnist](./classification_mnist)
+[TOC]
 
-## Tutorials
+## Worked Examples
 
 - [classification_plant_phenotype](./classification_plant_phenotype)
   * **Goal:** train/fine-tune PyTorch CV classifiers on plant patches in images (plant phenotyping example).
