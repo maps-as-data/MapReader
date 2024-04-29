@@ -15,20 +15,52 @@ To run these, you will need to install the required dependencies.
 
     We have our own forks of these repos to enable them to work on CPU!
 
-For DPTextDETR, you need to install the following:
+Detectron2
+~~~~~~~~~~~
 
-- Detectron2 - main repo available `here <https://github.com/facebookresearch/detectron2>`__
-- DPText-DETR - our fork available `here <https://github.com/rwood-97/DPText-DETR>`__
+Detectron2 is a popular object detection library built by Facebook AI Research.
+The main repo is available `here <https://github.com/facebookresearch/detectron2>`__.
 
-For DeepSolo, you need to install the following:
+To install, run the following commands in your terminal:
 
-- Detectron2 - main repo available `here <https://github.com/facebookresearch/detectron2>`__
-- DeepSolo - our fork available `here <https://github.com/rwood-97/DeepSolo>`__
+.. code:: bash
+
+    git clone https://github.com/facebookresearch/detectron2.git
+    cd detectron2
+    pip install .
 
 
 .. note::
 
     Since both the DPText-DETR and DeepSolo repos are built ontop of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install both at the same. To get around this, you can set up two different conda environments, one for each.
+
+You should then pick one of the following to install:
+
+DPTextDETR
+~~~~~~~~~~~
+
+Our fork for DPText-DETR is available `here <https://github.com/rwood-97/DPText-DETR>`__.
+
+To install, run the following commands in your terminal:
+
+.. code:: bash
+
+    git clone https://github.com/rwood-97/DPText-DETR.git
+    cd DPText-DETR
+    pip install .
+
+DeepSolo
+~~~~~~~~
+
+Our fork for DeepSolo is available `here <https://github.com/rwood-97/DeepSolo>`__
+
+To install, run the following commands in your terminal:
+
+.. code:: bash
+
+    git clone https://github.com/rwood-97/DeepSolo.git
+    cd DeepSolo
+    pip install .
 
 
 Set-up the runner
