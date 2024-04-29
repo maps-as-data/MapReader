@@ -70,8 +70,12 @@ Once you have installed the dependencies, you can set up your chosen "runner".
 
 You will need to choose a model configuration and download the corresponding model weights.
 
-- e.g. for the ``DPTextDETRRunner``, if you choose the "ArT/R_50_poly.yaml", you should download the "art_final.pth" model weights file from the DPTextDETR repo.
-- e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml", you should download the "ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth" model weights file from the DeepSolo repo.
+- Config files can be found in the model repositories under the ``configs`` directory.
+- Weights files should be downloaded from the github repositories (links to the downloads are in the README).
+
+e.g. for the ``DPTextDETRRunner``, if you choose the "ArT/R_50_poly.yaml", you should download the "art_final.pth" model weights file from the DPTextDETR repo.
+
+e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml", you should download the "ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth" model weights file from the DeepSolo repo.
 
 You will also need to load your patch and parent dataframes.
 Assuming you have saved them, as shown in the :doc:`Load </User-guide/Load>` user guide, you can load them like so:
