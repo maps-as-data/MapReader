@@ -31,7 +31,7 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    .. code-block:: bash
 
-      conda create -n mapreader
+      conda create -n mapreader python=3.10
 
    This will create a conda enviroment for you to install MapReader and its dependencies into.
 

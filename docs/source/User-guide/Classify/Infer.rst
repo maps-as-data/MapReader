@@ -124,37 +124,24 @@ As with the "test" dataset, to see a sample of your predictions, use:
 
     my_classifier.show_inference_sample_results(label="railspace", set_name="infer")
 
+
+Save predictions
+~~~~~~~~~~~~~~~~~
+
+To save your predictions, use the ``.save_predictions()`` method.
+e.g. to save your predictions on the "infer" dataset:
+
+.. code-block:: python
+
+    my_classifier.save_predictions(set_name="infer")
+
+
 Add predictions to metadata and save
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To add your predictions to your patch metadata (saved in ``patch_df.csv``), you will need to add your predictions and confidence values to your ``infer`` dataset's dataframe.
+To add your predictions to your patch metadata (saved in ``patch_df.csv``), you will need to load your predictions as metadata in the ``MapImages`` object.
 
-This dataframe is saved as the datasets ``patch_df`` attribute.
-To view it, use:
-
-.. code-block:: python
-
-    infer.patch_df
-
-To add your predictions and confidence values to this dataframe use:
-
-.. code-block:: python
-
-    import numpy as np
-
-    infer.patch_df['predicted_label'] = my_classifier.pred_label
-    infer.patch_df['pred'] = my_classifier.pred_label_indices
-    infer.patch_df['conf'] = np.array(my_classifier.pred_conf).max(axis=1)
-
-If you view your dataframe again (by running ``infer.patch_df`` as above), you will see your predictions and confidence values have been added as columns.
-
-From here, you can either save your results using:
-
-.. code-block:: python
-
-    infer.patch_df.to_csv("predictions_patch_df.csv", sep=",")
-
-Or, you can use the ``MapImages`` object to create some visualizations of your results:
+To do this, you will need to create a new ``MapImages`` object and load in your patches and parent images:
 
 .. code-block:: python
 
@@ -162,8 +149,23 @@ Or, you can use the ``MapImages`` object to create some visualizations of your r
 
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
 
-    infer_df = infer.patch_df.reset_index(names="image_id") # ensure image_id is one of the columns
-    my_maps.add_metadata(infer_df, tree_level='patch') # add dataframe as metadata
+You can then add your predictions to the metadata using the ``.add_metadata()`` method:
+
+.. code-block:: python
+
+    my_maps.add_metadata("path_to_predictions_patch_df.csv", tree_level='patch') # add dataframe as metadata
+
+For example, to load the predictions for the "infer" dataset:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_maps.add_metadata("./infer_predictions_patch_df.csv", tree_level='patch')
+
+From here, you can use the ``.show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </User-guide/Load>` user guide:
+
+.. code-block:: python
+
     my_maps.add_shape()
 
     parent_list = my_maps.list_parents()
