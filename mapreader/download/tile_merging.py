@@ -191,11 +191,17 @@ class TileMerger:
             file_name = self._get_output_name(grid_bb)
 
         out_path = f"{self.output_folder}{file_name}.{self.img_output_format[0]}"
+        i = 1
+        while os.path.exists(out_path):
+            out_path = (
+                f"{self.output_folder}{file_name}_{i}.{self.img_output_format[0]}"
+            )
+            i += 1
         merged_image.save(out_path, self.img_output_format[1])
-        success = True if os.path.exists(out_path) else False
-        if success:
-            logger.info(f"Merge successful! The image has been stored at '{out_path}'")
-        else:
+        success = out_path if os.path.exists(out_path) else False
+        if success is False:
             logger.warning(f"Merge unsuccessful! '{out_path}' not saved.")
+        else:
+            logger.info(f"Merge successful! The image has been stored at '{out_path}'")
 
         return success

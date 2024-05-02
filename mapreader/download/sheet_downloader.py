@@ -533,7 +533,7 @@ class SheetDownloader:
         """
         self.merger = TileMerger(output_folder=f"{path_save}/")
 
-    def _check_map_sheet_exists(self, feature: dict) -> bool:
+    def _check_map_sheet_exists(self, feature: dict, metadata_fname) -> bool:
         """
         Checks if a map sheet is already saved.
 
@@ -550,11 +550,21 @@ class SheetDownloader:
         path_save = self.merger.output_folder
         if os.path.exists(f"{path_save}{map_name}.png"):
             try:
+                # check image is valid
                 mpimg.imread(f"{path_save}{map_name}.png")
-                print(
-                    f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.'
+
+                # check image has same coords in metadata too
+                existing_metadata_df = pd.read_csv(
+                    f"{path_save}{metadata_fname}", sep=",", index_col=0
                 )
-                return True
+                polygon = get_polygon_from_grid_bb(
+                    feature["grid_bb"]
+                )  # use grid_bb to get coords of actually downloaded tiles
+                if str(polygon.bounds) in existing_metadata_df["coordinates"].values:
+                    print(
+                        f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.'
+                    )
+                    return True
             except OSError:
                 return False
         return False
@@ -576,19 +586,20 @@ class SheetDownloader:
         self.downloader.download_tiles(
             feature["grid_bb"], download_in_parallel=download_in_parallel
         )
-        success = self.merger.merge(feature["grid_bb"], map_name)
-        if success:
-            print(f'[INFO] Downloaded "{map_name}.png"')
+        img_path = self.merger.merge(feature["grid_bb"], map_name)
+        if img_path is not False:
+            print(f'[INFO] Downloaded "{img_path}"')
         else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
+            print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
 
         shutil.rmtree(DEFAULT_TEMP_FOLDER)
-        return success
+        return img_path
 
     def _save_metadata(
         self,
         feature: dict,
         out_filepath: str,
+        img_path: str,
         metadata_to_save: dict | None = None,
         **kwargs: dict | None,
     ) -> None:
@@ -602,6 +613,8 @@ class SheetDownloader:
             The feature for which to extract the metadata from
         out_filepath : str
             The path to save metadata csv.
+        img_path : str
+            The path to the downloaded map sheet.
         metadata_to_save : dict, optional
             A dictionary containing column names (str) and metadata keys (str or list) to save to metadata csv.
             Multilayer keys should be passed as a list, i.e. ["key1","key2"] will search for ``self.features[i]["key1"]["key2"]``.
@@ -631,7 +644,7 @@ class SheetDownloader:
         metadata_dict = {col: None for col in metadata_cols}
 
         # get default metadata
-        metadata_dict["name"] = str("map_" + feature["properties"]["IMAGE"] + ".png")
+        metadata_dict["name"] = os.path.basename(img_path)
         metadata_dict["url"] = str(feature["properties"]["IMAGEURL"])
         if not self.published_dates:
             date_col = kwargs.get("date_col", None)
@@ -706,15 +719,18 @@ class SheetDownloader:
 
         for feature in tqdm(features):
             if not overwrite:
-                if self._check_map_sheet_exists(feature):
+                if self._check_map_sheet_exists(feature, metadata_fname):
                     continue
-            success = self._download_map(
+            img_path = self._download_map(
                 feature, download_in_parallel=download_in_parallel
             )
-            if success:
+            if img_path is not False:
                 metadata_path = f"{path_save}/{metadata_fname}"
                 self._save_metadata(
-                    feature=feature, out_filepath=metadata_path, **kwargs
+                    feature=feature,
+                    out_filepath=metadata_path,
+                    img_path=img_path,
+                    **kwargs,
                 )
 
     def download_all_map_sheets(
