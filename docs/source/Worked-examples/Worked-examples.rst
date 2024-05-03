@@ -1,10 +1,10 @@
 Worked Examples
 ================
 
-We have provided a number of worked examples to demonstrate how to use the MapReader package.
+We have provided a number of worked examples to demonstrate how to use MapReader.
 These examples can be found in the `worked_examples <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples>`_ directory of the repository.
 
-Maps and geospatial images
+Geospatial images: Maps and earth observation imagery
 --------------------------
 
 MapReader was developed for maps and geospatial images.
@@ -30,7 +30,7 @@ It can be found `here <https://github.com/Living-with-machines/MapReader/blob/ma
 Non-geospatial images
 ---------------------
 
-MapReader can also for non-geospatial images.
+MapReader can also be used for non-geospatial images.
 We have provided two examples of this.
 
 Classification of plant phenotypes
