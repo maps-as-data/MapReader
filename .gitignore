@@ -11,3 +11,4 @@ docs/source/api/mapreader/
 dist/
 .coverage
 .coverage.*
+build/

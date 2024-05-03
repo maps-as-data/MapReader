@@ -1753,7 +1753,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         counter=-1,
                     )
 
-                ax.set_title(image_id)
+                ax.set_title(parent_id)
                 figures.append(fig)
 
                 if column_to_plot and plot_histogram:
