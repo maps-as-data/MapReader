@@ -5,7 +5,7 @@ We have provided a number of worked examples to demonstrate how to use MapReader
 These examples can be found in the `worked_examples <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples>`_ directory of the repository.
 
 Geospatial images: Maps and earth observation imagery
---------------------------
+-----------------------------------------------------
 
 MapReader was developed for maps and geospatial images.
 
