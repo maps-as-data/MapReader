@@ -1,6 +1,6 @@
 {
     "type": "FeatureCollection",
-    "totalFeatures": 4,
+    "totalFeatures": 6,
     "features": [
         {
             "type": "Feature",
@@ -217,6 +217,194 @@
                 "WFS_TITLE": "London VI.SE, Revised: 1893 to 1894, Published: 1894 to 1896",
                 "test": "test"
             }
+        },
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.107",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -4.7674,
+                                53.2872
+                            ],
+                            [
+                                -4.7682,
+                                53.3161
+                            ],
+                            [
+                                -4.6957,
+                                53.3168
+                            ],
+                            [
+                                -4.695,
+                                53.2879
+                            ],
+                            [
+                                -4.7674,
+                                53.2872
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "IMAGE": "101603986",
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "SET": "6Q_A",
+                "COUNTRY": "WAL",
+                "COUNTY": "Anglesey",
+                "SHEET_MAP": "X.NE & XI.NW",
+                "SHEET_NO": "010_NE",
+                "EDITION": "2",
+                "INSET_EXT": "",
+                "RESURVEY": "",
+                "SUR_STA": "1899",
+                "SUR_END": "1899",
+                "PSUR_STA": "",
+                "PSUR_END": "",
+                "ENG_STA": "",
+                "ENG_END": "",
+                "REV_STA": "",
+                "REV_END": "",
+                "PUB_STA": "1901",
+                "PUB_END": "1901",
+                "PPUB_STA": "",
+                "PPUB_END": "",
+                "PRI_STA": "",
+                "PRI_END": "",
+                "RPRI_STA": "",
+                "RPRI_END": "",
+                "MSD_SIG": "",
+                "LEV_STA": "",
+                "LEV_END": "",
+                "BOUND_STA": "",
+                "BOUND_END": "",
+                "SUR_SORT": "1899",
+                "PUB_SORT": "1901",
+                "PARISH": "Holyhead Rural; Holyhead Urban",
+                "RAILWAYS": "",
+                "RECORDSET": "",
+                "BNDRY_INST": "",
+                "YEAR": "1901",
+                "GROUP": "102",
+                "IN_NLS": "Y",
+                "NOTE_MAP": "",
+                "NOTE_LIST": "",
+                "SHEET": "Anglesey X.NE & XI.NW",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1899<br>Published: 1901",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1016/0398/101603986.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/101603986",
+                "IIIF_JSON": "https://map-view.nls.uk/iiif/2/10160%2F101603986/info.json",
+                "WFS_TITLE": "Anglesey X.NE & XI.NW, Revised: 1899, Published: 1901",
+                "WFS": "Y",
+                "OR_Num": "0",
+                "test": "test"
+            },
+            "bbox": [
+                -4.7682,
+                53.2872,
+                -4.695,
+                53.3168
+            ]
+        },
+        {
+            "type": "Feature",
+            "id": "Six_Inch_GB_WFS.116",
+            "test_date": "2021",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                -4.695,
+                                53.2879
+                            ],
+                            [
+                                -4.6957,
+                                53.3168
+                            ],
+                            [
+                                -4.6233,
+                                53.3175
+                            ],
+                            [
+                                -4.6226,
+                                53.2885
+                            ],
+                            [
+                                -4.695,
+                                53.2879
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "geometry_name": "the_geom",
+            "properties": {
+                "IMAGE": "101603986",
+                "SERIES": "OS 6 Inch to the Mile - England & Wales",
+                "SET": "6Q_A",
+                "COUNTRY": "WAL",
+                "COUNTY": "Anglesey",
+                "SHEET_MAP": "X.NE & XI.NW",
+                "SHEET_NO": "011_NW",
+                "EDITION": "2",
+                "INSET_EXT": "",
+                "RESURVEY": "",
+                "SUR_STA": "1899",
+                "SUR_END": "1899",
+                "PSUR_STA": "",
+                "PSUR_END": "",
+                "ENG_STA": "",
+                "ENG_END": "",
+                "REV_STA": "",
+                "REV_END": "",
+                "PUB_STA": "1901",
+                "PUB_END": "1901",
+                "PPUB_STA": "",
+                "PPUB_END": "",
+                "PRI_STA": "",
+                "PRI_END": "",
+                "RPRI_STA": "",
+                "RPRI_END": "",
+                "MSD_SIG": "",
+                "LEV_STA": "",
+                "LEV_END": "",
+                "BOUND_STA": "",
+                "BOUND_END": "",
+                "SUR_SORT": "1899",
+                "PUB_SORT": "1901",
+                "PARISH": "Holyhead Rural; Holyhead Urban",
+                "RAILWAYS": "",
+                "RECORDSET": "",
+                "BNDRY_INST": "",
+                "YEAR": "1901",
+                "GROUP": "102",
+                "IN_NLS": "Y",
+                "NOTE_MAP": "",
+                "NOTE_LIST": "",
+                "SHEET": "Anglesey X.NE & XI.NW",
+                "DATES": "Series: Ordnance Survey. Six-inch to the mile<br>Revised: 1899<br>Published: 1901",
+                "IMAGETHUMB": "https://deriv.nls.uk/dcn4/1016/0398/101603986.4.jpg",
+                "IMAGEURL": "https://maps.nls.uk/view/101603986",
+                "IIIF_JSON": "https://map-view.nls.uk/iiif/2/10160%2F101603986/info.json",
+                "WFS_TITLE": "Anglesey X.NE & XI.NW, Revised: 1899, Published: 1901",
+                "WFS": "Y",
+                "OR_Num": "0",
+                "test": "test"
+            },
+            "bbox": [
+                -4.6957,
+                53.2879,
+                -4.6226,
+                53.3175
+            ]
         }
     ],
     "crs": {
