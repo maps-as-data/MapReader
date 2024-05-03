@@ -1,7 +1,7 @@
 # MapReader and geospatial images 
-## Example of using MapReader with scanned maps or earth observation imagery
+## Examples of using MapReader with scanned maps or earth observation imagery
 
-## Worked Examples 
+### Worked Examples 
 
 These subdirectories contain jupyter notebooks that use MapReader for different tasks.
 
@@ -15,7 +15,7 @@ These subdirectories contain jupyter notebooks that use MapReader for different 
 <!--| Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  |-->
 
 
-## Worked Example Required Files
+### Worked Example Required Files
 
 These files are located within the worked_examples directory because they are required to run various notebooks provided here.
 
@@ -24,6 +24,6 @@ These files are located within the worked_examples directory because they are re
 | NLS_metadata  | metadata.json | [6-inch OS metadata](https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/geospatial/NLS_metadata/metadata_OS_Six_Inch_GB_WFS_light.json) | Metadata for different historical map collections used in worked examples | National Library of Scotland  | 
 <!--| Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  |-->
 
-## How can I contribute a worked example?
+#### How can I contribute a worked example?
 Open a ["Documentation Update"](https://github.com/Living-with-machines/MapReader/issues/new?assignees=&labels=documentation&projects=&template=documentation_update.md&title=) ticket and pitch your contribution to the team!
 
