@@ -544,49 +544,74 @@ class SheetDownloader:
         Returns
         -------
         bool
-            True if file exists, False if not.
+            img_path if file exists, False if not.
         """
-        map_name = str("map_" + feature["properties"]["IMAGE"])
         path_save = self.merger.output_folder
-        if os.path.exists(f"{path_save}{map_name}.png"):
+
+        try:
+            # get image id with same coords in metadata
+            existing_metadata_df = pd.read_csv(
+                f"{path_save}{metadata_fname}", sep=",", index_col=0
+            )
+        except FileNotFoundError:
+            return False
+
+        polygon = get_polygon_from_grid_bb(feature["grid_bb"])
+        if str(polygon.bounds) in existing_metadata_df["coordinates"].values:
+            image_id = existing_metadata_df[
+                existing_metadata_df["coordinates"] == str(polygon.bounds)
+            ].iloc[0]["name"]
+        else:
+            return False  # coordinates not in metadata means image doesn't exist
+
+        if os.path.exists(f"{path_save}{image_id}"):
             try:
                 # check image is valid
-                mpimg.imread(f"{path_save}{map_name}.png")
-
-                # check image has same coords in metadata too
-                existing_metadata_df = pd.read_csv(
-                    f"{path_save}{metadata_fname}", sep=",", index_col=0
-                )
-                polygon = get_polygon_from_grid_bb(
-                    feature["grid_bb"]
-                )  # use grid_bb to get coords of actually downloaded tiles
-                if str(polygon.bounds) in existing_metadata_df["coordinates"].values:
-                    print(
-                        f'[INFO] "{path_save}{map_name}.png" already exists. Skipping download.'
-                    )
-                    return True
+                mpimg.imread(f"{path_save}{image_id}")
+                return image_id
             except OSError:
                 return False
         return False
 
-    def _download_map(self, feature: dict, download_in_parallel: bool = True) -> bool:
+    def _download_map(
+        self,
+        feature: dict,
+        existing_id: str | bool,
+        download_in_parallel: bool = True,
+        overwrite: bool = False,
+    ) -> str | bool:
         """
         Downloads a single map sheet and saves as png file.
 
         Parameters
         ----------
         feature : dict
+            The feature for which to download the map sheet.
+        existing_id : str | bool
+            The existing image id if the map sheet already exists.
+        download_in_parallel : bool, optional
+            Whether to download tiles in parallel, by default ``True``.
+        overwrite : bool, optional
+            Whether to overwrite existing maps, by default ``False``.
 
         Returns
         -------
-        bool
-            True if map was downloaded successfully, False if not.
+        str or bool
+            image path if map was downloaded successfully, False if not.
         """
-        map_name = str("map_" + feature["properties"]["IMAGE"])
         self.downloader.download_tiles(
             feature["grid_bb"], download_in_parallel=download_in_parallel
         )
-        img_path = self.merger.merge(feature["grid_bb"], map_name)
+
+        if existing_id is False:
+            map_name = f"map_{feature['properties']['IMAGE']}"
+        else:
+            map_name = existing_id[:-4]  # remove file extension (assuming .png)
+
+        img_path = self.merger.merge(
+            feature["grid_bb"], file_name=map_name, overwrite=overwrite
+        )
+
         if img_path is not False:
             print(f'[INFO] Downloaded "{img_path}"')
         else:
@@ -718,11 +743,17 @@ class SheetDownloader:
         """
 
         for feature in tqdm(features):
-            if not overwrite:
-                if self._check_map_sheet_exists(feature, metadata_fname):
-                    continue
+            existing_id = self._check_map_sheet_exists(feature, metadata_fname)
+            if (
+                not overwrite and existing_id is not False
+            ):  # if map already exists and overwrite is False then skip
+                print(f'[INFO] "{existing_id}" already exists. Skipping download.')
+                continue
             img_path = self._download_map(
-                feature, download_in_parallel=download_in_parallel
+                feature,
+                existing_id,
+                download_in_parallel=download_in_parallel,
+                overwrite=overwrite,
             )
             if img_path is not False:
                 metadata_path = f"{path_save}/{metadata_fname}"

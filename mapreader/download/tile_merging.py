@@ -142,7 +142,12 @@ class TileMerger:
         tile_size = img_size[0]
         return tile_size
 
-    def merge(self, grid_bb: GridBoundingBox, file_name: str | None = None) -> bool:
+    def merge(
+        self,
+        grid_bb: GridBoundingBox,
+        file_name: str | None = None,
+        overwrite: bool = False,
+    ) -> str | bool:
         """Merges cells contained within GridBoundingBox.
 
         Parameters
@@ -151,11 +156,13 @@ class TileMerger:
             GridBoundingBox containing tiles to merge
         file_name : Union[str, None], optional
             Name to use when saving map
-
+            If None, default name will be used, by default None
+        overwrite : bool, optional
+            Whether or not to overwrite existing files, by default False
         Returns
         -------
-        bool
-            True if file has successfully downloaded, False if not.
+        str or bool
+            out path if file has successfully downloaded, False if not.
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
@@ -191,12 +198,13 @@ class TileMerger:
             file_name = self._get_output_name(grid_bb)
 
         out_path = f"{self.output_folder}{file_name}.{self.img_output_format[0]}"
-        i = 1
-        while os.path.exists(out_path):
-            out_path = (
-                f"{self.output_folder}{file_name}_{i}.{self.img_output_format[0]}"
-            )
-            i += 1
+        if not overwrite:
+            i = 1
+            while os.path.exists(out_path):
+                out_path = (
+                    f"{self.output_folder}{file_name}_{i}.{self.img_output_format[0]}"
+                )
+                i += 1
         merged_image.save(out_path, self.img_output_format[1])
         success = out_path if os.path.exists(out_path) else False
         if success is False:
