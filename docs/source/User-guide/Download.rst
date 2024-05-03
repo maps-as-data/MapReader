@@ -512,9 +512,4 @@ Again, by default, these will result in the directory structure shown in downloa
 
 .. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
 
-.. _Downloader:
 
-Downloader
-----------
-
-TBC
