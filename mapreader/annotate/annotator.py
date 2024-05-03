@@ -27,7 +27,7 @@ _CENTER_LAYOUT = widgets.Layout(
 )
 
 
-class Annotator(pd.DataFrame):
+class Annotator:
     """
     Annotator class for annotating patches with labels.
 
@@ -227,27 +227,28 @@ class Annotator(pd.DataFrame):
                 delimiter=delimiter,
             )
 
-        # initiate as a DataFrame
-        super().__init__(patch_df)
-
         ## pixel_bounds = x0, y0, x1, y1
-        self["min_x"] = self.pixel_bounds.apply(lambda x: x[0])
-        self["min_y"] = self.pixel_bounds.apply(lambda x: x[1])
-        self["max_x"] = self.pixel_bounds.apply(lambda x: x[2])
-        self["max_y"] = self.pixel_bounds.apply(lambda x: x[3])
+        patch_df["min_x"] = patch_df["pixel_bounds"].apply(lambda x: x[0])
+        patch_df["min_y"] = patch_df["pixel_bounds"].apply(lambda x: x[1])
+        patch_df["max_x"] = patch_df["pixel_bounds"].apply(lambda x: x[2])
+        patch_df["max_y"] = patch_df["pixel_bounds"].apply(lambda x: x[3])
 
         # Sort by sortby column if provided
         if isinstance(sortby, str):
-            if sortby in self.columns:
+            if sortby in patch_df.columns:
                 self._sortby = sortby
                 self._ascending = ascending
             else:
-                raise ValueError(f"[ERROR] {sortby} is not a column in the DataFrame.")
+                raise ValueError(
+                    f"[ERROR] {sortby} is not a column in the patch DataFrame."
+                )
         elif sortby is not None:
             raise ValueError("[ERROR] ``sortby`` must be a string or None.")
         else:
             self._sortby = None
             self._ascending = True
+
+        self.patch_df = patch_df
 
         self._labels = labels
         self.label_col = label_col
@@ -298,6 +299,9 @@ class Annotator(pd.DataFrame):
 
         # Setup queue
         self._queue = []
+
+    def __len__(self):
+        return len(self.patch_df)
 
     @staticmethod
     def _load_dataframes(
@@ -499,7 +503,7 @@ class Annotator(pd.DataFrame):
 
             return True
 
-        queue_df = self.copy(deep=True)
+        queue_df = self.patch_df.copy(deep=True)
         queue_df = queue_df[queue_df[self.label_col].isna()]  # only unlabelled
         queue_df["eligible"] = queue_df.apply(check_eligibility, axis=1)
 
@@ -562,20 +566,20 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        min_x = self.at[ix, "min_x"]
-        min_y = self.at[ix, "min_y"]
+        min_x = self.patch_df.at[ix, "min_x"]
+        min_y = self.patch_df.at[ix, "min_y"]
 
         # cannot assume all patches are same size
         try:
-            height, width, _ = self.at[ix, "shape"]
+            height, width, _ = self.patch_df.at[ix, "shape"]
         except KeyError:
-            im_path = self.at[ix, self.patch_paths_col]
+            im_path = self.patch_df.at[ix, self.patch_paths_col]
             im = Image.open(im_path)
             height = im.height
             width = im.width
 
-        current_parent = self.at[ix, "parent_id"]
-        parent_frame = self.query(f"parent_id=='{current_parent}'")
+        current_parent = self.patch_df.at[ix, "parent_id"]
+        parent_frame = self.patch_df.query(f"parent_id=='{current_parent}'")
 
         deltas = list(range(-self.surrounding, self.surrounding + 1))
         y_and_x = list(
@@ -770,7 +774,7 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        img_path = self.at[ix, self.patch_paths_col]
+        img_path = self.patch_df.at[ix, self.patch_paths_col]
 
         self.render()
         return self.previous_index, self.current_index, img_path
@@ -794,7 +798,7 @@ class Annotator(pd.DataFrame):
 
         ix = self._queue[self.current_index]
 
-        img_path = self.at[ix, self.patch_paths_col]
+        img_path = self.patch_df.at[ix, self.patch_paths_col]
 
         self.render()
         return self.previous_index, self.current_index, img_path
@@ -826,7 +830,7 @@ class Annotator(pd.DataFrame):
                 # disable skip button when at last example
                 button.disabled = self.current_index >= len(self) - 1
             elif button.description != "submit":
-                if self.at[ix, self.label_col] == button.description:
+                if self.patch_df.at[ix, self.label_col] == button.description:
                     button.icon = "check"
                 else:
                     button.icon = ""
@@ -842,8 +846,8 @@ class Annotator(pd.DataFrame):
             else:
                 display(image.convert("RGB"))
             add_ins = []
-            if "url" in self.loc[ix].keys():
-                url = self.at[ix, "url"]
+            if "url" in self.patch_df.loc[ix].keys():
+                url = self.patch_df.at[ix, "url"]
                 text = f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
                 add_ins += [widgets.HTML(text)]
 
@@ -881,7 +885,7 @@ class Annotator(pd.DataFrame):
         PIL.Image
             A PIL.Image object of the image at the given index.
         """
-        image_path = self.at[ix, self.patch_paths_col]
+        image_path = self.patch_df.at[ix, self.patch_paths_col]
         image = Image.open(image_path)
 
         if self.resize_to is not None:
@@ -907,7 +911,7 @@ class Annotator(pd.DataFrame):
         """
         # ix = self.iloc[self.current_index].name
         ix = self._queue[self.current_index]
-        self.at[ix, self.label_col] = annotation
+        self.patch_df.at[ix, self.label_col] = annotation
         if self.auto_save:
             self._auto_save()
         self._next_example()
@@ -950,7 +954,9 @@ class Annotator(pd.DataFrame):
             A dataframe containing the labelled images and their associated
             label index.
         """
-        filtered_df = self[self[self.label_col].notna()].copy(deep=True)
+        filtered_df = self.patch_df[self.patch_df[self.label_col].notna()].copy(
+            deep=True
+        )
 
         # force image_id to be index (incase of integer index)
         # TODO: Force all indices to be integers so this is not needed
@@ -973,8 +979,8 @@ class Annotator(pd.DataFrame):
 
     @property
     def filtered(self) -> pd.DataFrame:
-        _filter = ~self[self.label_col].isna()
-        return self[_filter]
+        _filter = ~self.patch_df[self.label_col].isna()
+        return self.patch_df[_filter]
 
     def render_complete(self):
         """

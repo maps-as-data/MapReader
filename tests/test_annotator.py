@@ -35,7 +35,7 @@ def test_init_with_dfs(load_dfs):
         auto_save=False,
     )
     assert len(annotator) == 9
-    assert isinstance(annotator.iloc[0]["coordinates"], tuple)
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
 def test_init_with_csvs(load_dfs):
@@ -48,7 +48,7 @@ def test_init_with_csvs(load_dfs):
         auto_save=False,
     )
     assert len(annotator) == 9
-    assert isinstance(annotator.iloc[0]["coordinates"], tuple)
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
 def test_init_with_fpaths(load_dfs, sample_dir):
@@ -62,7 +62,7 @@ def test_init_with_fpaths(load_dfs, sample_dir):
         auto_save=False,
     )
     assert len(annotator) == 9
-    assert "mean_pixel_R" in annotator.columns
+    assert "mean_pixel_R" in annotator.patch_df.columns
 
 
 def test_init_with_fpaths_tsv(load_dfs, sample_dir):
@@ -77,7 +77,7 @@ def test_init_with_fpaths_tsv(load_dfs, sample_dir):
         delimiter="\t",
     )
     assert len(annotator) == 9
-    assert "mean_pixel_R" in annotator.columns
+    assert "mean_pixel_R" in annotator.patch_df.columns
 
 
 def test_no_labels(load_dfs):
