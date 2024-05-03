@@ -42,7 +42,7 @@ Classification of plant phenotypes
 
 In our plant phenotypes example, we demonstrate how to use MapReader to classify plant phenotypes in images of plants.
 Importantly, this worked example demonstrates how to use MapReader with non-georeferenced images (e.g. non-georeferenced map images).
-It can be found `here <ttps://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
+It can be found `here <https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
 
 Classification of MNIST digits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
