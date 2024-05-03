@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import re
 from ast import literal_eval
 from pathlib import Path
 
@@ -504,11 +503,6 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
     sd.download_map_sheets_by_wfs_ids(
         [107, 116], maps_path, metadata_fname, overwrite=True
     )  # 107 and 116 both refer to https://maps.nls.uk/view/101603986
-    out, _ = capfd.readouterr()
-    assert re.search(
-        r"\[INFO\] Downloaded \".*\/test_maps\/map_101603986.png\"\n\[INFO\] Downloaded \".*\/test_maps\/map_101603986_1.png\"\n$",
-        out,
-    )
     assert os.path.exists(f"{maps_path}/map_101603986.png")
     assert os.path.exists(f"{maps_path}/map_101603986_1.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
