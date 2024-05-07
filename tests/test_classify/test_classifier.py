@@ -91,7 +91,7 @@ def test_init_models_string_errors(inputs):
 
 def test_init_resnet18_torch(inputs):
     annots, dataloaders = inputs
-    my_model = models.resnet18(pretrained=True)
+    my_model = models.resnet18(weights="DEFAULT")
     assert isinstance(my_model, models.ResNet)  # sanity check
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
@@ -167,9 +167,9 @@ def test_init_models_timm(inputs):
     for model2test in [
         ["resnest50d_4s2x40d", timm.models.ResNet],
         ["resnest101e", timm.models.ResNet],
-        ["swsl_resnext101_32x8d", timm.models.ResNet],
+        ["resnext101_32x8d.fb_swsl_ig1b_ft_in1k", timm.models.ResNet],
         ["resnet152", timm.models.ResNet],
-        ["tf_efficientnet_b3_ns", timm.models.EfficientNet],
+        ["tf_efficientnet_b3.ns_jft_in1k", timm.models.EfficientNet],
         ["swin_base_patch4_window7_224", timm.models.swin_transformer.SwinTransformer],
         ["vit_base_patch16_224", timm.models.vision_transformer.VisionTransformer],
     ]:  # these are models from 2021 paper
@@ -371,9 +371,9 @@ def test_infer_timm_models(inputs, infer_inputs):
     for model in [
         "resnest50d_4s2x40d",
         "resnest101e",
-        "swsl_resnext101_32x8d",
+        "resnext101_32x8d.fb_swsl_ig1b_ft_in1k",
         "resnet152",
-        "tf_efficientnet_b3_ns",
+        "tf_efficientnet_b3.ns_jft_in1k",
         "swin_base_patch4_window7_224",
         "vit_base_patch16_224",
     ]:  # these are models from 2021 paper

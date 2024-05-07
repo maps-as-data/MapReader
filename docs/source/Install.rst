@@ -86,6 +86,7 @@ This is probably the easiest way to install MapReader.
 
       pip install mapreader
 
+.. note:: To install the dev dependencies too use ``pip install "mapreader[dev]"`` instead.
 
 Method 2: Install from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,6 +109,7 @@ This method will create a ``MapReader`` directory on your machine which will con
       cd MapReader
       pip install -v -e .
 
+.. note:: To install the dev dependencies too use ``pip install -v -e ".[dev]"`` instead.
 
 ..
    Method 3: Install via conda (**EXPERIMENTAL**)
@@ -165,3 +167,16 @@ If you are using an M1 mac and are having issues installing MapReader due to an 
 
       brew install openblas
       OPENBLAS="$(brew --prefix openblas)" pip install mapreader
+
+
+Running tests
+-------------
+
+To run the tests for MapReader, you will need to have installed the dev dependencies as described above.
+You can then run the tests by running the following command from the root of the MapReader directory:
+
+.. code-block:: bash
+
+   python -m pytest -v
+
+If all tests pass, this means that MapReader has been installed correctly.

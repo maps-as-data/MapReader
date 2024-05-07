@@ -1367,7 +1367,7 @@ Use ``add_criterion`` to define one."
     def _initialize_model(
         self,
         model_name: str,
-        pretrained: bool | None = True,
+        weights: str | None = "DEFAULT",
         last_layer_num_classes: str | int | None = "default",
     ) -> tuple[Any, int, bool]:
         """
@@ -1378,8 +1378,9 @@ Use ``add_criterion`` to define one."
         ----------
         model_name : str
             Name of a PyTorch model. See https://pytorch.org/vision/0.8/models.html for options.
-        pretrained : bool, optional
-            Use pretrained version, by default ``True``
+        weights : str, optional
+            Weights to load into the model. If ``"DEFAULT"``, loads the default weights for the chosen model.
+            By default, ``"DEFAULT"``.
         last_layer_num_classes : str or int, optional
             Number of elements in the last layer. If ``"default"``, sets it to
             the number of classes. By default, ``"default"``.
@@ -1408,8 +1409,7 @@ Use ``add_criterion`` to define one."
 
         # Initialize these variables which will be set in this if statement.
         # Each of these variables is model specific.
-        model_dw = models.__getattribute__(model_name)
-        model_dw = model_dw(pretrained)
+        model_dw = models.get_model(model_name, weights=weights)
         input_size = (224, 224)
         is_inception = False
 

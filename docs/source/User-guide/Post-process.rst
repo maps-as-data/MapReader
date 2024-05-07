@@ -23,7 +23,7 @@ You can then run the post-processing code as follows:
 
 .. code-block:: python
 
-    from mapreader.process.post_process import PatchDataFrame
+    from mapreader.process.post_process import PostProcessor
 
     labels_map = {
         0: "no",
@@ -32,7 +32,7 @@ You can then run the post-processing code as follows:
         3: "railspace&building"
     }
 
-    patches = PatchDataFrame(preds, labels_map=labels_map)
+    patches = PostProcessor(preds, labels_map=labels_map)
 
 MapReader's post-processing will only work for features that are expected be continuous (e.g. railway, road, coastline, etc.) or clustered (e.g. a large body of water).
 You will need to tell MapReader which labels to select and then get the context for each of the relevant patches in order to work out if it is isolated or part of a line/cluster.

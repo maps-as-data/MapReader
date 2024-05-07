@@ -8,8 +8,8 @@ import pandas as pd
 from tqdm import tqdm
 
 
-class PatchDataFrame(pd.DataFrame):
-    """A class for storing patch dataframes.
+class PostProcessor:
+    """A class for post-processing predictions on patches using the surrounding context.
 
     Parameters
     ----------
@@ -56,11 +56,15 @@ class PatchDataFrame(pd.DataFrame):
         else:
             patch_df[["min_x", "min_y", "max_x", "max_y"]] = [*patch_df["pixel_bounds"]]
 
-        super().__init__(patch_df)
+        # set the patch_df attribute
+        self.patch_df = patch_df
 
         self.labels_map = labels_map
         self._label_patches = None
         self.context = {}
+
+    def __len__(self):
+        return len(self.patch_df)
 
     def get_context(
         self,
@@ -75,7 +79,9 @@ class PatchDataFrame(pd.DataFrame):
         """
         if isinstance(labels, str):
             labels = [labels]
-        self._label_patches = self[self["predicted_label"].isin(labels)]
+        self._label_patches = self.patch_df[
+            self.patch_df["predicted_label"].isin(labels)
+        ]
 
         for id in tqdm(self._label_patches.index):
             if id not in self.context:
@@ -89,28 +95,36 @@ class PatchDataFrame(pd.DataFrame):
         id,
     ):
         """Get the context of the patch with the specified index."""
-        parent_id = self.loc[id, "parent_id"]
-        min_x = self.loc[id, "min_x"]
-        min_y = self.loc[id, "min_y"]
-        max_x = self.loc[id, "max_x"]
-        max_y = self.loc[id, "max_y"]
+        parent_id = self.patch_df.loc[id, "parent_id"]
+        min_x = self.patch_df.loc[id, "min_x"]
+        min_y = self.patch_df.loc[id, "min_y"]
+        max_x = self.patch_df.loc[id, "max_x"]
+        max_y = self.patch_df.loc[id, "max_y"]
 
         context_grid = [
             *product(
-                [(self["min_x"], min_x), (min_x, max_x), (max_x, self["max_x"])],
-                [(self["min_y"], min_y), (min_y, max_y), (max_y, self["max_y"])],
+                [
+                    (self.patch_df["min_x"], min_x),
+                    (min_x, max_x),
+                    (max_x, self.patch_df["max_x"]),
+                ],
+                [
+                    (self.patch_df["min_y"], min_y),
+                    (min_y, max_y),
+                    (max_y, self.patch_df["max_y"]),
+                ],
             )
         ]
         # reshape to min_x, min_y, max_x, max_y
         context_grid = [(x[0][0], x[1][0], x[0][1], x[1][1]) for x in context_grid]
 
         context_list = [
-            self[
-                (self["min_x"] == context_loc[0])
-                & (self["min_y"] == context_loc[1])
-                & (self["max_x"] == context_loc[2])
-                & (self["max_y"] == context_loc[3])
-                & (self["parent_id"] == parent_id)
+            self.patch_df[
+                (self.patch_df["min_x"] == context_loc[0])
+                & (self.patch_df["min_y"] == context_loc[1])
+                & (self.patch_df["max_x"] == context_loc[2])
+                & (self.patch_df["max_y"] == context_loc[3])
+                & (self.patch_df["parent_id"] == parent_id)
             ]
             for context_loc in context_grid
         ]
@@ -163,7 +177,10 @@ class PatchDataFrame(pd.DataFrame):
         """Update the predictions of the patch with the specified index."""
         context_list = self.context[id]
 
-        context_df = self[self.index.isin(context_list)]
+        context_df = self.patch_df[self.patch_df.index.isin(context_list)].copy(
+            deep=True
+        )
+
         # drop central patch from context
         context_df.drop(index=id, inplace=True)
 
@@ -172,11 +189,11 @@ class PatchDataFrame(pd.DataFrame):
 
         prefix = "" if inplace else "new_"
         if (not any(context_df["predicted_label"].isin(labels))) & (
-            self.loc[id, "conf"] < conf
+            self.patch_df.loc[id, "conf"] < conf
         ):
-            self.loc[id, f"{prefix}predicted_label"] = remap[
-                self.loc[id, "predicted_label"]
+            self.patch_df.loc[id, f"{prefix}predicted_label"] = remap[
+                self.patch_df.loc[id, "predicted_label"]
             ]
-            self.loc[id, f"{prefix}pred"] = label_index_dict[
-                self.loc[id, f"{prefix}predicted_label"]
+            self.patch_df.loc[id, f"{prefix}pred"] = label_index_dict[
+                self.patch_df.loc[id, f"{prefix}predicted_label"]
             ]
