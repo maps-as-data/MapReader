@@ -1,11 +1,11 @@
 Worked Examples
 ================
 
-We have provided a number of worked examples to demonstrate how to use the MapReader package.
+We have provided a number of worked examples to demonstrate how to use MapReader.
 These examples can be found in the `worked_examples <https://github.com/Living-with-machines/MapReader/tree/main/worked_examples>`_ directory of the repository.
 
-Maps and geospatial images
---------------------------
+Geospatial images: Maps and earth observation imagery
+-----------------------------------------------------
 
 MapReader was developed for maps and geospatial images.
 
@@ -30,7 +30,7 @@ It can be found `here <https://github.com/Living-with-machines/MapReader/blob/ma
 Non-geospatial images
 ---------------------
 
-MapReader can also for non-geospatial images.
+MapReader can also be used for non-geospatial images.
 We have provided two examples of this.
 
 Classification of plant phenotypes
@@ -42,7 +42,7 @@ Classification of plant phenotypes
 
 In our plant phenotypes example, we demonstrate how to use MapReader to classify plant phenotypes in images of plants.
 Importantly, this worked example demonstrates how to use MapReader with non-georeferenced images (e.g. non-georeferenced map images).
-It can be found `here <ttps://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
+It can be found `here <https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
 
 Classification of MNIST digits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
