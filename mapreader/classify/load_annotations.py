@@ -395,7 +395,9 @@ Please check your image paths and update them if necessary.'
                 )
                 iter_ids.append(annots2review.iloc[image_idx].name)
                 # Add to reviewed
-                self.reviewed = self.reviewed.append(annots2review.iloc[image_idx])
+                self.reviewed = pd.concat(
+                    [self.reviewed, annots2review.iloc[image_idx : image_idx + 1]]
+                )
                 try:
                     self.reviewed.drop_duplicates(subset=[deduplicate_col])
                 except Exception:
@@ -416,9 +418,14 @@ Please check your image paths and update them if necessary.'
             ]:
                 list_input_ids = user_input_ids.split(",")
                 print(
-                    f"[INFO] Options for labels (or create a new label):{list(self.annotations[self.label_col].unique())}"
+                    f"[INFO] Options for labels:{list(self.annotations[self.label_col].unique())}"
                 )
                 input_label = input("Enter new label:  ")
+                if input_label not in list(self.annotations[self.label_col].unique()):
+                    print(
+                        f'[ERROR] Label "{input_label}" not found in the annotations. Please enter a valid label.'
+                    )
+                    continue
 
                 for input_id in list_input_ids:
                     input_id = int(input_id)
