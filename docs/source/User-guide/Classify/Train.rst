@@ -61,7 +61,7 @@ For example, to show your "railspace" label:
 .. code-block:: python
 
     #EXAMPLE
-    annotated_images.show_image_labels("railspace")
+    annotated_images.show_sample("railspace")
 
 .. todo:: update this pic
 
