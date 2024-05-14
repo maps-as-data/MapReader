@@ -583,6 +583,14 @@ e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AU
 
     my_classifier.metrics["epoch_rocauc_macro_test"]
 
+
+e.g. to view f-scores per class for each class in your labels map:
+
+.. code-block:: python
+    for label_id, label_name in annotated_images.labels_map.items():
+        print(label_name, my_classifier.metrics['epoch_fscore_'+str(label_id)+'_test'])
+
+
 Saving your work
 ------------------
 
