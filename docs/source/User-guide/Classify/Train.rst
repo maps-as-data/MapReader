@@ -564,7 +564,7 @@ e.g. to add metrics for the 'test' dataset:
 .. code-block:: python
 
     #EXAMPLE
-    my_classifier.calculate_add_metrics(a
+    my_classifier.calculate_add_metrics(
         y_true=my_classifier.orig_label,
         y_pred=my_classifier.pred_label,
         y_score=my_classifier.pred_conf,
