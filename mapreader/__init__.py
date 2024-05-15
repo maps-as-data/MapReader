@@ -31,3 +31,8 @@ from . import _version
 __version__ = _version.get_versions()["version"]
 
 from mapreader.load import geo_utils
+
+import mapreader
+
+def print_version():
+    print(mapreader.__version__)

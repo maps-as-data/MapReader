@@ -90,7 +90,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "mapreader = mapreader.mapreader:main",
+            "mapreader = mapreader:print_version",
         ],
     },
 )
