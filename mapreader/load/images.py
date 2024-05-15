@@ -1392,7 +1392,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 min_x, min_y, max_x, max_y = self.patches[patch]["pixel_bounds"]
                 if width != max_x - min_x:
                     width = max_x - min_x
-                img = img.crop((0, 0, width, height))
                 if height != max_y - min_y:
                     height = max_y - min_y
                 img = img.crop((0, 0, width, height))
@@ -1400,22 +1399,24 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 bands = img.getbands()
 
                 if calc_mean:
-                    if all(f"mean_pixel_{band}" in patch_keys for band in bands):
+                    if "mean_pixel" in patch_keys:
                         calc_mean = False
                 if calc_std:
-                    if all(f"std_pixel_{band}" in patch_keys for band in bands):
+                    if "std_pixel" in patch_keys:
                         calc_std = False
 
                 img_stat = ImageStat.Stat(img)
 
                 if calc_mean:
                     img_mean = img_stat.mean
+                    self.patches[patch]["mean_pixel"] = np.mean(img_mean) / 255
                     for i, band in enumerate(bands):
                         # Calculate mean pixel values
                         self.patches[patch][f"mean_pixel_{band}"] = img_mean[i] / 255
 
                 if calc_std:
                     img_std = img_stat.stddev
+                    self.patches[patch]["std_pixel"] = np.mean(img_std) / 255
                     for i, band in enumerate(bands):
                         # Calculate std pixel values
                         self.patches[patch][f"std_pixel_{band}"] = img_std[i] / 255
