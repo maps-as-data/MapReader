@@ -1289,7 +1289,6 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                 pass
 
             for feature in features:
-                text_id = feature["wfs_id_no"]
                 coords = np.array(feature["geometry"]["coordinates"][0][0])
 
                 # Plot coordinates
@@ -1302,6 +1301,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                 )
 
                 if add_id:
+                    text_id = feature["wfs_id_no"]
                     plt.text(
                         np.mean(coords[:, 0]) - 0.15,
                         np.mean(coords[:, 1]) - 0.05,
