@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from shapely import Polygon
+from tqdm.auto import tqdm
 
 
 class Runner:
@@ -78,7 +79,7 @@ class Runner:
         if isinstance(img_paths, (str, pathlib.Path)):
             img_paths = [img_paths]
 
-        for img_path in img_paths:
+        for img_path in tqdm(img_paths):
             _ = self.run_on_image(img_path, return_outputs=False, min_ioa=min_ioa)
 
         if return_dataframe:
@@ -162,6 +163,7 @@ class Runner:
         self,
         patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
+        deduplicate: bool = False,
     ) -> dict | pd.DataFrame:
         """Convert the patch predictions to parent predictions by converting pixel bounds.
 
@@ -171,6 +173,9 @@ class Runner:
             Dataframe containing patch information, by default None
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
+        deduplicate : bool, optional
+            Whether to deduplicate the parent predictions, by default False.
+            Depending on size of parent images, this can be slow.
 
         Returns
         -------
@@ -205,9 +210,42 @@ class Runner:
                     [parent_polygon, *instance[1:]]
                 )
 
+            if deduplicate:
+                self._deduplicate_parent_level(parent_id)
+
         if return_dataframe:
             return self._dict_to_dataframe(self.parent_predictions, geo=False)
         return self.parent_predictions
+
+    def _deduplicate_parent_level(self, image_id, min_ioa=0.7):
+        polygons = [
+            instance[0].buffer(0) for instance in self.parent_predictions[image_id]
+        ]
+
+        def calc_ioa(i, j):
+            return polygons[i].intersection(polygons[j]).area / polygons[i].area
+
+        i_matrix = np.zeros((len(polygons), len(polygons)))
+
+        for i, j in combinations(range(len(polygons)), 2):
+            if polygons[i].intersects(polygons[j]):
+                ioa_i = calc_ioa(i, j)
+                ioa_j = calc_ioa(j, i)
+                if ioa_i > ioa_j and ioa_i > min_ioa:
+                    i_matrix[i, j] = ioa_i
+                elif ioa_j > ioa_i and ioa_j > min_ioa:
+                    i_matrix[j, i] = ioa_j
+
+        for i, row in enumerate(i_matrix):
+            if any([ioa != 0 for ioa in row]):
+                self.parent_predictions[image_id][i] = None
+                i_matrix[:, i] = 0
+
+        self.parent_predictions[image_id] = [
+            prediction
+            for prediction in self.parent_predictions[image_id]
+            if prediction is not None
+        ]
 
     def convert_to_coords(
         self,
