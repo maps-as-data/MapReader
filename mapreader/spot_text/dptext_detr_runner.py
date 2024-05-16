@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+from itertools import combinations
 
 try:
     import adet
@@ -67,6 +68,7 @@ class DPTextDETRRunner:
         self,
         patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
+        min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
         """Run the model on all images in the patch dataframe.
 
@@ -76,6 +78,8 @@ class DPTextDETRRunner:
             Dataframe containing patch information, by default None.
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
 
         Returns
         -------
@@ -98,6 +102,7 @@ class DPTextDETRRunner:
         self,
         img_paths: str | pathlib.Path | list,
         return_dataframe: bool = False,
+        min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
         """Run the model on a list of images.
 
@@ -107,6 +112,8 @@ class DPTextDETRRunner:
             A list of image paths to run the model on.
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
 
         Returns
         -------
@@ -129,6 +136,7 @@ class DPTextDETRRunner:
         img_path: str | pathlib.Path,
         return_outputs=False,
         return_dataframe: bool = False,
+        min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
         """Run the model on a single image.
 
@@ -140,6 +148,8 @@ class DPTextDETRRunner:
             Whether to return the outputs direct from the model, by default False
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
 
         Returns
         -------
@@ -168,6 +178,7 @@ class DPTextDETRRunner:
         self,
         outputs: dict,
         return_dataframe: bool = False,
+        min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
         """Post process the model outputs to get patch predictions.
 
@@ -177,6 +188,8 @@ class DPTextDETRRunner:
             The outputs from the model.
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
 
         Returns
         -------
@@ -194,6 +207,7 @@ class DPTextDETRRunner:
         bd_pts = np.asarray(instances.polygons)
 
         self._post_process(image_id, scores, pred_classes, bd_pts)
+        self._deduplicate(image_id, min_ioa=min_ioa)
 
         if return_dataframe:
             return self._dict_to_dataframe(self.patch_predictions, geo=False)
@@ -209,6 +223,36 @@ class DPTextDETRRunner:
             score = f"{score:.2f}"
 
             self.patch_predictions[image_id].append([polygon, score])
+
+    def _deduplicate(self, image_id, min_ioa=0.7):
+        polygons = [
+            instance[0].buffer(0) for instance in self.patch_predictions[image_id]
+        ]
+
+        def calc_ioa(i, j):
+            return polygons[i].intersection(polygons[j]).area / polygons[i].area
+
+        i_matrix = np.zeros((len(polygons), len(polygons)))
+
+        for i, j in combinations(range(len(polygons)), 2):
+            if polygons[i].intersects(polygons[j]):
+                ioa_i = calc_ioa(i, j)
+                ioa_j = calc_ioa(j, i)
+                if ioa_i > ioa_j and ioa_i > min_ioa:
+                    i_matrix[i, j] = ioa_i
+                elif ioa_j > ioa_i and ioa_j > min_ioa:
+                    i_matrix[j, i] = ioa_j
+
+        for i, row in enumerate(i_matrix):
+            if any([ioa != 0 for ioa in row]):
+                self.patch_predictions[image_id][i] = None
+                i_matrix[:, i] = 0
+
+        self.patch_predictions[image_id] = [
+            prediction
+            for prediction in self.patch_predictions[image_id]
+            if prediction is not None
+        ]
 
     def convert_to_parent_pixel_bounds(
         self,
