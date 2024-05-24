@@ -96,7 +96,7 @@ Through its conceptual approach, modular structure, documentation, and worked ex
 
 # Acknowledgements
 
-This work was supported by Data/Culture (AHRC grant AH/XXXXX), Living with Machines (AHRC grant AH/S01179X/1), and The Alan Turing Institute (EPSRC grant EP/N510129/1). Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, was a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London. Maps and their metadata in MapReader are reproduced with the permission of the National Library of Scotland (https://maps.nls.uk/index.html). We also wish to thank participants in events in 2023 who provided feedback on using MapReader.
+This work was supported by Data/Culture (AHRC grant AH/Y00745X/1), Living with Machines (AHRC grant AH/S01179X/1), and The Alan Turing Institute (EPSRC grant EP/N510129/1). Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, was a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London. Maps and their metadata in MapReader are reproduced with the permission of the National Library of Scotland (https://maps.nls.uk/index.html). We also wish to thank participants in events in 2023 who provided feedback on using MapReader.
 
 # Contribution Statement
 
