@@ -61,7 +61,7 @@ For example, to show your "railspace" label:
 .. code-block:: python
 
     #EXAMPLE
-    annotated_images.show_image_labels("railspace")
+    annotated_images.show_sample("railspace")
 
 .. todo:: update this pic
 
@@ -231,6 +231,7 @@ To initialize your ``ClassifierContainer()`` for training, you will need to defi
 - ``model`` - The model (classifier) you would like to train.
 - ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_railspace", 1: "railspace"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
 - ``dataloaders`` - The dataloaders containing your train, test and val datasets.
+- ``device`` - The device you would like to use for training (e.g. ``"cuda"``, ``"mps"`` or ``"cpu"``).
 
 There are a number of options for the ``model`` argument:
 
@@ -241,9 +242,12 @@ There are a number of options for the ``model`` argument:
         .. code-block:: python
 
             #EXAMPLE
+            import torch
             from mapreader import ClassifierContainer
 
-            my_classifier = ClassifierContainer("resnet18", annotated_images.labels_map, dataloaders)
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+            my_classifier = ClassifierContainer("resnet18", annotated_images.labels_map, dataloaders, device=device)
 
         By default, this will load a pretrained form of the model and reshape the last layer to output the same number of nodes as labels in your dataset.
         You can load an untrained model by specifying ``pretrained=False``.
@@ -256,6 +260,8 @@ There are a number of options for the ``model`` argument:
 
 
             #EXAMPLE
+            import torch
+
             from torchvision import models
             from torch import nn
 
@@ -267,7 +273,9 @@ There are a number of options for the ``model`` argument:
             num_input_features = my_model.fc.in_features
             my_model.fc = nn.Linear(num_input_features, len(annotated_images.labels_map))
 
-            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device)
 
         This is equivalent to passing ``model="resnet18"`` (as above) but further customizations are, of course, possible.
         See `here <https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html>`__ for more details of how to do this.
@@ -289,7 +297,9 @@ There are a number of options for the ``model`` argument:
 
             my_model = torch.load("./models/model_checkpoint_6.pkl")
 
-            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device)
 
         .. admonition:: Advanced usage
             :class: dropdown
@@ -318,6 +328,7 @@ There are a number of options for the ``model`` argument:
         .. code-block:: python
 
             #EXAMPLE
+            import torch
             from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 
             from mapreader import ClassifierContainer
@@ -325,7 +336,9 @@ There are a number of options for the ``model`` argument:
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
 
-            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device)
 
         .. note:: You will need to install the `transformers <https://github.com/huggingface/transformers>`__ library to do this (``pip install transformers``).
 
@@ -336,12 +349,15 @@ There are a number of options for the ``model`` argument:
 
             #EXAMPLE
             import timm
+            import torch
 
             from mapreader import ClassifierContainer
 
             my_model = timm.create_model("hf_hub:timm/resnest101e.in1k", pretrained=True, num_classes=len(annotated_images.labels_map))
 
-            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders)
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device)
 
         .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).
 
@@ -548,7 +564,7 @@ e.g. to add metrics for the 'test' dataset:
 .. code-block:: python
 
     #EXAMPLE
-    my_classifier.calculate_add_metrics(a
+    my_classifier.calculate_add_metrics(
         y_true=my_classifier.orig_label,
         y_pred=my_classifier.pred_label,
         y_score=my_classifier.pred_conf,
@@ -566,6 +582,14 @@ e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AU
 .. code-block:: python
 
     my_classifier.metrics["epoch_rocauc_macro_test"]
+
+
+e.g. to view f-scores per class for each class in your labels map:
+
+.. code-block:: python
+    for label_id, label_name in annotated_images.labels_map.items():
+        print(label_name, my_classifier.metrics['epoch_fscore_'+str(label_id)+'_test'])
+
 
 Saving your work
 ------------------
