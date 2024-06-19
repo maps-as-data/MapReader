@@ -15,7 +15,7 @@ authors:
     affiliation: 1
   - name: Kasra Hosseini
     orcid: 0000-0003-4396-6019
-    affiliation: "1, 4"
+    affiliation: 4
   - name: Kalle Westerling
     orcid: 0000-0002-2014-332X
     affiliation: 1
@@ -24,7 +24,7 @@ authors:
     affiliation: 1
   - name: Kaspar Beelen
     orcid: 0000-0001-7331-1174
-    affiliation: 3
+    affiliation: "1, 3"
   - name: Daniel C.S. Wilson
     orcid: 0000-0001-6886-775X
     affiliation: 1
