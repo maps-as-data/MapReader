@@ -10,7 +10,7 @@ jobs:
   # You may pin to the exact commit or the version.
   # uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
   uses: lowlighter/metrics@v3.34
-    with:
-      template: repository
-      user: living-with-machines
-      repo: mapreader
+  with:
+    template: repository
+    user: living-with-machines
+    repo: mapreader
