@@ -1,0 +1,2 @@
+from deepsolo_runner import DeepSoloRunner
+from dptext_detr_runner import DPTextDETRRunner
