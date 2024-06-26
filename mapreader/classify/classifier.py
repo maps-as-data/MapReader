@@ -30,6 +30,7 @@ from .datasets import PatchDataset
 # from tqdm.autonotebook import tqdm
 # from torch.nn.modules.module import _addindent
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

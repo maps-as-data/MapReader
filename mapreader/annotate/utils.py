@@ -31,7 +31,9 @@ warnings.filterwarnings("ignore")
 #   (
 #     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
 
+# Set up logging
 logger = logging.getLogger(__name__)
+
 
 def prepare_data(
     df: pd.DataFrame,

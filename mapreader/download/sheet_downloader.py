@@ -22,6 +22,7 @@ from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
 from .tile_loading import DEFAULT_TEMP_FOLDER, TileDownloader
 from .tile_merging import TileMerger
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

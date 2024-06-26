@@ -8,6 +8,7 @@ import rasterio
 from geopy.distance import geodesic, great_circle
 from pyproj import Transformer
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

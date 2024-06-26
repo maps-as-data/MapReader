@@ -17,6 +17,7 @@ from torchvision.transforms import Compose
 
 from .datasets import PatchContextDataset, PatchDataset
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

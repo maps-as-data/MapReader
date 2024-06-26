@@ -32,6 +32,7 @@ if adet.__version__ != "0.2.0-dptext-detr":
         "Please install DPText-DETR from the following link: https://github.com/rwood-97/DPText-DETR"
     )
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

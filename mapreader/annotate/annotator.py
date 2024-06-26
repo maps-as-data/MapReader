@@ -28,6 +28,7 @@ _CENTER_LAYOUT = widgets.Layout(
     display="flex", flex_flow="column", align_items="center"
 )
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 class Annotator:
