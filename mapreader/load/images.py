@@ -38,6 +38,7 @@ import geopandas as geopd  # noqa: E402
 # Ignore warnings
 warnings.filterwarnings("ignore")
 
+# Set up logging
 logger = logging.getLogger(__name__)
 
 
