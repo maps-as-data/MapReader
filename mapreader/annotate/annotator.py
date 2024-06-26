@@ -21,6 +21,7 @@ from PIL import Image, ImageOps
 
 from ..load.loader import load_patches
 
+# Ignore warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 _CENTER_LAYOUT = widgets.Layout(

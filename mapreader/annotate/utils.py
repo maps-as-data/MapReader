@@ -26,8 +26,9 @@ from PIL import Image
 
 from mapreader import load_patches, loader
 
+# Ignore warnings
 warnings.filterwarnings("ignore")
-# warnings.filterwarnings(
+#   (
 #     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
 
 logger = logging.getLogger(__name__)
