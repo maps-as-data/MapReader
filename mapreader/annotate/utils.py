@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import logging
 import os
 import random
 import sys
@@ -29,6 +30,7 @@ warnings.filterwarnings("ignore")
 # warnings.filterwarnings(
 #     "ignore", message="Pandas doesn't allow columns to be created via a new attribute name")
 
+logger = logging.getLogger(__name__)
 
 def prepare_data(
     df: pd.DataFrame,
@@ -708,4 +710,4 @@ def save_annotation(
         print(f"[INFO] {new_labels} labels were not already stored")
         print(f"[INFO] Total number of saved annotations: {len(image_df)}")
     else:
-        print("[INFO] No annotations to save!")
+        logger.info("No annotations to save!")
