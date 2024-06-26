@@ -18,7 +18,7 @@ from adet.config import get_cfg
 try:
     from detectron2.engine import DefaultPredictor
 except ImportError:
-    raise ImportError("Please install Detectron2")
+    raise ImportError("Please install Detectron2: https://detectron2.readthedocs.io")
 
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
