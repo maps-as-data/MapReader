@@ -69,7 +69,9 @@ MapReader makes it possible to ask questions of thousands of digitized maps at a
 
 # Related Work
 
-MapReader is among the first end-to-end pipeline for processing historical maps and other images that was designed to lower barriers to experimenting with computer vision in answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media. As part of a collaboration between Machines Reading Maps and the David Rumsey Historical Map Collection, the Knowledge Computing Lab released mapKurator [@mapkurator], which takes map image input and creates geojson files of all text on each map. (MapReader now also incorporates this 'text spotting' task in addition to the patch classification task.)
+MapReader is among the first end-to-end pipeline for processing historical maps and other images that was designed to lower barriers to experimenting with computer vision in answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media. 
+
+In addition, as part of a collaboration between Machines Reading Maps and the David Rumsey Historical Map Collection, the Knowledge Computing Lab released mapKurator [@mapkurator] - a text detection and recognition ('text spotting') pipeline for maps - which takes map image input and and returns polygons and text transcriptions in geojson format. As of 2024, MapReader also incorporates this text spotting task in addition to the patch classification task.
 
 
 # Documentation
