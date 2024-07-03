@@ -10,20 +10,33 @@ We host online community calls every 2 months for friends of MapReader to meet u
 Upcoming calls
 ~~~~~~~~~~~~~~
 
-- August 1, 2024, 4-5pm UK time
-  - `Sign up for our community calls: <https://forms.office.com/e/x9zGL0yQyp>`_
-  - `Notes and Zoom link for this month's meeting <https://docs.google.com/document/d/1UE2OjPE7OitoB8AsG4swk1k3pD44lW_YgMkaR4VxUXU/edit>`_
+.. list-table:: Upcoming community calls
+   :widths: 25 25 50
+   :header-rows: 1
 
-- September 5, 2024, 4-5pm UK time
-  - `Sign up for our community calls: <https://forms.office.com/e/x9zGL0yQyp>`_
+   * - Date
+     - Sign-up link
+     - Notes and Zoom link
+   * - August 1, 2024, 4-5pm UK time
+     - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
+     - `Notes and Zoom link <https://docs.google.com/document/d/1UE2OjPE7OitoB8AsG4swk1k3pD44lW_YgMkaR4VxUXU/edit>`_
+   * - September 5, 2024, 4-5pm UK time
+     - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
+     - *Coming soon*
 
 Past calls
 ~~~~~~~~~~
 
-- April 18, 2024, 4-5pm UK time - `Notes and zoom link <https://docs.google.com/document/d/1CJFzwQzg9ZgviKVr9T_yKAY_SIzC6tl-sEOyJlpWMnw/edit>`_
+.. list-table:: Past community calls
+   :widths: 25 50
+   :header-rows: 1
 
-- February 15, 2024, 4-5pm UK time - `Notes <https://docs.google.com/document/d/155VlsYRbOEmmQDpDflWcTipFTfsKuPACWWmTKh6M820/edit>`_
-
+   * - Date
+     - Notes and Zoom link
+   * - April 18, 2024, 4-5pm UK time
+     - `Notes and Zoom link <https://docs.google.com/document/d/1CJFzwQzg9ZgviKVr9T_yKAY_SIzC6tl-sEOyJlpWMnw/edit>`_
+   * - February 15, 2024, 4-5pm UK time
+     - `Notes and Zoom link <https://docs.google.com/document/d/155VlsYRbOEmmQDpDflWcTipFTfsKuPACWWmTKh6M820/edit>`_
 
 
 Workshops
