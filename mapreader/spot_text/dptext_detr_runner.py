@@ -18,7 +18,7 @@ try:
 except ImportError:
     raise ImportError("[ERROR] Please install Detectron2")
 
-from shapely import Polygon
+from shapely import MultiPolygon, Polygon
 
 # first assert we are using the dptext detr version of adet
 if adet.__version__ != "0.2.0-dptext-detr":
@@ -101,7 +101,10 @@ class DPTextDETRRunner(Runner):
             # draw polygons
             if bd is not None:
                 bd = bd.reshape(-1, 2)
-                polygon = Polygon(bd)
+                polygon = Polygon(bd).buffer(0)
+
+                if isinstance(polygon, MultiPolygon):
+                    polygon = polygon.convex_hull
 
             score = f"{score:.2f}"
 
@@ -111,6 +114,7 @@ class DPTextDETRRunner(Runner):
     def _dict_to_dataframe(
         preds: dict,
         geo: bool = False,
+        parent: bool = False,
     ) -> pd.DataFrame:
         """Convert the predictions dictionary to a pandas DataFrame.
 
@@ -120,6 +124,8 @@ class DPTextDETRRunner(Runner):
             A dictionary of predictions.
         geo : bool, optional
             Whether the dictionary is georeferenced coords (or pixel bounds), by default True
+        parent : bool, optional
+            Whether the dictionary is at the parent level, by default False
 
         Returns
         -------
@@ -130,6 +136,9 @@ class DPTextDETRRunner(Runner):
             columns = ["polygon", "crs", "score"]
         else:
             columns = ["polygon", "score"]
+
+        if parent:
+            columns.append("patch_id")
 
         preds_df = pd.concat(
             pd.DataFrame(

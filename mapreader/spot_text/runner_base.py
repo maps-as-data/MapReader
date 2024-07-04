@@ -83,7 +83,9 @@ class Runner:
             _ = self.run_on_image(img_path, return_outputs=False, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.patch_predictions, geo=False)
+            return self._dict_to_dataframe(
+                self.patch_predictions, geo=False, parent=False
+            )
         return self.patch_predictions
 
     def run_on_image(
@@ -126,33 +128,37 @@ class Runner:
         self.get_patch_predictions(outputs, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.patch_predictions, geo=False)
+            return self._dict_to_dataframe(
+                self.patch_predictions, geo=False, parent=False
+            )
         return self.patch_predictions
 
     def _deduplicate(self, image_id, min_ioa=0.7):
-        polygons = [
-            instance[0].buffer(0) for instance in self.patch_predictions[image_id]
-        ]
+        polygons = [instance[0] for instance in self.patch_predictions[image_id]]
 
-        def calc_ioa(i, j):
+        def calc_ioa(polygons, i, j):
             return polygons[i].intersection(polygons[j]).area / polygons[i].area
 
+        # create an intersection matrix
         i_matrix = np.zeros((len(polygons), len(polygons)))
 
         for i, j in combinations(range(len(polygons)), 2):
             if polygons[i].intersects(polygons[j]):
-                ioa_i = calc_ioa(i, j)
-                ioa_j = calc_ioa(j, i)
+                ioa_i = calc_ioa(polygons, i, j)
+                ioa_j = calc_ioa(polygons, j, i)
+                # bigger ioa means more overlap, so keep the one with the bigger ioa (only if more than min_ioa)
                 if ioa_i > ioa_j and ioa_i > min_ioa:
                     i_matrix[i, j] = ioa_i
                 elif ioa_j > ioa_i and ioa_j > min_ioa:
                     i_matrix[j, i] = ioa_j
 
+        # if there is an intersection with another polygon then remove this polygon
         for i, row in enumerate(i_matrix):
             if any([ioa != 0 for ioa in row]):
                 self.patch_predictions[image_id][i] = None
                 i_matrix[:, i] = 0
 
+        # remove the None values
         self.patch_predictions[image_id] = [
             prediction
             for prediction in self.patch_predictions[image_id]
@@ -164,6 +170,7 @@ class Runner:
         patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
         deduplicate: bool = False,
+        min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
         """Convert the patch predictions to parent predictions by converting pixel bounds.
 
@@ -176,6 +183,9 @@ class Runner:
         deduplicate : bool, optional
             Whether to deduplicate the parent predictions, by default False.
             Depending on size of parent images, this can be slow.
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
+            This is only used if `deduplicate` is True.
 
         Returns
         -------
@@ -205,42 +215,78 @@ class Runner:
                 xx = xx + patch_df.loc[image_id, "pixel_bounds"][0]  # add min_x
                 yy = yy + patch_df.loc[image_id, "pixel_bounds"][1]  # add min_y
 
-                parent_polygon = Polygon(zip(xx, yy))
+                parent_polygon = Polygon(zip(xx, yy)).buffer(0)
                 self.parent_predictions[parent_id].append(
-                    [parent_polygon, *instance[1:]]
+                    [parent_polygon, *instance[1:], image_id]
                 )
 
-            if deduplicate:
-                self._deduplicate_parent_level(parent_id)
+        if deduplicate:
+            for parent_id in self.parent_predictions.keys():
+                self._deduplicate_parent_level(parent_id, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.parent_predictions, geo=False)
+            return self._dict_to_dataframe(
+                self.parent_predictions, geo=False, parent=True
+            )
         return self.parent_predictions
 
     def _deduplicate_parent_level(self, image_id, min_ioa=0.7):
-        polygons = [
-            instance[0].buffer(0) for instance in self.parent_predictions[image_id]
-        ]
+        # get parent predictions for selected parent image
+        parent_preds = np.array(self.parent_predictions[image_id])
 
-        def calc_ioa(i, j):
-            return polygons[i].intersection(polygons[j]).area / polygons[i].area
+        all_patches = parent_preds[:, -1]
+        patches = np.unique(all_patches).tolist()
 
-        i_matrix = np.zeros((len(polygons), len(polygons)))
+        for patch_i, patch_j in combinations(patches, 2):
+            # get patch bounds
+            patch_bounds_i = Polygon.from_bounds(
+                *self.patch_df.loc[patch_i, "pixel_bounds"]
+            )
+            patch_bounds_j = Polygon.from_bounds(
+                *self.patch_df.loc[patch_j, "pixel_bounds"]
+            )
 
-        for i, j in combinations(range(len(polygons)), 2):
-            if polygons[i].intersects(polygons[j]):
-                ioa_i = calc_ioa(i, j)
-                ioa_j = calc_ioa(j, i)
-                if ioa_i > ioa_j and ioa_i > min_ioa:
-                    i_matrix[i, j] = ioa_i
-                elif ioa_j > ioa_i and ioa_j > min_ioa:
-                    i_matrix[j, i] = ioa_j
+            if patch_bounds_i.intersects(patch_bounds_j):
+                # get patch intersection
+                intersection = patch_bounds_i.intersection(patch_bounds_j)
 
-        for i, row in enumerate(i_matrix):
-            if any([ioa != 0 for ioa in row]):
-                self.parent_predictions[image_id][i] = None
-                i_matrix[:, i] = 0
+                # get polygons that overlap with the patch intersection
+                polygons = []
+                for i, pred in enumerate(parent_preds):
+                    if pred[-1] in [patch_i, patch_j] and pred[0].intersects(
+                        intersection
+                    ):
+                        polygons.append([i, pred[0]])
 
+                def calc_ioa(polygons, i, j):
+                    return (
+                        polygons[i][1].intersection(polygons[j][1]).area
+                        / polygons[i][1].area
+                    )
+
+                # create an intersection matrix
+                i_matrix = np.zeros((len(polygons), len(polygons)))
+
+                # calculate intersection over area for these polygons
+                for i, j in combinations(range(len(polygons)), 2):
+                    if polygons[i][1].intersects(polygons[j][1]):
+                        ioa_i = calc_ioa(polygons, i, j)
+                        ioa_j = calc_ioa(polygons, j, i)
+                        # bigger ioa means more overlap, so keep the one with the bigger ioa (only if more than min_ioa)
+                        if ioa_i > ioa_j and ioa_i > min_ioa:
+                            i_matrix[i, j] = ioa_i
+                        elif ioa_j > ioa_i and ioa_j > min_ioa:
+                            i_matrix[j, i] = ioa_j
+
+                # if there is an intersection with another polygon then remove this polygon
+                for i, row in enumerate(i_matrix):
+                    # index of the polygon in the parent_preds array
+                    index = polygons[i][0]
+                    if any([ioa != 0 for ioa in row]):
+                        self.parent_predictions[image_id][index] = None
+                        i_matrix[:, i] = 0
+
+        # remove the None values
         self.parent_predictions[image_id] = [
             prediction
             for prediction in self.parent_predictions[image_id]
@@ -300,13 +346,13 @@ class Runner:
 
                     crs = parent_df.loc[parent_id, "crs"]
 
-                    parent_polygon_geo = Polygon(zip(xx, yy))
+                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     self.geo_predictions[parent_id].append(
                         [parent_polygon_geo, crs, *instance[1:]]
                     )
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.geo_predictions, geo=True)
+            return self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
         return self.geo_predictions
 
     def save_to_geojson(
@@ -321,7 +367,7 @@ class Runner:
             Path to save the GeoJSON file
         """
 
-        geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True)
+        geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
 
         # get the crs (should be the same for all polygons)
         assert geo_df["crs"].nunique() == 1

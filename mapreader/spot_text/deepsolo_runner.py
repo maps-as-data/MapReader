@@ -19,7 +19,7 @@ try:
 except ImportError:
     raise ImportError("[ERROR] Please install Detectron2")
 
-from shapely import LineString, Polygon
+from shapely import LineString, MultiPolygon, Polygon
 
 # first assert we are using the deep solo version of adet
 if adet.__version__ != "0.2.0-deepsolo":
@@ -273,7 +273,10 @@ class DeepSoloRunner(Runner):
             if bd is not None:
                 bd = np.hsplit(bd, 2)
                 bd = np.vstack([bd[0], bd[1][::-1]])
-                polygon = Polygon(bd)
+                polygon = Polygon(bd).buffer(0)
+
+                if isinstance(polygon, MultiPolygon):
+                    polygon = polygon.convex_hull
 
             # draw center lines
             line = self._process_ctrl_pnt(ctrl_pnt)
@@ -293,6 +296,7 @@ class DeepSoloRunner(Runner):
     def _dict_to_dataframe(
         preds: dict,
         geo: bool = False,
+        parent: bool = False,
     ) -> pd.DataFrame:
         """Convert the predictions dictionary to a pandas DataFrame.
 
@@ -302,6 +306,8 @@ class DeepSoloRunner(Runner):
             A dictionary of predictions.
         geo : bool, optional
             Whether the dictionary is georeferenced coords (or pixel bounds), by default True
+        parent : bool, optional
+            Whether the dictionary is at parent level, by default False
 
         Returns
         -------
@@ -312,6 +318,9 @@ class DeepSoloRunner(Runner):
             columns = ["polygon", "crs", "text", "score"]
         else:
             columns = ["polygon", "text", "score"]
+
+        if parent:
+            columns.append("patch_id")
 
         preds_df = pd.concat(
             pd.DataFrame(
