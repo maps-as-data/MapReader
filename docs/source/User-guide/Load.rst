@@ -180,6 +180,22 @@ e.g. to slice your maps into 50 x 50 meter patches:
 This will save your patches as ``.png`` files in a directory called ``patches_50_meters``.
 As above, you can use the ``path_save`` argument to change where these patches are saved.
 
+MapReader also contains an option to create some overlap between your patches.
+This can be useful for text spotting tasks where text may be cut off at the edges of patches.
+
+To add overlap to your patches, use the ``overlap`` argument:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_files.patchify_all(patch_size=1024, overlap=0.1)
+
+This will create 1024 x 1024 pixel patches with 10% overlap between each patch.
+
+.. note::
+    Greater overlaps will create more patches and result in greater computational costs when running.
+    You should be aware of this when choosing your overlap size.
+
 .. admonition:: Advanced usage
     :class: dropdown
 
