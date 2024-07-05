@@ -468,6 +468,20 @@ def test_patchify_meters_errors(sample_dir, image_id, tmp_path):
         maps.patchify_all(patch_size=10000, method="meters", path_save=tmp_path)
 
 
+def test_patchify_pixels_overlap(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=4, path_save=tmp_path, overlap=0.5)
+    parent_list = maps.list_parents()
+    patch_list = maps.list_patches()
+    print(patch_list, flush=True)
+    assert len(parent_list) == 1
+    assert len(patch_list) == 25
+    assert os.path.isfile(f"{tmp_path}/patch-0-0-4-4-#{image_id}#.png")
+    assert os.path.isfile(f"{tmp_path}/patch-2-2-6-6-#{image_id}#.png")
+    assert os.path.isfile(f"{tmp_path}/patch-6-6-9-9-#{image_id}#.png")
+    assert os.path.isfile(f"{tmp_path}/patch-8-8-9-9-#{image_id}#.png")
+
+
 # --- test other functions ---
 
 
