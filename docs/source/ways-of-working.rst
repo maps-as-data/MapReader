@@ -42,7 +42,7 @@ questions raised on GitHub asynchronously.
 As most members do not work full time on MapReader, it might take some time
 until your query or contribution is addressed - especially if expert knowledge
 is needed. Don't be afraid to nudge if they've not replied after a few days!
-:sparkling_heart:
+|:sparkling_heart:|
 
 Issues & Pull Requests
 ~~~~~~~~~~~~~~~~~~~~~~
