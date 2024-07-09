@@ -2,6 +2,7 @@ myst-parser
 nbsphinx
 pandoc
 sphinx-autoapi
+sphinx-autobuild
 sphinx-copybutton
 sphinx-togglebutton
 sphinx_rtd_theme
