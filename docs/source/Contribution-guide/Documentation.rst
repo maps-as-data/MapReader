@@ -100,6 +100,20 @@ Followed by specific example:
     #EXAMPLE
     my_files = loader("./maps/*.png")
 
+Previewing your changes
+------------------------
+
+To preview your changes, you can build the documentation locally.
+
+To do this, navigate to the ``MapReader/docs`` directory and run:
+
+.. code-block:: bash
+
+    make livehtml
+
+This will build the documentation and open a new tab in your browser with the documentation.
+The ``livehtml`` command will automatically update the documentation as you make changes to the files.
+
 When you are finished
 ----------------------
 
