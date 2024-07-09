@@ -6,3 +6,4 @@ sphinx-copybutton
 sphinx-togglebutton
 sphinx_rtd_theme
 sphinxcontrib-napoleon
+sphinxemoji

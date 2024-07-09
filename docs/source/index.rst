@@ -19,6 +19,7 @@ MapReader
    Coc
    Contribution-guide/Contribution-guide
    Developers-guide
+   ways-of-working
 
 ------------
 

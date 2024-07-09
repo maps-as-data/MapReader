@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx_togglebutton",
+    'sphinxemoji.sphinxemoji',
 ]
 
 templates_path = ["_templates"]
