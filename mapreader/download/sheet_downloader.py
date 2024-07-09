@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shutil
+import time
 from functools import reduce
 
 import matplotlib.image as mpimg
@@ -617,7 +618,16 @@ class SheetDownloader:
         else:
             print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
 
-        shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        try:
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except PermissionError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except OSError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return img_path
 
     def _save_metadata(

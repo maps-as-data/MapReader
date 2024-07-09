@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import time
 
 from shapely.geometry import Polygon
 
@@ -112,7 +113,17 @@ class Downloader:
         else:
             print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
 
-        shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        try:
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except PermissionError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except OSError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+
         return success
 
     def download_map_by_polygon(
