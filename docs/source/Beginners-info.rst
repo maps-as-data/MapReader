@@ -10,7 +10,7 @@ However, it can also be intimidating for beginners who are not familiar with usi
 
 Here are some resources to help you get started with using the terminal on your computer:
 
-- `Introduction to the command line <https://curriculum.dhinstitutes.org/workshops/command-line/>`__
+- `Introduction to the command line <https://app.dhrift.org/dynamic/?user=dhri-curriculum&repo=workshops&file=command-line&instUser=dhri-curriculum&instRepo=dhrift-site-template/>`__
 - `Introduction to the bash command line  <https://programminghistorian.org/en/lessons/intro-to-bash>`__
 - `Introduction to the Windows command line with PowerShell <https://programminghistorian.org/en/lessons/intro-to-powershell>`__
 - `The Unix shell <https://swcarpentry.github.io/shell-novice/>`__
