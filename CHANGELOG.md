@@ -12,16 +12,6 @@ The following table shows which versions of MapReader are compatible with which 
 +----------+------------+
 
 
-## [v1.2.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.4) (2024-04-08)
-
-<!--
--->
-
-- Remove support for python 3.8
-- Update dependencies and add cartopy as required dependency
-
----
-
 ## [v1.3.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.4) (2024-07-05)
 
 <!--
@@ -241,7 +231,8 @@ a284f4e Update pytest requirement from <8.0.0 to <9.0.0
 20023aa Create dependabot.yml
 -->
 
--
+- Remove support for python 3.8
+- Update dependencies and add cartopy as required dependency
 
 ## [v1.1.5](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.5) (2024-04-04)
 
