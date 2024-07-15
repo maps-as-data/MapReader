@@ -1,6 +1,6 @@
 # Changelog
 
-# Python versions
+## Python versions
 
 The following table shows which versions of MapReader are compatible with which versions of python:
 
