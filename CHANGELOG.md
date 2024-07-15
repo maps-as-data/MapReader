@@ -25,6 +25,7 @@ The following table shows which versions of MapReader are compatible with which 
 ## [v1.3.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.4) (2024-07-05)
 
 <!--
+PRs: #435
 add823a Merge pull request #435 from Living-with-machines/dev_text_spotting
 1d76188 add test for overlap
 6b2f282 fix ioa figure
@@ -41,6 +42,8 @@ e2bf35c Redoing list of community calls
 ## [v1.3.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.3) (2024-07-03)
 
 <!--
+PRs: #450, #449, #443, #438, #428, #424
+
 cfc90e7 Merge pull request #450 from Living-with-machines/katie-paper-final-read
 8cde900 rosie's edit
 bd3d5f6 Merge pull request #449 from Living-with-machines/km-citation-update
@@ -81,6 +84,8 @@ c65ff77 move common functions to base class
 ## [v1.3.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.2) (2024-05-17)
 
 <!--
+PRs: #434, #433, #431, #432, #418, #415, #414, #416, #396, #413
+
 282b873 Merge pull request #434 from Living-with-machines/426-calc-pixel-stats
 0a69fae update pixel stats calculation
 ed2af0b Merge pull request #433 from Living-with-machines/430-add-id
@@ -136,6 +141,8 @@ fe370ee Merge pull request #413 from Living-with-machines/issue-398
 ## [v1.3.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.1) (2024-05-03)
 
 <!--
+PRs: #399
+
 3d7ab10 update tests
 dd216eb fix overwriting issue
 1eb5aeb update saving for duplicate sheet names
@@ -150,6 +157,8 @@ e81c617 Merge branch 'main' into april_workshop
 ## [v1.3.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.0) (2024-04-29)
 
 <!--
+PRs: #388, 395, 384
+
 f256ae9 Merge pull request #388 from Living-with-machines/ocr
 6237341 update where to find configs and weights
 197e4dd update docs for install
@@ -208,6 +217,8 @@ f42b1c0 update installation instructions
 ## [v1.2.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.2.0) (2024-04-08)
 
 <!--
+PRs: #383, #380, #381, #382, #379
+
 e9d119f update docs
 5a62b69 move cartopy to required and update version
 d5ab0b8 force int for randint
@@ -235,6 +246,8 @@ a284f4e Update pytest requirement from <8.0.0 to <9.0.0
 ## [v1.1.5](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.5) (2024-04-04)
 
 <!--
+PRs: #378, #377, #374, #373, #372, #366, #363, #362
+
 75e2824 Merge pull request #378 from Living-with-machines/JOSS_paper
 0a61a89 Merge pull request #377 from Living-with-machines/rw_docs
 c1b9223 Update Install.rst
@@ -275,6 +288,8 @@ f106c95 Update Events.rst
 ## [v1.1.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.4) (2024-02-23)
 
 <!--
+PRs: #357
+
 4ae6026 Merge pull request #357 from Living-with-machines/rw_docs
 1d1ca54 Update Worked-examples.rst
 deeb7cb update docs
@@ -292,6 +307,8 @@ ee4e92f update annotate worked examples
 ## [v1.1.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.3) (2024-02-21)
 
 <!--
+PRs: #350, 356, 354, 319, 342
+
 a429260 Merge pull request #350 from Living-with-machines/context_classifier_single
 113f3a1 better test for scramble frame
 bf7c33b test backward compatibility
@@ -335,6 +352,8 @@ afd693d add tests
 ## [v1.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.2) (2024-02-05)
 
 <!--
+PRs: #374, 345, 338
+
 f31d87f Merge pull request #347 from Living-with-machines/346-annotations-order
 b52086e fix tests
 74c4c2d fix tests for random order of annotations
@@ -376,6 +395,8 @@ b936bed change delimiter
 ## [v1.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.1) (2024-01-08)
 
 <!--
+PRs: #337, #326, #335, #318, #336, #330, #328, #316
+
 8997b4d add missing tests
 31be1d0 Merge pull request #337 from Living-with-machines/dev_annotator
 a086c1f remove fail on no url col
@@ -422,6 +443,8 @@ edf22d5 minor updates + v number
 ## [v1.1.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.0) (2023-12-14)
 
 <!--
+PRs: #322, #321, #173
+
 8eda75e Merge pull request #322 from Living-with-machines/kmcdono2-docs-fix
 8dadad2 Merge pull request #321 from Living-with-machines/paper-katie-update
 f090542 Merge remote-tracking branch 'origin/fix_save_to_geojson' into 279-test-coord-saving
@@ -438,6 +461,8 @@ ccbf46c Merge pull request #173 from Living-with-machines/kallewesterling/issue1
 ## [v1.0.7](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.7) (2023-12-14)
 
 <!--
+PRs: #277, #317, #312, #311, #310, #309, #308, #307, #306, #305, #304, #303, #302, #301, #300, #299, #298, #297, #290
+
 9ee0cdf Merge branch 'kallewesterling/issue166' into analyse_preds
 462983d change how max_size is set in lieu of resize_to param
 7369464 Merge branch 'kallewesterling/issue166' into analyse_preds
@@ -552,6 +577,8 @@ ac48935 align classifier_context to classifier
 ## [v1.0.6](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.6) (2023-11-22)
 
 <!--
+PRs: #291, #280, #285, #283, #278, #276, #270, #269, #258, #256, #253, #246, #228
+
 c10b2c4 Merge pull request #291 from Living-with-machines/dev_download
 bc37c36 add docs
 20f47c6 Update PULL_REQUEST_TEMPLATE.md
@@ -657,6 +684,8 @@ ffcae41 print full (abs) path for broken_files.txt
 ## [v1.0.5](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.5) (2023-07-25)
 
 <!--
+PRs: #241, #221, #244, #227, #225, #226, #224, #222
+
 9ed7c86 Merge pull request #241 from Living-with-machines/update_file_saving
 e375dc5 Update test_annotations_loader.py
 aa69147 Merge branch 'main' into update_file_saving
@@ -716,6 +745,8 @@ f574956 add dev dependencies (timm and transformers)
 ## [v1.0.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.4) (2023-06-27)
 
 <!--
+PRs: #209, #210
+
 837a842 Merge pull request #209 from Living-with-machines/dev_download
 b53672a Merge pull request #210 from Living-with-machines/dev_load
 235b5a6 add tests for other models (load from string)
@@ -730,6 +761,8 @@ cf85f86 Merge branch 'main' into dev_load
 ## [v1.0.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.3) (2023-06-21)
 
 <!--
+PRs: #220
+
 2dcb57b Merge pull request #220 from Living-with-machines/tweak-developer-docs
 3415f53 adds details to dev docs about version numbers
 -->
@@ -739,6 +772,8 @@ cf85f86 Merge branch 'main' into dev_load
 ## [v1.0.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.2) (2023-06-20)
 
 <!--
+PRs: #202, #197, #200
+
 055d240 Merge pull request #202 from Living-with-machines/debug-gh-action-event-trigger
 aa16de4 add error message for broken image files|
 6c4b654 save metadata to csv on each download
@@ -753,6 +788,8 @@ aa16de4 add error message for broken image files|
 ## [v1.0.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.1) (2023-06-06)
 
 <!--
+PRs: #188
+
 40d65ca Merge pull request #188 from Living-with-machines/workshop_notebooks
 6f24b50 update empty notebook
 c100554 changes versioneer style
@@ -768,6 +805,8 @@ b8ea250 removes poetry as build tool
 ## [v1.0.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.0) (2023-06-06)
 
 <!--
+PRs: #195, #199, #185, #182, #164, #181, #176, #154, #180, #163, #160, #165, #151, #155, #140, #95, #158, #74, #149, #79, #136, #133, #102, #96, #94, #91, #87, #90, #89, #86
+
 eb2f0ea Update conf.py (turn off todos)
 cedae71 Update README.md
 597bcfb Merge pull request #195 from Living-with-machines/rwood-97-patch-1
@@ -1368,6 +1407,8 @@ f71620b add build details to developer's docs
 ## [v0.3.4](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.4) (2023-02-20)
 
 <!--
+PRs: #69, #68, #65
+
 e1355d3 Successful local build of conda package
 89ea886 build conda packages for upstream dependancies
 477e048 cherry pick a14bec1 (Add min_std_pixel and max_std_pixel)
@@ -1433,6 +1474,8 @@ d8f079d version 0.3.3
 ## [v0.3.3](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.3) (2022-04-27)
 
 <!--
+PRs: #38, #41, #40
+
 395a41b 5 epochs
 5116710 add annotations
 3abcec8 update README
@@ -1551,6 +1594,8 @@ da0dad0 Move rasterio to map dependencies
 ## [v0.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v0.1.2) (2022-03-03)
 
 <!--
+PRs: #25, #24
+
 41f924a Add files to quickstart notebook
 050fe7e Add quick_start notebook
 582f17e Update setup.py
@@ -1587,6 +1632,8 @@ a9aed7d update requirements.txt
 ## [v0.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v0.1.1) (2022-01-15)
 
 <!--
+PRs: #14, #12, #11, #8, #6, #3
+
 17078fe Update README.md
 2046504 Merge pull request #14 from Living-with-machines/evangeline-corcoran-patch-1
 8d772ea update toml file
