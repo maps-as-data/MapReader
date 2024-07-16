@@ -16,6 +16,15 @@ The following table shows which versions of MapReader are compatible with which 
 
 <!--
 PRs: #435
+- adds new developments to the text spotting code:
+    - Adds deduplicate methods for removing overlapping polygons within a patch and also between patches
+    - Add overlap option when creating patches
+    - Adds Runner base class to remove repeated code in the two different runners.
+- fixes
+    - #404: Add duplicate detection to text spotting code
+    - #405: Add method for dealing with cut-off at patch edges in text spotting work
+
+Commits:
 add823a Merge pull request #435 from Living-with-machines/dev_text_spotting
 1d76188 add test for overlap
 6b2f282 fix ioa figure
@@ -32,7 +41,12 @@ e2bf35c Redoing list of community calls
 ## [v1.3.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.3) (2024-07-03)
 
 <!--
-PRs: #450, #449, #443, #438, #428, #424
+PRs: #450, #449, #443, #438, #424
+- Added sentence to related work to mention briefly that MapReader now includes text spotting.
+- Addresses citation update request (openjournals/joss-reviews#6434 (comment)) for JOSS paper from @emdupre
+- Update authors on paper.md
+- Add a notebook for exploring and visualising text labels on maps for the June 2024 workshop in Lancaster
+- Update workshop notebooks from feedback
 
 cfc90e7 Merge pull request #450 from Living-with-machines/katie-paper-final-read
 8cde900 rosie's edit
