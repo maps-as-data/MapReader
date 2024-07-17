@@ -3,6 +3,12 @@ MapReader
 
 **A computer vision pipeline for exploring and analyzing images at scale**
 
+
+------------
+
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -20,11 +26,6 @@ MapReader
    Contribution-guide/Contribution-guide
    Developers-guide
    ways-of-working
-
-------------
-
-.. include:: ../../README.md
-   :parser: myst_parser.sphinx_
 
 Indices and tables
 ==================
