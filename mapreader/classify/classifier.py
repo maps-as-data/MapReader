@@ -624,7 +624,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Notes
         -----
         This method calls the
-        :meth:`mapreader.train.classifier.classifier.train` method with the
+        :meth:`~.train.classifier.classifier.train` method with the
         ``num_epochs`` set to ``1`` and all the other parameters specified in
         the function arguments.
         """
@@ -674,7 +674,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Train the model on the specified phases for a given number of epochs.
 
         Wrapper function for
-        :meth:`mapreader.train.classifier.classifier.train_core` method to
+        :meth:`~.train.classifier.classifier.train_core` method to
         capture exceptions (``KeyboardInterrupt`` is the only supported
         exception currently).
 
@@ -716,7 +716,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Notes
         -----
         Refer to the documentation of
-        :meth:`mapreader.train.classifier.classifier.train_core` for more
+        :meth:`~.train.classifier.classifier.train_core` for more
         information.
         """
 
