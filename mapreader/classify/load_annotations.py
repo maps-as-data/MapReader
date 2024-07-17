@@ -18,10 +18,12 @@ from .datasets import PatchContextDataset, PatchDataset
 
 
 class AnnotationsLoader:
+    """
+    A class for loading annotations and preparing datasets and dataloaders for
+    use in training/validation of a model.
+    """
+
     def __init__(self):
-        """
-        A Class for loading annotations and preparing datasets and dataloaders for use in training/validation of a model.
-        """
         self.annotations = pd.DataFrame()
         self.reviewed = pd.DataFrame()
         self.patch_paths_col = None
@@ -41,7 +43,9 @@ class AnnotationsLoader:
         scramble_frame: bool | None = False,
         reset_index: bool | None = False,
     ):
-        """Loads annotations from a csv file or dataframe and can be used to set the ``patch_paths_col`` and ``label_col`` attributes.
+        """
+        Loads annotations from a csv file or dataframe and can be used to set
+        the ``patch_paths_col`` and ``label_col`` attributes.
 
         Parameters
         ----------
