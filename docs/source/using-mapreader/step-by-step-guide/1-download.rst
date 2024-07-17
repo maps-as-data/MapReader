@@ -84,7 +84,7 @@ To help you visualize your metadata, the boundaries of the map sheets included i
 
      my_ts.plot_all_metadata_on_map()
 
-.. image:: ../../figures/plot_metadata_on_map.png
+.. image:: /_static/plot_metadata_on_map.png
      :width: 400px
      :align: center
 

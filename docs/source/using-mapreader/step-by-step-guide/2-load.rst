@@ -283,7 +283,7 @@ To view a random sample of your images, use:
 
     my_files.show_sample(num_samples=3)
 
-.. image:: ../../figures/show_sample_parent.png
+.. image:: /_static/show_sample_parent.png
     :width: 400px
 
 
@@ -295,7 +295,7 @@ If, however, you want to see a random sample of your patches use the ``tree_leve
 
     my_files.show_sample(num_samples=3, tree_level="patch")
 
-.. image:: ../../figures/show_sample_child.png
+.. image:: /_static/show_sample_child.png
     :width: 400px
 
 
@@ -310,7 +310,7 @@ e.g. :
     patch_list = my_files.list_patches()
     my_files.show(patch_list[250:300])
 
-.. image:: ../../figures/show.png
+.. image:: /_static/show.png
     :width: 400px
 
 
@@ -323,7 +323,7 @@ or
     files_to_show = [patch_list[0], patch_list[350], patch_list[400]]
     my_files.show(files_to_show)
 
-.. image:: ../../figures/show_list.png
+.. image:: /_static/show_list.png
     :width: 400px
 
 
@@ -343,7 +343,7 @@ This can be done using:
     parent_list = my_files.list_parents()
     my_files.show_parent(parent_list[0])
 
-.. image:: ../../figures/show_par.png
+.. image:: /_static/show_par.png
     :width: 400px
 
 
@@ -397,7 +397,7 @@ e.g. to view "mean_pixel_R" on your patches:
     parent_list = my_files.list_parents()
     my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R")
 
-.. image:: ../../figures/show_par_RGB.png
+.. image:: /_static/show_par_RGB.png
     :width: 400px
 
 If you want to see your image underneath, you can specify the ``alpha`` argument, which sets the transparency of your plotted values.
@@ -411,7 +411,7 @@ e.g. to view "mean_pixel_R" on your patches:
     parent_list = my_files.list_parents()
     my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R", alpha=0.5)
 
-.. image:: ../../figures/show_par_RGB_0.5.png
+.. image:: /_static/show_par_RGB_0.5.png
     :width: 400px
 
 .. note:: The ``column_to_plot`` argument can also be used with the ``show()`` method.

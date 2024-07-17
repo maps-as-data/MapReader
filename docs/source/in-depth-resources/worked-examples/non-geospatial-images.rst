@@ -10,7 +10,7 @@ We have provided two examples of this.
 Classification of plant phenotypes
 ----------------------------------
 
-.. image:: ../../figures/tutorial_classification_plant_phenotype.png
+.. image:: /_static/tutorial_classification_plant_phenotype.png
    :width: 400px
    :target: https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb
 
@@ -21,7 +21,7 @@ It can be found `here <https://github.com/Living-with-machines/MapReader/blob/ma
 Classification of MNIST digits
 ------------------------------
 
-.. image:: ../../figures/tutorial_classification_mnist.png
+.. image:: /_static/tutorial_classification_mnist.png
    :width: 400px
    :target: https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_mnist/Pipeline.ipynb
 

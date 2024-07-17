@@ -9,7 +9,7 @@ MapReader was developed for maps and geospatial images.
 Classification of one-inch OS maps
 ----------------------------------
 
-.. image:: ../../figures/tutorial_classification_one_inch_maps_001.png
+.. image:: /_static/tutorial_classification_one_inch_maps_001.png
    :width: 400px
    :target: https://github.com/Living-with-machines/MapReader/tree/main/worked_examples/geospatial
 

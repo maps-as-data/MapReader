@@ -8,7 +8,7 @@ What is unique about MapReader?
 
 MapReader is based on the 'patchwork method' in which whole map images are sliced into a grid of squares or 'patches':
 
-.. image:: ../figures/patchify.png
+.. image:: /_static/patchify.png
 
 This unique way of pre-processing map images enables the use of image classification to identify visual features within maps, in order to answer important research questions.
 
@@ -17,7 +17,7 @@ What is 'the MapReader pipeline'?
 
 The MapReader pipeline consists of a linear sequence of tasks:
 
-.. image:: ../figures/pipeline_explained.png
+.. image:: /_static/pipeline_explained.png
 
 Together, these tasks can be used to train a computer vision (CV) classifier to recognize visual features within maps and identify patches containing these features across entire map collections.
 
@@ -30,21 +30,21 @@ What are the inputs and outputs of each stage in the MapReader pipeline?
 ------------------------------------------------------------------------
 
 Download
-^^^^^^^^^
-.. image:: ../figures/in_out_download.png
+~~~~~~~~
+.. image:: /_static/in_out_download.png
     :width: 600px
 
 Load
-^^^^^
-.. image:: ../figures/in_out_load.png
+~~~~
+.. image:: /_static/in_out_load.png
     :width: 600px
 
 Annotate
-^^^^^^^^^
-.. image:: ../figures/in_out_annotate.png
+~~~~~~~~
+.. image:: /_static/in_out_annotate.png
     :width: 600px
 
 Classify (Train and Predict)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. image:: ../figures/in_out_classify.png
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: /_static/in_out_classify.png
     :width: 600px

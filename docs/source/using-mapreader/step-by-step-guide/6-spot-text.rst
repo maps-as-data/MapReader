@@ -162,10 +162,10 @@ If two polygons overlap with intersection over area greater than the minimum IoA
 
 Below are two examples of this:
 
-.. image:: ../../figures/IoA.png
+.. image:: /_static/IoA.png
     :width: 400px
 
-.. image:: ../../figures/IoA_0.9.png
+.. image:: /_static/IoA_0.9.png
     :width: 400px
 
 By default, the minimum IoA is set to 0.7 so the deduplication algorithm will only remove the smaller polygon in the second example.

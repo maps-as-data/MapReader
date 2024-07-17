@@ -65,7 +65,7 @@ For example, to show your "railspace" label:
 
 .. todo:: update this pic
 
-.. image:: ../../../figures/show_image_labels_10.png
+.. image:: /_static/show_image_labels_10.png
     :width: 400px
 
 
@@ -78,7 +78,7 @@ The ``.review_labels()`` method, which returns an interactive tool for adjusting
 
     annotated_images.review_labels()
 
-.. image:: ../../../figures/review_labels.png
+.. image:: /_static/review_labels.png
     :width: 400px
 
 
@@ -515,7 +515,7 @@ e.g. to plot the loss during each epoch of training and validation:
         legends=["Train", "Valid"],
     )
 
-.. image:: ../../../figures/loss.png
+.. image:: /_static/loss.png
     :width: 400px
 
 
@@ -535,7 +535,7 @@ To see a sample of your predictions, use:
 
     my_classifier.show_inference_sample_results(label="railspace")
 
-.. image:: ../../../figures/inference_sample_results.png
+.. image:: /_static/inference_sample_results.png
     :width: 400px
 
 
