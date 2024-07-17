@@ -5,7 +5,7 @@ Introduction to MapReader
     TODO: Add something here as a super high-level intro
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    what-is-mapreader
    why-should-you-use-mapreader

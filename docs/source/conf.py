@@ -57,7 +57,7 @@ autoapi_options = [
     "imported-members",
 ]
 
-autoapi_keep_files = False
+autoapi_keep_files = True
 autodoc_typehints = "description"
 autoapi_add_toctree_entry = False
 
