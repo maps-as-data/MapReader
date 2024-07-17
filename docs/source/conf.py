@@ -43,6 +43,8 @@ source_suffix = {
     ".md": "markdown",
 }
 
+suppress_warnings = ["myst.header"]
+
 # -- autoapi configuration -----
 
 autoapi_dirs = ["../../mapreader"]
