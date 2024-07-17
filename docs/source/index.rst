@@ -8,19 +8,11 @@ MapReader
    :hidden:
    :maxdepth: 2
 
-   About
-   Events
-   Project-cv
-   Beginners-info
-   Install
-   Input-guidance
-   User-guide/User-guide
-   Worked-examples/Worked-examples
-   api/index
-   Coc
-   Contribution-guide/Contribution-guide
-   Developers-guide
-   ways-of-working
+   introduction-to-mapreader/index
+   getting-started/index
+   using-mapreader/index
+   in-depth-resources/index
+   community-and-contributions/index
 
 Indices and tables
 ==================
