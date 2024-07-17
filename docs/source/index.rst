@@ -26,13 +26,6 @@ MapReader
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
 
--------------
-
-.. admonition:: To do list
-   :class: dropdown
-
-   .. todolist::
-
 Indices and tables
 ==================
 
