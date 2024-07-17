@@ -62,7 +62,9 @@ class ClassifierContainer:
         If set to ``True``, the default device is used.
         Defaults to ``False``.
     kwargs : Dict
-        Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
+        Keyword arguments to pass to the
+        :meth:`~.classify.classifier.ClassifierContainer._initialize_model`
+        method (if passing ``model`` as a string).
 
     Attributes
     ----------
@@ -781,16 +783,19 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Raises
         ------
         ValueError
-            If the criterion is not set. Use the ``add_criterion`` method to
-            set the criterion.
+            If the criterion is not set. Use the
+            :meth:`~.classify.classifier.ClassifierContainer.add_criterion`
+            method to set the criterion.
 
             If the optimizer is not set and the phase is "train". Use the
-            ``initialize_optimizer`` or ``add_optimizer`` method to set the
-            optimizer.
+            :meth:`~.classify.classifier.ClassifierContainer.initialize_optimizer`
+            or :meth:`~.classify.classifier.ClassifierContainer.add_optimizer`
+            method to set the optimizer.
 
         KeyError
             If the specified phase cannot be found in the keys of the object's
-            ``dataloaders`` dictionary property.
+            :attr:`~.classify.classifier.ClassifierContainer.dataloaders`
+            dictionary property.
 
         Returns
         -------
@@ -1102,11 +1107,11 @@ Use ``add_criterion`` to define one."
         Notes
         -----
         This method uses both the
-        ``sklearn.metrics.precision_recall_fscore_support`` and
-        ``sklearn.metrics.roc_auc_score`` functions from ``scikit-learn`` to
-        calculate the metrics for each average type (``"micro"``, ``"macro"``
-        and ``"weighted"``). The results are then added to the ``metrics``
-        dictionary. It also writes the metrics to the TensorBoard
+        :func:`sklearn.metrics.precision_recall_fscore_support` and
+        :func:`sklearn.metrics.roc_auc_score` functions from ``scikit-learn``
+        to calculate the metrics for each average type (``"micro"``,
+        ``"macro"`` and ``"weighted"``). The results are then added to the
+        ``metrics`` dictionary. It also writes the metrics to the TensorBoard
         SummaryWriter, if ``tboard_writer`` is not None.
         """
         # convert y_score to a numpy array:
@@ -1501,9 +1506,9 @@ Use ``add_criterion`` to define one."
         Notes
         -----
         This method uses the dataloader of the ``ImageClassifierData`` class
-        and the ``torchvision.utils.make_grid`` function to display the sample
-        data in a grid format. It also calls the ``_imshow`` method of the
-        ``ImageClassifierData`` class to show the sample data.
+        and the :func:`torchvision.utils.make_grid` function to display the
+        sample data in a grid format. It also calls the ``_imshow`` method of
+        the ``ImageClassifierData`` class to show the sample data.
         """
         if set_name not in self.dataloaders.keys():
             raise ValueError(

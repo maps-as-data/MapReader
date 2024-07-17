@@ -250,7 +250,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         ``patch_paths_col`` column of the ``patch_df`` DataFrame at the given
         index. The loaded image is then converted to the format specified by
         the ``image_mode`` attribute of the object. The resulting
-        ``PIL.Image.Image`` object is returned.
+        :class:`PIL.Image.Image` object is returned.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()

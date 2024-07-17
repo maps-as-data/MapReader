@@ -333,10 +333,18 @@ Please check your image paths in your annonations.csv file and update them if ne
         This method reviews images with their corresponding labels and allows
         the user to change the label for each image.
 
-        Updated labels are saved in ``self.annotations`` and in a newly created ``self.reviewed`` DataFrame.
+        Updated labels are saved in
+        :attr:`~.classify.load_annotations.AnnotationsLoader.annotations`
+        and in a newly created
+        :attr:`~.classify.load_annotations.AnnotationsLoader.reviewed`
+        DataFrame.
+
         If ``exclude_df`` is provided, images found in this df are skipped in the review process.
+
         If ``include_df`` is provided, only images found in this df are reviewed.
-        The ``self.reviewed`` DataFrame is deduplicated based on the ``deduplicate_col``.
+
+        The :attr:`~.classify.load_annotations.AnnotationsLoader.reviewed`
+        DataFrame is deduplicated based on the ``deduplicate_col``.
         """
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
