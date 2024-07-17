@@ -1,10 +1,6 @@
-<div align="center">
-    <br>
-    <p align="center">
-    <h1>MapReader</h1>
-    <h2>A computer vision pipeline for exploring and analyzing images at scale</h2>
-    </p>
-</div>
+# MapReader
+
+<h2 align="center">A computer vision pipeline for exploring and analyzing images at scale</h2>
 
 <p align="center">
     <a href="https://pypi.org/project/mapreader/">
@@ -141,3 +137,7 @@ Maps above reproduced with the permission of the National Library of Scotland ht
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+<style>
+  h1 {text-align: center;}
+</style>
