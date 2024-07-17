@@ -18,7 +18,7 @@ Writing your tutorial or worked example
 ----------------------------------------
 
 You can write your tutorial/worked example in any way you like but should save it in the ``worked_examples`` folder.
-We suggest using a `jupyter notebook <https://jupyter-notebook.readthedocs.io/en/latest/>`_.
+We suggest using a `Jupyter notebook <https://jupyter-notebook.readthedocs.io/en/latest/>`_.
 
 Take a look through our current :doc:`worked examples </Worked-examples/Worked-examples>` for inspiration.
 

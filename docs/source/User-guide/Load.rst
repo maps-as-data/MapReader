@@ -1,7 +1,7 @@
 Load
 =====
 
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your ``mr_py38`` Python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
@@ -59,7 +59,7 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
 .. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``target_crs``.
 
-Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, a pandas dataframe), use:
+Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, a Pandas dataframe), use:
 
 .. code-block:: python
 
@@ -79,10 +79,10 @@ For example, if you have downloaded your maps using the default settings of our 
 
     Other arguments you may want to specify when adding metadata to your images include:
 
-    - ``index_col`` - By default, this is set to ``0`` so the first column of your csv/excel spreadsheet will be used as the index column when creating a pandas dataframe. If you would like to use a different column you can specify ``index_col``.
+    - ``index_col`` - By default, this is set to ``0`` so the first column of your ``csv``/Excel spreadsheet will be used as the index column when creating a Pandas dataframe. If you would like to use a different column you can specify ``index_col``.
     - ``columns`` - By default, the ``add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
     - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
-    - ``delimiter`` - By default, this is set to ``|``. If your csv file is delimited using a different delimiter you should specify the delimiter argument.
+    - ``delimiter`` - By default, this is set to ``|``. If your ``csv`` file is delimited using a different delimiter you should specify the delimiter argument.
 
 
 .. note:: In MapReader versions < 1.0.7, coordinates were miscalculated. To correct this, use the ``add_coords_from_grid_bb()`` method to calculate new, correct coordinates.

@@ -10,7 +10,7 @@ MapReader's ``Annotate`` subpackage is used to interactively annotate images (e.
 Annotate your images
 ----------------------
 
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` python environment.
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mr_py38` Python environment.
 
 
 To prepare your annotations, you must specify a number of parameters when initializing the Annotator class.
@@ -51,7 +51,7 @@ e.g. :
         username="rosie",
     )
 
-.. note:: You can pass either a pandas DataFrame or the path to a csv file as the ``patch_df`` and ``parent_df`` arguments.
+.. note:: You can pass either a Pandas DataFrame or the path to a ``csv`` file as the ``patch_df`` and ``parent_df`` arguments.
 
 In the above examples, the following parameters are also specified:
 

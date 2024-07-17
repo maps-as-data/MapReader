@@ -14,10 +14,10 @@ You should choose one method within each step and follow the instructions for th
 
 .. todo:: Add comments about how to get to conda in Windows
 
-Step 1: Set up a virtual python environment
+Step 1: Set up a virtual Python environment
 ----------------------------------------------
 
-The most recent version of MapReader supports python versions 3.9+.
+The most recent version of MapReader supports Python versions 3.9+.
 
 Method 1: Using conda (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,7 +25,7 @@ Method 1: Using conda (recommended)
 We recommend installing MapReader using either Anaconda (`installation instructions here <https://docs.anaconda.com/anaconda/install/>`__) or miniconda (`installation instructions here <https://docs.conda.io/en/latest/miniconda.html>`__).
 A discussion of which of these to choose can be found `here <https://docs.conda.io/projects/conda/en/stable/user-guide/install/download.html>`__.
 
-Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual python environment:
+Once you have installed either Ananconda or miniconda, open your terminal and use the following commands to set up your virtual Python environment:
 
 -  Create a new conda environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
 
@@ -44,22 +44,22 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 Method 2: Using venv or other
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like not to use conda, you are more than welcome to set up a virtual python environment using other methods.
+If you would like not to use conda, you are more than welcome to set up a virtual Python environment using other methods.
 
-For example, if you would like to use venv, open your terminal and use the following commands to set up your virtual python environment:
+For example, if you would like to use venv, open your terminal and use the following commands to set up your virtual Python environment:
 
--  First, importantly, check which version of python your system is using:
+-  First, importantly, check which version of Python your system is using:
 
    .. code-block:: bash
 
       python3 --version
 
-   If this returns a version below 3.9, you will need download an updated python version.
+   If this returns a version below 3.9, you will need download an updated Python version.
    You can do this by downloading from `here <https://www.python.org/downloads/>`__ (make sure you download the right one for your operating system).
 
-   You should then run the above command again to check your python version has updated.
+   You should then run the above command again to check your Python version has updated.
 
--  Create a new virtual python environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
+-  Create a new virtual Python environment for ``mapreader`` (you can call this whatever you like, we use ``mapreader``):
 
    .. code-block:: bash
 
@@ -126,16 +126,16 @@ This method will create a ``MapReader`` directory on your machine which will con
 
    .. note:: The conda package seems to be sensitive to the precise priority of the conda channels, hence the use of the `--override-channels --strict-channel-priority` switches is required for this to work. Until this is resolve this installation method will be marked "experimental".
 
-Step 3: Add virtual python environment to notebooks
+Step 3: Add virtual Python environment to notebooks
 ------------------------------------------------------
 
-- To allow the newly created python virtual environment to show up in jupyter notebooks, run the following command:
+- To allow the newly created Python virtual environment to show up in Jupyter notebooks, run the following command:
 
 .. code-block:: bash
 
       python -m ipykernel install --user --name mapreader --display-name "Python (mr_py)"
 
-.. note:: if you have used a different name for your python virtual environment replace the ``mapreader`` with whatever name you have used.
+.. note:: if you have used a different name for your Python virtual environment replace the ``mapreader`` with whatever name you have used.
 
 
 Running tests

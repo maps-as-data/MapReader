@@ -116,7 +116,7 @@ Preparing your metadata
 MapReader uses the file names of your map images as unique identifiers (``image_id`` s).
 Therefore, if you would like to associate metadata to your map images, then, **at minimum**, your metadata must contain a column/header named ``image_id`` or ``name`` whose content is the file name of each map image.
 
-To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `pandas readable file format <https://pandas.pydata.org/>`_.
+To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `file format readable by Pandas <https://pandas.pydata.org/>`_.
 
 .. note:: Many map collections do not have item-level metadata, however even the minimal requirements here (a filename, geospatial coordinates, and CRS) will suffice for using MapReader. It is always a good idea to talk to the curators of the map collections you wish to use with MapReader to see if there are metadata files that can be shared for research purposes.
 
@@ -149,11 +149,11 @@ Your file can contain as many columns/rows as you like, so long as it contains a
 Option 2 - Loading metadata from other file formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As pandas is able to read `a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_, you may still be able to use your metadata even if it is saved in a different file format.
+As Pandas is able to read `a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_, you may still be able to use your metadata even if it is saved in a different file format.
 
-To do this, you will need to use python to:
+To do this, you will need to use Python to:
 
-1. Read your file using one of pandas ``read_xxx`` methods and create a dataframe from it.
+1. Read your file using one of Pandas ``read_xxx`` methods and create a dataframe from it.
 2. Ensure there is an ``image_ID`` column to your dataframe (and add one if there is not).
 3. Pass your dataframe to MapReader.
 

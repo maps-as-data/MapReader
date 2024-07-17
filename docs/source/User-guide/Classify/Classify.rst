@@ -1,7 +1,7 @@
 Classify (Train and Infer)
 ==========================
 
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your ``mapreader`` Python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 

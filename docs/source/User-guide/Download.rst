@@ -4,7 +4,7 @@ Download
 .. todo:: Add comment saying navigate in your terminal to your working directory and then open a notebook from there. Shift right click on a folder in windows to copy path name.
 .. todo:: Add instruction to create a new notebook.
 
-.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your `mapreader` python environment.
+.. note:: Run these commands in a Jupyter notebook (or other IDE), ensuring you are in your ``mapreader`` Python environment.
 
 .. note:: You will need to update file paths to reflect your own machines directory structure.
 
@@ -185,8 +185,8 @@ For all download methods, you should also be aware of the following arguments:
 - ``path_save`` - By default, this is set to ``maps`` so that your map images and metadata are saved in a directory called "maps". You can change this to save your map images and metadata in a different directory (e.g. ``path_save="my_maps_directory"``).
 - ``metadata_fname`` - By default, this is set to ``metadata.csv``. You can change this to save your metadata with a different file name (e.g. ``metadata_fname="my_maps_metadata.csv"``).
 - ``overwrite`` - By default, this is set to ``False`` and so if a map image exists already, the download is skipped and map images are not overwritten. Setting it to ``True`` (i.e. by specifying ``overwrite=True``) will result in existing map images being overwritten.
-- ``date_col`` - The key(s) to use when extracting the publication dates from your metadata.json.
-- ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your metadata.json to your metadata.csv. See below for further details.
+- ``date_col`` - The key(s) to use when extracting the publication dates from your ``metadata.json``.
+- ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your ``metadata.json`` to your ``metadata.csv``. See below for further details.
 
 Using the default ``path_save`` and ``metadata_fname`` arguments will result in the following directory structure:
 
@@ -511,5 +511,3 @@ e.g. :
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
 .. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
-
-

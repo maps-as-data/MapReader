@@ -23,7 +23,7 @@ i.e. not a program/app that you can click and find in your start page/ launch pa
 - Usually no GUI
 - ??
 
-Conda and python virtual environments
+Conda and Python virtual environments
 --------------------------------------
 
 A virtual environment is a way to create an isolated environment in which you can install specific versions of packages and dependencies for your Python projects.
@@ -32,8 +32,8 @@ In the installation instructions provided, there are two methods for setting up 
 
 If you're new to virtual environments in Python, this tutorial provides a good introduction:
 
-- `Getting started with python environments (using conda) <https://towardsdatascience.com/getting-started-with-python-environments-using-conda-32e9f2779307>`__
-- `Why you need python environments and how to manage them with conda <https://www.freecodecamp.org/news/why-you-need-python-environments-and-how-to-manage-them-with-conda-85f155f4353c/>`__
+- `Getting started with Python environments (using conda) <https://towardsdatascience.com/getting-started-with-python-environments-using-conda-32e9f2779307>`__
+- `Why you need Python environments and how to manage them with conda <https://www.freecodecamp.org/news/why-you-need-python-environments-and-how-to-manage-them-with-conda-85f155f4353c/>`__
 - `Virtual environments and packages <https://docs.python.org/3/tutorial/venv.html>`__
 - more??
 

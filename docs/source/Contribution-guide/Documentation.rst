@@ -61,7 +61,7 @@ Style guide
     Four
     ^^^^
 
-- Use ``.. code-block:: <lang>`` to create code blocks formatted as per your given langauge (replace ``<lang>`` with the language you will be writing in). e.g. ``.. code-block:: python`` will create a code block with python formatting.
+- Use ``.. code-block:: <lang>`` to create code blocks formatted as per your given langauge (replace ``<lang>`` with the language you will be writing in). e.g. ``.. code-block:: python`` will create a code block with Python formatting.
 - Use ``Link title <http://www.anexamplelink.com>`__`` to link to external pages.
 - Use ``.. contents::`` to automatically generate a table of contents detailing sections within the current page. e.g.
 

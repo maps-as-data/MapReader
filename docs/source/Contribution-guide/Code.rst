@@ -37,7 +37,7 @@ Style guide
 
 When making your changes, please:
 
-- Try to align to the `PEP 8 style guide for python code <https://peps.python.org/pep-0008/>`.
+- Try to align to the `PEP 8 style guide for Python code <https://peps.python.org/pep-0008/>`.
 - Try to use the numpy-style docstrings (as per `this link <https://numpydoc.readthedocs.io/en/latest/format.html#>_`).
 - Ensure all docstrings are kept up to date and reflect any changes to code functionality you have made.
 - Add and run tests for your code.

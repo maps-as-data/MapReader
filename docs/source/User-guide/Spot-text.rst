@@ -257,7 +257,7 @@ As above, use the ``border_color``, ``text_color`` and ``figsize`` arguments to 
     )
 
 
-You can then save these predictions to a csv file:
+You can then save these predictions to a ``csv`` file:
 
 .. code-block:: python
 
