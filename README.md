@@ -32,7 +32,7 @@
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale.
 
 <figure align="center">
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/river_banner_8bit.png"
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/figures/river_banner_8bit.png"
       alt="Annotated Map with Prediction Outputs"
       width="70%">
 </figure>
