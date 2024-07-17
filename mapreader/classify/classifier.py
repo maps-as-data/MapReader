@@ -31,6 +31,75 @@ from .datasets import PatchDataset
 
 
 class ClassifierContainer:
+    """
+    A class to store and train a PyTorch model.
+
+    Parameters
+    ----------
+    model : str, nn.Module or None
+        The PyTorch model to add to the object.
+
+        - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
+        - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
+
+    labels_map: Dict or None
+        A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
+        Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
+    dataloaders: Dict or None
+        A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
+    device : str, optional
+        The device to be used for training and storing models.
+        Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
+    input_size : int, optional
+        The expected input size of the model. Default is ``(224,224)``.
+    is_inception : bool, optional
+        Whether the model is an Inception-style model.
+        Default is ``False``.
+    load_path : str, optional
+        The path to an ``.obj`` file containing a
+    force_device : bool, optional
+        Whether to force the use of a specific device.
+        If set to ``True``, the default device is used.
+        Defaults to ``False``.
+    kwargs : Dict
+        Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
+
+    Attributes
+    ----------
+    device : torch.device
+        The device being used for training and storing models.
+    dataloaders : dict
+        A dictionary to store dataloaders for the model.
+    labels_map : dict
+        A dictionary mapping label indices to their labels.
+    dataset_sizes : dict
+        A dictionary to store sizes of datasets for the model.
+    model : torch.nn.Module
+        The model.
+    input_size : None or tuple of int
+        The size of the input to the model.
+    is_inception : bool
+        A flag indicating if the model is an Inception model.
+    optimizer : None or torch.optim.Optimizer
+        The optimizer being used for training the model.
+    scheduler : None or torch.optim.lr_scheduler._LRScheduler
+        The learning rate scheduler being used for training the model.
+    criterion : None or nn.modules.loss._Loss
+        The criterion to use for training the model.
+    metrics : dict
+        A dictionary to store the metrics computed during training.
+    last_epoch : int
+        The last epoch number completed during training.
+    best_loss : torch.Tensor
+        The best validation loss achieved during training.
+    best_epoch : int
+        The epoch in which the best validation loss was achieved during
+        training.
+    tmp_save_filename : str
+        A temporary file name to save checkpoints during training and
+        validation.
+    """
+
     def __init__(
         self,
         model: str | nn.Module | None,
@@ -43,75 +112,6 @@ class ClassifierContainer:
         force_device: bool | None = False,
         **kwargs,
     ):
-        """
-        Initialize an ClassifierContainer object.
-
-        Parameters
-        ----------
-        model : str, nn.Module or None
-            The PyTorch model to add to the object.
-
-            - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
-            - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
-
-        labels_map: Dict or None
-            A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
-            Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
-        dataloaders: Dict or None
-            A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
-        device : str, optional
-            The device to be used for training and storing models.
-            Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
-        input_size : int, optional
-            The expected input size of the model. Default is ``(224,224)``.
-        is_inception : bool, optional
-            Whether the model is an Inception-style model.
-            Default is ``False``.
-        load_path : str, optional
-            The path to an ``.obj`` file containing a
-        force_device : bool, optional
-            Whether to force the use of a specific device.
-            If set to ``True``, the default device is used.
-            Defaults to ``False``.
-        kwargs : Dict
-            Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
-
-        Attributes
-        ----------
-        device : torch.device
-            The device being used for training and storing models.
-        dataloaders : dict
-            A dictionary to store dataloaders for the model.
-        labels_map : dict
-            A dictionary mapping label indices to their labels.
-        dataset_sizes : dict
-            A dictionary to store sizes of datasets for the model.
-        model : torch.nn.Module
-            The model.
-        input_size : None or tuple of int
-            The size of the input to the model.
-        is_inception : bool
-            A flag indicating if the model is an Inception model.
-        optimizer : None or torch.optim.Optimizer
-            The optimizer being used for training the model.
-        scheduler : None or torch.optim.lr_scheduler._LRScheduler
-            The learning rate scheduler being used for training the model.
-        criterion : None or nn.modules.loss._Loss
-            The criterion to use for training the model.
-        metrics : dict
-            A dictionary to store the metrics computed during training.
-        last_epoch : int
-            The last epoch number completed during training.
-        best_loss : torch.Tensor
-            The best validation loss achieved during training.
-        best_epoch : int
-            The epoch in which the best validation loss was achieved during
-            training.
-        tmp_save_filename : str
-            A temporary file name to save checkpoints during training and
-            validation.
-        """
-
         # set up device
         if device in ["default", None]:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
