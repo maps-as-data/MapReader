@@ -26,13 +26,14 @@
   - [Contributors](#contributors)
 
 ---
+<!--- sphinx-include --->
 
 ## What is MapReader?
 
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale.
 
 <figure align="center">
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/figures/river_banner_8bit.png"
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/_static/river_banner_8bit.png"
       alt="Annotated Map with Prediction Outputs"
       width="70%">
 </figure>
@@ -48,7 +49,7 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 The MapReader pipeline consists of a linear sequence of tasks which, together, can be used to train a computer vision (CV) classifier to recognize visual features within maps and identify patches containing these features across entire map collections:
 
 <figure align="center">
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/figures/pipeline_explained.png"
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/_static/pipeline_explained.png"
         alt="MapReader pipeline"
         width="70%">
 </figure>
@@ -93,7 +94,6 @@ If you use MapReader in your work, please cite both the MapReader repo and [our 
 
 - Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
 - Kasra Hosseini, Rosie Wood, Andy Smith, Katie McDonough, Daniel C.S. Wilson, Christina Last, Kalle Westerling, and Evangeline Mae Corcoran. “Living-with-machines/mapreader: End of Lwm”. Zenodo, July 27, 2023. https://doi.org/10.5281/zenodo.8189653.
-
 
 ## Acknowledgements
 
