@@ -10,4 +10,4 @@ In-Depth Resources
    coding-basics
    github-basics
    worked-examples/index
-   api/mapreader/index
+   api/index
