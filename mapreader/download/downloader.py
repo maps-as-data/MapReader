@@ -128,16 +128,16 @@ class Downloader:
             if total_size_mb > 100:
                 print(f"[WARNING] Estimated total size: {total_size_mb * 1e-3:.2f}GB.")
                 if not force:
-                    raise ValueError(
-                        "[ERROR] This will download a lot of data. Please confirm download by setting ``force=True``."
+                    raise Warning(
+                        f"[WARNING] This will download approximately {total_size_mb * 1e-3:.2f}GB of data. Please confirm download by setting ``force=True``."
                     )
             else:
                 print(f"[INFO] Estimated total size: {total_size_mb:.2f}MB.")
         except urllib.error.URLError as e:
-            print(f"[ERROR] Unable to estimate download size. {e}")
+            print(f"[WARNING] Unable to estimate download size. {e}")
             if not force:
-                raise ValueError(
-                    "[ERROR] This could download a lot of data. Please confirm download by setting ``force=True``."
+                raise Warning(
+                    "[WARNING] This could download a lot of data. Please confirm download by setting ``force=True``."
                 )
 
         if map_name is None:
