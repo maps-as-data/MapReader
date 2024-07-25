@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import logging
 import os
 from ast import literal_eval
 from itertools import product
@@ -23,6 +24,9 @@ except ImportError:
         "[WARNING] parhugin (https://github.com/kasra-hosseini/parhugin) is not installed, continue without it."  # noqa
     )
     parhugin_installed = False
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class PatchDataset(Dataset):
@@ -581,7 +585,7 @@ class PatchContextDataset(PatchDataset):
                     ]
                 )
 
-            print(f"Total number of jobs: {len(list_jobs)}")
+            logger.info(f"Total number of jobs: {len(list_jobs)}")
             # and then adding them to my_proc
             my_proc.add_list_jobs(list_jobs)
             my_proc.run_jobs()

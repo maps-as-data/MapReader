@@ -38,7 +38,7 @@ def extractGeoInfo(image_path):
         tiff_proj = tiff_src.crs.to_string()
         tiff_coord = tuple(tiff_src.bounds)
 
-    print(f"[INFO] Shape: {tiff_shape}. \n[INFO] CRS: {tiff_proj}.")
+    logger.info(f"Shape: {tiff_shape}. \n[INFO] CRS: {tiff_proj}.")
     logger.info("Coordinates: {:.4f} {:.4f} {:.4f} {:.4f}".format(*tiff_coord))
 
     return tiff_shape, tiff_proj, tiff_coord
@@ -66,7 +66,7 @@ def reproject_geo_info(image_path, target_crs="EPSG:4326", calc_size_in_m=False)
     # Coordinate transformation: proj1 ---> proj2
     transformer = Transformer.from_crs(tiff_proj, target_crs, always_xy=True)
     coord = transformer.transform_bounds(*tiff_coord)
-    print(f"[INFO] New CRS: {target_crs}")
+    logger.info(f"New CRS: {target_crs}")
     logger.info("Reprojected coordinates: {:.4f} {:.4f} {:.4f} {:.4f}".format(*coord))
 
     height, width, _ = tiff_shape

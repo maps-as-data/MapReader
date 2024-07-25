@@ -515,7 +515,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         The method runs :meth:`mapreader.load.images.MapImages._add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
-        print(f"[INFO] Add shape, tree level: {tree_level}")
+        logger.info(f"Add shape, tree level: {tree_level}")
 
         image_ids = list(self.images[tree_level].keys())
         for image_id in image_ids:
@@ -623,7 +623,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         central longitude and latitude (``center_lon`` and ``center_lat``) for
         the image and adds the data to it.
         """
-        print(f"[INFO] Add center coordinates, tree level: {tree_level}")
+        logger.info(f"Add center coordinates, tree level: {tree_level}")
 
         image_ids = list(self.images[tree_level].keys())
 
@@ -1380,7 +1380,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
 
             if "patches" not in self.parents[parent_id]:
-                print(f"[WARNING] No patches found for: {parent_id}")
+                logger.warning(f"No patches found for: {parent_id}")
                 continue
 
             list_patches = self.parents[parent_id]["patches"]
@@ -1661,7 +1661,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 parent_id = self.patches[image_id].get("parent_id", None)
 
                 if parent_id is None:
-                    print(f"[WARNING] {image_id} has no parent. Skipping.")
+                    logger.warning(f"{image_id} has no parent. Skipping.")
                     continue
 
                 if parent_id not in parent_images.keys():
@@ -1891,7 +1891,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         for patch_file in tqdm(patch_files):
             if not os.path.isfile(patch_file):
-                print(f"[WARNING] File does not exist: {patch_file}")
+                logger.warning(f"File does not exist: {patch_file}")
                 continue
 
             self._check_image_mode(patch_file)
@@ -2016,7 +2016,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             for file in tqdm(files):
                 if not os.path.isfile(file):
-                    print(f"[WARNING] File does not exist: {file}")
+                    logger.warning(f"File does not exist: {file}")
                     continue
 
                 self._check_image_mode(file)
@@ -2571,9 +2571,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 try:
                     metadata_df = pd.read_csv(metadata)
                 except:
-                    print(f"[WARNING] could not find metadata file: {metadata}")  # noqa
+                    logger.warning(f"could not find metadata file: {metadata}")  # noqa
             else:
-                print(f"format cannot be recognized: {metadata_fmt}")
+                logger.warning(f"format cannot be recognized: {metadata_fmt}")
                 include_metadata = False
             if include_metadata:
                 metadata_df['rd_index_id'] = metadata_df[metadata_index_column].apply(lambda x: os.path.basename(x))

@@ -292,7 +292,7 @@ Please check your image paths in your annonations.csv file and update them if ne
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
 
-        print(f"[INFO] Unique labels: {self.unique_labels}")
+        logger.info(f"Unique labels: {self.unique_labels}")
 
     def review_labels(
         self,
@@ -410,7 +410,7 @@ Please check your image paths and update them if necessary.'
                 image_idx += 1
             plt.show()
 
-            print(f"[INFO] IDs of current patches: {iter_ids}")
+            logger.info(f"IDs of current patches: {iter_ids}")
             q = "\nEnter IDs, comma separated (or press enter to continue): "
             user_input_ids = input(q)
 
@@ -421,13 +421,13 @@ Please check your image paths and update them if necessary.'
                 "stop",
             ]:
                 list_input_ids = user_input_ids.split(",")
-                print(
-                    f"[INFO] Options for labels:{list(self.annotations[self.label_col].unique())}"
+                logger.info(
+                    f"Options for labels:{list(self.annotations[self.label_col].unique())}"
                 )
                 input_label = input("Enter new label:  ")
                 if input_label not in list(self.annotations[self.label_col].unique()):
-                    print(
-                        f'[ERROR] Label "{input_label}" not found in the annotations. Please enter a valid label.'
+                    logger.error(
+                        f'Label "{input_label}" not found in the annotations. Please enter a valid label.'
                     )
                     continue
 
@@ -635,7 +635,7 @@ Please check your image paths and update them if necessary.'
 
         logger.info("Number of annotations in each set:")
         for set_name in datasets.keys():
-            print(f"    - {set_name}:   {dataset_sizes[set_name]}")
+            logger.info(f"    - {set_name}:   {dataset_sizes[set_name]}")
 
     def create_patch_datasets(
         self, train_transform, val_transform, test_transform, df_train, df_val, df_test
@@ -847,11 +847,11 @@ Please check your image paths and update them if necessary.'
         return self.unique_labels.index(label)
 
     def __str__(self):
-        print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")
+        logger.info(f"Number of annotations:   {len(self.annotations)}\n")
         if len(self.annotations) > 0:
             value_counts = self.annotations[self.label_col].value_counts()
-            print(
-                f'[INFO] Number of instances of each label (from column "{self.label_col}"):'
+            logger.info(
+                f'Number of instances of each label (from column "{self.label_col}"):'
             )
             for label, count in value_counts.items():
                 print(f"    - {label}:  {count}")

@@ -180,7 +180,7 @@ class SheetDownloader:
                     ) from err
 
                 if published_date == "":  # missing date is fine
-                    print(f"[WARNING] No published date detected in {map_name}.")
+                    logger.warning(f"No published date detected in {map_name}.")
                     feature["properties"]["published_date"] = []
 
                 else:
@@ -209,7 +209,7 @@ class SheetDownloader:
                     feature["properties"]["published_date"] = int(published_date[0])
 
                 else:
-                    print(f"[WARNING] No published date detected in map {map_name}.")
+                    logger.warning(f"No published date detected in map {map_name}.")
                     feature["properties"]["published_date"] = []
 
         self.published_dates = True
@@ -511,13 +511,13 @@ class SheetDownloader:
             logger.info("No query results found/saved.")
         else:
             divider = 14 * "="
-            print(f"{divider}\nQuery results:\n{divider}")
+            logger.info(f"{divider}\nQuery results:\n{divider}")
             for feature in self.found_queries:
                 map_url = feature["properties"]["IMAGEURL"]
                 map_bounds = feature["polygon"].bounds
-                print(f"URL:     \t{map_url}")
-                print(f"coordinates (bounds):  \t{map_bounds}")
-                print(20 * "-")
+                logger.info(f"URL:     \t{map_url}")
+                logger.info(f"coordinates (bounds):  \t{map_bounds}")
+                logger.info(20 * "-")
 
     ## download
     def _initialise_downloader(self):

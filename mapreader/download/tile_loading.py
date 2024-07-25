@@ -214,4 +214,4 @@ def _trigger_download(url: str, file_path: str):
             f.write(data)
 
     except:
-        print(f"[WARNING] {url} not found.")
+        logger.warning(f"[WARNING] {url} not found.")

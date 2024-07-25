@@ -120,7 +120,7 @@ class ClassifierContainer:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
-        print(f"[INFO] Device is set to {self.device}")
+        logger.info(f"Device is set to {self.device}")
 
         # check if loading an pre-existing object
         if load_path:
@@ -802,7 +802,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         if phases is None:
             phases = ["train", "val"]
-        print(f"[INFO] Each step will pass: {phases}.")
+        logger.info(f"Each step will pass: {phases}.")
 
         for phase in phases:
             if phase not in self.dataloaders.keys():
@@ -1033,7 +1033,7 @@ Use ``add_criterion`` to define one."
         ]
 
         time_elapsed = time.time() - since
-        print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
+        logger.info(f"Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
 
         # load best model weights
         self.model.load_state_dict(best_model_wts)
@@ -1785,7 +1785,7 @@ Output will show batch number {num_batches}.'
         if save_path is None:
             save_path = f"{set_name}_predictions_patch_df.csv"
         patch_df.to_csv(save_path, sep=delimiter)
-        print(f"[INFO] Saved predictions to {save_path}.")
+        logger.info(f"Saved predictions to {save_path}.")
 
     def load_dataset(
         self,
