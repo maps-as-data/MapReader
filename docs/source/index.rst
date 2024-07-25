@@ -10,7 +10,7 @@ MapReader
    About
    Events
    Project-cv
-   Beginners-info
+   coding-basics/index
    Install
    Input-guidance
    User-guide/User-guide
