@@ -5,7 +5,6 @@ import copy
 import logging
 import os
 import random
-import socket
 import sys
 import time
 from collections.abc import Hashable, Iterable
@@ -962,12 +961,12 @@ Use ``add_criterion`` to define one."
 
                         if phase.lower() in valid_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", "dred", epoch_msg)
+                            logger.info(epoch_msg)
                         elif phase.lower() in train_phase_names:
                             epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", "dgreen", epoch_msg)
+                            logger.info(epoch_msg)
                         else:
-                            self.cprint("[INFO]", "dgreen", epoch_msg)
+                            logger.info(epoch_msg)
                     # --- END: one batch
 
                 # scheduler
@@ -1000,9 +999,9 @@ Use ``add_criterion`` to define one."
                     epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
 
                     if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", "dred", epoch_msg + "\n")
+                        logger.info(epoch_msg)
                     else:
-                        self.cprint("[INFO]", "dgreen", epoch_msg)
+                        logger.info(epoch_msg)
 
                 # labels/confidence
                 self.pred_conf.extend(running_pred_conf)
@@ -1816,7 +1815,7 @@ Output will show batch number {num_batches}.'
             The number of worker threads to use for loading data, by default 0.
         """
         if sampler and shuffle:
-            logger.info("``sampler`` is defined so train dataset will be unshuffled.")
+            logger.info("`sampler` is defined so train dataset will be unshuffled.")
 
         dataloader = DataLoader(
             dataset,
@@ -1934,38 +1933,6 @@ Output will show batch number {num_batches}.'
         """
         dtime = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
         return dtime
-
-    def cprint(self, type_info: str, bc_color: str, text: str) -> None:
-        """
-        Print colored text with additional information.
-
-        Parameters
-        ----------
-        type_info : str
-            The type of message to display.
-        bc_color : str
-            The color to use for the message text.
-        text : str
-            The text to display.
-
-        Returns
-        -------
-        None
-            The colored message is displayed on the standard output stream.
-        """
-        host_name = socket.gethostname().split(".")[0][:10]
-
-        print(
-            self._print_colors["green"]
-            + self._get_dtime()
-            + self._print_colors["reset"],
-            self._print_colors["magenta"] + host_name + self._print_colors["reset"],
-            self._print_colors["bold"]
-            + self._print_colors["grey"]
-            + type_info
-            + self._print_colors["reset"],
-            self._print_colors[bc_color] + text + self._print_colors["reset"],
-        )
 
     def update_progress(
         self,
