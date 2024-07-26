@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import pathlib
 from itertools import combinations
@@ -12,6 +13,9 @@ import pandas as pd
 from PIL import Image
 from shapely import Polygon
 from tqdm.auto import tqdm
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class Runner:
@@ -324,7 +328,7 @@ class Runner:
                 raise ValueError("[ERROR] Please provide a `parent_df`")
 
         if self.parent_predictions == {}:
-            print("[INFO] Converting patch pixel bounds to parent pixel bounds.")
+            logger.info("Converting patch pixel bounds to parent pixel bounds.")
             _ = self.convert_to_parent_pixel_bounds()
 
         for parent_id, prediction in self.parent_predictions.items():
