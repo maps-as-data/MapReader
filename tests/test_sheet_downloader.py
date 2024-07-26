@@ -28,7 +28,9 @@ def sample_dir():
 @pytest.fixture
 def sheet_downloader(sample_dir):
     test_json = f"{sample_dir}/test_json.json"  # contains 6 features
-    download_url = "https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png"
+    download_url = (
+        "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    )
     return SheetDownloader(test_json, download_url)
 
 
@@ -40,7 +42,9 @@ def test_init(sheet_downloader):
 
 def test_init_errors(sample_dir):
     test_json = f"{sample_dir}/test_json.json"  # crs changed to EPSG:3857 (note: coordinates are wrong in file)
-    download_url = "https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png"
+    download_url = (
+        "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    )
     with pytest.raises(ValueError, match="file not found"):
         SheetDownloader("fake_file.json", download_url)
     with pytest.raises(ValueError, match="string or list of strings"):
@@ -69,7 +73,9 @@ def test_get_grid_bb(sheet_downloader):
 
 def test_get_grid_bb_errors(sample_dir):
     test_json = f"{sample_dir}/test_json_epsg3857.json"  # crs changed to EPSG:3857 (note: coordinates are wrong in file)
-    download_url = "https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png"
+    download_url = (
+        "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    )
     sd = SheetDownloader(test_json, download_url)
     with pytest.raises(NotImplementedError, match="EPSG:4326"):
         sd.get_grid_bb()
