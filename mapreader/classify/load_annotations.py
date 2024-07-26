@@ -89,16 +89,16 @@ class AnnotationsLoader:
         if not self.patch_paths_col:
             self.patch_paths_col = patch_paths_col
         elif self.patch_paths_col != patch_paths_col:
-            print(
-                f'[WARNING] Patch paths column was previously "{self.patch_paths_col}, but will now be set to {patch_paths_col}.'
+            logger.warning(
+                f'Patch paths column was previously "{self.patch_paths_col}, but will now be set to {patch_paths_col}.'
             )
             self.patch_paths_col = patch_paths_col
 
         if not self.label_col:
             self.label_col = label_col
         elif self.label_col != label_col:
-            print(
-                f'[WARNING] Label column was previously "{self.label_col}, but will now be set to {label_col}.'
+            logger.warning(
+                f'Label column was previously "{self.label_col}, but will now be set to {label_col}.'
             )
             self.label_col = label_col
 
@@ -173,7 +173,7 @@ class AnnotationsLoader:
         """
 
         if os.path.isfile(annotations):
-            print(f'[INFO] Reading "{annotations}"')
+            logger.info(f'Reading "{annotations}"')
             annotations = pd.read_csv(annotations, sep=delimiter, index_col=0)
         else:
             raise ValueError(f'[ERROR] "{annotations}" cannot be found.')
@@ -222,9 +222,9 @@ class AnnotationsLoader:
                 for broken_path in broken_paths:
                     f.write(f"{broken_path}\n")
 
-            print(
-                f"[WARNING] {len(broken_paths)} files cannot be found.\n\
-Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument."
+            logger.warning(f"{len(broken_paths)} files cannot be found.")
+            logger.warning(
+                f"Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument."
             )
 
             if remove_broken:
@@ -234,15 +234,15 @@ Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible,
 Please check your files exist and, if possible, update your file paths using the 'images_dir' argument."
                     )
                 else:
-                    print(
-                        f"[INFO] Annotations with broken file paths have been removed.\n\
-Number of annotations remaining: {len(self.annotations)}"
+                    logger.info("Annotations with broken file paths have been removed.")
+                    logger.info(
+                        f"Number of annotations remaining: {len(self.annotations)}"
                     )
 
             else:  # raise error for 'remove_broken=False'
                 if ignore_broken:
-                    print(
-                        f"[WARNING] Continuing with {len(broken_paths)} broken file paths."
+                    logger.warning(
+                        f"Continuing with {len(broken_paths)} broken file paths."
                     )
                 else:
                     raise ValueError(
@@ -371,9 +371,9 @@ Please check your image paths in your annonations.csv file and update them if ne
 
         image_idx = 0
         while image_idx < len(annots2review):
-            print('[INFO] Type "exit", "end" or "stop" to exit.')
-            print(
-                f"[INFO] Showing {image_idx}-{image_idx+chunks} out of {len(annots2review)}."  # noqa
+            logger.info('Type "exit", "end" or "stop" to exit.')
+            logger.info(
+                f"Showing {image_idx}-{image_idx+chunks} out of {len(annots2review)}."  # noqa
             )
             plt.figure(figsize=(num_cols * 3, (chunks // num_cols) * 3))
             counter = 1
@@ -447,8 +447,8 @@ Please check your image paths and update them if necessary.'
                         self.annotations[self.label_col].value_counts().tolist()
                         == self.annotations["label_index"].value_counts().tolist()
                     )
-                    print(
-                        f'[INFO] Image {input_id} has been relabelled as "{input_label}"'
+                    logger.info(
+                        f'Image {input_id} has been relabelled as "{input_label}"'
                     )
 
                 user_input_ids = input(q)
@@ -756,8 +756,8 @@ Please check your image paths and update them if necessary.'
         ``sampler`` will only be applied to the training dataset (datasets["train"]).
         """
         if not self.datasets:
-            print(
-                "[INFO] Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations."
+            logger.info(
+                "Creating datasets using default train/val/test split of 0.7:0.15:0.15 and default transformations."
             )
             self.create_datasets()
 

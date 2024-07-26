@@ -348,7 +348,7 @@ class Annotator:
             logger.info(f"Adding metadata from {metadata_path}.")
         except ValueError:
             raise FileNotFoundError(
-                f"[INFO] Metadata file at {metadata_path} not found. Please specify the correct file path using the ``metadata_path`` argument."
+                f"[ERROR] Metadata file at {metadata_path} not found. Please specify the correct file path using the ``metadata_path`` argument."
             )
 
         parent_df, patch_df = maps.convert_images()

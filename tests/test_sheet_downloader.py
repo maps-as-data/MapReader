@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from ast import literal_eval
 from pathlib import Path
@@ -14,6 +15,9 @@ from mapreader import SheetDownloader
 from mapreader.download.data_structures import GridBoundingBox
 from mapreader.download.tile_loading import TileDownloader
 from mapreader.download.tile_merging import TileMerger
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -120,12 +124,12 @@ def test_get_merged_polygon(sheet_downloader):
 
 def test_get_minmax_latlon(sheet_downloader, capfd):
     sd = sheet_downloader
-    sd.get_minmax_latlon()
-    out, _ = capfd.readouterr()
-    assert (
-        out
-        == "[INFO] Min lat: 51.49344796, max lat: 54.2089733 \n[INFO] Min lon: -4.7682, max lon: -0.16093917\n"
-    )
+    with sheet_downloader.at_level(logging.INFO):
+        sd.get_minmax_latlon()
+    assert "Min lat: 51.49344796, max lat: 54.2089733" in sheet_downloader.text
+    assert "Min lon: -4.7682, max lon: -0.16093917" in sheet_downloader.text
+    # TODO: We need to test the output of the logger here if we want to test..
+    # I have made a first attempt via https://stackoverflow.com/questions/53125305/testing-logging-output-with-pytest
 
 
 # queries
@@ -491,11 +495,19 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
     assert df.loc[1, "name"] == "map_101603986_1.png"
 
     # run again, nothing should happen
-    sd.download_map_sheets_by_wfs_ids([107, 116], maps_path, metadata_fname)
-    out, _ = capfd.readouterr()
-    assert out.endswith(
-        '[INFO] "map_101603986.png" already exists. Skipping download.\n[INFO] "map_101603986_1.png" already exists. Skipping download.\n'
+    with sheet_downloader.at_level(logging.INFO):
+        sd.download_map_sheets_by_wfs_ids([107, 116], maps_path, metadata_fname)
+    assert (
+        '"map_101603986.png" already exists. Skipping download.'
+        in sheet_downloader.text
     )
+    assert (
+        '"map_101603986_1.png" already exists. Skipping download.'
+        in sheet_downloader.text
+    )
+    # TODO: We need to test the output of the logger here if we want to test..
+    # I have made a first attempt via https://stackoverflow.com/questions/53125305/testing-logging-output-with-pytest
+
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
 

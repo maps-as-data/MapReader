@@ -14,19 +14,20 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
+
 # Import parhugin
 try:
     from parhugin import multiFunc
 
     parhugin_installed = True
 except ImportError:
-    print(
-        "[WARNING] parhugin (https://github.com/kasra-hosseini/parhugin) is not installed, continue without it."  # noqa
+    logger.warning(
+        "parhugin (https://github.com/kasra-hosseini/parhugin) is not installed, continue without it."  # noqa
     )
     parhugin_installed = False
-
-# Set up logging
-logger = logging.getLogger(__name__)
 
 
 class PatchDataset(Dataset):
@@ -108,7 +109,7 @@ class PatchDataset(Dataset):
 
         elif isinstance(patch_df, str):
             if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
+                logger.info(f'Reading "{patch_df}".')
                 patch_df = pd.read_csv(patch_df, sep=delimiter)
                 # ensure tuple/list columns are read as such
                 patch_df = self._eval_df(patch_df)
@@ -145,8 +146,8 @@ class PatchDataset(Dataset):
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
                 if self.label_col:
-                    print(
-                        f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                    logger.info(
+                        f"Label index column ({label_index_col}) not in dataframe. Creating column."
                     )
                     self.patch_df[self.label_index_col] = self.patch_df[
                         self.label_col
@@ -466,7 +467,7 @@ class PatchContextDataset(PatchDataset):
 
         elif isinstance(patch_df, str):
             if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
+                logger.info(f'Reading "{patch_df}".')
                 patch_df = pd.read_csv(patch_df, sep=delimiter)
                 patch_df = self._eval_df(patch_df)
                 self.patch_df = patch_df
@@ -516,8 +517,8 @@ class PatchContextDataset(PatchDataset):
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
-                print(
-                    f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                logger.info(
+                    f"Label index column ({label_index_col}) not in dataframe. Creating column."
                 )
                 self.patch_df[self.label_index_col] = self.patch_df[
                     self.label_col

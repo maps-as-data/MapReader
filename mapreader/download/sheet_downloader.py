@@ -83,8 +83,7 @@ class SheetDownloader:
         self.crs = crs_string.to_string()
 
     def __str__(self) -> str:
-        info = f"[INFO] Metadata file has {self.__len__()} item(s)."
-        return info
+        return f"[INFO] Metadata file has {self.__len__()} item(s)."
 
     def __len__(self) -> int:
         return len(self.features)
@@ -97,7 +96,9 @@ class SheetDownloader:
             polygon = shape(feature["geometry"])
             map_name = feature["properties"]["IMAGE"]
             if len(polygon.geoms) != 1:
-                f"[WARNING] Multiple geometries found in map {map_name}. Using first instance."
+                logger.warning(
+                    f"Multiple geometries found in map {map_name}. Using first instance."
+                )
             feature["polygon"] = polygon.geoms[0]
 
         self.polygons = True
@@ -202,8 +203,8 @@ class SheetDownloader:
 
                 if len(published_date) > 0:  # if date is found
                     if len(published_date) > 1:
-                        print(
-                            f"[WARNING] Multiple published dates detected in map {map_name}. Using first date."
+                        logger.warning(
+                            f"Multiple published dates detected in map {map_name}. Using first date."
                         )
 
                     feature["properties"]["published_date"] = int(published_date[0])
@@ -235,10 +236,8 @@ class SheetDownloader:
             self.get_merged_polygon()
 
         min_x, min_y, max_x, max_y = self.merged_polygon.bounds
-        print(
-            f"[INFO] Min lat: {min_y}, max lat: {max_y} \n\
-[INFO] Min lon: {min_x}, max lon: {max_x}"
-        )
+        logger.info(f"Min lat: {min_y}, max lat: {max_y}")
+        logger.info(f"Min lon: {min_x}, max lon: {max_x}")
 
     ## queries
     def query_map_sheets_by_wfs_ids(
@@ -617,9 +616,9 @@ class SheetDownloader:
         )
 
         if img_path is not False:
-            print(f'[INFO] Downloaded "{img_path}"')
+            logger.info(f'Downloaded "{img_path}"')
         else:
-            print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
+            logger.warning(f'Download of "{img_path}" was unsuccessful.')
 
         shutil.rmtree(DEFAULT_TEMP_FOLDER)
         return img_path
@@ -751,7 +750,7 @@ class SheetDownloader:
             if (
                 not overwrite and existing_id is not False
             ):  # if map already exists and overwrite is False then skip
-                print(f'[INFO] "{existing_id}" already exists. Skipping download.')
+                logger.info(f'"{existing_id}" already exists. Skipping download.')
                 continue
             img_path = self._download_map(
                 feature,
@@ -1262,8 +1261,8 @@ class SheetDownloader:
             Whether to add an ID (WFS ID number) to each map sheet, by default True.
         """
         if self.crs != "EPSG:4326":
-            print(
-                "[WARNING] This method assumes your coordinates are projected using EPSG 4326. The plot may therefore be incorrect."
+            logger.warning(
+                "This method assumes your coordinates are projected using EPSG 4326. The plot may therefore be incorrect."
             )
 
         if add_id:
@@ -1314,8 +1313,8 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
                     )
 
         except ImportError:
-            print(
-                "[WARNING] Cartopy is not installed. \
+            logger.warning(
+                "Cartopy is not installed. \
 If you would like to install it, please follow instructions at https://scitools.org.uk/cartopy/docs/latest/installing.html"
             )
 

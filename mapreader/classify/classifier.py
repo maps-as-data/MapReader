@@ -174,14 +174,11 @@ class ClassifierContainer:
                 f"./tmp_checkpoints/tmp_{random.randint(0, int(1e10))}_checkpoint.pkl"
             )
 
-            # add colors for printing/logging
-            self._set_up_print_colors()
-
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
 
         for set_name, dataloader in self.dataloaders.items():
-            print(f'[INFO] Loaded "{set_name}" with {len(dataloader.dataset)} items.')
+            logger.info(f'Loaded "{set_name}" with {len(dataloader.dataset)} items.')
 
     def generate_layerwise_lrs(
         self,
@@ -440,7 +437,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
                     '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
                 )
 
-            print(f'[INFO] Using "{criterion}" as criterion.')
+            logger.info(f'Using "{criterion}" as criterion.')
 
         elif not isinstance(criterion, nn.modules.loss._Loss):
             raise ValueError(
@@ -738,7 +735,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         except KeyboardInterrupt:
             logger.info("Exiting...")
             if os.path.isfile(self.tmp_save_filename):
-                print(f'[INFO] Loading "{self.tmp_save_filename}" as model.')
+                logger.info(f'Loading "{self.tmp_save_filename}" as model.')
                 self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
             else:
                 logger.info("No checkpoint file found - model has not been updated.")
@@ -834,8 +831,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
                 tboard_writer = SummaryWriter(tensorboard_path)
             except ImportError:
-                print(
-                    "[WARNING] Could not import ``SummaryWriter`` from torch.utils.tensorboard"  # noqa
+                logger.warning(
+                    "Could not import `SummaryWriter` from torch.utils.tensorboard"  # noqa
                 )
                 logger.warning("Continuing without tensorboard.")
                 tensorboard_path = None
@@ -1016,12 +1013,9 @@ Use ``add_criterion`` to define one."
 
                 if phase.lower() in valid_phase_names:
                     if epoch % tmp_file_save_freq == 0:
-                        tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
-                        print(
-                            self._print_colors["lgrey"]
-                            + tmp_str
-                            + self._print_colors["reset"]
-                        )
+                        logger.info(
+                            f'Checkpoint file saved to "{self.tmp_save_filename}".'
+                        )  # noqa
                         self.last_epoch = epoch
                         self.save(self.tmp_save_filename, force=True)
 
@@ -1048,10 +1042,10 @@ Use ``add_criterion`` to define one."
                 with open(os.path.join(save_model_dir, "info.txt"), "a+") as fio:
                     fio.writelines(f"{save_filename},{self.best_loss:.5f}\n")
 
-                print(
-                    f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
-[INFO] Path: {save_model_path}"
+                logger.info(
+                    f"Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved."
                 )
+                logger.info(f"Path: {save_model_path}")
 
     @staticmethod
     def _get_logits(out):
@@ -1323,8 +1317,8 @@ Use ``add_criterion`` to define one."
 
         for i, one_item in enumerate(y_axis):
             if one_item not in self.metrics.keys():
-                print(
-                    f"[WARNING] requested item: {one_item} not in keys: {self.metrics.keys}"  # noqa
+                logger.warning(
+                    f"Requested item: {one_item} not in keys: {self.metrics.keys}"  # noqa
                 )
                 continue
 
@@ -1521,8 +1515,8 @@ Use ``add_criterion`` to define one."
 
         num_batches = int(np.ceil(len(dataloader.dataset) / dataloader.batch_size))
         if min(num_batches, batch_number) != batch_number:
-            print(
-                f'[INFO] "{set_name}" only contains {num_batches}.\n\
+            logger.info(
+                f'"{set_name}" only contains {num_batches}.\n\
 Output will show batch number {num_batches}.'
             )
             batch_number = num_batches
@@ -1564,12 +1558,10 @@ Output will show batch number {num_batches}.'
         num_samples = len(self.dataloaders[set_name].dataset)
         num_batches = int(np.ceil(num_samples / batch_size))
 
-        print(
-            f"[INFO] dataset: {set_name}\n\
-        - items:        {num_samples}\n\
-        - batch size:   {batch_size}\n\
-        - batches:      {num_batches}"
-        )
+        logger.info(f"Dataset: {set_name}")
+        logger.info(f"- items:        {num_samples}")
+        logger.info(f"- batch size:   {batch_size}")
+        logger.info(f"- batches:      {num_batches}")
 
     @staticmethod
     def _imshow(
@@ -1864,7 +1856,7 @@ Output will show batch number {num_batches}.'
         if not os.path.isfile(load_path):
             raise FileNotFoundError(f'[ERROR] "{load_path}" cannot be found.')
 
-        print(f'[INFO] Loading "{load_path}".')
+        logger.info(f'Loading "{load_path}".')
 
         with open(load_path, "rb") as myfile:
             # objPickle = pickle.load(myfile)
@@ -1887,40 +1879,6 @@ Output will show batch number {num_batches}.'
             self.model = self.model.to(mydevice)
         except:
             pass
-
-    def _set_up_print_colors(self):
-        """Private function, setting color attributes on the object."""
-        self._print_colors = {}
-
-        # color
-        self._print_colors["lgrey"] = "\033[1;90m"
-        self._print_colors["grey"] = "\033[90m"  # boring information
-        self._print_colors["yellow"] = "\033[93m"  # FYI
-        self._print_colors["orange"] = "\033[0;33m"  # Warning
-
-        self._print_colors["lred"] = "\033[1;31m"  # there is smoke
-        self._print_colors["red"] = "\033[91m"  # fire!
-        self._print_colors["dred"] = "\033[2;31m"  # Everything is on fire
-
-        self._print_colors["lblue"] = "\033[1;34m"
-        self._print_colors["blue"] = "\033[94m"
-        self._print_colors["dblue"] = "\033[2;34m"
-
-        self._print_colors["lgreen"] = "\033[1;32m"  # all is normal
-        self._print_colors["green"] = "\033[92m"  # something else
-        self._print_colors["dgreen"] = "\033[2;32m"  # even more interesting
-
-        self._print_colors["lmagenta"] = "\033[1;35m"
-        self._print_colors["magenta"] = "\033[95m"  # for title
-        self._print_colors["dmagenta"] = "\033[2;35m"
-
-        self._print_colors["cyan"] = "\033[96m"  # system time
-        self._print_colors["white"] = "\033[97m"  # final time
-        self._print_colors["black"] = "\033[0;30m"
-
-        self._print_colors["reset"] = "\033[0m"
-        self._print_colors["bold"] = "\033[1m"
-        self._print_colors["under"] = "\033[4m"
 
     def _get_dtime(self) -> str:
         """
