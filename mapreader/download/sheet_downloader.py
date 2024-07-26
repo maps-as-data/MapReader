@@ -4,6 +4,8 @@ import json
 import os
 import re
 import shutil
+import urllib
+import urllib.request
 from functools import reduce
 
 import matplotlib.image as mpimg
@@ -579,6 +581,7 @@ class SheetDownloader:
         existing_id: str | bool,
         download_in_parallel: bool = True,
         overwrite: bool = False,
+        force: bool = False,
     ) -> str | bool:
         """
         Downloads a single map sheet and saves as png file.
@@ -593,6 +596,8 @@ class SheetDownloader:
             Whether to download tiles in parallel, by default ``True``.
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
+        force : bool, optional
+            Whether to force the download or ask for confirmation, by default ``False``.
 
         Returns
         -------
@@ -725,6 +730,7 @@ class SheetDownloader:
         metadata_fname: str | None = "metadata.csv",
         overwrite: bool | None = False,
         download_in_parallel: bool = True,
+        force: bool = False,
         **kwargs: dict | None,
     ):
         """Download map sheets from a list of features.
@@ -741,11 +747,45 @@ class SheetDownloader:
             Whether to overwrite existing maps, by default ``False``.
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
+        force : bool, optional
+            Whether to force the download or ask for confirmation, by default ``False``.
         **kwargs : dict, optional
             Keyword arguments to pass to the
             :meth:`~.download.sheet_downloader.SheetDownloader._save_metadata`
             method.
         """
+        try:
+            # get url for single tile to estimate size
+            tile_url = self.downloader.generate_tile_url(
+                features[0]["grid_bb"].lower_corner, 0
+            )
+
+            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+            headers = {"User-Agent": user_agent}
+            request = urllib.request.Request(tile_url, None, headers)
+            response = urllib.request.urlopen(request)
+            # get size of single tile
+            size_bytes = len(response.read())
+            size_mb = size_bytes * 1e-6
+
+            # get total number of tiles
+            no_tiles = sum([feature["grid_bb"].covered_cells for feature in features])
+            total_size_mb = no_tiles * size_mb
+
+            if total_size_mb > 100:
+                print(f"[WARNING] Estimated total size: {total_size_mb * 1e-3:.2f}GB.")
+                if not force:
+                    raise Warning(
+                        f"[WARNING] This will download approximately {total_size_mb * 1e-3:.2f}GB of data. Please confirm download by setting ``force=True``."
+                    )
+            else:
+                print(f"[INFO] Estimated total size: {total_size_mb:.2f}MB.")
+        except urllib.error.URLError as e:
+            print(f"[WARNING] Unable to estimate download size. {e}")
+            if not force:
+                raise Warning(
+                    "[WARNING] This could download a lot of data. Please confirm download by setting ``force=True``."
+                )
 
         for feature in tqdm(features):
             existing_id = self._check_map_sheet_exists(feature, metadata_fname)

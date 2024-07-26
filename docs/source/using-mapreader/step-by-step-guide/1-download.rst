@@ -178,7 +178,9 @@ If you would like to use a different zoom level, use the ``zoom_level`` argument
 
 .. code-block:: python
 
-     my_ts.get_grid_bb(zoom_level=10)
+     my_ts.get_grid_bb(zoom_level=16)
+
+.. note:: The higher the zoom level, the more detailed your maps will be (and so the larger the file size). MapReader will raise a warning if you are downloading more than 100MB of data, to bypass this you will need to add ``force=True`` when calling the function to download your maps.
 
 For all download methods, you should also be aware of the following arguments:
 
@@ -187,6 +189,7 @@ For all download methods, you should also be aware of the following arguments:
 - ``overwrite`` - By default, this is set to ``False`` and so if a map image exists already, the download is skipped and map images are not overwritten. Setting it to ``True`` (i.e. by specifying ``overwrite=True``) will result in existing map images being overwritten.
 - ``date_col`` - The key(s) to use when extracting the publication dates from your ``metadata.json``.
 - ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your ``metadata.json`` to your ``metadata.csv``. See below for further details.
+- ``force`` - If you are downloading more than 100MB of data, you will need to confirm that you would like to download this data by setting ``force=True``.
 
 Using the default ``path_save`` and ``metadata_fname`` arguments will result in the following directory structure:
 

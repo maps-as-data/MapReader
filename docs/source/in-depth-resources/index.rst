@@ -7,7 +7,7 @@ In-Depth Resources
 .. toctree::
    :maxdepth: 2
 
-   coding-basics
+   coding-basics/index
    github-basics
    worked-examples/index
    api/index
