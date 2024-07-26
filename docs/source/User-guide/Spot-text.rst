@@ -34,7 +34,17 @@ To install, run the following commands in your terminal:
 
     Since both the DPText-DETR and DeepSolo repos are built ontop of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install both at the same. To get around this, you can set up two different conda environments, one for each.
 
+.. admonition:: Detectron2 issues for windows users
+    :class: dropdown
+
+    If you are on a windows machine and are having trouble installing Detectron2, you can try the following:
+    - Install `Visual Studio Build Tools <https://visualstudio.microsoft.com/downloads/?q=build+tools>`__.
+    - Follow instructions `here <https://stackoverflow.com/questions/64261546/how-to-solve-error-microsoft-visual-c-14-0-or-greater-is-required-when-inst>`__ to install the required packages. (The format might be different in newer versions of Visual Studio Build Tools, so you might need to look up the specific package names.)
+
+    Once this is done, retry installing Detectron2.
+
 You should then pick one of the following to install:
+
 
 DPTextDETR
 ~~~~~~~~~~~
@@ -62,6 +72,20 @@ To install, run the following commands in your terminal:
     cd DeepSolo
     pip install .
 
+
+Advice for patch size
+---------------------
+
+When running the text spotting models, we recommend using a patch size of 1024x1024 pixels.
+This is the size used in the training of the models, and so should give the best results.
+
+You may also want to create some overlap between your patches as this should minimise cut off text at the edges of patches.
+You will need to experiment with the amount of overlap to find the best results for your maps.
+
+.. note::
+    Greater overlaps will create more patches and result in greater computational costs when running.
+
+See the :doc:`Load </User-guide/Load>` user guide for more information on how to create patches.
 
 Set-up the runner
 -----------------
@@ -133,11 +157,32 @@ If you'd like to return a dataframe instead, use the ``return_dataframe`` argume
 
     patch_preds_df = my_runner.run_all(return_dataframe=True)
 
+MapReader will automatically run a deduplication algorithm to remove overlapping bounding boxes, based on a minimum intersection of area (IoA) for each overlapping polygon.
+If two polygons overlap with intersection over area greater than the minimum IoA, the the one with the lower IoA will be kept (i.e. the larger of the two polygons).
+
+Below are two examples of this:
+
+.. image:: ../figures/IoA.png
+    :width: 400px
+
+.. image:: ../figures/IoA_0.9.png
+    :width: 400px
+
+By default, the minimum IoA is set to 0.7 so the deduplication algorithm will only remove the smaller polygon in the second example.
+
+You can adjust the minimum IoA by setting the ``min_ioa`` argument:
+
+.. code-block:: python
+
+    patch_preds_df = my_runner.run_all(return_dataframe=True, min_ioa=0.9)
+
+Higher ``min_ioa``values will mean a tighter threshold for identifying two polygons as duplicates.
+
 If you'd like to run the runner on a single patch, you can also just run on one image:
 
 .. code-block:: python
 
-    patch_preds = my_runner.run_on_image("path/to/your/image.png")
+    patch_preds = my_runner.run_on_image("path/to/your/image.png", min_ioa=0.7)
 
 Again, this will return a dictionary by default but you can use the ``return_dataframe`` argument to return a dataframe instead.
 
@@ -180,6 +225,15 @@ If you'd like to return a dataframe instead, use the ``return_dataframe`` argume
 .. code-block:: python
 
     parent_preds_df = my_runner.convert_to_parent_pixel_bounds(return_dataframe=True)
+
+If you have created patches with overlap, then you should deduplicate at the parent level as well.
+You can do this by setting the ``deduplicate`` argument and passing a ``min_ioa`` value:
+
+.. code-block:: python
+
+    parent_preds_df = my_runner.convert_to_parent_pixel_bounds(return_dataframe=True, deduplicate=True, min_ioa=0.7)
+
+This will help resolve any issues with predictions being cut-off at the edges of patches since the overlap should help find the full piece of text.
 
 Again, to view the predictions, you can use the ``show`` method.
 You should pass a parent image ID as the ``image_id`` argument:
