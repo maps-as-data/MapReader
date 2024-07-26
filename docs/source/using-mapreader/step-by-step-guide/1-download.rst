@@ -178,9 +178,7 @@ If you would like to use a different zoom level, use the ``zoom_level`` argument
 
 .. code-block:: python
 
-     my_ts.get_grid_bb(zoom_level=16)
-
-.. note:: The higher the zoom level, the more detailed your maps will be (and so the larger the file size). MapReader will raise a warning if you are downloading more than 100MB of data, to bypass this you will need to add ``force=True`` when calling the function to download your maps.
+     my_ts.get_grid_bb(zoom_level=10)
 
 For all download methods, you should also be aware of the following arguments:
 
