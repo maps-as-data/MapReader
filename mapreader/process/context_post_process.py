@@ -8,7 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-class PostProcessor:
+class ContextPostProcessor:
     """A class for post-processing predictions on patches using the surrounding context.
 
     Parameters
