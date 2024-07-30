@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from mapreader.process.post_process import PostProcessor
+from mapreader.process.context_post_process import ContextPostProcessor
 
 
 @pytest.fixture
@@ -24,33 +24,33 @@ def labels_map():
 
 
 def test_init(labels_map, patch_df):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
-    assert isinstance(patches, PostProcessor)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
+    assert isinstance(patches, ContextPostProcessor)
     assert len(patches) == 81
     assert patches.labels_map == labels_map
 
 
 def test_init_errors(patch_df, labels_map):
     with pytest.raises(ValueError, match="must contain the following columns"):
-        PostProcessor(patch_df.drop(columns=["parent_id", "pred"]), labels_map)
+        ContextPostProcessor(patch_df.drop(columns=["parent_id", "pred"]), labels_map)
 
 
 def test_init_imaged_id_col(patch_df, labels_map):
     # e.g. if you have integer index
-    patches = PostProcessor(patch_df.reset_index(drop=False), labels_map)
-    assert isinstance(patches, PostProcessor)
+    patches = ContextPostProcessor(patch_df.reset_index(drop=False), labels_map)
+    assert isinstance(patches, ContextPostProcessor)
     assert patches.patch_df.index.name == "image_id"
 
     patch_df["image_id"] = patch_df.index
-    patches = PostProcessor(patch_df, labels_map)
-    assert isinstance(patches, PostProcessor)
+    patches = ContextPostProcessor(patch_df, labels_map)
+    assert isinstance(patches, ContextPostProcessor)
     assert patches.patch_df.index.name == "image_id"
     assert len(patches) == 81
     assert "image_id" in patches.patch_df.columns
 
 
 def test_get_context(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     # labels as str
     patches.get_context("railspace")
     assert len(patches.context) == 10
@@ -60,7 +60,7 @@ def test_get_context(patch_df, labels_map):
 
 
 def test_update_preds_railspace(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     patches.get_context(["railspace"])
     remap = {"railspace": "no"}
     patches.update_preds(remap)
@@ -94,7 +94,7 @@ def test_update_preds_railspace(patch_df, labels_map):
 
 
 def test_update_preds_railspace_railspace_building(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     patches.get_context(["railspace", "railspace&building"])
     remap = {"railspace": "no", "railspace&building": "building"}
     patches.update_preds(remap)
@@ -124,7 +124,7 @@ def test_update_preds_railspace_railspace_building(patch_df, labels_map):
 
 
 def test_update_preds_inplace(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     patches.get_context(["railspace"])
     remap = {"railspace": "no"}
     patches.update_preds(remap, inplace=True)
@@ -138,7 +138,7 @@ def test_update_preds_inplace(patch_df, labels_map):
 
 
 def test_update_preds_new_label(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     patches.get_context(["railspace"])
     remap = {"railspace": "new"}
     patches.update_preds(remap)
@@ -157,7 +157,7 @@ def test_update_preds_new_label(patch_df, labels_map):
 
 
 def test_update_preds_errors(patch_df, labels_map):
-    patches = PostProcessor(patch_df, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df, labels_map=labels_map)
     remap = {"railspace": "no"}
     with pytest.raises(ValueError, match="run `get_context` first"):
         patches.update_preds(remap)
