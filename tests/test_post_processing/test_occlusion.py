@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Callable
 
@@ -78,6 +79,12 @@ def test_init_dataframe_no_predictions(patch_df, model):
         OcclusionAnalyzer(patch_df, model)
 
 
+def test_init_device(patch_df, model):
+    analyzer = OcclusionAnalyzer(patch_df, model, device="cpu")
+    assert isinstance(analyzer, OcclusionAnalyzer)
+    assert isinstance(analyzer.device, torch.device)
+
+
 def test_init_reindex_dataframe(patch_df, model):
     patch_df.reset_index(inplace=True, drop=False)
     assert "image_id" in patch_df.columns
@@ -96,8 +103,13 @@ def test_init_models_string(sample_dir, patch_df):
 
 def test_add_criterion(patch_df, model):
     analyzer = OcclusionAnalyzer(patch_df, model)
-    analyzer.add_criterion("bce")  # loss function as str
-    assert isinstance(analyzer.criterion, torch.nn.BCELoss)
+    for criterion, criterion_type in [
+        ("cross_entropy", torch.nn.CrossEntropyLoss),
+        ("bce", torch.nn.BCELoss),
+        ("mse", torch.nn.MSELoss),
+    ]:
+        analyzer.add_criterion(criterion)  # loss function as str
+        assert isinstance(analyzer.criterion, criterion_type)
     my_criterion = torch.nn.L1Loss()
     analyzer.add_criterion(my_criterion)
     assert isinstance(analyzer.criterion, torch.nn.L1Loss)
@@ -121,7 +133,37 @@ def test_run_occlusion(sample_dir, patch_df, model):
     assert isinstance(out[0], Image.Image)
 
 
-def test_run_occlusion_error(patch_df, model):
+def test_run_occlusion_small_sample(sample_dir, patch_df, model):
+    img_path = f"{sample_dir}/patch-0-3045-145-3190-#map_100942121.png#.png"
+    patch_df["image_path"] = img_path
+    patch_df.loc[patch_df.iloc[0].name, "predicted_label"] = "fake_label"
+    analyzer = OcclusionAnalyzer(patch_df, model)
+    analyzer.add_criterion()
+    out = analyzer.run_occlusion("fake_label", 10)
+    assert len(out) == 1
+    assert isinstance(out[0], Image.Image)
+
+
+def test_run_occlusion_save(sample_dir, patch_df, model, tmp_path):
+    img_path = f"{sample_dir}/patch-0-3045-145-3190-#map_100942121.png#.png"
+    patch_df["image_path"] = img_path
+    analyzer = OcclusionAnalyzer(patch_df, model)
+    analyzer.add_criterion()
+    analyzer.run_occlusion(
+        "railspace", 2, save=True, path_save=f"{tmp_path}/occlusion/"
+    )
+    assert os.path.exists(f"{tmp_path}/occlusion/")
+    assert len(os.listdir(f"{tmp_path}/occlusion/")) == 2
+
+
+def test_run_occlusion_no_criterion_error(patch_df, model):
     analyzer = OcclusionAnalyzer(patch_df, model)
     with pytest.raises(ValueError, match="set your loss function"):
         analyzer.run_occlusion("railspace", 2)
+
+
+def test_run_occlusion_no_patches_error(patch_df, model):
+    analyzer = OcclusionAnalyzer(patch_df, model)
+    analyzer.add_criterion()
+    with pytest.raises(ValueError, match="No patches with label"):
+        analyzer.run_occlusion("fake", 2)
