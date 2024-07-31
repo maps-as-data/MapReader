@@ -94,6 +94,8 @@ class OcclusionAnalyzer:
         else:
             self.transform = transform
 
+        self.criterion = None
+
     def __len__(self):
         return len(self.patch_df)
 
@@ -107,7 +109,7 @@ class OcclusionAnalyzer:
         return df
 
     def _load_model(self, model_path: str) -> nn.Module:
-        model = torch.load(model_path, device=self.device)
+        model = torch.load(model_path, map_location=self.device)
         return model
 
     def add_criterion(
@@ -178,6 +180,10 @@ class OcclusionAnalyzer:
         block_size : int
             The size of the occlusion block. By default, 14.
         """
+        if self.criterion is None:
+            raise ValueError(
+                "[ERROR] Please first run ``add_criterion`` to set your loss function."
+            )
 
         patches = self.patch_df[self.patch_df["predicted_label"] == label]
 

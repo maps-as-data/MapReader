@@ -8,7 +8,7 @@ import pytest
 import timm
 import torch
 from PIL import Image
-from torchvision import models, transforms
+from torchvision import transforms
 
 from mapreader.process.occlusion_analysis import OcclusionAnalyzer
 
@@ -61,9 +61,7 @@ def test_init_fake_path_error(model):
 
 
 def test_init_error(model):
-    with pytest.raises(
-        ValueError, match="as a string (path to csv file) or pd.DataFrame"
-    ):
+    with pytest.raises(ValueError, match="as a string"):
         OcclusionAnalyzer({"image_id": "patch"}, model)
 
 
@@ -90,18 +88,10 @@ def test_init_reindex_dataframe(patch_df, model):
     assert "image_id" not in analyzer.patch_df.columns
 
 
-def test_init_models_string(patch_df):
-    for model2test in [
-        ["resnet18", models.ResNet],
-        ["alexnet", models.AlexNet],
-        ["vgg11", models.VGG],
-        ["squeezenet1_0", models.SqueezeNet],
-        ["densenet121", models.DenseNet],
-        ["inception_v3", models.Inception3],
-    ]:
-        model, model_type = model2test
-        analyzer = OcclusionAnalyzer(patch_df, model)
-        assert isinstance(analyzer.model, model_type)
+def test_init_models_string(sample_dir, patch_df):
+    model_path = f"{sample_dir}/model_test.pkl"
+    analyzer = OcclusionAnalyzer(patch_df, model_path)
+    assert isinstance(analyzer.model, torch.nn.Module)
 
 
 def test_add_criterion(patch_df, model):
@@ -121,8 +111,17 @@ def test_criterion_errors(patch_df, model):
         analyzer.add_criterion(0.01)
 
 
-def test_run_occlusion(patch_df, model):
+def test_run_occlusion(sample_dir, patch_df, model):
+    img_path = f"{sample_dir}/patch-0-3045-145-3190-#map_100942121.png#.png"
+    patch_df["image_path"] = img_path
     analyzer = OcclusionAnalyzer(patch_df, model)
+    analyzer.add_criterion()
     out = analyzer.run_occlusion("railspace", 2)
     assert len(out) == 2
-    assert isinstance(out[0], Image)
+    assert isinstance(out[0], Image.Image)
+
+
+def test_run_occlusion_error(patch_df, model):
+    analyzer = OcclusionAnalyzer(patch_df, model)
+    with pytest.raises(ValueError, match="set your loss function"):
+        analyzer.run_occlusion("railspace", 2)
