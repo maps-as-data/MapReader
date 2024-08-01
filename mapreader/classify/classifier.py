@@ -96,8 +96,8 @@ class ClassifierContainer:
             The optimizer being used for training the model.
         scheduler : None or torch.optim.lr_scheduler._LRScheduler
             The learning rate scheduler being used for training the model.
-        criterion : None or nn.modules.loss._Loss
-            The criterion to use for training the model.
+        loss_fn : None or nn.modules.loss._Loss
+            The loss function to use for training the model.
         metrics : dict
             A dictionary to store the metrics computed during training.
         last_epoch : int
@@ -157,7 +157,7 @@ class ClassifierContainer:
 
             self.optimizer = None
             self.scheduler = None
-            self.criterion = None
+            self.loss_fn = None
 
             self.metrics = {}
             self.last_epoch = 0
@@ -397,54 +397,54 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         self.scheduler = scheduler
 
-    def add_criterion(
-        self, criterion: str | nn.modules.loss._Loss | None = "cross entropy"
+    def add_loss_fn(
+        self, loss_fn: str | nn.modules.loss._Loss | None = "cross entropy"
     ) -> None:
         """
-        Add a loss criterion to the classifier object.
+        Add a loss function to the classifier object.
 
         Parameters
         ----------
-        criterion : str or torch.nn.modules.loss._Loss
-            The loss criterion to add to the classifier object.
+        loss_fn : str or torch.nn.modules.loss._Loss
+            The loss function to add to the classifier object.
             Accepted string values are "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) and "mse" (mean squared error).
 
         Returns
         -------
         None
-            The function only modifies the ``criterion`` attribute of the
+            The function only modifies the ``loss_fn`` attribute of the
             classifier and does not return anything.
         """
-        if isinstance(criterion, str):
-            if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
-                criterion = nn.CrossEntropyLoss()
-            elif criterion in [
+        if isinstance(loss_fn, str):
+            if loss_fn in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
+                loss_fn = nn.CrossEntropyLoss()
+            elif loss_fn in [
                 "bce",
                 "binary_cross_entropy",
                 "binary cross entropy",
                 "binary cross-entropy",
             ]:
-                criterion = nn.BCELoss()
-            elif criterion in [
+                loss_fn = nn.BCELoss()
+            elif loss_fn in [
                 "mse",
                 "mean_square_error",
                 "mean_squared_error",
                 "mean squared error",
             ]:
-                criterion = nn.MSELoss()
+                loss_fn = nn.MSELoss()
             else:
                 raise NotImplementedError(
-                    '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
+                    '[ERROR] At present, if passing ``loss_fn`` as a string, the loss function can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
                 )
 
-            print(f'[INFO] Using "{criterion}" as criterion.')
+            print(f'[INFO] Using "{loss_fn}" as loss function.')
 
-        elif not isinstance(criterion, nn.modules.loss._Loss):
+        elif not isinstance(loss_fn, nn.modules.loss._Loss):
             raise ValueError(
-                '[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
+                '[ERROR] Please pass ``loss_fn`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
             )
 
-        self.criterion = criterion
+        self.loss_fn = loss_fn
 
     def model_summary(
         self,
@@ -641,7 +641,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train_component_summary(self) -> None:
         """
-        Print a summary of the optimizer, criterion, and trainable model
+        Print a summary of the optimizer, loss function, and trainable model
         components.
 
         Returns:
@@ -653,8 +653,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         print("* Optimizer:")
         print(str(self.optimizer))
         print(divider)
-        print("* Criterion:")
-        print(str(self.criterion))
+        print("* Loss function:")
+        print(str(self.loss_fn))
         print(divider)
         print("* Model:")
         self.model_summary(trainable_col=True)
@@ -781,8 +781,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Raises
         ------
         ValueError
-            If the criterion is not set. Use the ``add_criterion`` method to
-            set the criterion.
+            If the loss function is not set. Use the ``add_loss_fn`` method to
+            set the loss function.
 
             If the optimizer is not set and the phase is "train". Use the
             ``initialize_optimizer`` or ``add_optimizer`` method to set the
@@ -889,10 +889,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             #     summing the final output and the auxiliary
                             #     output but in testing we only consider the
                             #     final output.
-                            if self.criterion is None:
+                            if self.loss_fn is None:
                                 raise ValueError(
-                                    "[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one."
+                                    "[ERROR] Loss function is not yet defined.\n\n\
+Use ``add_loss_fn`` to define one."
                                 )
 
                             if self.is_inception and (
@@ -905,8 +905,8 @@ Use ``add_criterion`` to define one."
                                 if not isinstance(aux_outputs, torch.Tensor):
                                     aux_outputs = self._get_logits(aux_outputs)
 
-                                loss1 = self.criterion(outputs, label_indices)
-                                loss2 = self.criterion(aux_outputs, label_indices)
+                                loss1 = self.loss_fn(outputs, label_indices)
+                                loss2 = self.loss_fn(aux_outputs, label_indices)
                                 # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
                                 loss = loss1 + 0.4 * loss2
 
@@ -916,7 +916,7 @@ Use ``add_criterion`` to define one."
                                 if not isinstance(outputs, torch.Tensor):
                                     outputs = self._get_logits(outputs)
 
-                                loss = self.criterion(outputs, label_indices)
+                                loss = self.loss_fn(outputs, label_indices)
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
 

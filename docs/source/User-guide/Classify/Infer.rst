@@ -49,7 +49,7 @@ There are a number of options for the ``model`` argument:
 
             This will also load the corresponding model file (in this case "./models/model_checkpoint_6.pkl").
 
-            If you use this option, your optimizer, scheduler and criterion will be loaded from last time.
+            If you use this option, your optimizer, scheduler and loss function will be loaded from last time.
 
     **2.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" or "Use in timm" instructions to load it and then pass this as the ``model`` argument.**
 

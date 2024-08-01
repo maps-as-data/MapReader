@@ -94,7 +94,7 @@ class OcclusionAnalyzer:
         else:
             self.transform = transform
 
-        self.criterion = None
+        self.loss_fn = None
 
     def __len__(self):
         return len(self.patch_df)
@@ -112,49 +112,49 @@ class OcclusionAnalyzer:
         model = torch.load(model_path, map_location=self.device)
         return model
 
-    def add_criterion(
-        self, criterion: str | nn.modules.loss._Loss | None = "cross entropy"
+    def add_loss_fn(
+        self, loss_fn: str | nn.modules.loss._Loss | None = "cross entropy"
     ) -> None:
         """
-        Add a loss criterion to the object.
+        Add a loss function to the object.
 
         Parameters
         ----------
-        criterion : str or torch.nn.modules.loss._Loss
-            The loss criterion to use.
+        loss_fn : str or torch.nn.modules.loss._Loss
+            The loss function to use.
             Can be a string or a torch.nn loss function. Accepted string values are "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) and "mse" (mean squared error).
             By default, "cross entropy" is used.
         """
-        if isinstance(criterion, str):
-            if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
-                criterion = nn.CrossEntropyLoss()
-            elif criterion in [
+        if isinstance(loss_fn, str):
+            if loss_fn in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
+                loss_fn = nn.CrossEntropyLoss()
+            elif loss_fn in [
                 "bce",
                 "binary_cross_entropy",
                 "binary cross entropy",
                 "binary cross-entropy",
             ]:
-                criterion = nn.BCELoss()
-            elif criterion in [
+                loss_fn = nn.BCELoss()
+            elif loss_fn in [
                 "mse",
                 "mean_square_error",
                 "mean_squared_error",
                 "mean squared error",
             ]:
-                criterion = nn.MSELoss()
+                loss_fn = nn.MSELoss()
             else:
                 raise NotImplementedError(
-                    '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
+                    '[ERROR] At present, if passing ``loss_fn`` as a string, the loss function can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
                 )
 
-            print(f'[INFO] Using "{criterion}" as criterion.')
+            print(f'[INFO] Using "{loss_fn}" as loss function.')
 
-        elif not isinstance(criterion, nn.modules.loss._Loss):
+        elif not isinstance(loss_fn, nn.modules.loss._Loss):
             raise ValueError(
-                '[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
+                '[ERROR] Please pass ``loss_fn`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
             )
 
-        self.criterion = criterion
+        self.loss_fn = loss_fn
 
     def run_occlusion(
         self,
@@ -180,9 +180,9 @@ class OcclusionAnalyzer:
         block_size : int
             The size of the occlusion block. By default, 14.
         """
-        if self.criterion is None:
+        if self.loss_fn is None:
             raise ValueError(
-                "[ERROR] Please first run ``add_criterion`` to set your loss function."
+                "[ERROR] Please first run ``add_loss_fn`` to set your loss function."
             )
 
         patches = self.patch_df[self.patch_df["predicted_label"] == label]
@@ -283,7 +283,7 @@ class OcclusionAnalyzer:
                 # preprocess the occluded image and get the prediction
                 image_tensor = self._preprocess_image(occluded_image)
                 prediction = self.model(image_tensor)
-                loss = round(float(self.criterion(prediction, gt_prediction)), 4)
+                loss = round(float(self.loss_fn(prediction, gt_prediction)), 4)
 
                 # store the loss in the heatmap
                 heatmap[row, column] = loss
