@@ -363,7 +363,7 @@ There are a number of options for the ``model`` argument:
 
 
 Define loss function, optimizer and scheduler
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to train/fine-tune your model, will need to define:
 

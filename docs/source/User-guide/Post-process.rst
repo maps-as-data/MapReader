@@ -191,7 +191,7 @@ Once this is set up, you can run the occlusion analysis as follows:
 The above example shows how to run the occlusion analysis on a random sample of 10 patches predicted as "railspace".
 The results will be a list of images showing the occlusion effect on the model's predictions. e.g.:
 
-.. image:: ../figures/occlusion.passing
+.. image:: ../figures/occlusion.png
     :width: 400px
 
 By default, the occlusion block will be 14 pixels by 14 pixels. You may want to adjust this based on the size of your patches or the desired "resolution" of your results.

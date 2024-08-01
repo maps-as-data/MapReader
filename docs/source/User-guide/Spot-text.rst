@@ -176,7 +176,7 @@ You can adjust the minimum IoA by setting the ``min_ioa`` argument:
 
     patch_preds_df = my_runner.run_all(return_dataframe=True, min_ioa=0.9)
 
-Higher ``min_ioa``values will mean a tighter threshold for identifying two polygons as duplicates.
+Higher ``min_ioa`` values will mean a tighter threshold for identifying two polygons as duplicates.
 
 If you'd like to run the runner on a single patch, you can also just run on one image:
 

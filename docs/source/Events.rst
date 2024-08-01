@@ -62,17 +62,17 @@ workshops to support a growing user community around MapReader during 2024.
 
    * - Sept 25, 2024
      - MapReader Workshop
-       
+
        at Spatial Humanities 2024
      - 1/2 day workshop co-located with the Spatial Humanities conference.
      - `More details <https://spathum.uni-bamberg.de/>`_
 
    * - Sept 30-Oct 2, 2024
      - Fall Data/Culture Workshop:
-       
+
        MapReader + Newspapers
      - At The Alan Turing Institute, London, UK
-       
+
        (and partially online/hybrid)
      - Website coming soon
 
@@ -89,25 +89,25 @@ workshops to support a growing user community around MapReader during 2024.
 
    * - Jun 5-7, 2024
      - Summer Data/Culture Workshop:
-       
+
        MapReader + Newspapers
      - 3-day workshop for historians and other historically-inclined researchers
-       
+
        about learning to use MapReader (2 days) paired with an introduction to
-       
+
        tools and data from Living with Machines related to digitized British
-       
+
        newspaper collections. Co-sponsored by the N8. Bursaries available.
-       
+
      - `Summer Data/Culture Workshop webpage <https://www.turing.ac.uk/events/summer-dataculture-workshop-learn-work-big-historical-data>`_
 
    * - Apr 30-May 1, 2024
      - Spring Data/Culture Workshop:
-       
+
        MapReader
      - 2-day workshop for historians and other historically-inclined researchers
-       
+
        about learning to use MapReader.
-       
+
        Bursaries available.
      - `Spring Data/Culture Workshop webpage <https://www.turing.ac.uk/events/spring-dataculture-workshop-search-inside-maps-mapreader>`_

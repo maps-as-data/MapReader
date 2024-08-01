@@ -114,7 +114,6 @@ def test_update_preds_railspace_railspace_building(patch_df, labels_map):
             "patch-1-7-2-8-#cropped_74488689.png#.png", "new_predicted_label"
         ]
         == "no"
-        
     )
     assert (
         patches.patch_df.loc[
