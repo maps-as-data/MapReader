@@ -331,7 +331,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps_14/"
     metadata_fname = "test_metadata.csv"
-    sd.download_all_map_sheets(maps_path, metadata_fname)
+    sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -360,12 +360,12 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
         (-0.98876953125, 53.448806835427575, -0.90087890625, 53.48804553605621),
         rel=1e-6,
     )
-    # zoom level 17
-    sd.get_grid_bb(17)
+    # zoom level 16
+    sd.get_grid_bb(16)
     assert sd.grid_bbs is True
-    maps_path = tmp_path / "test_maps_17/"
+    maps_path = tmp_path / "test_maps_16/"
     metadata_fname = "test_metadata.csv"
-    sd.download_all_map_sheets(maps_path, metadata_fname)
+    sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -392,7 +392,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     )
 
 
-def test_download_all_kwargs(sheet_downloader, tmp_path):
+def test_download_all_kwargs(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     # zoom level 14
     sd.get_grid_bb(14)
@@ -401,6 +401,7 @@ def test_download_all_kwargs(sheet_downloader, tmp_path):
     kwargs = {
         "metadata_to_save": {"test1": ["properties", "test"], "test2": "id"},
         "date_col": "test_date",
+        "force": True,
     }
     sd.download_all_map_sheets(maps_path, metadata_fname, **kwargs)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
@@ -438,13 +439,13 @@ def test_download_all_kwargs(sheet_downloader, tmp_path):
     assert df.loc[3, "test2"] == "Six_Inch_GB_WFS.132"
 
 
-def test_download_by_wfs_ids(sheet_downloader, tmp_path):
+def test_download_by_wfs_ids(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_wfs_ids(
-        16320, maps_path, metadata_fname
+        16320, maps_path, metadata_fname, force=True
     )  # test single wfs_id
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
@@ -461,14 +462,14 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     assert df.loc[0, "name"] == "map_101602026.png"
 
     sd.download_map_sheets_by_wfs_ids(
-        [16320, 16321], maps_path, metadata_fname
+        [16320, 16321], maps_path, metadata_fname, force=True
     )  # test list of wfs_ids
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2  # should have only downloaded/added one extra map
     assert df.loc[1, "name"] == "map_101602038.png"
     sd.download_map_sheets_by_wfs_ids(
-        16320, maps_path, metadata_fname, overwrite=True
+        16320, maps_path, metadata_fname, overwrite=True, force=True
     )  # test overwrite
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
@@ -476,13 +477,13 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path):
     assert df.loc[1, "name"] == "map_101602038.png"
 
 
-def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
+def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_wfs_ids(
-        [107, 116], maps_path, metadata_fname
+        [107, 116], maps_path, metadata_fname, force=True
     )  # 107 and 116 both refer to https://maps.nls.uk/view/101603986
     assert os.path.exists(f"{maps_path}/map_101603986.png")
     assert os.path.exists(f"{maps_path}/map_101603986_1.png")
@@ -502,7 +503,9 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
 
     # run again, nothing should happen
     with sheet_downloader.at_level(logging.INFO):
-        sd.download_map_sheets_by_wfs_ids([107, 116], maps_path, metadata_fname)
+        sd.download_map_sheets_by_wfs_ids(
+            [107, 116], maps_path, metadata_fname, force=True
+        )
     assert (
         '"map_101603986.png" already exists. Skipping download.'
         in sheet_downloader.text
@@ -519,7 +522,7 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
 
     # now overwrite them, but check we don't add new ones (_2, _3 etc.)
     sd.download_map_sheets_by_wfs_ids(
-        [107, 116], maps_path, metadata_fname, overwrite=True
+        [107, 116], maps_path, metadata_fname, overwrite=True, force=True
     )  # 107 and 116 both refer to https://maps.nls.uk/view/101603986
     assert os.path.exists(f"{maps_path}/map_101603986.png")
     assert os.path.exists(f"{maps_path}/map_101603986_1.png")
@@ -530,21 +533,23 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd):
     assert df.loc[1, "name"] == "map_101603986_1.png"
 
 
-def test_download_by_wfs_ids_errors(sheet_downloader, tmp_path):
+def test_download_by_wfs_ids_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(ValueError, match="as int or list of ints"):
-        sd.download_map_sheets_by_wfs_ids("string", maps_path, metadata_fname)
+        sd.download_map_sheets_by_wfs_ids(
+            "string", maps_path, metadata_fname, force=True
+        )
     with pytest.raises(ValueError, match="as int or list of ints"):
-        sd.download_map_sheets_by_wfs_ids(21.4, maps_path, metadata_fname)
+        sd.download_map_sheets_by_wfs_ids(21.4, maps_path, metadata_fname, force=True)
 
     with pytest.raises(ValueError, match="No map sheets"):
         sd.download_map_sheets_by_wfs_ids(12, maps_path, metadata_fname)
 
 
-def test_download_by_polygon(sheet_downloader, tmp_path):
+def test_download_by_polygon(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     polygon = Polygon(
@@ -559,9 +564,9 @@ def test_download_by_polygon(sheet_downloader, tmp_path):
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_polygon(
-        polygon, maps_path, metadata_fname
+        polygon, maps_path, metadata_fname, force=True
     )  # test mode = 'within'
-    assert os.path.exists(f"{maps_path}/map_101602026.png")
+    assert os.path.exists(f"{maps_path}/map_101602026.png"), os.listdir(maps_path)
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 1
@@ -576,7 +581,7 @@ def test_download_by_polygon(sheet_downloader, tmp_path):
     assert df.loc[0, "name"] == "map_101602026.png"
 
     sd.download_map_sheets_by_polygon(
-        polygon, maps_path, metadata_fname, mode="intersects"
+        polygon, maps_path, metadata_fname, mode="intersects", force=True
     )  # test mode = 'intersects', now 2 maps
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -584,7 +589,7 @@ def test_download_by_polygon(sheet_downloader, tmp_path):
     assert df.loc[1, "name"] == "map_101602038.png"
 
 
-def test_download_by_polygon_errors(sheet_downloader, tmp_path):
+def test_download_by_polygon_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     polygon = Polygon([[0, 1], [1, 2], [2, 3], [3, 4], [0, 1]])
@@ -594,18 +599,22 @@ def test_download_by_polygon_errors(sheet_downloader, tmp_path):
         NotImplementedError, match='``mode="within"`` or ``mode="intersects"``'
     ):
         sd.download_map_sheets_by_polygon(
-            polygon, maps_path, metadata_fname, mode="fake mode"
+            polygon, maps_path, metadata_fname, mode="fake mode", force=True
         )
     with pytest.raises(ValueError, match="out of map metadata bounds"):
-        sd.download_map_sheets_by_polygon(polygon, maps_path, metadata_fname)
+        sd.download_map_sheets_by_polygon(
+            polygon, maps_path, metadata_fname, force=True
+        )
 
 
-def test_download_by_coords(sheet_downloader, tmp_path):
+def test_download_by_coords(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
-    sd.download_map_sheets_by_coordinates((-0.99, 53.43), maps_path, metadata_fname)
+    sd.download_map_sheets_by_coordinates(
+        (-0.99, 53.43), maps_path, metadata_fname, force=True
+    )
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -621,22 +630,24 @@ def test_download_by_coords(sheet_downloader, tmp_path):
     assert df.loc[0, "name"] == "map_101602038.png"
 
 
-def test_download_by_coords_errors(sheet_downloader, tmp_path):
+def test_download_by_coords_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(ValueError, match="out of map metadata bounds"):
-        sd.download_map_sheets_by_coordinates((0, 1), maps_path, metadata_fname)
+        sd.download_map_sheets_by_coordinates(
+            (0, 1), maps_path, metadata_fname, force=True
+        )
 
 
-def test_download_by_line(sheet_downloader, tmp_path):
+def test_download_by_line(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     line = LineString([(-0.99, 53.43), (-0.93, 53.46)])
-    sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
+    sd.download_map_sheets_by_line(line, maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -652,23 +663,23 @@ def test_download_by_line(sheet_downloader, tmp_path):
     assert list(df["name"]) == ["map_101602026.png", "map_101602038.png"]
 
 
-def test_download_by_line_errors(sheet_downloader, tmp_path):
+def test_download_by_line_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     line = LineString([(0, 1), (2, 3)])
     with pytest.raises(ValueError, match="out of map metadata bounds"):
-        sd.download_map_sheets_by_line(line, maps_path, metadata_fname)
+        sd.download_map_sheets_by_line(line, maps_path, metadata_fname, force=True)
 
 
-def test_download_by_string(sheet_downloader, tmp_path):
+def test_download_by_string(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_string(
-        "Westminster", ["properties", "PARISH"], maps_path, metadata_fname
+        "Westminster", ["properties", "PARISH"], maps_path, metadata_fname, force=True
     )  # test w/ keys list
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
@@ -685,7 +696,7 @@ def test_download_by_string(sheet_downloader, tmp_path):
     assert df.loc[0, "name"] == "map_91617032.png"
 
     sd.download_map_sheets_by_string(
-        "Six_Inch_GB_WFS.16320", "id", maps_path, metadata_fname
+        "Six_Inch_GB_WFS.16320", "id", maps_path, metadata_fname, force=True
     )  # test append + w/ keys as string
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
@@ -693,7 +704,7 @@ def test_download_by_string(sheet_downloader, tmp_path):
     assert df.loc[1, "name"] == "map_101602026.png"
 
     sd.download_map_sheets_by_string(
-        "III.SW", path_save=maps_path, metadata_fname=metadata_fname
+        "III.SW", path_save=maps_path, metadata_fname=metadata_fname, force=True
     )  # test w/ no keys
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
@@ -702,31 +713,33 @@ def test_download_by_string(sheet_downloader, tmp_path):
     assert df.loc[2, "name"] == "map_101602038.png"
 
 
-def test_download_by_string_value_errors(sheet_downloader, tmp_path):
+def test_download_by_string_value_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(ValueError, match="pass ``string`` as a string"):
         sd.download_map_sheets_by_string(
-            10, path_save=maps_path, metadata_fname=metadata_fname
+            10, path_save=maps_path, metadata_fname=metadata_fname, force=True
         )
     with pytest.raises(ValueError, match="as string or list of strings"):
-        sd.download_map_sheets_by_string("Westminster", 10, maps_path, metadata_fname)
+        sd.download_map_sheets_by_string(
+            "Westminster", 10, maps_path, metadata_fname, force=True
+        )
 
 
-def test_download_by_string_key_errors(sheet_downloader, tmp_path):
+def test_download_by_string_key_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(KeyError, match="not found in features dictionary"):
         sd.download_map_sheets_by_string(
-            "Nottinghamshire", ["fake_key"], maps_path, metadata_fname
+            "Nottinghamshire", ["fake_key"], maps_path, metadata_fname, force=True
         )
 
 
-def test_download_by_queries(sheet_downloader, tmp_path):
+def test_download_by_queries(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
@@ -734,7 +747,7 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     sd.query_map_sheets_by_wfs_ids([16320, 132])  # features[0] and [3]
     sd.query_map_sheets_by_coordinates((-0.23, 51.5), append=True)  # features[3]
     assert len(sd.found_queries) == 2
-    sd.download_map_sheets_by_queries(maps_path, metadata_fname)
+    sd.download_map_sheets_by_queries(maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
@@ -751,10 +764,22 @@ def test_download_by_queries(sheet_downloader, tmp_path):
     assert list(df["name"]) == ["map_101602026.png", "map_91617032.png"]
 
 
-def test_download_by_queries_errors(sheet_downloader, tmp_path):
+def test_download_by_queries_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(ValueError, match="No query results"):
-        sd.download_map_sheets_by_queries(maps_path, metadata_fname)
+        sd.download_map_sheets_by_queries(maps_path, metadata_fname, force=True)
+
+
+def test_data_warning_error(sheet_downloader, tmp_path, mock_response):
+    sd = sheet_downloader
+    sd.features.extend(sd.features * 100)
+    sd.get_grid_bb(16)
+    maps_path = tmp_path / "test_maps/"
+    metadata_fname = "test_metadata.csv"
+    with pytest.raises(
+        Warning, match="Please confirm download by setting ``force=True``"
+    ):
+        sd.download_all_map_sheets(maps_path, metadata_fname)
