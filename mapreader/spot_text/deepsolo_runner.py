@@ -12,6 +12,7 @@ except ImportError:
 
 import numpy as np
 import pandas as pd
+import torch
 from adet.config import get_cfg
 
 try:
@@ -33,17 +34,34 @@ from .runner_base import Runner
 class DeepSoloRunner(Runner):
     def __init__(
         self,
-        patch_df: pd.DataFrame = None,
-        parent_df: pd.DataFrame = None,
+        patch_df: pd.DataFrame | str,
+        parent_df: pd.DataFrame | str = None,
         cfg_file: str
         | pathlib.Path = "./DeepSolo/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
         weights_file: str
         | pathlib.Path = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth",
-        device: str = "cpu",
+        device: str = "default",
+        delimiter: str = ",",
     ) -> None:
+        """Initialise the DeepSoloRunner.
+
+        Parameters
+        ----------
+        patch_df : pd.DataFrame | str
+            The dataframe containing the patch information. If a string, it should be a path to a CSV file.
+        parent_df : pd.DataFrame | str, optional
+            The dataframe containing the parent information. If a string, it should be a path to a CSV file, by default None.
+        cfg_file : str | pathlib.Path, optional
+            The path to the config file (yaml), by default "./DeepSolo/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml"
+        weights_file : str | pathlib.Path, optional
+            The path to the weights file (.pth), by default "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth"
+        device : str, optional
+            The device to use for the model, by default "default". If default, the device will be set to cuda if available, otherwise cpu.
+        delimiter : str, optional
+            The delimiter to use if loading dataframes from CSV files, by default ",".
+        """
         # setup the dataframes
-        self.patch_df = patch_df
-        self.parent_df = parent_df
+        self._load_df(patch_df, parent_df, delimiter)
 
         # set up predictions as dictionaries
         self.patch_predictions = {}
@@ -54,6 +72,8 @@ class DeepSoloRunner(Runner):
         cfg = get_cfg()  # get a fresh new config
         cfg.merge_from_file(cfg_file)
         cfg.MODEL.WEIGHTS = weights_file
+        if device == "default":
+            device = "cuda" if torch.cuda.is_available() else "cpu"
         cfg.MODEL.DEVICE = device
 
         self.voc_size = cfg.MODEL.TRANSFORMER.VOC_SIZE
