@@ -664,6 +664,7 @@ class Annotator:
         surrounding: int | None = None,
         resize_to: int | None = None,
         max_size: int | None = None,
+        show_vals: list[str] | None = None,
     ) -> None:
         """Annotate at the patch-level of the current patch.
         Renders the annotation interface for the first image.
@@ -696,6 +697,10 @@ class Annotator:
         max_size : int or None, optional
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
+        resize_to : int or None, optional
+            The size in pixels for the longest side to which resize each patch image. Default: None.
+        show_vals : list[str] or None, optional
+            List of column names to show in the display. By default, None.
 
         Notes
         -----
@@ -712,6 +717,8 @@ class Annotator:
             self._min_values = min_values
         if max_values is not None:
             self._max_values = max_values
+
+        self.show_vals = show_vals
 
         # re-set up queue using new min/max values
         self._queue = self._get_queue()
@@ -871,6 +878,22 @@ class Annotator:
                 url = self.patch_df.at[ix, "url"]
                 text = f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
                 add_ins += [widgets.HTML(text)]
+
+            if self.show_vals:
+                patch_info = []
+                for col in self.show_vals:
+                    if col in self.patch_df.columns:
+                        val = self.patch_df.at[ix, col]
+                        if isinstance(val, float):
+                            val = f"{val:.4g}"
+                        patch_info.append(f"<b>{col}</b>: {val}")
+                add_ins += [
+                    widgets.HTML(
+                        '<p style="text-align: center">'
+                        + "<br>".join(patch_info)
+                        + "</p>"
+                    )
+                ]
 
             value = self.current_index + 1 if self.current_index else 1
             description = f"{value} / {len(self._queue)}"
