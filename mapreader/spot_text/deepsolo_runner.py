@@ -199,9 +199,13 @@ class DeepSoloRunner(Runner):
             with open(self.use_customer_dictionary, "rb") as fp:
                 self.CTLABELS = pickle.load(fp)
         # voc_size includes the unknown class, which is not in self.CTABLES
-        assert int(self.voc_size - 1) == len(
-            self.CTLABELS
-        ), f"voc_size is not matched dictionary size, got {int(self.voc_size - 1)} and {len(self.CTLABELS)}."
+        voc_size_len = int(self.voc_size - 1)
+        CTLABELS_len = len(self.CTLABELS)
+        if not voc_size_len == CTLABELS_len:
+            raise ValueError(
+                f"Vocabulary size and CTABLES do not match up, \
+                             got {voc_size_len} and {CTLABELS_len}."
+            )
 
         # setup the predictor
         self.predictor = DefaultPredictor(cfg)

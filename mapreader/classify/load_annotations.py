@@ -439,10 +439,13 @@ Please check your image paths and update them if necessary.'
                     self.reviewed.loc[input_id, "label_index"] = self._get_label_index(
                         input_label
                     )
-                    assert (
+                    if not (
                         self.annotations[self.label_col].value_counts().tolist()
                         == self.annotations["label_index"].value_counts().tolist()
-                    )
+                    ):
+                        raise RuntimeError(
+                            f"[ERROR] Label indices do not match label counts. Please check the label indices for label '{input_label}'."
+                        )
                     print(
                         f'[INFO] Image {input_id} has been relabelled as "{input_label}"'
                     )
@@ -595,12 +598,18 @@ Please check your image paths and update them if necessary.'
                 test_size=float(relative_frac_test),
                 random_state=random_state,
             )
-            assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
+            if not len(self.annotations) == len(df_train) + len(df_val) + len(df_test):
+                raise ValueError(
+                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                )
 
         else:
             df_val = df_temp
             df_test = None
-            assert len(self.annotations) == len(df_train) + len(df_val)
+            if not len(self.annotations) == len(df_train) + len(df_val):
+                raise ValueError(
+                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                )
 
         if context_datasets:
             datasets = self.create_patch_context_datasets(

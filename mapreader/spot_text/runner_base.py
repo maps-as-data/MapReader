@@ -370,7 +370,8 @@ class Runner:
         geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
 
         # get the crs (should be the same for all polygons)
-        assert geo_df["crs"].nunique() == 1
+        if not geo_df["crs"].nunique() == 1:
+            raise ValueError("[ERROR] Multiple crs found in the predictions.")
         crs = geo_df["crs"].unique()[0]
 
         geo_df = geopd.GeoDataFrame(geo_df, geometry="polygon", crs=crs)
