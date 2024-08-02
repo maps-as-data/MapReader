@@ -651,7 +651,9 @@ class SheetDownloader:
 
             e.g. ``{"county": ["properties", "COUNTY"], "id": "id"}``
         **kwargs: dict, optional
-            Keyword arguments to pass to the ``extract_published_dates()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader.extract_published_dates`
+            method.
 
         Returns
         -------
@@ -660,8 +662,9 @@ class SheetDownloader:
 
         Notes
         -----
-        Default metadata items are: name, url, coordinates, crs, published_date, grid_bb.
-        Additional items can be added using ``metadata_to_save``.
+        Default metadata items are: ``name``, ``url``, ``coordinates``,
+        ``crs``, ``published_date``, ``grid_bb``. Additional items can be
+        added using the ``metadata_to_save`` argument.
         """
         metadata_cols = [
             "name",
@@ -747,7 +750,9 @@ class SheetDownloader:
         force : bool, optional
             Whether to force the download or ask for confirmation, by default ``False``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_save_metadata()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._save_metadata`
+            method.
         """
         try:
             # get url for single tile to estimate size
@@ -826,7 +831,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
@@ -869,7 +876,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
         """
 
         if not self.wfs_id_nos:
@@ -938,7 +947,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
 
         Notes
         -----
@@ -1016,7 +1027,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
         """
 
         if not isinstance(coords, tuple):
@@ -1076,7 +1089,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
 
         Notes
         -----
@@ -1151,7 +1166,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
 
         Notes
         -----
@@ -1220,7 +1237,9 @@ class SheetDownloader:
         download_in_parallel : bool, optional
             Whether to download tiles in parallel, by default ``True``.
         **kwargs : dict, optional
-            Keyword arguments to pass to the ``_download_map_sheets()`` method.
+            Keyword arguments to pass to the
+            :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
+            method.
         """
         if not self.grid_bbs:
             raise ValueError("[ERROR] Please first run ``get_grid_bb()``")
