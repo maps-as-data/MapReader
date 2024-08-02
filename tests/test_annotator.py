@@ -132,7 +132,7 @@ def test_sortby(load_dfs):
         sortby="min_x",
         ascending=False,
     )
-    queue = annotator.get_queue()
+    queue = annotator._get_queue()
     assert len(queue) == 9
     assert queue[0] == "patch-6-0-9-3-#cropped_74488689.png#.png"
     assert queue[-1] == "patch-0-6-3-9-#cropped_74488689.png#.png"
@@ -149,7 +149,7 @@ def test_min_values(load_dfs):
         min_values={"min_x": 3},
         sortby="min_x",  # no shuffle
     )
-    queue = annotator.get_queue()
+    queue = annotator._get_queue()
     assert len(queue) == 6
     assert queue[0] == "patch-3-0-6-3-#cropped_74488689.png#.png"
     assert queue[-1] == "patch-6-6-9-9-#cropped_74488689.png#.png"
@@ -166,7 +166,7 @@ def test_max_values(load_dfs):
         max_values={"min_x": 0},
         sortby="min_x",  # no shuffle
     )
-    queue = annotator.get_queue()
+    queue = annotator._get_queue()
     assert len(queue) == 3
     assert queue[0] == "patch-0-0-3-3-#cropped_74488689.png#.png"
     assert queue[-1] == "patch-0-6-3-9-#cropped_74488689.png#.png"
@@ -183,7 +183,7 @@ def test_filter_for(load_dfs):
         filter_for={"min_y": 0},
         sortby="min_x",  # no shuffle
     )
-    queue = annotator.get_queue()
+    queue = annotator._get_queue()
     assert len(queue) == 3
     assert queue[0] == "patch-0-0-3-3-#cropped_74488689.png#.png"
     assert queue[-1] == "patch-6-0-9-3-#cropped_74488689.png#.png"
