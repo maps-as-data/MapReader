@@ -56,6 +56,11 @@ def test_get_polygons(sheet_downloader):
     assert (isinstance(sd.features[i]["polygon"], Polygon) for i in sd.features)
 
 
+# TODO: add a test for when there are multiple geometries in one of the map's
+# features, i.e. when get_polygons is run and only one of the feature's
+# polygons is selected => logger warning for "Multiple geometries found in map"
+
+
 def test_get_grid_bb(sheet_downloader):
     sd = sheet_downloader
     sd.get_grid_bb()
@@ -126,14 +131,12 @@ def test_get_merged_polygon(sheet_downloader):
     assert isinstance(sd.merged_polygon, MultiPolygon)
 
 
-def test_get_minmax_latlon(sheet_downloader, capfd):
+def test_get_minmax_latlon(sheet_downloader, caplog):
+    caplog.set_level(logging.INFO)
     sd = sheet_downloader
-    with sheet_downloader.at_level(logging.INFO):
-        sd.get_minmax_latlon()
-    assert "Min lat: 51.49344796, max lat: 54.2089733" in sheet_downloader.text
-    assert "Min lon: -4.7682, max lon: -0.16093917" in sheet_downloader.text
-    # TODO: We need to test the output of the logger here if we want to test..
-    # I have made a first attempt via https://stackoverflow.com/questions/53125305/testing-logging-output-with-pytest
+    sd.get_minmax_latlon()
+    assert "Min lat: 51.49344796, max lat: 54.2089733" in caplog.text
+    assert "Min lon: -4.7682, max lon: -0.16093917" in caplog.text
 
 
 # queries
@@ -475,7 +478,9 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path, mock_response):
     assert df.loc[1, "name"] == "map_101602038.png"
 
 
-def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_response):
+
+def test_download_same_image_names(sheet_downloader, tmp_path, caplog):
+    caplog.set_level(logging.INFO)
     sd = sheet_downloader
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
@@ -500,20 +505,9 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_respo
     assert df.loc[1, "name"] == "map_101603986_1.png"
 
     # run again, nothing should happen
-    with sheet_downloader.at_level(logging.INFO):
-        sd.download_map_sheets_by_wfs_ids(
-            [107, 116], maps_path, metadata_fname, force=True
-        )
-    assert (
-        '"map_101603986.png" already exists. Skipping download.'
-        in sheet_downloader.text
-    )
-    assert (
-        '"map_101603986_1.png" already exists. Skipping download.'
-        in sheet_downloader.text
-    )
-    # TODO: We need to test the output of the logger here if we want to test..
-    # I have made a first attempt via https://stackoverflow.com/questions/53125305/testing-logging-output-with-pytest
+    sd.download_map_sheets_by_wfs_ids([107, 116], maps_path, metadata_fname, force=True)
+    assert '"map_101603986.png" already exists. Skipping download.' in caplog.text
+    assert '"map_101603986_1.png" already exists. Skipping download.' in caplog.text
 
     df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
