@@ -9,5 +9,6 @@ Community and contributions
 
    joining-the-community
    events
+   share-your-story
    contribution-guide/index
    code-of-conduct-and-inclusivity
