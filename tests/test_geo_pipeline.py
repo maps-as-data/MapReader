@@ -29,7 +29,9 @@ def test_pipeline(tmp_path, sample_dir):
 
     my_ts.extract_wfs_id_nos()
     my_ts.get_grid_bb(14)
-    my_ts.download_map_sheets_by_wfs_ids([131, 132], path_save=f"{tmp_path}/maps")
+    my_ts.download_map_sheets_by_wfs_ids(
+        [131, 132], path_save=f"{tmp_path}/maps", force=True
+    )
 
     # Load
     my_files = loader(f"{tmp_path}/maps/*png")
