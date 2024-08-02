@@ -232,14 +232,17 @@ class SheetDownloader:
 
     def get_minmax_latlon(self) -> None:
         """
-        Prints minimum and maximum latitudes and longitudes of all maps in metadata.
+        Returns minimum and maximum latitudes and longitudes of all maps in metadata.
         """
         if self.merged_polygon is None:
             self.get_merged_polygon()
 
         min_x, min_y, max_x, max_y = self.merged_polygon.bounds
+        logger.error("HELLO ERROR")
+        logger.warning("HELLO WARNING")
         logger.info(f"Min lat: {min_y}, max lat: {max_y}")
         logger.info(f"Min lon: {min_x}, max lon: {max_x}")
+        return (min_x, min_y, max_x, max_y)
 
     ## queries
     def query_map_sheets_by_wfs_ids(
