@@ -239,6 +239,20 @@ This will only show you patches that have been predicted to be "railspace".
 
 You can filter for any column in your patch DataFrame, and you can filter for multiple values by passing multiple key-value pairs as your ``filter_for`` dictionary.
 
+Showing additional information about your patches in the annotation interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like to show additional information about your patches in the annotation interface, you can pass the names of the columns you would like to show using the ``show_vals`` argument when calling the ``annotate()`` method.
+
+e.g. to show the ``"mean_pixel"`` and ``"std_pixel"`` columns in the annotation interface, you should pass these column names as a list to the ``show_vals`` argument:
+
+.. code-block:: python
+
+    annotator.annotate(show_vals=["mean_pixel", "std_pixel"])
+
+The values in these columns will then be shown below the patch when you are annotating.
+This can help you get an idea of which mean pixel values you might want to filter for or use as "min_values" or "max_values" arguments when annotating.
+
 .. _Save_annotations:
 
 Save your annotations
