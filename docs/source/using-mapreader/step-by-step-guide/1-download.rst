@@ -126,7 +126,7 @@ Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download 
 3. By WFS ID numbers.
 4. By searching for a string within a metadata field.**
 
-These methods can be used to either directly download maps, or to create a list of queries which can interacted with and downloaded subsequently.
+These methods can be used to either directly download maps or to create a list of queries which can interacted with and downloaded subsequently.
 
 .. _query_guidance:
 
