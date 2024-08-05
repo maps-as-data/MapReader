@@ -26,6 +26,69 @@ except ImportError:
 
 
 class PatchDataset(Dataset):
+    """A PyTorch Dataset class for loading image patches from a DataFrame.
+
+    Parameters
+    ----------
+    patch_df : pandas.DataFrame or str
+        DataFrame or path to csv file containing the paths to image patches and their labels.
+    transform : Union[str, transforms.Compose, Callable]
+        The transform to use on the image.
+        A string can be used to call default transforms - options are "train", "test" or "val".
+        Alternatively, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose) that takes in an image
+        and performs image transformations can be used.
+        At minimum, transform should be ``torchvision.transforms.ToTensor()``.
+    delimiter : str, optional
+        The delimiter to use when reading the dataframe. By default ``","``.
+    patch_paths_col : str, optional
+        The name of the column in the DataFrame containing the image paths. Default is "image_path".
+    label_col : str, optional
+        The name of the column containing the image labels. Default is None.
+    label_index_col : str, optional
+        The name of the column containing the indices of the image labels. Default is None.
+    image_mode : str, optional
+        The color format to convert the image to. Default is "RGB".
+
+    Attributes
+    ----------
+    patch_df : pandas.DataFrame
+        DataFrame containing the paths to image patches and their labels.
+    label_col : str
+        The name of the column containing the image labels.
+    label_index_col : str
+        The name of the column containing the labels indices.
+    patch_paths_col : str
+        The name of the column in the DataFrame containing the image
+        paths.
+    image_mode : str
+        The color format to convert the image to.
+    unique_labels : list
+        The unique labels in the label column of the patch_df DataFrame.
+    transform : callable
+        A callable object (a torchvision transform) that takes in an image
+        and performs image transformations.
+
+    Methods
+    -------
+    __len__()
+        Returns the length of the dataset.
+    __getitem__(idx)
+        Retrieves the image, its label and the index of that label at the given index in the dataset.
+    return_orig_image(idx)
+        Retrieves the original image at the given index in the dataset.
+    _default_transform(t_type, resize2)
+        Returns a transforms.Compose containing the default image transformations for the train and validation sets.
+
+    Raises
+    ------
+    ValueError
+        If ``label_col`` not in ``patch_df``.
+    ValueError
+        If ``label_index_col`` not in ``patch_df``.
+    ValueError
+        If ``transform`` passed as a string, but not one of "train", "test" or "val".
+    """
+
     def __init__(
         self,
         patch_df: pd.DataFrame | str,
@@ -36,69 +99,6 @@ class PatchDataset(Dataset):
         label_index_col: str | None = None,
         image_mode: str | None = "RGB",
     ):
-        """A PyTorch Dataset class for loading image patches from a DataFrame.
-
-        Parameters
-        ----------
-        patch_df : pandas.DataFrame or str
-            DataFrame or path to csv file containing the paths to image patches and their labels.
-        transform : Union[str, transforms.Compose, Callable]
-            The transform to use on the image.
-            A string can be used to call default transforms - options are "train", "test" or "val".
-            Alternatively, a callable object (e.g. a torchvision transform or torchvision.transforms.Compose) that takes in an image
-            and performs image transformations can be used.
-            At minimum, transform should be ``torchvision.transforms.ToTensor()``.
-        delimiter : str, optional
-            The delimiter to use when reading the dataframe. By default ``","``.
-        patch_paths_col : str, optional
-            The name of the column in the DataFrame containing the image paths. Default is "image_path".
-        label_col : str, optional
-            The name of the column containing the image labels. Default is None.
-        label_index_col : str, optional
-            The name of the column containing the indices of the image labels. Default is None.
-        image_mode : str, optional
-            The color format to convert the image to. Default is "RGB".
-
-        Attributes
-        ----------
-        patch_df : pandas.DataFrame
-            DataFrame containing the paths to image patches and their labels.
-        label_col : str
-            The name of the column containing the image labels.
-        label_index_col : str
-            The name of the column containing the labels indices.
-        patch_paths_col : str
-            The name of the column in the DataFrame containing the image
-            paths.
-        image_mode : str
-            The color format to convert the image to.
-        unique_labels : list
-            The unique labels in the label column of the patch_df DataFrame.
-        transform : callable
-            A callable object (a torchvision transform) that takes in an image
-            and performs image transformations.
-
-        Methods
-        -------
-        __len__()
-            Returns the length of the dataset.
-        __getitem__(idx)
-            Retrieves the image, its label and the index of that label at the given index in the dataset.
-        return_orig_image(idx)
-            Retrieves the original image at the given index in the dataset.
-        _default_transform(t_type, resize2)
-            Returns a transforms.Compose containing the default image transformations for the train and validation sets.
-
-        Raises
-        ------
-        ValueError
-            If ``label_col`` not in ``patch_df``.
-        ValueError
-            If ``label_index_col`` not in ``patch_df``.
-        ValueError
-            If ``transform`` passed as a string, but not one of "train", "test" or "val".
-        """
-
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
@@ -250,7 +250,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         ``patch_paths_col`` column of the ``patch_df`` DataFrame at the given
         index. The loaded image is then converted to the format specified by
         the ``image_mode`` attribute of the object. The resulting
-        ``PIL.Image.Image`` object is returned.
+        :class:`PIL.Image.Image` object is returned.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -387,6 +387,62 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
 
 # --- Dataset that returns an image, its context and its label
 class PatchContextDataset(PatchDataset):
+    """
+    A PyTorch Dataset class for loading contextual information about image
+    patches from a DataFrame.
+
+    Parameters
+    ----------
+    patch_df : pandas.DataFrame or str
+        DataFrame or path to csv file containing the paths to image patches and their labels.
+    total_df : pandas.DataFrame or str
+        DataFrame or path to csv file containing the paths to all images and their labels.
+    transform : str
+        Torchvision transform to be applied to context  images.
+        Either "train" or "val".
+    delimiter : str
+        The delimiter to use when reading the csv file. By default ``","``.
+    patch_paths_col : str, optional
+        The name of the column in the DataFrame containing the image paths. Default is "image_path".
+    label_col : str, optional
+        The name of the column containing the image labels. Default is None.
+    label_index_col : str, optional
+        The name of the column containing the indices of the image labels. Default is None.
+    image_mode : str, optional
+        The color space of the images. Default is "RGB".
+    context_dir : str, optional
+        The path to context maps (or, where to save context if not created yet).
+        Default is "./maps/maps_context".
+    create_context : bool, optional
+        Whether or not to create context maps. Default is False.
+    parent_path : str, optional
+        The path to the directory containing parent images. Default is
+        "./maps".
+
+    Attributes
+    ----------
+    patch_df : pandas.DataFrame
+        A pandas DataFrame with columns representing image paths, labels,
+        and object bounding boxes.
+    label_col : str
+        The name of the column containing the image labels.
+    label_index_col : str
+        The name of the column containing the labels indices.
+    patch_paths_col : str
+        The name of the column in the DataFrame containing the image
+        paths.
+    image_mode : str
+        The color space of the images.
+    parent_path : str
+        The path to the directory containing parent images.
+    create_context : bool
+        Whether or not to create context maps.
+    context_dir : str
+        The path to context maps.
+    unique_labels : list or str
+        The unique labels in ``label_col``.
+    """
+
     def __init__(
         self,
         patch_df: pd.DataFrame | str,
@@ -401,62 +457,6 @@ class PatchContextDataset(PatchDataset):
         create_context: bool = False,
         parent_path: str | None = "./maps",
     ):
-        """
-        A PyTorch Dataset class for loading contextual information about image
-        patches from a DataFrame.
-
-        Parameters
-        ----------
-        patch_df : pandas.DataFrame or str
-            DataFrame or path to csv file containing the paths to image patches and their labels.
-        total_df : pandas.DataFrame or str
-            DataFrame or path to csv file containing the paths to all images and their labels.
-        transform : str
-            Torchvision transform to be applied to context  images.
-            Either "train" or "val".
-        delimiter : str
-            The delimiter to use when reading the csv file. By default ``","``.
-        patch_paths_col : str, optional
-            The name of the column in the DataFrame containing the image paths. Default is "image_path".
-        label_col : str, optional
-            The name of the column containing the image labels. Default is None.
-        label_index_col : str, optional
-            The name of the column containing the indices of the image labels. Default is None.
-        image_mode : str, optional
-            The color space of the images. Default is "RGB".
-        context_dir : str, optional
-            The path to context maps (or, where to save context if not created yet).
-            Default is "./maps/maps_context".
-        create_context : bool, optional
-            Whether or not to create context maps. Default is False.
-        parent_path : str, optional
-            The path to the directory containing parent images. Default is
-            "./maps".
-
-        Attributes
-        ----------
-        patch_df : pandas.DataFrame
-            A pandas DataFrame with columns representing image paths, labels,
-            and object bounding boxes.
-        label_col : str
-            The name of the column containing the image labels.
-        label_index_col : str
-            The name of the column containing the labels indices.
-        patch_paths_col : str
-            The name of the column in the DataFrame containing the image
-            paths.
-        image_mode : str
-            The color space of the images.
-        parent_path : str
-            The path to the directory containing parent images.
-        create_context : bool
-            Whether or not to create context maps.
-        context_dir : str
-            The path to context maps.
-        unique_labels : list or str
-            The unique labels in ``label_col``.
-        """
-
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
