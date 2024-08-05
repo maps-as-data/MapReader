@@ -56,8 +56,8 @@ class MapImages:
     parent_path : str, optional
         Path to parent images (if applicable), by default ``None``.
     **kwargs : dict, optional
-        Additional keyword arguments to be passed to the ``_images_constructor``
-        method.
+        Keyword arguments to pass to the
+        :meth:`~.load.images.MapImages._images_constructor` method.
 
     Attributes
     ----------
@@ -160,7 +160,9 @@ class MapImages:
         **kwargs: dict,
     ) -> None:
         """
-        Constructs image data from the given image path and parent path and adds it to the ``MapImages`` instance's ``images`` attribute.
+        Constructs image data from the given image path and parent path and
+        adds it to the :class:`~.load.images.MapImages` instance's ``images``
+        attribute.
 
         Parameters
         ----------
@@ -186,7 +188,11 @@ class MapImages:
 
         Notes
         -----
-        This method assumes that the ``images`` attribute has been initialized on the MapImages instance as a dictionary with two levels of hierarchy, ``"parent"`` and ``"patch"``. The image data is added to the corresponding level based on the value of ``tree_level``.
+        This method assumes that the ``images`` attribute has been initialized
+        on the :class:`~.load.images.MapImages` instance as a dictionary with
+        two levels of hierarchy, ``"parent"`` and ``"patch"``. The image data
+        is added to the corresponding level based on the value of
+        ``tree_level``.
         """
 
         if tree_level not in ["parent", "patch"]:
@@ -256,7 +262,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     @staticmethod
     def _convert_image_path(inp_path: str) -> tuple[str, str, str]:
         """
-        Convert an image path into an absolute path and find basename and directory name.
+        Convert an image path into an absolute path and find basename and
+        directory name.
 
         Parameters
         ----------
@@ -283,7 +290,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         ignore_mismatch: bool | None = False,
     ) -> None:
         """
-        Add metadata information to the images dictionary.
+        Add metadata information to the ``images`` dictionary property.
 
         Parameters
         ----------
@@ -325,10 +332,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Notes
         ------
-        Your metadata file must contain an column which contains the image IDs (filenames) of your images.
-        This should have a column name of either ``name`` or ``image_id``.
+        Your metadata file must contain an column which contains the image IDs
+        (filenames) of your images. This should have a column name of either
+        ``name`` or ``image_id``.
 
-        Existing information in your ``MapImages`` object will be overwritten if there are overlapping column headings in your metadata file/dataframe.
+        Existing information in your :class:`~.load.images.MapImages` object
+        will be overwritten if there are overlapping column headings in your
+        metadata file/dataframe.
         """
 
         if isinstance(metadata, pd.DataFrame):
@@ -508,7 +518,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Notes
         -----
-        The method runs :meth:`mapreader.load.images.MapImages._add_shape_id`
+        The method runs :meth:`~.load.images.MapImages._add_shape_id`
         for each image present at the ``tree_level`` provided.
         """
         print(f"[INFO] Add shape, tree level: {tree_level}")
@@ -547,7 +557,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.MapImages._add_coord_increments_id`
+        :meth:`~.load.images.MapImages._add_coord_increments_id`
         for each image present at the parent level, which calculates
         pixel-wise delta longitude (``dlon``) and delta latitude (``dlat``)
         for the image and adds the data to it.
@@ -614,7 +624,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Notes
         -----
         The method runs
-        :meth:`mapreader.load.images.MapImages._add_center_coord_id`
+        :meth:`~.load.images.MapImages._add_center_coord_id`
         for each image present at the ``tree_level`` provided, which calculates
         central longitude and latitude (``center_lon`` and ``center_lat``) for
         the image and adds the data to it.
@@ -742,19 +752,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             dlat = abs(lat_max - lat_min) / image_height
             dlon = abs(lon_max - lon_min) / image_width
 
-        ``lon_min``, ``lat_min``, ``lon_max`` and ``lat_max`` are the coordinate
-        bounds of the image, and ``image_height`` and ``image_width`` are the
-        height and width of the image in pixels respectively.
+        ``lon_min``, ``lat_min``, ``lon_max`` and ``lat_max`` are the
+        coordinate bounds of the image, and ``image_height`` and
+        ``image_width`` are the height and width of the image in pixels
+        respectively.
 
-        This method assumes that the coordinate and shape metadata of the
-        image have already been added to the metadata.
+        This method assumes that the coordinate and shape metadata of the image
+        have already been added to the metadata.
 
         If the coordinate metadata cannot be found, a warning message will be
         printed if ``verbose=True``.
 
         If the shape metadata cannot be found, this method will call the
-        :meth:`mapreader.load.images.MapImages._add_shape_id` method to add
-        it.
+        :meth:`~.load.images.MapImages._add_shape_id` method to add it.
         """
 
         if "coordinates" not in self.parents[image_id].keys():
@@ -924,8 +934,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Notes
         -----
         This method requires the parent image to have location metadata added
-        with either the :meth:`mapreader.load.images.MapImages.add_metadata`
-        or :meth:`mapreader.load.images.MapImages.add_geo_info` methods.
+        with either the :meth:`~.load.images.MapImages.add_metadata`
+        or :meth:`~.load.images.MapImages.add_geo_info` methods.
 
         The calculations are performed using the ``geopy.distance.geodesic``
         and ``geopy.distance.great_circle`` methods. Thus, the method requires
@@ -990,6 +1000,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         output_format: str | None = "png",
         rewrite: bool | None = False,
         verbose: bool | None = False,
+        overlap: int = 0,
     ) -> None:
         """
         Patchify all images in the specified ``tree_level`` and (if ``add_to_parents=True``) add the patches to the MapImages instance's ``images`` dictionary.
@@ -1024,6 +1035,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         verbose : bool, optional
             If True, progress updates will be printed throughout, by default
             ``False``.
+        overlap : int, optional
+            Fractional overlap between patches, by default ``0``.
 
         Returns
         -------
@@ -1088,6 +1101,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     output_format=output_format,
                     rewrite=rewrite,
                     verbose=verbose,
+                    overlap=overlap,
                 )
 
     def _patchify_by_pixel(
@@ -1100,6 +1114,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         output_format: str | None = "png",
         rewrite: bool | None = False,
         verbose: bool | None = False,
+        overlap: int | None = 0,
     ):
         """Patchify one image and (if ``add_to_parents=True``) add the patch to the MapImages instance's ``images`` dictionary.
 
@@ -1123,6 +1138,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         verbose : bool, optional
             If True, progress updates will be printed throughout, by default
             ``False``.
+        overlap : int, optional
+            Fractional overlap between patches, by default ``0``.
         """
         tree_level = self._get_tree_level(image_id)
 
@@ -1140,15 +1157,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         height, width = img.height, img.width
 
-        for x in range(0, width, patch_size):
-            for y in range(0, height, patch_size):
+        x = 0
+        while x < width:
+            y = 0
+            while y < height:
                 max_x = min(x + patch_size, width)
                 max_y = min(y + patch_size, height)
 
-                min_x = x
-                min_y = y
-
-                patch_id = f"patch-{min_x}-{min_y}-{max_x}-{max_y}-#{image_id}#.{output_format}"
+                patch_id = f"patch-{x}-{y}-{max_x}-{max_y}-#{image_id}#.{output_format}"
                 patch_path = os.path.join(path_save, patch_id)
                 patch_path = os.path.abspath(patch_path)
 
@@ -1158,7 +1174,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
                 else:
-                    patch = img.crop((min_x, min_y, max_x, max_y))
+                    patch = img.crop((x, y, max_x, max_y))
                     if max_x == width:
                         patch = ImageOps.pad(
                             patch, (patch_size, patch.height), centering=(0, 0)
@@ -1181,10 +1197,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         image_path=patch_path,
                         parent_path=parent_path,
                         tree_level="patch",
-                        pixel_bounds=(min_x, min_y, max_x, max_y),
+                        pixel_bounds=(x, y, max_x, max_y),
                     )
                     self._add_patch_coords_id(patch_id)
                     self._add_patch_polygons_id(patch_id)
+
+                overlap_pixels = int(patch_size * overlap)
+                y = y + patch_size - overlap_pixels
+            x = x + patch_size - overlap_pixels
 
     def _patchify_by_pixel_square(
         self,
@@ -1428,8 +1448,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         delimiter: str | None = ",",
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Convert the ``MapImages`` instance's ``images`` dictionary into pandas
-        DataFrames for easy manipulation.
+        Convert the :class:`~.load.images.MapImages` instance's ``images``
+        dictionary into pandas DataFrames for easy manipulation.
 
         Parameters
         ----------
@@ -1481,8 +1501,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         **kwargs: dict,
     ) -> None:
         """
-        A wrapper method for `.show()` which plots all patches of a
-        specified parent (`parent_id`).
+        A wrapper method for :meth:`~.load.images.MapImages.show` which plots
+        all patches of a specified parent (`parent_id`).
 
         Parameters
         ----------
@@ -1491,8 +1511,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         column_to_plot : str, optional
             Column whose values will be plotted on patches, by default ``None``.
         **kwargs: Dict
-            Key words to pass to ``show`` method.
-            See help text for ``show`` for more information.
+            Key words to pass to :meth:`~.load.images.MapImages.show` method.
+            See help text for :meth:`~.load.images.MapImages.show` for more
+            information.
 
         Returns
         -------
@@ -1502,7 +1523,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Notes
         -----
         This is a wrapper method. See the documentation of the
-        :meth:`mapreader.load.images.MapImages.show` method for more detail.
+        :meth:`~.load.images.MapImages.show` method for more detail.
         """
         patch_ids = self.parents[parent_id]["patches"]
         figures = self.show(patch_ids, column_to_plot=column_to_plot, **kwargs)
@@ -1528,7 +1549,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         kml_dpi_image: int | None = None,
     ) -> None:
         """
-        Plot images from a list of `image_ids`.
+        Plot images from a list of ``image_ids``.
 
         Parameters
         ----------
@@ -1839,7 +1860,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     ) -> None:
         """
         Loads patch images from the given paths and adds them to the ``images``
-        dictionary in the ``MapImages`` instance.
+        dictionary in the :class:`~.load.images.MapImages` instance.
 
         Parameters
         ----------
@@ -2050,7 +2071,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         clear_images: bool | None = True,
     ) -> None:
         """
-        Create ``MapImages`` instance by loading data from pandas DataFrame(s).
+        Create :class:`~.load.images.MapImages` instance by loading data from
+        pandas DataFrame(s).
 
         Parameters
         ----------
@@ -2091,8 +2113,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
-        and update the ``images`` attribute of the ``MapImages`` instance with
-        the loaded data.
+        and update the ``images`` attribute of the
+        :class:`~.load.images.MapImages` instance with the loaded data.
 
         Parameters
         ----------
@@ -2253,7 +2275,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         verbose: bool = False,
         crs: str | None = None,
     ) -> None:
-        """Save all parents in MapImages instance as geotiffs.
+        """
+        Save all parents in :class:`~.load.images.MapImages` instance as
+        geotiffs.
 
         Parameters
         ----------
@@ -2363,7 +2387,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         verbose: bool | None = False,
         crs: str | None = None,
     ) -> None:
-        """Save all patches in MapImages instance as geotiffs.
+        """
+        Save all patches in :class:`~.load.images.MapImages` instance as
+        geotiffs.
 
         Parameters
         ----------
