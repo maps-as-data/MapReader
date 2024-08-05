@@ -704,7 +704,8 @@ class Annotator:
 
         Notes
         -----
-        This method is a wrapper for the ``_annotate`` method.
+        This method is a wrapper for the
+        :meth:`~.annotate.annotator.Annotate._annotate` method.
         """
         if border is not None:
             self.border = border
