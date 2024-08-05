@@ -22,6 +22,11 @@ try:
 except ImportError:
     pass
 
+try:
+    from mapreader.spot_text.maptext_runner import MapTextRunner
+except ImportError:
+    pass
+
 from mapreader.process import process
 
 from mapreader.annotate.annotator import Annotator

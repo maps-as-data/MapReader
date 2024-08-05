@@ -1,19 +1,20 @@
 Spot text
 =========
 
-MapReader now contains two new methods of spotting text on maps:
+MapReader implements three new frameworks for spotting text on maps:
 
 - ``DPTextDETRRunner`` - This is used to detect text on maps using `DPTextDETR <https://github.com/ymy-k/DPText-DETR/tree/main>`__ and outputs bounding boxes and scores.
-- ``DeepSoloRunner`` - This is used to detect and recognise text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
+- ``DeepSoloRunner`` - This is used to detect and recognize text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
+- ``MapTextPipeline`` - This is used to detect and recognize text on maps using `MapTextPipeline <https://github.com/yyyyyxie/MapTextPipeline>`__ and outputs bounding boxes, text and scores.
+
+We recommend using the ``MapTextPipeline`` for most use cases as it has been used to train a model on a sample of David Rumsey maps and so should work best for map text spotting.
 
 Install dependencies
 --------------------
 
-To run these, you will need to install the required dependencies.
+To run text spotting with MapReader, you will need to install the required dependencies. These are listed below:
 
-.. note::
-
-    We have our own forks of these repos to enable them to work on CPU!
+.. note:: We have our own forks of the ``DPTextDETRRunner``, ``DeepSolo`` and ``MapTextPipeline`` repos to enable them to work on CPU. Please use our forks but remember to cite the original authors in your work!
 
 Detectron2
 ~~~~~~~~~~~
@@ -30,10 +31,6 @@ To install, run the following commands in your terminal:
     pip install .
 
 
-.. note::
-
-    Since both the DPText-DETR and DeepSolo repos are built ontop of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install both at the same. To get around this, you can set up two different conda environments, one for each.
-
 .. admonition:: Detectron2 issues for windows users
     :class: dropdown
 
@@ -43,8 +40,9 @@ To install, run the following commands in your terminal:
 
     Once this is done, retry installing Detectron2.
 
-You should then pick one of the following to install:
+You should then **pick one** of the following to install:
 
+.. note:: Since the DPText-DETR, DeepSolo and MapTextPipeline frameworks are built on top of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install them at the same. To get around this, you can set up three different conda environments, one for each framework. This will allow you to switch between them as needed.
 
 DPTextDETR
 ~~~~~~~~~~~
@@ -72,18 +70,31 @@ To install, run the following commands in your terminal:
     cd DeepSolo
     pip install .
 
+MapTextPipeline
+~~~~~~~~~~~~~~~
+
+Our fork for MapTextPipeline is available `here <https://github.com/rwood-97/MapTextPipeline>`__
+
+To install, run the following commands in your terminal:
+
+.. code:: bash
+
+    git clone https://github.com/rwood-97/MapTextPipeline.git
+    cd MapTextPipeline
+    pip install .
+
 
 Advice for patch size
 ---------------------
 
 When running the text spotting models, we recommend using a patch size of 1024x1024 pixels.
-This is the size used in the training of the models, and so should give the best results.
+This is the size used as input to the models, and so should give the best results.
 
 You may also want to create some overlap between your patches as this should minimise cut off text at the edges of patches.
+MapReader has an algorithm to deduplicate overlapping bounding boxes so this creating an overlap will enable the fullest text to be detected.
 You will need to experiment with the amount of overlap to find the best results for your maps.
 
-.. note::
-    Greater overlaps will create more patches and result in greater computational costs when running.
+.. note:: Greater overlaps will create more patches and result in greater computational costs when running.
 
 See the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide for more information on how to create patches.
 
@@ -94,52 +105,91 @@ Once you have installed the dependencies, you can set up your chosen "runner".
 
 You will need to choose a model configuration and download the corresponding model weights.
 
-- Config files can be found in the model repositories under the ``configs`` directory.
+- Config files can be found in the ``DPText-DETR``, ``DeepSolo`` and ``MapTextPipeline`` repositories under the ``configs`` directory.
 - Weights files should be downloaded from the github repositories (links to the downloads are in the README).
 
 e.g. for the ``DPTextDETRRunner``, if you choose the "ArT/R_50_poly.yaml", you should download the "art_final.pth" model weights file from the DPTextDETR repo.
 
 e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml", you should download the "ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth" model weights file from the DeepSolo repo.
 
-You will also need to load your patch and parent dataframes.
-Assuming you have saved them, as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide, you can load them like so:
+e.g. for the ``MapTextPipeline``, if you choose the "ViTAEv2_S/rumsey/final_rumsey.yaml", you should download the "rumsey-finetune.pth" model weights file from the MapTextPipeline repo.
 
-.. code-block:: python
-
-    import pandas as pd
-
-    patch_df = pd.read_csv("patch_df.csv")
-    parent_df = pd.read_csv("parent_df.csv")
-
-You can then instantiate your runner.
+.. note:: We recommend using the "ViTAEv2_S/rumsey/final_rumsey.yaml" configuration and "rumsey-finetune.pth" weights from the ``MapTextPipeline``. But you should choose based on your own use case.
 
 For the DPTextDETRRunner, use:
 
 .. code-block:: python
 
-    from map_reader.spot_text import DPTextDETRRunner
+    from map_reader import DPTextDETRRunner
 
-    my_runner = DeepSoloRunner(
+    #EXAMPLE
+    my_runner = DPTextDETR(
+        "./patch_df.csv",
+        "./parent_df.csv",
+        cfg_file = "DPText-DETR/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        weights_file = "./art_final.pth",
+    )
+
+or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_runner = DPTextRunner(
         patch_df,
         parent_df,
         cfg_file = "DPText-DETR/configs/DPText_DETR/ArT/R_50_poly.yaml",
         weights_file = "./art_final.pth",
     )
 
-or, for the DeepSoloRunner, use:
+For the DeepSoloRunner, use:
 
 .. code-block:: python
 
-    from map_reader.spot_text import DeepSoloRunner
+    from map_reader import DeepSoloRunner
 
+    #EXAMPLE
     my_runner = DeepSoloRunner(
-        patch_df,
-        parent_df,
+        "./patch_df.csv",
+        "./parent_df.csv",
         cfg_file = "DeepSolo/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
         weights_file = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth"
     )
 
-You'll need to adjust the paths to the config and weights files to match your own set-up.
+or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+
+For the MapTextPipeline, use:
+
+.. code-block:: python
+
+    from map_reader import MapTextPipeline
+
+    #EXAMPLE
+    my_runner = MapTextPipeline(
+        "./patch_df.csv",
+        "./parent_df.csv",
+        cfg_file = "MapTextPipeline/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        weights_file = "./rumsey-finetune.pth"
+    )
+
+or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+
+.. note:: You'll need to adjust the paths to the config and weights files to match your own set-up!
+
+By default, the runners will set the device to "cuda" if available, otherwise it will use "cpu".
+You can explicitly set this using the ``device`` argument:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_runner = MapTextPipeline(
+        "./patch_df.csv",
+        "./parent_df.csv",
+        cfg_file = "MapTextPipeline/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        weights_file = "./rumsey-finetune.pth",
+        device = "cuda",
+    )
+
 
 Run the runner
 --------------
@@ -176,7 +226,7 @@ You can adjust the minimum IoA by setting the ``min_ioa`` argument:
 
     patch_preds_df = my_runner.run_all(return_dataframe=True, min_ioa=0.9)
 
-Higher ``min_ioa`` values will mean a tighter threshold for identifying two polygons as duplicates.
+Higher ``min_ioa``values will mean a tighter threshold for identifying two polygons as duplicates.
 
 If you'd like to run the runner on a single patch, you can also just run on one image:
 
@@ -257,7 +307,7 @@ As above, use the ``border_color``, ``text_color`` and ``figsize`` arguments to 
     )
 
 
-You can then save these predictions to a ``csv`` file:
+You can then save these predictions to a csv file:
 
 .. code-block:: python
 

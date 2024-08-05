@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+from ast import literal_eval
 from itertools import combinations
 
 import geopandas as geopd
@@ -18,6 +19,66 @@ class Runner:
     def __init__() -> None:
         """Initialise the Runner class."""
         # empty in the base class
+
+    def _load_df(
+        self,
+        patch_df: pd.DataFrame | str,
+        parent_df: pd.DataFrame | str,
+        delimiter: str = ",",
+    ):
+        """Load the patch and parent dataframes.
+
+        Parameters
+        ----------
+        patch_df : pd.DataFrame or str
+            The dataframe containing patch information. If a string, it should be the path to a csv file.
+        parent_df : pd.DataFrame or str
+            The dataframe containing parent information. If a string, it should be the path to a csv file.
+        delimiter : str, optional
+            The delimiter used in the csv file, by default ",".
+        """
+        if isinstance(patch_df, pd.DataFrame):
+            self.patch_df = patch_df
+
+        elif isinstance(patch_df, str):
+            if os.path.isfile(patch_df):
+                print(f'[INFO] Reading "{patch_df}".')
+                patch_df = pd.read_csv(patch_df, sep=delimiter, index_col=0)
+                # ensure tuple/list columns are read as such
+                patch_df = self._eval_df(patch_df)
+                self.patch_df = patch_df
+            else:
+                raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
+
+        else:
+            raise ValueError(
+                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+            )
+
+        if isinstance(parent_df, pd.DataFrame):
+            self.parent_df = parent_df
+
+        elif isinstance(parent_df, str):
+            if os.path.isfile(parent_df):
+                print(f'[INFO] Reading "{parent_df}".')
+                parent_df = pd.read_csv(parent_df, sep=delimiter, index_col=0)
+                parent_df = self._eval_df(parent_df)
+                self.parent_df = parent_df
+            else:
+                raise ValueError(f'[ERROR] "{parent_df}" cannot be found.')
+
+        else:
+            print("[WARNING] No parent dataframe provided.")
+            self.parent_df = parent_df
+
+    @staticmethod
+    def _eval_df(df):
+        for col in df.columns:
+            try:
+                df[col] = df[col].apply(literal_eval)
+            except (ValueError, TypeError, SyntaxError):
+                pass
+        return df
 
     def run_all(
         self,
