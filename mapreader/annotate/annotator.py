@@ -680,7 +680,8 @@ class Annotator:
 
         Notes
         -----
-        This method is a wrapper for the ``_annotate`` method.
+        This method is a wrapper for the
+        :meth:`~.annotate.annotator.Annotate._annotate` method.
         """
         if sortby is not None:
             self._sortby = sortby

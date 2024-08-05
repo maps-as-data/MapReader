@@ -1,41 +1,24 @@
 MapReader
 =========
 
-**A computer vision pipeline for exploring and analyzing images at scale**
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+   :start-after: <!--- sphinx-include --->
 
 .. toctree::
    :hidden:
    :maxdepth: 2
 
-   About
-   Events
-   Project-cv
-   coding-basics/index
-   Install
-   Input-guidance
-   User-guide/User-guide
-   Worked-examples/Worked-examples
-   api/index
-   Coc
-   Contribution-guide/Contribution-guide
-   Developers-guide
-   ways-of-working
+   introduction-to-mapreader/index
+   getting-started/index
+   using-mapreader/index
+   in-depth-resources/index
+   community-and-contributions/index
 
-------------
+..
+   Indices and tables
+   ==================
 
-.. include:: ../../README.md
-   :parser: myst_parser.sphinx_
-
--------------
-
-.. admonition:: To do list
-   :class: dropdown
-
-   .. todolist::
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

@@ -39,5 +39,7 @@ from mapreader.load import geo_utils
 
 import mapreader
 
+
 def print_version():
+    """Print the current version of mapreader."""
     print(mapreader.__version__)
