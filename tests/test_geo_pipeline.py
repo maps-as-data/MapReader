@@ -27,7 +27,7 @@ def test_pipeline(tmp_path, sample_dir):
         download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
     )
 
-    my_ts.extract_wfs_id_nos()
+    print(my_ts.wfs_id_nos)
     my_ts.get_grid_bb(14)
     my_ts.download_map_sheets_by_wfs_ids(
         [131, 132], path_save=f"{tmp_path}/maps", force=True

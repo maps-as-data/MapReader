@@ -19,7 +19,10 @@ from shapely.geometry import LineString, Point, Polygon, shape
 from shapely.ops import unary_union
 from tqdm.auto import tqdm
 
-from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
+from .downloader_utils import (
+    get_grid_bb_from_polygon,
+    get_polygon_from_grid_bb,
+)
 from .tile_loading import DEFAULT_TEMP_FOLDER, TileDownloader
 from .tile_merging import TileMerger
 
@@ -46,39 +49,51 @@ class SheetDownloader:
             should contain placeholders for the x coordinate (``x``), the y
             coordinate (``y``) and the zoom level (``z``).
         """
-        self.polygons = False
-        self.grid_bbs = False
-        self.wfs_id_nos = False
         self.published_dates = False
         self.found_queries = []
-        self.merged_polygon = None
+        self._merged_polygon = None
+        self._grid_bbs = None
+        self._polygons = None
 
         assert isinstance(
             metadata_path, str
         ), "[ERROR] Please pass metadata_path as string."
 
-        if os.path.isfile(metadata_path):
-            with open(metadata_path) as f:
-                self.metadata = json.load(f)
-                self.features = self.metadata["features"]
-                print(self.__str__())
-
-        else:
-            raise ValueError("[ERROR] Metadata file not found.")
-
-        if isinstance(download_url, str):
-            my_ts = [download_url]
-        elif isinstance(download_url, list):
-            my_ts = download_url
-        else:
+        if not isinstance(download_url, (str, list)):
             raise ValueError(
                 "[ERROR] Please pass ``download_url`` as string or list of strings."
             )
 
-        self.tile_server = my_ts
+        if not os.path.isfile(metadata_path):
+            raise ValueError("[ERROR] Metadata file not found.")
 
-        crs_string = CRS(self.metadata["crs"]["properties"]["name"])
-        self.crs = crs_string.to_string()
+        # Set up SheetDownloader.metadata + SheetDownloader.features
+        with open(metadata_path) as f:
+            self.metadata = json.load(f)
+            self.features = self.metadata["features"]
+            print(self.__str__())
+
+        # Set up SheetDownloader.tile_server
+        if isinstance(download_url, str):
+            download_url = [download_url]
+
+        self.tile_server = download_url
+
+        # Set up SheetDownloader.crs
+        self.crs = CRS(self.metadata["crs"]["properties"]["name"]).to_string()
+        self._test_crs()
+
+        # Set up SheetDownloader.polygons
+        _ = self.polygons
+
+        # Set up SheetDownloader.grid_bbs
+        _ = self.grid_bbs
+
+        # Set up SheetDownloader.merge_polygon
+        _ = self.merged_polygon
+
+        # Set up SheetDownloader.wfs_id_nos
+        _ = self.wfs_id_nos
 
     def __str__(self) -> str:
         info = f"[INFO] Metadata file has {self.__len__()} item(s)."
@@ -87,18 +102,37 @@ class SheetDownloader:
     def __len__(self) -> int:
         return len(self.features)
 
-    def get_polygons(self) -> None:
+    @property
+    def polygons(self) -> None:
         """
         For each map in metadata, creates a polygon from map geometry and saves to ``features`` dictionary.
         """
-        for feature in self.features:
-            polygon = shape(feature["geometry"])
-            map_name = feature["properties"]["IMAGE"]
-            if len(polygon.geoms) != 1:
-                f"[WARNING] Multiple geometries found in map {map_name}. Using first instance."
-            feature["polygon"] = polygon.geoms[0]
+        if not self._polygons:
+            for feature in self.features:
+                polygon = shape(feature["geometry"])
+                map_name = feature["properties"]["IMAGE"]
+                if len(polygon.geoms) != 1:
+                    f"[WARNING] Multiple geometries found in map {map_name}. Using first instance."
+                feature["polygon"] = polygon.geoms[0]
+            self._polygons = [f["polygon"] for f in self.features]
 
-        self.polygons = True
+        return self._polygons
+
+    def _test_crs(self):
+        if self.crs != "EPSG:4326":
+            raise NotImplementedError(
+                "[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets using coordinates in WGS1984 (aka EPSG:4326)."
+            )
+
+    @property
+    def grid_bbs(self) -> list:
+        """
+        For each map in metadata, creates a grid bounding box from map polygons and saves to ``features`` dictionary.
+        """
+        if not self._grid_bbs:
+            self.get_grid_bb()
+
+        return self._grid_bbs
 
     def get_grid_bb(self, zoom_level: int | None = 14) -> None:
         """
@@ -110,33 +144,30 @@ class SheetDownloader:
             The zoom level to use when creating the grid bounding box.
             Later used when downloading maps, by default 14.
         """
-        if not self.polygons:
-            self.get_polygons()
-
-        if self.crs != "EPSG:4326":
-            raise NotImplementedError(
-                "[ERROR] At the moment, MapReader can only create grid bounding boxes and download map sheets using coordinates in WGS1984 (aka EPSG:4326)."
-            )
-
         for feature in self.features:
             polygon = feature["polygon"]
             grid_bb = get_grid_bb_from_polygon(polygon, zoom_level)
 
             feature["grid_bb"] = grid_bb
 
-        self.grid_bbs = True
+        self._grid_bbs = [f["grid_bb"] for f in self.features]
+        return self._grid_bbs
 
-    def extract_wfs_id_nos(self) -> None:
+    @property
+    def wfs_id_nos(self) -> list:
         """
         For each map in metadata, extracts WFS ID numbers from WFS information and saves to ``features`` dictionary.
         """
-        for feature in self.features:
-            wfs_id = feature["id"]
-            wfs_id_no = wfs_id.split(sep=".")[-1]
+        try:
+            return [f["wfs_id_no"] for f in self.features]
+        except KeyError:
+            for feature in self.features:
+                wfs_id = feature["id"]
+                wfs_id_no = wfs_id.split(sep=".")[-1]
 
-            feature["wfs_id_no"] = eval(wfs_id_no)
+                feature["wfs_id_no"] = eval(wfs_id_no)
 
-        self.wfs_id_nos = True
+        return [f["wfs_id_no"] for f in self.features]
 
     def extract_published_dates(
         self,
@@ -212,31 +243,25 @@ class SheetDownloader:
 
         self.published_dates = True
 
-    def get_merged_polygon(self) -> None:
+    @property
+    def merged_polygon(self) -> None:
         """
         Creates a multipolygon representing all maps in metadata.
         """
+        if not self._merged_polygon:
+            polygon_list = self.polygons
 
-        if not self.polygons:
-            self.get_polygons()
+            self._merged_polygon = unary_union(polygon_list)
 
-        polygon_list = [feature["polygon"] for feature in self.features]
+        return self._merged_polygon
 
-        merged_polygon = unary_union(polygon_list)
-        self.merged_polygon = merged_polygon
-
-    def get_minmax_latlon(self) -> None:
+    @property
+    def minmax_latlon(self) -> tuple:
         """
-        Prints minimum and maximum latitudes and longitudes of all maps in metadata.
+        Returns minimum and maximum latitudes and longitudes of all maps in metadata.
         """
-        if self.merged_polygon is None:
-            self.get_merged_polygon()
-
-        min_x, min_y, max_x, max_y = self.merged_polygon.bounds
-        print(
-            f"[INFO] Min lat: {min_y}, max lat: {max_y} \n\
-[INFO] Min lon: {min_x}, max lon: {max_x}"
-        )
+        min_lon, min_lat, max_lon, max_lat = self.merged_polygon.bounds
+        return min_lon, min_lat, max_lon, max_lat
 
     ## queries
     def query_map_sheets_by_wfs_ids(
@@ -259,9 +284,6 @@ class SheetDownloader:
             Whether to print query results or not.
             By default False
         """
-        if not self.wfs_id_nos:
-            self.extract_wfs_id_nos()
-
         if isinstance(wfs_ids, list):
             requested_maps = wfs_ids
         elif isinstance(wfs_ids, int):
@@ -323,9 +345,6 @@ class SheetDownloader:
                 '[ERROR] Please use ``mode="within"`` or ``mode="intersects"``.'
             )
 
-        if not self.polygons:
-            self.get_polygons()
-
         if not append:
             self.found_queries = []  # reset each time
 
@@ -370,9 +389,6 @@ class SheetDownloader:
 
         coords = Point(coords)
 
-        if not self.polygons:
-            self.get_polygons()
-
         if not append:
             self.found_queries = []  # reset each time
 
@@ -416,9 +432,6 @@ class SheetDownloader:
                 "[ERROR] Please pass line as shapely.geometry.LineString object.\n\
 [HINT] Use ``create_line_from_latlons()`` to create line."
             )
-
-        if not self.polygons:
-            self.get_polygons()
 
         if not append:
             self.found_queries = []  # reset each time
@@ -502,9 +515,6 @@ class SheetDownloader:
         """
         Prints query results.
         """
-        if not self.polygons:
-            self.get_polygons()
-
         if len(self.found_queries) == 0:
             print("[INFO] No query results found/saved.")
         else:
@@ -880,10 +890,6 @@ class SheetDownloader:
             :meth:`~.download.sheet_downloader.SheetDownloader._download_map_sheets`
             method.
         """
-
-        if not self.wfs_id_nos:
-            self.extract_wfs_id_nos()
-
         if isinstance(wfs_ids, list):
             requested_maps = wfs_ids
         elif isinstance(wfs_ids, int):
@@ -1287,7 +1293,12 @@ class SheetDownloader:
         date_range = max_date - min_date
         print(min_date, max_date, date_range)
 
-        plt.hist(published_dates, bins=date_range, range=(min_date, max_date), **kwargs)
+        plt.hist(
+            published_dates,
+            bins=date_range,
+            range=(min_date, max_date),
+            **kwargs,
+        )
         plt.locator_params(integer=True)
         plt.xticks(size=14)
         plt.yticks(size=14)
@@ -1322,8 +1333,7 @@ class SheetDownloader:
             )
 
         if add_id:
-            if not self.wfs_id_nos:
-                self.extract_wfs_id_nos()
+            _ = self.wfs_id_nos
 
         plt.figure(figsize=[15, 15])
 
@@ -1439,3 +1449,32 @@ If you would like to install it, please follow instructions at https://scitools.
 
         features_to_plot = self.found_queries
         self.plot_features_on_map(features_to_plot, map_extent, add_id)
+
+    ## Backwards compatibility
+
+    def get_minmax_latlon(self) -> tuple:
+        """
+        Returns minimum and maximum latitudes and longitudes of all maps in metadata.
+
+        ..
+            For backwards compatibility.
+        """
+        return self.minmax_latlon
+
+    def get_merged_polygon(self) -> None:
+        """
+        Returns the merged polygon of all maps in metadata.
+
+        ..
+            For backwards compatibility.
+        """
+        return self.merged_polygon
+
+    def get_wfs_id_nos(self) -> list:
+        """
+        Returns WFS ID numbers of all maps in metadata.
+
+        ..
+            For backwards compatibility.
+        """
+        return self.wfs_id_nos

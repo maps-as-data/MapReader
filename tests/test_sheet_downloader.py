@@ -35,28 +35,40 @@ def test_init(sheet_downloader):
     assert len(sd) == 6
     assert sd.crs == "EPSG:4326"
 
+    # Test polygons property
+    assert isinstance(sd.polygons, list)
+    assert all([isinstance(polygon, Polygon) for polygon in sd.polygons])
+
+    # Test wfs_id_nos property
+    assert all([isinstance(wfs_id, int) for wfs_id in sd.wfs_id_nos])
+    assert sd.features[0]["wfs_id_no"] == 16320
+
+    # Test merged_polygon property
+    assert isinstance(sd.merged_polygon, MultiPolygon)
+
+    # Test minmax_latlon
+    min_lon, min_lat, max_lon, max_lat = sd.minmax_latlon
+    assert min_lon == -4.7682
+    assert min_lat == 51.49344796
+    assert max_lon == -0.16093917
+    assert max_lat == 54.2089733
+
 
 def test_init_errors(sample_dir):
     test_json = f"{sample_dir}/test_json.json"  # crs changed to EPSG:3857 (note: coordinates are wrong in file)
-    download_url = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    download_url = (
+        "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    )
     with pytest.raises(ValueError, match="file not found"):
         SheetDownloader("fake_file.json", download_url)
     with pytest.raises(ValueError, match="string or list of strings"):
         SheetDownloader(test_json, 10)
 
 
-def test_get_polygons(sheet_downloader):
-    sd = sheet_downloader
-    sd.get_polygons()
-    assert sd.polygons is True
-    assert (isinstance(sd.features[i]["polygon"], Polygon) for i in sd.features)
-
-
 def test_get_grid_bb(sheet_downloader):
     sd = sheet_downloader
     sd.get_grid_bb()
-    assert sd.grid_bbs is True
-    assert (isinstance(sd.features[i]["grid_bb"], GridBoundingBox) for i in sd.features)
+    assert all([isinstance(f["grid_bb"], GridBoundingBox) for f in sd.features])
     assert str(sd.features[0]["grid_bb"].lower_corner) == "(14, 8147, 5300)"
     assert str(sd.features[0]["grid_bb"].upper_corner) == "(14, 8150, 5302)"
 
@@ -67,17 +79,12 @@ def test_get_grid_bb(sheet_downloader):
 
 def test_get_grid_bb_errors(sample_dir):
     test_json = f"{sample_dir}/test_json_epsg3857.json"  # crs changed to EPSG:3857 (note: coordinates are wrong in file)
-    download_url = "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
-    sd = SheetDownloader(test_json, download_url)
+    download_url = (
+        "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+    )
     with pytest.raises(NotImplementedError, match="EPSG:4326"):
+        sd = SheetDownloader(test_json, download_url)
         sd.get_grid_bb()
-
-
-def test_extract_wfs_id_nos(sheet_downloader):
-    sd = sheet_downloader
-    sd.extract_wfs_id_nos()
-    assert sd.wfs_id_nos is True
-    assert sd.features[0]["wfs_id_no"] == 16320
 
 
 def test_extract_published_dates(sheet_downloader):
@@ -114,29 +121,13 @@ def test_published_dates_key_errors(sheet_downloader):
         sd.extract_published_dates(date_col="fake_key")  # str instead of list
 
 
-def test_get_merged_polygon(sheet_downloader):
-    sd = sheet_downloader
-    sd.get_merged_polygon()
-    assert isinstance(sd.merged_polygon, MultiPolygon)
-
-
-def test_get_minmax_latlon(sheet_downloader, capfd):
-    sd = sheet_downloader
-    sd.get_minmax_latlon()
-    out, _ = capfd.readouterr()
-    assert (
-        out
-        == "[INFO] Min lat: 51.49344796, max lat: 54.2089733 \n[INFO] Min lon: -4.7682, max lon: -0.16093917\n"
-    )
-
-
 # queries
 
 
 def test_query_by_wfs_ids(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_wfs_ids(16320)  # test single wfs_id
-    assert sd.wfs_id_nos is True
+    assert isinstance(sd.wfs_id_nos, list)
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[0]
 
@@ -169,7 +160,8 @@ def test_query_by_polygon(sheet_downloader):
         ]
     )  # should match to features[0]
     sd.query_map_sheets_by_polygon(polygon)  # test mode = 'within'
-    assert sd.polygons is True
+    assert isinstance(sd.polygons, list)
+
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[0]
 
@@ -216,7 +208,7 @@ def test_query_by_polygon_errors(sheet_downloader):
 def test_query_by_coords(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_coordinates((-0.99, 53.43))
-    assert sd.polygons is True
+    assert isinstance(sd.polygons, list)
     assert len(sd.found_queries) == 1
     assert sd.found_queries[0] == sd.features[1]
 
@@ -235,7 +227,7 @@ def test_query_by_line(sheet_downloader):
     sd = sheet_downloader
     line = LineString([(-0.99, 53.43), (-0.93, 53.46)])
     sd.query_map_sheets_by_line(line)
-    assert sd.polygons is True
+    assert isinstance(sd.polygons, list)
     assert len(sd.found_queries) == 2
     assert sd.found_queries == sd.features[:2]
 
@@ -321,6 +313,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     # zoom level 14
     sd.get_grid_bb(14)
+    assert all([isinstance(f["grid_bb"], GridBoundingBox) for f in sd.features])
     maps_path = tmp_path / "test_maps_14/"
     metadata_fname = "test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
@@ -354,7 +347,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     )
     # zoom level 16
     sd.get_grid_bb(16)
-    assert sd.grid_bbs is True
+    assert all([isinstance(f["grid_bb"], GridBoundingBox) for f in sd.features])
     maps_path = tmp_path / "test_maps_16/"
     metadata_fname = "test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
