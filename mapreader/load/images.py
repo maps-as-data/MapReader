@@ -2346,13 +2346,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if os.path.isfile(f"{geotiff_path}"):
             if not rewrite:
                 self._log_if_verbose(
-                    f"[INFO] File already exists: {geotiff_path}.", verbose
+                    f"File already exists: {geotiff_path}.", verbose, type="info"
                 )
                 return
 
         self._log_if_verbose(
-            f"[INFO] Creating: {geotiff_path}.",
+            f"Creating: {geotiff_path}.",
             verbose,
+            type="info",
         )
 
         if "shape" not in self.parents[parent_id].keys():
@@ -2457,13 +2458,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if os.path.isfile(f"{geotiff_path}"):
             if not rewrite:
                 self._log_if_verbose(
-                    f"[INFO] File already exists: {geotiff_path}.", verbose
+                    f"File already exists: {geotiff_path}.",
+                    verbose,
+                    type="info",
                 )
                 return
 
         self._log_if_verbose(
-            f"[INFO] Creating: {geotiff_path}.",
+            f"Creating: {geotiff_path}.",
             verbose,
+            type="info",
         )
 
         # get shape
