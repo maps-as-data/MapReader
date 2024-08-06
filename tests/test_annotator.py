@@ -38,6 +38,138 @@ def test_init_with_dfs(load_dfs):
     assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
+def test_init_defaults(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    # test defaults
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+    )
+    assert len(annotator) == 9
+    assert annotator._labels == ["a", "b"]
+    assert annotator.show_context is False
+    assert annotator.border is False
+    assert annotator.auto_save is True
+    assert annotator._sortby is None
+    assert annotator._ascending is True
+    assert annotator.task_name == "task"
+    assert annotator._min_values == {}
+    assert annotator._max_values == {}
+    assert annotator._filter_for is None
+    assert annotator.surrounding == 1
+    assert annotator.max_size == 1000
+    assert annotator.resize_to is None
+
+    annotator.annotate()
+    assert annotator.show_context is False
+    assert annotator.border is False
+    assert annotator._sortby is None
+    assert annotator._ascending is True
+    assert annotator._min_values == {}
+    assert annotator._max_values == {}
+    assert annotator.surrounding == 1
+    assert annotator.max_size == 1000
+    assert annotator.resize_to is None
+    assert annotator.show_vals is None
+
+    annotator.annotate(
+        show_context=True,
+        border=True,
+        sortby="min_x",
+        ascending=False,
+        min_values={"min_x": 0},
+        max_values={"min_x": 10},
+        surrounding=2,
+        resize_to=300,
+        max_size=500,
+        show_vals=["label"],
+    )
+    assert annotator.show_context is True
+    assert annotator.border is True
+    assert annotator._sortby == "min_x"
+    assert annotator._ascending is False
+    assert annotator._min_values == {"min_x": 0}
+    assert annotator._max_values == {"min_x": 10}
+    assert annotator.surrounding == 2
+    assert annotator.max_size == 500
+    assert annotator.resize_to == 300
+    assert annotator.show_vals == ["label"]
+
+
+def test_init_optional_args(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    # add optional arguments
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        show_context=True,
+        border=True,
+        auto_save=False,
+        sortby="min_x",
+        ascending=False,
+        username="rosie",
+        task_name="test",
+        surrounding=2,
+        max_size=500,
+        resize_to=300,
+    )
+    assert len(annotator) == 9
+    assert annotator._labels == ["a", "b"]
+    assert annotator.show_context is True
+    assert annotator.border is True
+    assert annotator.auto_save is False
+    assert annotator._sortby == "min_x"
+    assert annotator._ascending is False
+    assert annotator.username == "rosie"
+    assert annotator.task_name == "test"
+    assert annotator.surrounding == 2
+    assert annotator.max_size == 500
+    assert annotator.resize_to == 300
+
+    annotator.annotate()
+    assert annotator.show_context is True
+    assert annotator.border is True
+    assert annotator._sortby == "min_x"
+    assert annotator._ascending is False
+    assert annotator.surrounding == 2
+    assert annotator.max_size == 500
+    assert annotator.resize_to == 300
+
+    annotator.annotate(
+        show_context=False,
+        border=False,
+        sortby="max_x",
+        ascending=True,
+        surrounding=1,
+        resize_to=400,
+        max_size=1000,
+    )
+    assert annotator.show_context is False
+    assert annotator.border is False
+    assert annotator._sortby == "max_x"
+    assert annotator._ascending is True
+    assert annotator.surrounding == 1
+    assert annotator.max_size == 1000
+    assert annotator.resize_to == 400
+
+
+def test_init_dfs_value_error(load_dfs):
+    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+        Annotator(
+            patch_df=1,
+            parent_df=1,
+        )
+    _, _, tmp_path = load_dfs
+    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df=1,
+        )
+
+
 def test_init_with_csvs(load_dfs):
     _, _, tmp_path = load_dfs
     annotator = Annotator(
@@ -65,6 +197,30 @@ def test_init_with_fpaths(load_dfs, sample_dir):
     assert "mean_pixel_R" in annotator.patch_df.columns
 
 
+def test_incorrect_csv_paths(load_dfs):
+    with pytest.raises(FileNotFoundError):
+        Annotator(
+            patch_df="fake_df.csv",
+            parent_df="fake_df.csv",
+        )
+    _, _, tmp_path = load_dfs
+    with pytest.raises(FileNotFoundError):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df="fake_df.csv",
+        )
+
+
+def test_fpaths_metadata_filenotfound_error(load_dfs, sample_dir):
+    _, _, tmp_path = load_dfs
+    with pytest.raises(FileNotFoundError):
+        Annotator(
+            patch_paths=f"{tmp_path}/patches/*png",
+            parent_paths=f"{sample_dir}/cropped_74488689.png",
+            metadata_path="fake_df.csv",
+        )
+
+
 def test_init_with_fpaths_tsv(load_dfs, sample_dir):
     _, _, tmp_path = load_dfs
     annotator = Annotator(
@@ -78,6 +234,16 @@ def test_init_with_fpaths_tsv(load_dfs, sample_dir):
     )
     assert len(annotator) == 9
     assert "mean_pixel_R" in annotator.patch_df.columns
+
+
+def test_incorrect_delimiter(load_dfs):
+    _, _, tmp_path = load_dfs
+    with pytest.raises(ValueError):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df=f"{tmp_path}/parent_df.csv",
+            delimiter="|",
+        )
 
 
 def test_no_labels(load_dfs):
@@ -138,6 +304,22 @@ def test_sortby(load_dfs):
     assert queue[-1] == "patch-0-6-3-9-#cropped_74488689.png#.png"
 
 
+def test_sortby_value_errors(load_dfs):
+    parent_df, patch_df, _ = load_dfs
+    with pytest.raises(ValueError, match="not a column"):
+        Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            sortby="fake_col",
+        )
+    with pytest.raises(ValueError, match="must be a string or None"):
+        Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            sortby=1,
+        )
+
+
 def test_min_values(load_dfs):
     parent_df, patch_df, tmp_path = load_dfs
     annotator = Annotator(
@@ -189,47 +371,6 @@ def test_filter_for(load_dfs):
     assert queue[-1] == "patch-6-0-9-3-#cropped_74488689.png#.png"
 
 
-# errors
-
-
-def test_incorrect_csv_paths(load_dfs):
-    with pytest.raises(FileNotFoundError):
-        Annotator(
-            patch_df="fake_df.csv",
-            parent_df="fake_df.csv",
-        )
-    _, _, tmp_path = load_dfs
-    with pytest.raises(FileNotFoundError):
-        Annotator(
-            patch_df=f"{tmp_path}/patch_df.csv",
-            parent_df="fake_df.csv",
-        )
-
-
-def test_incorrect_delimiter(load_dfs):
-    _, _, tmp_path = load_dfs
-    with pytest.raises(ValueError):
-        Annotator(
-            patch_df=f"{tmp_path}/patch_df.csv",
-            parent_df=f"{tmp_path}/parent_df.csv",
-            delimiter="|",
-        )
-
-
-def test_init_dfs_value_error(load_dfs):
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
-        Annotator(
-            patch_df=1,
-            parent_df=1,
-        )
-    _, _, tmp_path = load_dfs
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
-        Annotator(
-            patch_df=f"{tmp_path}/patch_df.csv",
-            parent_df=1,
-        )
-
-
 def test_no_image_path_col(load_dfs):
     parent_df, patch_df, _ = load_dfs
     patch_df = patch_df.drop(columns=["image_path"])
@@ -237,32 +378,6 @@ def test_no_image_path_col(load_dfs):
         Annotator(
             patch_df=patch_df,
             parent_df=parent_df,
-        )
-
-
-def test_sortby_value_errors(load_dfs):
-    parent_df, patch_df, _ = load_dfs
-    with pytest.raises(ValueError, match="not a column"):
-        Annotator(
-            patch_df=patch_df,
-            parent_df=parent_df,
-            sortby="fake_col",
-        )
-    with pytest.raises(ValueError, match="must be a string or None"):
-        Annotator(
-            patch_df=patch_df,
-            parent_df=parent_df,
-            sortby=1,
-        )
-
-
-def test_fpaths_metadata_filenotfound_error(load_dfs, sample_dir):
-    _, _, tmp_path = load_dfs
-    with pytest.raises(FileNotFoundError):
-        Annotator(
-            patch_paths=f"{tmp_path}/patches/*png",
-            parent_paths=f"{sample_dir}/cropped_74488689.png",
-            metadata_path="fake_df.csv",
         )
 
 
