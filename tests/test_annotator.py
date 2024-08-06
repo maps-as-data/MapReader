@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -168,6 +169,35 @@ def test_init_dfs_value_error(load_dfs):
             patch_df=f"{tmp_path}/patch_df.csv",
             parent_df=1,
         )
+    with pytest.raises(ValueError, match="Please specify one"):
+        Annotator()
+
+
+def test_init_n_labels(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    for i in range(9):
+        labels = [str(x) for x in range(i)]
+        if (i % 2) == 0:
+            if i > 4:
+                expected = 4
+            else:
+                expected = 2
+        else:
+            if i == 3:
+                expected = 3
+            else:
+                expected = 5
+
+        annotator = Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            labels=labels,
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+        assert len(annotator) == 9
+        assert annotator._labels == labels
+        assert annotator.buttons_per_row == expected
 
 
 def test_init_with_csvs(load_dfs):
@@ -259,6 +289,18 @@ def test_no_labels(load_dfs):
 
     annotator._labels = ["a", "b"]
     assert annotator._labels == ["a", "b"]
+
+
+def test_str_labels(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    with pytest.raises(SyntaxError):
+        Annotator(
+            patch_df=patch_df,
+            parent_df=parent_df,
+            labels="a, b",
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
 
 
 def test_duplicate_labels(load_dfs):
@@ -371,6 +413,20 @@ def test_filter_for(load_dfs):
     assert queue[-1] == "patch-6-0-9-3-#cropped_74488689.png#.png"
 
 
+def test_max_size(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+        max_size=2,
+    )
+    assert annotator.max_size == 2
+    annotator.annotate()
+
+
 def test_no_image_path_col(load_dfs):
     parent_df, patch_df, _ = load_dfs
     patch_df = patch_df.drop(columns=["image_path"])
@@ -389,3 +445,37 @@ def test_unknown_arg_error(load_dfs):
             parent_df=parent_df,
             fake_arg=1,
         )
+
+
+def test_filtered(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+    )
+    out = annotator.filtered
+    assert len(out) == 0
+    annotator.patch_df["label"] = "a"
+    out = annotator.filtered
+    assert len(out) == 9
+
+
+def test_add_annotation(load_dfs):
+    parent_df, patch_df, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=True,
+    )
+    annotator.annotate()
+    patch = annotator._queue[0]
+    patch_idx = annotator.current_index
+    annotator._add_annotation("a")
+    assert annotator.patch_df.loc[patch, "label"] == "a"
+    assert annotator.current_index != patch_idx
+    assert os.path.isfile(annotator.annotations_file)
