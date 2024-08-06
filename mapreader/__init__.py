@@ -22,7 +22,7 @@ try:
 except ImportError:
     pass
 
-from mapreader.process import process
+from mapreader.process import context_post_process, occlusion_analysis
 
 from mapreader.annotate.annotator import Annotator
 
