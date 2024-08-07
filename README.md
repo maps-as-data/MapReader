@@ -107,4 +107,4 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 ## Publishing python packages
 
-A new python packages is automatically built and published to [PyPI](https://pypi.python.org/pypi) using a GitHub Actions workflow when a new release is created on GitHub.
+A new python package is automatically built and published to [PyPI](https://pypi.python.org/pypi) using a GitHub Actions workflow when a new release is created on GitHub.
