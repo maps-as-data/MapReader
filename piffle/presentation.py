@@ -29,7 +29,7 @@ class IIIFPresentation(addict.Dict):
 
     @classmethod
     def from_file(cls, path):
-        """Iniitialize :class:`IIIFPresentation` from a file."""
+        """Initialize :class:`IIIFPresentation` from a file."""
         with open(path) as manifest:
             data = json.loads(manifest.read())
         return cls(data)
