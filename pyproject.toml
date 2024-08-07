@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "piffle"
-version = "0.5.0"
+dynamic = ["version"]
 description = "Python library for working with IIIF Image and Presentation APIs"
 readme = "README.md"
 authors = [
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",    
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -35,9 +36,15 @@ dependencies = [
 license = {text = "Apache License, Version 2.0"}
 requires-python = ">=3.8"
 
+
+[tool.hatch.version]
+path = "piffle/__init__.py"
+
 [project.urls]
-homepage = "https://github.com/princeton-cdh/piffle"
-repository = "https://github.com/princeton-cdh/piffle"
+Homepage = "https://github.com/princeton-cdh/piffle"
+Repository = "https://github.com/princeton-cdh/piffle"
+#Documentation = "https://readthedocs.org"
+Changelog = "https://github.com/Princeton-CDH/piffle/blob/main/README.md"
 
 [project.optional-dependencies]
 test = [

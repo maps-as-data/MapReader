@@ -1,5 +1,1 @@
-# use version from in pyproject.toml
-# NOTE: this will pull the version for the currently installed version
-import importlib.metadata
-
-__version__ = importlib.metadata.version("piffle")
+__version__ = "0.5.1"

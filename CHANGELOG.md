@@ -1,5 +1,9 @@
 # Change & Version Information
 
+## 0.5.1
+
+* Add explicit support and testing for python 3.12
+
 ## 0.5
 
 * Now supports python 3.8-3.11; dropped support for Python versions 3.6, 3.7
