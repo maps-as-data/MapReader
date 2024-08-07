@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from mapreader.download.data_structures import Coordinate, GridBoundingBox, GridIndex
+from mapreader.download.data_structures import (
+    Coordinate,
+    GridBoundingBox,
+    GridIndex,
+)
 
 
-@pytest.fixture
-def init_coordinate():
+def test_init_coordinate():
     coordinate = Coordinate(0, 90)
     assert coordinate.lat == 0
     assert coordinate.lon == 90
@@ -27,8 +30,7 @@ def init_coordinate():
         coordinate = Coordinate(0, -181)
 
 
-@pytest.fixture
-def init_grid_index():
+def test_init_grid_index():
     grid_index = GridIndex(1, 2, 3)
     assert grid_index.x == 1
     assert grid_index.y == 2
@@ -46,13 +48,13 @@ def init_grid_index():
         grid_index = GridIndex(1, 9, 3)
 
 
-@pytest.fixture
-def init_grid_bounding_box():
+def test_init_grid_bounding_box():
     cell1 = GridIndex(1, 2, 3)
     cell2 = GridIndex(2, 3, 4)
 
     with pytest.raises(
-        NotImplementedError, match="Can't calculate a grid on different scales yet"
+        NotImplementedError,
+        match="Can't calculate a grid on different scales yet",
     ):
         bb = GridBoundingBox(cell1, cell2)
 
