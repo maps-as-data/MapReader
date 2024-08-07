@@ -3,7 +3,7 @@
 Python library for generating and parsing [IIIF Image API](http://iiif.io/api/image/2.1/) URLs in an
 object-oriented, pythonic fashion.
 
-[![Unit Test Status](https://github.com/Princeton-CDH/piffle/workflows/unit_tests/badge.svg)](https://github.com/Princeton-CDH/piffle/actions?query=workflow%3Aunit_tests)
+[![unit tests](https://github.com/Princeton-CDH/piffle/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/Princeton-CDH/piffle/actions/workflows/unit_tests.yml)
 [![codecov](https://codecov.io/gh/Princeton-CDH/piffle/branch/main/graph/badge.svg)](https://codecov.io/gh/Princeton-CDH/piffle)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d37850d90592f9d628df/maintainability)](https://codeclimate.com/github/Princeton-CDH/piffle/maintainability)
 
@@ -107,4 +107,4 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 ## Publishing python packages
 
-A new python packages is automatically built and published to [PyPI](https://pypi.python.org/pypi) using a GitHub Actions workflow when a new release is created on GitHub.
+A new python package is automatically built and published to [PyPI](https://pypi.python.org/pypi) using a GitHub Actions workflow when a new release is created on GitHub.
