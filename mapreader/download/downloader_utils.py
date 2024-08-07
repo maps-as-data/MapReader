@@ -158,6 +158,7 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
 def _check_z(z):
     if not z >= 0:
         raise ValueError("Zoom level must be positive")
+    return True
 
 
 def _get_index_from_coordinate(lon: float, lat: float, z: int) -> tuple[(int, int)]:
