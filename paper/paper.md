@@ -87,10 +87,10 @@ Our documentation aims to provide all information needed to set up and run MapRe
 - How to install MapReader
 - Guidance on the input to MapReader - e.g. what kind of maps and which formats work well in MapReader, how to set up your files
 - A step-by-step guide to running MapReader
-- worked examples - Jupyter notebooks demonstrating uses of MapReader for specific cases (with data, e.g. @Hosseini_mapreader_data)
+- Worked examples - Jupyter notebooks demonstrating uses of MapReader for specific cases (with data, e.g. @Hosseini_mapreader_data)
 - API Reference
 - Our Code of Conduct and Inclusivity statement
-- A guide for users wanting to contribute to MapReader and information our practices when developing MapReader
+- Guidance for users wanting to contribute to MapReader and information our practices when developing MapReader
 
 # Conclusion
 
