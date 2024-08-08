@@ -180,11 +180,12 @@ class Downloader:
             Additional keyword arguments to pass to the `_download_map` method
         """
 
-        assert isinstance(
-            polygon, Polygon
-        ), "[ERROR] \
-Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+        if type(polygon) is not Polygon:
+            raise ValueError(
+                "[ERROR] \
+    Please pass polygon as shapely.geometry.Polygon object.\n\
+    [HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+            )
 
         min_x, min_y, max_x, max_y = polygon.bounds
 

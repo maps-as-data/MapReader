@@ -155,6 +155,12 @@ def get_coordinate_from_index(grid_index: GridIndex) -> Coordinate:
     return Coordinate(lat, lon)
 
 
+def _check_z(z):
+    if not z >= 0:
+        raise ValueError("Zoom level must be positive")
+    return True
+
+
 def _get_index_from_coordinate(lon: float, lat: float, z: int) -> tuple[(int, int)]:
     """Generate (x,y) tuple from Coordinate latitudes and longitudes.
 
@@ -163,7 +169,7 @@ def _get_index_from_coordinate(lon: float, lat: float, z: int) -> tuple[(int, in
     Tuple
         (x,y) tuple.
     """
-    assert z >= 0, "Zoom level must be positive"
+    _check_z(z)
     n = 2**z
     x = int((lon + 180) / 360 * n)
     lat_rad = math.radians(lat)
@@ -179,7 +185,7 @@ def _get_coordinate_from_index(x: int, y: int, z: int) -> tuple[(float, float)]:
     Tuple
         (lon, lat) tuple representing the upper left corner of the tile.
     """
-    assert z >= 0, "Zoom level must be positive"
+    _check_z(z)
     n = 2**z
     lon = (x / n) * 360 - 180
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
