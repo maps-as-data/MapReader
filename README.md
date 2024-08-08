@@ -1,40 +1,42 @@
-<div align="center">
-    <br>
-    <p align="center">
-    <h1>MapReader</h1>
-    <h2>A computer vision pipeline for exploring and analyzing images at scale</h2>
-    </p>
-</div>
+# MapReader
 
-<p align="center">
-    <a href="https://pypi.org/project/mapreader/">
-        <img alt="PyPI" src="https://img.shields.io/pypi/v/MapReader">
-    </a>
-    <a href="https://github.com/Living-with-machines/MapReader/blob/main/LICENSE">
-        <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-    </a>
-    <a href="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
-        <img alt="Integration Tests badge" src="https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg">
-    </a>
-    <a href="https://zenodo.org/badge/latestdoi/430661738"><img src="https://zenodo.org/badge/430661738.svg" alt="DOI"></a>
-    <br/>
-    <a href="https://codecov.io/github/Living-with-machines/MapReader" >
-    <img src="https://codecov.io/github/Living-with-machines/MapReader/graph/badge.svg?token=38GQ3O1GB5"/>
-    </a>
-</p>
+> [!IMPORTANT] A computer vision pipeline for exploring and analyzing images at scale
 
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+![PyPI](https://img.shields.io/pypi/v/MapReader)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Integration Tests badge](https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg)
+![DOI](https://zenodo.org/badge/430661738.svg)
+![CodeCov](https://codecov.io/github/Living-with-machines/MapReader/graph/badge.svg?token=38GQ3O1GB5)
+
+## Table of Contents
+
+- [MapReader](#mapreader)
+  - [Table of Contents](#table-of-contents)
+  - [What is MapReader?](#what-is-mapreader)
+  - [Overview](#overview)
+    - [MapReader pipeline](#mapreader-pipeline)
+  - [Documentation](#documentation)
+  - [What is included in this repo?](#what-is-included-in-this-repo)
+  - [How to cite MapReader](#how-to-cite-mapreader)
+  - [Acknowledgements](#acknowledgements)
+  - [Contributors](#contributors)
+
+---
+<!--- sphinx-include --->
 
 ## What is MapReader?
 
-<div align="center">
-    <figure>
-    <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/figs/river_banner_8bit.png"
-        alt="Annotated Map with Prediction Outputs"
-        width="70%">
-    </figure>
-</div>
-
 MapReader is an end-to-end computer vision (CV) pipeline for exploring and analyzing images at scale.
+
+<figure align="center">
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/_static/river_banner_8bit.png"
+      alt="Annotated Map with Prediction Outputs"
+      width="70%">
+</figure>
 
 MapReader was developed in the [Living with Machines](https://livingwithmachines.ac.uk/) project to analyze large collections of historical maps but is a _**generalizable**_ computer vision pipeline which can be applied to _**any images**_ in a wide variety of domains.
 
@@ -44,30 +46,28 @@ MapReader is a groundbreaking interdisciplinary tool that emerged from a specifi
 
 ### MapReader pipeline
 
-<div align="center">
-  <figure>
-  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/figures/pipeline_explained.png"
+The MapReader pipeline consists of a linear sequence of tasks which, together, can be used to train a computer vision (CV) classifier to recognize visual features within maps and identify patches containing these features across entire map collections:
+
+<figure align="center">
+  <img src="https://raw.githubusercontent.com/Living-with-machines/MapReader/main/docs/source/_static/pipeline_explained.png"
         alt="MapReader pipeline"
         width="70%">
-  </figure>
-</div>
+</figure>
 
-The MapReader pipeline consists of a linear sequence of tasks which, together, can be used to train a computer vision (CV) classifier to recognize visual features within maps and identify patches containing these features across entire map collections.
-
-See our [About MapReader](https://mapreader.readthedocs.io/en/latest/About.html) page to learn more.
+See our [Introduction to MapReader](https://mapreader.readthedocs.io/en/latest/introduction-to-mapreader/) page to learn more.
 
 ## Documentation
 
-The MapReader documentation can be found at https://mapreader.readthedocs.io/en/latest/index.html.
+The MapReader documentation can be found at https://mapreader.readthedocs.io/en/latest/.
 
-**New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/Install.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/Input-guidance.html) for help with the initial set up of MapReader.
+**New users** should refer to the [Installation instructions](https://mapreader.readthedocs.io/en/latest/getting-started/installation-instructions/index.html) and [Input guidance](https://mapreader.readthedocs.io/en/latest/using-mapreader/input-guidance/) for help with the initial set up of MapReader.
 
-**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/User-guide/User-guide.html) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustrating use cases such as:
+**All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/using-mapreader/) for guidance on how to use MapReader. This contains end-to-end instructions on how to use the MapReader pipeline, plus a number of worked examples illustrating use cases such as:
 
 - Geospatial images (i.e. maps)
 - Non-geospatial images
 
- **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/api/index.html) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/Contribution-guide/Contribution-guide.html) for guidance on how to contribute to the MapReader package.
+ **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/in-depth-resources/api/mapreader/) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/community-and-contributions/contribution-guide/) for guidance on how to contribute to the MapReader package.
 
 **Join our Slack workspace!**
 Please fill out [this form](https://forms.gle/dXjECHZQkwrZ3Xpt9) to receive an invitation to the Slack workspace.
@@ -95,7 +95,6 @@ If you use MapReader in your work, please cite both the MapReader repo and [our 
 - Kasra Hosseini, Daniel C. S. Wilson, Kaspar Beelen, and Katherine McDonough. 2022. MapReader: a computer vision pipeline for the semantic exploration of maps at scale. In Proceedings of the 6th ACM SIGSPATIAL International Workshop on Geospatial Humanities (GeoHumanities '22). Association for Computing Machinery, New York, NY, USA, 8–19. https://doi.org/10.1145/3557919.3565812
 - Kasra Hosseini, Rosie Wood, Andy Smith, Katie McDonough, Daniel C.S. Wilson, Christina Last, Kalle Westerling, and Evangeline Mae Corcoran. “Living-with-machines/mapreader: End of Lwm”. Zenodo, July 27, 2023. https://doi.org/10.5281/zenodo.8189653.
 
-
 ## Acknowledgements
 
 This work was supported by Living with Machines (AHRC grant AH/S01179X/1) and The Alan Turing Institute (EPSRC grant EP/N510129/1).
@@ -105,10 +104,6 @@ Living with Machines, funded by the UK Research and Innovation (UKRI) Strategic 
 Maps above reproduced with the permission of the National Library of Scotland https://maps.nls.uk/index.html
 
 ## Contributors
-
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
