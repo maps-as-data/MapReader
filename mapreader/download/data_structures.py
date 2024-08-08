@@ -14,8 +14,11 @@ class Coordinate:
         lon : float
             longitude value (in range [-180°, 180°] )
         """
-        assert -90 <= lat <= 90
-        assert -180 <= lon <= 180
+        if not -90 <= lat <= 90:
+            raise ValueError("Latitude must be in range [-90, 90]")
+        if not -180 <= lon <= 180:
+            raise ValueError("Longitude must be in range [-180, 180]")
+
         self.lat = lat
         self.lon = lon
 
@@ -37,9 +40,12 @@ class GridIndex:
         z : int
             Zoom level
         """
-        assert z >= 0
-        assert 0 <= x < 2**z
-        assert 0 <= y < 2**z
+        if not z >= 0:
+            raise ValueError("Zoom level must be greater than or equal to 0")
+        if not 0 <= x < 2**z:
+            raise ValueError(f"X value must be in range [0, {2**z}]")
+        if not 0 <= y < 2**z:
+            raise ValueError(f"Y value must be in range [0, {2**z}]")
         self.x = x
         self.y = y
         self.z = z
@@ -61,7 +67,9 @@ class GridBoundingBox:
         cell1 : GridIndex
         cell2 : GridIndex
         """
-        assert cell1.z == cell2.z, "Can't calculate a grid on different scales yet"
+        if cell1.z != cell2.z:
+            raise NotImplementedError("Can't calculate a grid on different scales yet")
+
         start_x = min(cell1.x, cell2.x)
         end_x = max(cell1.x, cell2.x)
         start_y = min(cell1.y, cell2.y)

@@ -136,9 +136,10 @@ class TileMerger:
                 )
 
         img_size = start_image.size
-        assert (
-            img_size[0] == img_size[1]
-        ), f"Tiles must be quadratic. This tile, however, is rectangular: {img_size}"
+        if not (img_size[0] == img_size[1]):
+            raise ValueError(
+                f"[ERROR] Tiles must be square: {img_size[0]}x{img_size[1]}."
+            )
         tile_size = img_size[0]
         return tile_size
 

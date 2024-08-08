@@ -10,7 +10,7 @@ from mapreader import Annotator, loader
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent / "sample_files"
+    return Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
