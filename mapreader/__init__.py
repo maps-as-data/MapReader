@@ -30,6 +30,12 @@ try:
 except ImportError:
     pass
 
+try:
+    from mapreader.spot_text.maptext_runner import MapTextRunner
+except ImportError:
+    pass
+
+
 # post process
 from mapreader.process.context_post_process import ContextPostProcessor
 from mapreader.process.occlusion_analysis import OcclusionAnalyzer
