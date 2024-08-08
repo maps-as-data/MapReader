@@ -24,12 +24,14 @@ def test_pipeline(tmp_path, sample_dir):
     print(f"{sample_dir}/test_json.json")
     my_ts = SheetDownloader(
         metadata_path=f"{sample_dir}/test_json.json",
-        download_url="https://geo.nls.uk/maps/os/1inch_2nd_ed/{z}/{x}/{y}.png",
+        download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
     )
 
     my_ts.extract_wfs_id_nos()
     my_ts.get_grid_bb(14)
-    my_ts.download_map_sheets_by_wfs_ids([131, 132], path_save=f"{tmp_path}/maps")
+    my_ts.download_map_sheets_by_wfs_ids(
+        [131, 132], path_save=f"{tmp_path}/maps", force=True
+    )
 
     # Load
     my_files = loader(f"{tmp_path}/maps/*png")

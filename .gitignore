@@ -8,6 +8,7 @@ mapreader.egg-info
 conda_debug/
 docs/build/
 docs/source/api/mapreader/
+docs/source/in-depth-resources/api/mapreader/
 dist/
 .coverage
 .coverage.*

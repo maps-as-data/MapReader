@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 import shutil
 import time
+import urllib
+import urllib.request
 
 from shapely.geometry import Polygon
 
@@ -88,7 +90,9 @@ class Downloader:
             return True
         return False
 
-    def _download_map(self, grid_bb: GridBoundingBox, map_name: str | None) -> bool:
+    def _download_map(
+        self, grid_bb: GridBoundingBox, map_name: str | None, force: bool = False
+    ) -> bool:
         """
         Downloads a map contained within a grid bounding box.
 
@@ -98,12 +102,45 @@ class Downloader:
             The grid bounding box of the map
         map_name : str, optional
             Name to use when saving the map, by default None
+        force : bool, optional
+            Whether to force download, by default False
 
         Returns
         -------
         bool
             True if map was successfully downloaded, False if not.
         """
+        try:
+            # get url for single tile to estimate size
+            tile_url = self.downloader.generate_tile_url(grid_bb.lower_corner, 0)
+
+            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+            headers = {"User-Agent": user_agent}
+            request = urllib.request.Request(tile_url, None, headers)
+            response = urllib.request.urlopen(request)
+            # get size of single tile
+            size_bytes = len(response.read())
+            size_mb = size_bytes * 1e-6
+
+            # get total number of tiles
+            no_tiles = grid_bb.covered_cells
+            total_size_mb = no_tiles * size_mb
+
+            if total_size_mb > 100:
+                print(f"[WARNING] Estimated total size: {total_size_mb * 1e-3:.2f}GB.")
+                if not force:
+                    raise Warning(
+                        f"[WARNING] This will download approximately {total_size_mb * 1e-3:.2f}GB of data. Please confirm download by setting ``force=True``."
+                    )
+            else:
+                print(f"[INFO] Estimated total size: {total_size_mb:.2f}MB.")
+        except urllib.error.URLError as e:
+            print(f"[WARNING] Unable to estimate download size. {e}")
+            if not force:
+                raise Warning(
+                    "[WARNING] This could download a lot of data. Please confirm download by setting ``force=True``."
+                )
+
         if map_name is None:
             map_name = self.merger._get_output_name(grid_bb)
         self.downloader.download_tiles(grid_bb, download_in_parallel=False)
@@ -135,6 +172,7 @@ class Downloader:
         path_save: str | None = "maps",
         overwrite: bool | None = False,
         map_name: str | None = None,
+        **kwargs: dict,
     ) -> None:
         """
         Downloads a map contained within a polygon.
@@ -151,13 +189,16 @@ class Downloader:
             Whether to overwrite existing maps, by default ``False``.
         map_name : str, optional
             Name to use when saving the map, by default None
+        **kwargs : dict
+            Additional keyword arguments to pass to the `_download_map` method
         """
 
-        assert isinstance(
-            polygon, Polygon
-        ), "[ERROR] \
-Please pass polygon as shapely.geometry.Polygon object.\n\
-[HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+        if type(polygon) is not Polygon:
+            raise ValueError(
+                "[ERROR] \
+    Please pass polygon as shapely.geometry.Polygon object.\n\
+    [HINT] Use ``create_polygon_from_latlons()`` to create polygon."
+            )
 
         min_x, min_y, max_x, max_y = polygon.bounds
 
@@ -173,4 +214,4 @@ Please pass polygon as shapely.geometry.Polygon object.\n\
         if not overwrite:
             if self._check_map_exists(grid_bb, map_name):
                 return
-        self._download_map(grid_bb, map_name)
+        self._download_map(grid_bb, map_name, **kwargs)

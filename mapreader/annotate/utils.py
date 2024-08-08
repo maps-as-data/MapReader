@@ -310,7 +310,10 @@ def annotation_interface(
                     # stream=True so we don't download the whole page, only check if
                     # the page exists
                     response = requests.get(url, stream=True)
-                    assert response.status_code < 400
+                    if not response.status_code < 400:
+                        raise RuntimeError(
+                            f"URL could not get a response: {response.status_code}"
+                        )
                     print()
                     print(f"URL: {url}")
                 except:
