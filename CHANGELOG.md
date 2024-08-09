@@ -88,7 +88,114 @@ c65ff77 move common functions to base class
 ## [v1.3.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.2) (2024-05-17)
 
 <!--
-PRs: #434, #433, #431, #432, #418, #415, #414, #416, #396, #413
+PRs:
+
+    Pull request 434
+    ### Summary
+
+    Adds calculation of average across all channels for mean/std pixel stats.
+    Also makes sure image cropping is working for calc pixel stats.
+    Fixes #426
+
+    -------------------
+
+    Pull request 433
+    ### Summary
+
+    Fixes #430
+
+    -------------------
+
+    Pull request 431
+    ### Summary
+
+    Fixes #64
+
+    ### Describe your changes
+
+    Command line call now prints mapreader version
+
+    -------------------
+
+    Pull request 432
+    ### Summary
+
+    Fixes #400
+
+    ### Describe your changes
+
+    Previous code allowed you enter a new label when reviewing labels but would give you an error (even though it relabelled the patch fine). Now we give an error and only allow user to enter one of the existing labels when re-labelling/reviewing their annotations.
+
+    -------------------
+
+    Pull request 418
+    Addresses #386
+    -------------------
+
+    Pull request 415
+    ### Summary
+
+    Fixes non-geospatial README issues in #<386>
+
+    ### Describe your changes
+
+    Reformatted to standard fields per worked example, matching geospatial README.
+
+    -------------------
+
+    Pull request 414
+    ### Summary
+
+    Addresses "update geospatial README" in https://github.com/orgs/Living-with-machines/projects/7/views/1?pane=issue&itemId=59167565
+
+    Fixes part of  #<386>
+
+    ### Describe your changes
+
+    Changed README from content that is now mostly in documentation site to clear structure for list of worked examples and required files.
+
+    -------------------
+
+    Pull request 416
+    ### Summary
+
+    Fixes #389
+
+    ### Describe your changes
+
+    - updated all typos mentioned in https://github.com/openjournals/joss-reviews/issues/6434#issuecomment-2041626766
+
+    -------------------
+
+    Pull request 396
+    ### Summary
+
+    Fixes #385
+
+    ### Describe your changes
+
+    Update code and dependencies to ensure fix warnings in tests
+
+    To do:
+    - [x] Update docs re. how to run tests
+    - [x] Deal with annotator
+    - [ ] Zero division error ?
+
+    -------------------
+
+    Pull request 413
+    ### Summary
+
+    Fixes #398
+
+    ### Describe your changes
+
+    e.g. https://maps.nls.uk/view/101437802 goes over the boundary and so is registered twice in the NLS metadata but with two sets of coordinates.
+    Instead of erroring or overwriting the sheet, you will now get map_xxxx.png and map_xxxx_1.png saved and these will have separate metadata so separate coordinates.
+
+    This also adds a mock function when downloading maps and so fixes #183
+
+    -------------------
 
 282b873 Merge pull request #434 from Living-with-machines/426-calc-pixel-stats
 0a69fae update pixel stats calculation
@@ -145,7 +252,12 @@ fe370ee Merge pull request #413 from Living-with-machines/issue-398
 ## [v1.3.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.1) (2024-05-03)
 
 <!--
-PRs: #399
+PRs:
+    Pull request 399
+    ### Summary
+
+    Adding notebooks for the April/May workshop.
+
 
 3d7ab10 update tests
 dd216eb fix overwriting issue
@@ -161,7 +273,51 @@ e81c617 Merge branch 'main' into april_workshop
 ## [v1.3.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.0) (2024-04-29)
 
 <!--
-PRs: #388, 395, 384
+PRs:
+
+    Pull request 388
+    ### Summary
+
+    This PR begins the work of bringing text detection/recognition (ie. text spotting) into MapReader.
+
+    Addresses #358
+
+    ### Describe your changes
+
+    `DeepSoloRunner` is a class used for running the [DeepSolo model](https://github.com/ViTAE-Transformer/DeepSolo/tree/main) on images. This produces polygons + text.
+    `DPTextDETRRunner` is a class used for running the [DPText-DETR model](https://github.com/ymy-k/DPText-DETR) on images.  This produces just polygons.
+
+    To do:
+
+    - [x] Allow user to run on all patches in provided patch df
+    - [x] Add plotting function
+    - [x] Add docs for getting this running
+    - [x] Check licences
+    - [x] Add worked example
+    - [ ] Add polygon merging code (?)
+
+    -------------------
+
+    Pull request 395
+    ### Summary
+
+    -------------------
+
+    Pull request 384
+    ### Summary
+
+    Addresses #229
+    Fixes #364
+
+    ### Describe your changes
+
+    This PR:
+    - Updates supported python versions in MapReader from 3.8-3.11 to 3.9+
+    - Adds cartopy as required dependency vs optional as 0.22 is simpler to install
+    - Updates docs accordingly
+    - Adds testing for python 3.12
+
+    -------------------
 
 f256ae9 Merge pull request #388 from Living-with-machines/ocr
 6237341 update where to find configs and weights
@@ -221,7 +377,31 @@ f42b1c0 update installation instructions
 ## [v1.2.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.2.0) (2024-04-08)
 
 <!--
-PRs: #383, #380, #381, #382, #379
+PRs:
+
+    Pull request 383
+    Updates the requirements on [flake8](https://github.com/pycqa/flake8) to permit the latest version.
+
+    -------------------
+
+    Pull request 380
+    Updates the requirements on [pytest-cov](https://github.com/pytest-dev/pytest-cov) to permit the latest version.
+
+    -------------------
+
+    Pull request 381
+    Updates the requirements on [black](https://github.com/psf/black) to permit the latest version.
+
+    -------------------
+
+    Pull request 382
+    Updates the requirements on [torchvision](https://github.com/pytorch/vision) to permit the latest version.
+
+    -------------------
+
+    Pull request 379
+    Updates the requirements on [pytest](https://github.com/pytest-dev/pytest) to permit the latest version.
+
 
 e9d119f update docs
 5a62b69 move cartopy to required and update version
@@ -251,7 +431,101 @@ a284f4e Update pytest requirement from <8.0.0 to <9.0.0
 ## [v1.1.5](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.5) (2024-04-04)
 
 <!--
-PRs: #378, #377, #374, #373, #372, #366, #363, #362
+PRs:
+
+    Pull request 378
+    ### Summary
+
+    As per https://github.com/openjournals/joss-reviews/issues/6434 we are updating author list.
+
+    ### Describe your changes
+
+    Reorder authors
+
+    -------------------
+
+    Pull request 377
+    ### Summary
+
+    Addresses #364
+
+    ### Describe your changes
+
+    - Update supported python versions in docs
+    - Update setup.py to be 3.8+
+
+    -------------------
+
+    Pull request 374
+    ### Summary
+
+    Thanks to @DGalexander for flagging this.
+
+    This PR fixes mapreader's reproject coords functions when converting between coordinate systems.
+
+    ### Describe your changes
+
+    - coords are transformed from bounds:  (left, bottom, right, top) == (xmin, ymin, xmax, ymax)
+    - always_xy is set to True to ensure no variation between crs ordering
+
+    -------------------
+
+    Pull request 373
+    ### Summary
+
+    In v1.1.3 I removed the `square_cuts` argument when patchifying images.
+
+    In v1.1.2 or less, if you set `square_cuts=True`, when you reached an edge of an image, if your remaining 'slice' was less than the patch size you'd specified, you would move back a bit to create a square patch with some overlap with the previous patch. This essentially ensured all patches were square.
+    In v1.1.3+, I removed this in favour of padding the patches at edges. This still means you end up with square patches but if your 'slice' was less than the patch size you pad with x no. of pixels to create a square patch.
+
+    This PR re-adds the square-cuts argument to ensure bakcwards compatibility but with a deprecation warning.
+
+    ### Describe your changes
+
+    Add `_patchify_by_pixel_square()` method for the square cuts. This is just copy-paste of previous code and gets called if you set `square_cuts=True`.
+
+    -------------------
+
+    Pull request 372
+    ### Summary
+
+    This PR:
+    - updates the link to contribution guide in the README
+    - adds info about installing MapReader in development mode
+    - adds info about how to run MapReader tests
+
+    Fixes #371
+    Addresses #369
+
+    -------------------
+
+    Pull request 366
+    ### Summary
+
+    This removes the conda install instructions from the docs since it is outdated.
+    Addresses #365
+    Addresses #364
+
+    We should try to fix install asap as per #162
+
+    -------------------
+
+    Pull request 363
+    ### Summary
+
+    This allows users to specify whether to download in parallel vs sequentially.
+    Sequentially is slower but can overcome problems to do with rate limits when downloading from a tileserver.
+
+    ### Describe your changes
+
+    Feed the download_in_parallel argument up to download methods.
+
+    -------------------
+
+    Pull request 362
+
+    -------------------
+
 
 75e2824 Merge pull request #378 from Living-with-machines/JOSS_paper
 0a61a89 Merge pull request #377 from Living-with-machines/rw_docs
@@ -293,7 +567,21 @@ f106c95 Update Events.rst
 ## [v1.1.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.4) (2024-02-23)
 
 <!--
-PRs: #357
+PRs:
+    Pull request 357
+    ### Summary
+
+    Our worked examples were all slightly outdated and so some users were having trouble when running them.
+    This PR updates them to work with MapReader v1.1.4.
+
+    Fixes #355
+
+    ### Describe your changes
+
+    - Fix annotator for if you don't have urls
+    - Only return important columns
+    - Only add to parents if parents is not None
+
 
 4ae6026 Merge pull request #357 from Living-with-machines/rw_docs
 1d1ca54 Update Worked-examples.rst
@@ -312,7 +600,79 @@ ee4e92f update annotate worked examples
 ## [v1.1.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.3) (2024-02-21)
 
 <!--
-PRs: #350, 356, 354, 319, 342
+PRs:
+
+    Pull request 350
+    ### Summary
+
+    At the moment, MapReader has the option to use the context (i.e. central patch + surrounding patches) to improve the accuracy of the model. This is done with a custom model which has two branches and two separate input pipelines (one for patch only, one for context image). However, the context model code doesn't work very well.
+
+    An idea to fix/improve this is to use a single branch model but use only the context image as input. Annotations will be at the patch level so the model should hopefully learn that annotations correspond to patterns in the centre of the context image (i.e. central patch) rather than the whole image.
+
+    Addresses #17
+    Addresses #287
+
+    ### Describe your changes
+
+    - `square_cuts` argument is removed as option from `images.py` (Load subpackage). Patches at edges are now padded to create square patches so patch size is consistent across entire parent image.
+    - `annotator.py` now builds context image based on size of current patch so should work for patchify by meters
+    - `context_dataset` argument added when creating datasets in `load_annotations.py`. This calls a `create_context_datasets` method which creates a context dataset vs patch dataset.
+    - Context images in `PatchContextDataset` are now created by loading surrounding patches (as opposed to by no. of pixels either side). This is consistent with previous steps in the pipeline.
+    - `PatchContextDataset` now returns ONLY context image (before it was context image + patch image).
+    - `classifier.py` now works for context datasets and patch datasets (`context_classifier.py` is deleted as now redundant)
+    - Updated docs
+
+    -------------------
+
+    Pull request 356
+    ### Summary
+
+    Bug fix for annotations since `filter_for` argument added.
+
+    ### Describe your changes
+
+    I made it so filtering doesn't happen if no `filter_for` is given.
+
+    -------------------
+
+    Pull request 354
+    ### Summary
+
+    Update paper as per requests - https://github.com/openjournals/joss-reviews/issues/6168
+
+    Fixes #353
+
+    -------------------
+
+    Pull request 319
+    ### Summary
+
+    Since we have run the 2nd ed model on a set of 1st ed patches, we need a method of looking at the predicted labels and marking them as correct/incorrect. It would be good if we could do this using the new annotator.
+    This relates to [this issue](https://github.com/Living-with-machines/railspace/issues/1).
+
+    ### Describe your changes
+
+    This PR:
+    - Adds `filter_for` argument to the annotator class. You can now pass a dict (e.g. ``{"predicted_label":"railspace"}``) to the annotator and it will filter your patch_df for this col and value.
+
+    For annotating predictions, I guess we just have labels of "correct" "incorrect" and "unsure" and then we can annotate as normal but using this filter for each label.
+
+    Theres probably more to do - will think.
+
+    -------------------
+
+    Pull request 342
+    ### Summary
+
+    As per #339, this PR implements a post-processing script so that users can filter out false positives.
+    This works for linear features or anything where you expect multiple patches to be clustered but solo patches would be false positive.
+    It also adds a `save_predictions()` method the classifier to make sure predictions and confidence scores are saved in format expected for post-processing.
+
+    Fixes #218
+    Addresses #339
+
+    -------------------
+
 
 a429260 Merge pull request #350 from Living-with-machines/context_classifier_single
 113f3a1 better test for scramble frame
@@ -357,7 +717,108 @@ afd693d add tests
 ## [v1.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.2) (2024-02-05)
 
 <!--
-PRs: #374, 345, 338
+PRs:
+
+    Pull request 374
+    ### Summary
+
+    Thanks to @DGalexander for flagging this.
+
+    This PR fixes mapreader's reproject coords functions when converting between coordinate systems.
+
+    ### Describe your changes
+
+    - coords are transformed from bounds:  (left, bottom, right, top) == (xmin, ymin, xmax, ymax)
+    - always_xy is set to True to ensure no variation between crs ordering
+
+    -------------------
+
+    Pull request 345
+    ### Summary
+
+    Update links in docs to be relative. This means that if you are looking at old docs then clicking a link won't take you to v. latest.
+
+    Update rail_space and rail space to railspace.
+
+    Fixes #320
+
+    -------------------
+
+    Pull request 338
+    ### Summary
+
+    This PR implements changes from PRs #318, #326 and #335 and #337.
+    See specifics in these PRs and related issues.
+
+    -------------------
+
+
+    Pull request 318
+    ### Summary
+
+    At the moment, the code can output patches as geojson and geotiffs. These methods rely on coordinates being saved in the patch/parent metadata.
+
+    Problems with this come from:
+    - Coordinates are saved as a list in the patch/parent dataframes (`[minx, miny, maxx, maxy]`) so when reading from a csv, these coords are read as a string and not a python list object. This is a problem when indexing the coord list later on.
+    - In an earlier version of mapreader, the parent coordinates we calculated incorrectly. If these coords are in your parent dataframe it is not possible to recalculate using other info saved for hte parent image (i.e. the grid bounding box used for downloading)
+    - The save to geojson method uses a shapely polygon (generated from coordinates) for saving geometry instead of the coordinates. When reading from a csv, the polygon is read as a string not a polygon object.
+
+    ### Describe your changes
+
+    This PR:
+    - Adds method to apply `literal_eval` to all columns in dataframe using try/except. This fixes problems with tuples/coordinates/etc being read as strings. i.e. fixes problem with coords list.
+    - Adds method of regenerating coordinates from grid bounding boxes. i.e. to fix previously incorrect coords from bug in earlier version of MapReader.
+    - Recreates shapely polygon from string if needed
+    - Adds method for saving parent images as geotiffs. This is helpful because both parent/patch images can then be loaded into QGIS or other geospatial software and compared to a basemap to check that coords are as expected.
+
+    -------------------
+
+    Pull request 326
+    ### Summary
+
+    This PR adds tests for coordinate saving.
+    These coords have been checked by saving maps as geotiffs and comparing in QGIS against an OSM basemap.
+
+    Fixes #279
+
+    This PR should be merged after #318 as it has taken some changes from there.
+    `git merge main` before merging this PR.
+
+    ### Describe your changes
+
+    - Coords are tested for both zoom level 10 and 14.
+
+    -------------------
+
+    Pull request 335
+    Fixes #331
+
+    ### Summary
+
+    This PR changes the calculation of image shape such that the height, width and no. of channels are taken explicitly from the image not the array shape. This means that single band images get channels =1 rather than no value for channels.
+
+    ### Describe your changes
+
+    - Change how shape is calculated
+    - Update plotting to allow for single band images
+    - Updates geotiff saving to allow for single band images
+
+    -------------------
+
+    Pull request 337
+    ### Summary
+
+    Fixes #332
+    Fixes #333
+
+    ### Describe your changes
+
+    This PR:
+    - removes kwargs from the Annotator's `__init__()` method. This means that if you spell something wrong or pass an unrecognised arg you will get an error.
+    - removes error if URL not found in parent df.
+    - resets index when loading annoations, this means if your annotations df has "image_id" in col 0 then it will not error.
+
+    -------------------
 
 f31d87f Merge pull request #347 from Living-with-machines/346-annotations-order
 b52086e fix tests
@@ -400,7 +861,109 @@ b936bed change delimiter
 ## [v1.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.1) (2024-01-08)
 
 <!--
-PRs: #337, #326, #335, #318, #336, #330, #328, #316
+PRs:
+
+    Pull request 337
+    ### Summary
+
+    Fixes #332
+    Fixes #333
+
+    ### Describe your changes
+
+    This PR:
+    - removes kwargs from the Annotator's `__init__()` method. This means that if you spell something wrong or pass an unrecognised arg you will get an error.
+    - removes error if URL not found in parent df.
+    - resets index when loading annoations, this means if your annotations df has "image_id" in col 0 then it will not error.
+
+    -------------------
+
+    Pull request 326
+    ### Summary
+
+    This PR adds tests for coordinate saving.
+    These coords have been checked by saving maps as geotiffs and comparing in QGIS against an OSM basemap.
+
+    Fixes #279
+
+    This PR should be merged after #318 as it has taken some changes from there.
+    `git merge main` before merging this PR.
+
+    ### Describe your changes
+
+    - Coords are tested for both zoom level 10 and 14.
+
+    -------------------
+
+    Pull request 335
+    Fixes #331
+
+    ### Summary
+
+    This PR changes the calculation of image shape such that the height, width and no. of channels are taken explicitly from the image not the array shape. This means that single band images get channels =1 rather than no value for channels.
+
+    ### Describe your changes
+
+    - Change how shape is calculated
+    - Update plotting to allow for single band images
+    - Updates geotiff saving to allow for single band images
+
+    -------------------
+
+    Pull request 318
+    ### Summary
+
+    At the moment, the code can output patches as geojson and geotiffs. These methods rely on coordinates being saved in the patch/parent metadata.
+
+    Problems with this come from:
+    - Coordinates are saved as a list in the patch/parent dataframes (`[minx, miny, maxx, maxy]`) so when reading from a csv, these coords are read as a string and not a python list object. This is a problem when indexing the coord list later on.
+    - In an earlier version of mapreader, the parent coordinates we calculated incorrectly. If these coords are in your parent dataframe it is not possible to recalculate using other info saved for hte parent image (i.e. the grid bounding box used for downloading)
+    - The save to geojson method uses a shapely polygon (generated from coordinates) for saving geometry instead of the coordinates. When reading from a csv, the polygon is read as a string not a polygon object.
+
+    ### Describe your changes
+
+    This PR:
+    - Adds method to apply `literal_eval` to all columns in dataframe using try/except. This fixes problems with tuples/coordinates/etc being read as strings. i.e. fixes problem with coords list.
+    - Adds method of regenerating coordinates from grid bounding boxes. i.e. to fix previously incorrect coords from bug in earlier version of MapReader.
+    - Recreates shapely polygon from string if needed
+    - Adds method for saving parent images as geotiffs. This is helpful because both parent/patch images can then be loaded into QGIS or other geospatial software and compared to a basemap to check that coords are as expected.
+
+    -------------------
+
+    Pull request 336
+    Fixes links in the Classify Train/Infer pages.
+
+    -------------------
+
+    Pull request 330
+    This PR adds the codecov badge to the repo.
+    Fixes #314
+
+    Note: Other badge formats are available - see https://app.codecov.io/gh/Living-with-machines/MapReader/settings/badge for info.
+
+    -------------------
+
+    Pull request 328
+    To add codecov to the repo.
+    Addresses #314
+
+    - [ ] Add badge
+
+    -------------------
+
+    Pull request 316
+    ### Summary
+
+    This PR adds the JOSS paper and references file to the repo in a directory called `paper`.
+    It also adds a GH action which builds a draft of the paper - we should turn this off once we are done making changes!
+
+    Fixes #257
+
+    ## To do still
+
+    - [x] Check output of GH action
+    - [x] Fill in title, AHRC grant no., anything else that is currently "XXXX".
+
 
 8997b4d add missing tests
 31be1d0 Merge pull request #337 from Living-with-machines/dev_annotator
@@ -448,7 +1011,54 @@ edf22d5 minor updates + v number
 ## [v1.1.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.0) (2023-12-14)
 
 <!--
-PRs: #322, #321, #173
+PRs:
+
+    Pull request 322
+
+    ### Summary
+
+    Fixes #316 comment about Project CV being unclear (re: computer vision vs. curriculum vitae)
+
+    ### Describe your changes
+
+    Changed title in header from "Project CV" to "Project Curriculum Vitae"
+
+    -------------------
+
+    Pull request 321
+    ### Summary
+
+    Fixes @kasra-hosseini feedback in #316
+
+    ### Describe your changes
+
+    - add citation to JVC paper as reference for statement about map digitization
+    - add comment about documentation in conclusion
+
+    -------------------
+
+    Pull request 173
+    Attempting to create a new `Annotator` class for MapReader, which will provide a less buggy experience for the user who is trying to annotate their patches.
+
+    Feature requests:
+    - [X] ensure joining on existing annotations works
+    - [X] ensure not re-annotating
+    - [X] showing context
+    - [x] Add in `sortby` keyword, for sorting by a different column (existed in prior version)
+    - [x] Add a `min_mean_pixel` and `max_mean_pixel` for filtering data shown to you (existed in prior version)
+    - [x] display URL to NLS map
+    - [x] keep patch filepaths in annotations csv output
+    - [x] keep label names (either instead of or in addition to label indices) in annotations csv output.
+    - [X] margin
+    - [x] "next random patch"
+    - [ ] keyboard shortcuts
+    - [ ] batch sizing
+    - [ ] restrict to bounding box
+    - [ ] consider `load` and `dump` method/s (for, for instance LabelStudio input/output etc.)
+    - [x] Make it obvious that 'next' and 'previous' are next random patch not like moving left/right on context image
+
+    -------------------
+
 
 8eda75e Merge pull request #322 from Living-with-machines/kmcdono2-docs-fix
 8dadad2 Merge pull request #321 from Living-with-machines/paper-katie-update
@@ -466,7 +1076,109 @@ ccbf46c Merge pull request #173 from Living-with-machines/kallewesterling/issue1
 ## [v1.0.7](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.7) (2023-12-14)
 
 <!--
-PRs: #277, #317, #312, #311, #310, #309, #308, #307, #306, #305, #304, #303, #302, #301, #300, #299, #298, #297, #290
+PRs:
+
+    Pull request 277
+    `size_in_m`  variable was outside if statement and sometimes references before being set.
+
+    Tests should be added as part of #279
+
+    -------------------
+
+    Pull request 317
+    ### Summary
+
+    Fixes #313
+
+    -------------------
+
+    Pull request 312
+    Adds @andrewphilipsmith as a contributor for code, doc, mentoring, review.
+
+    -------------------
+
+    Pull request 311
+    Adds @kallewesterling as a contributor for maintenance, review, talk.
+
+    -------------------
+
+    Pull request 310
+    Adds @rwood-97 as a contributor for ideas, talk, tutorial, review, maintenance, research.
+
+    -------------------
+
+    Pull request 309
+    Adds @kasra-hosseini as a contributor for ideas, research, review, talk.
+
+    -------------------
+
+    Pull request 308
+    Adds @dcsw2 as a contributor for ideas, talk, doc, eventOrganizing.
+
+    -------------------
+
+    Pull request 307
+    Adds @kmcdono2 as a contributor for doc, eventOrganizing, projectManagement, review, talk, tutorial.
+
+    -------------------
+
+    Pull request 306
+    Adds @kasparvonbeelen as a contributor for ideas, review, research.
+
+    -------------------
+
+    Pull request 305
+    Adds @ChrisFleet as a contributor for data.
+
+    -------------------
+
+    Pull request 304
+    Adds @kallewesterling as a contributor for code, doc.
+
+    -------------------
+
+    Pull request 303
+    ### Summary
+
+    -------------------
+
+    Pull request 302
+    Adds @rwood-97 as a contributor for doc.
+
+    -------------------
+
+    Pull request 301
+    Adds @kasra-hosseini as a contributor for code.
+
+    -------------------
+
+    Pull request 300
+    Adds @dcsw2 as a contributor for research.
+
+    -------------------
+
+    Pull request 299
+    Adds @kmcdono2 as a contributor for research, ideas.
+
+    -------------------
+
+    Pull request 298
+    Adds @rwood-97 as a contributor for code.
+
+    -------------------
+
+    Pull request 297
+    ### Summary
+
+    Add contributors bot
+
+    -------------------
+
+    Pull request 290
+    ### Summary
+
+    -------------------
+
 
 9ee0cdf Merge branch 'kallewesterling/issue166' into analyse_preds
 462983d change how max_size is set in lieu of resize_to param
@@ -582,7 +1294,9 @@ ac48935 align classifier_context to classifier
 ## [v1.0.6](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.6) (2023-11-22)
 
 <!--
-PRs: #291, #280, #285, #283, #278, #276, #270, #269, #258, #256, #253, #246, #228
+PRs:
+
+
 
 c10b2c4 Merge pull request #291 from Living-with-machines/dev_download
 bc37c36 add docs
