@@ -80,17 +80,16 @@ MapReader aims to build computational skills among historians. Our extensive wor
 
 Our documentation aims to provide all information needed to set up and run MapReader. This includes:
 
-- A basic introduction to the software and its origins
-- Our project Curriculum Vitae - i.e. papers, talks, workshops, etc. delivered by the MapReader team
-- Information about MapReader events and activities, where the community can engage with MapReader
-- Guidance for users who a new to coding - including skills and tools that are useful for getting started with MapReader
-- How to install MapReader
-- Guidance on the input to MapReader - e.g. what kind of maps and which formats work well in MapReader, how to set up your files
-- A step-by-step guide to running MapReader
-- Worked examples - Jupyter notebooks demonstrating uses of MapReader for specific cases (with data, e.g. @Hosseini_mapreader_data)
-- API Reference
-- Our Code of Conduct and Inclusivity statement
-- Guidance for users wanting to contribute to MapReader and information our practices when developing MapReader
+- A basic introduction to the software and its origins;
+- Our project Curriculum Vitae - i.e. papers, talks, workshops, etc. delivered by the MapReader team;
+- Information about MapReader events and activities, where the community can engage with MapReader;
+- Guidance for users who are new to coding;
+- Guidance on the input to MapReader - e.g. what kind of maps and which formats work well in MapReader as well as how to set up your files;
+- A step-by-step guide to installing and running MapReader;
+- Worked examples - jupyter notebooks demonstrating MapReader use cases with data provided, e.g. @Hosseini_mapreader_data;
+- API Reference;
+- Code of Conduct and Inclusivity statement;
+- Guidance for users wanting to contribute to MapReader.
 
 # Conclusion
 
