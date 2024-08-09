@@ -318,7 +318,7 @@ There are a number of options for the ``model`` argument:
 
             This will also load the corresponding model file (in this case "./models/model_checkpoint_6.pkl").
 
-            If you use this option, your optimizer, scheduler and criterion will be loaded from last time.
+            If you use this option, your optimizer, scheduler and loss function will be loaded from last time.
 
     **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" or "Use in timm" instructions to load it and then pass this as the ``model`` argument.**
 
@@ -362,28 +362,28 @@ There are a number of options for the ``model`` argument:
         .. note:: You will need to install the `timm <https://huggingface.co/docs/timm/index>`__ library to do this (``pip install timm``).
 
 
-Define criterion, optimizer and scheduler
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Define loss function, optimizer and scheduler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to train/fine-tune your model, will need to define:
 
-**1.  A criterion ("loss function") - This works out how well your model is performing (the "loss").**
+**1.  A loss function - This works out how well your model is performing (the "loss").**
 
-    To add a criterion, use ``.add_criterion()``.
-    This method accepts any of "cross-entropy", "binary cross-entropy" and "mean squared error" as its ``criterion`` argument:
+    To add a loss function, use ``.add_loss_fn()``.
+    Already implemented options are "cross-entropy", "binary cross-entropy" and "mean squared error". You can pass these as strings:
 
     .. code-block:: python
 
         #EXAMPLE
-        my_classifier.add_criterion("cross-entropy")
+        my_classifier.add_loss_fn("cross-entropy")
 
-    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`__ as our criterion.
+    In this example, we have used `PyTorch's cross-entropy loss function <https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html>`__ as our loss function.
     You should change this to suit your needs.
 
     .. admonition:: Advanced usage
         :class: dropdown
 
-        If you would like to use a loss function other than those implemented, you can pass any `torch.nn loss function <https://pytorch.org/docs/stable/nn.html#loss-functions>`__ as the ``criterion`` argument.
+        If you would like to use a loss function other than those implemented, you can pass any `torch.nn loss function <https://pytorch.org/docs/stable/nn.html#loss-functions>`__ as the ``loss_fn`` argument.
 
         e.g. to use the mean absolute error as your loss function:
 
@@ -391,8 +391,8 @@ In order to train/fine-tune your model, will need to define:
 
             from torch import nn
 
-            criterion = nn.L1Loss()
-            my_classifier.add_criterion(criterion)
+            loss_fn = nn.L1Loss()
+            my_classifier.add_loss_fn(loss_fn)
 
 **2.  An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
 

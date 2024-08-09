@@ -15,7 +15,7 @@ This is all done within MapReader's ``ClassifierContainer()`` class, which is us
 - Load models (classifiers).
 - Define a labels map.
 - Load datasets and dataloaders.
-- Define a criterion (loss function), optimizer and scheduler.
+- Define a loss function, optimizer and scheduler.
 - Train and evaluate models using already annotated images.
 - Predict labels of unannotated images (model inference).
 - Visualize datasets and predictions.
