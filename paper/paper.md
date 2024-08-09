@@ -69,7 +69,7 @@ MapReader makes it possible to ask questions of thousands of digitized maps at a
 
 # Related Work
 
-MapReader is among the first end-to-end pipeline for processing historical maps and other images that was designed to lower barriers to experimenting with computer vision in answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media. 
+MapReader is among the first end-to-end pipeline for processing historical maps and other images that was designed to lower barriers to experimenting with computer vision in answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media.
 
 In addition, as part of a collaboration between Machines Reading Maps and the David Rumsey Historical Map Collection, the Knowledge Computing Lab released mapKurator [@mapkurator] - a text detection and recognition ('text spotting') pipeline for maps - which takes map image input and and returns polygons and text transcriptions in geojson format. As of 2024, MapReader also incorporates this text spotting task in addition to the patch classification task.
 
@@ -78,19 +78,19 @@ In addition, as part of a collaboration between Machines Reading Maps and the Da
 
 MapReader aims to build computational skills among historians. Our extensive work on documentation and training, including substantial updates to MapReader since @Hosseini_mapreader, reflect this commitment. As historians explore the possibilities of computational methods for novel historical research, MapReader models how computational tools can unlock difficult-to-use primary sources and how we can embrace open research practices as a way to encourage learning. We welcome contributions and requests for new documentation or tutorials.
 
-Our documentation includes:
-- About MapReader: A basic introduction to the software and its origins
-- Events: Activities where the community can engage with MapReader
-- Project Curriculum Vitae: Papers, talks, workshops, etc. delivered by the MapReader team
-- Coding Basics: Skills and tools that are useful for getting started with MapReader
-- Installation Instructions: How to install MapReader
-- Input Guidance: What kind of maps and which formats work well in MapReader
-- User Guide: Walkthrough of how to run MapReader
-- Worked Examples: Jupyter notebooks demonstrating uses of MapReader for specific cases (with data, e.g. @Hosseini_mapreader_data)
-- API Reference: Auto-generated API reference documentation
-- Code of Conduct and Inclusivity: Our approach to ethical and inclusive conduct
-- Contribution Guide: How to engage with MapReader
-- Developer's Guide: How to update the MapReader version number and upload to package managers
+Our documentation aims to provide all information needed to set up and run MapReader. This includes:
+
+- A basic introduction to the software and its origins
+- Our project Curriculum Vitae - i.e. papers, talks, workshops, etc. delivered by the MapReader team
+- Information about MapReader events and activities, where the community can engage with MapReader
+- Guidance for users who a new to coding - including skills and tools that are useful for getting started with MapReader
+- How to install MapReader
+- Guidance on the input to MapReader - e.g. what kind of maps and which formats work well in MapReader, how to set up your files
+- A step-by-step guide to running MapReader
+- Worked examples - Jupyter notebooks demonstrating uses of MapReader for specific cases (with data, e.g. @Hosseini_mapreader_data)
+- API Reference
+- Our Code of Conduct and Inclusivity statement
+- Guidance for users wanting to contribute to MapReader and information our practices when developing MapReader
 
 # Conclusion
 
