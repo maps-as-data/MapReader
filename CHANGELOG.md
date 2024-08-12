@@ -1,5 +1,12 @@
 # Change & Version Information
 
+## 0.6.0
+
+* HTTP request method `get_iiif_url` is now a class method on
+  `piffle.presentation.IIIFPresentation`, which can be extended when request
+  customization is needed
+* Manifests now supports attr-dict style access to `@id` in `seeAlso` list entries
+
 ## 0.5.1
 
 * Add explicit support and testing for python 3.12
