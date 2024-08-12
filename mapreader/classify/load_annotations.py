@@ -25,6 +25,7 @@ class AnnotationsLoader:
 
     def __init__(self):
         self.annotations = pd.DataFrame()
+        self.labels_map = {}
         self.reviewed = pd.DataFrame()
         self.patch_paths_col = None
         self.label_col = None
@@ -33,6 +34,7 @@ class AnnotationsLoader:
     def load(
         self,
         annotations: str | pd.DataFrame,
+        labels_map: dict | None = None,
         delimiter: str | None = ",",
         images_dir: str | None = None,
         remove_broken: bool | None = True,
@@ -52,6 +54,8 @@ class AnnotationsLoader:
         annotations : Union[str, pd.DataFrame]
             The annotations.
             Can either be the path to a csv file or a pandas.DataFrame.
+        labels_map : Optional[dict], optional
+            A dictionary mapping labels to indices. If not provided, labels will be mapped to indices based on the order in which they appear in the annotations dataframe. By default None.
         delimiter : Optional[str], optional
             The delimiter to use when loading the csv file as a dataframe, by default ",".
         images_dir : Optional[str], optional
@@ -132,8 +136,25 @@ class AnnotationsLoader:
 
         self.unique_labels = self.annotations[self.label_col].unique().tolist()
 
-        labels_map = {i: label for i, label in enumerate(self.unique_labels)}
-        self.labels_map = labels_map
+        # if labels_map is explicitly provided
+        if labels_map:
+            self.labels_map = dict(
+                sorted(labels_map.items())
+            )  # sort labels_map by keys
+            if not set(self.unique_labels).issubset(set(labels_map.values())):
+                raise ValueError(
+                    "[ERROR] There are label(s) in the annotations that are not in the labels map. Please check the labels_map."
+                )
+        # if inferring labels_map
+        else:
+            if append:
+                for label in self.unique_labels:
+                    if label not in self.labels_map.values():
+                        self.labels_map[len(self.labels_map)] = label
+            else:
+                # reset labels map
+                labels_map = {i: label for i, label in enumerate(self.unique_labels)}
+                self.labels_map = labels_map
 
         self.annotations["label_index"] = self.annotations[self.label_col].apply(
             self._get_label_index

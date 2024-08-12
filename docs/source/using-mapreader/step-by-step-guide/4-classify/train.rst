@@ -27,6 +27,7 @@ For example, if you have set up your directory as recommended in our :doc:`Input
     annotated_images = AnnotationsLoader()
     annotated_images.load("./annotations/railspace_#rosie#.csv")
 
+
 .. admonition:: Advanced usage
     :class: dropdown
 
@@ -43,7 +44,9 @@ To view the data loaded in from your ``csv`` as a dataframe, use:
     annotated_images.annotations
 
 You will note a ``label_index`` column has been added to your dataframe.
-This column contains a numerical reference number for each label, which is needed when training your model.
+
+This column contains a numerical reference number for each label.
+This is needed when training your model so that labels can be treated as numerical values instead of strings.
 
 To see how your labels map to their label indices, call the ``annotated_images.labels_map`` attribute:
 
@@ -52,6 +55,27 @@ To see how your labels map to their label indices, call the ``annotated_images.l
     annotated_images.labels_map
 
 .. note:: This ``labels_map`` will be needed later.
+
+By default, this ``labels_map`` is automatically generated when loading your annotations by finding unique labels in your annotations and assigning each a numerical index.
+The `0` index will be assigned to the label that appears first in the annotations, `1` to the second label and so on.
+
+.. note:: If you use the `scramble_frame` argument when loading your annotations from a file, the order of your labels will be shuffled and so the indices assigned to each label will be different each time you load your annotations.
+
+If instead, you would like to explicitly define your labels map, you can do so by passing a dictionary to the ``labels_map`` argument when loading your annotations.
+
+.. code-block:: python
+
+    #EXAMPLE
+    labels_map = {0: "no", 1: "railspace", 2: "building", 3: "railspace and building"}
+    annotated_images.load(
+        annotations="./path/to/annotations.csv",
+        labels_map=labels_map
+    )
+
+Now, calling the ``annotated_images.labels_map`` attribute should return the dictionary you passed in.
+
+.. note:: Using the ``labels_map`` argument is important if you are doing a second round of annotations and want to ensure that the labels are consistent between the two rounds!
+
 
 To view a sample of your annotated images use the ``show_sample()`` method.
 The ``label_to_show`` argument specifies which label you would like to show.
