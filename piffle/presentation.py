@@ -11,21 +11,68 @@ class IIIFException(Exception):
     """Custom exception for IIIF errors"""
 
 
-def get_iiif_url(url):
-    """Wrapper around :meth:`requests.get` to support conditionally
-    adding an auth tokens or other parameters."""
-    request_options = {}
-    # TODO: need some way of configuring hooks for e.g. setting auth tokens
-    return requests.get(url, **request_options)
+class AtDict(addict.Dict):
+    """Base attrdict class with handling for fields like @type, @id, etc"""
+
+    at_fields = ["type", "id", "context"]
+
+    def _key(self, key):
+        # convert key to @key if in the list of fields that requires it
+        if key in self.at_fields:
+            key = "@%s" % key
+        return key
+
+    def __missing__(self, key):
+        raise KeyError(self._key(key))
+
+    def __getattr__(self, key):
+        try:
+            # addict getattr just calls getitem
+            return super().__getattr__(self._key(key))
+        except KeyError:
+            # python hasattr checks for attribute error
+            # translate key error to attribute error,
+            # since in an attr dict it's kind of both
+            raise AttributeError
+
+    def __getitem__(self, key):
+        """
+        Access a value associated with a key.
+        """
+        val = super().__getitem__(self._key(key))
+
+        if key == "seeAlso" and isinstance(val, list) and isinstance(val[0], dict):
+            return [AtDict(entry) for entry in val]
+        return val
+
+    def __setitem__(self, key, value):
+        """
+        Add a key-value pair to the instance.
+        """
+        return super().__setitem__(self._key(key), value)
+
+    def __delitem__(self, key):
+        """
+        Delete a key-value pair
+        """
+        super().__delitem__(self._key(key))
 
 
-class IIIFPresentation(addict.Dict):
+class IIIFPresentation(AtDict):
     """:class:`addict.Dict` subclass for read access to IIIF Presentation
     content"""
 
     # TODO: document sample use, e.g. @ fields
 
     at_fields = ["type", "id", "context"]
+
+    @classmethod
+    def get_iiif_url(cls, url):
+        """Wrapper around :meth:`requests.get` to support conditionally
+        adding an auth tokens or other parameters."""
+        request_options = {}
+        # TODO: need some way of configuring hooks for e.g. setting auth tokens
+        return requests.get(url, **request_options)
 
     @classmethod
     def from_file(cls, path):
@@ -41,7 +88,7 @@ class IIIFPresentation(addict.Dict):
         :raises: :class:`IIIFException` if URL is not retrieved successfully,
             if the response is not JSON content, or if the JSON cannot be parsed.
         """
-        response = get_iiif_url(uri)
+        response = cls.get_iiif_url(uri)
         if response.status_code == requests.codes.ok:
             try:
                 return cls(response.json())
@@ -90,44 +137,6 @@ class IIIFPresentation(addict.Dict):
             uri = uri[: -len("/manifest")]
         # split on slashes and return the last portion
         return uri.split("/")[-1]
-
-    def __missing__(self, key):
-        raise KeyError(self._key(key))
-
-    def _key(self, key):
-        # convert key to @key if in the list of fields that requires it
-        if key in self.at_fields:
-            key = "@%s" % key
-        return key
-
-    def __getattr__(self, key):
-        try:
-            # addict getattr just calls getitem
-            return super().__getattr__(self._key(key))
-        except KeyError:
-            # python hasattr checks for attribute error
-            # translate key error to attribute error,
-            # since in an attr dict it's kind of both
-            raise AttributeError
-
-    def __getitem__(self, key):
-        """
-        Access a value associated with a key.
-        """
-        val = super().__getitem__(self._key(key))
-        return val
-
-    def __setitem__(self, key, value):
-        """
-        Add a key-value pair to the instance.
-        """
-        return super().__setitem__(self._key(key), value)
-
-    def __delitem__(self, key):
-        """
-        Delete a key-value pair
-        """
-        super().__delitem__(self._key(key))
 
     @property
     def first_label(self):
