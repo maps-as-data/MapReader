@@ -56,11 +56,6 @@ def test_file_ext_w_mixed_dir(mixed_dir):
     assert len(my_files) == 2
 
 
-def test_file_ext_w_mixed_file_paths(mixed_dir):
-    my_files = loader(f"{mixed_dir}/*", file_ext="tif")
-    assert len(my_files) == 2
-
-
 def test_mixed_file_path(mixed_dir):
     my_files = loader(f"{mixed_dir}/*tif")
     assert len(my_files) == 2
@@ -89,11 +84,11 @@ def test_unmixed_file_path(tiff_dir):
 
 
 def test_multiple_file_types_errors(mixed_dir):
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         loader(mixed_dir)
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         loader(f"{mixed_dir}/")
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         loader(f"{mixed_dir}/*")
 
 
@@ -101,9 +96,12 @@ def test_no_files_found_errors(tiff_dir):
     with pytest.raises(ValueError, match="No files found"):
         loader(tiff_dir, file_ext="png")
     with pytest.raises(ValueError, match="No files found"):
-        loader(f"{tiff_dir}/*tif", file_ext="png")
-    with pytest.raises(ValueError, match="No files found"):
         loader(f"{tiff_dir}/*png")
+
+
+def test_ignore_file_ext(tiff_dir):
+    maps = loader(f"{tiff_dir}/*tif", file_ext="png")
+    assert len(maps) == 2
 
 
 def test_empty_dir_errors(empty_dir):

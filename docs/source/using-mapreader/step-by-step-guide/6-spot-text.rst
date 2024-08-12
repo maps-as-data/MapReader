@@ -130,7 +130,7 @@ For the DPTextDETRRunner, use:
         weights_file = "./art_final.pth",
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use:
+or, if you have your `patch_df` and `parent_df` already loaded as pandas DataFrames or geopandas GeoDataFrames, you can use:
 
 .. code-block:: python
 
@@ -156,7 +156,7 @@ For the DeepSoloRunner, use:
         weights_file = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth"
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+or, if you have your `patch_df` and `parent_df` already loaded as pandas DataFrames or geopandas GeoDataFrames, you can use these directly as shown for the DPTextDETRRunner (above).
 
 For the MapTextPipeline, use:
 
@@ -172,7 +172,7 @@ For the MapTextPipeline, use:
         weights_file = "./rumsey-finetune.pth"
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+or, if you have your `patch_df` and `parent_df` already loaded as pandas DataFrames or geopandas GeoDataFrames, you can use these directly as shown for the DPTextDETRRunner (above).
 
 .. note:: You'll need to adjust the paths to the config and weights files to match your own set-up!
 

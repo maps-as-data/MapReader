@@ -6,6 +6,7 @@ except ImportError:
     pass
 
 import os
+import pathlib
 import random
 import re
 import warnings
@@ -22,12 +23,16 @@ import rasterio
 from PIL import Image, ImageOps, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
-from shapely import wkt
 from shapely.geometry import Polygon, box
 from tqdm.auto import tqdm
 
 from mapreader.download.data_structures import GridBoundingBox, GridIndex
 from mapreader.download.downloader_utils import get_polygon_from_grid_bb
+from mapreader.utils.load_frames import (
+    load_from_csv,
+    load_from_excel,
+    load_from_geojson,
+)
 
 os.environ[
     "USE_PYGEOS"
@@ -45,15 +50,15 @@ class MapImages:
     Parameters
     ----------
     path_images : str or None, optional
-        Path to the directory containing images (accepts wildcards). By
-        default, ``False``
-    file_ext : str or False, optional
+        Path to the directory containing images (accepts wildcards).
+        By default, ``None`` (no images will be loaded).
+    file_ext : str or None, optional
         The file extension of the image files to be loaded, ignored if file types are specified in ``path_images`` (e.g. with ``"./path/to/dir/*png"``).
-        By default ``False``.
+        By default ``None``.
     tree_level : str, optional
         Level of the image hierarchy to construct. The value can be
         ``"parent"`` (default) and ``"patch"``.
-    parent_path : str, optional
+    parent_path : str or None, optional
         Path to parent images (if applicable), by default ``None``.
     **kwargs : dict, optional
         Keyword arguments to pass to the
@@ -72,8 +77,8 @@ class MapImages:
     def __init__(
         self,
         path_images: str | None = None,
-        file_ext: str | bool | None = False,
-        tree_level: str | None = "parent",
+        file_ext: str | None = None,
+        tree_level: str = "parent",
         parent_path: str | None = None,
         **kwargs: dict,
     ):
@@ -90,6 +95,7 @@ class MapImages:
         self.images = {"parent": {}, "patch": {}}
         self.parents = self.images["parent"]
         self.patches = self.images["patch"]
+        self.georeferenced = False
 
         for image_path in tqdm(self.path_images):
             self._images_constructor(
@@ -99,28 +105,61 @@ class MapImages:
                 **kwargs,
             )
 
+        self.check_georeferencing()
+
+    def check_georeferencing(self):
+        if all(
+            "coordinates" in self.parents[parent_id].keys()
+            for parent_id in self.list_parents()
+        ):
+            self.georeferenced = True
+            self.add_patch_coords()
+
     @staticmethod
-    def _resolve_file_path(file_path, file_ext=None):
-        if file_ext:
-            if os.path.isdir(file_path):
-                files = glob(os.path.abspath(f"{file_path}/*.{file_ext}"))
-            else:  # if not dir
-                files = glob(os.path.abspath(file_path))
-                files = [file for file in files if file.split(".")[-1] == file_ext]
+    def _resolve_file_path(file_path: str, file_ext: str | None = None):
+        """Resolves file path to list of files.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the file(s) or directory containing files. Can contain wildcards.
+        file_ext : str or None, optional
+            The file extension of the images to be loaded, by default ``None``. Ignored if file types are specified in ``file_path`` (e.g. with ``"./path/to/dir/*png"``).
+
+        Returns
+        -------
+        list
+            List of file paths as strings.
+
+        Notes
+        -----
+        Valid inputs for file path are:
+
+        - Path to a directory containing images (e.g. ``"./path/to/dir"``).
+        - Path to a specific image file (e.g. ``"./path/to/image.png"``).
+        - Path to multiple image files (e.g. ``"./path/to/dir/*png"``).
+
+        If a directory is provided, the method will search for files with the specified extension (if provided) in the directory. Else it will search for all files in the directory.
+        """
+        if pathlib.Path(file_path).is_dir():
+            if file_ext:
+                files = [*pathlib.Path(file_path).glob(f"*.{file_ext}")]
+            else:
+                files = [*pathlib.Path(file_path).glob("*.*")]
+            files = [str(file) for file in files]  # convert to string
 
         else:
-            if os.path.isdir(file_path):
-                files = glob(os.path.abspath(f"{file_path}/*.*"))
-            else:
-                files = glob(os.path.abspath(file_path))
+            files = glob(
+                file_path
+            )  # if not a directory, assume it's a file path or contains wildcards
 
-        # check for issues
         if len(files) == 0:
             raise ValueError("[ERROR] No files found!")
-        test_ext = files[0].split(".")[-1]
-        if not all(file.split(".")[-1] == test_ext for file in files):
+
+        valid_file_exts = r"png$|jpg$|jpeg$|tif$|tiff$"
+        if any(re.search(valid_file_exts, file) is None for file in files):
             raise ValueError(
-                "[ERROR] Directory with multiple file types detected - please specify file extension (`patch_file_ext`) or, pass path to specific file types (wildcards accepted)."
+                "[ERROR] Non-image file types detected - please specify a file extension. Supported file types include: png, jpg, jpeg, tif, tiff."
             )
 
         return files
@@ -282,10 +321,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def add_metadata(
         self,
-        metadata: str | pd.DataFrame,
+        metadata: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
         index_col: int | str | None = 0,
         delimiter: str | None = ",",
-        columns: list[str] | None = None,
+        usecols: list[str] | None = None,
         tree_level: str | None = "parent",
         ignore_mismatch: bool | None = False,
     ) -> None:
@@ -294,21 +333,21 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        metadata : str or pandas.DataFrame
-            Path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame that contains the metadata information.
+        metadata : str or pathlib.Path or pandas.DataFrame or geopandas.GeoDataFrame
+            Path to a CSV/TSV/etc, Excel or JSON/GeoJSON file or a pandas DataFrame or geopandas GeoDataFrame.
         index_col : int or str, optional
             Column to use as the index when reading the file and converting into a panda.DataFrame.
             Accepts column indices or column names.
             By default ``0`` (first column).
 
-            Only used if a file path is provided as the ``metadata`` parameter.
-            Ignored if ``columns`` parameter is passed.
+            Only used if a CSV/TSV file path is provided as the ``metadata`` parameter.
+            Ignored if ``usecols`` parameter is passed.
         delimiter : str, optional
             Delimiter used in the ``csv`` file, by default ``","``.
 
             Only used if a ``csv`` file path is provided as
             the ``metadata`` parameter.
-        columns : list, optional
+        usecols : list, optional
             List of columns indices or names to add to MapImages.
             If ``None`` is passed, all columns will be used.
             By default ``None``.
@@ -322,7 +361,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         Raises
         ------
         ValueError
-            If metadata is not a pandas DataFrame or a ``csv``, ``xls`` or ``xlsx`` file path.
+            If metadata is not a valid file path, pandas DataFrame or geopandas GeoDataFrame.
 
             If 'name' or 'image_id' is not one of the columns in the metadata.
 
@@ -341,50 +380,54 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         metadata file/dataframe.
         """
 
-        if isinstance(metadata, pd.DataFrame):
-            if columns:
-                metadata_df = metadata[columns].copy()
+        if isinstance(metadata, (pd.DataFrame, geopd.GeoDataFrame)):
+            if usecols:
+                metadata_df = metadata[usecols].copy(deep=True)
             else:
-                metadata_df = metadata.copy()
-                columns = list(metadata_df.columns)
+                metadata_df = metadata.copy(deep=True)
 
-        else:  # if not df
-            if os.path.isfile(metadata):
-                if metadata.endswith(("xls", "xlsx")):
-                    if columns:
-                        metadata_df = pd.read_excel(
-                            metadata,
-                            usecols=columns,
-                        )
-                    else:
-                        metadata_df = pd.read_excel(
-                            metadata,
-                            index_col=index_col,
-                        )
-                        columns = list(metadata_df.columns)
+        elif isinstance(metadata, (str, pathlib.Path)):
+            if re.search(r"\.xls.*$", metadata):  # xls or xlsx
+                if usecols:
+                    metadata_df = load_from_excel(
+                        metadata,
+                        usecols=usecols,
+                    )
+                else:
+                    metadata_df = load_from_excel(
+                        metadata,
+                        index_col=index_col,
+                    )
 
-                elif metadata.endswith("sv"):  # csv, tsv, etc
-                    if columns:
-                        metadata_df = pd.read_csv(
-                            metadata, usecols=columns, delimiter=delimiter
-                        )
-                    else:
-                        metadata_df = pd.read_csv(
-                            metadata, index_col=index_col, delimiter=delimiter
-                        )
-                        columns = list(metadata_df.columns)
+            elif re.search(r"\..?sv$", metadata):  # csv, tsv, etc
+                print("[INFO] Loading metadata from CSV/TSV/etc file.", flush=True)
+                if usecols:
+                    metadata_df = load_from_csv(
+                        metadata, usecols=usecols, delimiter=delimiter
+                    )
+                else:
+                    metadata_df = load_from_csv(
+                        metadata, index_col=index_col, delimiter=delimiter
+                    )
+
+            elif re.search(r"\..?json$", metadata):  # json or geojson
+                metadata_df = load_from_geojson(metadata)
 
             else:
                 raise ValueError(
-                    "[ERROR] ``metadata`` should either be the path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame."  # noqa
+                    "[ERROR] Metadata should be a CSV/TSV/etc, Excel or JSON/GeoJSON file."
                 )
 
-        # identify image_id column
-        # what to do if "name" or "image_id" are index col?
+        else:  # if not a string, pathlib.Path, pd.DataFrame or geopd.GeoDataFrame
+            raise ValueError(
+                "[ERROR] ``metadata`` should either be the path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame or a geopandas GeoDataFrame."  # noqa
+            )
+
+        # if index_col is "name" or "image_id", add this as a column too
         if metadata_df.index.name in ["name", "image_id"]:
             metadata_df[metadata_df.index.name] = metadata_df.index
-            columns = list(metadata_df.columns)
 
+        columns = metadata_df.columns
         if "name" in columns:
             image_id_col = "name"
             if "image_id" in columns:
@@ -415,8 +458,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if not ignore_mismatch:
             if len(missing_metadata) != 0 and len(extra_metadata) != 0:
                 raise ValueError(
-                    f"[ERROR] Metadata is missing information for: {[*missing_metadata]}. \n\
-[ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}"
+                    f"""
+                    [ERROR] Metadata is missing information for: {[*missing_metadata]}.
+                    [ERROR] Metadata contains information about non-existent images: {[*extra_metadata]}
+                    """
                 )
             elif len(missing_metadata) != 0:
                 raise ValueError(
@@ -437,6 +482,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         self.images[tree_level][key][column] = literal_eval(item)
                     except:
                         self.images[tree_level][key][column] = item
+
+        if tree_level == "parent":
+            self.check_georeferencing()
 
     def show_sample(
         self,
@@ -534,12 +582,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         for parent_id in parent_list:
             if "grid_bb" not in self.parents[parent_id].keys():
-                print(
-                    f"[WARNING] No grid bounding box found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+                raise ValueError(
+                    f"[ERROR] No grid bounding box found for {parent_id}. Suggestion: run `add_metadata` or `add_geo_info`."
                 )
-                continue
 
             self._add_coords_from_grid_bb_id(image_id=parent_id, verbose=verbose)
+            self.georeferenced = True
+            self.add_patch_coords()
 
     def add_coord_increments(self, verbose: bool | None = False) -> None:
         """
@@ -568,10 +617,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         for parent_id in parent_list:
             if "coordinates" not in self.parents[parent_id].keys():
-                print(
-                    f"[WARNING] No coordinates found for {parent_id}. Suggestion: run add_metadata or add_geo_info."  # noqa
+                raise ValueError(
+                    f"[ERROR] No coordinates found for {parent_id}. Suggestion: run `add_metadata` or `add_geo_info`."  # noqa
                 )
-                continue
 
             self._add_coord_increments_id(image_id=parent_id, verbose=verbose)
 
@@ -633,27 +681,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         image_ids = list(self.images[tree_level].keys())
 
-        already_checked_parent_ids = (
-            []
-        )  # for if tree_level is patch, only print error message once for each parent image
         for image_id in image_ids:
             if tree_level == "parent":
                 if "coordinates" not in self.parents[image_id].keys():
-                    print(
-                        f"[WARNING] 'coordinates' could not be found in {image_id}. Suggestion: run add_metadata or add_geo_info"  # noqa
+                    raise ValueError(
+                        f"[ERROR] 'coordinates' could not be found in {image_id}. Suggestion: run `add_metadata` or `add_geo_info`"  # noqa
                     )
-                    continue
 
             if tree_level == "patch":
                 parent_id = self.patches[image_id]["parent_id"]
 
                 if "coordinates" not in self.parents[parent_id].keys():
-                    if parent_id not in already_checked_parent_ids:
-                        print(
-                            f"[WARNING] 'coordinates' could not be found in {parent_id} so center coordinates cannot be calculated for it's patches. Suggestion: run add_metadata or add_geo_info."  # noqa
-                        )
-                        already_checked_parent_ids.append(parent_id)
-                    continue
+                    raise ValueError(
+                        f"[ERROR] 'coordinates' could not be found in {parent_id} so center coordinates cannot be calculated for it's patches. Suggestion: run `add_metadata` or `add_geo_info`."  # noqa
+                    )
 
             self._add_center_coord_id(image_id=image_id, verbose=verbose)
 
@@ -1449,7 +1490,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Convert the :class:`~.load.images.MapImages` instance's ``images``
-        dictionary into pandas DataFrames for easy manipulation.
+        dictionary into pandas DataFrames (or geopandas GeoDataFrames if geo-referenced) for easy manipulation.
 
         Parameters
         ----------
@@ -1458,22 +1499,57 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Whether to save the dataframes as files. By default ``False``.
         save_format : str, optional
             If ``save = True``, the file format to use when saving the dataframes.
-            Options of csv ("csv") or excel ("excel" or "xlsx").
+            Options of csv ("csv"), excel ("excel" or "xlsx") or geojson ("geojson").
             By default, "csv".
         delimiter : str, optional
             The delimiter to use when saving the dataframe. By default ``","``.
 
         Returns
         -------
-        tuple of two pandas DataFrames
-            The method returns a tuple of two DataFrames: One for the
+        tuple of two pandas DataFrames or geopandas GeoDataFrames
+            The method returns a tuple of two DataFrames/GeoDataFrames: One for the
             ``parent`` images and one for the ``patch`` images.
         """
         parent_df = pd.DataFrame.from_dict(self.parents, orient="index")
         patch_df = pd.DataFrame.from_dict(self.patches, orient="index")
 
+        # set index name
         parent_df.index.set_names("image_id", inplace=True)
         patch_df.index.set_names("image_id", inplace=True)
+
+        # convert to GeoDataFrames if coordinates are present
+        if self.georeferenced:
+            parent_geos = parent_df["coordinates"].apply(
+                lambda x: Polygon.from_bounds(*x)
+            )
+            patch_geos = patch_df["coordinates"].apply(
+                lambda x: Polygon.from_bounds(*x)
+            )
+
+            # convert to GeoDataFrames
+            if "crs" in parent_df.columns:
+                parent_df = geopd.GeoDataFrame(
+                    parent_df, geometry=parent_geos, crs=parent_df["crs"].unique()[0]
+                )
+            else:
+                print(
+                    "[WARNING] No CRS found for parent images. Setting CRS to EPSG:4326."
+                )  ## TODO: Logging!
+                parent_df = geopd.GeoDataFrame(
+                    parent_df, geometry=parent_geos, crs="EPSG:4326"
+                )
+
+            if "crs" in patch_df.columns:
+                patch_df = geopd.GeoDataFrame(
+                    patch_df, geometry=patch_geos, crs=patch_df["crs"].unique()[0]
+                )
+            else:
+                print(
+                    "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
+                )  ## TODO: Logging!
+                patch_df = geopd.GeoDataFrame(
+                    patch_df, geometry=patch_geos, crs="EPSG:4326"
+                )
 
         if save:
             if save_format == "csv":
@@ -1486,10 +1562,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 print('[INFO] Saved parent dataframe as "parent_df.xlsx"')
                 patch_df.to_excel("patch_df.xlsx")
                 print('[INFO] Saved patch dataframe as "patch_df.xslx"')
+            # save as geojson (only if georeferenced)
+            elif save_format == "geojson":
+                if not self.georeferenced:
+                    raise ValueError(
+                        "[ERROR] Cannot save as GeoJSON as no coordinate information found."
+                    )
+                parent_df.to_file("parent_df.geojson", driver="GeoJSON")
+                print('[INFO] Saved parent dataframe as "parent_df.geojson"')
+                patch_df.to_file("patch_df.geojson", driver="GeoJSON")
+                print('[INFO] Saved patch dataframe as "patch_df.geojson"')
 
             else:
                 raise ValueError(
-                    f'[ERROR] ``save_format`` should be one of "csv", "excel" or "xlsx". Not {save_format}.'
+                    f'[ERROR] ``save_format`` should be one of "csv", "excel" or "xlsx" or "geojson". Not {save_format}.'
                 )
 
         return parent_df, patch_df
@@ -1852,8 +1938,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
     def load_patches(
         self,
         patch_paths: str,
-        patch_file_ext: str | bool | None = False,
         parent_paths: str | bool | None = False,
+        patch_file_ext: str | bool | None = False,
         parent_file_ext: str | bool | None = False,
         add_geo_info: bool | None = False,
         clear_images: bool | None = False,
@@ -1868,14 +1954,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             The file path of the patches to be loaded.
 
             *Note: The ``patch_paths`` parameter accepts wildcards.*
-        patch_file_ext : str or bool, optional
-            The file extension of the patches to be loaded, ignored if file extensions are specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
-            By default ``False``.
         parent_paths : str or bool, optional
             The file path of the parent images to be loaded. If set to
             ``False``, no parents are loaded. Default is ``False``.
 
             *Note: The ``parent_paths`` parameter accepts wildcards.*
+        patch_file_ext : str or bool, optional
+            The file extension of the patches to be loaded, ignored if file extensions are specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
+            By default ``False``.
         parent_file_ext : str or bool, optional
             The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
             By default ``False``.
@@ -1890,12 +1976,14 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
+        self.georeferenced = False  # reset georeferenced status
+
         patch_files = self._resolve_file_path(patch_paths, patch_file_ext)
 
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
-            self.parents = {}  # are these needed?
-            self.patches = {}  # are these needed?
+            self.parents = {}
+            self.patches = {}
 
         if parent_paths:
             # Add parents
@@ -1933,6 +2021,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             # Add patches to the parent
             self._add_patch_to_parent(patch_id)
+
+        self.check_georeferencing()
 
     @staticmethod
     def detect_parent_id_from_path(
@@ -2024,6 +2114,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
+        self.georeferenced = False  # reset georeferenced status
 
         if parent_paths:
             files = self._resolve_file_path(parent_paths, parent_file_ext)
@@ -2046,8 +2137,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self.parents[parent_id]["image_path"] = (
                     os.path.abspath(file) if os.path.isfile(file) else None
                 )
-                if add_geo_info:
-                    self.add_geo_info()
 
         elif parent_ids:
             if not isinstance(parent_ids, list):
@@ -2064,10 +2153,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 "[ERROR] Please pass one of ``parent_paths`` or ``parent_ids``."
             )
 
+        if add_geo_info:
+            self.add_geo_info()
+
+        self.check_georeferencing()
+
     def load_df(
         self,
-        parent_df: pd.DataFrame | None = None,
-        patch_df: pd.DataFrame | None = None,
+        parent_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
+        patch_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
         clear_images: bool | None = True,
     ) -> None:
         """
@@ -2076,10 +2170,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        parent_df : pandas.DataFrame, optional
+        parent_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
             DataFrame containing parents or path to parents, by default
             ``None``.
-        patch_df : pandas.DataFrame, optional
+        patch_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
             DataFrame containing patches, by default ``None``.
         clear_images : bool, optional
             If ``True``, clear images before reading the dataframes, by
@@ -2093,23 +2187,25 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
 
-        if isinstance(parent_df, pd.DataFrame):
+        if isinstance(parent_df, (pd.DataFrame, geopd.GeoDataFrame)):
             self.parents.update(parent_df.to_dict(orient="index"))
 
-        if isinstance(patch_df, pd.DataFrame):
+        if isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
             self.patches.update(patch_df.to_dict(orient="index"))
 
         for patch_id in self.list_patches():
             self._add_patch_to_parent(patch_id)
 
+        self.check_georeferencing()
+
     def load_csv(
         self,
-        parent_path: str | None = None,
-        patch_path: str | None = None,
-        clear_images: bool | None = False,
-        index_col_patch: int | None = 0,
-        index_col_parent: int | None = 0,
-        delimiter: str | None = ",",
+        parent_path: str | pathlib.Path,
+        patch_path: str | pathlib.Path,
+        clear_images: bool = False,
+        index_col_patch: int | str | None = 0,
+        index_col_parent: int | str | None = 0,
+        delimiter: str = ",",
     ) -> None:
         """
         Load CSV files containing information about parent and patches,
@@ -2118,16 +2214,16 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        parent_path : str, optional
+        parent_path : str or pathlib.Path
             Path to the CSV file containing parent image information.
-        patch_path : str, optional
+        patch_path : str or pathlib.Path
             Path to the CSV file containing patch information.
         clear_images : bool, optional
             If True, clear all previously loaded image information before
             loading new information. Default is ``False``.
-        index_col_patch : int, optional
+        index_col_patch : int or str or None, optional
             Column to set as index for the patch DataFrame, by default ``0``.
-        index_col_parent : int, optional
+        index_col_parent : int or str or None, optional
             Column to set as index for the parent DataFrame, by default ``0``.
         delimiter : str, optional
             The delimiter to use when reading the dataframe. By default ``","``.
@@ -2138,23 +2234,25 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
+            self.parents = {}
+            self.patches = {}
+            self.georeferenced = False
 
-        if not isinstance(parent_path, str):
-            raise ValueError("[ERROR] Please pass ``parent_path`` as string.")
-        if not isinstance(patch_path, str):
-            raise ValueError("[ERROR] Please pass ``patch_path`` as string.")
-
-        if os.path.isfile(parent_path):
-            parent_df = pd.read_csv(
-                parent_path, index_col=index_col_parent, sep=delimiter
+        if not isinstance(parent_path, (str | pathlib.Path)):
+            raise ValueError(
+                "[ERROR] Please pass ``parent_path`` as string or pathlib.Path."
             )
-        else:
-            raise ValueError(f"[ERROR] {parent_path} cannot be found.")
+        if not isinstance(patch_path, (str, pathlib.Path)):
+            raise ValueError(
+                "[ERROR] Please pass ``patch_path`` as string or pathlib.Path."
+            )
 
-        if os.path.isfile(patch_path):
-            patch_df = pd.read_csv(patch_path, index_col=index_col_patch, sep=delimiter)
-        else:
-            raise ValueError(f"[ERROR] {patch_path} cannot be found.")
+        parent_df = load_from_csv(
+            parent_path, index_col=index_col_parent, delimiter=delimiter
+        )
+        patch_df = load_from_csv(
+            patch_path, index_col=index_col_patch, delimiter=delimiter
+        )
 
         self.load_df(parent_df=parent_df, patch_df=patch_df, clear_images=clear_images)
 
@@ -2230,7 +2328,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         # Check whether coordinates are present
         if isinstance(tiff_src.crs, type(None)):
             self._print_if_verbose(
-                f"No coordinates found in {image_id}. Try add_metadata instead.",
+                f"No coordinates found in {image_id}. Try `add_metadata` instead.",
                 verbose,
             )  # noqa
             return
@@ -2531,20 +2629,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         _, patch_df = self.convert_images()
 
-        if "polygon" not in patch_df.columns:
-            self.add_patch_polygons()
-            _, patch_df = self.convert_images()
-
-        patch_df["polygon"] = patch_df["polygon"].apply(
-            lambda x: x if isinstance(x, Polygon) else wkt.loads(x)
-        )
-
         if not crs:
-            if "crs" in patch_df.columns:
-                if len(patch_df["crs"].unique()) == 1:
-                    crs = patch_df["crs"].unique()[0]
-            else:
-                crs = "EPSG:4326"
+            crs = patch_df.crs
 
         if "image_id" in patch_df.columns:
             patch_df.drop(columns=["image_id"], inplace=True)
@@ -2557,136 +2643,4 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             if isinstance(patch_df[col][0], tuple):
                 patch_df[col] = patch_df[col].apply(str)
 
-        geo_patch_df = geopd.GeoDataFrame(patch_df, geometry="polygon", crs=crs)
-        geo_patch_df.to_file(geojson_fname, driver="GeoJSON")
-
-    '''
-    def readPatches(self,
-                  patch_paths,
-                  parent_paths,
-                  metadata=None,
-                  metadata_fmt="dataframe",
-                  metadata_cols2add=[],
-                  metadata_index_column="image_id",
-                  clear_images=False):
-        """read patches from files (patch_paths) and add parents if
-           parent_paths is provided
-            Arguments:
-            patch_paths {str, wildcard accepted} -- path to patches
-            parent_paths {False or str, wildcard accepted} -- path to parents
-            Keyword Arguments:
-            clear_images {bool} -- clear images variable before reading
-                    patches (default: {False})
-        """
-        patch_paths = glob(os.path.abspath(patch_paths))
-
-        if clear_images:
-            self.images = {}
-            self.parents = {}
-            self.patches = {}
-            # XXX check
-        if not isinstance(metadata, type(None)):
-            include_metadata = True
-            if metadata_fmt in ["dataframe"]:
-                metadata_df = metadata
-            elif metadata_fmt.lower() in ["csv"]:
-                try:
-                    metadata_df = pd.read_csv(metadata)
-                except:
-                    print(f"[WARNING] could not find metadata file: {metadata}")  # noqa
-            else:
-                print(f"format cannot be recognized: {metadata_fmt}")
-                include_metadata = False
-            if include_metadata:
-                metadata_df['rd_index_id'] = metadata_df[metadata_index_column].apply(lambda x: os.path.basename(x))
-        else:
-            include_metadata = False
-            for tpath in patch_paths:
-            tpath = os.path.abspath(tpath)
-            if not os.path.isfile(tpath):
-                raise ValueError(f"patch_paths should point to actual files. Current patch_paths: {patch_paths}")
-            # patch ID is set to the basename
-            patch_id = os.path.basename(tpath)
-            # XXXX
-            if include_metadata and (not patch_id in list(metadata['rd_index_id'])):
-                continue
-            # Parent ID and border can be detected using patch_id
-            parent_id = self.detect_parent_id_from_path(patch_id)
-            min_x, min_y, max_x, max_y = self.detect_border_from_path(patch_id)
-
-            # Add patch
-            if not self.patches.get(patch_id, False):
-                self.patches[patch_id] = {}
-            self.patches[patch_id]["parent_id"] = parent_id
-            self.patches[patch_id]["image_path"] = tpath
-            self.patches[patch_id]["min_x"] = min_x
-            self.patches[patch_id]["min_y"] = min_y
-            self.patches[patch_id]["max_x"] = max_x
-            self.patches[patch_id]["max_y"] = max_y
-
-        # XXX check
-        if include_metadata:
-            # metadata_cols = set(metadata_df.columns) - set(['rd_index_id'])
-            for one_row in metadata_df.iterrows():
-                for one_col in list(metadata_cols2add):
-                    self.patches[one_row[1]['rd_index_id']][one_col] = one_row[1][one_col]
-
-        if parent_paths:
-            # Add parents
-            self.readParents(parent_paths=parent_paths)
-            # Add patches to the parent
-            self._add_patch_to_parent()
-
-    def process(self, tree_level="parent", update_paths=True,
-                save_preproc_dir="./test_preproc"):
-        """Process images using process.py module
-
-        Args:
-            tree_level (str, optional): "parent" or "patch" paths will be used. Defaults to "parent".
-            update_paths (bool, optional): XXX. Defaults to True.
-            save_preproc_dir (str, optional): Path to store preprocessed images. Defaults to "./test_preproc".
-        """
-            from mapreader import process
-        # Collect paths and store them self.process_paths
-        self.getProcessPaths(tree_level=tree_level)
-
-        saved_paths = process.preprocess_all(self.process_paths,
-                                             save_preproc_dir=save_preproc_dir)
-        if update_paths:
-            self.readParents(saved_paths, update=True)
-
-    def getProcessPaths(self, tree_level="parent"):
-        """Create a list of paths to be processed
-
-        Args:
-            tree_level (str, optional): "parent" or "patch" paths will be used. Defaults to "parent".
-        """
-        process_paths = []
-        for one_img in self.images[tree_level].keys():
-            process_paths.append(self.images[tree_level][one_img]["image_path"])
-        self.process_paths = process_paths
-
-    def prepare4inference(self, fmt="dataframe"):
-        """Convert images to the specified format (fmt)
-            Keyword Arguments:
-            fmt {str} -- convert images variable to this format (default: {"dataframe"})
-        """
-        if fmt in ["pandas", "dataframe"]:
-            patches = pd.DataFrame.from_dict(self.patches, orient="index")
-            patches.reset_index(inplace=True)
-            if len(patches) > 0:
-                patches.rename(columns={"image_path": "image_id"}, inplace=True)
-                patches.drop(columns=["index", "parent_id"], inplace=True)
-                patches["label"] = -1
-
-            parents = pd.DataFrame.from_dict(self.parents, orient="index")
-            parents.reset_index(inplace=True)
-            if len(parents) > 0:
-                parents.rename(columns={"image_path": "image_id"}, inplace=True)
-                parents.drop(columns=["index", "parent_id"], inplace=True)
-                parents["label"] = -1
-
-            return parents, patches
-        else:
-            raise ValueError(f"Format {fmt} is not supported!")
-    '''
+        patch_df.to_file(geojson_fname, driver="GeoJSON")

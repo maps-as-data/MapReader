@@ -164,7 +164,7 @@ def test_create_dataloaders_no_sampler(load_annots):
 
 def test_load_fake_csv_errors():
     annots = AnnotationsLoader()
-    with pytest.raises(ValueError, match="cannot be found"):
+    with pytest.raises(FileNotFoundError):
         annots.load("a_fake_file.csv")
 
 

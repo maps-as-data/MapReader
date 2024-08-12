@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import os
+import pathlib
+import re
 from decimal import Decimal
 from typing import Callable
 
+import geopandas as geopd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -13,6 +16,8 @@ from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch.utils.data import DataLoader, Sampler, WeightedRandomSampler
 from torchvision.transforms import Compose
+
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 from .datasets import PatchContextDataset, PatchDataset
 
@@ -32,53 +37,53 @@ class AnnotationsLoader:
 
     def load(
         self,
-        annotations: str | pd.DataFrame,
-        delimiter: str | None = ",",
+        annotations: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
+        delimiter: str = ",",
         images_dir: str | None = None,
-        remove_broken: bool | None = True,
-        ignore_broken: bool | None = False,
+        remove_broken: bool = True,
+        ignore_broken: bool = False,
         patch_paths_col: str | None = "image_path",
         label_col: str | None = "label",
-        append: bool | None = True,
-        scramble_frame: bool | None = False,
-        reset_index: bool | None = False,
+        append: bool = True,
+        scramble_frame: bool = False,
+        reset_index: bool = False,
     ):
         """
-        Loads annotations from a csv file or dataframe and can be used to set
-        the ``patch_paths_col`` and ``label_col`` attributes.
+        Loads annotations from a CSV/TSV/geojson file, a pandas DataFrame or a geopandas GeoDataFrame.
+        Sets the ``patch_paths_col`` and ``label_col`` attributes.
 
         Parameters
         ----------
-        annotations : Union[str, pd.DataFrame]
+        annotations : str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame
             The annotations.
-            Can either be the path to a csv file or a pandas.DataFrame.
-        delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default ",".
-        images_dir : Optional[str], optional
+            Can either be the path to a CSV/TSV/geojson file, a pandas DataFrame or a geopandas GeoDataFrame.
+        delimiter : str, optional
+            The delimiter to use when loading the csv file as a DataFrame, by default ",".
+        images_dir : str, optional
             The path to the directory in which patches are stored.
-            This argument should be passed if image paths are different from the path saved in annotations dataframe/csv.
-            If None, no updates will be made to the image paths in the annotations dataframe/csv.
+            This argument should be passed if image paths are different from the path saved in existing annotations.
+            If None, no updates will be made to the image paths in the annotations DataFrame/csv.
             By default None.
-        remove_broken : Optional[bool], optional
+        remove_broken : bool, optional
             Whether to remove annotations with broken image paths.
-            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            If False, annotations with broken paths will remain in annotations DataFrame and may cause issues!
             By default True.
-        ignore_broken : Optional[bool], optional
+        ignore_broken : bool, optional
             Whether to ignore broken image paths (only valid if remove_broken=False).
-            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+            If True, annotations with broken paths will remain in annotations DataFrame and no error will be raised. This may cause issues!
             If False, annotations with broken paths will raise error. By default, False.
-        patch_paths_col : Optional[str], optional
+        patch_paths_col : str, optional
             The name of the column containing the image paths, by default "image_path".
-        label_col : Optional[str], optional
+        label_col : str, optional
             The name of the column containing the image labels, by default "label".
-        append : Optional[bool], optional
-            Whether to append the annotations to a pre-existing ``annotations`` dataframe.
-            If False, existing dataframe will be overwritten.
+        append : bool, optional
+            Whether to append the annotations to a pre-existing ``annotations`` DataFrame.
+            If False, existing DataFrame will be overwritten.
             By default True.
-        scramble_frame : Optional[bool], optional
-            Whether to shuffle the rows of the dataframe, by default False.
-        reset_index : Optional[bool], optional
-            Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
+        scramble_frame : bool, optional
+            Whether to shuffle the rows of the DataFrame, by default False.
+        reset_index : bool, optional
+            Whether to reset the index of the DataFrame (e.g. after shuffling), by default False.
 
         Raises
         ------
@@ -102,13 +107,13 @@ class AnnotationsLoader:
             )
             self.label_col = label_col
 
-        if not isinstance(annotations, (str, pd.DataFrame)):
-            raise ValueError(
-                "[ERROR] Please pass ``annotations`` as a string (path to csv file) or pd.DataFrame."
-            )
-        if isinstance(annotations, str):
-            annotations = self._load_annotations_csv(
+        if isinstance(annotations, (str, pathlib.Path)):
+            annotations = self._load_annotations_file(
                 annotations, delimiter, scramble_frame, reset_index
+            )
+        if not isinstance(annotations, (pd.DataFrame, geopd.GeoDataFrame)):
+            raise ValueError(
+                "[ERROR] Please pass ``annotations`` as a path to a CSV/TSV/geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
         if images_dir:
@@ -141,42 +146,49 @@ class AnnotationsLoader:
 
         print(self)
 
-    def _load_annotations_csv(
+    def _load_annotations_file(
         self,
-        annotations: str,
-        delimiter: str | None = ",",
-        scramble_frame: bool | None = False,
-        reset_index: bool | None = False,
-    ) -> pd.DataFrame:
-        """Loads annotations from a csv file.
+        annotations: str | pathlib.Path,
+        delimiter: str = ",",
+        scramble_frame: bool = False,
+        reset_index: bool = False,
+    ) -> pd.DataFrame | geopd.GeoDataFrame:
+        """Loads annotations from a CSV/TSV/geojson file.
 
         Parameters
         ----------
-        annotations : str
-            The path to the annotations csv file.
-        delimiter : Optional[str], optional
-            The delimiter to use when loading the csv file as a dataframe, by default ",".
-        scramble_frame : Optional[bool], optional
-            Whether to shuffle the rows of the dataframe, by default False.
-        reset_index : Optional[bool], optional
-            Whether to reset the index of the dataframe (e.g. after shuffling), by default False.
+        annotations : str or pathlib.Path
+            The path to the annotations file.
+        delimiter : str, optional
+            The delimiter to use when loading the file as a DataFrame, by default ",".
+        scramble_frame : bool, optional
+            Whether to shuffle the rows of the DataFrame, by default False.
+        reset_index : bool, optional
+            Whether to reset the index of the DataFrame (e.g. after shuffling), by default False.
 
         Returns
         -------
-        pd.DataFrame
-            Dataframe containing the annotations.
+        pd.DataFrame or geopd.GeoDataFrame
+            DataFrame containing the annotations.
 
         Raises
         ------
         ValueError
-            If ``annotations`` is passed as something other than a string or pd.DataFrame.
+            If ``annotations`` is passed as something other than a string, pathlib.Path, pd.DataFrame or geopd.GeoDataFrame.
         """
 
-        if os.path.isfile(annotations):
+        if re.search(r"\..?sv$", annotations):
             print(f'[INFO] Reading "{annotations}"')
-            annotations = pd.read_csv(annotations, sep=delimiter, index_col=0)
+            annotations = load_from_csv(
+                annotations,
+                delimiter=delimiter,
+            )
+        elif re.search(r"\..?json$", annotations):
+            annotations = load_from_geojson(annotations)
         else:
-            raise ValueError(f'[ERROR] "{annotations}" cannot be found.')
+            raise ValueError(
+                "[ERROR] ``annotations`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+            )
 
         if scramble_frame:
             annotations = annotations.sample(frac=1)
@@ -200,11 +212,11 @@ class AnnotationsLoader:
         ----------
         remove_broken : Optional[bool], optional
             Whether to remove annotations with broken image paths.
-            If False, annotations with broken paths will remain in annotations dataframe and may cause issues!
+            If False, annotations with broken paths will remain in annotations DataFrame and may cause issues!
             By default True.
         ignore_broken : Optional[bool], optional
             Whether to ignore broken image paths (only valid if remove_broken=False).
-            If True, annotations with broken paths will remain in annotations dataframe and no error will be raised. This may cause issues!
+            If True, annotations with broken paths will remain in annotations DataFrame and no error will be raised. This may cause issues!
         """
 
         if len(self.annotations) == 0:
@@ -297,11 +309,11 @@ Please check your image paths in your annonations.csv file and update them if ne
     def review_labels(
         self,
         label_to_review: str | None = None,
-        chunks: int | None = 8 * 3,
-        num_cols: int | None = 8,
-        exclude_df: pd.DataFrame | None = None,
-        include_df: pd.DataFrame | None = None,
-        deduplicate_col: str | None = "image_id",
+        chunks: int = 8 * 3,
+        num_cols: int = 8,
+        exclude_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
+        include_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
+        deduplicate_col: str = "image_id",
     ) -> None:
         """
         Perform image review on annotations and update labels for a given
@@ -316,9 +328,9 @@ Please check your image paths in your annonations.csv file and update them if ne
             The number of images to display at a time, by default ``24``.
         num_cols : int, optional
             The number of columns in the display, by default ``8``.
-        exclude_df : pandas.DataFrame, optional
+        exclude_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
             A DataFrame of images to exclude from review, by default ``None``.
-        include_df : pandas.DataFrame, optional
+        include_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
             A DataFrame of images to include for review, by default ``None``.
         deduplicate_col : str, optional
             The column to use for deduplicating reviewed images, by default
@@ -359,7 +371,7 @@ Please check your image paths in your annonations.csv file and update them if ne
             annots2review.reset_index(inplace=True, drop=False)
 
         if exclude_df is not None:
-            if isinstance(exclude_df, pd.DataFrame):
+            if isinstance(exclude_df, (pd.DataFrame, geopd.GeoDataFrame)):
                 merged_df = pd.merge(
                     annots2review, exclude_df, how="left", indicator=True
                 )
@@ -368,14 +380,14 @@ Please check your image paths in your annonations.csv file and update them if ne
                 )
                 annots2review.reset_index(inplace=True, drop=True)
             else:
-                raise ValueError("[ERROR] ``exclude_df`` must be a pandas dataframe.")
+                raise ValueError("[ERROR] ``exclude_df`` must be a pandas DataFrame.")
 
         if include_df is not None:
-            if isinstance(include_df, pd.DataFrame):
+            if isinstance(include_df, (pd.DataFrame, geopd.GeoDataFrame)):
                 annots2review = pd.merge(annots2review, include_df, how="right")
                 annots2review.reset_index(inplace=True, drop=True)
             else:
-                raise ValueError("[ERROR] ``include_df`` must be a pandas dataframe.")
+                raise ValueError("[ERROR] ``include_df`` must be a pandas DataFrame.")
 
         image_idx = 0
         while image_idx < len(annots2review):
@@ -511,15 +523,15 @@ Please check your image paths and update them if necessary.'
 
     def create_datasets(
         self,
-        frac_train: float | None = 0.70,
-        frac_val: float | None = 0.15,
-        frac_test: float | None = 0.15,
-        random_state: int | None = 1364,
-        train_transform: str | (Compose | Callable) | None = "train",
-        val_transform: str | (Compose | Callable) | None = "val",
-        test_transform: str | (Compose | Callable) | None = "test",
+        frac_train: float = 0.70,
+        frac_val: float = 0.15,
+        frac_test: float = 0.15,
+        random_state: int = 1364,
+        train_transform: str | (Compose | Callable) = "train",
+        val_transform: str | (Compose | Callable) = "val",
+        test_transform: str | (Compose | Callable) = "test",
         context_datasets: bool = False,
-        context_df: str | pd.DataFrame | None = None,
+        context_df: str | pd.DataFrame | geopd.GeoDataFrame | None = None,
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -551,8 +563,8 @@ Please check your image paths and update them if necessary.'
             By default "test".
         context_datasets: bool, optional
             Whether to create context datasets or not. By default False.
-        context_df: str or pandas.DataFrame, optional
-            The dataframe containing all patches if using context datasets.
+        context_df: str or pandas.DataFrame or geopd.GeoDataFrame, optional
+            The DataFrame containing all patches if using context datasets.
             Used to create context images. By default None.
 
         Raises
@@ -612,7 +624,7 @@ Please check your image paths and update them if necessary.'
             )
             if not len(self.annotations) == len(df_train) + len(df_val) + len(df_test):
                 raise ValueError(
-                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                    "[ERROR] Number of annotations in the split DataFrames does not match the number of annotations in the original DataFrame."
                 )
 
         else:
@@ -620,7 +632,7 @@ Please check your image paths and update them if necessary.'
             df_test = None
             if not len(self.annotations) == len(df_train) + len(df_val):
                 raise ValueError(
-                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                    "[ERROR] Number of annotations in the split DataFrames does not match the number of annotations in the original DataFrame."
                 )
 
         if context_datasets:

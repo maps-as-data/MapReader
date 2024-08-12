@@ -217,13 +217,19 @@ def test_incorrect_delimiter(load_dfs):
 
 
 def test_init_dfs_value_error(load_dfs):
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+    with pytest.raises(
+        ValueError,
+        match="path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame",
+    ):
         Annotator(
             patch_df=1,
             parent_df=1,
         )
     _, _, tmp_path = load_dfs
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+    with pytest.raises(
+        ValueError,
+        match="path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame",
+    ):
         Annotator(
             patch_df=f"{tmp_path}/patch_df.csv",
             parent_df=1,

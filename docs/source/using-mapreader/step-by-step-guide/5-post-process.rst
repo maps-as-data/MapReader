@@ -10,7 +10,7 @@ The user can then choose how to relabel the patch (e.g. 'railspace' -> 'no').
 To run the post-processing code, you will need to have saved the predictions from your model in the format expected for the post-processing code.
 See the :doc:`/using-mapreader/step-by-step-guide/4-classify/index` docs for more on this.
 
-If you have your predictions saved in a ``csv`` file, you will first need to load them into a Pandas DataFrame:
+If you have your predictions saved in a ``csv`` file, you will first need to load them into a pandas DataFrame:
 
 .. code-block:: python
 
@@ -18,6 +18,13 @@ If you have your predictions saved in a ``csv`` file, you will first need to loa
 
     preds = pd.read_csv("path/to/predictions.csv", index_col=0)
 
+or, if you have your predictions saved in a ``geojson`` file, you can use a geopandas GeoDataFrame:
+
+.. code-block:: python
+
+    import geopandas as geopd
+
+    preds = geopd.read_file("path/to/predictions.geojson")
 
 You can then run the post-processing code as follows:
 

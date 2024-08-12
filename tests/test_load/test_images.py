@@ -6,7 +6,6 @@ from random import randint
 
 import geopandas as geopd
 import pandas as pd
-import PIL
 import pytest
 from PIL import Image
 from pytest import approx
@@ -134,6 +133,7 @@ def test_init_png(sample_dir, image_id):
     assert isinstance(maps, MapImages)
     str(maps)
     len(maps)
+    assert not maps.georeferenced
 
 
 def test_init_png_grayscale(sample_dir):
@@ -151,6 +151,7 @@ def test_init_tiff(sample_dir):
     tiffs = MapImages(f"{sample_dir}/{image_id}")
     assert len(tiffs) == 1
     assert isinstance(tiffs, MapImages)
+    assert not tiffs.georeferenced
 
 
 def test_init_geotiff(sample_dir):
@@ -158,6 +159,7 @@ def test_init_geotiff(sample_dir):
     geotiffs = MapImages(f"{sample_dir}/{image_id}")
     assert len(geotiffs) == 1
     assert isinstance(geotiffs, MapImages)
+    assert geotiffs.georeferenced
 
 
 def test_init_parent_path(sample_dir, image_id, capfd):
@@ -187,7 +189,7 @@ def test_init_tiff_32bit_error(sample_dir):
 
 def test_init_non_image_error(sample_dir):
     file_name = "ts_downloaded_maps.csv"
-    with pytest.raises(PIL.UnidentifiedImageError, match="not an image"):
+    with pytest.raises(ValueError, match="Non-image file types detected"):
         MapImages(f"{sample_dir}/{file_name}")
 
 
@@ -217,6 +219,7 @@ def test_add_metadata(sample_dir, image_id, ts_metadata_keys):
     for maps in [maps_csv, maps_tsv, maps_xlsx]:
         assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
         assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+        assert maps.georeferenced
         assert maps.parents[image_id]["coordinates"] == approx(
             (-4.83, 55.80, -4.21, 56.059), rel=1e-2
         )
@@ -302,21 +305,21 @@ def test_add_metadata_index_col(matching_metadata_dir):
 def test_add_metadata_columns(matching_metadata_dir, metadata_df):
     my_files_csv = MapImages(f"{matching_metadata_dir}/*png")
     my_files_csv.add_metadata(
-        f"{matching_metadata_dir}/metadata_df.csv", columns=["name", "coord"]
+        f"{matching_metadata_dir}/metadata_df.csv", usecols=["name", "coord"]
     )
 
     my_files_xlsx = MapImages(f"{matching_metadata_dir}/*png")
     my_files_xlsx.add_metadata(
-        f"{matching_metadata_dir}/metadata_df.xlsx", columns=["name", "coord"]
+        f"{matching_metadata_dir}/metadata_df.xlsx", usecols=["name", "coord"]
     )
 
     my_files_df = MapImages(f"{matching_metadata_dir}/*png")
-    my_files_df.add_metadata(metadata_df, columns=["name", "coord"])  # pass columns arg
+    my_files_df.add_metadata(metadata_df, usecols=["name", "coord"])  # pass columns arg
 
-    metadata_keys = ["parent_id", "image_path", "shape", "name", "coord"]
+    metadata_keys = set(["parent_id", "image_path", "shape", "name", "coord"])
     for my_files in [my_files_csv, my_files_xlsx, my_files_df]:
         for parent_id in my_files.list_parents():
-            assert list(my_files.parents[parent_id].keys()) == metadata_keys
+            assert set(my_files.parents[parent_id].keys()) == metadata_keys
             assert isinstance(my_files.parents[parent_id]["coord"], tuple)
 
 
@@ -358,6 +361,7 @@ def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
     assert isinstance(
         "polygon", str
     )  # expect this to be a string, reformed into polygon later
+    assert maps.georeferenced
 
 
 # other ``add_metadata`` errors
@@ -366,7 +370,7 @@ def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
 def test_metadata_not_found(matching_metadata_dir):
     my_files = MapImages(f"{matching_metadata_dir}/*png")
     assert len(my_files) == 3
-    with pytest.raises(ValueError):
+    with pytest.raises(FileNotFoundError):
         my_files.add_metadata(f"{matching_metadata_dir}/fakefile.csv")
 
 
@@ -403,6 +407,7 @@ def test_loader_add_geo_info(sample_dir):
     assert geotiffs.parents[image_id]["coordinates"] == approx(
         (-0.061, 51.6142, -0.0610, 51.614), rel=1e-2
     )
+    assert geotiffs.georeferenced
 
     # check nothing happens for png/tiff (no metadata)
     image_id = "cropped_74488689.png"
@@ -416,6 +421,7 @@ def test_loader_add_geo_info(sample_dir):
     keys = list(tiff.parents[image_id].keys())
     tiff.add_geo_info()
     assert list(tiff.parents[image_id].keys()) == keys
+    assert not tiff.georeferenced
 
 
 # --- test patchify ---
@@ -492,18 +498,21 @@ def test_load_patches(init_maps, sample_dir, tmp_path):
     geotiff_path = f"{sample_dir}/cropped_geo.tif"
     tiff_maps = MapImages(geotiff_path)
     tiff_maps.add_geo_info()
+    assert tiff_maps.georeferenced
     tiff_maps.patchify_all(patch_size=3, path_save=f"{tmp_path}_tiffs")
 
     assert len(maps.list_parents()) == 1
     assert len(maps.list_patches()) == 9
     maps.load_patches(f"{tmp_path}_tiffs", parent_paths=geotiff_path, add_geo_info=True)
     assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    assert maps.georeferenced
     assert len(maps.list_parents()) == 2
     assert len(maps.list_patches()) == 18  # 9 for each
 
     maps.load_patches(f"{tmp_path}_tiffs", parent_paths=geotiff_path, clear_images=True)
     assert len(maps.list_parents()) == 1
     assert len(maps.list_patches()) == 9
+    assert not maps.georeferenced
 
 
 def test_load_parents(init_maps, image_id, sample_dir):
@@ -515,11 +524,13 @@ def test_load_parents(init_maps, image_id, sample_dir):
     assert len(maps.list_parents()) == 2
     assert all(map in maps.list_parents() for map in [image_id, "cropped_geo.tif"])
     assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    assert maps.georeferenced
 
     tiff_path = f"{sample_dir}/cropped_non_geo.tif"
     maps.load_parents(tiff_path, overwrite=True)
     assert len(maps.list_parents()) == 1
     assert maps.list_parents() == ["cropped_non_geo.tif"]
+    assert not maps.georeferenced
 
 
 def test_add_shape(init_maps, image_id):
@@ -539,7 +550,7 @@ def test_add_shape(init_maps, image_id):
 def test_calc_coords_from_grid_bb(sample_dir, image_id):
     maps = MapImages(f"{sample_dir}/{image_id}")
     maps.add_metadata(
-        f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "grid_bb", "crs"]
+        f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
     assert "coordinates" not in maps.parents[image_id]
     maps.add_coords_from_grid_bb()
@@ -547,24 +558,23 @@ def test_calc_coords_from_grid_bb(sample_dir, image_id):
     assert maps.parents[image_id]["coordinates"] == approx(
         (-4.83, 55.80, -4.21, 56.059), rel=1e-2
     )
+    assert maps.georeferenced
 
 
-def test_calc_coords_from_grid_bb_warning(sample_dir, image_id, capfd):
+def test_calc_coords_from_grid_bb_error(sample_dir, image_id):
     maps = MapImages(f"{sample_dir}/{image_id}")
     assert all([x not in maps.parents[image_id] for x in ["coordinates", "grid_bb"]])
-    maps.add_coords_from_grid_bb()
-    out, _ = capfd.readouterr()
-    assert "[WARNING] No grid bounding box" in out
-    assert "coordinates" not in maps.parents[image_id]
+    with pytest.raises(ValueError, match="No grid bounding box"):
+        maps.add_coords_from_grid_bb()
 
 
-def test_calc_coords_from_grid_bb_error(sample_dir, image_id, capfd):
+def test_calc_coords_from_grid_bb_format_error(sample_dir, image_id, capfd):
     maps = MapImages(f"{sample_dir}/{image_id}")
     maps.add_metadata(
-        f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "grid_bb", "crs"]
+        f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
     assert "coordinates" not in maps.parents[image_id]
-    maps.parents[image_id]["grid_bb"] = 123
+    maps.parents[image_id]["grid_bb"] = 123  # wrong format
     with pytest.raises(ValueError, match="Unexpected grid_bb"):
         maps.add_coords_from_grid_bb()
 
@@ -585,14 +595,14 @@ def test_coord_functions(init_maps, image_id, sample_dir, capfd):
     assert "dlon" in geotiffs.parents[image_id].keys()
     assert "center_lon" in geotiffs.parents[image_id].keys()
 
-    # test for tiff with no geo info (i.e. no coords so nothing should happen)
+    # test for tiff with no geo info, no coordinates so should raise error
     image_id = "cropped_non_geo.tif"
     tiffs = MapImages(f"{sample_dir}/{image_id}")
     keys = list(tiffs.parents[image_id].keys())
-    tiffs.add_coord_increments()
-    tiffs.add_center_coord(tree_level="parent")
-    out, _ = capfd.readouterr()
-    assert "[WARNING] 'coordinates' could not be found" in out
+    with pytest.raises(ValueError, match="No coordinates"):
+        tiffs.add_coord_increments()
+    with pytest.raises(ValueError, match="'coordinates' could not be found"):
+        tiffs.add_center_coord(tree_level="parent")
     assert list(tiffs.parents[image_id].keys()) == keys
 
 
@@ -670,7 +680,7 @@ def test_save_to_geojson_missing_data(sample_dir, image_id, tmp_path):
     maps = MapImages(f"{sample_dir}/{image_id}")
     maps.patchify_all(patch_size=3, path_save=tmp_path)
     maps.add_metadata(
-        f"{sample_dir}/ts_downloaded_maps.csv", columns=["name", "coordinates", "crs"]
+        f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "coordinates", "crs"]
     )
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
@@ -733,8 +743,8 @@ def test_calc_pixel_stats(init_maps, sample_dir, tmp_path):
 def test_loader_convert_images(init_maps):
     maps, _, _ = init_maps
     parent_df, patch_df = maps.convert_images()
-    assert parent_df.shape == (1, 13)
-    assert patch_df.shape == (9, 7)
+    assert parent_df.shape == (1, 14)
+    assert patch_df.shape == (9, 8)
     parent_df, patch_df = maps.convert_images(save=True)
     assert os.path.isfile("./parent_df.csv")
     assert os.path.isfile("./patch_df.csv")
@@ -750,7 +760,7 @@ def test_loader_convert_images(init_maps):
 def test_loader_convert_images_errors(init_maps):
     maps, _, _ = init_maps
     with pytest.raises(ValueError, match="``save_format`` should be one of"):
-        maps.convert_images(save=True, save_format="json")
+        maps.convert_images(save=True, save_format="fakeformat")
 
 
 def test_save_parents_as_geotiffs(init_maps, sample_dir, image_id):

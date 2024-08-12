@@ -51,7 +51,7 @@ e.g. :
         username="rosie",
     )
 
-.. note:: You can pass either a Pandas DataFrame or the path to a ``csv`` file as the ``patch_df`` and ``parent_df`` arguments.
+.. note:: You can pass either a pandas DataFrame, geopandas GeoDataFrame or the path to a ``csv`` file as the ``patch_df`` and ``parent_df`` arguments.
 
 In the above examples, the following parameters are also specified:
 

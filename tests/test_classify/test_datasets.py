@@ -56,7 +56,7 @@ def test_patch_dataset_init_string(load_patch_df):
     )
     assert isinstance(patch_dataset, PatchDataset)
     for col in patch_df.columns:
-        if col == "polygon":
+        if col == "polygon" or "geometry":
             continue  # polygon column is converted to polygon type
         assert patch_df[col].equals(patch_dataset.patch_df[col])
     assert patch_dataset.label_col is None
@@ -113,7 +113,7 @@ def test_patch_context_dataset_init_string(load_patch_df):
     )
     assert isinstance(patch_dataset, PatchContextDataset)
     for col in patch_df.columns:
-        if col == "polygon":
+        if col == "polygon" or "geometry":
             continue  # polygon column is not converted to polygon type
         assert patch_df[col].equals(patch_dataset.patch_df[col])
     assert patch_dataset.label_col is None
