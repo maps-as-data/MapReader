@@ -882,7 +882,8 @@ Please check your image paths and update them if necessary.'
         Used to generate the ``label_index`` column.
 
         """
-        return self.unique_labels.index(label)
+        index_map = {v: k for k, v in self.labels_map.items()}
+        return index_map[label]
 
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")

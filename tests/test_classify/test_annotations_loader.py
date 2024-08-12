@@ -68,6 +68,34 @@ def test_labels_map(sample_dir):
     assert annots.labels_map == {0: "railspace", 1: "no", 2: "building"}
 
 
+def test_get_label_index(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+        labels_map={
+            0: "railspace",
+            1: "no",
+        },  # different order vs in the csv
+    )
+    assert annots.labels_map == {0: "railspace", 1: "no"}
+    assert annots._get_label_index("railspace") == 0
+
+    # test append
+    annots.load(
+        f"{sample_dir}/test_annots_append.csv",
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "railspace", 1: "no", 2: "building"}
+    assert annots._get_label_index("railspace") == 0
+    assert annots._get_label_index("building") == 2
+
+
 @pytest.mark.dependency(name="load_annots_df", scope="session")
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
