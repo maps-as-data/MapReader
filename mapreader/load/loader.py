@@ -11,7 +11,7 @@ def loader(
     **kwargs: dict,
 ) -> MapImages:
     """
-    Creates a ``MapImages`` class to manage a collection of image paths and
+    Creates a :class:`~.load.images.MapImages` class to manage a collection of image paths and
     construct image objects.
 
     Parameters
@@ -31,13 +31,13 @@ def loader(
     Returns
     -------
     MapImages
-        The ``MapImages`` class which can manage a collection of image paths
-        and construct image objects.
+        The :class:`~.load.images.MapImages` class which can manage a
+        collection of image paths and construct image objects.
 
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.load.images.MapImages` class for more detail.
+    :class:`~.load.images.MapImages` class for more detail.
     """
     img = MapImages(
         path_images=path_images,
@@ -57,9 +57,10 @@ def load_patches(
     clear_images: bool | None = False,
 ) -> MapImages:
     """
-    Creates a ``MapImages`` class to manage a collection of image paths and
-    construct image objects. Then loads patch images from the given paths and
-    adds them to the ``images`` dictionary in the ``MapImages`` instance.
+    Creates a :class:`~.load.images.MapImages` class to manage a collection of
+    image paths and construct image objects. Then loads patch images from the
+    given paths and adds them to the ``images`` dictionary in the
+    :class:`~.load.images.MapImages` instance.
 
     Parameters
     ----------
@@ -68,7 +69,8 @@ def load_patches(
 
         *Note: The ``patch_paths`` parameter accepts wildcards.*
     patch_file_ext : str or bool, optional
-        The file extension of the patches, ignored if file extensions are specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
+        The file extension of the patches, ignored if file extensions are
+        specified in ``patch_paths`` (e.g. with ``"./path/to/dir/*png"``)
         By default ``False``.
     parent_paths : str or bool, optional
         The file path of the parent images to be loaded. If set to
@@ -76,7 +78,8 @@ def load_patches(
 
         *Note: The ``parent_paths`` parameter accepts wildcards.*
     parent_file_ext : str or bool, optional
-        The file extension of the parent images, ignored if file extensions are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
+        The file extension of the parent images, ignored if file extensions
+        are specified in ``parent_paths`` (e.g. with ``"./path/to/dir/*png"``)
         By default ``False``.
     add_geo_info : bool, optional
         If ``True``, adds geographic information to the parent image.
@@ -88,16 +91,16 @@ def load_patches(
     Returns
     -------
     MapImages
-        The ``MapImages`` class which can manage a collection of image paths
-        and construct image objects.
+        The :class:`~.load.images.MapImages` class which can manage a
+        collection of image paths and construct image objects.
 
     Notes
     -----
     This is a wrapper method. See the documentation of the
-    :class:`mapreader.load.images.MapImages` class for more detail.
+    :class:`~.load.images.MapImages` class for more detail.
 
     This function in particular, also calls the
-    :meth:`mapreader.load.images.MapImages.loadPatches` method. Please see
+    :meth:`~.load.images.MapImages.load_patches` method. Please see
     the documentation for that method for more information as well.
     """
     img = MapImages()

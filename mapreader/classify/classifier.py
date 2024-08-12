@@ -31,6 +31,77 @@ from .datasets import PatchDataset
 
 
 class ClassifierContainer:
+    """
+    A class to store and train a PyTorch model.
+
+    Parameters
+    ----------
+    model : str, nn.Module or None
+        The PyTorch model to add to the object.
+
+        - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
+        - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
+
+    labels_map: Dict or None
+        A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
+        Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
+    dataloaders: Dict or None
+        A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
+    device : str, optional
+        The device to be used for training and storing models.
+        Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
+    input_size : int, optional
+        The expected input size of the model. Default is ``(224,224)``.
+    is_inception : bool, optional
+        Whether the model is an Inception-style model.
+        Default is ``False``.
+    load_path : str, optional
+        The path to an ``.obj`` file containing a
+    force_device : bool, optional
+        Whether to force the use of a specific device.
+        If set to ``True``, the default device is used.
+        Defaults to ``False``.
+    kwargs : Dict
+        Keyword arguments to pass to the
+        :meth:`~.classify.classifier.ClassifierContainer._initialize_model`
+        method (if passing ``model`` as a string).
+
+    Attributes
+    ----------
+    device : torch.device
+        The device being used for training and storing models.
+    dataloaders : dict
+        A dictionary to store dataloaders for the model.
+    labels_map : dict
+        A dictionary mapping label indices to their labels.
+    dataset_sizes : dict
+        A dictionary to store sizes of datasets for the model.
+    model : torch.nn.Module
+        The model.
+    input_size : None or tuple of int
+        The size of the input to the model.
+    is_inception : bool
+        A flag indicating if the model is an Inception model.
+    optimizer : None or torch.optim.Optimizer
+        The optimizer being used for training the model.
+    scheduler : None or torch.optim.lr_scheduler._LRScheduler
+        The learning rate scheduler being used for training the model.
+    loss_fn : None or nn.modules.loss._Loss
+        The loss function to use for training the model.
+    metrics : dict
+        A dictionary to store the metrics computed during training.
+    last_epoch : int
+        The last epoch number completed during training.
+    best_loss : torch.Tensor
+        The best validation loss achieved during training.
+    best_epoch : int
+        The epoch in which the best validation loss was achieved during
+        training.
+    tmp_save_filename : str
+        A temporary file name to save checkpoints during training and
+        validation.
+    """
+
     def __init__(
         self,
         model: str | nn.Module | None,
@@ -43,75 +114,6 @@ class ClassifierContainer:
         force_device: bool | None = False,
         **kwargs,
     ):
-        """
-        Initialize an ClassifierContainer object.
-
-        Parameters
-        ----------
-        model : str, nn.Module or None
-            The PyTorch model to add to the object.
-
-            - If passed as a string, will run ``_initialize_model(model, **kwargs)``. See https://pytorch.org/vision/0.8/models.html for options.
-            - Must be ``None`` if ``load_path`` is specified as model will be loaded from file.
-
-        labels_map: Dict or None
-            A dictionary containing the mapping of each label index to its label, with indices as keys and labels as values (i.e. idx: label).
-            Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
-        dataloaders: Dict or None
-            A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
-        device : str, optional
-            The device to be used for training and storing models.
-            Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
-        input_size : int, optional
-            The expected input size of the model. Default is ``(224,224)``.
-        is_inception : bool, optional
-            Whether the model is an Inception-style model.
-            Default is ``False``.
-        load_path : str, optional
-            The path to an ``.obj`` file containing a
-        force_device : bool, optional
-            Whether to force the use of a specific device.
-            If set to ``True``, the default device is used.
-            Defaults to ``False``.
-        kwargs : Dict
-            Keyword arguments to pass to the ``_initialize_model()`` method (if passing ``model`` as a string).
-
-        Attributes
-        ----------
-        device : torch.device
-            The device being used for training and storing models.
-        dataloaders : dict
-            A dictionary to store dataloaders for the model.
-        labels_map : dict
-            A dictionary mapping label indices to their labels.
-        dataset_sizes : dict
-            A dictionary to store sizes of datasets for the model.
-        model : torch.nn.Module
-            The model.
-        input_size : None or tuple of int
-            The size of the input to the model.
-        is_inception : bool
-            A flag indicating if the model is an Inception model.
-        optimizer : None or torch.optim.Optimizer
-            The optimizer being used for training the model.
-        scheduler : None or torch.optim.lr_scheduler._LRScheduler
-            The learning rate scheduler being used for training the model.
-        criterion : None or nn.modules.loss._Loss
-            The criterion to use for training the model.
-        metrics : dict
-            A dictionary to store the metrics computed during training.
-        last_epoch : int
-            The last epoch number completed during training.
-        best_loss : torch.Tensor
-            The best validation loss achieved during training.
-        best_epoch : int
-            The epoch in which the best validation loss was achieved during
-            training.
-        tmp_save_filename : str
-            A temporary file name to save checkpoints during training and
-            validation.
-        """
-
         # set up device
         if device in ["default", None]:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -157,7 +159,7 @@ class ClassifierContainer:
 
             self.optimizer = None
             self.scheduler = None
-            self.criterion = None
+            self.loss_fn = None
 
             self.metrics = {}
             self.last_epoch = 0
@@ -397,54 +399,54 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
         self.scheduler = scheduler
 
-    def add_criterion(
-        self, criterion: str | nn.modules.loss._Loss | None = "cross entropy"
+    def add_loss_fn(
+        self, loss_fn: str | nn.modules.loss._Loss | None = "cross entropy"
     ) -> None:
         """
-        Add a loss criterion to the classifier object.
+        Add a loss function to the classifier object.
 
         Parameters
         ----------
-        criterion : str or torch.nn.modules.loss._Loss
-            The loss criterion to add to the classifier object.
+        loss_fn : str or torch.nn.modules.loss._Loss
+            The loss function to add to the classifier object.
             Accepted string values are "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) and "mse" (mean squared error).
 
         Returns
         -------
         None
-            The function only modifies the ``criterion`` attribute of the
+            The function only modifies the ``loss_fn`` attribute of the
             classifier and does not return anything.
         """
-        if isinstance(criterion, str):
-            if criterion in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
-                criterion = nn.CrossEntropyLoss()
-            elif criterion in [
+        if isinstance(loss_fn, str):
+            if loss_fn in ["cross entropy", "ce", "cross_entropy", "cross-entropy"]:
+                loss_fn = nn.CrossEntropyLoss()
+            elif loss_fn in [
                 "bce",
                 "binary_cross_entropy",
                 "binary cross entropy",
                 "binary cross-entropy",
             ]:
-                criterion = nn.BCELoss()
-            elif criterion in [
+                loss_fn = nn.BCELoss()
+            elif loss_fn in [
                 "mse",
                 "mean_square_error",
                 "mean_squared_error",
                 "mean squared error",
             ]:
-                criterion = nn.MSELoss()
+                loss_fn = nn.MSELoss()
             else:
                 raise NotImplementedError(
-                    '[ERROR] At present, if passing ``criterion`` as a string, criterion can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
+                    '[ERROR] At present, if passing ``loss_fn`` as a string, the loss function can only be "cross entropy" or "ce" (cross-entropy), "bce" (binary cross-entropy) or "mse" (mean squared error).'
                 )
 
-            print(f'[INFO] Using "{criterion}" as criterion.')
+            print(f'[INFO] Using "{loss_fn}" as loss function.')
 
-        elif not isinstance(criterion, nn.modules.loss._Loss):
+        elif not isinstance(loss_fn, nn.modules.loss._Loss):
             raise ValueError(
-                '[ERROR] Please pass ``criterion`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
+                '[ERROR] Please pass ``loss_fn`` as a string ("cross entropy", "bce" or "mse") or torch.nn loss function (see https://pytorch.org/docs/stable/nn.html).'
             )
 
-        self.criterion = criterion
+        self.loss_fn = loss_fn
 
     def model_summary(
         self,
@@ -624,7 +626,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Notes
         -----
         This method calls the
-        :meth:`mapreader.train.classifier.classifier.train` method with the
+        :meth:`~.train.classifier.classifier.train` method with the
         ``num_epochs`` set to ``1`` and all the other parameters specified in
         the function arguments.
         """
@@ -641,7 +643,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
 
     def train_component_summary(self) -> None:
         """
-        Print a summary of the optimizer, criterion, and trainable model
+        Print a summary of the optimizer, loss function, and trainable model
         components.
 
         Returns:
@@ -653,8 +655,8 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         print("* Optimizer:")
         print(str(self.optimizer))
         print(divider)
-        print("* Criterion:")
-        print(str(self.criterion))
+        print("* Loss function:")
+        print(str(self.loss_fn))
         print(divider)
         print("* Model:")
         self.model_summary(trainable_col=True)
@@ -674,7 +676,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Train the model on the specified phases for a given number of epochs.
 
         Wrapper function for
-        :meth:`mapreader.train.classifier.classifier.train_core` method to
+        :meth:`~.train.classifier.classifier.train_core` method to
         capture exceptions (``KeyboardInterrupt`` is the only supported
         exception currently).
 
@@ -716,7 +718,7 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Notes
         -----
         Refer to the documentation of
-        :meth:`mapreader.train.classifier.classifier.train_core` for more
+        :meth:`~.train.classifier.classifier.train_core` for more
         information.
         """
 
@@ -781,16 +783,19 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to define one."  # noqa
         Raises
         ------
         ValueError
-            If the criterion is not set. Use the ``add_criterion`` method to
-            set the criterion.
+            If the loss function is not set. Use the
+            :meth:`~.classify.classifier.ClassifierContainer.add_loss_fn`
+            method to set the loss function.
 
             If the optimizer is not set and the phase is "train". Use the
-            ``initialize_optimizer`` or ``add_optimizer`` method to set the
-            optimizer.
+            :meth:`~.classify.classifier.ClassifierContainer.initialize_optimizer`
+            or :meth:`~.classify.classifier.ClassifierContainer.add_optimizer`
+            method to set the optimizer.
 
         KeyError
             If the specified phase cannot be found in the keys of the object's
-            ``dataloaders`` dictionary property.
+            :attr:`~.classify.classifier.ClassifierContainer.dataloaders`
+            dictionary property.
 
         Returns
         -------
@@ -889,10 +894,10 @@ Use ``initialize_optimizer`` or ``add_optimizer`` to add one."  # noqa
                             #     summing the final output and the auxiliary
                             #     output but in testing we only consider the
                             #     final output.
-                            if self.criterion is None:
+                            if self.loss_fn is None:
                                 raise ValueError(
-                                    "[ERROR] Criterion is not yet defined.\n\n\
-Use ``add_criterion`` to define one."
+                                    "[ERROR] Loss function is not yet defined.\n\n\
+Use ``add_loss_fn`` to define one."
                                 )
 
                             if self.is_inception and (
@@ -905,8 +910,8 @@ Use ``add_criterion`` to define one."
                                 if not isinstance(aux_outputs, torch.Tensor):
                                     aux_outputs = self._get_logits(aux_outputs)
 
-                                loss1 = self.criterion(outputs, label_indices)
-                                loss2 = self.criterion(aux_outputs, label_indices)
+                                loss1 = self.loss_fn(outputs, label_indices)
+                                loss2 = self.loss_fn(aux_outputs, label_indices)
                                 # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
                                 loss = loss1 + 0.4 * loss2
 
@@ -916,7 +921,7 @@ Use ``add_criterion`` to define one."
                                 if not isinstance(outputs, torch.Tensor):
                                     outputs = self._get_logits(outputs)
 
-                                loss = self.criterion(outputs, label_indices)
+                                loss = self.loss_fn(outputs, label_indices)
 
                             _, pred_label_indices = torch.max(outputs, dim=1)
 
@@ -1102,11 +1107,11 @@ Use ``add_criterion`` to define one."
         Notes
         -----
         This method uses both the
-        ``sklearn.metrics.precision_recall_fscore_support`` and
-        ``sklearn.metrics.roc_auc_score`` functions from ``scikit-learn`` to
-        calculate the metrics for each average type (``"micro"``, ``"macro"``
-        and ``"weighted"``). The results are then added to the ``metrics``
-        dictionary. It also writes the metrics to the TensorBoard
+        :func:`sklearn.metrics.precision_recall_fscore_support` and
+        :func:`sklearn.metrics.roc_auc_score` functions from ``scikit-learn``
+        to calculate the metrics for each average type (``"micro"``,
+        ``"macro"`` and ``"weighted"``). The results are then added to the
+        ``metrics`` dictionary. It also writes the metrics to the TensorBoard
         SummaryWriter, if ``tboard_writer`` is not None.
         """
         # convert y_score to a numpy array:
@@ -1501,9 +1506,9 @@ Use ``add_criterion`` to define one."
         Notes
         -----
         This method uses the dataloader of the ``ImageClassifierData`` class
-        and the ``torchvision.utils.make_grid`` function to display the sample
-        data in a grid format. It also calls the ``_imshow`` method of the
-        ``ImageClassifierData`` class to show the sample data.
+        and the :func:`torchvision.utils.make_grid` function to display the
+        sample data in a grid format. It also calls the ``_imshow`` method of
+        the ``ImageClassifierData`` class to show the sample data.
         """
         if set_name not in self.dataloaders.keys():
             raise ValueError(

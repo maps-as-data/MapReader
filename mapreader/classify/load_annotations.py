@@ -18,11 +18,14 @@ from .datasets import PatchContextDataset, PatchDataset
 
 
 class AnnotationsLoader:
+    """
+    A class for loading annotations and preparing datasets and dataloaders for
+    use in training/validation of a model.
+    """
+
     def __init__(self):
-        """
-        A Class for loading annotations and preparing datasets and dataloaders for use in training/validation of a model.
-        """
         self.annotations = pd.DataFrame()
+        self.labels_map = {}
         self.reviewed = pd.DataFrame()
         self.patch_paths_col = None
         self.label_col = None
@@ -31,6 +34,7 @@ class AnnotationsLoader:
     def load(
         self,
         annotations: str | pd.DataFrame,
+        labels_map: dict | None = None,
         delimiter: str | None = ",",
         images_dir: str | None = None,
         remove_broken: bool | None = True,
@@ -41,13 +45,17 @@ class AnnotationsLoader:
         scramble_frame: bool | None = False,
         reset_index: bool | None = False,
     ):
-        """Loads annotations from a csv file or dataframe and can be used to set the ``patch_paths_col`` and ``label_col`` attributes.
+        """
+        Loads annotations from a csv file or dataframe and can be used to set
+        the ``patch_paths_col`` and ``label_col`` attributes.
 
         Parameters
         ----------
         annotations : Union[str, pd.DataFrame]
             The annotations.
             Can either be the path to a csv file or a pandas.DataFrame.
+        labels_map : Optional[dict], optional
+            A dictionary mapping labels to indices. If not provided, labels will be mapped to indices based on the order in which they appear in the annotations dataframe. By default None.
         delimiter : Optional[str], optional
             The delimiter to use when loading the csv file as a dataframe, by default ",".
         images_dir : Optional[str], optional
@@ -128,8 +136,25 @@ class AnnotationsLoader:
 
         self.unique_labels = self.annotations[self.label_col].unique().tolist()
 
-        labels_map = {i: label for i, label in enumerate(self.unique_labels)}
-        self.labels_map = labels_map
+        # if labels_map is explicitly provided
+        if labels_map:
+            self.labels_map = dict(
+                sorted(labels_map.items())
+            )  # sort labels_map by keys
+            if not set(self.unique_labels).issubset(set(labels_map.values())):
+                raise ValueError(
+                    "[ERROR] There are label(s) in the annotations that are not in the labels map. Please check the labels_map."
+                )
+        # if inferring labels_map
+        else:
+            if append:
+                for label in self.unique_labels:
+                    if label not in self.labels_map.values():
+                        self.labels_map[len(self.labels_map)] = label
+            else:
+                # reset labels map
+                labels_map = {i: label for i, label in enumerate(self.unique_labels)}
+                self.labels_map = labels_map
 
         self.annotations["label_index"] = self.annotations[self.label_col].apply(
             self._get_label_index
@@ -329,10 +354,18 @@ Please check your image paths in your annonations.csv file and update them if ne
         This method reviews images with their corresponding labels and allows
         the user to change the label for each image.
 
-        Updated labels are saved in ``self.annotations`` and in a newly created ``self.reviewed`` DataFrame.
+        Updated labels are saved in
+        :attr:`~.classify.load_annotations.AnnotationsLoader.annotations`
+        and in a newly created
+        :attr:`~.classify.load_annotations.AnnotationsLoader.reviewed`
+        DataFrame.
+
         If ``exclude_df`` is provided, images found in this df are skipped in the review process.
+
         If ``include_df`` is provided, only images found in this df are reviewed.
-        The ``self.reviewed`` DataFrame is deduplicated based on the ``deduplicate_col``.
+
+        The :attr:`~.classify.load_annotations.AnnotationsLoader.reviewed`
+        DataFrame is deduplicated based on the ``deduplicate_col``.
         """
         if len(self.annotations) == 0:
             raise ValueError("[ERROR] No annotations loaded.")
@@ -439,10 +472,13 @@ Please check your image paths and update them if necessary.'
                     self.reviewed.loc[input_id, "label_index"] = self._get_label_index(
                         input_label
                     )
-                    assert (
+                    if not (
                         self.annotations[self.label_col].value_counts().tolist()
                         == self.annotations["label_index"].value_counts().tolist()
-                    )
+                    ):
+                        raise RuntimeError(
+                            f"[ERROR] Label indices do not match label counts. Please check the label indices for label '{input_label}'."
+                        )
                     print(
                         f'[INFO] Image {input_id} has been relabelled as "{input_label}"'
                     )
@@ -595,12 +631,18 @@ Please check your image paths and update them if necessary.'
                 test_size=float(relative_frac_test),
                 random_state=random_state,
             )
-            assert len(self.annotations) == len(df_train) + len(df_val) + len(df_test)
+            if not len(self.annotations) == len(df_train) + len(df_val) + len(df_test):
+                raise ValueError(
+                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                )
 
         else:
             df_val = df_temp
             df_test = None
-            assert len(self.annotations) == len(df_train) + len(df_val)
+            if not len(self.annotations) == len(df_train) + len(df_val):
+                raise ValueError(
+                    "[ERROR] Number of annotations in the split dataframes does not match the number of annotations in the original dataframe."
+                )
 
         if context_datasets:
             datasets = self.create_patch_context_datasets(
@@ -840,7 +882,8 @@ Please check your image paths and update them if necessary.'
         Used to generate the ``label_index`` column.
 
         """
-        return self.unique_labels.index(label)
+        index_map = {v: k for k, v in self.labels_map.items()}
+        return index_map[label]
 
     def __str__(self):
         print(f"[INFO] Number of annotations:   {len(self.annotations)}\n")
