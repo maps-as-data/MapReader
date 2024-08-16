@@ -13,6 +13,10 @@ The following table shows which versions of MapReader are compatible with which 
 
 ---
 
+## Pre-release
+
+_ADD NEW CHANGES HERE_
+
 ## Changes for versions <= v1.3.8 were added retroactively and may not be complete.
 
 ## [v1.3.8](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.8) (2024-08-12)
