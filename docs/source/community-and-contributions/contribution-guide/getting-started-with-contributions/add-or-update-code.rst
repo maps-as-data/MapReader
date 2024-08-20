@@ -61,10 +61,20 @@ To run the tests, use the following command:
 
 This will run all the tests in the MapReader package.
 
+If you've made changes to the MapReader code, please run the tests and ensure all are passing.
+Or, if you've made code changes that intentionally alter the behavior of MapReader, please update the tests accordingly.
+
+If possible, you should also add new tests for any new code/functionality you have added.
+
+Updating documentation
+----------------------
+
+If possible, please update the MapReader documentation to reflect any changes you have made to the code.
+You can see more guidance on this :doc:`here </community-and-contributions/contribution-guide/getting-started-with-contributions/add-or-update-documentation>`.
 
 When you are finished
 ----------------------
 
-Once you are happy with the changes you have made, please create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
+Once you are happy with the changes you have made, please update the changelog (`CHANGELOG.md`) with a summary of your changes (you can look at previous entries for guidance) and create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
 
 If possible, please link your pull request to any issue(s) your changes fix/address and write a thorough description of the changes you have made.
