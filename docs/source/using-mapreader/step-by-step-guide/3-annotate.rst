@@ -63,6 +63,7 @@ In the above examples, the following parameters are also specified:
 Other arguments that you may want to be aware of when initializing the ``Annotator`` instance include:
 
 - ``show_context``: Whether to show a context image in the annotation interface (default: ``False``).
+- ``border``: Whether to show a border around the central patch when showing context (default: ``False``).
 - ``surrounding``: How many surrounding patches to show in the context image (default: ``1``).
 - ``sortby``: The name of the column to use to sort the patch Dataframe (e.g. "mean_pixel_R" to sort by red pixel intensities).
 - ``ascending``: A boolean indicating whether to sort in ascending or descending order (default: ``True``).
@@ -136,6 +137,30 @@ Or, equivalently, :
     annotator.annotate(show_context=True)
 
 .. note:: Passing the ``show_context`` argument when calling the ``annotate()`` method overrides the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+
+If you have set ``show_context=True``, you can also choose to show a border around the central patch using the ``border`` argument:
+
+.. code-block:: python
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df="./patch_df.csv",
+        parent_df="./parent_df.csv",
+        annotations_dir="./annotations",
+        task_name="railspace",
+        labels=["no_railspace", "railspace"],
+        username="rosie",
+        show_context=True,
+        border=True,
+    )
+
+    annotator.annotate()
+
+or, equivalently, :
+
+.. code-block:: python
+
+    annotator.annotate(show_context=True, border=True)
 
 By default, your ``Annotator`` will show one surrounding patch in the context image.
 You can change this by passing the ``surrounding`` argument when initializing the ``Annotator`` instance and/or when calling the ``annotate`` method.
@@ -213,6 +238,20 @@ e.g. to filter for patches that have been predicted to be "railspace":
 This will only show you patches that have been predicted to be "railspace".
 
 You can filter for any column in your patch DataFrame, and you can filter for multiple values by passing multiple key-value pairs as your ``filter_for`` dictionary.
+
+Showing additional information about your patches in the annotation interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like to show additional information about your patches in the annotation interface, you can pass the names of the columns you would like to show using the ``show_vals`` argument when calling the ``annotate()`` method.
+
+e.g. to show the ``"mean_pixel"`` and ``"std_pixel"`` columns in the annotation interface, you should pass these column names as a list to the ``show_vals`` argument:
+
+.. code-block:: python
+
+    annotator.annotate(show_vals=["mean_pixel", "std_pixel"])
+
+The values in these columns will then be shown below the patch when you are annotating.
+This can help you get an idea of which mean pixel values you might want to filter for or use as "min_values" or "max_values" arguments when annotating.
 
 .. _Save_annotations:
 
