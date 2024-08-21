@@ -15,6 +15,7 @@ Describe changes/updates you have made to the code.
 - [ ] Ensure submission passes current tests
 - [ ] Add tests
 - [ ] Update relevant docs
+- [ ] Update changelog
 
 ### Reviewer checklist
 
