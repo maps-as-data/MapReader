@@ -8,7 +8,7 @@ To add yourself as a contributor to MapReader, comment on your issue or PR with 
 
 .. note:: Remember to change this to your GitHub username!
 
-for example, to add Katie McDonough for research, ideas and docs, you would write:
+For example, to add Katie McDonough for research, ideas and docs, you would write:
 
 ``@all-contributors please add @kmcdono2 for research, ideas, docs``
 
