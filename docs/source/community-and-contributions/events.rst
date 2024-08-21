@@ -24,19 +24,19 @@ in the Google notes doc for each call.
      - `Notes and Zoom link <https://docs.google.com/document/d/1UE2OjPE7OitoB8AsG4swk1k3pD44lW_YgMkaR4VxUXU/edit>`_
    * - September 5, 2024, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
-     - Notes and Zoom link - *Coming soon*
+     - `Notes and Zoom link <https://docs.google.com/document/d/1zkrj-Bfofdzj9lbuP5yM58nY8_aGBUAqBlWPwb946XM/edit>`_
    * - October 31, 2024, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
-     - Notes and Zoom link - *Coming soon*
+     - `Notes and Zoom link <https://docs.google.com/document/d/1goI0tqiySbMyXbCTlSD8iCLMIE45DVJhqme_dNo5oVg/edit>`_
    * - December 12, 2024, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
-     - Notes and Zoom link - *Coming soon*
+     - `Notes and Zoom link <https://docs.google.com/document/d/177Gc3jqQ4L-HIhQuzEdEej-GYdHb-kaMxoLxMr_-tXU/edit>`_
    * - January 9, 2025, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
-     - Notes and Zoom link - *Coming soon*
+     - `Notes and Zoom link <https://docs.google.com/document/d/1Xe8ZxTb0_AhuTDsrOsPMzUF1xV6FfzBmvvvlhRQ6NK8/edit>`_
    * - February 6, 2025, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
-     - Notes and Zoom link - *Coming soon*
+     - `Notes and Zoom link <https://docs.google.com/document/d/1RkOO-E6EtekXZC0Y3ZGF1w4ztx2PpPfcZzvEsiIdgDk/edit>`_
 
 .. ----- Past community calls -------------------------------------------------
 
@@ -83,10 +83,9 @@ workshops to support a growing user community around MapReader during 2024.
      - Fall Data/Culture Workshop:
 
        MapReader + Newspapers
-     - At The Alan Turing Institute, London, UK
-
-       (and partially online/hybrid)
-     - Website coming soon
+     - At The Alan Turing Institute, London, UK (and partially online/hybrid)
+     - `More details <https://www.turing.ac.uk/events/autumn-dataculture-workshop>`_
+     - `Application form <https://forms.office.com/pages/responsepage.aspx?id=p_SVQ1XklU-Knx-672OE-TgLartKqSxMr5oVtD7lkzpURTE3MDIyQUtaM0s0SjU1UUVLWDUyOTZSVi4u>`_
 
 
 .. ----- Past workshops -------------------------------------------------------
