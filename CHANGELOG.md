@@ -213,27 +213,33 @@ _This release marks the end of the Living with Machines project._
 
 ## [v1.0.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.4) (2023-06-27)
 
-## Commit messages
-
-- save metadata to csv on each download
-- add error message for broken image files
-
 ## Pull requests
 
 - [#210](https://github.com/Living-with-machines/MapReader/pull/210)
 - [#209](https://github.com/Living-with-machines/MapReader/pull/209)
 
+## Commit messages
+
+- save metadata to csv on each download
+- add error message for broken image files
+
 ## [v1.0.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.3) (2023-06-21)
-
-### Commit messages
-
-- adds details to dev docs about version numbers
 
 ### Pull requests
 
 - [#220](https://github.com/Living-with-machines/MapReader/pull/220)
 
+### Commit messages
+
+- adds details to dev docs about version numbers
+
 ## [v1.0.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.2) (2023-06-20)
+
+### Pull requests
+
+- [#200](https://github.com/Living-with-machines/MapReader/pull/200)
+- [#197](https://github.com/Living-with-machines/MapReader/pull/197)
+- [#202](https://github.com/Living-with-machines/MapReader/pull/202)
 
 ### Commit messages
 
@@ -246,13 +252,11 @@ _This release marks the end of the Living with Machines project._
 - fixes production PyPI deployment
 - enables manual triggers
 
+## [v1.0.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.1) (2023-06-06)
+
 ### Pull requests
 
-- [#200](https://github.com/Living-with-machines/MapReader/pull/200)
-- [#197](https://github.com/Living-with-machines/MapReader/pull/197)
-- [#202](https://github.com/Living-with-machines/MapReader/pull/202)
-
-## [v1.0.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.1) (2023-06-06)
+- [#188](https://github.com/Living-with-machines/MapReader/pull/188)
 
 ### Commit messages
 
@@ -267,11 +271,25 @@ _This release marks the end of the Living with Machines project._
 - update workshop notebook w/ katies comments
 - update empty notebook
 
+## [v1.0.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.0) (2023-06-06)
+
 ### Pull requests
 
-- [#188](https://github.com/Living-with-machines/MapReader/pull/188)
-
-## [v1.0.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.0) (2023-06-06)
+- [#95](https://github.com/Living-with-machines/MapReader/pull/95)
+- [#140](https://github.com/Living-with-machines/MapReader/pull/140)
+- [#155](https://github.com/Living-with-machines/MapReader/pull/155)
+- [#151](https://github.com/Living-with-machines/MapReader/pull/151)
+- [#165](https://github.com/Living-with-machines/MapReader/pull/165)
+- [#160](https://github.com/Living-with-machines/MapReader/pull/160)
+- [#163](https://github.com/Living-with-machines/MapReader/pull/163)
+- [#180](https://github.com/Living-with-machines/MapReader/pull/180)
+- [#154](https://github.com/Living-with-machines/MapReader/pull/154)
+- [#176](https://github.com/Living-with-machines/MapReader/pull/176)
+- [#164](https://github.com/Living-with-machines/MapReader/pull/164)
+- [#182](https://github.com/Living-with-machines/MapReader/pull/182)
+- [#185](https://github.com/Living-with-machines/MapReader/pull/185)
+- [#199](https://github.com/Living-with-machines/MapReader/pull/199)
+- [#195](https://github.com/Living-with-machines/MapReader/pull/195)
 
 ### Commit messages
 
@@ -491,25 +509,13 @@ _This release marks the end of the Living with Machines project._
 - Update README.md
 - Update conf.py (turn off todos)
 
+## [v0.3.4](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.4) (2023-02-20)
+
 ### Pull requests
 
-- [#95](https://github.com/Living-with-machines/MapReader/pull/95)
-- [#140](https://github.com/Living-with-machines/MapReader/pull/140)
-- [#155](https://github.com/Living-with-machines/MapReader/pull/155)
-- [#151](https://github.com/Living-with-machines/MapReader/pull/151)
-- [#165](https://github.com/Living-with-machines/MapReader/pull/165)
-- [#160](https://github.com/Living-with-machines/MapReader/pull/160)
-- [#163](https://github.com/Living-with-machines/MapReader/pull/163)
-- [#180](https://github.com/Living-with-machines/MapReader/pull/180)
-- [#154](https://github.com/Living-with-machines/MapReader/pull/154)
-- [#176](https://github.com/Living-with-machines/MapReader/pull/176)
-- [#164](https://github.com/Living-with-machines/MapReader/pull/164)
-- [#182](https://github.com/Living-with-machines/MapReader/pull/182)
-- [#185](https://github.com/Living-with-machines/MapReader/pull/185)
-- [#199](https://github.com/Living-with-machines/MapReader/pull/199)
-- [#195](https://github.com/Living-with-machines/MapReader/pull/195)
-
-## [v0.3.4](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.4) (2023-02-20)
+- [#65](https://github.com/Living-with-machines/MapReader/pull/65)
+- [#68](https://github.com/Living-with-machines/MapReader/pull/68)
+- [#69](https://github.com/Living-with-machines/MapReader/pull/69)
 
 ### Commit messages
 
@@ -555,13 +561,13 @@ _This release marks the end of the Living with Machines project._
 - build conda packages for upstream dependancies
 - Successful local build of conda package
 
+## [v0.3.3](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.3) (2022-04-27)
+
 ### Pull requests
 
-- [#65](https://github.com/Living-with-machines/MapReader/pull/65)
-- [#68](https://github.com/Living-with-machines/MapReader/pull/68)
-- [#69](https://github.com/Living-with-machines/MapReader/pull/69)
-
-## [v0.3.3](https://github.com/Living-with-machines/MapReader/releases/tag/v0.3.3) (2022-04-27)
+- [#40](https://github.com/Living-with-machines/MapReader/pull/40)
+- [#41](https://github.com/Living-with-machines/MapReader/pull/41)
+- [#38](https://github.com/Living-with-machines/MapReader/pull/38)
 
 ### Commit messages
 
@@ -671,13 +677,12 @@ _This release marks the end of the Living with Machines project._
 - add annotations
 - 5 epochs
 
+## [v0.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v0.1.2) (2022-03-03)
+
 ### Pull requests
 
-- [#40](https://github.com/Living-with-machines/MapReader/pull/40)
-- [#41](https://github.com/Living-with-machines/MapReader/pull/41)
-- [#38](https://github.com/Living-with-machines/MapReader/pull/38)
-
-## [v0.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v0.1.2) (2022-03-03)
+- [#24](https://github.com/Living-with-machines/MapReader/pull/24)
+- [#25](https://github.com/Living-with-machines/MapReader/pull/25)
 
 ### Commit messages
 
@@ -710,11 +715,6 @@ _This release marks the end of the Living with Machines project._
 - Update setup.py
 - Add quick_start notebook
 - Add files to quickstart notebook
-
-### Pull requests
-
-- [#24](https://github.com/Living-with-machines/MapReader/pull/24)
-- [#25](https://github.com/Living-with-machines/MapReader/pull/25)
 
 ## [v0.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v0.1.1) (2022-01-15)
 
