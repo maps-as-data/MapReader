@@ -87,6 +87,7 @@ _ADD NEW CHANGES HERE_
 ## [v1.3.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.1) (2024-05-03)
 
 ### Fixed
+
 - Fixes [#398](https://github.com/Living-with-machines/MapReader/issues/398)
 
 ## [v1.3.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.0) (2024-04-29)
@@ -95,16 +96,19 @@ _This release was used for the Data/Culture Spring Workshop 2024._
 
 ### Added
 
-- Support for Python 3.12 ([#384](https://github.com/Living-with-machines/MapReader/pull/384)
 - Adds text spotting to MapReader ([#388](https://github.com/Living-with-machines/MapReader/pull/388))
+
+## [v1.2.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.2.0) (2024-04-08)
+
+_This release removes support for Python 3.8._
+
+### Added
+
+- Support for Python 3.12 ([#384](https://github.com/Living-with-machines/MapReader/pull/384)
 
 ### Removed
 
 - Support for Python 3.8 ([#384](https://github.com/Living-with-machines/MapReader/pull/384))
-
-## [v1.2.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.2.0) (2024-04-08)
-
-TODO
 
 ## [v1.1.5](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.5) (2024-04-04)
 
@@ -123,9 +127,9 @@ TODO
 
 ## [v1.1.4](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.4) (2024-02-23)
 
-### Changed
+### Fixed
 
-- Updates to worked examples ([#357](https://github.com/Living-with-machines/MapReader/pull/357))
+- Annotator no longer errors if "url" not in dataframe ([#357](https://github.com/Living-with-machines/MapReader/pull/357))
 
 ## [v1.1.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.3) (2024-02-21)
 
@@ -147,12 +151,19 @@ TODO
 
 ## [v1.1.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.2) (2024-02-05)
 
+### Fixed
+
+- Fixes [#346](https://github.com/Living-with-machines/MapReader/issues/346))
+
+## [v1.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.1) (2024-01-08)
+
 ### Added
 
 - Adds `add_coords_from_grid_bb` method to the `MapImages` class, allowing users to regenerate coordinates from grid bounding boxes
 ([#318](https://github.com/Living-with-machines/MapReader/pull/318))
 - Adds `save_parents_as_geotiffs` method to the `MapImages` class, enabling users to save parent images as GeoTIFFs ([#318](https://github.com/Living-with-machines/MapReader/pull/318))
 - Ensures CSV files are loaded correctly by applying `literal_eval` to all columns in the dataframe ([#318](https://github.com/Living-with-machines/MapReader/pull/318))
+- Adds first draft of JOSS paper ([#321](https://github.com/Living-with-machines/MapReader/pull/321))
 
 ### Changed
 
@@ -162,23 +173,24 @@ TODO
 ### Fixed
 
 - Fixes [#331](https://github.com/Living-with-machines/MapReader/issues/331)
-- Fixes [#346](https://github.com/Living-with-machines/MapReader/issues/346)
-
-## [v1.1.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.1) (2024-01-08)
-
-TODO
 
 ## [v1.1.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.1.0) (2023-12-14)
 
-### Changed
+### Fixed
 
-- Replaces annotation interface in MapReader ([#173](https://github.com/Living-with-machines/MapReader/pull/173))
+- Fixes the `reproject_geo_info` method in `geo_utils` ([#317](https://github.com/Living-with-machines/MapReader/pull/317))
 
 ## [v1.0.7](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.7) (2023-12-14)
+
+_New annotation interface!_
 
 ### Added
 
 - Adds `all-contributors` bot to MapReader repo ([#297](https://github.com/Living-with-machines/MapReader/pull/297))
+
+### Changed
+
+- New annotation interface in MapReader ([#173](https://github.com/Living-with-machines/MapReader/pull/173))
 
 ## [v1.0.6](https://github.com/Living-with-machines/MapReader/releases/tag/v1.0.6) (2023-11-22)
 
