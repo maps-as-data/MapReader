@@ -72,9 +72,21 @@ Updating documentation
 If possible, please update the MapReader documentation to reflect any changes you have made to the code.
 You can see more guidance on this :doc:`here </community-and-contributions/contribution-guide/getting-started-with-contributions/add-or-update-documentation>`.
 
+Updating the changelog
+----------------------
+
+If you have made changes to the code, please update the "Pre-release" section of the changelog (`CHANGELOG.md`) with a summary of your changes.
+
+We follow the `Common Changelog <https://common-changelog.org/>`__ guidance for our changelog.
+You can use their documentation and our previous changelog entries to help you format your own changelog entry.
+
+.. note::
+
+    If you have made only minor changes to the code (e.g. updating docstrings, minor style changes, formatting updates, etc.), you do not need to update the changelog. Instead you should add the `no changelog` label to your pull request.
+
 When you are finished
 ----------------------
 
-Once you are happy with the changes you have made, please update the changelog (`CHANGELOG.md`) with a summary of your changes (you can look at previous entries for guidance) and create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
+Once you are happy with the changes you have made, create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
 
 If possible, please link your pull request to any issue(s) your changes fix/address and write a thorough description of the changes you have made.
