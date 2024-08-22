@@ -5,7 +5,7 @@ Events
 Community Calls
 ---------------
 
-We host online community calls every 2 months for friends of MapReader to meet
+We host online community calls every month for friends of MapReader to meet
 up and discuss work in progress, feature requests, shared development tasks,
 or other issues and ideas. All are welcome. Details for joining are available
 in the Google notes doc for each call.
