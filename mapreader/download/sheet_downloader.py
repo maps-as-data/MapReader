@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import time
 import urllib
 import urllib.request
 
@@ -570,7 +571,18 @@ class SheetDownloader:
         else:
             print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
 
-        shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        # Try to remove the temporary folder
+        try:
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except PermissionError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except OSError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+
         return img_path
 
     def _save_metadata(

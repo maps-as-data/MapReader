@@ -233,13 +233,13 @@ def test_init_load(inputs, load_classifier):
     assert isinstance(classifier.model, models.ResNet)
 
 
-def test_add_criterion(load_classifier):
+def test_add_loss_fn(load_classifier):
     classifier = load_classifier
-    classifier.add_criterion("bce")  # loss function as str
-    assert isinstance(classifier.criterion, torch.nn.BCELoss)
-    my_criterion = torch.nn.L1Loss()
-    classifier.add_criterion(my_criterion)
-    assert isinstance(classifier.criterion, torch.nn.L1Loss)
+    classifier.add_loss_fn("bce")  # loss function as str
+    assert isinstance(classifier.loss_fn, torch.nn.BCELoss)
+    loss_fn = torch.nn.L1Loss()
+    classifier.add_loss_fn(loss_fn)
+    assert isinstance(classifier.loss_fn, torch.nn.L1Loss)
 
 
 def test_initialize_optimizer(load_classifier):
@@ -299,12 +299,12 @@ def test_init_errors(sample_dir):
         ClassifierContainer("VGG", None, None)
 
 
-def test_criterion_errors(load_classifier):
+def test_loss_fn_errors(load_classifier):
     classifier = load_classifier
-    with pytest.raises(NotImplementedError, match="criterion can only be"):
-        classifier.add_criterion("a fake criterion")
+    with pytest.raises(NotImplementedError, match="loss function can only be"):
+        classifier.add_loss_fn("a fake loss_fn")
     with pytest.raises(ValueError, match="Please pass"):
-        classifier.add_criterion(0.01)
+        classifier.add_loss_fn(0.01)
 
 
 def test_optimizer_errors(load_classifier):
@@ -343,7 +343,7 @@ def test_infer_models_by_string(inputs, infer_inputs):
         classifier = ClassifierContainer(
             model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
-        classifier.add_criterion()
+        classifier.add_loss_fn()
         classifier.initialize_optimizer()
         classifier.initialize_scheduler()
         classifier.load_dataset(infer_inputs, set_name="infer")
@@ -358,7 +358,7 @@ def test_infer_hf_models(inputs, infer_inputs):
     classifier = ClassifierContainer(
         my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )
-    classifier.add_criterion()
+    classifier.add_loss_fn()
     classifier.initialize_optimizer()
     classifier.initialize_scheduler()
     classifier.load_dataset(infer_inputs, set_name="infer")
@@ -383,7 +383,7 @@ def test_infer_timm_models(inputs, infer_inputs):
         classifier = ClassifierContainer(
             my_model, labels_map=annots.labels_map, dataloaders=dataloaders
         )
-        classifier.add_criterion()
+        classifier.add_loss_fn()
         classifier.initialize_optimizer()
         classifier.initialize_scheduler()
         classifier.load_dataset(infer_inputs, set_name="infer")

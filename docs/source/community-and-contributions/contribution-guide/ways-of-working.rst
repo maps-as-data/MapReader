@@ -76,6 +76,6 @@ Project members will:
 Acknowledgments
 ~~~~~~~~~~~~~~~
 
-We have used `_The Turing Way_ <https://github.com/alan-turing-institute/the-turing-way>`_'s
+We have used `The Turing Way <https://github.com/alan-turing-institute/the-turing-way>`_'s
 `ways of working document <https://github.com/alan-turing-institute/the-turing-way/blob/main/ways_of_working.md>`_
 as a template for this document.

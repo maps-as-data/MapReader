@@ -37,8 +37,8 @@ Style guide
 
 When making your changes, please:
 
-- Try to align to the `PEP 8 style guide for Python code <https://peps.python.org/pep-0008/>`.
-- Try to use the numpy-style docstrings (as per `this link <https://numpydoc.readthedocs.io/en/latest/format.html#>_`).
+- Try to align to the `PEP 8 style guide for Python code <https://peps.python.org/pep-0008/>`__.
+- Try to use the numpy-style docstrings (as per `this link <https://numpydoc.readthedocs.io/en/latest/format.html#>`__).
 - Ensure all docstrings are kept up to date and reflect any changes to code functionality you have made.
 - Add and run tests for your code.
 - If you add new dependencies, add these to our ``setup.py``.
@@ -46,8 +46,8 @@ When making your changes, please:
 
 When you are done making changes, please:
 
-- Run `black <https://black.readthedocs.io/en/stable/>` to reformat your code
-- Run `flake8 <https://flake8.pycqa.org/en/latest/index.html#>` to lint your code.
+- Run `black <https://black.readthedocs.io/en/stable/>`__ to reformat your code
+- Run `flake8 <https://flake8.pycqa.org/en/latest/index.html#>`__ to lint your code.
 
 
 Running tests
@@ -61,10 +61,32 @@ To run the tests, use the following command:
 
 This will run all the tests in the MapReader package.
 
+If you've made changes to the MapReader code, please run the tests and ensure all are passing.
+Or, if you've made code changes that intentionally alter the behavior of MapReader, please update the tests accordingly.
+
+If possible, you should also add new tests for any new code/functionality you have added.
+
+Updating documentation
+----------------------
+
+If possible, please update the MapReader documentation to reflect any changes you have made to the code.
+You can see more guidance on this :doc:`here </community-and-contributions/contribution-guide/getting-started-with-contributions/add-or-update-documentation>`.
+
+Updating the changelog
+----------------------
+
+If you have made changes to the code, please update the "Pre-release" section of the changelog (`CHANGELOG.md`) with a summary of your changes.
+
+We follow the `Common Changelog <https://common-changelog.org/>`__ guidance for our changelog.
+You can use their documentation and our previous changelog entries to help you format your own changelog entry.
+
+.. note::
+
+    If you have made only minor changes to the code (e.g. updating docstrings, minor style changes, formatting updates, etc.), you do not need to update the changelog. Instead you should add the `no changelog` label to your pull request.
 
 When you are finished
 ----------------------
 
-Once you are happy with the changes you have made, please create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
+Once you are happy with the changes you have made, create a new `pull request <https://github.com/Living-with-machines/MapReader/pulls>`_ to let us know you'd like us to review your code.
 
 If possible, please link your pull request to any issue(s) your changes fix/address and write a thorough description of the changes you have made.

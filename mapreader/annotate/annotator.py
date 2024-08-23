@@ -59,6 +59,8 @@ class Annotator:
         Name of the column in which labels are stored in patch DataFrame, by default "label"
     show_context : bool, optional
         Whether to show context when loading patches, by default False
+    border : bool, optional
+        Whether to add a border around the central patch when showing context, by default False
     auto_save : bool, optional
         Whether to automatically save annotations, by default True
     delimiter : str, optional
@@ -112,6 +114,7 @@ class Annotator:
         patch_paths_col: str = "image_path",
         label_col: str = "label",
         show_context: bool = False,
+        border: bool = False,
         auto_save: bool = True,
         delimiter: str = ",",
         sortby: str | None = None,
@@ -265,6 +268,7 @@ class Annotator:
         self.patch_paths_col = patch_paths_col
         self.annotations_file = annotations_file
         self.show_context = show_context
+        self.border = border
         self.auto_save = auto_save
         self.username = username
         self.task_name = task_name
@@ -455,7 +459,7 @@ class Annotator:
 
         self.navbox = widgets.VBox([widgets.HBox([prev_btn, next_btn])])
 
-    def get_queue(
+    def _get_queue(
         self, as_type: str | None = "list"
     ) -> list[int] | (pd.Index | pd.Series):
         """
@@ -523,7 +527,7 @@ class Annotator:
             return indices
         return queue_df
 
-    def get_context(self):
+    def _get_context(self):
         """
         Provides the surrounding context for the patch to be annotated.
 
@@ -534,15 +538,21 @@ class Annotator:
             context.
         """
 
-        def get_path(image_path, dim=True):
+        def get_square(image_path, dim=True, border=False):
             # Resize the image
             im = Image.open(image_path)
 
             # Dim the image
-            if dim in [True, "True"]:
+            if dim in ["True", True]:
                 im_array = np.array(im)
                 im_array = 256 - (256 - im_array) * 0.4  # lighten image
                 im = Image.fromarray(im_array.astype(np.uint8))
+
+            if border in ["True", True] and self.border:
+                w, h = im.size
+                im = ImageOps.expand(im, border=2, fill="red")
+                im = im.resize((w, h))
+
             return im
 
         def get_empty_square(patch_size: tuple[int, int]):
@@ -596,7 +606,10 @@ class Annotator:
 
         # derive ids from items
         ids = [x.index[0] if len(x.index) == 1 else None for x in items]
-        ids = [x != ix for x in ids]
+        # list of booleans, True if not the current patch, False if the current patch
+        # used for dimming the surrounding patches and adding a border to the current patch
+        dim_bools = [x != ix for x in ids]
+        border_bools = [x == ix for x in ids]
 
         # derive images from items
         image_paths = [
@@ -604,14 +617,16 @@ class Annotator:
         ]
 
         # zip them
-        image_list = list(zip(image_paths, ids))
+        image_list = list(zip(image_paths, dim_bools, border_bools))
 
         # split them into rows
         per_row = len(deltas)
         images = [
             [
-                get_path(x[0], dim=x[1]) if x[0] else get_empty_square((width, height))
-                for x in lst
+                get_square(image_path, dim=dim, border=border)
+                if image_path
+                else get_empty_square((width, height))
+                for image_path, dim, border in lst
             ]
             for lst in array_split(image_list, per_row)
         ]
@@ -644,6 +659,7 @@ class Annotator:
     def annotate(
         self,
         show_context: bool | None = None,
+        border: bool | None = None,
         sortby: str | None = None,
         ascending: bool | None = None,
         min_values: dict | None = None,
@@ -651,6 +667,7 @@ class Annotator:
         surrounding: int | None = None,
         resize_to: int | None = None,
         max_size: int | None = None,
+        show_vals: list[str] | None = None,
     ) -> None:
         """Annotate at the patch-level of the current patch.
         Renders the annotation interface for the first image.
@@ -659,6 +676,9 @@ class Annotator:
         ----------
         show_context : bool or None, optional
             Whether or not to display the surrounding context for each image.
+            Default is None.
+        border : bool or None, optional
+            Whether or not to display a border around the image (when using `show_context`).
             Default is None.
         sortby : str or None, optional
             Name of the column to use to sort the patch DataFrame, by default None.
@@ -680,12 +700,18 @@ class Annotator:
         max_size : int or None, optional
             The size in pixels for the longest side to which constrain each
             patch image. Default: 100.
+        resize_to : int or None, optional
+            The size in pixels for the longest side to which resize each patch image. Default: None.
+        show_vals : list[str] or None, optional
+            List of column names to show in the display. By default, None.
 
         Notes
         -----
         This method is a wrapper for the
         :meth:`~.annotate.annotator.Annotate._annotate` method.
         """
+        if border is not None:
+            self.border = border
         if sortby is not None:
             self._sortby = sortby
         if ascending is not None:
@@ -696,8 +722,10 @@ class Annotator:
         if max_values is not None:
             self._max_values = max_values
 
+        self.show_vals = show_vals
+
         # re-set up queue using new min/max values
-        self._queue = self.get_queue()
+        self._queue = self._get_queue()
 
         self._annotate(
             show_context=show_context,
@@ -746,7 +774,7 @@ class Annotator:
             self.max_size = max_size
 
         # re-set up queue
-        self._queue = self.get_queue()
+        self._queue = self._get_queue()
 
         if self._filter_for is not None:
             print(f"[INFO] Filtering for: {self._filter_for}")
@@ -770,7 +798,7 @@ class Annotator:
             Previous index, current index, and path of the current image.
         """
         if self.current_index == len(self._queue):
-            self.render_complete()
+            self._render_complete()
             return
 
         self.previous_index = self.current_index
@@ -780,7 +808,7 @@ class Annotator:
 
         img_path = self.patch_df.at[ix, self.patch_paths_col]
 
-        self.render()
+        self._render()
         return self.previous_index, self.current_index, img_path
 
     def _prev_example(self, *_) -> tuple[int, int, str]:
@@ -793,7 +821,7 @@ class Annotator:
             Previous index, current index, and path of the current image.
         """
         if self.current_index == len(self._queue):
-            self.render_complete()
+            self._render_complete()
             return
 
         if self.current_index > 0:
@@ -804,10 +832,10 @@ class Annotator:
 
         img_path = self.patch_df.at[ix, self.patch_paths_col]
 
-        self.render()
+        self._render()
         return self.previous_index, self.current_index, img_path
 
-    def render(self) -> None:
+    def _render(self) -> None:
         """
         Displays the image at the current index in the annotation interface.
 
@@ -820,7 +848,7 @@ class Annotator:
         """
         # Check whether we have reached the end
         if self.current_index >= len(self) - 1:
-            self.render_complete()
+            self._render_complete()
             return
 
         ix = self._queue[self.current_index]
@@ -844,7 +872,7 @@ class Annotator:
             clear_output(wait=True)
             image = self.get_patch_image(ix)
             if self.show_context:
-                context = self.get_context()
+                context = self._get_context()
                 self._context_image = context
                 display(context.convert("RGB"))
             else:
@@ -854,6 +882,22 @@ class Annotator:
                 url = self.patch_df.at[ix, "url"]
                 text = f'<p><a href="{url}" target="_blank">Click to see entire map.</a></p>'
                 add_ins += [widgets.HTML(text)]
+
+            if self.show_vals:
+                patch_info = []
+                for col in self.show_vals:
+                    if col in self.patch_df.columns:
+                        val = self.patch_df.at[ix, col]
+                        if isinstance(val, float):
+                            val = f"{val:.4g}"
+                        patch_info.append(f"<b>{col}</b>: {val}")
+                add_ins += [
+                    widgets.HTML(
+                        '<p style="text-align: center">'
+                        + "<br>".join(patch_info)
+                        + "</p>"
+                    )
+                ]
 
             value = self.current_index + 1 if self.current_index else 1
             description = f"{value} / {len(self._queue)}"
@@ -986,7 +1030,7 @@ class Annotator:
         _filter = ~self.patch_df[self.label_col].isna()
         return self.patch_df[_filter]
 
-    def render_complete(self):
+    def _render_complete(self):
         """
         Renders the completion message once all images have been annotated.
 

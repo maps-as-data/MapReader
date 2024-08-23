@@ -61,7 +61,7 @@ def test_pipeline(tmp_path, sample_dir):
         model="resnet18", dataloaders=dataloaders, labels_map={0: "No", 1: "rail space"}
     )
 
-    my_classifier.add_criterion("cross-entropy")
+    my_classifier.add_loss_fn("cross-entropy")
     params_to_optimize = my_classifier.generate_layerwise_lrs(
         min_lr=1e-4, max_lr=1e-3, spacing="geomspace"
     )

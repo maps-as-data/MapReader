@@ -45,6 +45,57 @@ def test_load_csv(load_annots, sample_dir):
     assert annots.labels_map == {0: "no", 1: "railspace", 2: "building"}
 
 
+def test_labels_map(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+        labels_map={1: "no", 0: "railspace"},
+    )
+    assert len(annots.annotations) == 81
+    assert annots.labels_map == {0: "railspace", 1: "no"}
+    # test append
+    annots.load(
+        f"{sample_dir}/test_annots_append.csv",
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 83
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "railspace", 1: "no", 2: "building"}
+
+
+def test_get_label_index(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/test_annots.csv",
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+        labels_map={
+            0: "railspace",
+            1: "no",
+        },  # different order vs in the csv
+    )
+    assert annots.labels_map == {0: "railspace", 1: "no"}
+    assert annots._get_label_index("railspace") == 0
+
+    # test append
+    annots.load(
+        f"{sample_dir}/test_annots_append.csv",
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "railspace", 1: "no", 2: "building"}
+    assert annots._get_label_index("railspace") == 0
+    assert annots._get_label_index("building") == 2
+
+
 @pytest.mark.dependency(name="load_annots_df", scope="session")
 def test_load_df(sample_dir):
     annots = AnnotationsLoader()
@@ -160,6 +211,30 @@ def test_create_dataloaders_no_sampler(load_annots):
 
 
 # errors
+
+
+def test_labels_map_errors(sample_dir):
+    # csv
+    annots = AnnotationsLoader()
+    with pytest.raises(ValueError, match="not in the labels map"):
+        annots.load(
+            f"{sample_dir}/test_annots.csv",
+            reset_index=True,
+            remove_broken=False,
+            ignore_broken=True,
+            labels_map={0: "no"},
+        )
+    # dataframe
+    annots = AnnotationsLoader()
+    df = pd.read_csv(f"{sample_dir}/test_annots.csv", sep=",", index_col=0)
+    with pytest.raises(ValueError, match="not in the labels map"):
+        annots.load(
+            df,
+            reset_index=True,
+            remove_broken=False,
+            ignore_broken=True,
+            labels_map={0: "no"},
+        )
 
 
 def test_load_fake_csv_errors():

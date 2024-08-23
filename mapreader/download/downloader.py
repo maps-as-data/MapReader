@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import time
 import urllib
 import urllib.request
 
@@ -144,12 +145,24 @@ class Downloader:
             map_name = self.merger._get_output_name(grid_bb)
         self.downloader.download_tiles(grid_bb, download_in_parallel=False)
         success = self.merger.merge(grid_bb, map_name)
+
         if success:
             print(f'[INFO] Downloaded "{map_name}.png"')
         else:
             print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
 
-        shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        # Try to remove the temporary folder
+        try:
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except PermissionError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+        except OSError:
+            # try again
+            time.sleep(5)
+            shutil.rmtree(DEFAULT_TEMP_FOLDER)
+
         return success
 
     def download_map_by_polygon(
