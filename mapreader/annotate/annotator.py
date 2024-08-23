@@ -131,7 +131,7 @@ class Annotator:
         if labels is None:
             labels = []
         if patch_df is not None:
-            if isinstance(patch_df, (str | pathlib.Path)):
+            if isinstance(patch_df, (str, pathlib.Path)):
                 if re.search(r"\..?sv$", patch_df):
                     patch_df = load_from_csv(
                         patch_df,
