@@ -4,21 +4,21 @@ import pathlib
 import re
 from ast import literal_eval
 
-import geopandas as geopd
+import geopandas as gpd
 import pandas as pd
 
 
-def eval_dataframe(df: pd.DataFrame | geopd.GeoDataFrame):
+def eval_dataframe(df: pd.DataFrame | gpd.GeoDataFrame):
     """Evaluates the columns of a DataFrame/GeoDataFrame and converts them to their respective types.
 
     Parameters
     ----------
-    df : pd.DataFrame | geopd.GeoDataFrame
+    df : pd.DataFrame | gpd.GeoDataFrame
         The DataFrame/GeoDataFrame to evaluate.
 
     Returns
     -------
-    pd.DataFrame | geopd.GeoDataFrame
+    pd.DataFrame | gpd.GeoDataFrame
         The evaluated DataFrame/GeoDataFrame.
     """
     for col in df.columns:
@@ -45,7 +45,7 @@ def load_from_geojson(
     **kwargs,
 ):
     check_exists(fpath)
-    df = geopd.read_file(fpath, **kwargs)
+    df = gpd.read_file(fpath, **kwargs)
     df = eval_dataframe(df)
     return df
 

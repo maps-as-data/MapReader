@@ -5,7 +5,7 @@ import pathlib
 from ast import literal_eval
 from itertools import combinations
 
-import geopandas as geopd
+import geopandas as gpd
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -435,7 +435,7 @@ class Runner:
             raise ValueError("[ERROR] Multiple crs found in the predictions.")
         crs = geo_df["crs"].unique()[0]
 
-        geo_df = geopd.GeoDataFrame(geo_df, geometry="polygon", crs=crs)
+        geo_df = gpd.GeoDataFrame(geo_df, geometry="polygon", crs=crs)
         geo_df.to_file(save_path, driver="GeoJSON")
 
     def show(

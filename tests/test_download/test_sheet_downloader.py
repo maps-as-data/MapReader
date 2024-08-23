@@ -47,24 +47,17 @@ def test_init_errors(sample_dir):
         SheetDownloader(test_json, 10)
 
 
-def test_get_polygons(sheet_downloader):
-    sd = sheet_downloader
-    sd.get_polygons()
-    assert sd.polygons is True
-    assert (isinstance(sd.features[i]["polygon"], Polygon) for i in sd.features)
-
-
 def test_get_grid_bb(sheet_downloader):
     sd = sheet_downloader
     sd.get_grid_bb()
-    assert sd.grid_bbs is True
-    assert (isinstance(sd.features[i]["grid_bb"], GridBoundingBox) for i in sd.features)
-    assert str(sd.features[0]["grid_bb"].lower_corner) == "(14, 8147, 5300)"
-    assert str(sd.features[0]["grid_bb"].upper_corner) == "(14, 8150, 5302)"
+    assert "grid_bb" in sd.metadata.columns
+    assert (isinstance(i, GridBoundingBox) for i in sd.metadata["grid_bb"])
+    assert str(sd.metadata.iloc[0]["grid_bb"].lower_corner) == "(14, 8147, 5300)"
+    assert str(sd.metadata.iloc[0]["grid_bb"].upper_corner) == "(14, 8150, 5302)"
 
     sd.get_grid_bb(10)
-    assert str(sd.features[0]["grid_bb"].lower_corner) == "(10, 509, 331)"
-    assert str(sd.features[0]["grid_bb"].upper_corner) == "(10, 509, 331)"
+    assert str(sd.metadata.iloc[0]["grid_bb"].lower_corner) == "(10, 509, 331)"
+    assert str(sd.metadata.iloc[0]["grid_bb"].upper_corner) == "(10, 509, 331)"
 
 
 def test_get_grid_bb_errors(sample_dir):
@@ -80,41 +73,35 @@ def test_get_grid_bb_errors(sample_dir):
 def test_extract_wfs_id_nos(sheet_downloader):
     sd = sheet_downloader
     sd.extract_wfs_id_nos()
-    assert sd.wfs_id_nos is True
-    assert sd.features[0]["wfs_id_no"] == 16320
+    assert "wfs_id_no" in sd.metadata.columns
+    assert sd.metadata.iloc[0]["wfs_id_no"] == 16320
 
 
 def test_extract_published_dates(sheet_downloader):
     sd = sheet_downloader
     sd.extract_published_dates()
-    assert sd.published_dates is True
-    assert sd.features[0]["properties"]["published_date"] == 1900
+    assert "published_date" in sd.metadata.columns
+    assert sd.metadata.iloc[0]["published_date"] == 1900
     assert (
-        sd.features[3]["properties"]["published_date"] == 1896
+        sd.metadata.iloc[3]["published_date"] == 1896
     )  # metadata has "1894 to 1896" - method takes end date only
 
-    sd.extract_published_dates(date_col=["properties", "YEAR"])  # list of keys
-    assert sd.features[0]["properties"]["published_date"] == 2023
-    assert sd.features[3]["properties"]["published_date"] == 1894
+    sd.extract_published_dates(date_col="YEAR")  # str
+    assert sd.metadata.iloc[0]["published_date"] == 2023
+    assert sd.metadata.iloc[3]["published_date"] == 1894
 
     sd.extract_published_dates(date_col="test_date")  # keys as str
-    assert sd.features[0]["properties"]["published_date"] == 2021
-    assert sd.features[3]["properties"]["published_date"] == 2021
+    assert sd.metadata.iloc[0]["published_date"] == 2021
+    assert sd.metadata.iloc[3]["published_date"] == 2021
 
 
 def test_published_dates_value_errors(sheet_downloader):
     sd = sheet_downloader
-    with pytest.raises(ValueError, match="as string or list of strings"):
+    with pytest.raises(ValueError, match="as a string"):
         sd.extract_published_dates(date_col=1)
-    with pytest.raises(ValueError, match="not an integer"):
+    with pytest.raises(ValueError, match="No publication dates found"):
         sd.extract_published_dates(date_col="id")
-
-
-def test_published_dates_key_errors(sheet_downloader):
-    sd = sheet_downloader
-    with pytest.raises(KeyError):
-        sd.extract_published_dates(date_col=["properties", "fake_key"])
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         sd.extract_published_dates(date_col="fake_key")  # str instead of list
 
 
@@ -140,17 +127,17 @@ def test_get_minmax_latlon(sheet_downloader, capfd):
 def test_query_by_wfs_ids(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_wfs_ids(16320)  # test single wfs_id
-    assert sd.wfs_id_nos is True
+    assert "wfs_id_no" in sd.metadata.columns
     assert len(sd.found_queries) == 1
-    assert sd.found_queries[0] == sd.features[0]
+    assert sd.found_queries.iloc[0].equals(sd.metadata.iloc[0])
 
     sd.query_map_sheets_by_wfs_ids([16320, 16321])  # test list of wfs_ids
     assert len(sd.found_queries) == 2
-    assert sd.found_queries == sd.features[:2]
+    assert sd.found_queries.equals(sd.metadata[:2])
 
     sd.query_map_sheets_by_wfs_ids(132, append=True)  # test append
     assert len(sd.found_queries) == 3
-    assert sd.found_queries[2] == sd.features[3]
+    assert sd.found_queries.iloc[2].equals(sd.metadata.iloc[3])
 
 
 def test_query_by_wfs_ids_errors(sheet_downloader):
@@ -163,53 +150,28 @@ def test_query_by_wfs_ids_errors(sheet_downloader):
 
 def test_query_by_polygon(sheet_downloader):
     sd = sheet_downloader
-    polygon = Polygon(
-        [
-            [-0.98078243, 53.45664144],
-            [-0.9806354, 53.48556079],
-            [-0.90790637, 53.48540701],
-            [-0.90810282, 53.45648782],
-            [-0.98078243, 53.45664144],
-        ]
-    )  # should match to features[0]
+    polygon = sd.metadata.iloc[0]["geometry"].geoms[0]
     sd.query_map_sheets_by_polygon(polygon)  # test mode = 'within'
-    assert sd.polygons is True
     assert len(sd.found_queries) == 1
-    assert sd.found_queries[0] == sd.features[0]
+    assert sd.found_queries.iloc[0].equals(sd.metadata.iloc[0])
 
     sd.query_map_sheets_by_polygon(
         polygon, mode="intersects"
     )  # test mode = 'intersects'
     assert len(sd.found_queries) == 2
-    assert sd.found_queries == sd.features[:2]
+    assert sd.found_queries.equals(sd.metadata[:2])
 
-    another_polygon = Polygon(
-        [
-            [-0.23045502, 51.49344796],
-            [-0.23053988, 51.52237709],
-            [-0.16097999, 51.52243594],
-            [-0.16093917, 51.49350674],
-            [-0.23045502, 51.49344796],
-        ]
-    )  # should match to features[3]
+    another_polygon = sd.metadata.iloc[3]["geometry"].geoms[0]
     sd.query_map_sheets_by_polygon(another_polygon, append=True)  # test append
     assert len(sd.found_queries) == 3
-    assert sd.found_queries[2] == sd.features[3]
+    assert sd.found_queries.iloc[2].equals(sd.metadata.iloc[3])
 
 
 def test_query_by_polygon_errors(sheet_downloader):
     sd = sheet_downloader
     with pytest.raises(ValueError, match="pass polygon as shapely.geometry.Polygon"):
         sd.query_map_sheets_by_polygon([1, 2])
-    polygon = Polygon(
-        [
-            [-4.79999994, 54.48000003],
-            [-5.39999994, 54.48000003],
-            [-5.40999994, 54.74000003],
-            [-4.80999994, 54.75000003],
-            [-4.79999994, 54.48000003],
-        ]
-    )  # should match to features[0]
+    polygon = sd.metadata.iloc[0]["geometry"].geoms[0]
 
     with pytest.raises(
         NotImplementedError, match='``mode="within"`` or ``mode="intersects"``'
@@ -220,13 +182,12 @@ def test_query_by_polygon_errors(sheet_downloader):
 def test_query_by_coords(sheet_downloader):
     sd = sheet_downloader
     sd.query_map_sheets_by_coordinates((-0.99, 53.43))
-    assert sd.polygons is True
     assert len(sd.found_queries) == 1
-    assert sd.found_queries[0] == sd.features[1]
+    assert sd.found_queries.iloc[0].equals(sd.metadata.iloc[1])
 
     sd.query_map_sheets_by_coordinates((-0.23, 51.5), append=True)  # test append
     assert len(sd.found_queries) == 2
-    assert sd.found_queries[1] == sd.features[3]
+    assert sd.found_queries.iloc[1].equals(sd.metadata.iloc[3])
 
 
 def test_query_by_coords_errors(sheet_downloader):
@@ -239,14 +200,13 @@ def test_query_by_line(sheet_downloader):
     sd = sheet_downloader
     line = LineString([(-0.99, 53.43), (-0.93, 53.46)])
     sd.query_map_sheets_by_line(line)
-    assert sd.polygons is True
     assert len(sd.found_queries) == 2
-    assert sd.found_queries == sd.features[:2]
+    assert sd.found_queries.equals(sd.metadata[:2])
 
     another_line = LineString([(-0.2, 51.5), (-0.21, 51.6)])
     sd.query_map_sheets_by_line(another_line, append=True)  # test append
     assert len(sd.found_queries) == 3
-    assert sd.found_queries[2] == sd.features[3]
+    assert sd.found_queries.iloc[2].equals(sd.metadata.iloc[3])
 
 
 def test_query_by_line_errors(sheet_downloader):
@@ -257,19 +217,19 @@ def test_query_by_line_errors(sheet_downloader):
 
 def test_query_by_string(sheet_downloader):
     sd = sheet_downloader
-    sd.query_map_sheets_by_string("Westminster", ["properties", "PARISH"])
+    sd.query_map_sheets_by_string("Westminster", ["PARISH"])
     assert len(sd.found_queries) == 1
-    assert sd.found_queries[0] == sd.features[3]
+    assert sd.found_queries.iloc[0].equals(sd.metadata.iloc[3])
 
     sd.query_map_sheets_by_string(
         "Six_Inch_GB_WFS.16320", "id", append=True
     )  # test append + w/ keys as string
     assert len(sd.found_queries) == 2
-    assert sd.found_queries[1] == sd.features[0]
+    assert sd.found_queries.iloc[1].equals(sd.metadata.iloc[0])
 
     sd.query_map_sheets_by_string("III.SW")  # test w/ no keys
     assert len(sd.found_queries) == 1
-    assert sd.found_queries[0] == sd.features[1]
+    assert sd.found_queries.iloc[0].equals(sd.metadata.iloc[1])
 
 
 def test_query_by_string_value_errors(sheet_downloader):
@@ -282,7 +242,7 @@ def test_query_by_string_value_errors(sheet_downloader):
 
 def test_query_by_string_key_errors(sheet_downloader):
     sd = sheet_downloader
-    with pytest.raises(KeyError, match="not found in features dictionary"):
+    with pytest.raises(KeyError):
         sd.query_map_sheets_by_string("Nottinghamshire", ["fake_key"])
 
 
@@ -316,7 +276,7 @@ def mock_response(monkeypatch):
                 )
                 i += 1
         merged_image.save(out_path, self.img_output_format[1])
-        return out_path
+        return out_path, True
 
     monkeypatch.setattr(TileMerger, "merge", mock_merge)
 
@@ -358,7 +318,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     )
     # zoom level 16
     sd.get_grid_bb(16)
-    assert sd.grid_bbs is True
+    assert "grid_bb" in sd.metadata.columns
     maps_path = tmp_path / "test_maps_16/"
     metadata_fname = "test_metadata.csv"
     sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
@@ -395,7 +355,7 @@ def test_download_all_kwargs(sheet_downloader, tmp_path, mock_response):
     maps_path = tmp_path / "test_maps_14/"
     metadata_fname = "test_metadata.csv"
     kwargs = {
-        "metadata_to_save": {"test1": ["properties", "test"], "test2": "id"},
+        "metadata_to_save": {"test1": "test", "test2": "id"},
         "date_col": "test_date",
         "force": True,
     }
@@ -531,22 +491,14 @@ def test_download_by_wfs_ids_errors(sheet_downloader, tmp_path, mock_response):
     with pytest.raises(ValueError, match="as int or list of ints"):
         sd.download_map_sheets_by_wfs_ids(21.4, maps_path, metadata_fname, force=True)
 
-    with pytest.raises(ValueError, match="No map sheets"):
+    with pytest.raises(ValueError, match="No maps to download"):
         sd.download_map_sheets_by_wfs_ids(12, maps_path, metadata_fname)
 
 
 def test_download_by_polygon(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
-    polygon = Polygon(
-        [
-            [-0.98078243, 53.45664144],
-            [-0.9806354, 53.48556079],
-            [-0.90790637, 53.48540701],
-            [-0.90810282, 53.45648782],
-            [-0.98078243, 53.45664144],
-        ]
-    )  # should match to features[0]
+    polygon = sd.metadata.iloc[0]["geometry"].geoms[0]
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_polygon(
@@ -578,16 +530,17 @@ def test_download_by_polygon(sheet_downloader, tmp_path, mock_response):
 def test_download_by_polygon_errors(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     sd.get_grid_bb(14)
-    polygon = Polygon([[0, 1], [1, 2], [2, 3], [3, 4], [0, 1]])
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     with pytest.raises(
         NotImplementedError, match='``mode="within"`` or ``mode="intersects"``'
     ):
+        polygon = sd.metadata.iloc[0]["geometry"].geoms[0]
         sd.download_map_sheets_by_polygon(
             polygon, maps_path, metadata_fname, mode="fake mode", force=True
         )
     with pytest.raises(ValueError, match="out of map metadata bounds"):
+        polygon = Polygon([[0, 1], [1, 2], [2, 3], [3, 4], [0, 1]])
         sd.download_map_sheets_by_polygon(
             polygon, maps_path, metadata_fname, force=True
         )
@@ -665,7 +618,7 @@ def test_download_by_string(sheet_downloader, tmp_path, mock_response):
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
     sd.download_map_sheets_by_string(
-        "Westminster", ["properties", "PARISH"], maps_path, metadata_fname, force=True
+        "Westminster", ["PARISH"], maps_path, metadata_fname, force=True
     )  # test w/ keys list
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
@@ -719,7 +672,7 @@ def test_download_by_string_key_errors(sheet_downloader, tmp_path, mock_response
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
-    with pytest.raises(KeyError, match="not found in features dictionary"):
+    with pytest.raises(KeyError):
         sd.download_map_sheets_by_string(
             "Nottinghamshire", ["fake_key"], maps_path, metadata_fname, force=True
         )
@@ -755,13 +708,13 @@ def test_download_by_queries_errors(sheet_downloader, tmp_path, mock_response):
     sd.get_grid_bb(14)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"
-    with pytest.raises(ValueError, match="No query results"):
+    with pytest.raises(ValueError, match="No maps to download"):
         sd.download_map_sheets_by_queries(maps_path, metadata_fname, force=True)
 
 
 def test_data_warning_error(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
-    sd.features.extend(sd.features * 100)
+    sd.metadata = pd.concat([sd.metadata] * 100)
     sd.get_grid_bb(16)
     maps_path = tmp_path / "test_maps/"
     metadata_fname = "test_metadata.csv"

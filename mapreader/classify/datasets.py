@@ -7,7 +7,7 @@ import re
 from itertools import product
 from typing import Callable
 
-import geopandas as geopd
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
@@ -34,7 +34,7 @@ class PatchDataset(Dataset):
 
     Parameters
     ----------
-    patch_df : str or pathlib.Path or pandas.DataFrame or geopd.GeoDataFrame
+    patch_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
         DataFrame or path to CSV/TSV/geojson file containing the paths to image patches and their labels.
     transform : Union[str, transforms.Compose, Callable]
         The transform to use on the image.
@@ -55,7 +55,7 @@ class PatchDataset(Dataset):
 
     Attributes
     ----------
-    patch_df : pandas.DataFrame or geopd.GeoDataFrame
+    patch_df : pandas.DataFrame or gpd.GeoDataFrame
         DataFrame containing the paths to image patches and their labels.
     label_col : str
         The name of the column containing the image labels.
@@ -95,7 +95,7 @@ class PatchDataset(Dataset):
 
     def __init__(
         self,
-        patch_df: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
         transform: str | (transforms.Compose | Callable),
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
@@ -103,7 +103,7 @@ class PatchDataset(Dataset):
         label_index_col: str | None = None,
         image_mode: str | None = "RGB",
     ):
-        if isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
 
         elif isinstance(patch_df, (str | pathlib.Path)):
@@ -391,9 +391,9 @@ class PatchContextDataset(PatchDataset):
 
     Parameters
     ----------
-    patch_df : str or pathlib.Path or pandas.DataFrame or geopd.GeoDataFrame
+    patch_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
         DataFrame or path to CSV/TSV/geojson file containing the paths to image patches and their labels.
-    total_df : str or pathlib.Path or pandas.DataFrame or geopd.GeoDataFrame
+    total_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
         DataFrame or path to CSV/TSV/geojson file containing the paths to all images and their labels.
     transform : str
         Torchvision transform to be applied to context  images.
@@ -419,7 +419,7 @@ class PatchContextDataset(PatchDataset):
 
     Attributes
     ----------
-    patch_df : pandas.DataFrame or geopd.GeoDataFrame
+    patch_df : pandas.DataFrame or gpd.GeoDataFrame
         DataFrame with columns representing image paths, labels,
         and object bounding boxes.
     label_col : str
@@ -443,8 +443,8 @@ class PatchContextDataset(PatchDataset):
 
     def __init__(
         self,
-        patch_df: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
-        total_df: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
+        total_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
         transform: str,
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
@@ -455,7 +455,7 @@ class PatchContextDataset(PatchDataset):
         create_context: bool = False,
         parent_path: str | None = "./maps",
     ):
-        if isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
         elif isinstance(patch_df, (str | pathlib.Path)):
             print(f'[INFO] Reading "{patch_df}".')
@@ -475,7 +475,7 @@ class PatchContextDataset(PatchDataset):
                 "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
-        if isinstance(total_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(total_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.total_df = total_df
         elif isinstance(total_df, (str | pathlib.Path)):
             print(f'[INFO] Reading "{total_df}".')

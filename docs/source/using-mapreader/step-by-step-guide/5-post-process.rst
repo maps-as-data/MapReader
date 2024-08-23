@@ -22,9 +22,9 @@ or, if you have your predictions saved in a ``geojson`` file, you can use a geop
 
 .. code-block:: python
 
-    import geopandas as geopd
+    import geopandas as gpd
 
-    preds = geopd.read_file("path/to/predictions.geojson")
+    preds = gpd.read_file("path/to/predictions.geojson")
 
 You can then run the post-processing code as follows:
 

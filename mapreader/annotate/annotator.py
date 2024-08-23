@@ -12,7 +12,7 @@ import warnings
 from itertools import product
 from pathlib import Path
 
-import geopandas as geopd
+import geopandas as gpd
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
@@ -37,9 +37,9 @@ class Annotator:
 
     Parameters
     ----------
-    patch_df : str, pathlib.Path, pd.DataFrame or geopd.GeoDataFrame or None, optional
+    patch_df : str, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame or None, optional
         Path to a CSV/geojson file or a pandas DataFrame/ geopandas GeoDataFrame containing patch data, by default None
-    parent_df : str, pathlib.Path, pd.DataFrame or geopd.GeoDataFrame or None, optional
+    parent_df : str, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame or None, optional
         Path to a CSV/geojson file or a pandas DataFrame/ geopandas GeoDataFrame containing parent data, by default None
     labels : list, optional
         List of labels for annotation, by default None
@@ -102,8 +102,8 @@ class Annotator:
 
     def __init__(
         self,
-        patch_df: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame | None = None,
-        parent_df: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame | None = None,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame | None = None,
+        parent_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame | None = None,
         labels: list = None,
         patch_paths: str | None = None,
         parent_paths: str | None = None,
@@ -140,7 +140,7 @@ class Annotator:
                     raise ValueError(
                         "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
-            elif not isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
+            elif not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
@@ -159,7 +159,7 @@ class Annotator:
                     raise ValueError(
                         "[ERROR] ``parent_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
-            if not isinstance(parent_df, (pd.DataFrame, geopd.GeoDataFrame)):
+            if not isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
@@ -184,9 +184,9 @@ class Annotator:
                 )
 
         # Check for metadata + data
-        if not isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             raise ValueError("[ERROR] No patch data available.")
-        if not isinstance(parent_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if not isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
             raise ValueError("[ERROR] No metadata (parent data) available.")
 
         # Check for url column and add to patch dataframe
@@ -362,7 +362,7 @@ class Annotator:
 
     @staticmethod
     def _load_annotations(
-        patch_df: pd.DataFrame | geopd.GeoDataFrames,
+        patch_df: pd.DataFrame | gpd.GeoDataFrames,
         annotations_file: str,
         labels: list,
         label_col: str,
@@ -372,7 +372,7 @@ class Annotator:
 
         Parameters
         ----------
-        patch_df : pd.DataFrame or geopd.GeoDataFrame
+        patch_df : pd.DataFrame or gpd.GeoDataFrame
             Current patch dataframe.
         annotations_file : str
             Name of the annotations file

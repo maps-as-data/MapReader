@@ -37,7 +37,7 @@ from mapreader.utils.load_frames import (
 os.environ[
     "USE_PYGEOS"
 ] = "0"  # see here https://github.com/geopandas/geopandas/issues/2691
-import geopandas as geopd  # noqa: E402
+import geopandas as gpd  # noqa: E402
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
@@ -321,7 +321,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def add_metadata(
         self,
-        metadata: str | pathlib.Path | pd.DataFrame | geopd.GeoDataFrame,
+        metadata: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
         index_col: int | str | None = 0,
         delimiter: str | None = ",",
         usecols: list[str] | None = None,
@@ -380,7 +380,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         metadata file/dataframe.
         """
 
-        if isinstance(metadata, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(metadata, (pd.DataFrame, gpd.GeoDataFrame)):
             if usecols:
                 metadata_df = metadata[usecols].copy(deep=True)
             else:
@@ -418,7 +418,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     "[ERROR] Metadata should be a CSV/TSV/etc, Excel or JSON/GeoJSON file."
                 )
 
-        else:  # if not a string, pathlib.Path, pd.DataFrame or geopd.GeoDataFrame
+        else:  # if not a string, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame
             raise ValueError(
                 "[ERROR] ``metadata`` should either be the path to a ``csv`` (or similar), ``xls`` or ``xlsx`` file or a pandas DataFrame or a geopandas GeoDataFrame."  # noqa
             )
@@ -1528,26 +1528,26 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             # convert to GeoDataFrames
             if "crs" in parent_df.columns:
-                parent_df = geopd.GeoDataFrame(
+                parent_df = gpd.GeoDataFrame(
                     parent_df, geometry=parent_geos, crs=parent_df["crs"].unique()[0]
                 )
             else:
                 print(
                     "[WARNING] No CRS found for parent images. Setting CRS to EPSG:4326."
                 )  ## TODO: Logging!
-                parent_df = geopd.GeoDataFrame(
+                parent_df = gpd.GeoDataFrame(
                     parent_df, geometry=parent_geos, crs="EPSG:4326"
                 )
 
             if "crs" in patch_df.columns:
-                patch_df = geopd.GeoDataFrame(
+                patch_df = gpd.GeoDataFrame(
                     patch_df, geometry=patch_geos, crs=patch_df["crs"].unique()[0]
                 )
             else:
                 print(
                     "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
                 )  ## TODO: Logging!
-                patch_df = geopd.GeoDataFrame(
+                patch_df = gpd.GeoDataFrame(
                     patch_df, geometry=patch_geos, crs="EPSG:4326"
                 )
 
@@ -2160,8 +2160,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def load_df(
         self,
-        parent_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
-        patch_df: pd.DataFrame | geopd.GeoDataFrame | None = None,
+        parent_df: pd.DataFrame | gpd.GeoDataFrame | None = None,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame | None = None,
         clear_images: bool | None = True,
     ) -> None:
         """
@@ -2170,10 +2170,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        parent_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
+        parent_df : pandas.DataFrame or gpd.GeoDataFrame or None, optional
             DataFrame containing parents or path to parents, by default
             ``None``.
-        patch_df : pandas.DataFrame or geopd.GeoDataFrame or None, optional
+        patch_df : pandas.DataFrame or gpd.GeoDataFrame or None, optional
             DataFrame containing patches, by default ``None``.
         clear_images : bool, optional
             If ``True``, clear images before reading the dataframes, by
@@ -2187,10 +2187,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
 
-        if isinstance(parent_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.parents.update(parent_df.to_dict(orient="index"))
 
-        if isinstance(patch_df, (pd.DataFrame, geopd.GeoDataFrame)):
+        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patches.update(patch_df.to_dict(orient="index"))
 
         for patch_id in self.list_patches():

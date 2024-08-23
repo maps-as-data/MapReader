@@ -5,7 +5,6 @@
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.16320",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -53,13 +52,13 @@
                 "YEAR": 2023,
                 "IMAGE": "101602026",
                 "WFS_TITLE": "Nottinghamshire III.NE, Revised: 1898, Published: 1900",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             }
         },
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.16321",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -107,13 +106,13 @@
                 "YEAR": 1901,
                 "IMAGE": "101602038",
                 "WFS_TITLE": "Nottinghamshire III.SW, Revised: 1897 to 1898, Published: 1901",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             }
         },
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.131",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -161,13 +160,13 @@
                 "YEAR": 1896,
                 "IMAGE": "102352861",
                 "WFS_TITLE": "Yorkshire XCV, Surveyed: 1892 to 1893, Published: 1896",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             }
         },
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.132",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -215,13 +214,13 @@
                 "YEAR": 1894,
                 "IMAGE": "91617032",
                 "WFS_TITLE": "London VI.SE, Revised: 1893 to 1894, Published: 1894 to 1896",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             }
         },
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.107",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -303,7 +302,8 @@
                 "WFS_TITLE": "Anglesey X.NE & XI.NW, Revised: 1899, Published: 1901",
                 "WFS": "Y",
                 "OR_Num": "0",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             },
             "bbox": [
                 -4.7682,
@@ -315,7 +315,6 @@
         {
             "type": "Feature",
             "id": "Six_Inch_GB_WFS.116",
-            "test_date": "2021",
             "geometry": {
                 "type": "MultiPolygon",
                 "coordinates": [
@@ -397,7 +396,8 @@
                 "WFS_TITLE": "Anglesey X.NE & XI.NW, Revised: 1899, Published: 1901",
                 "WFS": "Y",
                 "OR_Num": "0",
-                "test": "test"
+                "test": "test",
+                "test_date": "2021",
             },
             "bbox": [
                 -4.6957,
