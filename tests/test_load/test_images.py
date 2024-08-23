@@ -66,7 +66,15 @@ def init_dataframes(sample_dir, image_id, tmp_path):
 
 @pytest.fixture
 def ts_metadata_keys():
-    return ["name", "url", "coordinates", "crs", "published_date", "grid_bb", "polygon"]
+    return [
+        "name",
+        "url",
+        "coordinates",
+        "crs",
+        "published_date",
+        "grid_bb",
+        "geometry",
+    ]
 
 
 @pytest.fixture
@@ -216,6 +224,8 @@ def test_add_metadata(sample_dir, image_id, ts_metadata_keys):
     maps_xlsx = MapImages(f"{sample_dir}/{image_id}")
     maps_xlsx.add_metadata(f"{sample_dir}/ts_downloaded_maps.xlsx")
 
+    ts_metadata_keys.remove("geometry")
+
     for maps in [maps_csv, maps_tsv, maps_xlsx]:
         assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
         assert isinstance(maps.parents[image_id]["coordinates"], tuple)
@@ -349,7 +359,7 @@ def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
         "shape",
         "pixel_bounds",
         "coordinates",
-        "polygon",
+        "geometry",
         "mean_pixel_R",
         "mean_pixel_A",
         "std_pixel_R",
@@ -359,7 +369,7 @@ def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
     for k in ["shape", "pixel_bounds", "coordinates"]:
         assert isinstance(maps.patches[patch_id][k], tuple)
     assert isinstance(
-        "polygon", str
+        "geometry", str
     )  # expect this to be a string, reformed into polygon later
     assert maps.georeferenced
 
@@ -616,11 +626,11 @@ def test_add_patch_coords(init_maps):
 
 def test_add_patch_polygons(init_maps):
     maps, _, patch_list = init_maps
-    maps.patches[patch_list[0]].pop("polygon")
-    assert "polygon" not in maps.patches[patch_list[0]].keys()
+    maps.patches[patch_list[0]].pop("geometry")
+    assert "geometry" not in maps.patches[patch_list[0]].keys()
     maps.add_patch_polygons()
-    assert "polygon" in maps.patches[patch_list[0]].keys()
-    assert isinstance(maps.patches[patch_list[0]]["polygon"], Polygon)
+    assert "geometry" in maps.patches[patch_list[0]].keys()
+    assert isinstance(maps.patches[patch_list[0]]["geometry"], Polygon)
 
 
 def test_save_patches_as_geotiffs(init_maps):
@@ -699,7 +709,7 @@ def test_save_to_geojson_polygon_strings(
     maps.add_metadata(parent_df, tree_level="parent")
     maps.add_metadata(patch_df, tree_level="patch")
     patch_id = maps.list_patches()[0]
-    assert isinstance(maps.patches[patch_id]["polygon"], str)
+    assert isinstance(maps.patches[patch_id]["geometry"], str)
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
     geo_df = gpd.read_file(f"{tmp_path}/patches.geojson")
@@ -744,7 +754,7 @@ def test_loader_convert_images(init_maps):
     maps, _, _ = init_maps
     parent_df, patch_df = maps.convert_images()
     assert parent_df.shape == (1, 14)
-    assert patch_df.shape == (9, 8)
+    assert patch_df.shape == (9, 7)
     parent_df, patch_df = maps.convert_images(save=True)
     assert os.path.isfile("./parent_df.csv")
     assert os.path.isfile("./patch_df.csv")

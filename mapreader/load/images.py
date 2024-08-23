@@ -114,6 +114,7 @@ class MapImages:
         ):
             self.georeferenced = True
             self.add_patch_coords()
+            self.add_patch_polygons()
 
     @staticmethod
     def _resolve_file_path(file_path: str, file_ext: str | None = None):
@@ -400,7 +401,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
             elif re.search(r"\..?sv$", metadata):  # csv, tsv, etc
-                print("[INFO] Loading metadata from CSV/TSV/etc file.", flush=True)
+                print("[INFO] Loading metadata from CSV/TSV/etc file.")
                 if usecols:
                     metadata_df = load_from_csv(
                         metadata, usecols=usecols, delimiter=delimiter
@@ -411,6 +412,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
             elif re.search(r"\..?json$", metadata):  # json or geojson
+                print("[INFO] Loading metadata from JSON/GeoJSON file.")
                 metadata_df = load_from_geojson(metadata)
 
             else:
@@ -440,6 +442,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             raise ValueError(
                 "[ERROR] 'name' or 'image_id' should be one of the columns."
             )
+
+        if "polygon" in metadata_df.columns:
+            print("[INFO] Converting 'polygon' column to 'geometry'")
+            metadata_df["geometry"] = metadata_df["polygon"]
 
         if any(metadata_df.duplicated(subset=image_id_col)):
             print(
@@ -897,7 +903,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if "coordinates" in self.patches[image_id].keys():
             coords = self.patches[image_id]["coordinates"]
-            self.patches[image_id]["polygon"] = box(*coords)
+            self.patches[image_id]["geometry"] = box(*coords)
 
     def _add_center_coord_id(
         self,
@@ -1522,10 +1528,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             parent_geos = parent_df["coordinates"].apply(
                 lambda x: Polygon.from_bounds(*x)
             )
-            patch_geos = patch_df["coordinates"].apply(
-                lambda x: Polygon.from_bounds(*x)
-            )
-
             # convert to GeoDataFrames
             if "crs" in parent_df.columns:
                 parent_df = gpd.GeoDataFrame(
@@ -1540,16 +1542,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 )
 
             if "crs" in patch_df.columns:
-                patch_df = gpd.GeoDataFrame(
-                    patch_df, geometry=patch_geos, crs=patch_df["crs"].unique()[0]
-                )
+                patch_df = gpd.GeoDataFrame(patch_df, crs=patch_df["crs"].unique()[0])
             else:
-                print(
-                    "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
-                )  ## TODO: Logging!
-                patch_df = gpd.GeoDataFrame(
-                    patch_df, geometry=patch_geos, crs="EPSG:4326"
-                )
+                if len(patch_df):
+                    print(
+                        "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
+                    )  ## TODO: Logging!
+                    patch_df = gpd.GeoDataFrame(patch_df, crs="EPSG:4326")
 
         if save:
             if save_format == "csv":
@@ -2187,6 +2186,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
 
+        if "polygon" in parent_df.columns:
+            print("[INFO] Converting 'polygon' to 'geometry' for parent_df.")
+            parent_df["geometry"] = parent_df["polygon"]
+        if "polygon" in patch_df.columns:
+            print("[INFO] Converting 'polygon' to 'geometry' for patch_df.")
+            patch_df["geometry"] = patch_df["polygon"]
+
         if isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.parents.update(parent_df.to_dict(orient="index"))
 
@@ -2620,12 +2626,23 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             If None, the method will look for "crs" in the patches dictionary and, if found, will use that. Otherwise it will set the crs to the default value of "EPSG:4326".
             By default None
         """
+        if len(self.patches.keys()) == 0:
+            raise ValueError(
+                "[ERROR] No patches found. Please patchify your maps first!"
+            )
+
         if os.path.isfile(geojson_fname):
             if not rewrite:
                 print(
                     f"[WARNING] File already exists: {geojson_fname}. Use ``rewrite=True`` to overwrite."
                 )
                 return
+
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] No geographic information found. Please run `add_geo_info`  or `add_metadata` first."
+            )
 
         _, patch_df = self.convert_images()
 

@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from mapreader.process.context_post_process import ContextPostProcessor
+from mapreader.utils.load_frames import eval_dataframe
 
 
 @pytest.fixture
@@ -15,7 +16,8 @@ def sample_dir():
 
 @pytest.fixture
 def patch_df(sample_dir):
-    return pd.read_csv(f"{sample_dir}/post_processing_patch_df.csv", index_col=0)
+    df = pd.read_csv(f"{sample_dir}/post_processing_patch_df.csv", index_col=0)
+    return eval_dataframe(df)
 
 
 @pytest.fixture
