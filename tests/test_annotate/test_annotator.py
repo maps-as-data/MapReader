@@ -160,7 +160,7 @@ def test_init_optional_args(load_dfs):
 def test_init_dfs_value_error(load_dfs):
     with pytest.raises(
         ValueError,
-        match="path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame",
+        match="path to a CSV/TSV/etc or geojson file or a pandas DataFrame or",
     ):
         Annotator(
             patch_df=1,
@@ -169,7 +169,7 @@ def test_init_dfs_value_error(load_dfs):
     _, _, tmp_path = load_dfs
     with pytest.raises(
         ValueError,
-        match="path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame",
+        match="path to a CSV/TSV/etc or geojson file or a pandas DataFrame or",
     ):
         Annotator(
             patch_df=f"{tmp_path}/patch_df.csv",

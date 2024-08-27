@@ -57,7 +57,7 @@ def test_init_dataframe_transform(patch_df, model):
 
 def test_init_fake_path_error(model):
     patch_df = "fake_df.csv"
-    with pytest.raises(ValueError, match="cannot be found"):
+    with pytest.raises(FileNotFoundError, match="not found"):
         OcclusionAnalyzer(patch_df, model)
 
 

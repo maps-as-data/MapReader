@@ -753,7 +753,7 @@ def test_calc_pixel_stats(init_maps, sample_dir, tmp_path):
 def test_loader_convert_images(init_maps):
     maps, _, _ = init_maps
     parent_df, patch_df = maps.convert_images()
-    assert parent_df.shape == (1, 14)
+    assert parent_df.shape == (1, 13)
     assert patch_df.shape == (9, 7)
     parent_df, patch_df = maps.convert_images(save=True)
     assert os.path.isfile("./parent_df.csv")

@@ -55,8 +55,10 @@ class OcclusionAnalyzer:
                     patch_df,
                     delimiter=delimiter,
                 )
+                self.patch_df = patch_df
             elif re.search(r"\..?json$", patch_df):
                 patch_df = load_from_geojson(patch_df)
+                self.patch_df = patch_df
             else:
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
