@@ -36,6 +36,9 @@ def load_from_csv(
 ):
     check_exists(fpath)
     df = pd.read_csv(fpath, index_col=index_col, **kwargs)
+    if "polygon" in df.columns:
+        print("[INFO] Renaming 'polygon' to 'geometry'.")
+        df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
     return df
 
@@ -57,6 +60,9 @@ def load_from_excel(
 ):
     check_exists(fpath)
     df = pd.read_excel(fpath, index_col=index_col, **kwargs)
+    if "polygon" in df.columns:
+        print("[INFO] Renaming 'polygon' to 'geometry'.")
+        df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
     return df
 

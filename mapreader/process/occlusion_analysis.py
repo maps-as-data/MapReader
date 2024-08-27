@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import os
-from ast import literal_eval
+import pathlib
+import re
 
 import cv2
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import torch
@@ -13,13 +15,15 @@ from torch import nn
 from torchvision import transforms
 from tqdm import tqdm
 
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
+
 
 class OcclusionAnalyzer:
     """A class for carrying out occlusion analysis on patches.
 
     Parameters
     ----------
-    patch_df : pd.DataFrame
+    patch_df : pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path
         The DataFrame containing patches and predictions.
     model : str or nn.Module
             The PyTorch model to add to the object.
@@ -35,24 +39,28 @@ class OcclusionAnalyzer:
 
     def __init__(
         self,
-        patch_df: pd.DataFrame | str,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
         model: str | nn.Module,
         transform: str | callable = "default",
         delimiter: str = ",",
         device: str = "default",
     ):
-        if isinstance(patch_df, pd.DataFrame):
+        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
 
-        elif isinstance(patch_df, str):
-            if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
-                patch_df = pd.read_csv(patch_df, sep=delimiter, index_col=0)
-                # ensure tuple/list columns are read as such
-                patch_df = self._eval_df(patch_df)
-                self.patch_df = patch_df
+        elif isinstance(patch_df, (str, pathlib.Path)):
+            if re.search(r"\..?sv$", patch_df):
+                print(f'[INFO] Reading "{patch_df}"')
+                patch_df = load_from_csv(
+                    patch_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..?json$", patch_df):
+                patch_df = load_from_geojson(patch_df)
             else:
-                raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+                )
 
         else:
             raise ValueError(
@@ -98,15 +106,6 @@ class OcclusionAnalyzer:
 
     def __len__(self):
         return len(self.patch_df)
-
-    @staticmethod
-    def _eval_df(df):
-        for col in df.columns:
-            try:
-                df[col] = df[col].apply(literal_eval)
-            except (ValueError, TypeError, SyntaxError):
-                pass
-        return df
 
     def _load_model(self, model_path: str) -> nn.Module:
         model = torch.load(model_path, map_location=self.device)

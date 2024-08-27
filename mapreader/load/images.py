@@ -444,8 +444,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
 
         if "polygon" in metadata_df.columns:
-            print("[INFO] Converting 'polygon' column to 'geometry'")
-            metadata_df["geometry"] = metadata_df["polygon"]
+            print("[INFO] Renaming 'polygon' column to 'geometry'")
+            metadata_df = metadata_df.rename(columns={"polygon": "geometry"})
 
         if any(metadata_df.duplicated(subset=image_id_col)):
             print(
@@ -2187,11 +2187,11 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.images = {"parent": {}, "patch": {}}
 
         if "polygon" in parent_df.columns:
-            print("[INFO] Converting 'polygon' to 'geometry' for parent_df.")
-            parent_df["geometry"] = parent_df["polygon"]
+            print("[INFO] Renaming 'polygon' to 'geometry' for parent_df.")
+            parent_df = parent_df.rename(columns={"polygon": "geometry"})
         if "polygon" in patch_df.columns:
-            print("[INFO] Converting 'polygon' to 'geometry' for patch_df.")
-            patch_df["geometry"] = patch_df["polygon"]
+            print("[INFO] Renaming 'polygon' to 'geometry' for patch_df.")
+            patch_df = patch_df.rename(columns={"polygon": "geometry"})
 
         if isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.parents.update(parent_df.to_dict(orient="index"))
@@ -2645,6 +2645,12 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
 
         _, patch_df = self.convert_images()
+
+        if crs and crs != patch_df.crs:
+            print(
+                f"[INFO] Reprojecting patches to {crs}. Note: This will not update coordinates column."
+            )
+            patch_df = patch_df.to_crs(crs)
 
         if not crs:
             crs = patch_df.crs

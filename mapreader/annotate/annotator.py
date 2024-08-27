@@ -141,11 +141,11 @@ class Annotator:
                     patch_df = load_from_geojson(patch_df)
                 else:
                     raise ValueError(
-                        "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                        "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
             elif not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
                 raise ValueError(
-                    "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                    "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
             patch_df = eval_dataframe(patch_df)
 
@@ -160,11 +160,11 @@ class Annotator:
                     parent_df = load_from_geojson(parent_df)
                 else:
                     raise ValueError(
-                        "[ERROR] ``parent_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                        "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
             if not isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
                 raise ValueError(
-                    "[ERROR] ``parent_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                    "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
             parent_df = eval_dataframe(parent_df)
 
@@ -366,7 +366,7 @@ class Annotator:
 
     @staticmethod
     def _load_annotations(
-        patch_df: pd.DataFrame | gpd.GeoDataFrames,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame,
         annotations_file: str,
         labels: list,
         label_col: str,
