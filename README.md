@@ -1,6 +1,6 @@
 # MapReader
 
-> [!IMPORTANT] A computer vision pipeline for exploring and analyzing images at scale
+**MapReader is a computer vision pipeline for exploring and analyzing images at scale.**
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors)
