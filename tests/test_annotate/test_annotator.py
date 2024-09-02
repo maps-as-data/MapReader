@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
+import pathlib
 
 import pytest
 
@@ -10,7 +10,7 @@ from mapreader import Annotator, loader
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -23,6 +23,8 @@ def load_dfs(sample_dir, tmp_path):
     parent_df, patch_df = my_maps.convert_images()
     parent_df.to_csv(f"{tmp_path}/parent_df.csv")
     patch_df.to_csv(f"{tmp_path}/patch_df.csv")
+    parent_df.to_file(f"{tmp_path}/parent_df.geojson")
+    patch_df.to_file(f"{tmp_path}/patch_df.geojson")
     return parent_df, patch_df, tmp_path
 
 
@@ -217,6 +219,19 @@ def test_init_with_csvs(load_dfs):
     assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
+def test_init_with_csvs_pathlib(load_dfs):
+    _, _, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+    )
+    assert len(annotator) == 9
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
+
+
 def test_init_with_fpaths(load_dfs, sample_dir):
     _, _, tmp_path = load_dfs
     annotator = Annotator(
@@ -229,6 +244,19 @@ def test_init_with_fpaths(load_dfs, sample_dir):
     )
     assert len(annotator) == 9
     assert "mean_pixel_R" in annotator.patch_df.columns
+
+
+def test_init_with_geojson(load_dfs):
+    _, _, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.geojson"),
+        parent_df=pathlib.Path(f"{tmp_path}/parent_df.geojson"),
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+    )
+    assert len(annotator) == 9
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
 def test_incorrect_csv_paths(load_dfs):

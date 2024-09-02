@@ -49,6 +49,11 @@ def load_from_geojson(
 ):
     check_exists(fpath)
     df = gpd.read_file(fpath, **kwargs)
+    if "image_id" in df.columns:
+        df.set_index("image_id", drop=True, inplace=True)
+    elif "name" in df.columns:
+        df["image_id"] = df["name"]
+        df.set_index("image_id", drop=True, inplace=True)
     df = eval_dataframe(df)
     return df
 
