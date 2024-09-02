@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from ast import literal_eval
 from pathlib import Path
 
 import pandas as pd
@@ -14,6 +13,7 @@ from mapreader import SheetDownloader
 from mapreader.download.data_structures import GridBoundingBox
 from mapreader.download.tile_loading import TileDownloader
 from mapreader.download.tile_merging import TileMerger
+from mapreader.utils.load_frames import load_from_csv
 
 
 @pytest.fixture
@@ -290,7 +290,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 6
     assert list(df.columns) == [
         "name",
@@ -312,7 +312,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
         ]
     )
     # test coords
-    assert literal_eval(df.loc[0, "coordinates"]) == approx(
+    assert df.loc[0, "coordinates"] == approx(
         (-0.98876953125, 53.448806835427575, -0.90087890625, 53.48804553605621),
         rel=1e-6,
     )
@@ -324,7 +324,7 @@ def test_download_all(sheet_downloader, tmp_path, mock_response):
     sd.download_all_map_sheets(maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 6
     assert list(df.columns) == [
         "name",
@@ -362,7 +362,7 @@ def test_download_all_kwargs(sheet_downloader, tmp_path, mock_response):
     sd.download_all_map_sheets(maps_path, metadata_fname, **kwargs)
     assert os.path.exists(f"{maps_path}/map_102352861.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 6
     assert list(df.columns) == [
         "name",
@@ -386,7 +386,7 @@ def test_download_all_kwargs(sheet_downloader, tmp_path, mock_response):
         ]
     )
     # test coords
-    assert literal_eval(df.loc[0, "coordinates"]) == approx(
+    assert df.loc[0, "coordinates"] == approx(
         (-0.98876953125, 53.448806835427575, -0.90087890625, 53.48804553605621),
         rel=1e-6,
     )
@@ -405,7 +405,7 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path, mock_response):
     )  # test single wfs_id
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 1
     assert list(df.columns) == [
         "name",
@@ -421,13 +421,13 @@ def test_download_by_wfs_ids(sheet_downloader, tmp_path, mock_response):
         [16320, 16321], maps_path, metadata_fname, force=True
     )  # test list of wfs_ids
     assert os.path.exists(f"{maps_path}/map_101602038.png")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2  # should have only downloaded/added one extra map
     assert df.loc[1, "name"] == "map_101602038.png"
     sd.download_map_sheets_by_wfs_ids(
         16320, maps_path, metadata_fname, overwrite=True, force=True
     )  # test overwrite
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert df.loc[0, "name"] == "map_101602026.png"
     assert df.loc[1, "name"] == "map_101602038.png"
@@ -444,7 +444,7 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_respo
     assert os.path.exists(f"{maps_path}/map_101603986.png")
     assert os.path.exists(f"{maps_path}/map_101603986_1.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert list(df.columns) == [
         "name",
@@ -463,7 +463,7 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_respo
     assert out.endswith(
         '[INFO] "map_101603986.png" already exists. Skipping download.\n[INFO] "map_101603986_1.png" already exists. Skipping download.\n'
     )
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
 
     # now overwrite them, but check we don't add new ones (_2, _3 etc.)
@@ -473,7 +473,7 @@ def test_download_same_image_names(sheet_downloader, tmp_path, capfd, mock_respo
     assert os.path.exists(f"{maps_path}/map_101603986.png")
     assert os.path.exists(f"{maps_path}/map_101603986_1.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert df.loc[0, "name"] == "map_101603986.png"
     assert df.loc[1, "name"] == "map_101603986_1.png"
@@ -506,7 +506,7 @@ def test_download_by_polygon(sheet_downloader, tmp_path, mock_response):
     )  # test mode = 'within'
     assert os.path.exists(f"{maps_path}/map_101602026.png"), os.listdir(maps_path)
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 1
     assert list(df.columns) == [
         "name",
@@ -522,7 +522,7 @@ def test_download_by_polygon(sheet_downloader, tmp_path, mock_response):
         polygon, maps_path, metadata_fname, mode="intersects", force=True
     )  # test mode = 'intersects', now 2 maps
     assert os.path.exists(f"{maps_path}/map_101602038.png")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2  # should have only downloaded/added one extra map
     assert df.loc[1, "name"] == "map_101602038.png"
 
@@ -556,7 +556,7 @@ def test_download_by_coords(sheet_downloader, tmp_path, mock_response):
     )
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 1
     assert list(df.columns) == [
         "name",
@@ -589,7 +589,7 @@ def test_download_by_line(sheet_downloader, tmp_path, mock_response):
     sd.download_map_sheets_by_line(line, maps_path, metadata_fname, force=True)
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert list(df.columns) == [
         "name",
@@ -622,7 +622,7 @@ def test_download_by_string(sheet_downloader, tmp_path, mock_response):
     )  # test w/ keys list
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 1
     assert list(df.columns) == [
         "name",
@@ -638,7 +638,7 @@ def test_download_by_string(sheet_downloader, tmp_path, mock_response):
         "Six_Inch_GB_WFS.16320", "id", maps_path, metadata_fname, force=True
     )  # test append + w/ keys as string
     assert os.path.exists(f"{maps_path}/map_101602026.png")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert df.loc[1, "name"] == "map_101602026.png"
 
@@ -647,7 +647,7 @@ def test_download_by_string(sheet_downloader, tmp_path, mock_response):
     )  # test w/ no keys
     assert os.path.exists(f"{maps_path}/map_101602038.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 3
     assert df.loc[2, "name"] == "map_101602038.png"
 
@@ -690,7 +690,7 @@ def test_download_by_queries(sheet_downloader, tmp_path, mock_response):
     assert os.path.exists(f"{maps_path}/map_101602026.png")
     assert os.path.exists(f"{maps_path}/map_91617032.png")
     assert os.path.exists(f"{maps_path}/{metadata_fname}")
-    df = pd.read_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
+    df = load_from_csv(f"{maps_path}/{metadata_fname}", sep=",", index_col=0)
     assert len(df) == 2
     assert list(df.columns) == [
         "name",

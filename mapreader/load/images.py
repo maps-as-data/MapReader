@@ -23,7 +23,7 @@ import rasterio
 from PIL import Image, ImageOps, ImageStat
 from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
-from shapely.geometry import Polygon, box
+from shapely.geometry import box
 from tqdm.auto import tqdm
 
 from mapreader.download.data_structures import GridBoundingBox, GridIndex
@@ -113,8 +113,11 @@ class MapImages:
             for parent_id in self.list_parents()
         ):
             self.georeferenced = True
+            self.add_parent_polygons()
             self.add_patch_coords()
             self.add_patch_polygons()
+        else:
+            self.georeferenced = False
 
     @staticmethod
     def _resolve_file_path(file_path: str, file_ext: str | None = None):
@@ -704,6 +707,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
             self._add_center_coord_id(image_id=image_id, verbose=verbose)
 
+    def add_parent_polygons(self, verbose: bool = False) -> None:
+        """Add polygon to all parents in parents dictionary.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to print verbose outputs.
+            By default, ``False``
+        """
+        parent_list = self.list_parents()
+
+        for parent_id in tqdm(parent_list):
+            self._add_parent_polygons_id(parent_id, verbose)
+
     def _add_shape_id(
         self,
         image_id: int | str,
@@ -949,6 +966,29 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             ]
             self.images[tree_level][image_id]["center_lat"] = np.mean([min_y, max_y])
             self.images[tree_level][image_id]["center_lon"] = np.mean([min_x, max_x])
+
+    def _add_parent_polygons_id(self, image_id: str, verbose: bool = False) -> None:
+        """Create polygon from a parent image and save to parent dictionary.
+
+        Parameters
+        ----------
+        image_id : str
+            The ID of the parent image
+        verbose : bool, optional
+            Whether to print verbose outputs.
+            By default, ``False``.
+
+        Return
+        -------
+        None
+        """
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] No georeferencing information found. Suggestion: run add_metadata or add_geo_info."
+            )
+
+        coords = self.parents[image_id]["coordinates"]
+        self.parents[image_id]["geometry"] = box(*coords)
 
     def _calc_pixel_height_width(
         self,
@@ -1525,26 +1565,23 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         # convert to GeoDataFrames if coordinates are present
         if self.georeferenced:
-            parent_geos = parent_df["coordinates"].apply(
-                lambda x: Polygon.from_bounds(*x)
-            )
-            # convert to GeoDataFrames
-            if "crs" in parent_df.columns:
-                parent_df = gpd.GeoDataFrame(
-                    parent_df, geometry=parent_geos, crs=parent_df["crs"].unique()[0]
-                )
-            else:
-                print(
-                    "[WARNING] No CRS found for parent images. Setting CRS to EPSG:4326."
-                )  ## TODO: Logging!
-                parent_df = gpd.GeoDataFrame(
-                    parent_df, geometry=parent_geos, crs="EPSG:4326"
-                )
+            if len(parent_df):
+                if "crs" in parent_df.columns:
+                    parent_df = gpd.GeoDataFrame(
+                        parent_df, crs=parent_df["crs"].unique()[0]
+                    )
+                else:
+                    print(
+                        "[WARNING] No CRS found for parent images. Setting CRS to EPSG:4326."
+                    )  ## TODO: Logging!
+                    parent_df = gpd.GeoDataFrame(parent_df, crs="EPSG:4326")
 
-            if "crs" in patch_df.columns:
-                patch_df = gpd.GeoDataFrame(patch_df, crs=patch_df["crs"].unique()[0])
-            else:
-                if len(patch_df):
+            if len(patch_df):
+                if "crs" in patch_df.columns:
+                    patch_df = gpd.GeoDataFrame(
+                        patch_df, crs=patch_df["crs"].unique()[0]
+                    )
+                else:
                     print(
                         "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
                     )  ## TODO: Logging!
@@ -1552,25 +1589,37 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if save:
             if save_format == "csv":
-                parent_df.to_csv("parent_df.csv", sep=delimiter)
-                print('[INFO] Saved parent dataframe as "parent_df.csv"')
-                patch_df.to_csv("patch_df.csv", sep=delimiter)
-                print('[INFO] Saved patch dataframe as "patch_df.csv"')
+                if len(parent_df):
+                    parent_df.to_csv("parent_df.csv", sep=delimiter)
+                    print('[INFO] Saved parent dataframe as "parent_df.csv"')
+                if len(patch_df):
+                    patch_df.to_csv("patch_df.csv", sep=delimiter)
+                    print('[INFO] Saved patch dataframe as "patch_df.csv"')
             elif save_format in ["excel", "xlsx"]:
-                parent_df.to_excel("parent_df.xlsx")
-                print('[INFO] Saved parent dataframe as "parent_df.xlsx"')
-                patch_df.to_excel("patch_df.xlsx")
-                print('[INFO] Saved patch dataframe as "patch_df.xslx"')
+                if len(parent_df):
+                    parent_df.to_excel("parent_df.xlsx")
+                    print('[INFO] Saved parent dataframe as "parent_df.xlsx"')
+                if len(patch_df):
+                    patch_df.to_excel("patch_df.xlsx")
+                    print('[INFO] Saved patch dataframe as "patch_df.xslx"')
+
             # save as geojson (only if georeferenced)
             elif save_format == "geojson":
                 if not self.georeferenced:
                     raise ValueError(
                         "[ERROR] Cannot save as GeoJSON as no coordinate information found."
                     )
-                parent_df.to_file("parent_df.geojson", driver="GeoJSON")
-                print('[INFO] Saved parent dataframe as "parent_df.geojson"')
-                patch_df.to_file("patch_df.geojson", driver="GeoJSON")
-                print('[INFO] Saved patch dataframe as "patch_df.geojson"')
+
+                if isinstance(
+                    patch_df, gpd.GeoDataFrame
+                ):  # will only be geodf if len > 0
+                    parent_df.to_file("parent_df.geojson", driver="GeoJSON")
+                    print('[INFO] Saved parent dataframe as "parent_df.geojson"')
+                if isinstance(
+                    patch_df, gpd.GeoDataFrame
+                ):  # will only be geodf if len > 0
+                    patch_df.to_file("patch_df.geojson", driver="GeoJSON")
+                    print('[INFO] Saved patch dataframe as "patch_df.geojson"')
 
             else:
                 raise ValueError(

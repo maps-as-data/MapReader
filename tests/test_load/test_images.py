@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
+import pathlib
 from random import randint
 
 import geopandas as gpd
@@ -12,11 +12,12 @@ from pytest import approx
 from shapely.geometry import Polygon
 
 from mapreader.load.images import MapImages
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -73,8 +74,11 @@ def ts_metadata_keys():
         "crs",
         "published_date",
         "grid_bb",
-        "geometry",
+        "geometry",  # polygon col renamed to geometry
     ]
+
+
+# creating missing/matching/extra metadata
 
 
 @pytest.fixture
@@ -224,15 +228,56 @@ def test_add_metadata(sample_dir, image_id, ts_metadata_keys):
     maps_xlsx = MapImages(f"{sample_dir}/{image_id}")
     maps_xlsx.add_metadata(f"{sample_dir}/ts_downloaded_maps.xlsx")
 
-    ts_metadata_keys.remove("geometry")
+    # metadata json
+    maps_json = MapImages(f"{sample_dir}/{image_id}")
+    maps_json.add_metadata(f"{sample_dir}/ts_downloaded_maps.geojson")
 
-    for maps in [maps_csv, maps_tsv, maps_xlsx]:
+    for maps in [maps_csv, maps_tsv, maps_xlsx, maps_json]:
         assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
         assert isinstance(maps.parents[image_id]["coordinates"], tuple)
         assert maps.georeferenced
         assert maps.parents[image_id]["coordinates"] == approx(
             (-4.83, 55.80, -4.21, 56.059), rel=1e-2
         )
+
+
+def test_add_metadata_pathlib(sample_dir, image_id, ts_metadata_keys):
+    # metadata csv
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(pathlib.Path(f"{sample_dir}/ts_downloaded_maps.csv"))
+
+    assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
+    assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+    assert maps.georeferenced
+    assert maps.parents[image_id]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
+
+
+def test_add_metadata_df(sample_dir, image_id, ts_metadata_keys):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    df = load_from_csv(f"{sample_dir}/ts_downloaded_maps.csv")
+    maps.add_metadata(df)
+
+    assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
+    assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+    assert maps.georeferenced
+    assert maps.parents[image_id]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
+
+
+def test_add_metadata_geodf(sample_dir, image_id, ts_metadata_keys):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    gdf = load_from_geojson(f"{sample_dir}/ts_downloaded_maps.geojson")
+    maps.add_metadata(gdf)
+
+    assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
+    assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+    assert maps.georeferenced
+    assert maps.parents[image_id]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
 
 
 # check for mismatched metadata
@@ -312,7 +357,7 @@ def test_add_metadata_index_col(matching_metadata_dir):
         assert list(my_files.parents[parent_id].keys()) == metadata_keys
 
 
-def test_add_metadata_columns(matching_metadata_dir, metadata_df):
+def test_add_metadata_usecols(matching_metadata_dir, metadata_df):
     my_files_csv = MapImages(f"{matching_metadata_dir}/*png")
     my_files_csv.add_metadata(
         f"{matching_metadata_dir}/metadata_df.csv", usecols=["name", "coord"]
@@ -372,6 +417,20 @@ def test_add_metadata_patch(sample_dir, image_id, init_dataframes, tmp_path):
         "geometry", str
     )  # expect this to be a string, reformed into polygon later
     assert maps.georeferenced
+
+
+def test_add_metadata_polygons(sample_dir, image_id, ts_metadata_keys):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    gdf = load_from_geojson(f"{sample_dir}/ts_downloaded_maps.geojson")
+    gdf.rename(columns={"geometry": "polygon"}, inplace=True)
+    maps.add_metadata(gdf)
+
+    assert all([k in maps.parents[image_id].keys() for k in ts_metadata_keys])
+    assert isinstance(maps.parents[image_id]["coordinates"], tuple)
+    assert maps.georeferenced
+    assert maps.parents[image_id]["coordinates"] == approx(
+        (-4.83, 55.80, -4.21, 56.059), rel=1e-2
+    )
 
 
 # other ``add_metadata`` errors
@@ -633,6 +692,18 @@ def test_add_patch_polygons(init_maps):
     assert isinstance(maps.patches[patch_list[0]]["geometry"], Polygon)
 
 
+def test_add_parent_polygons(init_maps):
+    maps, parent_list, _ = init_maps
+    for parent in parent_list:
+        maps.parents[parent].pop("geometry")
+    assert "geometry" not in maps.parents[parent_list[0]].keys()
+    maps.add_parent_polygons()
+    assert "geometry" in maps.parents[parent_list[0]].keys()
+    assert isinstance(maps.parents[parent_list[0]]["geometry"], Polygon)
+    maps.check_georeferencing()
+    assert maps.georeferenced
+
+
 def test_save_patches_as_geotiffs(init_maps):
     maps, _, _ = init_maps
     maps.save_patches_as_geotiffs()
@@ -765,6 +836,20 @@ def test_loader_convert_images(init_maps):
     assert os.path.isfile("./patch_df.xlsx")
     os.remove("./parent_df.xlsx")
     os.remove("./patch_df.xlsx")
+    assert maps.georeferenced
+    parent_df, patch_df = maps.convert_images(save=True, save_format="geojson")
+    assert os.path.isfile("./parent_df.geojson")
+    assert os.path.isfile("./patch_df.geojson")
+    os.remove("./parent_df.geojson")
+    os.remove("./patch_df.geojson")
+
+
+def test_loader_convert_images_geojson_errors(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    assert not maps.georeferenced
+    with pytest.raises(ValueError, match="no coordinate information found"):
+        maps.convert_images(save=True, save_format="geojson")
 
 
 def test_loader_convert_images_errors(init_maps):
