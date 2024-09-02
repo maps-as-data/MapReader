@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+import pathlib
 
 import pandas as pd
 import pytest
@@ -11,7 +11,7 @@ from mapreader.utils.load_frames import eval_dataframe
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -27,6 +27,34 @@ def labels_map():
 
 def test_init(labels_map, patch_df):
     patches = ContextPostProcessor(patch_df, labels_map=labels_map)
+    assert isinstance(patches, ContextPostProcessor)
+    assert len(patches) == 81
+    assert patches.labels_map == labels_map
+
+
+def test_init_csv(labels_map, sample_dir):
+    patches = ContextPostProcessor(
+        f"{sample_dir}/post_processing_patch_df.csv", labels_map=labels_map
+    )
+    assert isinstance(patches, ContextPostProcessor)
+    assert len(patches) == 81
+    assert patches.labels_map == labels_map
+
+
+def test_init_csv_pathlib(labels_map, sample_dir):
+    patches = ContextPostProcessor(
+        pathlib.Path(f"{sample_dir}/post_processing_patch_df.csv"),
+        labels_map=labels_map,
+    )
+    assert isinstance(patches, ContextPostProcessor)
+    assert len(patches) == 81
+    assert patches.labels_map == labels_map
+
+
+def test_init_geojson(labels_map, sample_dir):
+    patches = ContextPostProcessor(
+        f"{sample_dir}/post_processing_patch_df.geojson", labels_map=labels_map
+    )
     assert isinstance(patches, ContextPostProcessor)
     assert len(patches) == 81
     assert patches.labels_map == labels_map
