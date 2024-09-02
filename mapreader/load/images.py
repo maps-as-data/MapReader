@@ -1610,14 +1610,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         "[ERROR] Cannot save as GeoJSON as no coordinate information found."
                     )
 
-                if isinstance(
-                    patch_df, gpd.GeoDataFrame
-                ):  # will only be geodf if len > 0
+                if isinstance(parent_df, gpd.GeoDataFrame):
+                    # change tuple columns to strings
+                    for col in parent_df.columns:
+                        if isinstance(parent_df[col][0], tuple):
+                            parent_df[col] = parent_df[col].apply(str)
+
                     parent_df.to_file("parent_df.geojson", driver="GeoJSON")
                     print('[INFO] Saved parent dataframe as "parent_df.geojson"')
-                if isinstance(
-                    patch_df, gpd.GeoDataFrame
-                ):  # will only be geodf if len > 0
+                if isinstance(patch_df, gpd.GeoDataFrame):
+                    # change tuple columns to strings
+                    for col in patch_df.columns:
+                        if isinstance(patch_df[col][0], tuple):
+                            patch_df[col] = patch_df[col].apply(str)
+
                     patch_df.to_file("patch_df.geojson", driver="GeoJSON")
                     print('[INFO] Saved patch dataframe as "patch_df.geojson"')
 
