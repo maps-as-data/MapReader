@@ -1612,18 +1612,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
                 if isinstance(parent_df, gpd.GeoDataFrame):
                     parent_df_copy = parent_df.copy(deep=True)
-                    # change tuple columns to strings
+                    # change tuple/list columns to strings
                     for col in parent_df_copy.columns:
-                        if isinstance(parent_df_copy[col][0], tuple):
+                        if isinstance(parent_df_copy[col][0], (tuple, list)):
                             parent_df_copy[col] = parent_df_copy[col].apply(str)
 
                     parent_df_copy.to_file("parent_df.geojson", driver="GeoJSON")
                     print('[INFO] Saved parent dataframe as "parent_df.geojson"')
+
                 if isinstance(patch_df, gpd.GeoDataFrame):
                     patch_df_copy = patch_df.copy(deep=True)
-                    # change tuple columns to strings
+                    # change tuple/list columns to strings
                     for col in patch_df_copy.columns:
-                        if isinstance(patch_df_copy[col][0], tuple):
+                        if isinstance(patch_df_copy[col][0], (tuple, list)):
                             patch_df_copy[col] = patch_df_copy[col].apply(str)
 
                     patch_df_copy.to_file("patch_df.geojson", driver="GeoJSON")
@@ -2718,9 +2719,9 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
-        # change tuple columns to strings
+        # change tuple/list columns to strings
         for col in patch_df.columns:
-            if isinstance(patch_df[col][0], tuple):
+            if isinstance(patch_df[col][0], (tuple, list)):
                 patch_df[col] = patch_df[col].apply(str)
 
         patch_df.to_file(geojson_fname, driver="GeoJSON")
