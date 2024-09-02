@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shutil
 
 import pytest
 
@@ -20,11 +21,11 @@ def load_dfs(sample_dir, tmp_path):
     my_maps.patchify_all(
         patch_size=3, path_save=f"{tmp_path}/patches/"
     )  # creates 9 patches
-    parent_df, patch_df = my_maps.convert_images()
+    parent_df, patch_df = my_maps.convert_images(save=True, save_format="geojson")
     parent_df.to_csv(f"{tmp_path}/parent_df.csv")
     patch_df.to_csv(f"{tmp_path}/patch_df.csv")
-    parent_df.to_file(f"{tmp_path}/parent_df.geojson")
-    patch_df.to_file(f"{tmp_path}/patch_df.geojson")
+    shutil.move("./parent_df.geojson", f"{tmp_path}/parent_df.geojson")
+    shutil.move("./patch_df.geojson", f"{tmp_path}/patch_df.geojson")
     return parent_df, patch_df, tmp_path
 
 

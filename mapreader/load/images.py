@@ -1611,20 +1611,22 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
                 if isinstance(parent_df, gpd.GeoDataFrame):
+                    parent_df_copy = parent_df.copy(deep=True)
                     # change tuple columns to strings
-                    for col in parent_df.columns:
-                        if isinstance(parent_df[col][0], tuple):
-                            parent_df[col] = parent_df[col].apply(str)
+                    for col in parent_df_copy.columns:
+                        if isinstance(parent_df_copy[col][0], tuple):
+                            parent_df_copy[col] = parent_df_copy[col].apply(str)
 
-                    parent_df.to_file("parent_df.geojson", driver="GeoJSON")
+                    parent_df_copy.to_file("parent_df.geojson", driver="GeoJSON")
                     print('[INFO] Saved parent dataframe as "parent_df.geojson"')
                 if isinstance(patch_df, gpd.GeoDataFrame):
+                    patch_df_copy = patch_df.copy(deep=True)
                     # change tuple columns to strings
-                    for col in patch_df.columns:
-                        if isinstance(patch_df[col][0], tuple):
-                            patch_df[col] = patch_df[col].apply(str)
+                    for col in patch_df_copy.columns:
+                        if isinstance(patch_df_copy[col][0], tuple):
+                            patch_df_copy[col] = patch_df_copy[col].apply(str)
 
-                    patch_df.to_file("patch_df.geojson", driver="GeoJSON")
+                    patch_df_copy.to_file("patch_df.geojson", driver="GeoJSON")
                     print('[INFO] Saved patch dataframe as "patch_df.geojson"')
 
             else:
