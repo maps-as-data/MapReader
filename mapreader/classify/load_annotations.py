@@ -552,7 +552,7 @@ Please check your image paths and update them if necessary.'
         val_transform: str | (Compose | Callable) = "val",
         test_transform: str | (Compose | Callable) = "test",
         context_datasets: bool = False,
-        context_df: str | pd.DataFrame | gpd.GeoDataFrame | None = None,
+        context_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame | None = None,
     ) -> None:
         """
         Splits the dataset into three subsets: training, validation, and test sets (DataFrames) and saves them as a dictionary in ``self.datasets``.
@@ -584,7 +584,7 @@ Please check your image paths and update them if necessary.'
             By default "test".
         context_datasets: bool, optional
             Whether to create context datasets or not. By default False.
-        context_df: str or pandas.DataFrame or gpd.GeoDataFrame, optional
+        context_df: str or or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame, optional
             The DataFrame containing all patches if using context datasets.
             Used to create context images. By default None.
 

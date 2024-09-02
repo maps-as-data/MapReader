@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
+import pathlib
 
+import geopandas as gpd
 import pandas as pd
 import pytest
 from torch.utils.data import DataLoader, RandomSampler
@@ -13,7 +14,7 @@ from mapreader.classify.datasets import PatchContextDataset, PatchDataset
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -104,6 +105,42 @@ def test_load_df(sample_dir):
     assert len(annots.annotations) == 81
     assert isinstance(annots.annotations, pd.DataFrame)
     assert annots.labels_map == {0: "no", 1: "railspace"}
+
+
+def test_load_csv_pathlib(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        pathlib.Path(f"{sample_dir}/test_annots.csv"),
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 81
+    assert isinstance(annots.annotations, pd.DataFrame)
+    assert annots.labels_map == {0: "no", 1: "railspace"}
+    # test append
+    annots.load(
+        pathlib.Path(f"{sample_dir}/test_annots_append.csv"),
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 83
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "no", 1: "railspace", 2: "building"}
+
+
+def test_load_geojson(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/land_annots.geojson",
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 58
+    assert isinstance(annots.annotations, gpd.GeoDataFrame)
+    assert annots.labels_map == {0: "0", 1: "1"}
 
 
 def test_init_images_dir(sample_dir):
