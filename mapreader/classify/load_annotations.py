@@ -198,13 +198,13 @@ class AnnotationsLoader:
             If ``annotations`` is passed as something other than a string, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame.
         """
 
-        if re.search(r"\..?sv$", annotations):
+        if re.search(r"\..?sv$", str(annotations)):
             print(f'[INFO] Reading "{annotations}"')
             annotations = load_from_csv(
                 annotations,
                 delimiter=delimiter,
             )
-        elif re.search(r"\..?json$", annotations):
+        elif re.search(r"\..*?json$", str(annotations)):
             annotations = load_from_geojson(annotations)
         else:
             raise ValueError(

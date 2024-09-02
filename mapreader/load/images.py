@@ -388,7 +388,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 metadata_df = metadata.copy(deep=True)
 
         elif isinstance(metadata, (str, pathlib.Path)):
-            if re.search(r"\.xls.*$", metadata):  # xls or xlsx
+            if re.search(r"\.xls.*$", str(metadata)):  # xls or xlsx
                 if usecols:
                     metadata_df = load_from_excel(
                         metadata,
@@ -400,7 +400,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         index_col=index_col,
                     )
 
-            elif re.search(r"\..?sv$", metadata):  # csv, tsv, etc
+            elif re.search(r"\..?sv$", str(metadata)):  # csv, tsv, etc
                 print("[INFO] Loading metadata from CSV/TSV/etc file.")
                 if usecols:
                     metadata_df = load_from_csv(
@@ -411,7 +411,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                         metadata, index_col=index_col, delimiter=delimiter
                     )
 
-            elif re.search(r"\..?json$", metadata):  # json or geojson
+            elif re.search(r"\..*?json$", str(metadata)):  # json or geojson
                 print("[INFO] Loading metadata from JSON/GeoJSON file.")
                 metadata_df = load_from_geojson(metadata)
 

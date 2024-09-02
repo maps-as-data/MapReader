@@ -49,14 +49,14 @@ class OcclusionAnalyzer:
             self.patch_df = patch_df
 
         elif isinstance(patch_df, (str, pathlib.Path)):
-            if re.search(r"\..?sv$", patch_df):
+            if re.search(r"\..?sv$", str(patch_df)):
                 print(f'[INFO] Reading "{patch_df}"')
                 patch_df = load_from_csv(
                     patch_df,
                     delimiter=delimiter,
                 )
                 self.patch_df = patch_df
-            elif re.search(r"\..?json$", patch_df):
+            elif re.search(r"\..*?json$", str(patch_df)):
                 patch_df = load_from_geojson(patch_df)
                 self.patch_df = patch_df
             else:

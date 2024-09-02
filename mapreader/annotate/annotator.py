@@ -20,7 +20,7 @@ from IPython.display import clear_output, display
 from numpy import array_split
 from PIL import Image, ImageOps
 
-from mapreader.utils.load_frames import eval_dataframe, load_from_csv, load_from_geojson
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 from ..load.loader import load_patches
 
@@ -132,12 +132,12 @@ class Annotator:
             labels = []
         if patch_df is not None:
             if isinstance(patch_df, (str, pathlib.Path)):
-                if re.search(r"\..?sv$", patch_df):
+                if re.search(r"\..?sv$", str(patch_df)):
                     patch_df = load_from_csv(
                         patch_df,
                         delimiter=delimiter,
                     )
-                elif re.search(r"\..?json$", patch_df):
+                elif re.search(r"\..*?json$", str(patch_df)):
                     patch_df = load_from_geojson(patch_df)
                 else:
                     raise ValueError(
@@ -147,16 +147,15 @@ class Annotator:
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
-            patch_df = eval_dataframe(patch_df)
 
         if parent_df is not None:
             if isinstance(parent_df, (str, pathlib.Path)):
-                if re.search(r"\..?sv$", parent_df):
+                if re.search(r"\..?sv$", str(parent_df)):
                     parent_df = load_from_csv(
                         parent_df,
                         delimiter=delimiter,
                     )
-                elif re.search(r"\..?json$", parent_df):
+                elif re.search(r"\..*?json$", str(parent_df)):
                     parent_df = load_from_geojson(parent_df)
                 else:
                     raise ValueError(
@@ -166,7 +165,6 @@ class Annotator:
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
-            parent_df = eval_dataframe(parent_df)
 
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes

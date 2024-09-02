@@ -106,14 +106,14 @@ class PatchDataset(Dataset):
         if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
 
-        elif isinstance(patch_df, (str | pathlib.Path)):
+        elif isinstance(patch_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{patch_df}".')
-            if re.search(r"\..?sv$", patch_df):
+            if re.search(r"\..?sv$", str(patch_df)):
                 self.patch_df = load_from_csv(
                     patch_df,
                     delimiter=delimiter,
                 )
-            elif re.search(r"\..?json$", patch_df):
+            elif re.search(r"\..*?json$", str(patch_df)):
                 self.patch_df = load_from_geojson(patch_df)
             else:
                 raise ValueError(
@@ -457,14 +457,14 @@ class PatchContextDataset(PatchDataset):
     ):
         if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
-        elif isinstance(patch_df, (str | pathlib.Path)):
+        elif isinstance(patch_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{patch_df}".')
-            if re.search(r"\..?sv$", patch_df):
+            if re.search(r"\..?sv$", str(patch_df)):
                 self.patch_df = load_from_csv(
                     patch_df,
                     delimiter=delimiter,
                 )
-            elif re.search(r"\..?json$", patch_df):
+            elif re.search(r"\..*?json$", str(patch_df)):
                 self.patch_df = load_from_geojson(patch_df)
             else:
                 raise ValueError(
@@ -477,14 +477,14 @@ class PatchContextDataset(PatchDataset):
 
         if isinstance(total_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.total_df = total_df
-        elif isinstance(total_df, (str | pathlib.Path)):
+        elif isinstance(total_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{total_df}".')
-            if re.search(r"\..?sv$", total_df):
+            if re.search(r"\..?sv$", str(total_df)):
                 self.total_df = load_from_csv(
                     total_df,
                     delimiter=delimiter,
                 )
-            elif re.search(r"\..?json$", total_df):
+            elif re.search(r"\..*?json$", str(total_df)):
                 self.total_df = load_from_geojson(total_df)
             else:
                 raise ValueError(

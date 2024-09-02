@@ -24,17 +24,17 @@ class Runner:
 
     def _load_df(
         self,
-        patch_df: pd.DataFrame | str,
-        parent_df: pd.DataFrame | str,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
+        parent_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
         delimiter: str = ",",
     ):
         """Load the patch and parent dataframes.
 
         Parameters
         ----------
-        patch_df : pd.DataFrame or str
+        patch_df : pd.DataFrame or gpd.GeoDataFrame or str or pathlib.Path
             The dataframe containing patch information. If a string, it should be the path to a csv file.
-        parent_df : pd.DataFrame or str
+        parent_df : pd.DataFrame or gpd.GeoDataFrame or str or pathlib.Path
             The dataframe containing parent information. If a string, it should be the path to a csv file.
         delimiter : str, optional
             The delimiter used in the csv file, by default ",".
@@ -42,14 +42,14 @@ class Runner:
         if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.patch_df = patch_df
 
-        elif isinstance(patch_df, str):
+        elif isinstance(patch_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{patch_df}"')
-            if re.search(r"\..?sv$", patch_df):
+            if re.search(r"\..?sv$", str(patch_df)):
                 self.patch_df = load_from_csv(
                     patch_df,
                     delimiter=delimiter,
                 )
-            elif re.search(r"\..?json$", patch_df):
+            elif re.search(r"\..*?json$", str(patch_df)):
                 self.patch_df = load_from_geojson(patch_df)
             else:
                 raise ValueError(
@@ -64,14 +64,14 @@ class Runner:
         if isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
             self.parent_df = parent_df
 
-        elif isinstance(parent_df, str):
+        elif isinstance(parent_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{parent_df}"')
-            if re.search(r"\..?sv$", parent_df):
+            if re.search(r"\..?sv$", str(parent_df)):
                 self.parent_df = load_from_csv(
                     parent_df,
                     delimiter=delimiter,
                 )
-            elif re.search(r"\..?json$", parent_df):
+            elif re.search(r"\..*?json$", str(parent_df)):
                 self.parent_df = load_from_geojson(parent_df)
             else:
                 raise ValueError(

@@ -80,11 +80,11 @@ def get_load_function(
     """
     check_exists(fpath)
 
-    if re.search(r"\.xls.*$", fpath):  # xls or xlsx
+    if re.search(r"\.xls.*$", str(fpath)):  # xls or xlsx
         func = load_from_excel
-    elif re.search(r"\..?sv$", fpath):  # csv, tsv, etc
+    elif re.search(r"\..?sv$", str(fpath)):  # csv, tsv, etc
         func = load_from_csv
-    elif re.search(r"\..?json$", fpath):  # json, geojson
+    elif re.search(r"\..*?json$", str(fpath)):  # json, geojson
         func = load_from_geojson
     else:
         raise ValueError(
