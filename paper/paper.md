@@ -101,6 +101,6 @@ This work was supported by Data/Culture (AHRC grant AH/Y00745X/1), Living with M
 
 # Contribution Statement
 
-Katherine McDonough wrote and revised this article, with substantial contributions from Daniel C.S. Wilson and Rosie Wood. Andy Smith, Kalle Westerling, Kaspar Beelen and Kasra Hosseini reviewed the final manuscript. Please see contributions to the MapReader software library at https://github.com/Living-with-machines/MapReader#contributors, including work from all named authors.
+Katherine McDonough wrote and revised this article, with substantial contributions from Daniel C.S. Wilson and Rosie Wood. Andy Smith, Kalle Westerling, Kaspar Beelen and Kasra Hosseini reviewed the final manuscript. Please see contributions to the MapReader software library at https://github.com/maps-as-data/MapReader#contributors, including work from all named authors.
 
 # References
