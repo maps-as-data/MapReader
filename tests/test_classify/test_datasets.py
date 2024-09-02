@@ -35,7 +35,7 @@ def load_patch_df(sample_dir, tmp_path):
     )  # creates 9 patches
     _, patch_df = my_maps.convert_images(save=True, save_format="geojson")
     patch_df.to_csv(f"{tmp_path}/patch_df.csv")
-    shutil.rmtree("./parent_df.geojson")
+    os.remove("./parent_df.geojson")
     shutil.move("./patch_df.geojson", f"{tmp_path}/patch_df.geojson")
     return patch_df, tmp_path
 
