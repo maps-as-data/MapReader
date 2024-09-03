@@ -50,8 +50,8 @@ def test_eval_dataframe(init_dataframes, tmp_path):
     parent_df_csv = eval_dataframe(parent_df_csv)
     assert isinstance(parent_df_csv.iloc[0]["shape"], tuple)
     assert isinstance(
-        parent_df_csv.iloc[0]["geometry"], str
-    )  # str because of shapely object, not evaluated
+        parent_df_csv.iloc[0]["geometry"], Polygon
+    )  # should be shapely Polygon
     assert isinstance(parent_df_csv.iloc[0]["patches"], list)
 
 
@@ -74,7 +74,9 @@ def test_load_from_csv(init_dataframes, tmp_path):
     assert "geometry" in parent_df_csv.columns
     assert "polygon" not in parent_df_csv.columns
     assert isinstance(parent_df_csv.iloc[0]["shape"], tuple)
-    assert isinstance(parent_df_csv.iloc[0]["geometry"], str)
+    assert isinstance(
+        parent_df_csv.iloc[0]["geometry"], Polygon
+    )  # should be shapely Polygon
     assert isinstance(parent_df_csv.iloc[0]["patches"], list)
 
 
@@ -94,7 +96,9 @@ def test_load_from_excel(init_dataframes, tmp_path):
     assert "geometry" in parent_df_excel.columns
     assert "polygon" not in parent_df_excel.columns
     assert isinstance(parent_df_excel.iloc[0]["shape"], tuple)
-    assert isinstance(parent_df_excel.iloc[0]["geometry"], str)
+    assert isinstance(
+        parent_df_excel.iloc[0]["geometry"], Polygon
+    )  # should be shapely Polygon
     assert isinstance(parent_df_excel.iloc[0]["patches"], list)
 
 
@@ -110,7 +114,9 @@ def test_load_from_geojson(init_dataframes, tmp_path):
     assert "image_id" in parent_df_geojson.columns  # image_id should be in columns
     assert parent_df_geojson.geometry.name == "geometry"
     assert isinstance(parent_df_geojson.iloc[0]["shape"], str)
-    assert isinstance(parent_df_geojson.iloc[0]["geometry"], Polygon)
+    assert isinstance(
+        parent_df_geojson.iloc[0]["geometry"], Polygon
+    )  # should be shapely Polygon (always)
     parent_df_geojson = load_from_geojson(f"{tmp_path}/parent_df.geojson")
     print(parent_df_geojson.columns)
     print(parent_df_geojson.head())
@@ -122,7 +128,9 @@ def test_load_from_geojson(init_dataframes, tmp_path):
     assert parent_df_geojson.geometry.name == "geometry"
     assert parent_df_geojson.crs == "EPSG:4326"
     assert isinstance(parent_df_geojson.iloc[0]["shape"], tuple)
-    assert isinstance(parent_df_geojson.iloc[0]["geometry"], Polygon)
+    assert isinstance(
+        parent_df_geojson.iloc[0]["geometry"], Polygon
+    )  # should be shapely Polygon (always)
 
 
 def test_get_load_function(sample_dir):

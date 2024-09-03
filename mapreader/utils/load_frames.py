@@ -6,6 +6,7 @@ from ast import literal_eval
 
 import geopandas as gpd
 import pandas as pd
+from shapely import from_wkt
 
 
 def eval_dataframe(df: pd.DataFrame | gpd.GeoDataFrame):
@@ -40,6 +41,9 @@ def load_from_csv(
         print("[INFO] Renaming 'polygon' to 'geometry'.")
         df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
+    if "geometry" in df.columns:
+        df["geometry"] = df["geometry"].apply(from_wkt)
+        df = gpd.GeoDataFrame(df, geometry="geometry")
     return df
 
 
@@ -56,6 +60,7 @@ def load_from_geojson(
         df["image_id"] = df["name"]
         df.set_index("image_id", drop=True, inplace=True)
     df = eval_dataframe(df)
+
     return df
 
 
@@ -70,6 +75,9 @@ def load_from_excel(
         print("[INFO] Renaming 'polygon' to 'geometry'.")
         df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
+    if "geometry" in df.columns:
+        df["geometry"] = df["geometry"].apply(from_wkt)
+        df = gpd.GeoDataFrame(df, geometry="geometry")
     return df
 
 
