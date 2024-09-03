@@ -384,7 +384,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         metadata file/dataframe.
         """
 
-        if isinstance(metadata, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(metadata, pd.DataFrame):
             if usecols:
                 metadata_df = metadata[usecols].copy(deep=True)
             else:
@@ -2243,18 +2243,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if clear_images:
             self.images = {"parent": {}, "patch": {}}
+            self.parents = {}
+            self.patches = {}
 
-        if "polygon" in parent_df.columns:
-            print("[INFO] Renaming 'polygon' to 'geometry' for parent_df.")
-            parent_df = parent_df.rename(columns={"polygon": "geometry"})
-        if "polygon" in patch_df.columns:
-            print("[INFO] Renaming 'polygon' to 'geometry' for patch_df.")
-            patch_df = patch_df.rename(columns={"polygon": "geometry"})
-
-        if isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(parent_df, pd.DataFrame):
+            if "polygon" in parent_df.columns:
+                print("[INFO] Renaming 'polygon' to 'geometry' for parent_df.")
+                parent_df = parent_df.rename(columns={"polygon": "geometry"})
             self.parents.update(parent_df.to_dict(orient="index"))
 
-        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(patch_df, pd.DataFrame):
+            if "polygon" in patch_df.columns:
+                print("[INFO] Renaming 'polygon' to 'geometry' for patch_df.")
+                patch_df = patch_df.rename(columns={"polygon": "geometry"})
             self.patches.update(patch_df.to_dict(orient="index"))
 
         for patch_id in self.list_patches():
@@ -2264,8 +2265,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
     def load_csv(
         self,
-        parent_path: str | pathlib.Path,
-        patch_path: str | pathlib.Path,
+        parent_path: str | pathlib.Path | None = None,
+        patch_path: str | pathlib.Path | None = None,
         clear_images: bool = False,
         index_col_patch: int | str | None = 0,
         index_col_parent: int | str | None = 0,
@@ -2278,10 +2279,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         Parameters
         ----------
-        parent_path : str or pathlib.Path
-            Path to the CSV file containing parent image information.
-        patch_path : str or pathlib.Path
-            Path to the CSV file containing patch information.
+        parent_path : str or pathlib.Path or None
+            Path to the CSV file containing parent image information. By default, ``None``.
+        patch_path : str or pathlib.Path or None
+            Path to the CSV file containing patch information. By default, ``None``.
         clear_images : bool, optional
             If True, clear all previously loaded image information before
             loading new information. Default is ``False``.
@@ -2300,23 +2301,20 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             self.images = {"parent": {}, "patch": {}}
             self.parents = {}
             self.patches = {}
-            self.georeferenced = False
 
-        if not isinstance(parent_path, (str | pathlib.Path)):
-            raise ValueError(
-                "[ERROR] Please pass ``parent_path`` as string or pathlib.Path."
+        if isinstance(parent_path, (str, pathlib.Path)):
+            parent_df = load_from_csv(
+                parent_path, index_col=index_col_parent, delimiter=delimiter
             )
-        if not isinstance(patch_path, (str, pathlib.Path)):
-            raise ValueError(
-                "[ERROR] Please pass ``patch_path`` as string or pathlib.Path."
-            )
+        else:
+            parent_df = None
 
-        parent_df = load_from_csv(
-            parent_path, index_col=index_col_parent, delimiter=delimiter
-        )
-        patch_df = load_from_csv(
-            patch_path, index_col=index_col_patch, delimiter=delimiter
-        )
+        if isinstance(patch_path, (str, pathlib.Path)):
+            patch_df = load_from_csv(
+                patch_path, index_col=index_col_patch, delimiter=delimiter
+            )
+        else:
+            patch_df = None
 
         self.load_df(parent_df=parent_df, patch_df=patch_df, clear_images=clear_images)
 
@@ -2719,9 +2717,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
-        # change tuple/list columns to strings
-        for col in patch_df.columns:
-            if isinstance(patch_df[col][0], (tuple, list)):
-                patch_df[col] = patch_df[col].apply(str)
 
+        # save
         patch_df.to_file(geojson_fname, driver="GeoJSON")

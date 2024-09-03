@@ -115,7 +115,7 @@ class AnnotationsLoader:
             annotations = self._load_annotations_file(
                 annotations, delimiter, scramble_frame, reset_index
             )
-        if not isinstance(annotations, (pd.DataFrame, gpd.GeoDataFrame)):
+        if not isinstance(annotations, pd.DataFrame):
             raise ValueError(
                 "[ERROR] Please pass ``annotations`` as a path to a CSV/TSV/geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )
@@ -392,7 +392,7 @@ Please check your image paths in your annonations.csv file and update them if ne
             annots2review.reset_index(inplace=True, drop=False)
 
         if exclude_df is not None:
-            if isinstance(exclude_df, (pd.DataFrame, gpd.GeoDataFrame)):
+            if isinstance(exclude_df, pd.DataFrame):
                 merged_df = pd.merge(
                     annots2review, exclude_df, how="left", indicator=True
                 )
@@ -404,7 +404,7 @@ Please check your image paths in your annonations.csv file and update them if ne
                 raise ValueError("[ERROR] ``exclude_df`` must be a pandas DataFrame.")
 
         if include_df is not None:
-            if isinstance(include_df, (pd.DataFrame, gpd.GeoDataFrame)):
+            if isinstance(include_df, pd.DataFrame):
                 annots2review = pd.merge(annots2review, include_df, how="right")
                 annots2review.reset_index(inplace=True, drop=True)
             else:

@@ -93,6 +93,38 @@ def test_patch_dataset_init_geojson(load_patch_df):
     assert patch_dataset.label_col is None
 
 
+def test_patch_dataset_fake_transform_error(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match='can only be "train", "val" or "test"'):
+        PatchDataset(patch_df=patch_df, transform="fake transform")
+
+
+def test_patch_dataset_init_errors(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchDataset(
+            patch_df="fake.file",
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchDataset(
+            patch_df=234,
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchDataset(
+            patch_df=patch_df,
+            transform="test",
+            label_col="fake_col",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchDataset(
+            patch_df=patch_df,
+            transform="test",
+            label_index_col="fake_col",
+        )
+
+
 def test_patch_dataset_init_annots(annots):
     patch_dataset = PatchDataset(
         patch_df=annots.annotations, transform="test", label_col="label"
@@ -180,6 +212,36 @@ def test_patch_context_dataset_init_geojson(load_patch_df):
             continue  # polygon column is not converted to polygon type
         assert patch_df[col].equals(patch_dataset.patch_df[col])
     assert patch_dataset.label_col is None
+
+
+def test_patch_context_dataset_init_errors(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchContextDataset(
+            patch_df="fake.file",
+            total_df=patch_df,
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df="fake.file",
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df=patch_df,
+            transform="test",
+            label_col="fake_col",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df=patch_df,
+            transform="test",
+            label_index_col="fake_col",
+        )
 
 
 def test_patch_context_dataset_init_annots(annots):

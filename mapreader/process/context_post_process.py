@@ -46,7 +46,7 @@ class ContextPostProcessor:
                     "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
                 )
 
-        if not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if not isinstance(patch_df, pd.DataFrame):
             raise ValueError(
                 "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )

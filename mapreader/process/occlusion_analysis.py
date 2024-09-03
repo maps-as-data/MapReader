@@ -45,7 +45,7 @@ class OcclusionAnalyzer:
         delimiter: str = ",",
         device: str = "default",
     ):
-        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
         elif isinstance(patch_df, (str, pathlib.Path)):

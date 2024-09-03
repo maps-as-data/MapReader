@@ -143,7 +143,7 @@ class Annotator:
                     raise ValueError(
                         "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
-            elif not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+            elif not isinstance(patch_df, pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
@@ -161,7 +161,7 @@ class Annotator:
                     raise ValueError(
                         "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                     )
-            if not isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
+            if not isinstance(parent_df, pd.DataFrame):
                 raise ValueError(
                     "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
@@ -185,9 +185,9 @@ class Annotator:
                 )
 
         # Check for metadata + data
-        if not isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if not isinstance(patch_df, pd.DataFrame):
             raise ValueError("[ERROR] No patch data available.")
-        if not isinstance(parent_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if not isinstance(parent_df, pd.DataFrame):
             raise ValueError("[ERROR] No metadata (parent data) available.")
 
         # Check for url column and add to patch dataframe

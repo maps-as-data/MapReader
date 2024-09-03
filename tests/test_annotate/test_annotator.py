@@ -299,6 +299,37 @@ def test_init_with_fpaths_tsv(load_dfs, sample_dir):
     assert "mean_pixel_R" in annotator.patch_df.columns
 
 
+def test_init_errors(load_dfs, sample_dir):
+    _, _, tmp_path = load_dfs
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson file or"):
+        Annotator(
+            patch_df="fake.file",
+            parent_df=f"{tmp_path}/parent_df.csv",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson file or"):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df="fake.file",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+    with pytest.raises(ValueError, match="specify one of"):
+        Annotator()
+    with pytest.raises(FileNotFoundError, match="Metadata file .* not found"):
+        Annotator(
+            patch_paths=f"{tmp_path}/patches/*png",
+            parent_paths=f"{sample_dir}/cropped_74488689.png",
+            metadata_path="fake.file",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+
+
 def test_incorrect_delimiter(load_dfs):
     _, _, tmp_path = load_dfs
     with pytest.raises(ValueError):

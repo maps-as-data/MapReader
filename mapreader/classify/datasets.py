@@ -103,7 +103,7 @@ class PatchDataset(Dataset):
         label_index_col: str | None = None,
         image_mode: str | None = "RGB",
     ):
-        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
         elif isinstance(patch_df, (str, pathlib.Path)):
@@ -455,7 +455,7 @@ class PatchContextDataset(PatchDataset):
         create_context: bool = False,
         parent_path: str | None = "./maps",
     ):
-        if isinstance(patch_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
         elif isinstance(patch_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{patch_df}".')
@@ -475,7 +475,7 @@ class PatchContextDataset(PatchDataset):
                 "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
-        if isinstance(total_df, (pd.DataFrame, gpd.GeoDataFrame)):
+        if isinstance(total_df, pd.DataFrame):
             self.total_df = total_df
         elif isinstance(total_df, (str, pathlib.Path)):
             print(f'[INFO] Reading "{total_df}".')
@@ -517,12 +517,17 @@ class PatchContextDataset(PatchDataset):
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
-                print(
-                    f"[INFO] Label index column ({label_index_col}) not in DataFrame. Creating column."
-                )
-                self.patch_df[self.label_index_col] = self.patch_df[
-                    self.label_col
-                ].apply(self._get_label_index)
+                if self.label_col:
+                    print(
+                        f"[INFO] Label index column ({label_index_col}) not in DataFrame. Creating column."
+                    )
+                    self.patch_df[self.label_index_col] = self.patch_df[
+                        self.label_col
+                    ].apply(self._get_label_index)
+                else:
+                    raise ValueError(
+                        f"[ERROR] Label index column ({label_index_col}) not in DataFrame."
+                    )
 
         if isinstance(transform, str):
             if transform in ["train", "val", "test"]:

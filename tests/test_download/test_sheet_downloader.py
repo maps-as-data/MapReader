@@ -722,3 +722,22 @@ def test_data_warning_error(sheet_downloader, tmp_path, mock_response):
         Warning, match="Please confirm download by setting ``force=True``"
     ):
         sd.download_all_map_sheets(maps_path, metadata_fname)
+
+
+def test_download_grid_bb_errors(sheet_downloader):
+    sd = sheet_downloader
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_all_map_sheets()
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_map_sheets_by_wfs_ids(16320)
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_map_sheets_by_coordinates((-0.99, 53.43))
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_map_sheets_by_polygon(sd.metadata.iloc[0]["geometry"].geoms[0])
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_map_sheets_by_line(LineString([(-0.99, 53.43), (-0.93, 53.46)]))
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.download_map_sheets_by_string("Westminster", ["PARISH"])
+    with pytest.raises(ValueError, match="Please first run"):
+        sd.query_map_sheets_by_wfs_ids(16320)
+        sd.download_map_sheets_by_queries()

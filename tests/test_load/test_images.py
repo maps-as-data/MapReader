@@ -280,6 +280,14 @@ def test_add_metadata_geodf(sample_dir, image_id, ts_metadata_keys):
     )
 
 
+def test_add_metadata_errors(sample_dir, image_id):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    with pytest.raises(ValueError, match="a CSV/TSV/etc, Excel or JSON/GeoJSON file"):
+        maps.add_metadata("fake.file")
+    with pytest.raises(ValueError, match="file or a pandas DataFrame"):
+        maps.add_metadata(123)
+
+
 # check for mismatched metadata
 
 
@@ -664,15 +672,18 @@ def test_coord_functions(init_maps, image_id, sample_dir, capfd):
     assert "dlon" in geotiffs.parents[image_id].keys()
     assert "center_lon" in geotiffs.parents[image_id].keys()
 
+
+def test_coord_functions_errors(sample_dir, image_id, tmp_path):
     # test for tiff with no geo info, no coordinates so should raise error
-    image_id = "cropped_non_geo.tif"
-    tiffs = MapImages(f"{sample_dir}/{image_id}")
-    keys = list(tiffs.parents[image_id].keys())
+    tiffs = MapImages(f"{sample_dir}/cropped_non_geo.tif")
     with pytest.raises(ValueError, match="No coordinates"):
         tiffs.add_coord_increments()
     with pytest.raises(ValueError, match="'coordinates' could not be found"):
         tiffs.add_center_coord(tree_level="parent")
-    assert list(tiffs.parents[image_id].keys()) == keys
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    with pytest.raises(ValueError, match="'coordinates' could not be found"):
+        maps.add_center_coord(tree_level="patch")
 
 
 def test_add_patch_coords(init_maps):
@@ -702,6 +713,12 @@ def test_add_parent_polygons(init_maps):
     assert isinstance(maps.parents[parent_list[0]]["geometry"], Polygon)
     maps.check_georeferencing()
     assert maps.georeferenced
+
+
+def test_add_parent_polygons_errors(sample_dir, image_id):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    with pytest.raises(ValueError, match="No georeferencing information"):
+        maps.add_parent_polygons()
 
 
 def test_save_patches_as_geotiffs(init_maps):
@@ -755,6 +772,22 @@ def test_save_to_geojson(init_maps, tmp_path, capfd):
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     out, _ = capfd.readouterr()
     assert "[WARNING] File already exists" in out
+
+
+def test_save_to_geojson_error(sample_dir, image_id, tmp_path, capfd):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
+    with pytest.raises(ValueError, match="No patches"):
+        maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
+    # remove coordinates
+    for parent in maps.list_parents():
+        maps.parents[parent].pop("geometry")
+        maps.parents[parent].pop("coordinates")
+    maps.check_georeferencing()
+    assert not maps.georeferenced
+    with pytest.raises(ValueError, match="No geographic information"):
+        maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
 
 
 def test_save_to_geojson_missing_data(sample_dir, image_id, tmp_path):
@@ -897,3 +930,76 @@ def test_show_sample_grayscale(sample_dir, tmp_path, monkeypatch):
     monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
     maps.show_sample(num_samples=1, tree_level="parent")
     maps.show_sample(num_samples=1, tree_level="patch")
+
+
+def test_load_parents_errors(sample_dir, image_id):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    with pytest.raises(ValueError, match="Please pass one of"):
+        maps.load_parents()
+
+
+def test_load_df(init_dataframes, image_id):
+    # set up
+    parent_df, patch_df = init_dataframes
+    parent_df = load_from_csv(parent_df)
+    parent_df.rename(columns={"geometry": "polygon"}, inplace=True)
+    assert "polygon" in parent_df.columns
+    patch_df = load_from_csv(patch_df)
+    patch_df.rename(columns={"geometry": "polygon"}, inplace=True)
+    assert "polygon" in patch_df.columns
+
+    maps = MapImages()
+    # test loading parent df
+    maps.load_df(parent_df=parent_df)
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+    assert maps.georeferenced
+    assert "geometry" in maps.parents[image_id].keys()
+    # test loading patch df
+    maps.load_df(patch_df=patch_df, clear_images=False)
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 9
+    maps.check_georeferencing()
+    assert maps.georeferenced
+    assert "geometry" in maps.parents[image_id].keys()
+    assert "geometry" in maps.patches[maps.list_patches()[0]].keys()
+    # test clear images
+    maps.load_df(parent_df=parent_df, clear_images=True)
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+
+
+def test_load_csv(init_dataframes, image_id):
+    # set up
+    patch_df, parent_df = init_dataframes
+    parent_df = load_from_csv(parent_df)
+    parent_df.rename(columns={"geometry": "polygon"}, inplace=True)
+    assert "polygon" in parent_df.columns
+    parent_df.to_csv("./patch_df.csv")  # save to csv again
+    patch_df = load_from_csv(patch_df)
+    patch_df.rename(columns={"geometry": "polygon"}, inplace=True)
+    assert "polygon" in patch_df.columns
+    patch_df.to_csv("./parent_df.csv")  # save to csv again
+
+    maps = MapImages()
+    # test loading parent df
+    maps.load_csv(parent_path="./parent_df.csv")
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+    assert maps.georeferenced
+    assert "geometry" in maps.parents[image_id].keys()
+    # test loading patch df
+    maps.load_csv(patch_path="./patch_df.csv")
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 9
+    assert maps.georeferenced
+    assert "geometry" in maps.parents[image_id].keys()
+    assert "geometry" in maps.patches[maps.list_patches()[0]].keys()
+    # test clear images
+    maps.load_csv(parent_path="./parent_df.csv", clear_images=True)
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
+    # test pathlib
+    maps.load_csv(parent_path=pathlib.Path("./parent_df.csv"), clear_images=True)
+    assert len(maps.list_parents()) == 1
+    assert len(maps.list_patches()) == 0
