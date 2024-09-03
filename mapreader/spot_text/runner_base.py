@@ -397,7 +397,7 @@ class Runner:
         """
 
         geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
-        geo_df.to_file(save_path, driver="GeoJSON")
+        geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")
 
     def show(
         self,

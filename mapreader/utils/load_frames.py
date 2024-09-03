@@ -48,7 +48,8 @@ def load_from_geojson(
     **kwargs,
 ):
     check_exists(fpath)
-    df = gpd.read_file(fpath, **kwargs)
+    engine = kwargs.pop("engine", "pyogrio")
+    df = gpd.read_file(fpath, engine=engine, **kwargs)
     if "image_id" in df.columns:
         df.set_index("image_id", drop=True, inplace=True)
     elif "name" in df.columns:

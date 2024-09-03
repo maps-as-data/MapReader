@@ -764,7 +764,7 @@ def test_save_to_geojson(init_maps, tmp_path, capfd):
     maps, _, _ = init_maps
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
-    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson")
+    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson", engine="pyogrio")
     assert "geometry" in geo_df.columns
     assert str(geo_df.crs.to_string()) == "EPSG:4326"
     assert isinstance(geo_df["geometry"][0], Polygon)
@@ -798,7 +798,7 @@ def test_save_to_geojson_missing_data(sample_dir, image_id, tmp_path):
     )
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
-    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson")
+    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson", engine="pyogrio")
     assert "geometry" in geo_df.columns
     assert str(geo_df.crs.to_string()) == "EPSG:4326"
     assert isinstance(geo_df["geometry"][0], Polygon)
@@ -816,7 +816,7 @@ def test_save_to_geojson_polygon_strings(
     assert isinstance(maps.patches[patch_id]["geometry"], str)
     maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
     assert os.path.exists(f"{tmp_path}/patches.geojson")
-    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson")
+    geo_df = gpd.read_file(f"{tmp_path}/patches.geojson", engine="pyogrio")
     assert "geometry" in geo_df.columns
     assert str(geo_df.crs.to_string()) == "EPSG:4326"
     assert isinstance(geo_df["geometry"][0], Polygon)

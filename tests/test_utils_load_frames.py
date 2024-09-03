@@ -100,8 +100,10 @@ def test_load_from_excel(init_dataframes, tmp_path):
 
 def test_load_from_geojson(init_dataframes, tmp_path):
     parent_df, _ = init_dataframes
-    parent_df.to_file(f"{tmp_path}/parent_df.geojson", driver="GeoJSON")
-    parent_df_geojson = gpd.read_file(f"{tmp_path}/parent_df.geojson")
+    parent_df.to_file(
+        f"{tmp_path}/parent_df.geojson", driver="GeoJSON", engine="pyogrio"
+    )
+    parent_df_geojson = gpd.read_file(f"{tmp_path}/parent_df.geojson", engine="pyogrio")
     print(parent_df_geojson.columns)
     print(parent_df_geojson.head())
     assert parent_df_geojson.index == range(len(parent_df))  # should be numeric index

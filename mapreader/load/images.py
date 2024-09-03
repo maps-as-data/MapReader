@@ -2715,6 +2715,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if not crs:
             crs = patch_df.crs
 
+        if "image_id" in patch_df.columns:
+            patch_df.drop(columns=["image_id"], inplace=True)
+        patch_df.reset_index(names="image_id", inplace=True)
+
         # drop pixel stats columns
         patch_df.drop(columns=patch_df.filter(like="pixel", axis=1), inplace=True)
 
