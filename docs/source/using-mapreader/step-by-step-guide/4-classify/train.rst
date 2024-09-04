@@ -35,9 +35,9 @@ For example, if you have set up your directory as recommended in our :doc:`Input
 
     - ``delimiter`` - By default, this is set to "," so will assume your ``csv`` file is comma separated. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
-    - ``append`` - By default, this is ``False`` and so each call to the ``.load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
+    - ``append`` - By default, this is ``False`` and so each call to the ``load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
 
-To view the data loaded in from your ``csv`` as a dataframe, use:
+To view the data loaded in from your annotations file as a dataframe, use:
 
 .. code-block:: python
 
@@ -96,7 +96,7 @@ For example, to show your "railspace" label:
 By default, this will show you a sample of 9 images, but this can be changed by specifying ``num_sample``.
 
 When viewing your annotations, you may notice that you have mislabelled one of your images.
-The ``.review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
+The ``review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
 
 .. code-block:: python
 
@@ -174,7 +174,7 @@ Before using your annotated images to train your model, you will first need to:
                 ]
             )
 
-    You can access these by calling the ``.transform`` attribute on any dataset or from the ``PatchDataset`` API documentation.
+    You can access these by calling the ``transform`` attribute on any dataset or from the ``PatchDataset`` API documentation.
 
 .. _sampler:
 
@@ -205,7 +205,7 @@ To split your annotated images and create your dataloaders, use:
 
     dataloaders = annotated_images.create_dataloaders()
 
-By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``.create_datasets()`` method.
+By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``create_datasets()`` method.
 It will then create a dataloader for each dataset, using a batch size of 16 and the :ref:`default sampler<sampler>`.
 
 To change the batch size used when creating your dataloaders, use the ``batch_size`` argument:
@@ -393,7 +393,7 @@ In order to train/fine-tune your model, will need to define:
 
 **1.  A loss function - This works out how well your model is performing (the "loss").**
 
-    To add a loss function, use ``.add_loss_fn()``.
+    To add a loss function, use ``add_loss_fn()``.
     Already implemented options are "cross-entropy", "binary cross-entropy" and "mean squared error". You can pass these as strings:
 
     .. code-block:: python
@@ -420,7 +420,7 @@ In order to train/fine-tune your model, will need to define:
 
 **2.  An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
 
-    The ``.initialize_optimizer()`` method is used to add an optimizer to you ``ClassifierContainer()`` (``my_classifier``):
+    The ``initialize_optimizer()`` method is used to add an optimizer to you ``ClassifierContainer()`` (``my_classifier``):
 
     .. code-block:: python
 
@@ -452,7 +452,7 @@ In order to train/fine-tune your model, will need to define:
         params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
 
 
-    You should then pass your ``params2optimize`` list to the ``.initialize_optimizer()`` method:
+    You should then pass your ``params2optimize`` list to the ``initialize_optimizer()`` method:
 
     .. code-block:: python
 
@@ -460,7 +460,7 @@ In order to train/fine-tune your model, will need to define:
 
 **3.  A scheduler - This defines how to adjust your learning rates during training.**
 
-    To add a scheduler, use the ``.initialize_scheduler()`` method:
+    To add a scheduler, use the ``initialize_scheduler()`` method:
 
     .. code-block:: python
 
@@ -514,7 +514,7 @@ e.g. to pass through 10 epochs of training data:
 Plot metrics
 ^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accessible via the ``.metrics`` attribute.
+Metrics are stored in a dictionary accessible via the ``metrics`` attribute.
 To list these, use:
 
 .. code-block:: python
@@ -523,7 +523,7 @@ To list these, use:
 
 .. todo:: Explain what these metrics are/mean
 
-To help visualize the progress of your training, metrics can be plotted using the ``.plot_metric()`` method.
+To help visualize the progress of your training, metrics can be plotted using the ``plot_metric()`` method.
 
 The name of the metrics you would like to plot should be passed as the ``y_axis`` argument.
 This can take any number/combination of metrics.
@@ -547,7 +547,7 @@ Testing
 --------
 
 The "test" dataset can be used to test your model.
-This can be done using the ``.inference()`` method:
+This can be done using the ``inference()`` method:
 
 .. code-block:: python
 
@@ -565,7 +565,7 @@ To see a sample of your predictions, use:
 
 .. note:: This will show you the transformed images which may look weird to the human eye.
 
-By default, the ``.show_inference_sample_results()`` method will show you six samples of your "test" dataset.
+By default, the ``show_inference_sample_results()`` method will show you six samples of your "test" dataset.
 To change the number of samples shown, specify the ``num_samples`` argument.
 
 It can be useful to see instances where your model is struggling to classify your images.
@@ -580,8 +580,8 @@ e.g. To view samples where the model is less than 80% confident about its predic
 
 This can help you identify images that might need to be brought into your training data for further optimization of your model.
 
-By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``.metrics`` attribute.
-Instead, they must be added using the ``.calculate_add_metrics()``.
+By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``metrics`` attribute.
+Instead, they must be added using the ``calculate_add_metrics()``.
 
 e.g. to add metrics for the 'test' dataset:
 
@@ -651,7 +651,7 @@ To do this, you will need to create a new dataset containing your patches:
 
     infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
-.. note:: You should have created this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance).
+.. note:: You should have created this CSV file using the ``convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance). This could also be a GeoJSON file.
 
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
@@ -664,11 +664,11 @@ You should then add this dataset to your ``ClassifierContainer()`` (``my_classif
 
 This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute.
 
-By default, the ``.load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
+By default, the ``load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
 You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
 See :ref:`this section<sampler>` for more information on samplers.
 
-After loading your dataset, you can then simply run the ``.inference()`` method to infer the labels on the patches in your dataset:
+After loading your dataset, you can then simply run the ``inference()`` method to infer the labels on the patches in your dataset:
 
 .. code-block:: python
 
@@ -683,7 +683,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 Save predictions
 ~~~~~~~~~~~~~~~~~
 
-To save your predictions, use the ``.save_predictions()`` method.
+To save your predictions, use the ``save_predictions()`` method.
 e.g. to save your predictions on the "infer" dataset:
 
 .. code-block:: python
@@ -704,7 +704,7 @@ To do this, you will need to create a new ``MapImages`` object and load in your 
 
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
 
-You can then add your predictions to the metadata using the ``.add_metadata()`` method:
+You can then add your predictions to the metadata using the ``add_metadata()`` method:
 
 .. code-block:: python
 
@@ -717,7 +717,7 @@ For example, to load the predictions for the "infer" dataset:
     #EXAMPLE
     my_maps.add_metadata("./infer_predictions_patch_df.csv", tree_level='patch')
 
-From here, you can use the ``.show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
+From here, you can use the ``show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
 
 .. code-block:: python
 

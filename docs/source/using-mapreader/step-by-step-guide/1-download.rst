@@ -13,8 +13,8 @@ Download
 MapReader's ``Download`` subpackage is used to download maps stored on as XYZ tile layers on a tile server.
 It contains two classes for downloading maps:
 
-- :ref:`SheetDownloader` - This can be used to download map sheets and relies on information provided in a metadata ``json`` file.
-- :ref:`Downloader` - This is used to download maps using polygons and can be used even if you don't have a metadata ``json`` file.
+- :ref:`SheetDownloader` - This can be used to download map sheets and relies on information provided in a metadata json file.
+- :ref:`Downloader` - This is used to download maps using polygons and can be used even if you don't have a metadata file.
 
 MapReader uses XYZ tile layers (also known as 'slippy map tile layers') to download map tiles.
 
@@ -28,8 +28,8 @@ Regardless of which class you will use to download your maps, you must know the 
 SheetDownloader
 ---------------
 
-To download map sheets, you must provide MapReader with a metadata file (usually a ``json`` file), which contains information about your map sheets.
-Guidance on what this metadata ``json`` should contain can be found in our :doc:`Input Guidance </using-mapreader/input-guidance/index>`.
+To download map sheets, you must provide MapReader with a metadata JSON/GeoJSON file, which contains information about your map sheets.
+Guidance on what this metadata file should contain can be found in our :doc:`Input Guidance </using-mapreader/input-guidance/index>`.
 An example is shown below:
 
 .. code-block:: javascript
@@ -56,8 +56,7 @@ An example is shown below:
 
 .. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
-To set up your sheet downloader, you should first create a ``SheetDownloader`` instance, specifying a ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the URL for your XYZ tile layer).
-This is done using:
+To set up your sheet downloader, you should first create a ``SheetDownloader`` instance, specifying a ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the URL for your XYZ tile layer):
 
 .. code-block:: python
 
@@ -78,7 +77,19 @@ e.g. for the OS one-inch maps:
          download_url="https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png",
      )
 
-To help you visualize your metadata, the boundaries of the map sheets included in your metadata can be visualized using:
+
+Understanding your metadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+At any point, you can view your metadata dataframe using the ``.metadata`` attribute:
+
+.. code-block:: python
+
+     my_ts.metadata
+
+This can help you explore the structure of your metadata and identify the information you'd like to use for querying.
+
+To help you visualize your maps, the boundaries of the map sheets included in your metadata can be visualized using:
 
 .. code-block:: python
 
@@ -89,12 +100,19 @@ To help you visualize your metadata, the boundaries of the map sheets included i
      :align: center
 
 
-
-The ``add_id`` argument can be used to add the WFS ID numbers of your map sheets on the resulting plot.
+Passing ``add_id=True`` when calling this method will add the WFS ID numbers of your map sheets to your plot.
 This can be helpful in identifying the map sheets you'd like to download.
 
-It can also be helpful to know the range of publication dates for your map sheets.
-This can be done using the ``.extract_published_dates()`` method:
+Another helpful method is the ``get_minmax_latlon()`` method, which will print out the minimum and maximum latitudes and longitudes of all your map sheets and can help you identify valid ranges of latitudes and longitudes to use for querying.
+It's use is as follows:
+
+.. code-block:: python
+
+     my_ts.get_minmax_latlon()
+
+
+As well as geographic information, it can also be helpful to know the range of publication dates for your map sheets.
+This can be done using the ``extract_published_dates()`` method:
 
 .. code-block:: python
 
@@ -105,18 +123,21 @@ If you would like to extract the dates from elsewhere, you can specify the ``dat
 
 .. code-block:: python
 
-     my_ts.extract_published_dates(date_col=["properties", "YEAR"])
+     my_ts.extract_published_dates(date_col="YEAR")
 
 This will extract published dates from the ``"YEAR"`` field of your metadata (again, see example metadata.json above).
-
-.. note:: If your metadata.json is a multilayer dictionary, you will need to pass the key for each layer as a separate item in list form.
 
 These dates can then be visualized, as a histogram, using:
 
 .. code-block:: python
 
-     my_ts.hist_published_dates()
+     my_ts.metadata["published_date"].hist()
 
+
+.. _query_guidance:
+
+Query guidance
+~~~~~~~~~~~~~~~
 
 Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download map sheets using a number of methods:
 
@@ -128,25 +149,13 @@ Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download 
 
 These methods can be used to either directly download maps or to create a list of queries which can interacted with and downloaded subsequently.
 
-.. _query_guidance:
-
-Query guidance
-~~~~~~~~~~~~~~~
-
 For all query methods, you should be aware of the following arguments:
 
 - ``append`` - By default, this is set to ``False`` and so a new query list is created each time you make a new query. Setting it to ``True`` (i.e. by specifying ``append=True``) will result in your newly query results being appended to your previous ones.
 - ``print`` - By default, this is set to ``False`` and so query results will not be printed when you run the query method. Setting it to ``True`` will result in your query results being printed.
 
-You should also be aware of:
-
-- The ``.get_minmax_latlon()`` method, which will print out the minimum and maximum latitudes and longitudes of all your map sheets and can help you identify valid ranges of latitudes and longitudes to use for querying. It's use is as follows:
-
-.. code-block:: python
-
-     my_ts.get_minmax_latlon()
-
-- The ``.print_found_queries()`` method, which can be used to print your query results at any time. It's use is as follows:
+The ``print_found_queries()`` method, which can be used to print your query results at any time.
+It's use is as follows:
 
 .. code-block:: python
 
@@ -154,7 +163,8 @@ You should also be aware of:
 
 .. note:: You can also set ``print=True`` in the query commands to print your results in situ. See above.
 
-- The ``.plot_queries_on_map()`` method, which can be used to plot your query results on a map. As with the ``.plot_all_metadata_on_map()``, you can specify ``add_id=True`` to add the WFS ID numbers to your plot. Use this method as follows:
+The ``plot_queries_on_map()`` method, which can be used to plot your query results on a map.
+As with the ``plot_all_metadata_on_map()``, you can specify ``add_id=True`` to add the WFS ID numbers to your plot. Use this method as follows:
 
 .. code-block:: python
 
@@ -189,7 +199,7 @@ For all download methods, you should also be aware of the following arguments:
 - ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your ``metadata.json`` to your ``metadata.csv``. See below for further details.
 - ``force`` - If you are downloading more than 100MB of data, you will need to confirm that you would like to download this data by setting ``force=True``.
 
-Using the default ``path_save`` and ``metadata_fname`` arguments will result in the following directory structure:
+Using the default ``path_save`` and ``metadata_fname`` will result in the following directory structure:
 
 ::
 
@@ -211,15 +221,15 @@ By default, your metadata.csv file will only contain the following columns:
 - "published_date"
 - "grid_bb"
 
-If you would like to transfer additional data from your metadata.json to you metadata.csv, you should create a dictionary containing the names of the fields you would like to save and pass this as the ``metadata_to_save`` keyword argument in each download method.
+If you would like to transfer additional data from your ``metadata.json`` to you ``metadata.csv``, you should create a dictionary containing the names of the fields you would like to save and pass this as the ``metadata_to_save`` keyword argument in each download method.
 
 This should be in the form of:
 
 .. code-block:: python
 
      metadata_to_save = {
-          "new_column_name_1": ["metadata_key_layer_1"],
-          "new_column_name_2": ["metadata_key_layer_1", "metadata_key_layer_2"],
+          "new_column_name_1": "metadata_json_column1",
+          "new_column_name_2": "metadata_json_column2",
           ...
      }
 
@@ -228,7 +238,7 @@ For example, to save the "WFS_TITLE" field from the example metadata.json above,
 .. code-block:: python
 
      metadata_to_save = {
-          "wfs_title": ["properties", "WFS_TITLE"],
+          "wfs_title": "WFS_TITLE",
      }
 
 This would result in a metadata.csv with the following columns:
@@ -244,7 +254,7 @@ This would result in a metadata.csv with the following columns:
 1. Finding map sheets which overlap or intersect with a polygon.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``.query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods can be used find and download map sheets which are within or intersect/overlap with a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_.
+The ``query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods can be used find and download map sheets which are within or intersect/overlap with a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_.
 These methods have two modes:
 
 - "within" - This finds map sheets whose bounds are completely within the given polygon.
@@ -252,7 +262,7 @@ These methods have two modes:
 
 The ``mode`` can be selected by specifying ``mode="within"`` or ``mode="intersects"``.
 
-The ``.query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods take a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_ object as the ``polygon`` argument.
+The ``query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods take a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_ object as the ``polygon`` argument.
 These polygons can be created using MapReader's ``create_polygon_from_latlons()`` function:
 
 .. code-block:: python
@@ -313,7 +323,7 @@ Again, by default, this will result in the directory structure shown in download
 1. Finding map sheets which contain a set of coordinates.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``.query_map_sheets_by_coordinates()`` and ``download_map_sheets_by_coordinates()`` methods can be used find and download map sheets which contain a set of coordinates.
+The ``query_map_sheets_by_coordinates()`` and ``download_map_sheets_by_coordinates()`` methods can be used find and download map sheets which contain a set of coordinates.
 
 To find maps sheets which contain a given set of coordinates, use:
 
@@ -360,7 +370,7 @@ Again, by default, these will result in the directory structure shown in downloa
 3. Finding map sheets which intersect with a line.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``.query_map_sheets_by_line()`` and ``download_map_sheets_by_line()`` methods can be used find and download map sheets which intersect with a line.
+The ``query_map_sheets_by_line()`` and ``download_map_sheets_by_line()`` methods can be used find and download map sheets which intersect with a line.
 
 These methods take a `shapely.LineString <https://shapely.readthedocs.io/en/stable/reference/shapely.LineString.html#shapely.LineString>`_ object as the ``line`` argument.
 These lines can be created using MapReader's ``create_line_from_latlons()`` function:
@@ -409,7 +419,7 @@ Again, by default, this will result in the directory structure shown in download
 4. Finding map sheets using their WFS ID numbers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``.query_map_sheets_by_wfs_ids()`` and ``download_map_sheets_by_wfs_ids()`` methods can be used find and download map sheets using their WFS ID numbers.
+The ``query_map_sheets_by_wfs_ids()`` and ``download_map_sheets_by_wfs_ids()`` methods can be used find and download map sheets using their WFS ID numbers.
 
 To find maps sheets using their WFS ID numbers, use:
 
@@ -458,7 +468,7 @@ Again, by default, these will result in the directory structure shown in downloa
 5. Finding map sheets by searching for a string in their metadata.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``.query_map_sheets_by_string()`` and ``download_map_sheets_by_string()`` methods can be used find and download map sheets by searching for a string in their metadata.
+The ``query_map_sheets_by_string()`` and ``download_map_sheets_by_string()`` methods can be used find and download map sheets by searching for a string in their metadata.
 
 These methods use `regex string searching <https://docs.python.org/3/library/re.html>`__ to find map sheets whose metadata contains a given string.
 Wildcards and regular expressions can therefore be used in the ``string`` argument.
@@ -469,22 +479,22 @@ To find maps sheets whose metadata contains a given string, use:
 
      my_ts.query_map_sheets_by_string("my search string")
 
-e.g. :
+e.g. The following will find any maps which contain the string "shire" in their metadata (e.g. Wiltshire, Lanarkshire, etc.):
 
 .. code-block:: python
 
      #EXAMPLE
-     my_ts.query_map_sheets_by_string("n?don")
+     my_ts.query_map_sheets_by_string("shire")
 
 .. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
 
 .. admonition:: Advanced usage
     :class: dropdown
 
-    By default the ``keys`` argument is set to ``None``, meaning that this method will search for your string in **all** metadata fields.
+    By default the ``columns`` argument is set to ``None``, meaning that this method will search for your string in **all** metadata fields.
 
-    You can, however, specify the ``keys`` argument to search within a specific metadata field.
-    e.g. to search in ``features["properties"]["WFS_TITLE"]``, you should use ``keys=["properties", "WFS_TITLE"]``.
+    However, you can also specify the ``columns`` argument to search within a specific metadata column or columns.
+    e.g. to search in the "WFS_TITLE" column you should use ``columns="WFS_TITLE"`` or, to search in the "WFS_TITLE" and "IMAGE" columns you should use ``columns=["WFS_TITLE", "IMAGE"]``.
 
 To download your query results, use:
 
@@ -502,12 +512,12 @@ Alternatively, you can bypass the querying step and download map sheets directly
 
      my_ts.download_map_sheets_by_string("my search string")
 
-e.g. :
+e.g. to search for "shire" (e.g. Wiltshire, Lanarkshire, etc.):
 
 .. code-block:: python
 
      #EXAMPLE
-     my_ts.download_map_sheets_by_string("*shire")
+     my_ts.download_map_sheets_by_string("shire")
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 

@@ -27,14 +27,14 @@ e.g. :
     annotator = Annotator(
         patch_paths="./patches_100_pixel/*.png",
         parent_paths="./maps/*.png",
-        metadata="./maps/metadata.csv",
+        metadata="./maps/metadata.csv", # or .geojson
         annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_railspace", "railspace"],
         username="rosie",
     )
 
-Alternatively, if you have created/saved a ``patch_df`` and ``parent_df`` from MapReader's Load subpackage, you can replace the ``patch_paths`` and ``parent_paths`` arguments with ``patch_df`` and ``parent_df`` arguments, respectively.
+Alternatively, if you have created/saved a ``patch_df`` and ``parent_df`` from MapReader's ``Load`` subpackage, you can replace the ``patch_paths`` and ``parent_paths`` arguments with ``patch_df`` and ``parent_df`` arguments, respectively.
 e.g. :
 
 .. code-block:: python
@@ -43,15 +43,29 @@ e.g. :
 
     # EXAMPLE
     annotator = Annotator(
-        patch_df="./patch_df.csv",
-        parent_df="./parent_df.csv",
+        patch_df="./patch_df.csv", # or .geojson
+        parent_df="./parent_df.csv", # or .geojson
         annotations_dir="./annotations",
         task_name="railspace",
         labels=["no_railspace", "railspace"],
         username="rosie",
     )
 
-.. note:: You can pass either a pandas DataFrame, geopandas GeoDataFrame or the path to a ``csv`` file as the ``patch_df`` and ``parent_df`` arguments.
+or, if you have the patch and parent DataFrames in memory:
+
+.. code-block:: python
+
+    from mapreader import Annotator
+
+    # EXAMPLE
+    annotator = Annotator(
+        patch_df=patch_df,
+        parent_df=parent_df,
+        annotations_dir="./annotations",
+        task_name="railspace",
+        labels=["no_railspace", "railspace"],
+        username="rosie",
+    )
 
 In the above examples, the following parameters are also specified:
 
