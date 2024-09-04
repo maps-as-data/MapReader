@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import pathlib
 
+import adet
 import pytest
 from detectron2.engine import DefaultPredictor
+
+print(adet.__version__)
 
 from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages

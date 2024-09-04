@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pathlib
 
+import adet
 import pytest
+
+print(adet.__version__)
+
 from detectron2.engine import DefaultPredictor
 
 from mapreader import DeepSoloRunner
