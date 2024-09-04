@@ -29,6 +29,7 @@ from tqdm.auto import tqdm
 from mapreader.download.data_structures import GridBoundingBox, GridIndex
 from mapreader.download.downloader_utils import get_polygon_from_grid_bb
 from mapreader.utils.load_frames import (
+    get_geodataframe,
     load_from_csv,
     load_from_excel,
     load_from_geojson,
@@ -1566,26 +1567,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         # convert to GeoDataFrames if coordinates are present
         if self.georeferenced:
             if len(parent_df):
-                if "crs" in parent_df.columns:
-                    parent_df = gpd.GeoDataFrame(
-                        parent_df, crs=parent_df["crs"].unique()[0]
-                    )
-                else:
-                    print(
-                        "[WARNING] No CRS found for parent images. Setting CRS to EPSG:4326."
-                    )  ## TODO: Logging!
-                    parent_df = gpd.GeoDataFrame(parent_df, crs="EPSG:4326")
+                parent_df = get_geodataframe(parent_df)
 
             if len(patch_df):
-                if "crs" in patch_df.columns:
-                    patch_df = gpd.GeoDataFrame(
-                        patch_df, crs=patch_df["crs"].unique()[0]
-                    )
-                else:
-                    print(
-                        "[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326."
-                    )  ## TODO: Logging!
-                    patch_df = gpd.GeoDataFrame(patch_df, crs="EPSG:4326")
+                patch_df = get_geodataframe(patch_df)
 
         if save:
             if save_format == "csv":

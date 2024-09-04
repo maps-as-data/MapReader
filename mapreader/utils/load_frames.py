@@ -6,7 +6,7 @@ from ast import literal_eval
 
 import geopandas as gpd
 import pandas as pd
-from shapely import from_wkt
+from shapely import Geometry, from_wkt
 
 
 def eval_dataframe(df: pd.DataFrame | gpd.GeoDataFrame):
@@ -41,9 +41,7 @@ def load_from_csv(
         print("[INFO] Renaming 'polygon' to 'geometry'.")
         df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
-    if "geometry" in df.columns:
-        df["geometry"] = df["geometry"].apply(from_wkt)
-        df = gpd.GeoDataFrame(df, geometry="geometry")
+    df = get_geodataframe(df)
     return df
 
 
@@ -60,7 +58,6 @@ def load_from_geojson(
         df["image_id"] = df["name"]
         df.set_index("image_id", drop=True, inplace=True)
     df = eval_dataframe(df)
-
     return df
 
 
@@ -75,9 +72,7 @@ def load_from_excel(
         print("[INFO] Renaming 'polygon' to 'geometry'.")
         df = df.rename(columns={"polygon": "geometry"})
     df = eval_dataframe(df)
-    if "geometry" in df.columns:
-        df["geometry"] = df["geometry"].apply(from_wkt)
-        df = gpd.GeoDataFrame(df, geometry="geometry")
+    df = get_geodataframe(df)
     return df
 
 
@@ -111,3 +106,20 @@ def get_load_function(
 def check_exists(fpath):
     if not pathlib.Path(fpath).exists():
         raise FileNotFoundError(f"[ERROR] File {fpath} not found.")
+
+
+def get_geodataframe(df: pd.DataFrame):
+    if "geometry" in df.columns:
+        # convert geometry column to shapely objects
+        if not isinstance(df.iloc[0]["geometry"], Geometry):
+            df["geometry"] = df["geometry"].apply(from_wkt)
+        # get crs
+        if "crs" in df.columns:
+            if df["crs"].nunique() > 1:
+                raise ValueError("[ERROR] Multiple CRS found in the dataframe.")
+            crs = df["crs"].unique()[0]
+        else:
+            print("[WARNING] No CRS found for patch images. Setting CRS to EPSG:4326.")
+            crs = "EPSG:4326"
+        return gpd.GeoDataFrame(df, crs=crs, geometry="geometry")
+    return df
