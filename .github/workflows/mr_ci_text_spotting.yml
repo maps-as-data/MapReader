@@ -18,7 +18,7 @@ jobs:
             torchvision: "0.14.1"
           - torch: "2.2.2"
             torchvision: "0.17.2"
-        python-version: ["3.9", "3.12"]
+
     env:
       # point datasets to ~/.torch so it's cached by CI
       DETECTRON2_DATASETS: ~/.torch/datasets
@@ -26,10 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.9
 
       - name: Update pip
         run: |
@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ${{ env.pythonLocation }}/lib/${{ matrix.python-version }}/site-packages
+            ${{ env.pythonLocation }}/lib/python3.9/site-packages
             ~/.torch
           key: ${{ runner.os }}-torch${{ matrix.torch }}-${{ hashFiles('setup.py') }}-20220119
 
@@ -59,6 +59,7 @@ jobs:
         run: |
           CC=clang CXX=clang++ python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
           python -m detectron2.utils.collect_env
+          python -m pip install ".[dev]"
           python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
 
       - name: Run unittests
