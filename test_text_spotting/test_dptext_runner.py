@@ -11,7 +11,7 @@ from mapreader.load import MapImages
 
 @pytest.fixture
 def sample_dir():
-    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "tests" / "sample_files"
 
 
 @pytest.fixture
