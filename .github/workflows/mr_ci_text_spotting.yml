@@ -60,7 +60,24 @@ jobs:
           CC=clang CXX=clang++ python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
           python -m detectron2.utils.collect_env
           python -m pip install ".[dev]"
-          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
 
-      - name: Run unittests
-        run: python -m pytest tests/test_text_spotting/
+      - name: Install DPText-DETR and run unittests
+        run: |
+          git clone https://github.com/maps-as-data/DPText-DETR.git
+          python -m pip install DPText-DETR # Install DPText-DETR
+          wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
+          python -m pytest test_text_spotting/test_dptext_runner.py
+
+      - name: Install DeepSolo and run unittests
+        run: |
+          git clone https://github.com/maps-as-data/DeepSolo.git
+          python -m pip install DeepSolo # Install DeepSolo
+          wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
+          python -m pytest test_text_spotting/test_deepsolo_runner.py
+
+      - name: Install MapTextPipeline and run unittests
+        run: |
+          git clone https://github.com/maps-as-data/MapTextPipeline.git
+          python -m pip install MapTextPipeline # Install MapTextPipeline
+          wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
+          python -m pytest test_text_spotting/test_maptext_runner.py
