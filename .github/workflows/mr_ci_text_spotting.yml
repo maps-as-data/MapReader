@@ -74,7 +74,7 @@ jobs:
       - name: Install DeepSolo
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
-          python -m ppip install 'git+https://github.com/maps-as-data/DeepSolo.git' --no-deps --force-reinstall # Install DeepSolo
+          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' --no-deps --force-reinstall # Install DeepSolo
           wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
 
       - name: Run DeepSolo unittests
