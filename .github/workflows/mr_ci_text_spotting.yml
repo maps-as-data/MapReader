@@ -64,7 +64,7 @@ jobs:
       - name: Install DPText-DETR
         run: |
           git clone https://github.com/maps-as-data/DPText-DETR.git
-          python -m pip uninstall adet -y
+          python -m pip uninstall AdelaiDet -y
           python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
           wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
 
@@ -75,7 +75,7 @@ jobs:
       - name: Install DeepSolo
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
-          python -m pip uninstall adet -y
+          python -m pip uninstall AdelaiDet -y
           python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' # Install DeepSolo
           wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
 
@@ -86,7 +86,7 @@ jobs:
       - name: Install MapTextPipeline
         run: |
           git clone https://github.com/maps-as-data/MapTextPipeline.git
-          python -m pip uninstall adet -y
+          python -m pip uninstall AdelaiDet -y
           python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' # Install MapTextPipeline
           wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
 
