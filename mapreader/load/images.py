@@ -1565,12 +1565,10 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_df.index.set_names("image_id", inplace=True)
 
         # convert to GeoDataFrames if coordinates are present
-        if self.georeferenced:
-            if len(parent_df):
-                parent_df = get_geodataframe(parent_df)
-
-            if len(patch_df):
-                patch_df = get_geodataframe(patch_df)
+        if len(parent_df):
+            parent_df = get_geodataframe(parent_df)
+        if len(patch_df):
+            patch_df = get_geodataframe(patch_df)
 
         if save:
             if save_format == "csv":
@@ -1596,25 +1594,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     )
 
                 if isinstance(parent_df, gpd.GeoDataFrame):
-                    parent_df_copy = parent_df.copy(deep=True)
-                    # change tuple/list columns to strings
-                    for col in parent_df_copy.columns:
-                        if isinstance(parent_df_copy[col][0], (tuple, list)):
-                            parent_df_copy[col] = parent_df_copy[col].apply(str)
-
-                    parent_df_copy.to_file(
+                    parent_df.to_file(
                         "parent_df.geojson", driver="GeoJSON", engine="pyogrio"
                     )
                     print('[INFO] Saved parent dataframe as "parent_df.geojson"')
 
                 if isinstance(patch_df, gpd.GeoDataFrame):
-                    patch_df_copy = patch_df.copy(deep=True)
-                    # change tuple/list columns to strings
-                    for col in patch_df_copy.columns:
-                        if isinstance(patch_df_copy[col][0], (tuple, list)):
-                            patch_df_copy[col] = patch_df_copy[col].apply(str)
-
-                    patch_df_copy.to_file(
+                    patch_df.to_file(
                         "patch_df.geojson", driver="GeoJSON", engine="pyogrio"
                     )
                     print('[INFO] Saved patch dataframe as "patch_df.geojson"')
@@ -2160,7 +2146,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         -------
         None
         """
-        self.georeferenced = False  # reset georeferenced status
 
         if parent_paths:
             files = self._resolve_file_path(parent_paths, parent_file_ext)
