@@ -36,15 +36,6 @@ jobs:
           python -m ensurepip
           python -m pip install --upgrade pip
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.pythonLocation }}/lib/python3.9/site-packages/*
-            !${{ env.pythonLocation }}/lib/python3.9/site-packages/AdelaiDet*
-            ~/.torch
-          key: ${{ runner.os }}-torch${{ matrix.torch }}-${{ hashFiles('setup.py') }}-20220119
-
       - name: Install dependencies
         run: |
           python -m pip install -U pip
