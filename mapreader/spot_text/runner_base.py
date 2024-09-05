@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 import pathlib
-from ast import literal_eval
+import re
 from itertools import combinations
 
-import geopandas as geopd
+import geopandas as gpd
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +13,8 @@ import pandas as pd
 from PIL import Image
 from shapely import Polygon
 from tqdm.auto import tqdm
+
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 
 class Runner:
@@ -22,17 +24,17 @@ class Runner:
 
     def _load_df(
         self,
-        patch_df: pd.DataFrame | str,
-        parent_df: pd.DataFrame | str,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
+        parent_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
         delimiter: str = ",",
     ):
         """Load the patch and parent dataframes.
 
         Parameters
         ----------
-        patch_df : pd.DataFrame or str
+        patch_df : pd.DataFrame or gpd.GeoDataFrame or str or pathlib.Path
             The dataframe containing patch information. If a string, it should be the path to a csv file.
-        parent_df : pd.DataFrame or str
+        parent_df : pd.DataFrame or gpd.GeoDataFrame or str or pathlib.Path
             The dataframe containing parent information. If a string, it should be the path to a csv file.
         delimiter : str, optional
             The delimiter used in the csv file, by default ",".
@@ -40,49 +42,49 @@ class Runner:
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
-        elif isinstance(patch_df, str):
-            if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
-                patch_df = pd.read_csv(patch_df, sep=delimiter, index_col=0)
-                # ensure tuple/list columns are read as such
-                patch_df = self._eval_df(patch_df)
-                self.patch_df = patch_df
+        elif isinstance(patch_df, (str, pathlib.Path)):
+            print(f'[INFO] Reading "{patch_df}"')
+            if re.search(r"\..?sv$", str(patch_df)):
+                self.patch_df = load_from_csv(
+                    patch_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(patch_df)):
+                self.patch_df = load_from_geojson(patch_df)
             else:
-                raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+                )
 
         else:
             raise ValueError(
-                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+                "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
         if isinstance(parent_df, pd.DataFrame):
             self.parent_df = parent_df
 
-        elif isinstance(parent_df, str):
-            if os.path.isfile(parent_df):
-                print(f'[INFO] Reading "{parent_df}".')
-                parent_df = pd.read_csv(parent_df, sep=delimiter, index_col=0)
-                parent_df = self._eval_df(parent_df)
-                self.parent_df = parent_df
+        elif isinstance(parent_df, (str, pathlib.Path)):
+            print(f'[INFO] Reading "{parent_df}"')
+            if re.search(r"\..?sv$", str(parent_df)):
+                self.parent_df = load_from_csv(
+                    parent_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(parent_df)):
+                self.parent_df = load_from_geojson(parent_df)
             else:
-                raise ValueError(f'[ERROR] "{parent_df}" cannot be found.')
+                raise ValueError(
+                    "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+                )
 
         else:
-            print("[WARNING] No parent dataframe provided.")
-            self.parent_df = parent_df
-
-    @staticmethod
-    def _eval_df(df):
-        for col in df.columns:
-            try:
-                df[col] = df[col].apply(literal_eval)
-            except (ValueError, TypeError, SyntaxError):
-                pass
-        return df
+            raise ValueError(
+                "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+            )
 
     def run_all(
         self,
-        patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
         min_ioa: float = 0.7,
     ) -> dict | pd.DataFrame:
@@ -90,8 +92,6 @@ class Runner:
 
         Parameters
         ----------
-        patch_df : pd.DataFrame, optional
-            Dataframe containing patch information, by default None.
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
         min_ioa : float, optional
@@ -99,15 +99,10 @@ class Runner:
 
         Returns
         -------
-        dict or pd.DataFrame
+        dict or pd.DataFrame or gpd.GeoDataFrame
             A dictionary of predictions for each patch image or a DataFrame if `as_dataframe` is True.
         """
-        if patch_df is None:
-            if self.patch_df is not None:
-                patch_df = self.patch_df
-            else:
-                raise ValueError("[ERROR] Please provide a `patch_df`")
-        img_paths = patch_df["image_path"].to_list()
+        img_paths = self.patch_df["image_path"].to_list()
 
         patch_predictions = self.run_on_images(
             img_paths, return_dataframe=return_dataframe, min_ioa=min_ioa
@@ -228,7 +223,6 @@ class Runner:
 
     def convert_to_parent_pixel_bounds(
         self,
-        patch_df: pd.DataFrame = None,
         return_dataframe: bool = False,
         deduplicate: bool = False,
         min_ioa: float = 0.7,
@@ -237,8 +231,6 @@ class Runner:
 
         Parameters
         ----------
-        patch_df : pd.DataFrame, optional
-            Dataframe containing patch information, by default None
         return_dataframe : bool, optional
             Whether to return the predictions as a pandas DataFrame, by default False
         deduplicate : bool, optional
@@ -252,20 +244,10 @@ class Runner:
         -------
         dict or pd.DataFrame
             A dictionary of predictions for each parent image or a DataFrame if `as_dataframe` is True.
-
-        Raises
-        ------
-        ValueError
-            If `patch_df` is not available.
         """
-        if patch_df is None:
-            if self.patch_df is not None:
-                patch_df = self.patch_df
-            else:
-                raise ValueError("[ERROR] Please provide a `patch_df`")
 
         for image_id, prediction in self.patch_predictions.items():
-            parent_id = patch_df.loc[image_id, "parent_id"]
+            parent_id = self.patch_df.loc[image_id, "parent_id"]
             if parent_id not in self.parent_predictions.keys():
                 self.parent_predictions[parent_id] = []
 
@@ -273,8 +255,8 @@ class Runner:
                 polygon = instance[0]
 
                 xx, yy = (np.array(i) for i in polygon.exterior.xy)
-                xx = xx + patch_df.loc[image_id, "pixel_bounds"][0]  # add min_x
-                yy = yy + patch_df.loc[image_id, "pixel_bounds"][1]  # add min_y
+                xx = xx + self.patch_df.loc[image_id, "pixel_bounds"][0]  # add min_x
+                yy = yy + self.patch_df.loc[image_id, "pixel_bounds"][1]  # add min_y
 
                 parent_polygon = Polygon(zip(xx, yy)).buffer(0)
                 self.parent_predictions[parent_id].append(
@@ -356,34 +338,20 @@ class Runner:
 
     def convert_to_coords(
         self,
-        parent_df: pd.DataFrame = None,
         return_dataframe: bool = False,
-    ) -> dict | pd.DataFrame:
+    ) -> dict | gpd.GeoDataFrame:
         """Convert the parent predictions to georeferenced predictions by converting pixel bounds to coordinates.
 
         Parameters
         ----------
-        parent_df : pd.DataFrame, optional
-            Dataframe containing parent image information, by default None
         return_dataframe : bool, optional
-            Whether to return the predictions as a pandas DataFrame, by default False
+            Whether to return the predictions as a geopandas GeoDataFrame, by default False
 
         Returns
         -------
-        dict or pd.DataFrame
+        dict or gpd.GeoDataFrame
             A dictionary of predictions for each parent image or a DataFrame if `as_dataframe` is True.
-
-        Raises
-        ------
-        ValueError
-            If `parent_df` is not available.
         """
-        if parent_df is None:
-            if self.parent_df is not None:
-                parent_df = self.parent_df
-            else:
-                raise ValueError("[ERROR] Please provide a `parent_df`")
-
         if self.parent_predictions == {}:
             print("[INFO] Converting patch pixel bounds to parent pixel bounds.")
             _ = self.convert_to_parent_pixel_bounds()
@@ -397,15 +365,15 @@ class Runner:
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
                     xx = (
-                        xx * parent_df.loc[parent_id, "dlon"]
-                        + parent_df.loc[parent_id, "coordinates"][0]
+                        xx * self.parent_df.loc[parent_id, "dlon"]
+                        + self.parent_df.loc[parent_id, "coordinates"][0]
                     )
                     yy = (
-                        parent_df.loc[parent_id, "coordinates"][3]
-                        - yy * parent_df.loc[parent_id, "dlat"]
+                        self.parent_df.loc[parent_id, "coordinates"][3]
+                        - yy * self.parent_df.loc[parent_id, "dlat"]
                     )
 
-                    crs = parent_df.loc[parent_id, "crs"]
+                    crs = self.parent_df.loc[parent_id, "crs"]
 
                     parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     self.geo_predictions[parent_id].append(
@@ -429,14 +397,7 @@ class Runner:
         """
 
         geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
-
-        # get the crs (should be the same for all polygons)
-        if not geo_df["crs"].nunique() == 1:
-            raise ValueError("[ERROR] Multiple crs found in the predictions.")
-        crs = geo_df["crs"].unique()[0]
-
-        geo_df = geopd.GeoDataFrame(geo_df, geometry="polygon", crs=crs)
-        geo_df.to_file(save_path, driver="GeoJSON")
+        geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")
 
     def show(
         self,

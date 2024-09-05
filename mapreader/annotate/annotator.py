@@ -4,19 +4,23 @@ import functools
 import hashlib
 import json
 import os
+import pathlib
 import random
+import re
 import string
 import warnings
-from ast import literal_eval
 from itertools import product
 from pathlib import Path
 
+import geopandas as gpd
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import clear_output, display
 from numpy import array_split
 from PIL import Image, ImageOps
+
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 from ..load.loader import load_patches
 
@@ -33,10 +37,10 @@ class Annotator:
 
     Parameters
     ----------
-    patch_df : str or pd.DataFrame or None, optional
-        Path to a CSV file or a pandas DataFrame containing patch data, by default None
-    parent_df : str or pd.DataFrame or None, optional
-        Path to a CSV file or a pandas DataFrame containing parent data, by default None
+    patch_df : str, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame or None, optional
+        Path to a CSV/geojson file or a pandas DataFrame/ geopandas GeoDataFrame containing patch data, by default None
+    parent_df : str, pathlib.Path, pd.DataFrame or gpd.GeoDataFrame or None, optional
+        Path to a CSV/geojson file or a pandas DataFrame/ geopandas GeoDataFrame containing parent data, by default None
     labels : list, optional
         List of labels for annotation, by default None
     patch_paths : str or None, optional
@@ -89,7 +93,7 @@ class Annotator:
     FileNotFoundError
         If the provided patch_df or parent_df file path does not exist
     ValueError
-        If patch_df or parent_df is not a valid path to a CSV file or a pandas DataFrame
+        If patch_df or parent_df is not a valid path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame
         If patch_df or patch_paths is not provided
         If the DataFrame does not have the required columns
         If sortby is not a string or None
@@ -100,8 +104,8 @@ class Annotator:
 
     def __init__(
         self,
-        patch_df: str | pd.DataFrame | None = None,
-        parent_df: str | pd.DataFrame | None = None,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame | None = None,
+        parent_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame | None = None,
         labels: list = None,
         patch_paths: str | None = None,
         parent_paths: str | None = None,
@@ -127,36 +131,40 @@ class Annotator:
         if labels is None:
             labels = []
         if patch_df is not None:
-            if isinstance(patch_df, str):
-                if os.path.exists(patch_df):
-                    patch_df = pd.read_csv(
+            if isinstance(patch_df, (str, pathlib.Path)):
+                if re.search(r"\..?sv$", str(patch_df)):
+                    patch_df = load_from_csv(
                         patch_df,
-                        index_col=0,
-                        sep=delimiter,
+                        delimiter=delimiter,
                     )
+                elif re.search(r"\..*?json$", str(patch_df)):
+                    patch_df = load_from_geojson(patch_df)
                 else:
-                    raise FileNotFoundError(f"[ERROR] Could not find {patch_df}.")
-            if not isinstance(patch_df, pd.DataFrame):
+                    raise ValueError(
+                        "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                    )
+            elif not isinstance(patch_df, pd.DataFrame):
                 raise ValueError(
-                    "[ERROR] ``patch_df`` must be a path to a csv or a pandas DataFrame."
+                    "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
-            patch_df = self._eval_df(patch_df)  # eval tuples/lists in df
 
         if parent_df is not None:
-            if isinstance(parent_df, str):
-                if os.path.exists(parent_df):
-                    parent_df = pd.read_csv(
+            if isinstance(parent_df, (str, pathlib.Path)):
+                if re.search(r"\..?sv$", str(parent_df)):
+                    parent_df = load_from_csv(
                         parent_df,
-                        index_col=0,
-                        sep=delimiter,
+                        delimiter=delimiter,
                     )
+                elif re.search(r"\..*?json$", str(parent_df)):
+                    parent_df = load_from_geojson(parent_df)
                 else:
-                    raise FileNotFoundError(f"[ERROR] Could not find {parent_df}.")
+                    raise ValueError(
+                        "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                    )
             if not isinstance(parent_df, pd.DataFrame):
                 raise ValueError(
-                    "[ERROR] ``parent_df`` must be a path to a csv or a pandas DataFrame."
+                    "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
                 )
-            parent_df = self._eval_df(parent_df)  # eval tuples/lists in df
 
         if patch_df is None:
             # If we don't get patch data provided, we'll use the patches and parents to create the dataframes
@@ -355,17 +363,8 @@ class Annotator:
         return parent_df, patch_df
 
     @staticmethod
-    def _eval_df(df):
-        for col in df.columns:
-            try:
-                df[col] = df[col].apply(literal_eval)
-            except (ValueError, TypeError, SyntaxError):
-                pass
-        return df
-
-    @staticmethod
     def _load_annotations(
-        patch_df: pd.DataFrame,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame,
         annotations_file: str,
         labels: list,
         label_col: str,
@@ -375,7 +374,7 @@ class Annotator:
 
         Parameters
         ----------
-        patch_df : pd.DataFrame
+        patch_df : pd.DataFrame or gpd.GeoDataFrame
             Current patch dataframe.
         annotations_file : str
             Name of the annotations file
@@ -387,7 +386,9 @@ class Annotator:
             Delimiter used in CSV files
 
         """
-        existing_annotations = pd.read_csv(annotations_file, index_col=0, sep=delimiter)
+        existing_annotations = load_from_csv(
+            annotations_file, index_col=0, sep=delimiter
+        )
 
         if label_col not in existing_annotations.columns:
             raise ValueError(
@@ -995,8 +996,8 @@ class Annotator:
 
         Returns
         -------
-        pandas.DataFrame
-            A dataframe containing the labelled images and their associated
+        pandas.DataFrame or geopandas.GeoDataFrame
+            A DataFrame/GeoDataFrame containing the labelled images and their associated
             label index.
         """
         filtered_df = self.patch_df[self.patch_df[self.label_col].notna()].copy(

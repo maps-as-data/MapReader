@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from ast import literal_eval
+import pathlib
+import re
 from itertools import product
 
+import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
+
+from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 
 class ContextPostProcessor:
@@ -13,18 +17,40 @@ class ContextPostProcessor:
 
     Parameters
     ----------
-    patch_df : pd.DataFrame
+    patch_df : pd.DataFrame | geopandas.GeoDataFrame | str | pathlib.Path
         the DataFrame containing patches and predictions
     labels_map : dict
         the dictionary mapping label indices to their labels.
         e.g. `{0: "no", 1: "railspace"}`.
+    delimiter : str, optional
+        The delimiter used in the CSV file, by default ",".
     """
 
     def __init__(
         self,
-        patch_df: pd.DataFrame,
+        patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
         labels_map: dict,
+        delimiter: str = ",",
     ):
+        if isinstance(patch_df, (str, pathlib.Path)):
+            if re.search(r"\..?sv$", str(patch_df)):
+                print(f'[INFO] Reading "{patch_df}"')
+                patch_df = load_from_csv(
+                    patch_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(patch_df)):
+                patch_df = load_from_geojson(patch_df)
+            else:
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+                )
+
+        if not isinstance(patch_df, pd.DataFrame):
+            raise ValueError(
+                "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
+            )
+
         required_columns = [
             "parent_id",
             "pixel_bounds",
@@ -36,13 +62,6 @@ class ContextPostProcessor:
             raise ValueError(
                 f"[ERROR] Your dataframe must contain the following columns: {required_columns}."
             )
-
-        # ensure lists/tuples are evaluated as such
-        for col in patch_df.columns:
-            try:
-                patch_df[col] = patch_df[col].apply(literal_eval)
-            except (ValueError, TypeError, SyntaxError):
-                pass
 
         if patch_df.index.name != "image_id" and "image_id" in patch_df.columns:
             patch_df.set_index("image_id", drop=True, inplace=True)

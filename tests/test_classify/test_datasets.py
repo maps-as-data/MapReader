@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
+import pathlib
+import shutil
 
 import pytest
 from PIL import Image
@@ -13,7 +14,7 @@ from mapreader.classify.datasets import PatchContextDataset, PatchDataset
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -32,8 +33,10 @@ def load_patch_df(sample_dir, tmp_path):
     my_maps.patchify_all(
         patch_size=3, path_save=f"{tmp_path}/patches/"
     )  # creates 9 patches
-    _, patch_df = my_maps.convert_images()
+    _, patch_df = my_maps.convert_images(save=True, save_format="geojson")
     patch_df.to_csv(f"{tmp_path}/patch_df.csv")
+    os.remove("./parent_df.geojson")
+    shutil.move("./patch_df.geojson", f"{tmp_path}/patch_df.geojson")
     return patch_df, tmp_path
 
 
@@ -56,10 +59,70 @@ def test_patch_dataset_init_string(load_patch_df):
     )
     assert isinstance(patch_dataset, PatchDataset)
     for col in patch_df.columns:
-        if col == "polygon":
+        if col == "polygon" or "geometry":
             continue  # polygon column is converted to polygon type
         assert patch_df[col].equals(patch_dataset.patch_df[col])
     assert patch_dataset.label_col is None
+
+
+def test_patch_dataset_init_pathlib(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchDataset(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        transform="test",
+    )
+    assert isinstance(patch_dataset, PatchDataset)
+    for col in patch_df.columns:
+        if col == "polygon" or "geometry":
+            continue  # polygon column is converted to polygon type
+        assert patch_df[col].equals(patch_dataset.patch_df[col])
+    assert patch_dataset.label_col is None
+
+
+def test_patch_dataset_init_geojson(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchDataset(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.geojson"),
+        transform="test",
+    )
+    assert isinstance(patch_dataset, PatchDataset)
+    for col in patch_df.columns:
+        if col == "polygon" or "geometry":
+            continue  # polygon column is converted to polygon type
+        assert patch_df[col].equals(patch_dataset.patch_df[col])
+    assert patch_dataset.label_col is None
+
+
+def test_patch_dataset_fake_transform_error(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match='can only be "train", "val" or "test"'):
+        PatchDataset(patch_df=patch_df, transform="fake transform")
+
+
+def test_patch_dataset_init_errors(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchDataset(
+            patch_df="fake.file",
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchDataset(
+            patch_df=234,
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchDataset(
+            patch_df=patch_df,
+            transform="test",
+            label_col="fake_col",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchDataset(
+            patch_df=patch_df,
+            transform="test",
+            label_index_col="fake_col",
+        )
 
 
 def test_patch_dataset_init_annots(annots):
@@ -113,10 +176,72 @@ def test_patch_context_dataset_init_string(load_patch_df):
     )
     assert isinstance(patch_dataset, PatchContextDataset)
     for col in patch_df.columns:
-        if col == "polygon":
+        if col == "polygon" or "geometry":
             continue  # polygon column is not converted to polygon type
         assert patch_df[col].equals(patch_dataset.patch_df[col])
     assert patch_dataset.label_col is None
+
+
+def test_patch_context_dataset_init_pathlib(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchContextDataset(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        total_df=pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        transform="test",
+        create_context=True,
+    )
+    assert isinstance(patch_dataset, PatchContextDataset)
+    for col in patch_df.columns:
+        if col == "polygon" or "geometry":
+            continue  # polygon column is not converted to polygon type
+        assert patch_df[col].equals(patch_dataset.patch_df[col])
+    assert patch_dataset.label_col is None
+
+
+def test_patch_context_dataset_init_geojson(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    patch_dataset = PatchContextDataset(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.geojson"),
+        total_df=pathlib.Path(f"{tmp_path}/patch_df.geojson"),
+        transform="test",
+        create_context=True,
+    )
+    assert isinstance(patch_dataset, PatchContextDataset)
+    for col in patch_df.columns:
+        if col == "polygon" or "geometry":
+            continue  # polygon column is not converted to polygon type
+        assert patch_df[col].equals(patch_dataset.patch_df[col])
+    assert patch_dataset.label_col is None
+
+
+def test_patch_context_dataset_init_errors(load_patch_df):
+    patch_df, tmp_path = load_patch_df
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchContextDataset(
+            patch_df="fake.file",
+            total_df=patch_df,
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/geojson file"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df="fake.file",
+            transform="test",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df=patch_df,
+            transform="test",
+            label_col="fake_col",
+        )
+    with pytest.raises(ValueError, match="not in DataFrame"):
+        PatchContextDataset(
+            patch_df=patch_df,
+            total_df=patch_df,
+            transform="test",
+            label_index_col="fake_col",
+        )
 
 
 def test_patch_context_dataset_init_annots(annots):
