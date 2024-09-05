@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import os
 import pathlib
 
 import adet
+import geopandas as gpd
+import pandas as pd
 import pytest
-
-print(adet.__version__)
-
 from detectron2.engine import DefaultPredictor
+from detectron2.structures.instances import Instances
 
 from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
+
+print(adet.__version__)
+ADET_PATH = pathlib.Path(adet.__path__[0]).resolve().parent
 
 
 @pytest.fixture
@@ -26,20 +30,181 @@ def init_dataframes(sample_dir, tmp_path):
     tuple
         path to parent and patch dataframes
     """
-    maps = MapImages(f"{sample_dir}/cropped_74488689.png")
-    maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
-    maps.patchify_all(patch_size=3, path_save=tmp_path)  # gives 9 patches
-    maps.add_center_coord(tree_level="parent")
-    maps.add_patch_polygons()
+    maps = MapImages(f"{sample_dir}/mapreader_text.png")
+    maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
+    maps.patchify_all(patch_size=800, path_save=tmp_path)
+    maps.check_georeferencing()
     parent_df, patch_df = maps.convert_images()
     return parent_df, patch_df
 
 
-def test_dptext_init(init_dataframes):
+@pytest.fixture
+def init_runner(init_dataframes):
     parent_df, patch_df = init_dataframes
     runner = DeepSoloRunner(
-        parent_df,
         patch_df,
+        parent_df=parent_df,
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+    )
+    return runner
+
+
+def test_deepsolo_init(init_dataframes):
+    parent_df, patch_df = init_dataframes
+    runner = DeepSoloRunner(
+        patch_df,
+        parent_df=parent_df,
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
+    assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
+
+
+def test_deepsolo_init_str(init_dataframes, tmp_path):
+    parent_df, patch_df = init_dataframes
+    parent_df = parent_df.to_csv(f"{tmp_path}/parent_df.csv")
+    patch_df = patch_df.to_csv(f"{tmp_path}/patch_df.csv")
+    runner = DeepSoloRunner(
+        f"{tmp_path}/patch_df.csv",
+        parent_df=f"{tmp_path}/parent_df.csv",
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+    )
+    assert isinstance(runner, DeepSoloRunner)
+    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
+    assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
+
+
+def test_deepsolo_init_pathlib(init_dataframes, tmp_path):
+    parent_df, patch_df = init_dataframes
+    parent_df = parent_df.to_csv(f"{tmp_path}/parent_df.csv")
+    patch_df = patch_df.to_csv(f"{tmp_path}/patch_df.csv")
+    runner = DeepSoloRunner(
+        pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+    )
+    assert isinstance(runner, DeepSoloRunner)
+    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
+    assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
+
+
+def test_deepsolo_init_tsv(init_dataframes, tmp_path):
+    parent_df, patch_df = init_dataframes
+    parent_df = parent_df.to_csv(f"{tmp_path}/parent_df.tsv", sep="\t")
+    patch_df = patch_df.to_csv(f"{tmp_path}/patch_df.tsv", sep="\t")
+    runner = DeepSoloRunner(
+        f"{tmp_path}/patch_df.tsv",
+        parent_df=f"{tmp_path}/parent_df.tsv",
+        delimiter="\t",
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+    )
+    assert isinstance(runner, DeepSoloRunner)
+    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
+    assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
+
+
+def test_deepsolo_run_all(init_runner):
+    runner = init_runner
+    # dict
+    out = runner.run_all()
+    assert isinstance(out, dict)
+    assert "patch-0-0-800-40-#mapreader_text.png#.png" in out.keys()
+    assert isinstance(out["patch-0-0-800-40-#mapreader_text.png#.png"], list)
+    # dataframe
+    runner.patch_predictions = {}
+    out = runner.run_all(return_dataframe=True)
+    assert isinstance(out, pd.DataFrame)
+    assert set(out.columns) == set(["image_id", "geometry", "text", "score"])
+    assert "patch-0-0-800-40-#mapreader_text.png#.png" in out["image_id"].values
+
+
+def test_deepsolo_convert_to_parent(init_runner):
+    runner = init_runner
+    _ = runner.run_all()
+    # dict
+    out = runner.convert_to_parent_pixel_bounds()
+    assert isinstance(out, dict)
+    assert "mapreader_text.png" in out.keys()
+    assert isinstance(out["mapreader_text.png"], list)
+    # dataframe
+    runner.parent_predictions = {}
+    out = runner.convert_to_parent_pixel_bounds(return_dataframe=True)
+    assert isinstance(out, pd.DataFrame)
+    assert set(out.columns) == set(
+        ["image_id", "patch_id", "geometry", "text", "score"]
+    )
+    assert "mapreader_text.png" in out["image_id"].values
+
+
+def test_deepsolo_convert_to_parent_coords(init_runner):
+    runner = init_runner
+    _ = runner.run_all()
+    # dict
+    out = runner.convert_to_coords()
+    assert isinstance(out, dict)
+    assert "mapreader_text.png" in out.keys()
+    assert isinstance(out["mapreader_text.png"], list)
+    # dataframe
+    runner.parent_predictions = {}
+    out = runner.convert_to_coords(return_dataframe=True)
+    assert isinstance(out, gpd.GeoDataFrame)
+    assert set(out.columns) == set(
+        ["image_id", "patch_id", "geometry", "crs", "text", "score"]
+    )
+    assert "mapreader_text.png" in out["image_id"].values
+    assert out.crs == runner.parent_df.crs
+
+
+def test_deepsolo_deduplicate(sample_dir, tmp_path):
+    maps = MapImages(f"{sample_dir}/mapreader_text.png")
+    maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
+    maps.patchify_all(patch_size=800, path_save=tmp_path, overlap=0.5)
+    maps.check_georeferencing()
+    parent_df, patch_df = maps.convert_images()
+    runner = DeepSoloRunner(
+        patch_df,
+        parent_df=parent_df,
+        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+    )
+    _ = runner.run_all()
+    out = runner.convert_to_parent_pixel_bounds(deduplicate=False)
+    len_before = len(out["mapreader_text.png"])
+    runner.patch_predictions = {}
+    out_07 = runner.convert_to_parent_pixel_bounds(deduplicate=True)
+    len_07 = len(out_07["mapreader_text.png"])
+    print(len_before, len_07)
+    assert len_before >= len_07
+    runner.patch_predictions = {}
+    out_05 = runner.convert_to_parent_pixel_bounds(deduplicate=True, min_ioa=0.5)
+    len_05 = len(out_05["mapreader_text.png"])
+    print(len_before, len_05)
+    assert len_before >= len_05
+    assert len_07 >= len_05
+
+
+def test_deepsolo_run_on_image(init_runner):
+    runner = init_runner
+    out = runner.run_on_image(
+        runner.patch_df.iloc[0]["image_path"], return_outputs=True
+    )
+    assert isinstance(out, dict)
+    assert "instances" in out.keys()
+    assert isinstance(out["instances"], Instances)
+
+
+def test_deepsolo_save_to_geojson(init_runner, tmp_path):
+    runner = init_runner
+    _ = runner.run_all()
+    _ = runner.convert_to_coords()
+    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    assert os.path.exists(f"{tmp_path}/text.geojson")
+    gdf = gpd.read_file(f"{tmp_path}/text.geojson")
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert set(gdf.columns) == set(
+        ["image_id", "patch_id", "geometry", "crs", "text", "score"]
+    )
