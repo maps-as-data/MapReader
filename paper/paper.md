@@ -49,13 +49,13 @@ bibliography: paper.bib
 
 # Summary
 
-MapReader is an interdisciplinary software library for processing digitized maps [@Hosseini_mapreader] and other types of images by 'patching' them into small, custom-sized cells which are then classified according to the user's needs. MapReader thus offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for computer-vision-based inference of large collections. As an example, in @Hosseini_mapreader, we utilized MapReader's interface to manually annotate 62,020 patches, used its functionalities to train a suite of computer vision models and performed model inference on approximately 30.5 million patches.
+MapReader is an interdisciplinary software library for processing digitized maps [@Hosseini_mapreader] and other types of images with two tasks: patch classification and text spotting. Patch classification works by 'patching' images into small, custom-sized cells which are then classified according to the user's needs. Text spotting detects and recognizes text. MapReader offers a flexible pipeline which can be used both for manual annotation of small datasets as well as for computer-vision-based inference of large collections. As an example, in @Hosseini_mapreader, we annotated 62,020 patches, trained a suite of computer vision models and performed model inference on approximately 30.5 million patches.
 
 MapReader's approach was inspired by methods in biomedical imaging, which were adapted for use by historians, and it is suitable for a wide range of applications in image analysis: it has, for example, been applied to an image classification problem in plant phenotype research [@Corcoran]. This cross-pollination between the humanities and the natural sciences was made possible by the open and reproducible research methods at the heart of MapReader.
 
-MapReader pioneers a methodological shift in how historians interact with maps as primary sources. Sustained engagement with big collections of maps rarely moves beyond analysis of cartographic history. To change this, MapReader encourages historians to reflect on the content of maps and is designed to facilitate linking datasets representing visual map content with other historical geospatial data.
+MapReader pioneers a methodological shift in how historians interact with maps as primary sources. Sustained engagement with big collections of maps rarely moves beyond analysis of cartographic history. To change this, MapReader encourages historians to reflect on the content of maps and is designed to facilitate linking datasets representing visual map content with other historical geospatial data to enable spatial historical research.
 
-In this paper, we present the MapReader release at the conclusion of the Living with Machines project, which supported the development of the software and associated historical research. This release represents the culmination of extensive work to improve MapReader's usability, especially through clear documentation and tutorials.
+In this paper, we present the MapReader release at the conclusion of the Living with Machines project, which supported the initial development of the software and associated historical research. This release represents the culmination of extensive work to improve MapReader's usability among historians, especially through clear documentation and tutorials.
 
 ![MapReader modules and input-outputs. Credit: Rosie Wood.\label{fig:modules}](https://hackmd.io/_uploads/HJWJatQEa.png)
 
@@ -64,14 +64,14 @@ In this paper, we present the MapReader release at the conclusion of the Living 
 
 Since the 1990s, map libraries have been scanning maps and creating digital collections of these images [@Hosseini_maps]. As of 2023, there are more than a million images of maps in digital libraries and archives around the world, and yet it is very difficult for anyone to do more than browse them in a web viewer.
 
-MapReader makes it possible to ask questions of thousands of digitized maps at a time, a fundamentally different intellectual experience from both the traditional manner of viewing a few maps at a time on a reading room table as well as the act of visually scanning digital files sequentially. As an example, we used MapReader to process a collection of approximately 16,000 nineteenth-century Ordnance Survey map sheets (approximately 30.5 million patches) covering England, Wales and Scotland [@Hosseini_mapreader]. Inspired by the possibility of seeing a series of maps stitched together in seamless layers---such as the National Library of Scotland's Ordnance Survey map viewing interface---MapReader takes the next step by transforming the experience of working with maps from surface exploration to critical investigation [@Hosseini_maps].
+MapReader makes it possible to ask questions of thousands of digitized maps at a time, a fundamentally different intellectual experience from both the traditional manner of viewing a few maps at a time on a reading room table as well as the act of visually scanning digital files sequentially. We used MapReader to process a collection of approximately 16,000 nineteenth-century Ordnance Survey map sheets (approximately 30.5 million patches) covering England, Wales and Scotland [@Hosseini_mapreader]. Inspired by the possibility of seeing a series of maps stitched together in seamless layers---such as in the National Library of Scotland's Ordnance Survey map viewing interface---MapReader takes the next step by transforming the experience of working with maps from surface exploration to critical investigation [@Hosseini_maps].
 
 
 # Related Work
 
-MapReader is among the first end-to-end pipeline for processing historical maps and other images that was designed to lower barriers to experimenting with computer vision in answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media.
+MapReader is among the first end-to-end pipelines for processing historical maps and other images. It has been designed to lower barriers to experimenting with computer vision and answering research questions about large image datasets. Other projects are emerging which are performing similar research tasks with the visual content in historical map collections [@Petitpierre; @Combes], and of course other tools, like the Distant Viewing Toolkit [@Arnold], address similar needs for other kinds of media.
 
-In addition, as part of a collaboration between Machines Reading Maps and the David Rumsey Historical Map Collection, the Knowledge Computing Lab released mapKurator [@mapkurator] - a text detection and recognition ('text spotting') pipeline for maps - which takes map image input and and returns polygons and text transcriptions in geojson format. As of 2024, MapReader also incorporates this text spotting task in addition to the patch classification task.
+In addition, as part of a collaboration between Machines Reading Maps and the David Rumsey Historical Map Collection, the Knowledge Computing Lab released mapKurator [@mapkurator] - the first text spotting pipeline for maps - which takes map image input and and returns polygons and text transcriptions in geojson format. Now, MapReader also incorporates this text spotting task in addition to its original patch classification task.
 
 
 # Documentation
@@ -81,15 +81,15 @@ MapReader aims to build computational skills among historians. Our extensive wor
 Our documentation aims to provide all information needed to set up and run MapReader. This includes:
 
 - A basic introduction to the software and its origins;
-- Our project Curriculum Vitae - i.e. papers, talks, workshops, etc. delivered by the MapReader team;
+- A project Curriculum Vitae - i.e. papers, talks, workshops, etc. delivered by the MapReader team;
 - Information about MapReader events and activities, where the community can engage with MapReader;
 - Guidance for users who are new to coding;
-- Guidance on the input to MapReader - e.g. what kind of maps and which formats work well in MapReader as well as how to set up your files;
+- Guidance on input - e.g. what kind of maps and which formats work well in MapReader as well as how to set up files;
 - A step-by-step guide to installing and running MapReader;
 - Worked examples - jupyter notebooks demonstrating MapReader use cases with data provided, e.g. @Hosseini_mapreader_data;
-- API Reference;
-- Code of Conduct and Inclusivity statement;
-- Guidance for users wanting to contribute to MapReader.
+- An API Reference;
+- A Code of Conduct and Inclusivity statement; and
+- Guidance for contributing to MapReader.
 
 # Conclusion
 
