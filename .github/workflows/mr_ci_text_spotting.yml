@@ -49,6 +49,7 @@ jobs:
         run: |
           python -m pip install -U pip
           python -m pip install wheel ninja opencv-python-headless onnx pytest-xdist
+          python -m pip install numpy<2.0.0
           python -m pip install torch==${{matrix.torch}} torchvision==${{matrix.torchvision}} -f https://download.pytorch.org/whl/torch_stable.html
           # install from github to get latest; install iopath first since fvcore depends on it
           python -m pip install -U 'git+https://github.com/facebookresearch/iopath'
@@ -66,6 +67,7 @@ jobs:
         run: |
           git clone https://github.com/maps-as-data/DPText-DETR.git
           python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' --force-reinstall # Install DPText-DETR
+          python -m pip install numpy<2.0.0
           wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
 
       - name: Run DPText-DETR unittests
@@ -77,6 +79,7 @@ jobs:
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
           python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' --force-reinstall # Install DeepSolo
+          python -m pip install numpy<2.0.0
           wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
 
       - name: Run DeepSolo unittests
@@ -87,6 +90,7 @@ jobs:
         run: |
           git clone https://github.com/maps-as-data/MapTextPipeline.git
           python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' --force-reinstall # Install MapTextPipeline
+          python -m pip install numpy<2.0.0
           wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
 
       - name: Run MapTextPipeline unittests
