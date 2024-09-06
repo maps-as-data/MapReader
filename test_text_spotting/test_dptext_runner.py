@@ -14,6 +14,8 @@ from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages
 
 print(adet.__version__)
+print(adet.__path__, flush=True)
+print(adet.__file__, flush=True)
 ADET_PATH = pathlib.Path(adet.__path__[0]).resolve().parent
 
 
