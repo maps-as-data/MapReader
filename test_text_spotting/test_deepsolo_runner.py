@@ -14,7 +14,13 @@ from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
 
 print(adet.__version__)
-ADET_PATH = pathlib.Path(adet.__path__[0]).resolve().parent
+
+# use cloned DeepSolo path if running in github actions
+ADET_PATH = (
+    pathlib.Path("./DeepSolo/").resolve()
+    if os.getenv("GITHUB_ACTIONS") == "true"
+    else pathlib.Path(adet.__path__[0]).resolve().parent
+)
 
 
 @pytest.fixture

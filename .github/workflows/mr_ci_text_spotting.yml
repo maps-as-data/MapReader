@@ -63,7 +63,7 @@ jobs:
 
       - name: Run DPText-DETR unittests
         run: |
-          python -m pytest test_text_spotting/test_dptext_runner.py -s
+          python -m pytest test_text_spotting/test_dptext_runner.py
 
 
       - name: Install DeepSolo
