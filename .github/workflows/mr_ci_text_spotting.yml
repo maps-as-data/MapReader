@@ -57,7 +57,7 @@ jobs:
       - name: Install DPText-DETR
         run: |
           git clone https://github.com/maps-as-data/DPText-DETR.git
-          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' --force-reinstall # Install DPText-DETR
+          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
           python -m pip install numpy==1.26.4
           wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
 
@@ -69,7 +69,7 @@ jobs:
       - name: Install DeepSolo
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
-          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' --force-reinstall # Install DeepSolo
+          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' # Install DeepSolo
           python -m pip install numpy==1.26.4
           wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
 
@@ -80,7 +80,7 @@ jobs:
       - name: Install MapTextPipeline
         run: |
           git clone https://github.com/maps-as-data/MapTextPipeline.git
-          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' --force-reinstall # Install MapTextPipeline
+          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' # Install MapTextPipeline
           python -m pip install "numpy<2.0.0"
           wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
 
