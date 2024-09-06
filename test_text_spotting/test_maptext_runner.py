@@ -19,7 +19,7 @@ print(adet.__version__)
 ADET_PATH = (
     pathlib.Path("./MapTextPipeline/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(adet.__path__[0]).resolve().parent
+    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
 )
 
 
@@ -29,13 +29,14 @@ def sample_dir():
 
 
 @pytest.fixture(scope="session")
-def init_dataframes(sample_dir, tmp_path):
+def init_dataframes(sample_dir, tmp_path_factory):
     """Initializes MapImages object (with metadata from csv and patches) and creates parent and patch dataframes.
     Returns
     -------
     tuple
         path to parent and patch dataframes
     """
+    tmp_path = tmp_path_factory.mktemp("patches")
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
     maps.patchify_all(patch_size=800, path_save=tmp_path)
@@ -143,7 +144,7 @@ def test_maptext_convert_to_parent(runner_run_all):
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
     # dataframe
-    out = runner._dict_to_dataframe(runner.patch_predictions, geo=False, parent=True)
+    out = runner._dict_to_dataframe(runner.parent_predictions, geo=False, parent=True)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "geometry", "text", "score"]
@@ -159,7 +160,7 @@ def test_maptext_convert_to_parent_coords(runner_run_all):
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
     # dataframe
-    out = runner._dict_to_dataframe(runner.parent_predictions, geo=True, parent=True)
+    out = runner._dict_to_dataframe(runner.geo_predictions, geo=True, parent=True)
     assert isinstance(out, gpd.GeoDataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "geometry", "crs", "text", "score"]

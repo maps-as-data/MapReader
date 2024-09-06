@@ -19,7 +19,7 @@ print(adet.__version__)
 ADET_PATH = (
     pathlib.Path("./DeepSolo/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(adet.__path__[0]).resolve().parent
+    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
 )
 
 
@@ -29,13 +29,14 @@ def sample_dir():
 
 
 @pytest.fixture(scope="session")
-def init_dataframes(sample_dir, tmp_path):
+def init_dataframes(sample_dir, tmp_path_factory):
     """Initializes MapImages object (with metadata from csv and patches) and creates parent and patch dataframes.
     Returns
     -------
     tuple
         path to parent and patch dataframes
     """
+    tmp_path = tmp_path_factory.mktemp("patches")
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
     maps.patchify_all(patch_size=800, path_save=tmp_path)
