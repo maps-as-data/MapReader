@@ -14,9 +14,13 @@ from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages
 
 print(adet.__version__)
-print(adet.__path__, flush=True)
-print(adet.__file__, flush=True)
-ADET_PATH = pathlib.Path(adet.__path__[0]).resolve().parent
+
+# use cloned DPText-DETR path if running in github actions
+ADET_PATH = (
+    pathlib.Path("./DPText-DETR/").resolve()
+    if os.getenv("GITHUB_ACTIONS") == "true"
+    else pathlib.Path(adet.__path__[0]).resolve().parent
+)
 
 
 @pytest.fixture
