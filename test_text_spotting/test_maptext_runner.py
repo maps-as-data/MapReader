@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import pickle
 
 import adet
 import geopandas as gpd
@@ -23,20 +24,19 @@ ADET_PATH = (
 )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def sample_dir():
     return pathlib.Path(__file__).resolve().parent.parent / "tests" / "sample_files"
 
 
-@pytest.fixture(scope="session")
-def init_dataframes(sample_dir, tmp_path_factory):
+@pytest.fixture
+def init_dataframes(sample_dir, tmp_path):
     """Initializes MapImages object (with metadata from csv and patches) and creates parent and patch dataframes.
     Returns
     -------
     tuple
         path to parent and patch dataframes
     """
-    tmp_path = tmp_path_factory.mktemp("patches")
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
     maps.patchify_all(patch_size=800, path_save=tmp_path)
@@ -45,7 +45,17 @@ def init_dataframes(sample_dir, tmp_path_factory):
     return parent_df, patch_df
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
+def mock_response(monkeypatch, sample_dir):
+    def mock_pred(self, *args, **kwargs):
+        with open(f"{sample_dir}/patch-0-0-800-40-maptext-pred.pkl", "rb") as f:
+            outputs = pickle.load(f)
+        return outputs
+
+    monkeypatch.setattr(DefaultPredictor, "__call__", mock_pred)
+
+
+@pytest.fixture
 def init_runner(init_dataframes):
     parent_df, patch_df = init_dataframes
     runner = MapTextRunner(
@@ -56,8 +66,8 @@ def init_runner(init_dataframes):
     return runner
 
 
-@pytest.fixture(scope="session")
-def runner_run_all(init_runner):
+@pytest.fixture
+def runner_run_all(init_runner, mock_response):
     runner = init_runner
     _ = runner.run_all()
     return runner
@@ -122,7 +132,7 @@ def test_maptext_init_tsv(init_dataframes, tmp_path):
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
 
-def test_maptext_run_all(init_runner):
+def test_maptext_run_all(init_runner, mock_response):
     runner = init_runner
     # dict
     out = runner.run_all()
@@ -136,7 +146,7 @@ def test_maptext_run_all(init_runner):
     assert "patch-0-0-800-40-#mapreader_text.png#.png" in out["image_id"].values
 
 
-def test_maptext_convert_to_parent(runner_run_all):
+def test_maptext_convert_to_parent(runner_run_all, mock_response):
     runner = runner_run_all
     # dict
     out = runner.convert_to_parent_pixel_bounds()
@@ -152,7 +162,7 @@ def test_maptext_convert_to_parent(runner_run_all):
     assert "mapreader_text.png" in out["image_id"].values
 
 
-def test_maptext_convert_to_parent_coords(runner_run_all):
+def test_maptext_convert_to_parent_coords(runner_run_all, mock_response):
     runner = runner_run_all
     # dict
     out = runner.convert_to_coords()
@@ -169,7 +179,7 @@ def test_maptext_convert_to_parent_coords(runner_run_all):
     assert out.crs == runner.parent_df.crs
 
 
-def test_maptext_deduplicate(sample_dir, tmp_path):
+def test_maptext_deduplicate(sample_dir, tmp_path, mock_response):
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
     maps.patchify_all(patch_size=800, path_save=tmp_path, overlap=0.5)
@@ -196,7 +206,7 @@ def test_maptext_deduplicate(sample_dir, tmp_path):
     assert len_07 >= len_05
 
 
-def test_maptext_run_on_image(init_runner):
+def test_maptext_run_on_image(init_runner, mock_response):
     runner = init_runner
     out = runner.run_on_image(
         runner.patch_df.iloc[0]["image_path"], return_outputs=True
@@ -206,7 +216,7 @@ def test_maptext_run_on_image(init_runner):
     assert isinstance(out["instances"], Instances)
 
 
-def test_maptext_save_to_geojson(runner_run_all, tmp_path):
+def test_maptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
     runner.save_to_geojson(f"{tmp_path}/text.geojson")
