@@ -24,7 +24,7 @@ from pyproj import Transformer
 from rasterio.plot import reshape_as_raster
 from shapely import wkt
 from shapely.geometry import Polygon, box
-from tqdm.auto import tqdm
+from tqdm.autonotebook import tqdm
 
 from mapreader.download.data_structures import GridBoundingBox, GridIndex
 from mapreader.download.downloader_utils import get_polygon_from_grid_bb

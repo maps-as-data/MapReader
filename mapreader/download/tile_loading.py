@@ -6,7 +6,7 @@ import os
 import urllib.request
 
 from joblib import Parallel, delayed
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .data_structures import GridBoundingBox, GridIndex
 

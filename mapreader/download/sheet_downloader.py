@@ -18,7 +18,7 @@ import pandas as pd
 from pyproj.crs import CRS
 from shapely.geometry import LineString, Point, Polygon, shape
 from shapely.ops import unary_union
-from tqdm.auto import tqdm
+from tqdm.autonotebook import tqdm
 
 from .downloader_utils import get_grid_bb_from_polygon, get_polygon_from_grid_bb
 from .tile_loading import DEFAULT_TEMP_FOLDER, TileDownloader

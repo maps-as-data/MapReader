@@ -5,7 +5,7 @@ from ast import literal_eval
 from itertools import product
 
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 
 class ContextPostProcessor:

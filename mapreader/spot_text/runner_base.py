@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from shapely import Polygon
-from tqdm.auto import tqdm
+from tqdm.autonotebook import tqdm
 
 
 class Runner:
