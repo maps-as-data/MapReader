@@ -11,7 +11,6 @@ except ImportError:
     )
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import torch
 from adet.config import get_cfg
@@ -22,7 +21,6 @@ except ImportError:
     raise ImportError("[ERROR] Please install Detectron2")
 
 from adet.utils.vitae_predictor import ViTAEPredictor
-from shapely import LineString, MultiPolygon, Polygon
 
 # first assert we are using the deep solo version of adet
 if adet.__version__ != "0.2.0-maptextpipeline":
@@ -30,10 +28,10 @@ if adet.__version__ != "0.2.0-maptextpipeline":
         "[ERROR] Please install MapTextPipeline from the following link: https://github.com/rwood-97/MapTextPipeline"
     )
 
-from .runner_base import Runner
+from .rec_runner_base import RecRunner
 
 
-class MapTextRunner(Runner):
+class MapTextRunner(RecRunner):
     def __init__(
         self,
         patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
@@ -44,7 +42,7 @@ class MapTextRunner(Runner):
         device: str = "default",
         delimiter: str = ",",
     ) -> None:
-        """_summary_
+        """Initialise the MapTextRunner.
 
         Parameters
         ----------
@@ -68,6 +66,8 @@ class MapTextRunner(Runner):
         self.patch_predictions = {}
         self.parent_predictions = {}
         self.geo_predictions = {}
+        self.search_results = {}
+        self.geo_search_results = {}
 
         # setup the config
         cfg = get_cfg()  # get a fresh new config
@@ -379,50 +379,6 @@ class MapTextRunner(Runner):
             self.predictor = ViTAEPredictor(cfg)
         self.predictor = DefaultPredictor(cfg)
 
-    def get_patch_predictions(
-        self,
-        outputs: dict,
-        return_dataframe: bool = False,
-        min_ioa: float = 0.7,
-    ) -> dict | pd.DataFrame:
-        """Post process the model outputs to get patch predictions.
-
-        Parameters
-        ----------
-        outputs : dict
-            The outputs from the model.
-        return_dataframe : bool, optional
-            Whether to return the predictions as a pandas DataFrame, by default False
-        min_ioa : float, optional
-            The minimum intersection over area to consider two polygons the same, by default 0.7
-
-        Returns
-        -------
-        dict or pd.DataFrame
-            A dictionary containing the patch predictions or a DataFrame if `as_dataframe` is True.
-        """
-        # key for predictions
-        image_id = outputs["image_id"]
-        self.patch_predictions[image_id] = []
-
-        # get instances
-        instances = outputs["instances"].to("cpu")
-        ctrl_pnts = instances.ctrl_points.numpy()
-        scores = instances.scores.tolist()
-        recs = instances.recs
-        bd_pts = np.asarray(instances.bd)
-
-        self._post_process(image_id, ctrl_pnts, scores, recs, bd_pts)
-        self._deduplicate(image_id, min_ioa=min_ioa)
-
-        if return_dataframe:
-            return self._dict_to_dataframe(self.patch_predictions, geo=False)
-        return self.patch_predictions
-
-    def _process_ctrl_pnt(self, pnt):
-        points = pnt.reshape(-1, 2)
-        return points
-
     def _ctc_decode_recognition(self, rec):
         last_char = "###"
         s = ""
@@ -443,83 +399,3 @@ class MapTextRunner(Runner):
             else:
                 last_char = "###"
         return s
-
-    def _post_process(self, image_id, ctrl_pnts, scores, recs, bd_pnts, alpha=0.4):
-        for ctrl_pnt, score, rec, bd in zip(ctrl_pnts, scores, recs, bd_pnts):
-            # draw polygons
-            if bd is not None:
-                bd = np.hsplit(bd, 2)
-                bd = np.vstack([bd[0], bd[1][::-1]])
-                polygon = Polygon(bd).buffer(0)
-
-                if isinstance(polygon, MultiPolygon):
-                    polygon = polygon.convex_hull
-
-            # draw center lines
-            line = self._process_ctrl_pnt(ctrl_pnt)
-            line = LineString(line)
-
-            # draw text
-            text = self._ctc_decode_recognition(rec)
-            if self.voc_size == 37:
-                text = text.upper()
-            # text = "{:.2f}: {}".format(score, text)
-            text = f"{text}"
-            score = f"{score:.2f}"
-
-            self.patch_predictions[image_id].append([polygon, text, score])
-
-    @staticmethod
-    def _dict_to_dataframe(
-        preds: dict,
-        geo: bool = False,
-        parent: bool = False,
-    ) -> pd.DataFrame:
-        """Convert the predictions dictionary to a pandas DataFrame.
-
-        Parameters
-        ----------
-        preds : dict
-            A dictionary of predictions.
-        geo : bool, optional
-            Whether the dictionary is georeferenced coords (or pixel bounds), by default True
-        parent : bool, optional
-            Whether the dictionary is at parent level, by default False
-
-        Returns
-        -------
-        pd.DataFrame
-            A pandas DataFrame containing the predictions.
-        """
-        if geo:
-            columns = ["geometry", "crs", "text", "score"]
-        else:
-            columns = ["geometry", "text", "score"]
-
-        if parent:
-            columns.append("patch_id")
-
-        preds_df = pd.concat(
-            pd.DataFrame(
-                preds[k],
-                index=np.full(len(preds[k]), k),
-                columns=columns,
-            )
-            for k in preds.keys()
-        )
-
-        if geo:
-            # get the crs (should be the same for all)
-            if not preds_df["crs"].nunique() == 1:
-                raise ValueError("[ERROR] Multiple crs found in the predictions.")
-            crs = preds_df["crs"].unique()[0]
-
-            preds_df = gpd.GeoDataFrame(
-                preds_df,
-                geometry="geometry",
-                crs=crs,
-            )
-
-        preds_df.index.name = "image_id"
-        preds_df.reset_index(inplace=True)  # reset index to get image_id as a column
-        return preds_df

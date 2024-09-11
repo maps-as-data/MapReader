@@ -100,7 +100,7 @@ class Runner:
         Returns
         -------
         dict or pd.DataFrame or gpd.GeoDataFrame
-            A dictionary of predictions for each patch image or a DataFrame if `as_dataframe` is True.
+            A dictionary of predictions for each patch image or a DataFrame if `return_dataframe` is True.
         """
         img_paths = self.patch_df["image_path"].to_list()
 
@@ -129,7 +129,7 @@ class Runner:
         Returns
         -------
         dict or pd.DataFrame
-            A dictionary of predictions for each image or a DataFrame if `as_dataframe` is True.
+            A dictionary of predictions for each image or a DataFrame if `return_dataframe` is True.
         """
 
         if isinstance(img_paths, (str, pathlib.Path)):
@@ -243,7 +243,7 @@ class Runner:
         Returns
         -------
         dict or pd.DataFrame
-            A dictionary of predictions for each parent image or a DataFrame if `as_dataframe` is True.
+            A dictionary of predictions for each parent image or a DataFrame if `return_dataframe` is True.
         """
 
         for image_id, prediction in self.patch_predictions.items():
@@ -350,7 +350,7 @@ class Runner:
         Returns
         -------
         dict or gpd.GeoDataFrame
-            A dictionary of predictions for each parent image or a DataFrame if `as_dataframe` is True.
+            A dictionary of predictions for each parent image or a DataFrame if `return_dataframe` is True.
         """
         if self.parent_predictions == {}:
             print("[INFO] Converting patch pixel bounds to parent pixel bounds.")
