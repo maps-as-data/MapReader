@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
+import pathlib
 
+import geopandas as gpd
 import pandas as pd
 import pytest
 from torch.utils.data import DataLoader, RandomSampler
@@ -13,7 +14,7 @@ from mapreader.classify.datasets import PatchContextDataset, PatchDataset
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -43,6 +44,24 @@ def test_load_csv(load_annots, sample_dir):
     assert len(annots.annotations) == 83
     assert annots.unique_labels == ["no", "railspace", "building"]
     assert annots.labels_map == {0: "no", 1: "railspace", 2: "building"}
+
+
+def test_reset_cols(load_annots, sample_dir):
+    annots = load_annots
+    assert len(annots.annotations) == 81
+    assert annots.patch_paths_col == "image_path"
+    assert annots.label_col == "label"
+    annots.load(
+        f"{sample_dir}/test_annots_append.csv",
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+        patch_paths_col="label",
+        label_col="image_path",
+    )  # test append but rename patch paths and label cols
+    assert len(annots.annotations) == 83
+    assert annots.patch_paths_col == "label"
+    assert annots.label_col == "image_path"
 
 
 def test_labels_map(sample_dir):
@@ -106,6 +125,42 @@ def test_load_df(sample_dir):
     assert annots.labels_map == {0: "no", 1: "railspace"}
 
 
+def test_load_csv_pathlib(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        pathlib.Path(f"{sample_dir}/test_annots.csv"),
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 81
+    assert isinstance(annots.annotations, pd.DataFrame)
+    assert annots.labels_map == {0: "no", 1: "railspace"}
+    # test append
+    annots.load(
+        pathlib.Path(f"{sample_dir}/test_annots_append.csv"),
+        append=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 83
+    assert annots.unique_labels == ["no", "railspace", "building"]
+    assert annots.labels_map == {0: "no", 1: "railspace", 2: "building"}
+
+
+def test_load_geojson(sample_dir):
+    annots = AnnotationsLoader()
+    annots.load(
+        f"{sample_dir}/land_annots.geojson",
+        reset_index=True,
+        remove_broken=False,
+        ignore_broken=True,
+    )
+    assert len(annots.annotations) == 58
+    assert isinstance(annots.annotations, gpd.GeoDataFrame)
+    assert annots.labels_map == {0: "0", 1: "1"}
+
+
 def test_init_images_dir(sample_dir):
     annots = AnnotationsLoader()
     annots.load(
@@ -146,6 +201,10 @@ def test_create_datasets_default_transforms(load_annots):
     annots = load_annots
     annots.create_datasets(0.5, 0.3, 0.2)
     assert annots.dataset_sizes == {"train": 40, "val": 24, "test": 17}
+    assert isinstance(annots.datasets["train"], PatchDataset)
+    assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
+    annots.create_datasets(0.5, 0.5, 0)
+    assert annots.dataset_sizes == {"train": 40, "val": 41}
     assert isinstance(annots.datasets["train"], PatchDataset)
     assert isinstance(annots.datasets["train"].patch_df, pd.DataFrame)
 
@@ -237,16 +296,16 @@ def test_labels_map_errors(sample_dir):
         )
 
 
-def test_load_fake_csv_errors():
+def test_load_errors(sample_dir):
     annots = AnnotationsLoader()
-    with pytest.raises(ValueError, match="cannot be found"):
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson"):
+        annots.load("fake.file")
+    with pytest.raises(FileNotFoundError):
         annots.load("a_fake_file.csv")
-
-
-def test_load_csv_errors(sample_dir):
-    annots = AnnotationsLoader()
     with pytest.raises(ValueError, match="No annotations remaining"):
         annots.load(f"{sample_dir}/test_annots.csv")
+    with pytest.raises(ValueError, match="files cannot be found"):
+        annots.load(f"{sample_dir}/test_annots.csv", remove_broken=False)
 
 
 def test_create_datasets_errors(load_annots):

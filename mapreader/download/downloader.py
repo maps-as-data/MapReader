@@ -144,12 +144,12 @@ class Downloader:
         if map_name is None:
             map_name = self.merger._get_output_name(grid_bb)
         self.downloader.download_tiles(grid_bb, download_in_parallel=False)
-        success = self.merger.merge(grid_bb, map_name)
+        img_path, success = self.merger.merge(grid_bb, map_name)
 
         if success:
-            print(f'[INFO] Downloaded "{map_name}.png"')
+            print(f'[INFO] Downloaded "{img_path}"')
         else:
-            print(f'[WARNING] Download of "{map_name}.png" was unsuccessful.')
+            print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
 
         # Try to remove the temporary folder
         try:

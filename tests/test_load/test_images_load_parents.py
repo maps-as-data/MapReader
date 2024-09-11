@@ -63,9 +63,6 @@ def test_file_ext_w_mixed_paths(dirs):
     my_files = loader()
     my_files.load_parents(f"{parent_path}/", parent_file_ext="png")
     assert len(my_files) == 3
-    my_files = loader()
-    my_files.load_parents(f"{parent_path}/*", parent_file_ext="png")
-    assert len(my_files) == 3
 
 
 # errors
@@ -73,13 +70,13 @@ def test_file_ext_w_mixed_paths(dirs):
 
 def test_multiple_file_types_errors(dirs):
     parent_path, _ = dirs
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         my_files = loader()
         my_files.load_parents(parent_path)
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         my_files = loader()
         my_files.load_parents(f"{parent_path}/")
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         my_files = loader()
         my_files.load_parents(f"{parent_path}/*")
 
@@ -91,13 +88,14 @@ def test_no_files_found_errors(dirs):
         my_files.load_parents(parent_path, parent_file_ext="tif")
     with pytest.raises(ValueError, match="No files found"):
         my_files = loader()
-        my_files.load_parents(f"{parent_path}/*", parent_file_ext="tif")
-    with pytest.raises(ValueError, match="No files found"):
-        my_files = loader()
-        my_files.load_parents(f"{parent_path}/*png", parent_file_ext="tif")
-    with pytest.raises(ValueError, match="No files found"):
-        my_files = loader()
         my_files.load_parents(f"{parent_path}/*tif")
+
+
+def test_ignore_file_ext(dirs):
+    parent_path, _ = dirs
+    my_files = loader()
+    my_files.load_parents(f"{parent_path}/*png", parent_file_ext="tif")
+    assert len(my_files) == 3
 
 
 def test_load_parents_empty_dir(empty_dir):

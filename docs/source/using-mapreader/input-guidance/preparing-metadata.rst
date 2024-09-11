@@ -1,25 +1,15 @@
 Preparing your metadata
 =======================
 
-MapReader uses the file names of your map images as unique identifiers (``image_id`` s).
-Therefore, if you would like to associate metadata to your map images, then, **at minimum**, your metadata must contain a column/header named ``image_id`` or ``name`` whose content is the file name of each map image.
+MapReader uses the file names of your map images as unique identifiers.
+Therefore, if you would like to associate metadata (e.g. georeferencing information, publication dates or any other information about your images) to your map images, then your metadata must contain a column/header named ``image_id`` or ``name`` that matches the file names of your map images and columns for the metadata you'd like to add.
 
-To load metadata (e.g. georeferencing information, publication dates or any other information about your images) into MapReader, your metadata must be in a `file format readable by Pandas <https://pandas.pydata.org/>`_.
+To load metadata from a file into MapReader, your metadata file should be in a CSV (or TSV/etc), Excel or GeoJSON file format.
 
-.. note:: Many map collections do not have item-level metadata, however even the minimal requirements here (a filename, geospatial coordinates, and CRS) will suffice for using MapReader. It is always a good idea to talk to the curators of the map collections you wish to use with MapReader to see if there are metadata files that can be shared for research purposes.
-
-
-Option 1 - Using a ``csv``, ``xls`` or ``xlsx`` file
------------------------------------------------------
-
-The simplest option is to save your metadata as a ``csv``, ``xls`` or ``xlsx`` file and load it directly into MapReader.
-
-.. note:: If you are using a ``csv`` file but the contents of you metadata contains commas, you will need to use another delimiter. We recommend using a pipe (``|``).
-
-If you are loading metadata from a ``csv``, ``xls`` or ``xlsx`` file, your file should be structures as follows:
+e.g. If you are loading metadata from a CSV/TSV/etc or Excel file, your file could be structured as follows:
 
 +-----------+-----------------------------+------------------------+--------------+
-| image_id  | column1 (e.g. coords)       | column2 (e.g. region)  | column3      |
+| image_id  | coordinates                 | region                 | column3      |
 +===========+=============================+========================+==============+
 | map1.png  | (-4.8, 55.8, -4.2, 56.4)    | Glasgow                | ...          |
 +-----------+-----------------------------+------------------------+--------------+
@@ -30,14 +20,16 @@ If you are loading metadata from a ``csv``, ``xls`` or ``xlsx`` file, your file 
 | ...       | ...                         | ...                    | ...          |
 +-----------+-----------------------------+------------------------+--------------+
 
-Your file can contain as many columns/rows as you like, so long as it contains at least one named ``image_id`` or ``name``.
+This file can contain as many columns as you like, but the ``image_id`` column is required to ensure the metadata is matched to the correct map image.
+
+.. note:: Many map collections do not have item-level metadata, however even the minimal requirements here (a filename, geospatial coordinates, and CRS) will suffice for using MapReader. It is always a good idea to talk to the curators of the map collections you wish to use with MapReader to see if there are metadata files that can be shared for research purposes.
 
 .. Add comment about nature of coordinates as supplied by NLS vs what they might be for other collections
 
-Option 2 - Loading metadata from other file formats
----------------------------------------------------
+Using metadata in other formats
+--------------------------------
 
-As Pandas is able to read `a number of different file formats <https://pandas.pydata.org/docs/user_guide/io.html>`_, you may still be able to use your metadata even if it is saved in a different file format.
+So long as your file is in a format readable by `Pandas <https://pandas.pydata.org/docs/user_guide/io.html>`_ or `GeoPandas <https://geopandas.org/en/stable/docs/user_guide/io.html>`_, you may still be able to use your metadata even if it is saved in a file format not supported by MapReader.
 
 To do this, you will need to use Python to:
 

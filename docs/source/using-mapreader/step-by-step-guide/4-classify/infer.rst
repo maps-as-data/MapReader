@@ -102,7 +102,7 @@ This can be done by loading a dataframe containing the paths to your patches:
 
     infer = PatchDataset("./patch_df.csv", delimiter=",", transform="test")
 
-.. note:: You can create this ``.csv`` file using the ``.convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance).
+.. note:: You can create this CSV file using the ``convert_image(save=True)`` method on your ``MapImages`` object (follow instructions in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance). This could also be a GeoJSON file.
 
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
@@ -115,14 +115,14 @@ You should then add this dataset to your ``ClassifierContainer()`` (``my_classif
 
 This will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute.
 
-By default, the ``.load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
+By default, the ``load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
 You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
 See :ref:`this section<sampler>` for more information on samplers.
 
 Infer
 ------
 
-After loading your dataset, you can then simply run the ``.inference()`` method to infer the labels on the patches in your dataset:
+After loading your dataset, you can then simply run the ``inference()`` method to infer the labels on the patches in your dataset:
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 Save predictions
 ~~~~~~~~~~~~~~~~~
 
-To save your predictions, use the ``.save_predictions()`` method.
+To save your predictions, use the ``save_predictions()`` method.
 e.g. to save your predictions on the "infer" dataset:
 
 .. code-block:: python
@@ -159,7 +159,7 @@ To do this, you will need to create a new ``MapImages`` object and load in your 
 
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
 
-You can then add your predictions to the metadata using the ``.add_metadata()`` method:
+You can then add your predictions to the metadata using the ``add_metadata()`` method:
 
 .. code-block:: python
 
@@ -172,7 +172,7 @@ For example, to load the predictions for the "infer" dataset:
     #EXAMPLE
     my_maps.add_metadata("./infer_predictions_patch_df.csv", tree_level='patch')
 
-From here, you can use the ``.show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
+From here, you can use the ``show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
 
 .. code-block:: python
 

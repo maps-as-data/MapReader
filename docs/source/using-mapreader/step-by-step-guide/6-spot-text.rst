@@ -124,13 +124,13 @@ For the DPTextDETRRunner, use:
 
     #EXAMPLE
     my_runner = DPTextDETR(
-        "./patch_df.csv",
-        "./parent_df.csv",
+        "./patch_df.csv", # or .geojson
+        "./parent_df.csv", # or .geojson
         cfg_file = "DPText-DETR/configs/DPText_DETR/ArT/R_50_poly.yaml",
         weights_file = "./art_final.pth",
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use:
+or, if you have your `patch_df` and `parent_df` already loaded as pandas DataFrames or geopandas GeoDataFrames, you can use:
 
 .. code-block:: python
 
@@ -150,13 +150,13 @@ For the DeepSoloRunner, use:
 
     #EXAMPLE
     my_runner = DeepSoloRunner(
-        "./patch_df.csv",
-        "./parent_df.csv",
+        patch_df,
+        parent_df,
         cfg_file = "DeepSolo/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
         weights_file = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth"
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+or, you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
 
 For the MapTextPipeline, use:
 
@@ -166,13 +166,13 @@ For the MapTextPipeline, use:
 
     #EXAMPLE
     my_runner = MapTextPipeline(
-        "./patch_df.csv",
-        "./parent_df.csv",
+        patch_df,
+        parent_df,
         cfg_file = "MapTextPipeline/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
         weights_file = "./rumsey-finetune.pth"
     )
 
-or, if you have your `patch_df` and `parent_df` already loaded as pandas dataframes, you can use these directly as shown for the DPTextDETRRunner (above).
+or, you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
 
 .. note:: You'll need to adjust the paths to the config and weights files to match your own set-up!
 

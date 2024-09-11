@@ -58,8 +58,6 @@ def test_no_parents(dirs):
     assert len(my_files) == 5
     my_files = load_patches(patch_path, patch_file_ext="png")
     assert len(my_files) == 5
-    my_files = load_patches(f"{patch_path}/*", patch_file_ext="png")
-    assert len(my_files) == 5
 
 
 # load patches and parents
@@ -71,10 +69,6 @@ def test_w_parent_dir_and_parent_file_ext(dirs):
     assert len(my_files) == 6
     my_files = load_patches(
         patch_path, parent_paths=f"{parent_path}/", parent_file_ext="png"
-    )
-    assert len(my_files) == 6
-    my_files = load_patches(
-        patch_path, parent_paths=f"{parent_path}/*", parent_file_ext="png"
     )
     assert len(my_files) == 6
 
@@ -92,11 +86,11 @@ def test_w_parent_file_paths(dirs):
 
 def test_multiple_file_types_errors(dirs):
     parent_path, patch_path = dirs
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         load_patches(parent_path)
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         load_patches(f"{parent_path}/")
-    with pytest.raises(ValueError, match="multiple file types"):
+    with pytest.raises(ValueError, match="Non-image file types"):
         load_patches(f"{parent_path}/*")
 
 
@@ -105,11 +99,15 @@ def test_no_files_found_errors(dirs):
     with pytest.raises(ValueError, match="No files found"):
         load_patches(patch_path, patch_file_ext="tif")
     with pytest.raises(ValueError, match="No files found"):
-        load_patches(f"{patch_path}/*", patch_file_ext="tif")
-    with pytest.raises(ValueError, match="No files found"):
-        load_patches(f"{patch_path}/*png", patch_file_ext="tif")
-    with pytest.raises(ValueError, match="No files found"):
         load_patches(f"{patch_path}/*tif")
+
+
+def test_ignore_file_ext(dirs):
+    _, patch_path = dirs
+    maps = load_patches(f"{patch_path}/*png", patch_file_ext="tif")
+    assert (
+        len(maps) == 5
+    )  # file1.png and file2.png will be added as parents (w/ no file path)
 
 
 def test_empty_dir_errors(empty_dir):

@@ -16,10 +16,10 @@ Instructions for accessing tile layers from one example collection is below:
 If you want to download maps from a TileServer using MapReader's ``Download`` subpackage, you will need to begin with the 'Download' task.
 For this, you will need:
 
-* A ``json`` file containing metadata for each map sheet you would like to query/download.
+* A `geojson <https://geojson.org/>`__ file containing metadata for each map sheet you would like to query/download.
 * The URL of the XYZ tile layer which you would like to access.
 
-At a minimum, for each map sheet, your ``json`` file should contain information on:
+At a minimum, for each map sheet, your geojson file should contain information on:
 
 - the name and URL of an individual sheet that is contained in the composite layer
 - the geometry of the sheet (i.e. its coordinates), so that, where applicable, individual sheets can be isolated from the whole layer

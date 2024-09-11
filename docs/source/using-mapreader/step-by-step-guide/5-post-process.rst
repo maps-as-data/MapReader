@@ -17,16 +17,10 @@ For example, if a patch is predicted to be a railspace, but is surrounded by pat
 To implement this, for a given patch, the code checks whether any of the 8 surrounding patches have the same label (e.g. 'railspace') and, if not, assumes the current patch's predicted label to be a false positive.
 The user can then choose how to relabel the patch (e.g. 'railspace' -> 'no').
 
-If you have your predictions saved in a csv file, you will first need to load them into a pandas DataFrame:
+To run the post-processing code, you will need to have saved the predictions from your model in the format expected for the post-processing code.
+See the :doc:`/using-mapreader/step-by-step-guide/4-classify/index` docs for more on this.
 
-.. code-block:: python
-
-    import pandas as pd
-
-    preds = pd.read_csv("path/to/predictions.csv", index_col=0)
-
-
-You can then run the context post-processing code as follows:
+You can run the context post-processing code as follows:
 
 .. code-block:: python
 
@@ -39,7 +33,13 @@ You can then run the context post-processing code as follows:
         3: "railspace&building"
     }
 
-    patches = ContextPostProcessor(preds, labels_map=labels_map)
+    patches = ContextPostProcessor(patch_df="path/to/predictions.csv", labels_map=labels_map) # or .geojson
+
+or, if you have already loaded your predictions into a pandas DataFrame (preds), you can pass this directly:
+
+.. code-block:: python
+
+    patches = ContextPostProcessor(patch_df=preds, labels_map=labels_map)
 
 This context based post-processing will only work for features that are expected be continuous (e.g. railway, road, coastline, etc.) or clustered (e.g. a large body of water).
 You will need to tell MapReader which labels to select and then get the context for each of the relevant patches in order to work out if it is isolated or part of a line/cluster.
@@ -108,14 +108,14 @@ Occlusion analysis is a method for understanding the model's predictions by occl
 This can help to identify which parts of the image are most important for the model's predictions.
 
 First, to set up your analyzer, you will need to load your predictions and your model.
-You can do this by passing the path to your predictions csv file and the path to your model.pth file as follows:
+You can do this by passing the path to your predictions CSV/GeoJSON file and the path to your model.pth file as follows:
 
 .. code-block:: python
 
     from mapreader.process.occlusion_analysis import OcclusionAnalyzer
 
     analyzer = OcclusionAnalyzer(
-        patch_df="path/to/predictions.csv",
+        patch_df="path/to/predictions.csv", # or .geojson
         model="path/to/model.pth",
     )
 

@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import os
-from ast import literal_eval
+import pathlib
+import re
 from itertools import product
 from typing import Callable
 
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
@@ -24,14 +26,16 @@ except ImportError:
     )
     parhugin_installed = False
 
+from mapreader.utils.load_frames import eval_dataframe, load_from_csv, load_from_geojson
+
 
 class PatchDataset(Dataset):
     """A PyTorch Dataset class for loading image patches from a DataFrame.
 
     Parameters
     ----------
-    patch_df : pandas.DataFrame or str
-        DataFrame or path to csv file containing the paths to image patches and their labels.
+    patch_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
+        DataFrame or path to CSV/TSV/geojson file containing the paths to image patches and their labels.
     transform : Union[str, transforms.Compose, Callable]
         The transform to use on the image.
         A string can be used to call default transforms - options are "train", "test" or "val".
@@ -39,7 +43,7 @@ class PatchDataset(Dataset):
         and performs image transformations can be used.
         At minimum, transform should be ``torchvision.transforms.ToTensor()``.
     delimiter : str, optional
-        The delimiter to use when reading the dataframe. By default ``","``.
+        The delimiter to use when reading the CSV/TSV file. By default ``","``.
     patch_paths_col : str, optional
         The name of the column in the DataFrame containing the image paths. Default is "image_path".
     label_col : str, optional
@@ -51,7 +55,7 @@ class PatchDataset(Dataset):
 
     Attributes
     ----------
-    patch_df : pandas.DataFrame
+    patch_df : pandas.DataFrame or gpd.GeoDataFrame
         DataFrame containing the paths to image patches and their labels.
     label_col : str
         The name of the column containing the image labels.
@@ -91,7 +95,7 @@ class PatchDataset(Dataset):
 
     def __init__(
         self,
-        patch_df: pd.DataFrame | str,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
         transform: str | (transforms.Compose | Callable),
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
@@ -102,19 +106,22 @@ class PatchDataset(Dataset):
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
 
-        elif isinstance(patch_df, str):
-            if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
-                patch_df = pd.read_csv(patch_df, sep=delimiter)
-                # ensure tuple/list columns are read as such
-                patch_df = self._eval_df(patch_df)
-                self.patch_df = patch_df
+        elif isinstance(patch_df, (str, pathlib.Path)):
+            print(f'[INFO] Reading "{patch_df}".')
+            if re.search(r"\..?sv$", str(patch_df)):
+                self.patch_df = load_from_csv(
+                    patch_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(patch_df)):
+                self.patch_df = load_from_geojson(patch_df)
             else:
-                raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
-
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                )
         else:
             raise ValueError(
-                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+                "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
         # force index to be image_id
@@ -133,7 +140,7 @@ class PatchDataset(Dataset):
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
                 raise ValueError(
-                    f"[ERROR] Label column ({label_col}) not in dataframe."
+                    f"[ERROR] Label column ({label_col}) not in DataFrame."
                 )
             else:
                 self.unique_labels = self.patch_df[self.label_col].unique().tolist()
@@ -142,14 +149,14 @@ class PatchDataset(Dataset):
             if self.label_index_col not in self.patch_df.columns:
                 if self.label_col:
                     print(
-                        f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
+                        f"[INFO] Label index column ({label_index_col}) not in DataFrame. Creating column."
                     )
                     self.patch_df[self.label_index_col] = self.patch_df[
                         self.label_col
                     ].apply(self._get_label_index)
                 else:
                     raise ValueError(
-                        f"[ERROR] Label index column ({label_index_col}) not in dataframe."
+                        f"[ERROR] Label index column ({label_index_col}) not in DataFrame."
                     )
 
         if isinstance(transform, str):
@@ -161,15 +168,6 @@ class PatchDataset(Dataset):
                 )
         else:
             self.transform = transform
-
-    @staticmethod
-    def _eval_df(df):
-        for col in df.columns:
-            try:
-                df[col] = df[col].apply(literal_eval)
-            except (ValueError, TypeError, SyntaxError):
-                pass
-        return df
 
     def __len__(self) -> int:
         """
@@ -393,15 +391,15 @@ class PatchContextDataset(PatchDataset):
 
     Parameters
     ----------
-    patch_df : pandas.DataFrame or str
-        DataFrame or path to csv file containing the paths to image patches and their labels.
-    total_df : pandas.DataFrame or str
-        DataFrame or path to csv file containing the paths to all images and their labels.
+    patch_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
+        DataFrame or path to CSV/TSV/geojson file containing the paths to image patches and their labels.
+    total_df : str or pathlib.Path or pandas.DataFrame or gpd.GeoDataFrame
+        DataFrame or path to CSV/TSV/geojson file containing the paths to all images and their labels.
     transform : str
         Torchvision transform to be applied to context  images.
         Either "train" or "val".
     delimiter : str
-        The delimiter to use when reading the csv file. By default ``","``.
+        The delimiter to use when reading the CSV/TSV file. By default ``","``.
     patch_paths_col : str, optional
         The name of the column in the DataFrame containing the image paths. Default is "image_path".
     label_col : str, optional
@@ -421,8 +419,8 @@ class PatchContextDataset(PatchDataset):
 
     Attributes
     ----------
-    patch_df : pandas.DataFrame
-        A pandas DataFrame with columns representing image paths, labels,
+    patch_df : pandas.DataFrame or gpd.GeoDataFrame
+        DataFrame with columns representing image paths, labels,
         and object bounding boxes.
     label_col : str
         The name of the column containing the image labels.
@@ -445,8 +443,8 @@ class PatchContextDataset(PatchDataset):
 
     def __init__(
         self,
-        patch_df: pd.DataFrame | str,
-        total_df: pd.DataFrame | str,
+        patch_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
+        total_df: str | pathlib.Path | pd.DataFrame | gpd.GeoDataFrame,
         transform: str,
         delimiter: str = ",",
         patch_paths_col: str | None = "image_path",
@@ -459,35 +457,42 @@ class PatchContextDataset(PatchDataset):
     ):
         if isinstance(patch_df, pd.DataFrame):
             self.patch_df = patch_df
-
-        elif isinstance(patch_df, str):
-            if os.path.isfile(patch_df):
-                print(f'[INFO] Reading "{patch_df}".')
-                patch_df = pd.read_csv(patch_df, sep=delimiter)
-                patch_df = self._eval_df(patch_df)
-                self.patch_df = patch_df
+        elif isinstance(patch_df, (str, pathlib.Path)):
+            print(f'[INFO] Reading "{patch_df}".')
+            if re.search(r"\..?sv$", str(patch_df)):
+                self.patch_df = load_from_csv(
+                    patch_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(patch_df)):
+                self.patch_df = load_from_geojson(patch_df)
             else:
-                raise ValueError(f'[ERROR] "{patch_df}" cannot be found.')
-
+                raise ValueError(
+                    "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                )
         else:
             raise ValueError(
-                "[ERROR] Please pass ``patch_df`` as a string (path to csv file) or pd.DataFrame."
+                "[ERROR] ``patch_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
         if isinstance(total_df, pd.DataFrame):
             self.total_df = total_df
-
-        elif isinstance(total_df, str):
-            if os.path.isfile(total_df):
-                total_df = pd.read_csv(total_df, sep=delimiter)
-                total_df = self._eval_df(total_df)
-                self.total_df = total_df
+        elif isinstance(total_df, (str, pathlib.Path)):
+            print(f'[INFO] Reading "{total_df}".')
+            if re.search(r"\..?sv$", str(total_df)):
+                self.total_df = load_from_csv(
+                    total_df,
+                    delimiter=delimiter,
+                )
+            elif re.search(r"\..*?json$", str(total_df)):
+                self.total_df = load_from_geojson(total_df)
             else:
-                raise ValueError(f'[ERROR] "{total_df}" cannot be found.')
-
+                raise ValueError(
+                    "[ERROR] ``total_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
+                )
         else:
             raise ValueError(
-                "[ERROR] Please pass ``total_df`` as a string (path to csv file) or pd.DataFrame."
+                "[ERROR] ``total_df`` must be a path to a CSV/geojson file or a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
         # force index to be image_id
@@ -506,18 +511,23 @@ class PatchContextDataset(PatchDataset):
         if self.label_col:
             if self.label_col not in self.patch_df.columns:
                 raise ValueError(
-                    f"[ERROR] Label column ({self.label_col}) not in dataframe."
+                    f"[ERROR] Label column ({self.label_col}) not in DataFrame."
                 )
             self.unique_labels = self.patch_df[self.label_col].unique().tolist()
 
         if self.label_index_col:
             if self.label_index_col not in self.patch_df.columns:
-                print(
-                    f"[INFO] Label index column ({label_index_col}) not in dataframe. Creating column."
-                )
-                self.patch_df[self.label_index_col] = self.patch_df[
-                    self.label_col
-                ].apply(self._get_label_index)
+                if self.label_col:
+                    print(
+                        f"[INFO] Label index column ({label_index_col}) not in DataFrame. Creating column."
+                    )
+                    self.patch_df[self.label_index_col] = self.patch_df[
+                        self.label_col
+                    ].apply(self._get_label_index)
+                else:
+                    raise ValueError(
+                        f"[ERROR] Label index column ({label_index_col}) not in DataFrame."
+                    )
 
         if isinstance(transform, str):
             if transform in ["train", "val", "test"]:
@@ -646,7 +656,7 @@ class PatchContextDataset(PatchDataset):
             )
         if "parent_id" not in total_df.columns:
             total_df["parent_id"] = total_df.index.map(lambda x: x.split("#")[1])
-        total_df = self._eval_df(total_df)
+        total_df = eval_dataframe(total_df)
 
         if not all(
             [col in total_df.columns for col in ["min_x", "min_y", "max_x", "max_y"]]
