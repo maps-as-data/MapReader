@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 import re
 
 import geopandas as gpd
@@ -265,20 +266,16 @@ class RecRunner(Runner):
         if return_fig:
             return fig
 
-    def convert_search_results_to_coords(
-        self, return_dataframe: bool = False
-    ) -> dict | gpd.GeoDataFrame:
-        """Convert the search results to georeferenced search results by converting the pixel bounds to coordinates.
+    def save_search_results_to_geojson(
+        self,
+        save_path: str | pathlib.Path,
+    ) -> None:
+        """Convert the search results to georeferenced search results and save them to a GeoJSON file.
 
         Parameters
         ----------
-        return_dataframe : bool, optional
-            Whether to return the results as a geopandas GeoDataFrame, by default False
-
-        Returns
-        -------
-        dict | gpd.GeoDataFrame
-            A dictionary of search results for each parent image or a DataFrame if `return_dataframe` is True.
+        save_path : str | pathlib.Path
+            The path to save the GeoJSON file.
 
         Raises
         ------
@@ -288,12 +285,11 @@ class RecRunner(Runner):
         if self.search_results == {}:
             raise ValueError("[ERROR] No results to convert!")
 
-        # reset the geo search results
-        self.geo_search_results = {}
+        geo_search_results = {}
 
         for parent_id, prediction in self.search_results.items():
-            if parent_id not in self.geo_search_results.keys():
-                self.geo_search_results[parent_id] = []
+            if parent_id not in geo_search_results.keys():
+                geo_search_results[parent_id] = []
 
                 for instance in prediction:
                     polygon = instance[0]
@@ -311,12 +307,9 @@ class RecRunner(Runner):
                     crs = self.parent_df.loc[parent_id, "crs"]
 
                     parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
-                    self.geo_search_results[parent_id].append(
+                    geo_search_results[parent_id].append(
                         [parent_polygon_geo, crs, *instance[1:]]
                     )
 
-        if return_dataframe:
-            return self._dict_to_dataframe(
-                self.geo_search_results, geo=True, parent=True
-            )
-        return self.geo_search_results
+        geo_df = self._dict_to_dataframe(geo_search_results, geo=True, parent=True)
+        geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")

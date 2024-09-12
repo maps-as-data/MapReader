@@ -67,7 +67,6 @@ class MapTextRunner(RecRunner):
         self.parent_predictions = {}
         self.geo_predictions = {}
         self.search_results = {}
-        self.geo_search_results = {}
 
         # setup the config
         cfg = get_cfg()  # get a fresh new config
