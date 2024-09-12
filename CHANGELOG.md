@@ -17,6 +17,8 @@ The following table shows which versions of MapReader are compatible with which 
 
 _ADD NEW CHANGES HERE_
 
+## [v1.4.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.4.0) (2024-09-12)
+
 ### Added
 
 - `check_georeferencing` method and `georeferenced` attribute added to `MapImages` class ([#495](https://github.com/maps-as-data/MapReader/pull/495))
