@@ -112,7 +112,7 @@ e.g. for the ``DPTextDETRRunner``, if you choose the "ArT/R_50_poly.yaml", you s
 
 e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml", you should download the "ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth" model weights file from the DeepSolo repo.
 
-e.g. for the ``MapTextPipeline``, if you choose the "ViTAEv2_S/rumsey/final_rumsey.yaml", you should download the "rumsey-finetune.pth" model weights file from the MapTextPipeline repo.
+e.g. for the ``MapTextRunner``, if you choose the "ViTAEv2_S/rumsey/final_rumsey.yaml", you should download the "rumsey-finetune.pth" model weights file from the MapTextPipeline repo.
 
 .. note:: We recommend using the "ViTAEv2_S/rumsey/final_rumsey.yaml" configuration and "rumsey-finetune.pth" weights from the ``MapTextPipeline``. But you should choose based on your own use case.
 
@@ -120,7 +120,7 @@ For the DPTextDETRRunner, use:
 
 .. code-block:: python
 
-    from map_reader import DPTextDETRRunner
+    from mapreader import DPTextDETRRunner
 
     #EXAMPLE
     my_runner = DPTextDETR(
@@ -146,7 +146,7 @@ For the DeepSoloRunner, use:
 
 .. code-block:: python
 
-    from map_reader import DeepSoloRunner
+    from mapreader import DeepSoloRunner
 
     #EXAMPLE
     my_runner = DeepSoloRunner(
@@ -158,14 +158,14 @@ For the DeepSoloRunner, use:
 
 or, you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
 
-For the MapTextPipeline, use:
+For the MapTextRunner, use:
 
 .. code-block:: python
 
-    from map_reader import MapTextPipeline
+    from mapreader import MapTextRunner
 
     #EXAMPLE
-    my_runner = MapTextPipeline(
+    my_runner = MapTextRunner(
         patch_df,
         parent_df,
         cfg_file = "MapTextPipeline/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
@@ -182,7 +182,7 @@ You can explicitly set this using the ``device`` argument:
 .. code-block:: python
 
     #EXAMPLE
-    my_runner = MapTextPipeline(
+    my_runner = MapTextRunner(
         "./patch_df.csv",
         "./parent_df.csv",
         cfg_file = "MapTextPipeline/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
@@ -322,10 +322,77 @@ If you maps are georeferenced in your ``parent_df``, you can also convert the pi
 
     geo_preds_df = my_runner.convert_to_coords(return_dataframe=True)
 
-Again, you can save these to a csv file as above, or, you can save them to a geojson file for loading into GIS software:
+Again, you can save these to a csv file (as shown above), or, you can save them to a geojson file for loading into GIS software:
 
 .. code-block:: python
 
     my_runner.save_to_geojson("text_preds.geojson")
 
 This will save the predictions to a geojson file, with each text prediction as a separate feature.
+
+Search predictions
+------------------
+
+If you are using the DeepSoloRunner or the MapTextRunner, you will have recognized text outputs.
+You can search these predictions using the ``search_preds`` method:
+
+.. code-block:: python
+
+    search_results = my_runner.search_preds("search term")
+
+e.g To find all predictions containing the word "church" and ignoring the case:
+
+.. code-block:: python
+
+    # EXAMPLE
+    search_results = my_runner.search_preds("church")
+
+By default, this will return a dictionary containing the search results.
+If you'd like to return a dataframe instead, use the ``return_dataframe`` argument:
+
+.. code-block:: python
+
+    # EXAMPLE
+    search_results_df = my_runner.search_preds("church", return_dataframe=True)
+
+You can also ignore the case of the search term by setting the ``ignore_case`` argument:
+
+.. code-block:: python
+
+    # EXAMPLE
+    search_results_df = my_runner.search_preds("church", return_dataframe=True, ignore_case=True)
+
+
+The search accepts regex patterns so you can use these to search for more complex patterns.
+
+e.g. To search for all predictions containing the word "church" or "chapel", you could use the pattern "church|chapel":
+
+.. code-block:: python
+
+    # EXAMPLE
+    search_results_df = my_runner.search_preds("church|chapel", return_dataframe=True, ignore_case=True)
+
+Once you have your search results, you can view them on your map using the ``show_search_results`` method.
+
+.. code-block:: python
+
+    my_runner.show_search_results("map_74488689.png")
+
+This will show the map with the search results.
+
+As with the ``show`` method, you can use the ``border_color``, ``text_color`` and ``figsize`` arguments to customize the appearance of the image.
+
+Save search results
+~~~~~~~~~~~~~~~~~~~
+
+If your maps are georeferenced, you can also save your search results using the ``save_search_results_to_geojson`` method:
+
+.. code-block:: python
+
+    my_runner.save_search_results_to_geojson("search_results.geojson")
+
+This will save the search results to a geojson file, with each search result as a separate feature.
+
+These can then be loaded into GIS software for further analysis/exploration.
+
+If your maps are not georeferenced, you can save the search results to a csv file using the pandas ``to_csv`` method (as shown above).
