@@ -283,7 +283,7 @@ class RecRunner(Runner):
             If no search results are found.
         """
         if self.search_results == {}:
-            raise ValueError("[ERROR] No results to convert!")
+            raise ValueError("[ERROR] No results to save!")
 
         geo_search_results = {}
 

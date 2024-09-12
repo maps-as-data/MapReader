@@ -226,3 +226,47 @@ def test_deepsolo_save_to_geojson(runner_run_all, tmp_path, mock_response):
     assert set(gdf.columns) == set(
         ["image_id", "patch_id", "geometry", "crs", "text", "score"]
     )
+
+
+def test_deepsolo_search_preds(runner_run_all, mock_response):
+    runner = runner_run_all
+    _ = runner.convert_to_parent_pixel_bounds()
+    out = runner.search_preds("map", ignore_case=True)
+    assert isinstance(out, dict)
+    assert "mapreader_text.png" in out.keys()
+    # test dataframe
+    out = runner.search_preds("map", ignore_case=True, return_dataframe=True)
+    assert isinstance(out, pd.DataFrame)
+    assert set(out.columns) == set(
+        ["image_id", "patch_id", "geometry", "text", "score"]
+    )
+    assert "mapreader_text.png" in out["image_id"].values
+    out = runner.search_preds("somethingelse", ignore_case=True, return_dataframe=True)
+    assert len(out) == 0
+
+
+def test_deepsolo_search_preds_errors(runner_run_all, mock_response):
+    runner = runner_run_all
+    with pytest.raises(ValueError, match="No parent predictions found"):
+        runner.search_preds("maps", ignore_case=True)
+
+
+def test_deepsolo_save_search_results(runner_run_all, tmp_path, mock_response):
+    runner = runner_run_all
+    _ = runner.convert_to_parent_pixel_bounds()
+    out = runner.search_preds("map", ignore_case=True)
+    assert isinstance(out, dict)
+    runner.save_search_results_to_geojson(f"{tmp_path}/search_results.geojson")
+    assert os.path.exists(f"{tmp_path}/search_results.geojson")
+    gdf = gpd.read_file(f"{tmp_path}/search_results.geojson")
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert set(gdf.columns) == set(
+        ["image_id", "patch_id", "geometry", "crs", "text", "score"]
+    )
+    assert "mapreader_text.png" in gdf["image_id"].values
+
+
+def test_deepsolo_save_search_results_errors(runner_run_all, tmp_path, mock_response):
+    runner = runner_run_all
+    with pytest.raises(ValueError, match="No results to save"):
+        runner.save_search_results_to_geojson(f"{tmp_path}/test.geojson")
