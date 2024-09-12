@@ -24,6 +24,7 @@ _ADD NEW CHANGES HERE_
 - All file loading methods now support `pathlib.Path` and `gpd.GeoDataFrame` objects as input ([#495](https://github.com/maps-as-data/MapReader/pull/495))
 - Loading of dataframes from GeoJSON files now supported in many file loading methods (e.g. `add_metadata`, `Annotator.__init__`, `AnnotationsLoader.load`, etc.) ([#495](https://github.com/maps-as-data/MapReader/pull/495))
 - `load_frames.py` added to `mapreader.utils`. This has functions for loading from various file formats (e.g. CSV, Excel, GeoJSON, etc.) and converting to GeoDataFrames ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- Added tests for text spotting code ([#500](https://github.com/maps-as-data/MapReader/pull/500))
 
 ### Changed
 
