@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
+import pathlib
+import shutil
 
 import pytest
 
@@ -10,7 +11,7 @@ from mapreader import Annotator, loader
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -20,9 +21,11 @@ def load_dfs(sample_dir, tmp_path):
     my_maps.patchify_all(
         patch_size=3, path_save=f"{tmp_path}/patches/"
     )  # creates 9 patches
-    parent_df, patch_df = my_maps.convert_images()
+    parent_df, patch_df = my_maps.convert_images(save=True, save_format="geojson")
     parent_df.to_csv(f"{tmp_path}/parent_df.csv")
     patch_df.to_csv(f"{tmp_path}/patch_df.csv")
+    shutil.move("./parent_df.geojson", f"{tmp_path}/parent_df.geojson")
+    shutil.move("./patch_df.geojson", f"{tmp_path}/patch_df.geojson")
     return parent_df, patch_df, tmp_path
 
 
@@ -158,19 +161,23 @@ def test_init_optional_args(load_dfs):
 
 
 def test_init_dfs_value_error(load_dfs):
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+    with pytest.raises(
+        ValueError,
+        match="path to a CSV/TSV/etc or geojson file or a pandas DataFrame or",
+    ):
         Annotator(
             patch_df=1,
             parent_df=1,
         )
     _, _, tmp_path = load_dfs
-    with pytest.raises(ValueError, match="path to a csv or a pandas DataFrame"):
+    with pytest.raises(
+        ValueError,
+        match="path to a CSV/TSV/etc or geojson file or a pandas DataFrame or",
+    ):
         Annotator(
             patch_df=f"{tmp_path}/patch_df.csv",
             parent_df=1,
         )
-    with pytest.raises(ValueError, match="Please specify one"):
-        Annotator()
 
 
 def test_init_n_labels(load_dfs):
@@ -213,6 +220,19 @@ def test_init_with_csvs(load_dfs):
     assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
+def test_init_with_csvs_pathlib(load_dfs):
+    _, _, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.csv"),
+        parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+    )
+    assert len(annotator) == 9
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
+
+
 def test_init_with_fpaths(load_dfs, sample_dir):
     _, _, tmp_path = load_dfs
     annotator = Annotator(
@@ -225,6 +245,19 @@ def test_init_with_fpaths(load_dfs, sample_dir):
     )
     assert len(annotator) == 9
     assert "mean_pixel_R" in annotator.patch_df.columns
+
+
+def test_init_with_geojson(load_dfs):
+    _, _, tmp_path = load_dfs
+    annotator = Annotator(
+        patch_df=pathlib.Path(f"{tmp_path}/patch_df.geojson"),
+        parent_df=pathlib.Path(f"{tmp_path}/parent_df.geojson"),
+        labels=["a", "b"],
+        annotations_dir=f"{tmp_path}/annotations/",
+        auto_save=False,
+    )
+    assert len(annotator) == 9
+    assert isinstance(annotator.patch_df.iloc[0]["coordinates"], tuple)
 
 
 def test_incorrect_csv_paths(load_dfs):
@@ -264,6 +297,37 @@ def test_init_with_fpaths_tsv(load_dfs, sample_dir):
     )
     assert len(annotator) == 9
     assert "mean_pixel_R" in annotator.patch_df.columns
+
+
+def test_init_errors(load_dfs, sample_dir):
+    _, _, tmp_path = load_dfs
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson file or"):
+        Annotator(
+            patch_df="fake.file",
+            parent_df=f"{tmp_path}/parent_df.csv",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson file or"):
+        Annotator(
+            patch_df=f"{tmp_path}/patch_df.csv",
+            parent_df="fake.file",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
+    with pytest.raises(ValueError, match="specify one of"):
+        Annotator()
+    with pytest.raises(FileNotFoundError, match="Metadata file .* not found"):
+        Annotator(
+            patch_paths=f"{tmp_path}/patches/*png",
+            parent_paths=f"{sample_dir}/cropped_74488689.png",
+            metadata_path="fake.file",
+            labels=["a", "b"],
+            annotations_dir=f"{tmp_path}/annotations/",
+            auto_save=False,
+        )
 
 
 def test_incorrect_delimiter(load_dfs):

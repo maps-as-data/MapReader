@@ -59,15 +59,22 @@ If your image files are georeferenced and already contain metadata (e.g. geoTIFF
 
 .. note:: This function will reproject your coordinates into "EPSG:4326". To change this specify ``target_crs``.
 
-Or, if you have separate metadata (e.g. a ``csv``, ``xls`` or ``xlsx`` file or, a Pandas dataframe), use:
+Or, if you have separate metadata (e.g. a CSV, Excel or GeoJSON file, a pandas DataFrame or a geopandas GeoDataFrame), use:
 
 .. code-block:: python
 
-    my_files.add_metadata(metadata="./path/to/metadata.csv")
+    my_files.add_metadata(metadata="./path/to/metadata.csv") # or .xlsx, .geojson etc.
+
+or, if you have a pandas DataFrame or geopandas GeoDataFrame (``metadata_df``):
+
+.. code-block:: python
+
+    my_files.add_metadata(metadata=metadata_df)
 
 .. note:: Specific guidance on preparing your metadata file/dataframe can be found on our :doc:`Input Guidance </using-mapreader/input-guidance/index>` page.
 
-For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance </using-mapreader/input-guidance/index>`:
+For example, if you have downloaded your maps using the default settings of our ``Download`` subpackage or have set up your directory as recommended in our `Input Guidance </using-mapreader/input-guidance/index>`, you will have a file called ``metadata.csv`` in your ``maps`` directory.
+You can load it as follows:
 
 .. code-block:: python
 
@@ -79,10 +86,10 @@ For example, if you have downloaded your maps using the default settings of our 
 
     Other arguments you may want to specify when adding metadata to your images include:
 
-    - ``index_col`` - By default, this is set to ``0`` so the first column of your ``csv``/Excel spreadsheet will be used as the index column when creating a Pandas dataframe. If you would like to use a different column you can specify ``index_col``.
-    - ``columns`` - By default, the ``add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``columns``\s argument (e.g. ``columns=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
+    - ``index_col`` - By default, this is set to ``0`` so the first column of your CSV/TSV/Excel spreadsheet will be used as the index column when creating a pandas DataFrame. If you would like to use a different column you can specify ``index_col``.
+    - ``usecols`` - By default, the ``add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``usecols`` argument (e.g. ``usecols=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
     - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
-    - ``delimiter`` - By default, this is set to ``|``. If your ``csv`` file is delimited using a different delimiter you should specify the delimiter argument.
+    - ``delimiter`` - By default, MapReader expects CSV files. If your file is delimited using a different delimiter you should specify the delimiter argument (e.g. a TSV file would require ``delimiter="\t"``).
 
 
 .. note:: In MapReader versions < 1.0.7, coordinates were miscalculated. To correct this, use the ``add_coords_from_grid_bb()`` method to calculate new, correct coordinates.
@@ -257,14 +264,19 @@ At any point, you can also save these dataframes by passing the ``save`` argumen
 
 By default, this will save your parent and patch dataframes as ``parent_df.csv`` and ``patch_df.csv`` respectively.
 
-If instead, you'd like to save them as excel files, add ``save_format="excel"`` to your command:
+If instead, you'd like to save them as excel files, use ``save_format="excel"``:
 
 .. code-block:: python
 
     parent_df, patch_df = my_files.convert_images(save=True, save_format="excel")
 
-Alternatively, you can save your patch metadata in a georeferenced json (i.e. geojson) file.
-To do this, use:
+or, if you'd like to save them as a geojson file, use ``save_format="geojson"``:
+
+.. code-block:: python
+
+    parent_df, patch_df = my_files.convert_images(save=True, save_format="geojson")
+
+Alternatively, you can save your patch metadata in a GeoJSON file using:
 
 .. code-block:: python
 

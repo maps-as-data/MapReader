@@ -167,10 +167,7 @@ class TileMerger:
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
-        try:
-            tile_size = self._load_tile_size(grid_bb)
-        except FileNotFoundError:
-            return False  # unsuccessful
+        tile_size = self._load_tile_size(grid_bb)
 
         merged_image = Image.new(
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)
@@ -207,10 +204,11 @@ class TileMerger:
                 )
                 i += 1
         merged_image.save(out_path, self.img_output_format[1])
+
         success = out_path if os.path.exists(out_path) else False
         if success is False:
             logger.warning(f"Merge unsuccessful! '{out_path}' not saved.")
         else:
             logger.info(f"Merge successful! The image has been stored at '{out_path}'")
 
-        return success
+        return out_path, success

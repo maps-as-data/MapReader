@@ -17,7 +17,30 @@ The following table shows which versions of MapReader are compatible with which 
 
 _ADD NEW CHANGES HERE_
 
-### [v1.3.9](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.9) (2024-08-21)
+### Added
+
+- `check_georeferencing` method and `georeferenced` attribute added to `MapImages` class ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- `MapImages.convert_images` method now supports saving to GeoJSON format (set `save_format="geojson"`) ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- All file loading methods now support `pathlib.Path` and `gpd.GeoDataFrame` objects as input ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- Loading of dataframes from GeoJSON files now supported in many file loading methods (e.g. `add_metadata`, `Annotator.__init__`, `AnnotationsLoader.load`, etc.) ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- `load_frames.py` added to `mapreader.utils`. This has functions for loading from various file formats (e.g. CSV, Excel, GeoJSON, etc.) and converting to GeoDataFrames ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+
+### Changed
+
+- Refactoring of `SheetDownloader` to make full use of geopandas functionality - "metadata.json" is now read in as a GeoDataFrame instead of json dictionary ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- `query_map_sheets_by_string` and `download_map_sheets_by_string` methods now search using columns in the GeoDataFrame instead of keys in the json dictionary ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- `columns` argument renamed to `usecols` in `MapImages.add_metadata` method (to align with pandas) ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+- `polygon` column renamed to `geometry` (to align with geopandas) ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+
+### Removed
+
+- `hist_published_dates` method removed from `SheetDownloader` as it is no longer needed. Use `sd.metadata["published_date"].hist()` instead ([#495](https://github.com/maps-as-data/MapReader/pull/495))
+
+## [v.1.3.10](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.9) (2024-09-04)
+
+_No changes to code. This release marks the move the the `maps-as-data` github organisation._
+
+## [v1.3.9](https://github.com/Living-with-machines/MapReader/releases/tag/v1.3.9) (2024-08-21)
 
 ### Added
 
