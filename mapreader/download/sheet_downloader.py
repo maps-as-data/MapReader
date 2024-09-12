@@ -13,7 +13,7 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import pandas as pd
 from shapely.geometry import LineString, Point, Polygon
-from tqdm.auto import tqdm
+from tqdm.autonotebook import tqdm
 
 from mapreader.utils.load_frames import load_from_geojson
 
