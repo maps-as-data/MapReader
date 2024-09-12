@@ -98,7 +98,7 @@ class DPTextDETRRunner(Runner):
         Returns
         -------
         dict or pd.DataFrame
-            A dictionary containing the patch predictions or a DataFrame if `as_dataframe` is True.
+            A dictionary containing the patch predictions or a DataFrame if `return_dataframe` is True.
         """
         # key for predictions
         image_id = outputs["image_id"]
