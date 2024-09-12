@@ -11,7 +11,7 @@ import torch
 from PIL import Image
 from torch import nn
 from torchvision import transforms
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 
 class OcclusionAnalyzer:

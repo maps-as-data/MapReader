@@ -25,10 +25,6 @@ from torchvision import models
 
 from .datasets import PatchDataset
 
-# import pickle
-# from tqdm.autonotebook import tqdm
-# from torch.nn.modules.module import _addindent
-
 
 class ClassifierContainer:
     """
