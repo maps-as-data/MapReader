@@ -13,7 +13,7 @@ import torch
 from PIL import Image
 from torch import nn
 from torchvision import transforms
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 

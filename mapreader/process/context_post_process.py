@@ -7,7 +7,7 @@ from itertools import product
 
 import geopandas as gpd
 import pandas as pd
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 

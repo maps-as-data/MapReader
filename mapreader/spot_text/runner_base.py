@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from shapely import Polygon
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 

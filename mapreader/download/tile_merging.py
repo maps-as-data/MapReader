@@ -5,7 +5,7 @@ import logging
 import os
 
 from PIL import Image
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from .data_structures import GridBoundingBox, GridIndex
 from .tile_loading import DEFAULT_IMG_DOWNLOAD_FORMAT, DEFAULT_TEMP_FOLDER
