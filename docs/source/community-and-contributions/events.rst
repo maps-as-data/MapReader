@@ -22,7 +22,7 @@ in the Google notes doc for each call.
    * - October 31, 2024, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
      - `Notes and Zoom link <https://docs.google.com/document/d/1goI0tqiySbMyXbCTlSD8iCLMIE45DVJhqme_dNo5oVg/edit>`_
-   * - December 12, 2024, 4-5pm UK time
+   * - November 21, 2024, 4-5pm UK time
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
      - `Notes and Zoom link <https://docs.google.com/document/d/177Gc3jqQ4L-HIhQuzEdEej-GYdHb-kaMxoLxMr_-tXU/edit>`_
    * - January 9, 2025, 4-5pm UK time
