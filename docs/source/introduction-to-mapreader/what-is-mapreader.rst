@@ -18,8 +18,7 @@ The classification pipeline was inspired by methods in biomedical imaging and ge
 The success of the tool subsequently generated interest from plant phenotype researchers working with large image datasets and so MapReader is an example of cross-pollination between the humanities and the sciences made possible by reproducible data science.
 
 Since then, MapReader has expanded to include a text spotting pipeline, which enables users to detect and recognize text in map images.
-
-.. TODO:: Add info here about the text spotting pipeline
+These text spotting elements of MapReader were inspired by the work completed during Machines Reading Maps (AHRC grant AH/V009400/1), whose team members at the University of Minnesota developed the first end-to-end text spotting pipeline used to find text on maps: mapKurator.
 
 What is unique about MapReader?
 --------------------------------
