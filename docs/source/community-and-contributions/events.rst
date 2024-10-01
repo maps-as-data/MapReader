@@ -42,11 +42,9 @@ in the Google notes doc for each call.
      - Notes and Zoom link
 
    * - August 1, 2024, 4-5pm UK time
-     - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
      - `Notes and Zoom link <https://docs.google.com/document/d/1UE2OjPE7OitoB8AsG4swk1k3pD44lW_YgMkaR4VxUXU/edit>`_
 
    * - September 5, 2024, 4-5pm UK time
-     - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
      - `Notes and Zoom link <https://docs.google.com/document/d/1zkrj-Bfofdzj9lbuP5yM58nY8_aGBUAqBlWPwb946XM/edit>`_
    
    * - April 18, 2024, 4-5pm UK time
