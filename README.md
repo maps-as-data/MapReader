@@ -91,7 +91,12 @@ The repository is structured as follows:
 
 ## How to cite MapReader
 
-If you use MapReader in your work, please cite the MapReader repository through our [Zenodo record](https://zenodo.org/records/13643609), our [MapReader JOSS paper](https://doi.org/10.21105/joss.06434) and [our SIGSPATIAL paper](https://dl.acm.org/doi/10.1145/3557919.3565812).
+If you use MapReader in your work, please cite:
+- Our [JOSS paper](https://doi.org/10.21105/joss.06434) - to acknowledge the software irrespective of the version you used.
+- Our [Zenodo record](https://zenodo.org/records/13643609) - to acknowledge the specific version of the software you used (or use the "Cite all versions?" option if your specific version isn't there).
+- Optionally, our [SIGSPATIAL paper](https://dl.acm.org/doi/10.1145/3557919.3565812) to acknowledge the development of the software and the research behind it.
+
+<!-- Add bibtext entries for the papers here -->
 
 ## Acknowledgements
 
