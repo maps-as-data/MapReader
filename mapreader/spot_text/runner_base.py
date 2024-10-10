@@ -15,6 +15,7 @@ from PIL import Image
 from shapely import Polygon
 from tqdm.auto import tqdm
 
+from mapreader import MapImages
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
 
@@ -86,6 +87,28 @@ class Runner:
             raise ValueError(
                 "[ERROR] ``parent_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )
+
+        self.check_georeferencing()
+
+    def check_georeferencing(self):
+        if "coordinates" in self.parent_df.columns:
+            if "dlat" in self.parent_df.columns and "dlon" in self.parent_df.columns:
+                self.georeferenced = True
+            else:
+                self._add_coord_increments()
+                self.check_georeferencing()
+        else:
+            print(
+                "[WARNING] Will not be able to georeference results, please ensure parent_df has 'coordinates' column."
+            )
+            self.georeferenced = False
+
+    def _add_coord_increments(self):
+        maps = MapImages()
+        maps.load_df(self.parent_df)
+        maps.add_coord_increments()
+        parent_df, _ = maps.convert_images()
+        self.parent_df = parent_df
 
     def run_all(
         self,
@@ -356,6 +379,12 @@ class Runner:
         dict or gpd.GeoDataFrame
             A dictionary of predictions for each parent image or a DataFrame if `return_dataframe` is True.
         """
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] Cannot convert to coordinates as parent_df does not have 'coordinates' column."
+            )
+
         if self.parent_predictions == {}:
             print("[INFO] Converting patch pixel bounds to parent pixel bounds.")
             _ = self.convert_to_parent_pixel_bounds()
@@ -399,6 +428,10 @@ class Runner:
         save_path : str | pathlib.Path, optional
             Path to save the GeoJSON file
         """
+        if self.geo_predictions == {}:
+            raise ValueError(
+                "[ERROR] No georeferenced predictions found. Run `convert_to_coords` first."
+            )
 
         geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
         geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")
@@ -474,6 +507,12 @@ class Runner:
         xyz_url: str | None = None,
         style_kwargs: dict | None = None,
     ):
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] This method only works for georeferenced results. Please ensure parent_df has 'coordinates' column and run `convert_to_coords` first."
+            )
+
         if parent_id not in self.geo_predictions.keys():
             raise ValueError(
                 f"[ERROR] {parent_id} not found in geo predictions. Check your ID is valid or try running `convert_to_coords` first."

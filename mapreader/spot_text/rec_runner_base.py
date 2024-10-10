@@ -249,13 +249,19 @@ class RecRunner(Runner):
         fig.show()
 
     def _get_geo_search_results(self):
-        """Convert search results to georeferenced search results
+        """Convert search results to georeferenced search results.
 
         Returns
         -------
         dict
             Dictionary containing georeferenced search results.
         """
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] Cannot convert to coordinates as parent_df does not have 'coordinates' column."
+            )
+
         geo_search_results = {}
 
         for parent_id, prediction in self.search_results.items():
@@ -290,6 +296,12 @@ class RecRunner(Runner):
         xyz_url: str | None = None,
         style_kwargs: dict | None = None,
     ):
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] This method only works for georeferenced results. Please ensure parent_df has 'coordinates' column and run `convert_to_coords` first."
+            )
+
         if parent_id not in self.geo_predictions.keys():
             raise ValueError(f"[ERROR] {parent_id} not found in geo predictions.")
 
