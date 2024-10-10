@@ -62,7 +62,10 @@ class Runner:
                 "[ERROR] ``patch_df`` must be a path to a CSV/TSV/etc or geojson file, a pandas DataFrame or a geopandas GeoDataFrame."
             )
 
-        if isinstance(parent_df, pd.DataFrame):
+        if parent_df is None:
+            self.parent_df = pd.DataFrame()  # empty dataframe
+
+        elif isinstance(parent_df, pd.DataFrame):
             self.parent_df = parent_df
 
         elif isinstance(parent_df, (str, pathlib.Path)):
