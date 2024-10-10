@@ -1861,7 +1861,13 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         fig, ax = plt.subplots(figsize=figsize)
         ax.axis("off")
-        ax.imshow(img)
+
+        # check if grayscale
+        if len(img.getbands()) == 1:
+            ax.imshow(img, cmap="gray", vmin=0, vmax=255, zorder=1)
+        else:
+            ax.imshow(img, zorder=1)
+        ax.set_title(parent_id)
 
         _, patch_df = self.convert_images()
 
@@ -1872,7 +1878,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_df = gpd.GeoDataFrame(patch_df, geometry="pixel_geometry")
 
         if column_to_plot:  # plot column values
-            return patch_df[patch_df["parent_id"] == parent_id].plot(
+            patch_df[patch_df["parent_id"] == parent_id].plot(
                 column=column_to_plot,
                 ax=ax,
                 legend=True,
@@ -1880,13 +1886,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 cmap=cmap,
                 vmin=vmin,
                 vmax=vmax,
-                alpha=alpha,  # pass alpha from method argument
+                alpha=alpha,
                 **style_kwargs,
             )
         else:  # plot patches (i.e. bounding boxes)
-            return patch_df[patch_df["parent_id"] == parent_id].boundary.plot(
-                ax=ax, alpha=alpha, **style_kwargs  # pass alpha from method argument
+            patch_df[patch_df["parent_id"] == parent_id].boundary.plot(
+                ax=ax, alpha=alpha, **style_kwargs
             )
+
+        fig.show()
 
     def load_patches(
         self,
