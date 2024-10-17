@@ -859,15 +859,19 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         grid_bb = self.parents[image_id]["grid_bb"]
 
         if isinstance(grid_bb, str):
-            cell1, cell2 = re.findall(r"\(.*?\)", grid_bb)
+            try:
+                cell1, cell2 = re.findall(r"\(.*?\)", grid_bb)
 
-            z1, x1, y1 = literal_eval(cell1)
-            z2, x2, y2 = literal_eval(cell2)
+                z1, x1, y1 = literal_eval(cell1)
+                z2, x2, y2 = literal_eval(cell2)
 
-            cell1 = GridIndex(x1, y1, z1)
-            cell2 = GridIndex(x2, y2, z2)
+                cell1 = GridIndex(x1, y1, z1)
+                cell2 = GridIndex(x2, y2, z2)
 
-            grid_bb = GridBoundingBox(cell1, cell2)
+                grid_bb = GridBoundingBox(cell1, cell2)
+
+            except:
+                raise ValueError(f"[ERROR] Unexpected grid_bb format for {image_id}.")
 
         if isinstance(grid_bb, GridBoundingBox):
             polygon = get_polygon_from_grid_bb(grid_bb)
