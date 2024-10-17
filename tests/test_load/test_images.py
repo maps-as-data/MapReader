@@ -629,6 +629,8 @@ def test_calc_coords_from_grid_bb(sample_dir, image_id):
     maps.add_metadata(
         f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
+    for parent in maps.list_parents():
+        maps.parents[parent].pop("coordinates")  # remove coordinates so we can test
     assert "coordinates" not in maps.parents[image_id]
     maps.add_coords_from_grid_bb()
     assert "coordinates" in maps.parents[image_id]
@@ -650,8 +652,13 @@ def test_calc_coords_from_grid_bb_format_error(sample_dir, image_id, capfd):
     maps.add_metadata(
         f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
+    for parent in maps.list_parents():
+        maps.parents[parent].pop("coordinates")  # remove coordinates so we can test
     assert "coordinates" not in maps.parents[image_id]
-    maps.parents[image_id]["grid_bb"] = 123  # wrong format
+    maps.parents[image_id]["grid_bb"] = 123  # change to some other format/string
+    with pytest.raises(ValueError, match="Unexpected grid_bb"):
+        maps.add_coords_from_grid_bb()
+    maps.parents[image_id]["grid_bb"] = "17,0,0"  # change to some other format/string
     with pytest.raises(ValueError, match="Unexpected grid_bb"):
         maps.add_coords_from_grid_bb()
 
@@ -717,7 +724,7 @@ def test_add_parent_polygons(init_maps):
 
 def test_add_parent_polygons_errors(sample_dir, image_id):
     maps = MapImages(f"{sample_dir}/{image_id}")
-    with pytest.raises(ValueError, match="No georeferencing information"):
+    with pytest.raises(ValueError, match="No coordinate information found"):
         maps.add_parent_polygons()
 
 
@@ -779,11 +786,16 @@ def test_save_to_geojson_error(sample_dir, image_id, tmp_path, capfd):
     maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
     with pytest.raises(ValueError, match="No patches"):
         maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
-    maps.patchify_all(patch_size=3, path_save=tmp_path)
     # remove coordinates
     for parent in maps.list_parents():
-        maps.parents[parent].pop("geometry")
-        maps.parents[parent].pop("coordinates")
+        maps.parents[parent].pop("geometry")  # remove geometry
+        maps.parents[parent].pop(
+            "coordinates"
+        )  # remove coordinates (for add_parent_polygons)
+        maps.parents[parent].pop(
+            "grid_bb"
+        )  # remove grid_bb (for add_coords_from_grid_bb)
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
     maps.check_georeferencing()
     assert not maps.georeferenced
     with pytest.raises(ValueError, match="No geographic information"):
