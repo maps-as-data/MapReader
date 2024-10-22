@@ -75,3 +75,68 @@ jobs:
       - name: Run unittests
         run: |
           python -m pytest test_text_spotting
+
+  all_tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: [3.9, 3.12]
+      fail-fast: false
+    env:
+      # point datasets to ~/.torch so it's cached by CI
+      DETECTRON2_DATASETS: ~/.torch/datasets
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Update pip
+        run: |
+          python -m ensurepip
+          python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install wheel ninja opencv-python-headless onnx pytest-xdist
+          python -m pip install numpy==1.26.4
+          python -m pip install torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
+          # install from github to get latest; install iopath first since fvcore depends on it
+          python -m pip install -U 'git+https://github.com/facebookresearch/iopath'
+          python -m pip install -U 'git+https://github.com/facebookresearch/fvcore'
+          wget https://raw.githubusercontent.com/pytorch/pytorch/master/torch/utils/collect_env.py
+          python collect_env.py
+
+      - name: Build and install
+        run: |
+          python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
+          python -m detectron2.utils.collect_env
+          python -m pip install ".[dev]"
+
+      - name: Install DPText-DETR
+        run: |
+          git clone https://github.com/maps-as-data/DPText-DETR.git
+          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
+          wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
+
+      - name: Install DeepSolo
+        run: |
+          git clone https://github.com/maps-as-data/DeepSolo.git
+          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' --force-reinstall --no-deps # Install DeepSolo
+          wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
+
+      - name: Install MapTextPipeline
+        run: |
+          git clone https://github.com/maps-as-data/MapTextPipeline.git
+          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' --force-reinstall --no-deps # Install MapTextPipeline
+          wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
+
+      - name: Run unittests
+        run: |
+          python -m pytest test_text_spotting
