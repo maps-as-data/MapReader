@@ -7,6 +7,7 @@ import pickle
 import geopandas as gpd
 import pandas as pd
 import pytest
+from deepsolo.config import get_cfg
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
 
@@ -68,6 +69,11 @@ def runner_run_all(init_runner, mock_response):
     runner = init_runner
     _ = runner.run_all()
     return runner
+
+
+def test_get_cfg():
+    cfg = get_cfg()
+    assert "TEMPERATURE" in cfg["MODEL"]["TRANSFORMER"].keys()
 
 
 def test_deepsolo_init(init_dataframes):

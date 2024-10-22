@@ -73,8 +73,8 @@ def runner_run_all(init_runner, mock_response):
 
 def test_get_cfg():
     cfg = get_cfg()
-    print(cfg, flush=True)
-    assert cfg["MODEL"]["TRANSFORMER"].get("TEMPERATURE")
+    assert "TEMPERATURE" in cfg["MODEL"]["TRANSFORMER"].keys()
+    assert "FROZEN" in cfg["MODEL"]["TRANSFORMER"].keys()
 
 
 def test_maptext_init(init_dataframes):

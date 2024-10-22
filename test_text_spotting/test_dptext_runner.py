@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
+from dptext_detr.config import get_cfg
 
 from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages
@@ -68,6 +69,12 @@ def runner_run_all(init_runner, mock_response):
     runner = init_runner
     _ = runner.run_all()
     return runner
+
+
+def test_get_cfg():
+    cfg = get_cfg()
+    assert "USE_POLYGON" in cfg["MODEL"]["TRANSFORMER"].keys()
+    assert "DET_ONLY" in cfg["TEST"].keys()
 
 
 def test_dptext_init(init_dataframes):
