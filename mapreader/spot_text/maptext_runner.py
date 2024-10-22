@@ -19,7 +19,6 @@ import geopandas as gpd
 import pandas as pd
 import torch
 from maptextpipeline.config import get_cfg
-from maptextpipeline.utils.vitae_predictor import ViTAEPredictor
 
 from .rec_runner_base import RecRunner
 
@@ -368,6 +367,8 @@ class MapTextRunner(RecRunner):
 
         # setup the predictor
         if "vitae" in cfg.MODEL.BACKBONE.NAME.lower():
+            from maptextpipeline.utils.vitae_predictor import ViTAEPredictor
+
             self.predictor = ViTAEPredictor(cfg)
         self.predictor = DefaultPredictor(cfg)
 
