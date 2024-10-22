@@ -4,7 +4,6 @@ import os
 import pathlib
 import pickle
 
-import adet
 import geopandas as gpd
 import pandas as pd
 import pytest
@@ -14,13 +13,11 @@ from detectron2.structures.instances import Instances
 from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
 
-print(adet.__version__)
-
 # use cloned DeepSolo path if running in github actions
-ADET_PATH = (
+DEEPSOLO_PATH = (
     pathlib.Path("./DeepSolo/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
+    else pathlib.Path(os.getenv("DEEPSOLO_PATH")).resolve()
 )
 
 
@@ -61,7 +58,7 @@ def init_runner(init_dataframes):
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     return runner
 
@@ -78,7 +75,7 @@ def test_deepsolo_init(init_dataframes):
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -93,7 +90,7 @@ def test_deepsolo_init_str(init_dataframes, tmp_path):
     runner = DeepSoloRunner(
         f"{tmp_path}/patch_df.csv",
         parent_df=f"{tmp_path}/parent_df.csv",
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -108,7 +105,7 @@ def test_deepsolo_init_pathlib(init_dataframes, tmp_path):
     runner = DeepSoloRunner(
         pathlib.Path(f"{tmp_path}/patch_df.csv"),
         parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -124,7 +121,7 @@ def test_deepsolo_init_tsv(init_dataframes, tmp_path):
         f"{tmp_path}/patch_df.tsv",
         parent_df=f"{tmp_path}/parent_df.tsv",
         delimiter="\t",
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -188,7 +185,7 @@ def test_deepsolo_deduplicate(sample_dir, tmp_path, mock_response):
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     _ = runner.run_all()
     out = runner.convert_to_parent_pixel_bounds(deduplicate=False)

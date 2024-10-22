@@ -4,7 +4,6 @@ import os
 import pathlib
 import pickle
 
-import adet
 import geopandas as gpd
 import pandas as pd
 import pytest
@@ -14,13 +13,11 @@ from detectron2.structures.instances import Instances
 from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages
 
-print(adet.__version__)
-
 # use cloned DPText-DETR path if running in github actions
-ADET_PATH = (
+DPTEXT_DETR_PATH = (
     pathlib.Path("./DPText-DETR/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
+    else pathlib.Path(os.getenv("DPTEXT_DETR_PATH")).resolve()
 )
 
 
@@ -61,7 +58,7 @@ def init_runner(init_dataframes):
     runner = DPTextDETRRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     return runner
 
@@ -78,7 +75,7 @@ def test_dptext_init(init_dataframes):
     runner = DPTextDETRRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     assert isinstance(runner, DPTextDETRRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -93,7 +90,7 @@ def test_dptext_init_str(init_dataframes, tmp_path):
     runner = DPTextDETRRunner(
         f"{tmp_path}/patch_df.csv",
         parent_df=f"{tmp_path}/parent_df.csv",
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     assert isinstance(runner, DPTextDETRRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -108,7 +105,7 @@ def test_dptext_init_pathlib(init_dataframes, tmp_path):
     runner = DPTextDETRRunner(
         pathlib.Path(f"{tmp_path}/patch_df.csv"),
         parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     assert isinstance(runner, DPTextDETRRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -124,7 +121,7 @@ def test_dptext_init_tsv(init_dataframes, tmp_path):
         f"{tmp_path}/patch_df.tsv",
         parent_df=f"{tmp_path}/parent_df.tsv",
         delimiter="\t",
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     assert isinstance(runner, DPTextDETRRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -184,7 +181,7 @@ def test_dptext_deduplicate(sample_dir, tmp_path, mock_response):
     runner = DPTextDETRRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
+        cfg_file=f"{DPTEXT_DETR_PATH}/configs/DPText_DETR/ArT/R_50_poly.yaml",
     )
     _ = runner.run_all()
     out = runner.convert_to_parent_pixel_bounds(deduplicate=False)
