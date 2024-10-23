@@ -24,7 +24,7 @@ MAPTEXTPIPELINE_PATH = (
 
 @pytest.fixture
 def sample_dir():
-    return pathlib.Path(__file__).resolve().parent.parent / "tests" / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
