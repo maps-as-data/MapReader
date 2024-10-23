@@ -8,7 +8,7 @@ jobs:
   all_tests:
     strategy:
       matrix:
-        os: [ubuntu-latest] #, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: [3.9, 3.11]
       fail-fast: false
     env:
@@ -37,8 +37,6 @@ jobs:
           python -m pip install torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
           python -m pip install ".[dev]"
           python -m pip install pytest-cov
-          wget https://raw.githubusercontent.com/pytorch/pytorch/master/torch/utils/collect_env.py
-          python collect_env.py
 
       - name: Build and install detectron2
         run: |
@@ -48,20 +46,24 @@ jobs:
       - name: Install DPText-DETR
         run: |
           git clone https://github.com/maps-as-data/DPText-DETR.git
-          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git' # Install DPText-DETR
-          wget https://huggingface.co/rwood-97/DPText_DETR_ArT_R_50_poly/resolve/main/art_final.pth
+          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git'
 
       - name: Install DeepSolo
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
-          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git' --force-reinstall --no-deps # Install DeepSolo
-          wget https://huggingface.co/rwood-97/DeepSolo_ic15_res50/resolve/main/ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
+          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git'
 
       - name: Install MapTextPipeline
         run: |
           git clone https://github.com/maps-as-data/MapTextPipeline.git
-          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git' --force-reinstall --no-deps # Install MapTextPipeline
-          wget https://huggingface.co/rwood-97/MapTextPipeline_rumsey/resolve/main/rumsey-finetune.pth
+          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git'
+
+      - name: Hugging Face CLI
+        run: |
+          pip install -U "huggingface_hub[cli]"
+          huggingface-cli download rwood-97/DPText_DETR_ArT_R_50_poly art_final.pth
+          huggingface-cli download rwood-97/DeepSolo_ic15_res50 ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth
+          huggingface-cli download rwood-97/MapTextPipeline_rumsey rumsey-finetune.pth
 
       - name: Run unittests
         run: |
