@@ -39,20 +39,24 @@ jobs:
         run: |
           python -m pip install wheel
           python -m pip install numpy==1.26.4 torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
-          python -m pip install ".[dev, text]" # all dependencies
+          python -m pip install ".[dev]" # not text ones as windows install fails
           python -m pip install pytest-cov
+          python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
-      - name: Clone DPText-DETR
+      - name: Clone + install DPText-DETR
         run: |
           git clone https://github.com/maps-as-data/DPText-DETR.git
+          python -m pip install ./DPText-DETR
 
-      - name: Clone DeepSolo
+      - name: Clone + install DeepSolo
         run: |
           git clone https://github.com/maps-as-data/DeepSolo.git
+          python -m pip install ./DeepSolo
 
-      - name: Clone MapTextPipeline
+      - name: Clone + install MapTextPipeline
         run: |
           git clone https://github.com/maps-as-data/MapTextPipeline.git
+          python -m pip install ./MapTextPipeline
 
       - name: Hugging Face CLI
         run: |
