@@ -25,15 +25,8 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Get ninja for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          winget install --id=Ninja-build.Ninja  -e
-
-      - name: Get ninja for Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          apt-get install ninja-build
+      - name: Install ninja-build tool
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Update pip
         run: |
