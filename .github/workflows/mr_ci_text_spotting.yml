@@ -25,6 +25,11 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Check LongPathsEnabled
+        if: matrix.os == 'windows-latest'
+        run: |
+          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+
       - name: Update pip
         run: |
           python -m ensurepip
