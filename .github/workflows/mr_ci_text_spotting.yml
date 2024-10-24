@@ -39,7 +39,7 @@ jobs:
         run: |
           python -m pip install wheel ninja
           python -m pip install numpy==1.26.4 torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
-          python -m pip install ".[dev, text]" # all dependencies
+          DCMAKE_OBJECT_PATH_MAX=1024 python -m pip install ".[dev, text]" # all dependencies
           python -m pip install pytest-cov
 
       - name: Clone DPText-DETR
