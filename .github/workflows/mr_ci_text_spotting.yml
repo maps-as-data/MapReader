@@ -25,10 +25,15 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Check LongPathsEnabled
+      - name: Get ninja for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+          winget install --id=Ninja-build.Ninja  -e
+
+      - name: Get ninja for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          apt-get install ninja-build
 
       - name: Update pip
         run: |
@@ -37,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install wheel ninja
+          python -m pip install wheel
           python -m pip install numpy==1.26.4 torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
           DCMAKE_OBJECT_PATH_MAX=1024 python -m pip install ".[dev, text]" # all dependencies
           python -m pip install pytest-cov
