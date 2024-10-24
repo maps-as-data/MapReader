@@ -1,7 +1,7 @@
 Spot text
 =========
 
-MapReader implements three new frameworks for spotting text on maps:
+MapReader implements three frameworks for spotting text on maps:
 
 - ``DPTextDETRRunner`` - This is used to detect text on maps using `DPTextDETR <https://github.com/ymy-k/DPText-DETR/tree/main>`__ and outputs bounding boxes and scores.
 - ``DeepSoloRunner`` - This is used to detect and recognize text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
@@ -9,80 +9,18 @@ MapReader implements three new frameworks for spotting text on maps:
 
 We recommend using the ``MapTextPipeline`` for most use cases as it has been used to train a model on a sample of David Rumsey maps and so should work best for map text spotting.
 
-Install dependencies
---------------------
+Installing dependencies
+-----------------------
 
-To run text spotting with MapReader, you will need to install the required dependencies. These are listed below:
+To run text spotting with MapReader, you will need to install the required dependencies.
+Refer to our :doc:`installation instructions </getting-started/installation-instructions/index>` for guidance on how to install these.
 
-.. note:: We have our own forks of the ``DPTextDETRRunner``, ``DeepSolo`` and ``MapTextPipeline`` repos to enable them to work on CPU. Please use our forks but remember to cite the original authors in your work!
+Assuming your installation is successful, you will have installed the following:
 
-Detectron2
-~~~~~~~~~~~
-
-Detectron2 is a popular object detection library built by Facebook AI Research.
-The main repo is available `here <https://github.com/facebookresearch/detectron2>`__.
-
-To install, run the following commands in your terminal:
-
-.. code:: bash
-
-    git clone https://github.com/facebookresearch/detectron2.git
-    cd detectron2
-    pip install .
-
-
-.. admonition:: Detectron2 issues for windows users
-    :class: dropdown
-
-    If you are on a windows machine and are having trouble installing Detectron2, you can try the following:
-    - Install `Visual Studio Build Tools <https://visualstudio.microsoft.com/downloads/?q=build+tools>`__.
-    - Follow instructions `here <https://stackoverflow.com/questions/64261546/how-to-solve-error-microsoft-visual-c-14-0-or-greater-is-required-when-inst>`__ to install the required packages. (The format might be different in newer versions of Visual Studio Build Tools, so you might need to look up the specific package names.)
-
-    Once this is done, retry installing Detectron2.
-
-You should then **pick one** of the following to install:
-
-.. note:: Since the DPText-DETR, DeepSolo and MapTextPipeline frameworks are built on top of `AdelaiDet <https://github.com/aim-uofa/AdelaiDet>`__, you won't be able to install them at the same. To get around this, you can set up three different conda environments, one for each framework. This will allow you to switch between them as needed.
-
-DPTextDETR
-~~~~~~~~~~~
-
-Our fork for DPText-DETR is available `here <https://github.com/rwood-97/DPText-DETR>`__.
-
-To install, run the following commands in your terminal:
-
-.. code:: bash
-
-    git clone https://github.com/rwood-97/DPText-DETR.git
-    cd DPText-DETR
-    pip install .
-
-DeepSolo
-~~~~~~~~
-
-Our fork for DeepSolo is available `here <https://github.com/rwood-97/DeepSolo>`__
-
-To install, run the following commands in your terminal:
-
-.. code:: bash
-
-    git clone https://github.com/rwood-97/DeepSolo.git
-    cd DeepSolo
-    pip install .
-
-MapTextPipeline
-~~~~~~~~~~~~~~~
-
-Our fork for MapTextPipeline is available `here <https://github.com/rwood-97/MapTextPipeline>`__
-
-To install, run the following commands in your terminal:
-
-.. code:: bash
-
-    git clone https://github.com/rwood-97/MapTextPipeline.git
-    cd MapTextPipeline
-    pip install .
-
+- detectron2 - This is a popular object detection library built by Facebook AI Research. The main repo is available `here <https://github.com/facebookresearch/detectron2>`__.
+- DPTextDETR - Our fork for DPText-DETR is available `here <https://github.com/rwood-97/DPText-DETR>`__.
+- DeepSolo - Our fork for DeepSolo is available `here <https://github.com/rwood-97/DeepSolo>`__
+- MapTextPipeline - Our fork for MapTextPipeline is available `here <https://github.com/rwood-97/MapTextPipeline>`__
 
 Advice for patch size
 ---------------------

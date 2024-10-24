@@ -4,29 +4,27 @@ import os
 import pathlib
 import pickle
 
-import adet
 import geopandas as gpd
 import pandas as pd
 import pytest
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
+from maptextpipeline.config import get_cfg
 
 from mapreader import MapTextRunner
 from mapreader.load import MapImages
 
-print(adet.__version__)
-
 # use cloned MapTextPipeline path if running in github actions
-ADET_PATH = (
+MAPTEXTPIPELINE_PATH = (
     pathlib.Path("./MapTextPipeline/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
+    else pathlib.Path(os.getenv("MAPTEXTPIPELINE_PATH")).resolve()
 )
 
 
 @pytest.fixture
 def sample_dir():
-    return pathlib.Path(__file__).resolve().parent.parent / "tests" / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -61,7 +59,7 @@ def init_runner(init_dataframes):
     runner = MapTextRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     return runner
 
@@ -73,12 +71,18 @@ def runner_run_all(init_runner, mock_response):
     return runner
 
 
+def test_get_cfg():
+    cfg = get_cfg()
+    assert "TEMPERATURE" in cfg["MODEL"]["TRANSFORMER"].keys()
+    assert "FROZEN" in cfg["MODEL"]["TRANSFORMER"].keys()
+
+
 def test_maptext_init(init_dataframes):
     parent_df, patch_df = init_dataframes
     runner = MapTextRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -93,7 +97,7 @@ def test_maptext_init_str(init_dataframes, tmp_path):
     runner = MapTextRunner(
         f"{tmp_path}/patch_df.csv",
         parent_df=f"{tmp_path}/parent_df.csv",
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -108,7 +112,7 @@ def test_maptext_init_pathlib(init_dataframes, tmp_path):
     runner = MapTextRunner(
         pathlib.Path(f"{tmp_path}/patch_df.csv"),
         parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -124,7 +128,7 @@ def test_maptext_init_tsv(init_dataframes, tmp_path):
         f"{tmp_path}/patch_df.tsv",
         parent_df=f"{tmp_path}/parent_df.tsv",
         delimiter="\t",
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -188,7 +192,7 @@ def test_maptext_deduplicate(sample_dir, tmp_path, mock_response):
     runner = MapTextRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/ViTAEv2_S/rumsey/final_rumsey.yaml",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     _ = runner.run_all()
     out = runner.convert_to_parent_pixel_bounds(deduplicate=False)

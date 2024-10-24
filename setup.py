@@ -38,8 +38,8 @@ setuptools.setup(
         "nest-asyncio>=1.5.1,<2.0.0",
         "scikit-image>=0.18.3",
         "scikit-learn>=1.0.1,<2.0.0",
-        "torch>=1.10.0",
-        "torchvision>=0.11.1,<0.17.3",
+        "torch>=1.10.0,<=2.2.2",
+        "torchvision>=0.11.1,<=0.17.2",
         "jupyter>=1.0.0,<2.0.0",
         "ipykernel>=6.5.1,<7.0.0",
         "ipywidgets>=8.0.0,<9.0.0",
@@ -69,6 +69,12 @@ setuptools.setup(
             "transformers<5.0.0",
             "black>=23.7.0,<25.0.0",
             "flake8>=6.0.0,<8.0.0",
+        ],
+        "text": [
+            "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
+            "DPText-DETR @ git+https://github.com/maps-as-data/DPText-DETR.git",
+            "DeepSolo @ git+https://github.com/maps-as-data/DeepSolo.git",
+            "MapTextPipeline @ git+https://github.com/maps-as-data/MapTextPipeline.git",
         ],
     },
     classifiers=[

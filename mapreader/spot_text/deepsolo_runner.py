@@ -4,27 +4,21 @@ import pathlib
 import pickle
 
 try:
-    import adet
+    from detectron2.engine import DefaultPredictor
+except ImportError:
+    raise ImportError("[ERROR] Please install Detectron2")
+
+try:
+    import deepsolo  # noqa
 except ImportError:
     raise ImportError(
-        "[ERROR] Please install DeepSolo from the following link: https://github.com/rwood-97/DeepSolo"
+        "[ERROR] Please install DeepSolo from the following link: https://github.com/maps-as-data/DeepSolo"
     )
 
 import geopandas as gpd
 import pandas as pd
 import torch
-from adet.config import get_cfg
-
-try:
-    from detectron2.engine import DefaultPredictor
-except ImportError:
-    raise ImportError("[ERROR] Please install Detectron2")
-
-# first assert we are using the deep solo version of adet
-if adet.__version__ != "0.2.0-deepsolo":
-    raise ImportError(
-        "[ERROR] Please install DeepSolo from the following link: https://github.com/rwood-97/DeepSolo"
-    )
+from deepsolo.config import get_cfg
 
 from .rec_runner_base import RecRunner
 

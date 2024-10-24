@@ -4,29 +4,21 @@ import pathlib
 import pickle
 
 try:
-    import adet
+    from detectron2.engine import DefaultPredictor
+except ImportError:
+    raise ImportError("[ERROR] Please install Detectron2")
+
+try:
+    import maptextpipeline  # noqa
 except ImportError:
     raise ImportError(
-        "[ERROR] Please install DeepSolo from the following link: https://github.com/rwood-97/DeepSolo"
+        "[ERROR] Please install MapTextPipeline from the following link: https://github.com/maps-as-data/MapTextPipeline"
     )
 
 import geopandas as gpd
 import pandas as pd
 import torch
-from adet.config import get_cfg
-
-try:
-    from detectron2.engine import DefaultPredictor
-except ImportError:
-    raise ImportError("[ERROR] Please install Detectron2")
-
-from adet.utils.vitae_predictor import ViTAEPredictor
-
-# first assert we are using the deep solo version of adet
-if adet.__version__ != "0.2.0-maptextpipeline":
-    raise ImportError(
-        "[ERROR] Please install MapTextPipeline from the following link: https://github.com/rwood-97/MapTextPipeline"
-    )
+from maptextpipeline.config import get_cfg
 
 from .rec_runner_base import RecRunner
 
@@ -375,6 +367,8 @@ class MapTextRunner(RecRunner):
 
         # setup the predictor
         if "vitae" in cfg.MODEL.BACKBONE.NAME.lower():
+            from maptextpipeline.utils.vitae_predictor import ViTAEPredictor
+
             self.predictor = ViTAEPredictor(cfg)
         self.predictor = DefaultPredictor(cfg)
 

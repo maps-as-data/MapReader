@@ -3,30 +3,23 @@ from __future__ import annotations
 import pathlib
 
 try:
-    import adet
+    from detectron2.engine import DefaultPredictor
+except ImportError:
+    raise ImportError("[ERROR] Please install Detectron2")
+
+try:
+    import dptext_detr  # noqa
 except ImportError:
     raise ImportError(
-        "[ERROR] Please install DPText-DETR from the following link: https://github.com/rwood-97/DPText-DETR"
+        "[ERROR] Please install DPText-DETR from the following link: https://github.com/maps-as-data/DPText-DETR"
     )
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import torch
-from adet.config import get_cfg
-
-try:
-    from detectron2.engine import DefaultPredictor
-except ImportError:
-    raise ImportError("[ERROR] Please install Detectron2")
-
+from dptext_detr.config import get_cfg
 from shapely import MultiPolygon, Polygon
-
-# first assert we are using the dptext detr version of adet
-if adet.__version__ != "0.2.0-dptext-detr":
-    raise ImportError(
-        "[ERROR] Please install DPText-DETR from the following link: https://github.com/rwood-97/DPText-DETR"
-    )
 
 from .runner_base import Runner
 
