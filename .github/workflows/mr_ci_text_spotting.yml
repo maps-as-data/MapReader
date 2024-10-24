@@ -27,6 +27,8 @@ jobs:
 
       - name: Install ninja-build tool
         uses: seanmiddleditch/gha-setup-ninja@v5
+        with:
+          version: 1.12.1
 
       - name: Update pip
         run: |
