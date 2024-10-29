@@ -15,6 +15,10 @@ The following table shows which versions of MapReader are compatible with which 
 
 ## Pre-release
 
+_Add new changes here_
+
+## [v1.5.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.0) (2024-10-29)
+
 ### Added
 
 - Ability to install all three text-spotting frameworks at same time ([#514](https://github.com/maps-as-data/MapReader/pull/514))
