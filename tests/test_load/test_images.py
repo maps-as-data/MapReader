@@ -569,6 +569,65 @@ def test_patchify_pixels_overlap(sample_dir, image_id, tmp_path):
 # --- test other functions ---
 
 
+def test_check_georeferencing(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.check_georeferencing()
+    assert maps.georeferenced is False  # no metadata yet
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing via coordinates col
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+    maps.patchify_all(patch_size=3, path_save=f"{tmp_path}/patches_3_pixel")
+    parent_df, patch_df = maps.convert_images()  # save these for loading later
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+    )
+    assert "geometry" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "crs", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing from grid_bb
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing from grid_bb
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "published_date"],
+    )
+    maps.load_patches(patch_paths=f"{tmp_path}/patches_3_pixel/*png")
+    assert len(maps.patches) == 9
+    assert maps.georeferenced is False  # still no georeferencing info
+    maps.add_metadata(patch_df, tree_level="patch")
+    assert maps.georeferenced is True  # now have georeferencing info
+    assert "coordinates" in maps.parents["cropped_74488689.png"].keys()
+    assert "geometry" in maps.parents["cropped_74488689.png"].keys()
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+    )
+    assert "geometry" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+
+
 def test_load_patches(init_maps, sample_dir, tmp_path):
     maps, _, _ = init_maps
 
