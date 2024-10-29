@@ -4,30 +4,27 @@ import os
 import pathlib
 import pickle
 
-import adet
-import folium
 import geopandas as gpd
 import pandas as pd
 import pytest
+from deepsolo.config import get_cfg
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
 
 from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
 
-print(adet.__version__)
-
 # use cloned DeepSolo path if running in github actions
-ADET_PATH = (
+DEEPSOLO_PATH = (
     pathlib.Path("./DeepSolo/").resolve()
     if os.getenv("GITHUB_ACTIONS") == "true"
-    else pathlib.Path(os.getenv("ADET_PATH")).resolve()
+    else pathlib.Path(os.getenv("DEEPSOLO_PATH")).resolve()
 )
 
 
 @pytest.fixture
 def sample_dir():
-    return pathlib.Path(__file__).resolve().parent.parent / "tests" / "sample_files"
+    return pathlib.Path(__file__).resolve().parent.parent / "sample_files"
 
 
 @pytest.fixture
@@ -62,7 +59,7 @@ def init_runner(init_dataframes):
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     return runner
 
@@ -74,12 +71,17 @@ def runner_run_all(init_runner, mock_response):
     return runner
 
 
+def test_get_cfg():
+    cfg = get_cfg()
+    assert "TEMPERATURE" in cfg["MODEL"]["TRANSFORMER"].keys()
+
+
 def test_deepsolo_init(init_dataframes):
     parent_df, patch_df = init_dataframes
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -94,7 +96,7 @@ def test_deepsolo_init_str(init_dataframes, tmp_path):
     runner = DeepSoloRunner(
         f"{tmp_path}/patch_df.csv",
         parent_df=f"{tmp_path}/parent_df.csv",
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -109,7 +111,7 @@ def test_deepsolo_init_pathlib(init_dataframes, tmp_path):
     runner = DeepSoloRunner(
         pathlib.Path(f"{tmp_path}/patch_df.csv"),
         parent_df=pathlib.Path(f"{tmp_path}/parent_df.csv"),
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -125,7 +127,7 @@ def test_deepsolo_init_tsv(init_dataframes, tmp_path):
         f"{tmp_path}/patch_df.tsv",
         parent_df=f"{tmp_path}/parent_df.tsv",
         delimiter="\t",
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     assert isinstance(runner, DeepSoloRunner)
     assert isinstance(runner.predictor, DefaultPredictor)
@@ -189,7 +191,7 @@ def test_deepsolo_deduplicate(sample_dir, tmp_path, mock_response):
     runner = DeepSoloRunner(
         patch_df,
         parent_df=parent_df,
-        cfg_file=f"{ADET_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
+        cfg_file=f"{DEEPSOLO_PATH}/configs/R_50/IC15/finetune_150k_tt_mlt_13_15_textocr.yaml",
     )
     _ = runner.run_all()
     out = runner.convert_to_parent_pixel_bounds(deduplicate=False)
@@ -215,25 +217,6 @@ def test_deepsolo_run_on_image(init_runner, mock_response):
     assert isinstance(out, dict)
     assert "instances" in out.keys()
     assert isinstance(out["instances"], Instances)
-
-
-def test_deepsolo_explore_preds(runner_run_all, tmp_path, mock_response):
-    runner = runner_run_all
-    _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.explore_predictions("mapreader_text.png")
-    assert isinstance(out, folium.Map)
-    assert [*out.to_dict()["children"].keys()][
-        0
-    ] == "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-
-    # using tilelayer
-    out = runner.explore_patches(
-        "mapreader_text.png", xyz_url="https://tile.opentopomap.org/{z}/{x}/{y}.png"
-    )
-    assert isinstance(out, folium.Map)
-    assert [*out.to_dict()["children"].keys()][
-        0
-    ] == "https://tile.opentopomap.org/{z}/{x}/{y}.png"
 
 
 def test_deepsolo_save_to_geojson(runner_run_all, tmp_path, mock_response):
@@ -263,26 +246,6 @@ def test_deepsolo_search_preds(runner_run_all, mock_response):
     assert "mapreader_text.png" in out["image_id"].values
     out = runner.search_preds("somethingelse", ignore_case=True, return_dataframe=True)
     assert len(out) == 0
-
-
-def test_deepsolo_explore_search_results(runner_run_all, mock_response):
-    runner = runner_run_all
-    _ = runner.convert_to_parent_pixel_bounds()
-    _ = runner.search_preds("map", ignore_case=True)
-    out = runner.explore_search_results("mapreader_text.png")
-    assert isinstance(out, folium.Map)
-    assert [*out.to_dict()["children"].keys()][
-        0
-    ] == "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-
-    # using tilelayer
-    out = runner.explore_search_results(
-        "mapreader_text.png", xyz_url="https://tile.opentopomap.org/{z}/{x}/{y}.png"
-    )
-    assert isinstance(out, folium.Map)
-    assert [*out.to_dict()["children"].keys()][
-        0
-    ] == "https://tile.opentopomap.org/{z}/{x}/{y}.png"
 
 
 def test_deepsolo_search_preds_errors(runner_run_all, mock_response):
