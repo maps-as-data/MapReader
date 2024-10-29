@@ -114,7 +114,7 @@ class MapImages:
             for parent_id in self.list_parents()
         ):
             self.add_parent_polygons(tqdm_kwargs={"disable": True})
-            self.add_patch_coords(tqdm)
+            self.add_patch_coords(tqdm_kwargs={"disable": True})
             self.add_patch_polygons(tqdm_kwargs={"disable": True})
             self.georeferenced = True
         else:

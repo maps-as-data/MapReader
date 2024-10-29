@@ -592,6 +592,30 @@ def test_load_patches(init_maps, sample_dir, tmp_path):
     assert not maps.georeferenced
 
 
+def test_infer_coords_from_patches(sample_dir, tmp_path):
+    # create tiff patches
+    geotiff_path = f"{sample_dir}/cropped_geo.tif"
+    tiff_maps = MapImages(geotiff_path)
+    tiff_maps.add_geo_info()
+    assert tiff_maps.georeferenced
+    tiff_maps.patchify_all(patch_size=3, path_save=f"{tmp_path}_tiffs")
+    parent_df, patch_df = tiff_maps.convert_images()
+
+    maps = MapImages()  # create new instance
+    maps.load_patches(f"{tmp_path}_tiffs", parent_paths=geotiff_path, add_geo_info=True)
+    maps.check_georeferencing()
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_geo.tif#.png"].keys()
+    )  # need coordinates in patches
+    assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    assert maps.georeferenced
+    maps.parents["cropped_geo.tif"].pop("coordinates")
+    maps.infer_parent_coords_from_patches()
+    assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    maps.check_georeferencing()
+    assert maps.georeferenced
+
+
 def test_load_parents(init_maps, image_id, sample_dir):
     maps, _, _ = init_maps
 
