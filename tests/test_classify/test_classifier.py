@@ -327,7 +327,38 @@ def test_scheduler_errors(load_classifier):
         classifier.initialize_scheduler("a fake scheduler type")
 
 
-# dont test train here due to fake file paths
+# test train
+
+
+def test_fake_phase_error(load_classifier):
+    classifier = load_classifier
+    with pytest.raises(KeyError, match="cannot be found in dataloaders"):
+        classifier.train("fake")
+
+
+def test_missing_optimizer_error(load_classifier):
+    classifier = load_classifier
+    classifier.optimizer = None
+    with pytest.raises(ValueError, match="optimizer should be defined "):
+        classifier.train()
+
+
+def test_missing_scheduler_error(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer()
+    classifier.scheduler = None
+    with pytest.raises(ValueError, match="scheduler should be defined "):
+        classifier.train()
+
+
+def test_missing_loss_fn_error(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer()
+    classifier.initialize_scheduler()
+    classifier.loss_fn = None
+    with pytest.raises(ValueError, match="loss function should be defined "):
+        classifier.train()
+
 
 # test inference w/ various models and model-types
 
