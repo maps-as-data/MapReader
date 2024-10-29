@@ -4,6 +4,7 @@ import os
 import pathlib
 from random import randint
 
+import folium
 import geopandas as gpd
 import pandas as pd
 import pytest
@@ -968,6 +969,36 @@ def test_show_sample_grayscale(sample_dir, tmp_path, monkeypatch):
     monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
     maps.show_sample(num_samples=1, tree_level="parent")
     maps.show_sample(num_samples=1, tree_level="patch")
+
+
+def test_explore_patches(init_maps):
+    maps, parent_list, _ = init_maps
+    out = maps.explore_patches(parent_list[0])
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+    # using tilelayer
+    out = maps.explore_patches(
+        parent_list[0], xyz_url="https://tile.opentopomap.org/{z}/{x}/{y}.png"
+    )
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.opentopomap.org/{z}/{x}/{y}.png"
+
+
+def test_explore_patches_errors(init_maps):
+    maps, parent_list, _ = init_maps
+    maps.georeferenced = False  # set to False to test error
+    with pytest.raises(
+        NotImplementedError, match="only works with georeferenced images"
+    ):
+        maps.explore_patches(parent_list[0])
+    maps.check_georeferencing()
+    with pytest.raises(ValueError, match="not found in parent list"):
+        maps.explore_patches("fake_id")
 
 
 def test_load_parents_errors(sample_dir, image_id):

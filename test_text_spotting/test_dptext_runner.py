@@ -5,6 +5,7 @@ import pathlib
 import pickle
 
 import adet
+import folium
 import geopandas as gpd
 import pandas as pd
 import pytest
@@ -210,6 +211,25 @@ def test_dptext_run_on_image(init_runner, mock_response):
     assert isinstance(out, dict)
     assert "instances" in out.keys()
     assert isinstance(out["instances"], Instances)
+
+
+def test_dptext_explore_preds(runner_run_all, tmp_path, mock_response):
+    runner = runner_run_all
+    _ = runner.convert_to_parent_pixel_bounds()
+    out = runner.explore_predictions("mapreader_text.png")
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+    # using tilelayer
+    out = runner.explore_patches(
+        "mapreader_text.png", xyz_url="https://tile.opentopomap.org/{z}/{x}/{y}.png"
+    )
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.opentopomap.org/{z}/{x}/{y}.png"
 
 
 def test_dptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
