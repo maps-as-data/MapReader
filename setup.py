@@ -73,12 +73,6 @@ setuptools.setup(
             "black>=23.7.0,<25.0.0",
             "flake8>=6.0.0,<8.0.0",
         ],
-        "text": [
-            "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
-            "DPText-DETR @ git+https://github.com/maps-as-data/DPText-DETR.git",
-            "DeepSolo @ git+https://github.com/maps-as-data/DeepSolo.git",
-            "MapTextPipeline @ git+https://github.com/maps-as-data/MapTextPipeline.git",
-        ],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
