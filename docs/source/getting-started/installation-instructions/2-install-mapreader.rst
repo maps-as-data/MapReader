@@ -4,8 +4,13 @@ Step 2: Install MapReader
 Method 1: Install from `PyPI <https://pypi.org/project/mapreader/>`_
 --------------------------------------------------------------------
 
-If you want to use the latest stable release of MapReader and do not want/need access to the worked examples or MapReader code, we recommend installing from PyPI.
-This is probably the easiest way to install MapReader.
+Installing MapReader from PyPI is probably the easiest way to install MapReader.
+
+We recommend using this method if:
+
+- You want to use the latest stable release of MapReader.
+- You **only want to use MapReader's classification pipeline** (i.e. you do not need the text spotting functionality).
+- You do not need access to the worked examples or MapReader code.
 
 To install ``mapreader`` without the text spotting dependencies (i.e. just the classification pipeline):
 
@@ -13,19 +18,21 @@ To install ``mapreader`` without the text spotting dependencies (i.e. just the c
 
    pip install mapreader
 
-Or, to install ``mapreader`` with the text spotting dependencies:
-
-.. code-block:: bash
-
-   pip install "mapreader[text]"
-
-.. note:: To install the dev dependencies too use ``pip install "mapreader[dev]"`` or ``pip install "mapreader[text, dev]"``.
+.. note:: To install the dev dependencies too, use ``pip install "mapreader[dev]"``.
 
 Method 2: Install from source
 -----------------------------
 
-If you want to keep up with the latest changes to MapReader, or want/need easy access to the worked examples or MapReader code, we recommend installing from source.
-This method will create a ``MapReader`` directory on your machine which will contain all the MapReader code, docs and worked examples.
+Installing from source is the best way to install MapReader if you want to use the text spotting functionality or access the worked examples.
+
+We recommend using this method if:
+
+- You want to keep up with the latest changes to MapReader.
+- You **want to use the text spotting functionality** in addition to the classification pipeline.
+- You want access to the worked examples.
+- You want access to the MapReader code (e.g. for development purposes).
+
+This method will clone the ``MapReader`` repository onto your machine. This folder will contain all the MapReader code, docs and worked examples.
 
 .. note:: You will need to have `git <https://git-scm.com/>`__ installed to use this method. If you are using conda, this can be done by running ``conda install git``. Otherwise, you should install git by following the instructions on `their website <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
 
@@ -40,16 +47,16 @@ Then, to install ``mapreader`` without the text spotting dependencies:
 .. code-block:: bash
 
    cd MapReader
-   pip install -v -e .
+   pip install .
 
-Or, to install ``mapreader`` with the text spotting dependencies:
+.. note:: To install the dev dependencies too, use ``pip install ".[dev]"``.
+
+Finally, to install the text spotting dependencies, you should run:
 
 .. code-block:: bash
 
    cd MapReader
-   pip install -v -e ".[text]"
-
-.. note:: To install the dev dependencies too use ``pip install -v -e ".[dev]"`` or ``pip install -v -e ".[text, dev]"``.
+   pip install -r text-requirements.txt
 
 ..
    Method 3: Install via conda (**EXPERIMENTAL**)

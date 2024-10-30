@@ -17,6 +17,20 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
+## [v1.5.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.1) (2024-10-30)
+
+## Added
+
+- Added `text-requirement.txt` file to install text spotting dependencies. Users can now install text spotting dependencies using `pip install -r text-requirements.txt` ([#515](https://github.com/maps-as-data/MapReader/pull/515))
+
+## Removed
+
+- Removed `text` extras from `setup.py` ([#515](https://github.com/maps-as-data/MapReader/pull/515))
+
+## Fixed
+
+- Fixes upload to PyPI by removing `text` extras ([#515](https://github.com/maps-as-data/MapReader/pull/515))
+
 ## [v1.5.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.0) (2024-10-29)
 
 ### Added
