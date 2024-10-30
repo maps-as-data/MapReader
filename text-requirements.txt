@@ -1,4 +1,4 @@
-DeepSolo @ git+https://github.com/maps-as-data/DeepSolo.git
 detectron2 @ git+https://github.com/facebookresearch/detectron2.git
+DeepSolo @ git+https://github.com/maps-as-data/DeepSolo.git
 DPText-DETR @ git+https://github.com/maps-as-data/DPText-DETR.git
 MapTextPipeline @ git+https://github.com/maps-as-data/MapTextPipeline.git
