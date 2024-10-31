@@ -1877,7 +1877,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
         if self.georeferenced:
             patch_df = pd.DataFrame(patch_df)  # convert back to pd.DataFrame
-            patch_df.drop(columns=["geometry", "crs"], inplace=True)
+            if len(patch_df):
+                patch_df.drop(columns=["geometry", "crs"], inplace=True)
         patch_df["pixel_geometry"] = patch_df["pixel_bounds"].apply(lambda x: box(*x))
         patch_df = gpd.GeoDataFrame(patch_df, geometry="pixel_geometry")
 
