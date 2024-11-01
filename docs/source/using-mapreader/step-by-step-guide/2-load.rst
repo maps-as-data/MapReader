@@ -332,7 +332,7 @@ To do this use the ``show_patches`` method:
 
 If you maps and patches are georeferenced, you can also use the `explore_patches` method to view your patches on a map.
 
-For example, to view your patches overlayed on an OpenStreetMap.Mapnik layer, use:
+For example, to view your patches overlaid on an OpenStreetMap.Mapnik layer (the default), use:
 
 .. code-block:: python
 

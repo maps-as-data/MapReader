@@ -3,10 +3,10 @@ Infer using a fine-tuned model
 
 You can use any classifier (model) to predict labels on unannotated patches.
 
-Initialize ``ClassifierContainer()``
+Initialize ``ClassifierContainer``
 -------------------------------------
 
-To initialize your ``ClassifierContainer()`` for inference, you will need to define:
+To initialize your ``ClassifierContainer`` for inference, you will need to define:
 
 - ``model`` - The model (classifier) you would like to use.
 - ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_railspace", 1: "railspace"}``). This labels map should be the same as that used when training/fine-tuning the classifier.
@@ -14,7 +14,7 @@ To initialize your ``ClassifierContainer()`` for inference, you will need to def
 
 There are a number of options for the ``model`` argument:
 
-    **1.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.**
+    **1.  To load a locally-saved model, use ``torch.load`` to load your file and then pass this as the ``model`` argument.**
 
         If you have already trained a model using MapReader, your outputs, by default, should be saved in directory called ``models``.
         Within this directory will be ``checkpoint_X.pkl`` and ``model_checkpoint_X.pkl`` files.
@@ -37,10 +37,10 @@ There are a number of options for the ``model`` argument:
         .. admonition:: Advanced usage
             :class: dropdown
 
-            The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer()``.
-            If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer()``.
+            The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer``.
+            If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer``.
 
-            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer()``:
+            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer``:
 
             .. code-block:: python
 
@@ -107,22 +107,22 @@ This can be done by loading a dataframe containing the paths to your patches:
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
 
-You should then add this dataset to your ``ClassifierContainer()`` (``my_classifier``\):
+You should then add this dataset to your ``ClassifierContainer`` (``my_classifier``\):
 
 .. code-block:: python
 
     my_classifier.load_dataset(infer, set_name="infer")
 
-This will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute.
+This will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer``\'s ``dataloaders`` attribute.
 
-By default, the ``load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
+By default, the ``load_dataset`` method will create a dataloader with batch size of 16 and will not use a sampler.
 You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
 See :ref:`this section<sampler>` for more information on samplers.
 
 Infer
 ------
 
-After loading your dataset, you can then simply run the ``inference()`` method to infer the labels on the patches in your dataset:
+After loading your dataset, you can then simply run the ``inference`` method to infer the labels on the patches in your dataset:
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 Save predictions
 ~~~~~~~~~~~~~~~~~
 
-To save your predictions, use the ``save_predictions()`` method.
+To save your predictions, use the ``save_predictions`` method.
 e.g. to save your predictions on the "infer" dataset:
 
 .. code-block:: python
@@ -159,7 +159,7 @@ To do this, you will need to create a new ``MapImages`` object and load in your 
 
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
 
-You can then add your predictions to the metadata using the ``add_metadata()`` method:
+You can then add your predictions to the metadata using the ``add_metadata`` method:
 
 .. code-block:: python
 
@@ -172,13 +172,31 @@ For example, to load the predictions for the "infer" dataset:
     #EXAMPLE
     my_maps.add_metadata("./infer_predictions_patch_df.csv", tree_level='patch')
 
-From here, you can use the ``show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
+From here, you can use the ``show_patches`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
 
 .. code-block:: python
 
     my_maps.add_shape()
 
     parent_list = my_maps.list_parents()
-    my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
+    my_maps.show_patches(
+        parent_list[0],
+        column_to_plot="conf",
+        vmin=0,
+        vmax=1,
+        alpha=0.5
+    )
+
+Or, if your maps are georeferenced, you can use the ``explore_patches`` method instead:
+
+.. code-block:: python
+
+    my_maps.explore_patches(
+        parent_list[0],
+        column_to_plot="conf",
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png",
+        vmin=0,
+        vmax=1,
+    )
 
 Refer to the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance for further details on how these methods work.

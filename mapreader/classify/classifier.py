@@ -1323,6 +1323,32 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
 
         self.metrics[phase][metric].append(value)
 
+    def list_metrics(self, phases: str | list[str] = "all") -> None:
+        """Prints the available metrics for the specified phases.
+
+        Parameters
+        ----------
+        phases : str | list[str], optional
+            The phases to find metrics for, by default "all"
+        """
+        if isinstance(phases, str):
+            if phases == "all":
+                phases = [*self.metrics.keys()]
+            else:
+                phases = [phases]
+
+        if not isinstance(phases, list):
+            raise ValueError(
+                '[ERROR] ``phases`` must be a string or a list of strings. E.g. ["train", "val"].'
+            )
+
+        metrics = set(
+            metric for phase in phases for metric in self.metrics.get(phase, {}).keys()
+        )
+
+        print("Phases:", *phases, sep="\n  - ")
+        print("\nAvailable metrics:", *metrics, sep="\n  - ")
+
     def plot_metric(
         self,
         metrics: str | list[str],
