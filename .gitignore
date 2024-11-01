@@ -20,6 +20,15 @@ worked_examples/**/workshops_*/**/*.csv
 worked_examples/**/workshops_*/**/*.geojson
 worked_examples/**/workshops_*/**/*.xlsx
 
+# worked examples
+worked_examples/**/patches_*_*/*.png
+worked_examples/**/patches_*_*/*.tif
+worked_examples/**/maps/*.png
+worked_examples/**/*.csv
+worked_examples/**/*.geojson
+worked_examples/**/models_tutorial/*
+worked_examples/**/tboard_tutorial/*
+worked_examples/**/tmp_checkpoints/*
 
 # test outputs
 /broken_files.txt
