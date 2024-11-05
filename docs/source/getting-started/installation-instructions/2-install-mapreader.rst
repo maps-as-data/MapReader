@@ -20,6 +20,8 @@ To install ``mapreader`` without the text spotting dependencies (i.e. just the c
 
 .. note:: To install the dev dependencies too, use ``pip install "mapreader[dev]"``.
 
+To install the text-spotting dependencies, head to the :doc:`Spot text </using-mapreader/step-by-step-guide/6-spot-text>` section of the user guide!
+
 Method 2: Install from source
 -----------------------------
 
