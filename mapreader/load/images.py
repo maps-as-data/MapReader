@@ -994,34 +994,37 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         """
         parent_id = self.patches[image_id]["parent_id"]
 
-        if "coordinates" not in self.parents[parent_id].keys():
-            self._print_if_verbose(
-                f"[WARNING] No coordinates found in  {parent_id} (parent of {image_id}). Suggestion: run `add_metadata` or `add_geo_info`.",
-                verbose,
-            )
-            return
+        if parent_id in self.parents.keys():
+            if "coordinates" not in self.parents[parent_id].keys():
+                self._print_if_verbose(
+                    f"[WARNING] No coordinates found in  {parent_id} (parent of {image_id}). Suggestion: run `add_metadata` or `add_geo_info`.",
+                    verbose,
+                )
+                return
 
-        else:
-            if not all([k in self.parents[parent_id].keys() for k in ["dlat", "dlon"]]):
-                self._add_coord_increments_id(parent_id)
+            else:
+                if not all(
+                    [k in self.parents[parent_id].keys() for k in ["dlat", "dlon"]]
+                ):
+                    self._add_coord_increments_id(parent_id)
 
-            # get min_x and min_y and pixel-wise dlon and dlat for parent image
-            parent_min_x, parent_min_y, parent_max_x, parent_max_y = self.parents[
-                parent_id
-            ]["coordinates"]
-            dlon = self.parents[parent_id]["dlon"]
-            dlat = self.parents[parent_id]["dlat"]
+                # get min_x and min_y and pixel-wise dlon and dlat for parent image
+                parent_min_x, parent_min_y, parent_max_x, parent_max_y = self.parents[
+                    parent_id
+                ]["coordinates"]
+                dlon = self.parents[parent_id]["dlon"]
+                dlat = self.parents[parent_id]["dlat"]
 
-            pixel_bounds = self.patches[image_id]["pixel_bounds"]
+                pixel_bounds = self.patches[image_id]["pixel_bounds"]
 
-            # get patch coords
-            min_x = (pixel_bounds[0] * dlon) + parent_min_x
-            min_y = parent_max_y - (pixel_bounds[3] * dlat)
-            max_x = (pixel_bounds[2] * dlon) + parent_min_x
-            max_y = parent_max_y - (pixel_bounds[1] * dlat)
+                # get patch coords
+                min_x = (pixel_bounds[0] * dlon) + parent_min_x
+                min_y = parent_max_y - (pixel_bounds[3] * dlat)
+                max_x = (pixel_bounds[2] * dlon) + parent_min_x
+                max_y = parent_max_y - (pixel_bounds[1] * dlat)
 
-            self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
-            self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
+                self.patches[image_id]["coordinates"] = (min_x, min_y, max_x, max_y)
+                self.patches[image_id]["crs"] = self.parents[parent_id]["crs"]
 
     def _add_patch_polygons_id(self, image_id: str, verbose: bool = False) -> None:
         """Create polygon from a patch and save to patch dictionary.
