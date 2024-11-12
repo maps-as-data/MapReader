@@ -1783,37 +1783,37 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         if style_kwargs is None:
             style_kwargs = {}
 
-        if self.georeferenced:
-            if xyz_url:
-                tiles = xyz.TileProvider(name=xyz_url, url=xyz_url, attribution=xyz_url)
-            else:
-                tiles = xyz.providers.OpenStreetMap.Mapnik
-
-            _, patch_df = self.convert_images()
-
-            if "image_id" in patch_df.columns:
-                patch_df.drop(columns=["image_id"], inplace=True)
-
-            if column_to_plot:  # plot column values
-                return patch_df[patch_df["parent_id"] == parent_id].explore(
-                    column=column_to_plot,
-                    tiles=tiles,
-                    categorical=categorical,
-                    cmap=cmap,
-                    vmin=vmin,
-                    vmax=vmax,
-                    style_kwds=style_kwargs,
-                )
-            else:  # plot patches (i.e. bounding boxes)
-                return patch_df[patch_df["parent_id"] == parent_id].explore(
-                    tiles=tiles,
-                    style_kwds=style_kwargs,
-                )
-
-        else:
+        if not self.georeferenced:
             raise NotImplementedError(
                 "[ERROR] This method only works with georeferenced images. Either add coordinate information or use the `show_patches` method."
             )
+
+        if xyz_url:
+            tiles = xyz.TileProvider(name=xyz_url, url=xyz_url, attribution=xyz_url)
+        else:
+            tiles = xyz.providers.OpenStreetMap.Mapnik
+
+        _, patch_df = self.convert_images()
+
+        if "image_id" in patch_df.columns:
+            patch_df.drop(columns=["image_id"], inplace=True)
+
+        if column_to_plot:  # plot column values
+            return patch_df[patch_df["parent_id"] == parent_id].explore(
+                column=column_to_plot,
+                tiles=tiles,
+                categorical=categorical,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                style_kwds=style_kwargs,
+            )
+
+        # plot patches (i.e. bounding boxes)
+        return patch_df[patch_df["parent_id"] == parent_id].explore(
+            tiles=tiles,
+            style_kwds=style_kwargs,
+        )
 
     def show_patches(
         self,
