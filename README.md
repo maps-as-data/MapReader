@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Integration Tests badge](https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg)
 ![DOI](https://zenodo.org/badge/430661738.svg)
-![CodeCov](https://codecov.io/github/Living-with-machines/MapReader/graph/badge.svg?token=38GQ3O1GB5)
+[![codecov](https://codecov.io/gh/maps-as-data/MapReader/graph/badge.svg?token=38GQ3O1GB5)](https://codecov.io/gh/maps-as-data/MapReader)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.06434/status.svg)](https://doi.org/10.21105/joss.06434)
 
 ## Table of Contents
