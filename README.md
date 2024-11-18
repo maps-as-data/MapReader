@@ -69,7 +69,7 @@ The MapReader documentation can be found at https://mapreader.readthedocs.io/en/
 **All users** should refer to our [User Guide](https://mapreader.readthedocs.io/en/latest/using-mapreader/) for guidance on how to use MapReader.
 This contains end-to-end instructions on how to use the MapReader pipeline.
 
- **Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/in-depth-resources/api/mapreader/) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/community-and-contributions/contribution-guide/) for guidance on how to contribute to the MapReader package.
+**Developers and contributors** may also want to refer to the [API documentation](https://mapreader.readthedocs.io/en/latest/in-depth-resources/api/mapreader/) and [Contribution guide](https://mapreader.readthedocs.io/en/latest/community-and-contributions/contribution-guide/) for guidance on how to contribute to the MapReader package.
 
 
 ## Stay in touch
