@@ -103,7 +103,7 @@ To help you visualize your maps, the boundaries of the map sheets included in yo
 Passing ``add_id=True`` when calling this method will add the WFS ID numbers of your map sheets to your plot.
 This can be helpful in identifying the map sheets you'd like to download.
 
-Another helpful method is the ``get_minmax_latlon()`` method, which will print out the minimum and maximum latitudes and longitudes of all your map sheets and can help you identify valid ranges of latitudes and longitudes to use for querying.
+Another helpful method is the ``get_minmax_latlon`` method, which will print out the minimum and maximum latitudes and longitudes of all your map sheets and can help you identify valid ranges of latitudes and longitudes to use for querying.
 It's use is as follows:
 
 .. code-block:: python
@@ -112,7 +112,7 @@ It's use is as follows:
 
 
 As well as geographic information, it can also be helpful to know the range of publication dates for your map sheets.
-This can be done using the ``extract_published_dates()`` method:
+This can be done using the ``extract_published_dates`` method:
 
 .. code-block:: python
 
@@ -154,7 +154,7 @@ For all query methods, you should be aware of the following arguments:
 - ``append`` - By default, this is set to ``False`` and so a new query list is created each time you make a new query. Setting it to ``True`` (i.e. by specifying ``append=True``) will result in your newly query results being appended to your previous ones.
 - ``print`` - By default, this is set to ``False`` and so query results will not be printed when you run the query method. Setting it to ``True`` will result in your query results being printed.
 
-The ``print_found_queries()`` method, which can be used to print your query results at any time.
+The ``print_found_queries`` method, which can be used to print your query results at any time.
 It's use is as follows:
 
 .. code-block:: python
@@ -163,8 +163,8 @@ It's use is as follows:
 
 .. note:: You can also set ``print=True`` in the query commands to print your results in situ. See above.
 
-The ``plot_queries_on_map()`` method, which can be used to plot your query results on a map.
-As with the ``plot_all_metadata_on_map()``, you can specify ``add_id=True`` to add the WFS ID numbers to your plot. Use this method as follows:
+The ``plot_queries_on_map`` method, which can be used to plot your query results on a map.
+As with the ``plot_all_metadata_on_map``, you can specify ``add_id=True`` to add the WFS ID numbers to your plot. Use this method as follows:
 
 .. code-block:: python
 
@@ -254,7 +254,7 @@ This would result in a metadata.csv with the following columns:
 1. Finding map sheets which overlap or intersect with a polygon.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods can be used find and download map sheets which are within or intersect/overlap with a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_.
+The ``query_map_sheets_by_polygon`` and ``download_map_sheets_by_polygon`` methods can be used find and download map sheets which are within or intersect/overlap with a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_.
 These methods have two modes:
 
 - "within" - This finds map sheets whose bounds are completely within the given polygon.
@@ -262,8 +262,8 @@ These methods have two modes:
 
 The ``mode`` can be selected by specifying ``mode="within"`` or ``mode="intersects"``.
 
-The ``query_map_sheets_by_polygon()`` and ``download_map_sheets_by_polygon()`` methods take a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_ object as the ``polygon`` argument.
-These polygons can be created using MapReader's ``create_polygon_from_latlons()`` function:
+The ``query_map_sheets_by_polygon`` and ``download_map_sheets_by_polygon`` methods take a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_ object as the ``polygon`` argument.
+These polygons can be created using MapReader's ``create_polygon_from_latlons`` function:
 
 .. code-block:: python
 
@@ -302,7 +302,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_polygon()`` method.
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_polygon`` method.
 
 To download map sheets which fall within the bounds of this polygon, use:
 
@@ -318,12 +318,12 @@ Or, to find map sheets which intersect with this polygon, use:
 
 Again, by default, this will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries``, see download_guidance_ for further guidance.
 
 1. Finding map sheets which contain a set of coordinates.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``query_map_sheets_by_coordinates()`` and ``download_map_sheets_by_coordinates()`` methods can be used find and download map sheets which contain a set of coordinates.
+The ``query_map_sheets_by_coordinates`` and ``download_map_sheets_by_coordinates`` methods can be used find and download map sheets which contain a set of coordinates.
 
 To find maps sheets which contain a given set of coordinates, use:
 
@@ -350,7 +350,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_coordinates()`` method:
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_coordinates`` method:
 
 .. code-block:: python
 
@@ -365,15 +365,15 @@ e.g. :
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
 
 3. Finding map sheets which intersect with a line.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``query_map_sheets_by_line()`` and ``download_map_sheets_by_line()`` methods can be used find and download map sheets which intersect with a line.
+The ``query_map_sheets_by_line`` and ``download_map_sheets_by_line`` methods can be used find and download map sheets which intersect with a line.
 
 These methods take a `shapely.LineString <https://shapely.readthedocs.io/en/stable/reference/shapely.LineString.html#shapely.LineString>`_ object as the ``line`` argument.
-These lines can be created using MapReader's ``create_line_from_latlons()`` function:
+These lines can be created using MapReader's ``create_line_from_latlons`` function:
 
 .. code-block:: python
 
@@ -406,7 +406,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_line()`` method:
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_line`` method:
 
 .. code-block:: python
 
@@ -414,12 +414,12 @@ Alternatively, you can bypass the querying step and download map sheets directly
 
 Again, by default, this will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
 
 4. Finding map sheets using their WFS ID numbers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``query_map_sheets_by_wfs_ids()`` and ``download_map_sheets_by_wfs_ids()`` methods can be used find and download map sheets using their WFS ID numbers.
+The ``query_map_sheets_by_wfs_ids`` and ``download_map_sheets_by_wfs_ids`` methods can be used find and download map sheets using their WFS ID numbers.
 
 To find maps sheets using their WFS ID numbers, use:
 
@@ -447,7 +447,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_wfs_ids()`` method:
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_wfs_ids`` method:
 
 .. code-block:: python
 
@@ -463,12 +463,12 @@ or
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
 
 5. Finding map sheets by searching for a string in their metadata.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``query_map_sheets_by_string()`` and ``download_map_sheets_by_string()`` methods can be used find and download map sheets by searching for a string in their metadata.
+The ``query_map_sheets_by_string`` and ``download_map_sheets_by_string`` methods can be used find and download map sheets by searching for a string in their metadata.
 
 These methods use `regex string searching <https://docs.python.org/3/library/re.html>`__ to find map sheets whose metadata contains a given string.
 Wildcards and regular expressions can therefore be used in the ``string`` argument.
@@ -506,7 +506,7 @@ By default, this will result in the directory structure shown in download_guidan
 
 .. note:: Further information on the use of the download methods can be found in download_guidance_.
 
-Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_string()`` method:
+Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_string`` method:
 
 .. code-block:: python
 
@@ -521,4 +521,4 @@ e.g. to search for "shire" (e.g. Wiltshire, Lanarkshire, etc.):
 
 Again, by default, these will result in the directory structure shown in download_guidance_.
 
-.. note:: As with the ``download_map_sheets_by_queries()`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.

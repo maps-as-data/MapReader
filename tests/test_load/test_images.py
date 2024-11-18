@@ -4,6 +4,7 @@ import os
 import pathlib
 from random import randint
 
+import folium
 import geopandas as gpd
 import pandas as pd
 import pytest
@@ -568,6 +569,65 @@ def test_patchify_pixels_overlap(sample_dir, image_id, tmp_path):
 # --- test other functions ---
 
 
+def test_check_georeferencing(sample_dir, image_id, tmp_path):
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.check_georeferencing()
+    assert maps.georeferenced is False  # no metadata yet
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "coordinates", "crs", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing via coordinates col
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+    maps.patchify_all(patch_size=3, path_save=f"{tmp_path}/patches_3_pixel")
+    parent_df, patch_df = maps.convert_images()  # save these for loading later
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+    )
+    assert "geometry" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "crs", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing from grid_bb
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "published_date", "grid_bb"],
+    )
+    assert maps.georeferenced is True  # have added georeferencing from grid_bb
+    assert (
+        "geometry" in maps.parents["cropped_74488689.png"].keys()
+    )  # should also have added polygon
+
+    maps = MapImages(f"{sample_dir}/{image_id}")
+    maps.add_metadata(
+        f"{sample_dir}/ts_downloaded_maps.csv",
+        usecols=["name", "url", "published_date"],
+    )
+    maps.load_patches(patch_paths=f"{tmp_path}/patches_3_pixel/*png")
+    assert len(maps.patches) == 9
+    assert maps.georeferenced is False  # still no georeferencing info
+    maps.add_metadata(patch_df, tree_level="patch")
+    assert maps.georeferenced is True  # now have georeferencing info
+    assert "coordinates" in maps.parents["cropped_74488689.png"].keys()
+    assert "geometry" in maps.parents["cropped_74488689.png"].keys()
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+    )
+    assert "geometry" in maps.patches["patch-0-0-3-3-#cropped_74488689.png#.png"].keys()
+
+
 def test_load_patches(init_maps, sample_dir, tmp_path):
     maps, _, _ = init_maps
 
@@ -590,6 +650,30 @@ def test_load_patches(init_maps, sample_dir, tmp_path):
     assert len(maps.list_parents()) == 1
     assert len(maps.list_patches()) == 9
     assert not maps.georeferenced
+
+
+def test_infer_coords_from_patches(sample_dir, tmp_path):
+    # create tiff patches
+    geotiff_path = f"{sample_dir}/cropped_geo.tif"
+    tiff_maps = MapImages(geotiff_path)
+    tiff_maps.add_geo_info()
+    assert tiff_maps.georeferenced
+    tiff_maps.patchify_all(patch_size=3, path_save=f"{tmp_path}_tiffs")
+    parent_df, patch_df = tiff_maps.convert_images()
+
+    maps = MapImages()  # create new instance
+    maps.load_patches(f"{tmp_path}_tiffs", parent_paths=geotiff_path, add_geo_info=True)
+    maps.check_georeferencing()
+    assert (
+        "coordinates" in maps.patches["patch-0-0-3-3-#cropped_geo.tif#.png"].keys()
+    )  # need coordinates in patches
+    assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    assert maps.georeferenced
+    maps.parents["cropped_geo.tif"].pop("coordinates")
+    maps.infer_parent_coords_from_patches()
+    assert "coordinates" in maps.parents["cropped_geo.tif"].keys()
+    maps.check_georeferencing()
+    assert maps.georeferenced
 
 
 def test_load_parents(init_maps, image_id, sample_dir):
@@ -629,6 +713,8 @@ def test_calc_coords_from_grid_bb(sample_dir, image_id):
     maps.add_metadata(
         f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
+    for parent in maps.list_parents():
+        maps.parents[parent].pop("coordinates")  # remove coordinates so we can test
     assert "coordinates" not in maps.parents[image_id]
     maps.add_coords_from_grid_bb()
     assert "coordinates" in maps.parents[image_id]
@@ -650,8 +736,13 @@ def test_calc_coords_from_grid_bb_format_error(sample_dir, image_id, capfd):
     maps.add_metadata(
         f"{sample_dir}/ts_downloaded_maps.csv", usecols=["name", "grid_bb", "crs"]
     )
+    for parent in maps.list_parents():
+        maps.parents[parent].pop("coordinates")  # remove coordinates so we can test
     assert "coordinates" not in maps.parents[image_id]
-    maps.parents[image_id]["grid_bb"] = 123  # wrong format
+    maps.parents[image_id]["grid_bb"] = 123  # change to some other format/string
+    with pytest.raises(ValueError, match="Unexpected grid_bb"):
+        maps.add_coords_from_grid_bb()
+    maps.parents[image_id]["grid_bb"] = "17,0,0"  # change to some other format/string
     with pytest.raises(ValueError, match="Unexpected grid_bb"):
         maps.add_coords_from_grid_bb()
 
@@ -717,7 +808,7 @@ def test_add_parent_polygons(init_maps):
 
 def test_add_parent_polygons_errors(sample_dir, image_id):
     maps = MapImages(f"{sample_dir}/{image_id}")
-    with pytest.raises(ValueError, match="No georeferencing information"):
+    with pytest.raises(ValueError, match="No coordinate information found"):
         maps.add_parent_polygons()
 
 
@@ -779,11 +870,16 @@ def test_save_to_geojson_error(sample_dir, image_id, tmp_path, capfd):
     maps.add_metadata(f"{sample_dir}/ts_downloaded_maps.csv")
     with pytest.raises(ValueError, match="No patches"):
         maps.save_patches_to_geojson(geojson_fname=f"{tmp_path}/patches.geojson")
-    maps.patchify_all(patch_size=3, path_save=tmp_path)
     # remove coordinates
     for parent in maps.list_parents():
-        maps.parents[parent].pop("geometry")
-        maps.parents[parent].pop("coordinates")
+        maps.parents[parent].pop("geometry")  # remove geometry
+        maps.parents[parent].pop(
+            "coordinates"
+        )  # remove coordinates (for add_parent_polygons)
+        maps.parents[parent].pop(
+            "grid_bb"
+        )  # remove grid_bb (for add_coords_from_grid_bb)
+    maps.patchify_all(patch_size=3, path_save=tmp_path)
     maps.check_georeferencing()
     assert not maps.georeferenced
     with pytest.raises(ValueError, match="No geographic information"):
@@ -932,6 +1028,36 @@ def test_show_sample_grayscale(sample_dir, tmp_path, monkeypatch):
     monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
     maps.show_sample(num_samples=1, tree_level="parent")
     maps.show_sample(num_samples=1, tree_level="patch")
+
+
+def test_explore_patches(init_maps):
+    maps, parent_list, _ = init_maps
+    out = maps.explore_patches(parent_list[0])
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+    # using tilelayer
+    out = maps.explore_patches(
+        parent_list[0], xyz_url="https://tile.opentopomap.org/{z}/{x}/{y}.png"
+    )
+    assert isinstance(out, folium.Map)
+    assert [*out.to_dict()["children"].keys()][
+        0
+    ] == "https://tile.opentopomap.org/{z}/{x}/{y}.png"
+
+
+def test_explore_patches_errors(init_maps):
+    maps, parent_list, _ = init_maps
+    maps.georeferenced = False  # set to False to test error
+    with pytest.raises(
+        NotImplementedError, match="only works with georeferenced images"
+    ):
+        maps.explore_patches(parent_list[0])
+    maps.check_georeferencing()
+    with pytest.raises(ValueError, match="not found in parent list"):
+        maps.explore_patches("fake_id")
 
 
 def test_load_parents_errors(sample_dir, image_id):

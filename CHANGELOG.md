@@ -16,6 +16,17 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 
 _Add new changes here_
+### Added
+
+- Added `infer_parent_coords_from_patches` method to `MapImages` class ([#511](https://github.com/maps-as-data/MapReader/pull/511))
+- Added `explore_patches` method to `MapImages` class for interactive exploration of patches ([#511](https://github.com/maps-as-data/MapReader/pull/511))
+- Added `explore_predictions` and `explore_search_results` methods to text runners ([#511](https://github.com/maps-as-data/MapReader/pull/511))
+
+### Changed
+
+- Metrics are now stored in a nested dictionary (e.g. `metrics['train']['loss']` instead of `metrics["epoch_loss_train]`) ([#511](https://github.com/maps-as-data/MapReader/pull/511))
+- `plot_metric` method is simplified - see updated docs ([#511](https://github.com/maps-as-data/MapReader/pull/511))
+- Renamed `show_parent` as `show_patches` ([#511](https://github.com/maps-as-data/MapReader/pull/511))
 
 ### Changed
 
@@ -23,15 +34,15 @@ _Add new changes here_
 
 ## [v1.5.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.1) (2024-10-30)
 
-## Added
+### Added
 
 - Added `text-requirement.txt` file to install text spotting dependencies. Users can now install text spotting dependencies using `pip install -r text-requirements.txt` ([#515](https://github.com/maps-as-data/MapReader/pull/515))
 
-## Removed
+### Removed
 
 - Removed `text` extras from `setup.py` ([#515](https://github.com/maps-as-data/MapReader/pull/515))
 
-## Fixed
+### Fixed
 
 - Fixes upload to PyPI by removing `text` extras ([#515](https://github.com/maps-as-data/MapReader/pull/515))
 

@@ -10,7 +10,7 @@ MapReader's ``Load`` subpackage is used to load, visualize and patchify images (
 Load images (and metadata)
 ----------------------------
 
-First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using MapReader's ``loader()`` function.
+First, images (e.g. png, jpeg, tiff or geotiff files) can be loaded in using MapReader's ``loader`` function.
 
 This can be done using:
 
@@ -87,12 +87,12 @@ You can load it as follows:
     Other arguments you may want to specify when adding metadata to your images include:
 
     - ``index_col`` - By default, this is set to ``0`` so the first column of your CSV/TSV/Excel spreadsheet will be used as the index column when creating a pandas DataFrame. If you would like to use a different column you can specify ``index_col``.
-    - ``usecols`` - By default, the ``add_metadata()`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``usecols`` argument (e.g. ``usecols=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
+    - ``usecols`` - By default, the ``add_metadata`` method will add all the columns in your metadata to your ``MapImages`` object. If you would like to add only specific columns, you can pass a list of these as the ``usecols`` argument (e.g. ``usecols=[`name`, `coordinates`, `region`]``) to add only these columns to your ``MapImages`` object.
     - ``ignore_mismatch``- By default, this is set to ``False`` so that an error is given if the images in your ``MapImages`` object are mismatched to your metadata. Setting ``ignore_mismatch`` to ``True`` (by specifying ``ignore_mismatch=True``) will allow you to bypass this error and add mismatched metadata. Only metadata corresponding to images in your ``MapImages`` object will be added.
     - ``delimiter`` - By default, MapReader expects CSV files. If your file is delimited using a different delimiter you should specify the delimiter argument (e.g. a TSV file would require ``delimiter="\t"``).
 
 
-.. note:: In MapReader versions < 1.0.7, coordinates were miscalculated. To correct this, use the ``add_coords_from_grid_bb()`` method to calculate new, correct coordinates.
+.. note:: In MapReader versions < 1.0.7, coordinates were miscalculated. To correct this, use the ``add_coords_from_grid_bb`` method to calculate new, correct coordinates.
 
 Patchify
 ----------
@@ -208,8 +208,8 @@ This will create 1024 x 1024 pixel patches with 10% overlap between each patch.
 
     Other arguments you may want to specify when patchifying your images include:
 
-    - ``square_cuts`` - By default, this is set to ``False``. Thus, if your ``patch_size`` is not a factor of your image size (e.g. if you are trying to slice a 100x100 pixel image into 8x8 pixel patches), you will end up with some rectangular patches at the edges of your image. If you set ``square_cuts=True``, then all your patches will be square, however there will be some overlap between edge patches. Using ``square_cuts=True`` is useful if you need square images for model training, and don't want to warp your rectangular images by resizing them at a later stage.
-    - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``patchify_all()`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
+    - ``square_cuts`` - This is a deprecated method and no longer recommended for use. By default, this is set to ``False`` and padding is added to patches at the edges of the parent image to ensure square patches. If you set ``square_cuts=True``, instead of padding, there will be some overlap between edge patches.
+    - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``patchify_all`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
     - ``rewrite`` - By default, this is set to ``False`` so that if your patches already exist they are not overwritten. Setting it to ``True`` (by specifying ``rewrite=True``) will mean already existing patches are recreated and overwritten.
 
 If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), use:
@@ -220,10 +220,10 @@ If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), 
 
 This will save each patch in your ``MapImages`` object as a georeferenced ``.tif`` file in your patches directory.
 
-.. note:: MapReader also has a ``save_parents_as_geotiff()`` method for saving parent images as geotiffs.
+.. note:: MapReader also has a ``save_parents_as_geotiff`` method for saving parent images as geotiffs.
 
-After running the ``patchify_all()`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
-To view an iterable list of these, you can use the ``list_parents()`` and ``list_patches()`` methods:
+After running the ``patchify_all`` method, you'll see that ``print(my_files)`` shows you have both 'parents' and 'patches'.
+To view an iterable list of these, you can use the ``list_parents`` and ``list_patches`` methods:
 
 .. code-block:: python
 
@@ -256,7 +256,7 @@ or
 
 .. note:: These parent and patch dataframes **will not** automatically update so you will want to run this command again if you add new information into your ``MapImages`` object.
 
-At any point, you can also save these dataframes by passing the ``save`` argument to the ``convert_images()`` method:
+At any point, you can also save these dataframes by passing the ``save`` argument to the ``convert_images`` method:
 
 .. code-block:: python
 
@@ -311,49 +311,13 @@ If, however, you want to see a random sample of your patches use the ``tree_leve
     :width: 400px
 
 
-It can also be helpful to see your patches in the context of their parent image.
-To do this use the ``show()`` method.
-
-e.g. :
-
-.. code-block:: python
-
-    #EXAMPLE
-    patch_list = my_files.list_patches()
-    my_files.show(patch_list[250:300])
-
-.. image:: /_static/show.png
-    :width: 400px
-
-
-or
-
-.. code-block:: python
-
-    #EXAMPLE
-    patch_list = my_files.list_patches()
-    files_to_show = [patch_list[0], patch_list[350], patch_list[400]]
-    my_files.show(files_to_show)
-
-.. image:: /_static/show_list.png
-    :width: 400px
-
-
-This will show you your chosen patches, by default highlighted with red borders, in the context of their parent image.
-
-.. admonition:: Advanced usage
-    :class: dropdown
-
-    Further usage of the ``show()`` method is detailed in :ref:`Further_analysis`.
-    Please head there for guidance on advanced usage.
-
-You may also want to see all the patches created from one of your parent images.
-This can be done using:
+It can also be helpful to see all your patches in the context of their parent image.
+To do this use the ``show_patches`` method:
 
 .. code-block:: python
 
     parent_list = my_files.list_parents()
-    my_files.show_parent(parent_list[0])
+    my_files.show_patches(parent_list[0])
 
 .. image:: /_static/show_par.png
     :width: 400px
@@ -362,8 +326,36 @@ This can be done using:
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Further usage of the ``show_parent()`` method is detailed in :ref:`Further_analysis`.
+    Further usage of the ``show_patches`` method is detailed in :ref:`Further_analysis`.
     Please head there for guidance on advanced usage.
+
+
+If you maps and patches are georeferenced, you can also use the `explore_patches` method to view your patches on a map.
+
+For example, to view your patches overlaid on an OpenStreetMap.Mapnik layer (the default), use:
+
+.. code-block:: python
+
+    parent_list = my_files.list_parents()
+    my_files.explore_patches(parent_list[0])
+
+
+Or, if your maps are taken from a tilelayer, you can specify the URL of the tilelayer you'd like to use as the base map:
+
+.. code-block:: python
+
+    parent_list = my_files.list_parents()
+    my_files.explore_patches(
+        parent_list[0],
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png"
+    )
+
+.. admonition:: Advanced usage
+    :class: dropdown
+
+    Further usage of the ``explore_patches`` method is detailed in :ref:`Further_analysis`.
+    Please head there for guidance on advanced usage.
+
 
 .. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)
 
@@ -373,13 +365,13 @@ Further analysis/visualization (optional)
 -------------------------------------------
 
 If you have loaded geographic coordinates into your ``MapImages`` object, you may want to calculate the central coordinates of your patches.
-The ``add_center_coord()`` method can used to do this:
+The ``add_center_coord`` method can used to do this:
 
 .. code-block:: python
 
     my_files.add_center_coord()
 
-You can then rerun the ``convert_images()`` method to see your results.
+You can then rerun the ``convert_images`` method to see your results.
 
 i.e.:
 
@@ -390,30 +382,33 @@ i.e.:
 
 You will see that center coordinates of each patch have been added to your patch dataframe.
 
-The ``calc_pixel_stats()`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
+The ``calc_pixel_stats`` method can be used to calculate means and standard deviations of pixel intensities of each of your patches:
 
 .. code-block:: python
 
     my_files.calc_pixel_stats()
 
-After rerunning the ``convert_images()`` method (as above), you will see that mean and standard pixel intensities have been added to your patch dataframe.
+After rerunning the ``convert_images`` method (as above), you will see that mean and standard pixel intensities have been added to your patch dataframe.
 
-The ``show()`` and ``show_parent()`` methods can be used to plot these values ontop of your patches.
+The ``show_patches`` and ``explore_patches`` methods can be used to plot these values on top of your patches.
 This is done by specifying the ``column_to_plot`` argument.
 
-e.g. to view "mean_pixel_R" on your patches:
+e.g. to view "mean_pixel_R" on your patches with the ``show_patches`` method:
 
 .. code-block:: python
 
     #EXAMPLE
     parent_list = my_files.list_parents()
-    my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R")
+    my_files.show_patches(
+        parent_list[0],
+        column_to_plot="mean_pixel_R"
+    )
 
 .. image:: /_static/show_par_RGB.png
     :width: 400px
 
 If you want to see your image underneath, you can specify the ``alpha`` argument, which sets the transparency of your plotted values.
-``alpha`` can range between 0 and 1, with lower ``alpha`` values allowing you to see the more of the image underneath.
+The value of ``alpha`` can range between 0 and 1, with lower ``alpha`` values allowing you to see the more of the image underneath.
 
 e.g. to view "mean_pixel_R" on your patches:
 
@@ -421,22 +416,38 @@ e.g. to view "mean_pixel_R" on your patches:
 
     #EXAMPLE
     parent_list = my_files.list_parents()
-    my_files.show_parent(parent_list[0], column_to_plot="mean_pixel_R", alpha=0.5)
+    my_files.show_parent(
+        parent_list[0],
+        column_to_plot="mean_pixel_R",
+        alpha=0.5
+    )
 
 .. image:: /_static/show_par_RGB_0.5.png
     :width: 400px
 
-.. note:: The ``column_to_plot`` argument can also be used with the ``show()`` method.
+Or, if your maps are georeferenced, you can use the ``explore_patches`` method to view your patches on a map.
+
+e.g. to view "mean_pixel_R" on your patches:
+
+.. code-block:: python
+
+    #EXAMPLE
+    parent_list = my_files.list_parents()
+    my_files.explore_patches(
+        parent_list[0],
+        column_to_plot="mean_pixel_R",
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png"
+    )
 
 .. admonition:: Advanced usage
     :class: dropdown
 
-    Other arguments you may want to specify when showing your images (for both the ``show()`` and ``show_parent()`` methods):
+    Other arguments you may want to specify when viewing your images (for both the ``show_patches`` and ``explore_patches`` methods):
 
-    - ``plot_parent`` - By default, this is set to ``True`` so that the parent image is shown. If you would like to remove the parent image, e.g. if you are plotting column values, you can set ``plot_parent=False``. This should speed up the code for plotting.
-    - ``patch_border`` - By default, this is set to ``True`` so that borders are plotted around each patch. Setting ``patch_border`` to ``False`` (by specifying ``patch_border=False``) will stop patch borders being shown.
-    - ``border_color`` - By default, this is set to ``"r"`` (red). Any of the colors found `here <https://matplotlib.org/stable/gallery/color/named_colors.html>`__ can be used instead.
+    - ``categorical`` - By default, this is set to ``False`` and so will be inferred. If you have a categorical numerical variable you would like to plot, you can set this to ``True``.
     - ``cmap`` - By default, this is set to ``"viridis"```. Any of the color maps found `here <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`__ can be used instead.
-    - ``plot_histogram`` - Setting this to ``True`` (by specifying ``plot_histogram=True``) will result in a histogram of the values found in ``column_to_plot`` being produced.
+    - ``vmin`` and ``vmax`` - By default, these are set to ``None`` and so will be inferred. If you would like to specify the range of your color map, you can do so by setting these arguments.
+    - ``style_kwargs`` - This is a dictionary of arguments that is passed to the plotting tool. You can use this to customize your plots further.
+
 
 .. todo:: Move 'Further analysis/visualization' to a different page (e.g. as an appendix)

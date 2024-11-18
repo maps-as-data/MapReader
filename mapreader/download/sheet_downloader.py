@@ -1114,8 +1114,12 @@ class SheetDownloader:
         self._initialise_downloader()
         self._initialise_merger(path_save)
 
+        features = self.metadata[
+            self.metadata.index.isin(self.found_queries.index)
+        ]  # to update query data e.g. if we have added grid_bb
+
         self._download_map_sheets(
-            self.found_queries,
+            features,
             path_save,
             metadata_fname,
             overwrite,
