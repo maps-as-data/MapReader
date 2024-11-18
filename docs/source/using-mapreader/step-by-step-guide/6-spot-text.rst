@@ -174,13 +174,13 @@ If you'd like to run the runner on a single patch, you can also just run on one 
 
 Again, this will return a dictionary by default but you can use the ``return_dataframe`` argument to return a dataframe instead.
 
-To view the patch predictions, you can use the ``show`` method.
+To view the patch predictions, you can use the ``show_predictions`` method.
 This takes an image ID as an argument, and will show you all the predictions for that image:
 
 .. code-block:: python
 
     #EXAMPLE
-    my_runner.show(
+    my_runner.show_predictions(
         "patch-0-0-1000-1000-#map_74488689.png#.png"
     )
 
@@ -189,7 +189,7 @@ You can change these by setting the ``border_color`` and ``text_color`` argument
 
 .. code-block:: python
 
-    my_runner.show(
+    my_runner.show_predictions(
         "patch-0-0-1000-1000-#map_74488689.png#.png",
         border_color = "green",
         text_color = "yellow",
@@ -229,7 +229,7 @@ You should pass a parent image ID as the ``image_id`` argument:
 .. code-block:: python
 
     #EXAMPLE
-    my_runner.show(
+    my_runner.show_predictions(
         "map_74488689.png"
     )
 
@@ -237,15 +237,14 @@ As above, use the ``border_color``, ``text_color`` and ``figsize`` arguments to 
 
 .. code-block:: python
 
-    my_runner.show(
+    my_runner.show_predictions(
         "map_74488689.png",
         border_color = "green",
         text_color = "yellow",
         figsize = (20, 20),
     )
 
-
-You can then save these predictions to a csv file:
+You can save your predictions to a csv file using the pandas ``to_csv`` method:
 
 .. code-block:: python
 
@@ -260,7 +259,30 @@ If you maps are georeferenced in your ``parent_df``, you can also convert the pi
 
     geo_preds_df = my_runner.convert_to_coords(return_dataframe=True)
 
-Again, you can save these to a csv file (as shown above), or, you can save them to a geojson file for loading into GIS software:
+Once this is done, you can use the ``explore_predictions`` method to view your predictions on a map.
+
+For example, to view your predictions overlaid on an OpenStreetMap.Mapnik layer (the default), use:
+
+.. code-block:: python
+
+    my_runner.explore_predictions(
+        "map_74488689.png",
+    )
+
+
+Or, if your maps are taken from a tilelayer, you can specify the URL of the tilelayer you'd like to use as the base map:
+
+.. code-block:: python
+
+    my_runner.explore_predictions(
+        "map_74488689.png",
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png"
+    )
+
+You can also pass in a dictionary of ``style_kwargs`` to customize the appearance of the map.
+Refer to the `geopandas explore documentation <https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.explore.html>`__ for more information on the available options.
+
+Again, you can save your georeferenced predictions to a csv file (as shown above), or, you can save them to a geojson file for loading into GIS software:
 
 .. code-block:: python
 
@@ -318,7 +340,20 @@ Once you have your search results, you can view them on your map using the ``sho
 
 This will show the map with the search results.
 
-As with the ``show`` method, you can use the ``border_color``, ``text_color`` and ``figsize`` arguments to customize the appearance of the image.
+As with the ``show_predictions`` method, you can use the ``border_color``, ``text_color`` and ``figsize`` arguments to customize the appearance of the image.
+
+If your maps are georeferenced, you can also use the ``explore_search_results`` method to view your search results on a map.
+This method works in the same way as the ``explore_predictions`` method.
+So, for example, to show your search results overlaid on your chosen tilelayer, you can use:
+
+.. code-block:: python
+
+    my_runner.explore_search_results(
+        "map_74488689.png",
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png"
+    )
+
+You can also pass in a dictionary of ``style_kwargs`` to customize the appearance of the map.
 
 Save search results
 ~~~~~~~~~~~~~~~~~~~

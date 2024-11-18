@@ -35,7 +35,7 @@ For example, if you have set up your directory as recommended in our :doc:`Input
 
     - ``delimiter`` - By default, this is set to "," so will assume your ``csv`` file is comma separated. You will need to specify the ``delimiter`` argument if your file is saved in another format.
     - ``id_col``, ``patch_paths_col``, ``label_col`` - These are used to indicate the column headings for the columns which contain image IDs, patch file paths and labels respectively. By default, these are set to "image_id", "image_path" and "label".
-    - ``append`` - By default, this is ``False`` and so each call to the ``load()`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
+    - ``append`` - By default, this is ``False`` and so each call to the ``load`` method will overwrite existing annotations. If you would like to load a second ``csv`` file into your ``AnnotationsLoader`` instance you will need to set ``append=True``.
 
 To view the data loaded in from your annotations file as a dataframe, use:
 
@@ -77,7 +77,7 @@ Now, calling the ``annotated_images.labels_map`` attribute should return the dic
 .. note:: Using the ``labels_map`` argument is important if you are doing a second round of annotations and want to ensure that the labels are consistent between the two rounds!
 
 
-To view a sample of your annotated images use the ``show_sample()`` method.
+To view a sample of your annotated images use the ``show_sample`` method.
 The ``label_to_show`` argument specifies which label you would like to show.
 
 For example, to show your "railspace" label:
@@ -96,7 +96,7 @@ For example, to show your "railspace" label:
 By default, this will show you a sample of 9 images, but this can be changed by specifying ``num_sample``.
 
 When viewing your annotations, you may notice that you have mislabelled one of your images.
-The ``review_labels()`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
+The ``review_labels`` method, which returns an interactive tool for adjusting your annotations, provides an easy way to fix this:
 
 .. code-block:: python
 
@@ -205,7 +205,7 @@ To split your annotated images and create your dataloaders, use:
 
     dataloaders = annotated_images.create_dataloaders()
 
-By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``create_datasets()`` method.
+By default, this will split your annotated images using the :ref:`default train:val:test ratios<ratios>` and apply the :ref:`default image transforms<transforms>` to each by calling the ``create_datasets`` method.
 It will then create a dataloader for each dataset, using a batch size of 16 and the :ref:`default sampler<sampler>`.
 
 To change the batch size used when creating your dataloaders, use the ``batch_size`` argument:
@@ -224,8 +224,8 @@ To change the batch size used when creating your dataloaders, use the ``batch_si
     - ``shuffle`` - If your datasets are ordered (e.g. ``"a","a","a","a","b","c"``), you can use ``shuffle=True`` to create dataloaders which contain shuffled batches of data. This cannot be used in conjunction with a sampler and so, by default, ``shuffle=False``.
 
 
-If you would like to use custom settings when creating your datasets, you should call the ``create_datasets()`` method directly instead of via the ``create_dataloaders()`` method.
-You should then run the ``create_dataloaders()`` method afterwards to create your dataloaders as before.
+If you would like to use custom settings when creating your datasets, you should call the ``create_datasets`` method directly instead of via the ``create_dataloaders`` method.
+You should then run the ``create_dataloaders`` method afterwards to create your dataloaders as before.
 
 For example, to change the ratios used to split your annotations, you can specify ``frac_train``, ``frac_val`` and ``frac_test``:
 
@@ -247,10 +247,10 @@ This will result in a split of 60% (train), 30% (val) and 10% (test).
 Train
 ------
 
-Initialize ``ClassifierContainer()``
+Initialize ``ClassifierContainer``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To initialize your ``ClassifierContainer()`` for training, you will need to define:
+To initialize your ``ClassifierContainer`` for training, you will need to define:
 
 - ``model`` - The model (classifier) you would like to train.
 - ``labels_map`` - A dictionary mapping your labels to their indices (e.g. ``{0: "no_railspace", 1: "railspace"}``). If you have loaded annotations using the method above, you can find your labels map at ``annotated_images.labels_map``.
@@ -304,7 +304,7 @@ There are a number of options for the ``model`` argument:
         This is equivalent to passing ``model="resnet18"`` (as above) but further customizations are, of course, possible.
         See `here <https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html>`__ for more details of how to do this.
 
-    **3.  To load a locally-saved model, use ``torch.load()`` to load your file and then pass this as the ``model`` argument.**
+    **3.  To load a locally-saved model, use ``torch.load`` to load your file and then pass this as the ``model`` argument.**
 
         If you have already trained a model using MapReader, your outputs, by default, should be saved in directory called ``models``.
         Within this directory will be ``checkpoint_X.pkl`` and ``model_checkpoint_X.pkl`` files.
@@ -328,10 +328,10 @@ There are a number of options for the ``model`` argument:
         .. admonition:: Advanced usage
             :class: dropdown
 
-            The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer()``.
-            If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer()``.
+            The ``checkpoint_X.pkl`` files contain all the information, except for your models (which is saved in the ``model_checkpoint_X.pkl`` files), you had previously loaded in to your ``ClassifierContainer``.
+            If you have already trained a model using MapReader, you can use these files to reload your previously used ``ClassifierContainer``.
 
-            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer()``:
+            To do this, set the ``model``, ``dataloaders`` and ``label_map`` arguments to ``None`` and pass ``load_path="./models/your_checkpoint_file.pkl"`` when initializing your ``ClassifierContainer``:
 
             .. code-block:: python
 
@@ -393,7 +393,7 @@ In order to train/fine-tune your model, will need to define:
 
 **1.  A loss function - This works out how well your model is performing (the "loss").**
 
-    To add a loss function, use ``add_loss_fn()``.
+    To add a loss function, use ``add_loss_fn``.
     Already implemented options are "cross-entropy", "binary cross-entropy" and "mean squared error". You can pass these as strings:
 
     .. code-block:: python
@@ -420,7 +420,7 @@ In order to train/fine-tune your model, will need to define:
 
 **2.  An optimizer - This works out how much to adjust your model parameters by after each training cycle ("epoch").**
 
-    The ``initialize_optimizer()`` method is used to add an optimizer to you ``ClassifierContainer()`` (``my_classifier``):
+    The ``initialize_optimizer`` method is used to add an optimizer to you ``ClassifierContainer`` (``my_classifier``):
 
     .. code-block:: python
 
@@ -452,7 +452,7 @@ In order to train/fine-tune your model, will need to define:
         params2optimize = my_classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3, spacing="geomspace")
 
 
-    You should then pass your ``params2optimize`` list to the ``initialize_optimizer()`` method:
+    You should then pass your ``params2optimize`` list to the ``initialize_optimizer`` method:
 
     .. code-block:: python
 
@@ -460,7 +460,7 @@ In order to train/fine-tune your model, will need to define:
 
 **3.  A scheduler - This defines how to adjust your learning rates during training.**
 
-    To add a scheduler, use the ``initialize_scheduler()`` method:
+    To add a scheduler, use the ``initialize_scheduler`` method:
 
     .. code-block:: python
 
@@ -514,40 +514,64 @@ e.g. to pass through 10 epochs of training data:
 Plot metrics
 ^^^^^^^^^^^^^
 
-Metrics are stored in a dictionary accessible via the ``metrics`` attribute.
-To list these, use:
+Metrics are stored in a nested dictionary accessible via the ``metrics`` attribute.
+To list the metrics available, use:
 
 .. code-block:: python
 
-    list(my_classifier.metrics.keys())
+    my_classifier.list_metrics()
 
 .. todo:: Explain what these metrics are/mean
 
-To help visualize the progress of your training, metrics can be plotted using the ``plot_metric()`` method.
+To help visualize the progress of your training, metrics can be plotted using the ``plot_metric`` method.
 
-The name of the metrics you would like to plot should be passed as the ``y_axis`` argument.
-This can take any number/combination of metrics.
-
-e.g. to plot the loss during each epoch of training and validation:
+e.g. to plot the loss for all phases:
 
 .. code-block:: python
 
     #EXAMPLE
     my_classifier.plot_metric(
-        y_axis=["epoch_loss_train", "epoch_loss_val"],
-        y_label="Loss",
-        legends=["Train", "Valid"],
+        metrics="loss",
     )
 
-.. image:: /_static/loss.png
-    :width: 400px
+By default, ``plot_metrics`` will plot metrics for all phases.
+If instead you'd like to plot metrics for just one phase, or for specific phases, you can pass the ``phases`` argument:
+
+e.g. to plot the loss for the "train" phase only:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_classifier.plot_metric(
+        metrics="loss",
+        phases="train",
+    )
+
+To plot multiple metrics at once, pass a list of metrics to the ``metrics`` argument:
+
+e.g. to plot the precision, recall and f-scores for all phases:
+
+.. code-block:: python
+
+    #EXAMPLE
+    my_classifier.plot_metric(
+        metrics=["precision_micro", "recall_micro", "fscore_micro"],
+    )
+
+.. admonition:: Advanced usage
+    :class: dropdown
+
+    Other arguments you may want to specify when plotting your metrics include:
+    - ``colors`` - By default, this is set to ``None`` and so the default colors are used. You can specify the colors you would like to use for each metric by passing a list of colors to the ``colors`` argument.
+    - ``figsize`` - By default, this is set to ``(10, 5)``. You can change this by specifying the ``figsize`` argument.
+    - ``plt_xrange`` and ``plt_yrange`` - By default, these are set to ``None`` and so the x and y axes are automatically scaled. You can specify the range of the x and y axes by passing a tuple of two values to the ``plt_xrange`` and ``plt_yrange`` arguments respectively.
 
 
 Testing
 --------
 
 The "test" dataset can be used to test your model.
-This can be done using the ``inference()`` method:
+This can be done using the ``inference`` method:
 
 .. code-block:: python
 
@@ -565,7 +589,7 @@ To see a sample of your predictions, use:
 
 .. note:: This will show you the transformed images which may look weird to the human eye.
 
-By default, the ``show_inference_sample_results()`` method will show you six samples of your "test" dataset.
+By default, the ``show_inference_sample_results`` method will show you six samples of your "test" dataset.
 To change the number of samples shown, specify the ``num_samples`` argument.
 
 It can be useful to see instances where your model is struggling to classify your images.
@@ -580,8 +604,8 @@ e.g. To view samples where the model is less than 80% confident about its predic
 
 This can help you identify images that might need to be brought into your training data for further optimization of your model.
 
-By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers()``\s ``metrics`` attribute.
-Instead, they must be added using the ``calculate_add_metrics()``.
+By default, when using your model for inference, metrics will not be added to your ``ClassifierContainers``\s ``metrics`` attribute.
+Instead, they must be added using the ``calculate_add_metrics``.
 
 e.g. to add metrics for the 'test' dataset:
 
@@ -589,32 +613,36 @@ e.g. to add metrics for the 'test' dataset:
 
     #EXAMPLE
     my_classifier.calculate_add_metrics(
-        y_true=my_classifier.orig_label,
-        y_pred=my_classifier.pred_label,
+        y_true=my_classifier.gt_label_indices,
+        y_pred=my_classifier.pred_label_indices,
         y_score=my_classifier.pred_conf,
         phase="test",
     )
+
+You can then use the ``list_metrics`` method to see the metrics calculated for the "test" dataset.
+
+.. code-block:: python
+
+    my_classifier.list_metrics(phases="test")
 
 Metrics from this inference can then be viewed using:
 
 .. code-block:: python
 
-    my_classifier.metrics["metric_to_view"]
+    my_classifier.metrics["test"]["metric_to_view"]
 
 e.g. to view the `Area Under the Receiver Operating Characteristic Curve (ROC AUC) <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html>`__ macro metric:
 
 .. code-block:: python
 
-    my_classifier.metrics["epoch_rocauc_macro_test"]
-
+    my_classifier.metrics["test"]["rocauc_macro"]
 
 e.g. to view f-scores per class for each class in your labels map:
 
 .. code-block:: python
 
     for label_id, label_name in annotated_images.labels_map.items():
-        print(label_name, my_classifier.metrics['epoch_fscore_'+str(label_id)+'_test'])
-
+        print(label_name, my_classifier.metrics["test"]["fscore_"+str(label_id)])
 
 Saving your work
 ------------------
@@ -627,7 +655,7 @@ If you would like to explicitly save your work, use:
 
     my_classifier.save("file_name.pkl")
 
-This will save both your ``ClassifierContainer()`` and your model as `pickle <https://docs.python.org/3/library/pickle.html>`__ files.
+This will save both your ``ClassifierContainer`` and your model as `pickle <https://docs.python.org/3/library/pickle.html>`__ files.
 
 e.g. :
 
@@ -636,7 +664,7 @@ e.g. :
     #EXAMPLE
     my_classifier.save("classifier.pkl")
 
-This will save your ``ClassifierContainer()`` as ``classifier.pkl`` and your model as ``model_classifier.pkl``.
+This will save your ``ClassifierContainer`` as ``classifier.pkl`` and your model as ``model_classifier.pkl``.
 
 Infer (predict)
 ----------------
@@ -656,19 +684,19 @@ To do this, you will need to create a new dataset containing your patches:
 The ``transform`` argument is used to specify which `image transforms <https://pytorch.org/vision/stable/transforms.html>`__  to use on your patch images.
 See :ref:`this section<transforms>` for more information on transforms.
 
-You should then add this dataset to your ``ClassifierContainer()`` (``my_classifier``\):
+You should then add this dataset to your ``ClassifierContainer`` (``my_classifier``\):
 
 .. code-block:: python
 
     my_classifier.load_dataset(infer, set_name="infer")
 
-This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer()``\'s ``dataloaders`` attribute.
+This command will create a ``DataLoader`` from your dataset and add it to your ``ClassifierContainer``\'s ``dataloaders`` attribute.
 
-By default, the ``load_dataset()`` method will create a dataloader with batch size of 16 and will not use a sampler.
+By default, the ``load_dataset`` method will create a dataloader with batch size of 16 and will not use a sampler.
 You can change these by specifying the ``batch_size`` and ``sampler`` arguments respectively.
 See :ref:`this section<sampler>` for more information on samplers.
 
-After loading your dataset, you can then simply run the ``inference()`` method to infer the labels on the patches in your dataset:
+After loading your dataset, you can then simply run the ``inference`` method to infer the labels on the patches in your dataset:
 
 .. code-block:: python
 
@@ -683,7 +711,7 @@ As with the "test" dataset, to see a sample of your predictions, use:
 Save predictions
 ~~~~~~~~~~~~~~~~~
 
-To save your predictions, use the ``save_predictions()`` method.
+To save your predictions, use the ``save_predictions`` method.
 e.g. to save your predictions on the "infer" dataset:
 
 .. code-block:: python
@@ -704,7 +732,7 @@ To do this, you will need to create a new ``MapImages`` object and load in your 
 
     my_maps = load_patches(patch_paths = "./path/to/patches/*png", parent_paths="./path/to/parents/*png")
 
-You can then add your predictions to the metadata using the ``add_metadata()`` method:
+You can then add your predictions to the metadata using the ``add_metadata`` method:
 
 .. code-block:: python
 
@@ -717,13 +745,31 @@ For example, to load the predictions for the "infer" dataset:
     #EXAMPLE
     my_maps.add_metadata("./infer_predictions_patch_df.csv", tree_level='patch')
 
-From here, you can use the ``show_parent()`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
+From here, you can use the ``show_patches`` method to visualize your predictions on the parent images as shown in the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guide:
 
 .. code-block:: python
 
     my_maps.add_shape()
 
     parent_list = my_maps.list_parents()
-    my_maps.show_parent(parent_list[0], column_to_plot="conf", vmin=0, vmax=1, alpha=0.5, patch_border=False)
+    my_maps.show_patches(
+        parent_list[0],
+        column_to_plot="conf",
+        vmin=0,
+        vmax=1,
+        alpha=0.5
+    )
+
+Or, if your maps are georeferenced, you can use the ``explore_patches`` method instead:
+
+.. code-block:: python
+
+    my_maps.explore_patches(
+        parent_list[0],
+        column_to_plot="conf",
+        xyz_url="https://geo.nls.uk/mapdata3/os/6inchfirst/{z}/{x}/{y}.png",
+        vmin=0,
+        vmax=1,
+    )
 
 Refer to the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance for further details on how these methods work.

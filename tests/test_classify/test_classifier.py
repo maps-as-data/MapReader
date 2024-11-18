@@ -272,8 +272,11 @@ def test_calculate_add_metrics(load_classifier):
     y_pred = np.random.randint(0, 2, 10)
     y_score = np.random.random_sample((10, 1))
     classifier.calculate_add_metrics(y_true, y_pred, y_score, phase="pytest")
-    assert len(classifier.metrics) == 20
-    assert "epoch_fscore_0_pytest" in classifier.metrics
+    assert "pytest" in classifier.metrics.keys()
+    for metric in ["precision", "recall", "fscore", "support"]:
+        for suffix in ["0", "micro", "macro", "weighted"]:
+            assert f"{metric}_{suffix}" in classifier.metrics["pytest"].keys()
+            assert len(classifier.metrics["pytest"][f"{metric}_{suffix}"]) == 1
 
 
 def test_save(load_classifier, tmp_path):
@@ -293,9 +296,9 @@ def test_load_dataset(load_classifier, sample_dir):
 
 
 def test_init_errors(sample_dir):
-    with pytest.raises(ValueError, match="cannot be used together"):
-        ClassifierContainer("VGG", None, None, load_path=f"{sample_dir}/test.pkl")
-    with pytest.raises(ValueError, match="Unless passing ``load_path``"):
+    with pytest.raises(
+        ValueError, match="``model`` and ``labels_map`` must be defined"
+    ):
         ClassifierContainer("VGG", None, None)
 
 
@@ -320,11 +323,42 @@ def test_scheduler_errors(load_classifier):
     with pytest.raises(ValueError, match="not yet defined"):
         classifier.initialize_scheduler()
     classifier.initialize_optimizer()
-    with pytest.raises(NotImplementedError, match="can only be"):
+    with pytest.raises(NotImplementedError, match="only StepLR"):
         classifier.initialize_scheduler("a fake scheduler type")
 
 
-# dont test train here due to fake file paths
+# test train
+
+
+def test_fake_phase_error(load_classifier):
+    classifier = load_classifier
+    with pytest.raises(KeyError, match="cannot be found in dataloaders"):
+        classifier.train("fake")
+
+
+def test_missing_optimizer_error(load_classifier):
+    classifier = load_classifier
+    classifier.optimizer = None
+    with pytest.raises(ValueError, match="optimizer should be defined "):
+        classifier.train()
+
+
+def test_missing_scheduler_error(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer()
+    classifier.scheduler = None
+    with pytest.raises(ValueError, match="scheduler should be defined "):
+        classifier.train()
+
+
+def test_missing_loss_fn_error(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer()
+    classifier.initialize_scheduler()
+    classifier.loss_fn = None
+    with pytest.raises(ValueError, match="loss function should be defined "):
+        classifier.train()
+
 
 # test inference w/ various models and model-types
 

@@ -10,7 +10,7 @@ MapReader's ``Classify`` subpackage is used to:
 - Train or fine-tune a classifier on annotated patches.
 - Use a classifier to infer/predict the labels of unannotated patches.
 
-This is all done within MapReader's ``ClassifierContainer()`` class, which is used to:
+This is all done within MapReader's ``ClassifierContainer`` class, which is used to:
 
 - Load models (classifiers).
 - Define a labels map.

@@ -95,7 +95,7 @@ Patch size
 
 By default, your patches will be shown to you as their original size in pixels.
 This can make annotating difficult if your patches are very small.
-To resize your patches when viewing them in the annotation interface, you can pass the ``resize_to`` argument when initializing the ``Annotator`` or when calling the ``annotate()`` method.
+To resize your patches when viewing them in the annotation interface, you can pass the ``resize_to`` argument when initializing the ``Annotator`` or when calling the ``annotate`` method.
 
 e.g. to resize your patches so that their largest edge is 300 pixels:
 
@@ -118,7 +118,7 @@ Or, equivalently, :
 
     annotator.annotate(resize_to=300)
 
-.. note:: Passing the ``resize_to`` argument when calling the ``annotate()`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator``.
+.. note:: Passing the ``resize_to`` argument when calling the ``annotate`` method overrides the ``resize_to`` argument passed when initializing the ``Annotator``.
 
 Context
 ~~~~~~~
@@ -150,7 +150,7 @@ Or, equivalently, :
 
     annotator.annotate(show_context=True)
 
-.. note:: Passing the ``show_context`` argument when calling the ``annotate()`` method overrides the ``show_context`` argument passed when initializing the ``Annotator`` instance.
+.. note:: Passing the ``show_context`` argument when calling the ``annotate`` method overrides the ``show_context`` argument passed when initializing the ``Annotator`` instance.
 
 If you have set ``show_context=True``, you can also choose to show a border around the central patch using the ``border`` argument:
 
@@ -256,7 +256,7 @@ You can filter for any column in your patch DataFrame, and you can filter for mu
 Showing additional information about your patches in the annotation interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to show additional information about your patches in the annotation interface, you can pass the names of the columns you would like to show using the ``show_vals`` argument when calling the ``annotate()`` method.
+If you would like to show additional information about your patches in the annotation interface, you can pass the names of the columns you would like to show using the ``show_vals`` argument when calling the ``annotate`` method.
 
 e.g. to show the ``"mean_pixel"`` and ``"std_pixel"`` columns in the annotation interface, you should pass these column names as a list to the ``show_vals`` argument:
 
