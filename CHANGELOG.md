@@ -27,9 +27,6 @@ _Add new changes here_
 - Metrics are now stored in a nested dictionary (e.g. `metrics['train']['loss']` instead of `metrics["epoch_loss_train]`) ([#511](https://github.com/maps-as-data/MapReader/pull/511))
 - `plot_metric` method is simplified - see updated docs ([#511](https://github.com/maps-as-data/MapReader/pull/511))
 - Renamed `show_parent` as `show_patches` ([#511](https://github.com/maps-as-data/MapReader/pull/511))
-
-### Changed
-
 - Default value for `add_id` argument when plotting metadata in `SheetDownloader` is now `False` ([#529](https://github.com/maps-as-data/MapReader/pull/529))
 
 ## [v1.5.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.1) (2024-10-30)
