@@ -17,6 +17,10 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
+### Changed
+
+- Default value for `add_id` argument when plotting metadata in `SheetDownloader` is now `False` ([#529](https://github.com/maps-as-data/MapReader/pull/529))
+
 ## [v1.5.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.5.1) (2024-10-30)
 
 ## Added
