@@ -1131,7 +1131,7 @@ class SheetDownloader:
         self,
         features: gpd.GeoDataFrame,
         map_extent: str | (list | tuple) | None = None,
-        add_id: bool | None = True,
+        add_id: bool = False,
     ) -> None:
         """
         Plot boundaries of map sheets on a map using cartopy.
@@ -1146,7 +1146,7 @@ class SheetDownloader:
             If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
-            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+            Whether to add an ID (WFS ID number) to each map sheet, by default False.
         """
         plt.figure(figsize=[15, 15])
 
@@ -1188,7 +1188,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
     def plot_all_metadata_on_map(
         self,
         map_extent: str | (list | tuple) | None = None,
-        add_id: bool | None = True,
+        add_id: bool = False,
     ) -> None:
         """
         Plots boundaries of all map sheets in metadata on a map using cartopy.
@@ -1203,7 +1203,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
             If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
-            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+            Whether to add an ID (WFS ID number) to each map sheet, by default False.
         """
 
         self.plot_features_on_map(self.metadata, map_extent, add_id)
@@ -1211,7 +1211,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
     def plot_queries_on_map(
         self,
         map_extent: str | (list | tuple) | None = None,
-        add_id: bool | None = True,
+        add_id: bool = False,
     ) -> None:
         """
         Plots boundaries of query results on a map using cartopy.
@@ -1226,7 +1226,7 @@ Try passing coordinates (min_x, max_x, min_y, max_y) instead or leave blank to a
             If None, the map extent will be set automatically.
             By default None.
         add_id : bool, optional
-            Whether to add an ID (WFS ID number) to each map sheet, by default True.
+            Whether to add an ID (WFS ID number) to each map sheet, by default False.
         """
 
         self.plot_features_on_map(self.found_queries, map_extent, add_id)
