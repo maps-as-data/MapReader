@@ -16,6 +16,9 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 
 _Add new changes here_
+
+## [v1.6.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.1) (2024-11-18)
+
 ### Added
 
 - Added `infer_parent_coords_from_patches` method to `MapImages` class ([#511](https://github.com/maps-as-data/MapReader/pull/511))
