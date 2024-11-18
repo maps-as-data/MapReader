@@ -2,12 +2,13 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors)
-![PyPI](https://img.shields.io/pypi/v/MapReader)
+[![PyPI](https://img.shields.io/pypi/v/MapReader)](https://pypi.org/project/mapreader/)
+[![](https://readthedocs.org/projects/mapreader/badge/?version=latest)](https://mapreader.readthedocs.io/en/latest)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Integration Tests badge](https://github.com/Living-with-machines/MapReader/actions/workflows/mr_ci.yml/badge.svg)
-![DOI](https://zenodo.org/badge/430661738.svg)
-![CodeCov](https://codecov.io/github/Living-with-machines/MapReader/graph/badge.svg?token=38GQ3O1GB5)
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.06434/status.svg)](https://doi.org/10.21105/joss.06434)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13643609.svg)](https://zenodo.org/records/13643609)
+[![CodeCov](https://codecov.io/gh/maps-as-data/MapReader/graph/badge.svg?token=38GQ3O1GB5)](https://codecov.io/gh/maps-as-data/MapReader)
+[![JOSS Paper](https://joss.theoj.org/papers/10.21105/joss.06434/status.svg)](https://doi.org/10.21105/joss.06434)
 
 ## Table of Contents
 

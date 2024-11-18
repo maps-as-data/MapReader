@@ -40,7 +40,7 @@ Clone the ``mapreader`` source code from the `MapReader GitHub repository <https
 
 .. code-block:: bash
 
-   git clone https://github.com/Living-with-machines/MapReader.git
+   git clone https://github.com/maps-as-data/MapReader.git
 
 Then, to install ``mapreader`` without the text spotting dependencies:
 
