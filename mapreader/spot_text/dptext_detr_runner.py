@@ -21,10 +21,11 @@ import torch
 from dptext_detr.config import get_cfg
 from shapely import MultiPolygon, Polygon
 
-from .runner_base import Runner
+from .dataclasses import Prediction
+from .runner_base import DetRunner
 
 
-class DPTextDETRRunner(Runner):
+class DPTextDETRRunner(DetRunner):
     def __init__(
         self,
         patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
@@ -71,7 +72,7 @@ class DPTextDETRRunner(Runner):
         # setup the predictor
         self.predictor = DefaultPredictor(cfg)
 
-    def get_patch_predictions(
+    def _get_patch_predictions(
         self,
         outputs: dict,
         return_dataframe: bool = False,
@@ -107,7 +108,7 @@ class DPTextDETRRunner(Runner):
         self._deduplicate(image_id, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.patch_predictions, geo=False)
+            return self._dict_to_dataframe(self.patch_predictions)
         return self.patch_predictions
 
     def _post_process(self, image_id, scores, pred_classes, bd_pnts):
@@ -122,59 +123,6 @@ class DPTextDETRRunner(Runner):
 
             score = f"{score:.2f}"
 
-            self.patch_predictions[image_id].append([polygon, score])
-
-    @staticmethod
-    def _dict_to_dataframe(
-        preds: dict,
-        geo: bool = False,
-        parent: bool = False,
-    ) -> pd.DataFrame:
-        """Convert the predictions dictionary to a pandas DataFrame.
-
-        Parameters
-        ----------
-        preds : dict
-            A dictionary of predictions.
-        geo : bool, optional
-            Whether the dictionary is georeferenced coords (or pixel bounds), by default True
-        parent : bool, optional
-            Whether the dictionary is at the parent level, by default False
-
-        Returns
-        -------
-        pd.DataFrame
-            A pandas DataFrame containing the predictions.
-        """
-        if geo:
-            columns = ["geometry", "crs", "score"]
-        else:
-            columns = ["geometry", "score"]
-
-        if parent:
-            columns.append("patch_id")
-
-        preds_df = pd.concat(
-            pd.DataFrame(
-                preds[k],
-                index=np.full(len(preds[k]), k),
-                columns=columns,
+            self.patch_predictions[image_id].append(
+                Prediction(geometry=polygon, score=score)
             )
-            for k in preds.keys()
-        )
-
-        if geo:
-            # get the crs (should be the same for all)
-            if not preds_df["crs"].nunique() == 1:
-                raise ValueError("[ERROR] Multiple crs found in the predictions.")
-            crs = preds_df["crs"].unique()[0]
-
-            preds_df = gpd.GeoDataFrame(
-                preds_df,
-                geometry="geometry",
-                crs=crs,
-            )
-
-        preds_df.index.name = "image_id"
-        preds_df.reset_index(inplace=True)
-        return preds_df

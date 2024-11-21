@@ -20,10 +20,10 @@ import pandas as pd
 import torch
 from maptextpipeline.config import get_cfg
 
-from .rec_runner_base import RecRunner
+from .runner_base import DetRecRunner
 
 
-class MapTextRunner(RecRunner):
+class MapTextRunner(DetRecRunner):
     def __init__(
         self,
         patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,

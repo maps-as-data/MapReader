@@ -12,16 +12,18 @@ import numpy as np
 import pandas as pd
 import xyzservices as xyz
 from PIL import Image
-from shapely import Polygon
+from shapely import LineString, MultiPolygon, Polygon
 from tqdm.auto import tqdm
 
 from mapreader import MapImages
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
+from .dataclasses import Prediction
 
-class Runner:
+
+class DetRunner:
     def __init__() -> None:
-        """Initialise the Runner class."""
+        """Initialise the DetRunner class."""
         # empty in the base class
 
     def _load_df(
@@ -110,6 +112,52 @@ class Runner:
         parent_df, _ = maps.convert_images()
         self.parent_df = parent_df
 
+    @staticmethod
+    def _dict_to_dataframe(
+        preds: dict,
+    ) -> pd.DataFrame:
+        """Convert the predictions dictionary to a pandas DataFrame.
+
+        Parameters
+        ----------
+        preds : dict
+            A dictionary of predictions.
+
+        Returns
+        -------
+        pd.DataFrame
+            A pandas DataFrame containing the predictions.
+        """
+
+        if len(preds):
+            preds_df = pd.concat(
+                pd.DataFrame(
+                    preds[k],
+                    index=np.full(len(preds[k]), k),
+                )
+                for k in preds.keys()
+            )
+            # drop empty cols
+            preds_df.dropna(inplace=True, axis=1)
+
+            if "crs" in preds_df.columns:
+                # get the crs (should be the same for all)
+                if not preds_df["crs"].nunique() == 1:
+                    raise ValueError("[ERROR] Multiple crs found in the predictions.")
+                crs = preds_df["crs"].unique()[0]
+
+                preds_df = gpd.GeoDataFrame(
+                    preds_df,
+                    geometry="geometry",
+                    crs=crs,
+                )
+        else:
+            preds_df = pd.DataFrame()  # empty dataframe
+
+        preds_df.index.name = "image_id"
+        preds_df.reset_index(inplace=True)  # reset index to get image_id as a column
+        return preds_df
+
     def run_all(
         self,
         return_dataframe: bool = False,
@@ -166,9 +214,7 @@ class Runner:
             _ = self.run_on_image(img_path, return_outputs=False, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(
-                self.patch_predictions, geo=False, parent=False
-            )
+            return self._dict_to_dataframe(self.patch_predictions)
         return self.patch_predictions
 
     def run_on_image(
@@ -208,16 +254,13 @@ class Runner:
         if return_outputs:
             return outputs
 
-        self.get_patch_predictions(outputs, min_ioa=min_ioa)
-
-        if return_dataframe:
-            return self._dict_to_dataframe(
-                self.patch_predictions, geo=False, parent=False
-            )
-        return self.patch_predictions
+        patch_predictions = self._get_patch_predictions(
+            outputs, return_dataframe=return_dataframe, min_ioa=min_ioa
+        )
+        return patch_predictions
 
     def _deduplicate(self, image_id, min_ioa=0.7):
-        polygons = [instance[0] for instance in self.patch_predictions[image_id]]
+        polygons = [instance.geometry for instance in self.patch_predictions[image_id]]
 
         def calc_ioa(polygons, i, j):
             return polygons[i].intersection(polygons[j]).area / polygons[i].area
@@ -272,6 +315,7 @@ class Runner:
         dict or pd.DataFrame
             A dictionary of predictions for each parent image or a DataFrame if `return_dataframe` is True.
         """
+        self.parent_predictions = {}  # reset parent predictions
 
         for image_id, prediction in self.patch_predictions.items():
             parent_id = self.patch_df.loc[image_id, "parent_id"]
@@ -279,7 +323,7 @@ class Runner:
                 self.parent_predictions[parent_id] = []
 
             for instance in prediction:
-                polygon = instance[0]
+                polygon = instance.geometry
 
                 xx, yy = (np.array(i) for i in polygon.exterior.xy)
                 xx = xx + self.patch_df.loc[image_id, "pixel_bounds"][0]  # add min_x
@@ -287,7 +331,12 @@ class Runner:
 
                 parent_polygon = Polygon(zip(xx, yy)).buffer(0)
                 self.parent_predictions[parent_id].append(
-                    [parent_polygon, *instance[1:], image_id]
+                    Prediction(
+                        geometry=parent_polygon,
+                        score=instance.score,
+                        text=instance.text,
+                        patch_id=image_id,
+                    )
                 )
 
         if deduplicate:
@@ -295,16 +344,12 @@ class Runner:
                 self._deduplicate_parent_level(parent_id, min_ioa=min_ioa)
 
         if return_dataframe:
-            return self._dict_to_dataframe(
-                self.parent_predictions, geo=False, parent=True
-            )
+            return self._dict_to_dataframe(self.parent_predictions)
         return self.parent_predictions
 
     def _deduplicate_parent_level(self, image_id, min_ioa=0.7):
         # get parent predictions for selected parent image
-        parent_preds = np.array(self.parent_predictions[image_id])
-
-        all_patches = parent_preds[:, -1]
+        all_patches = [pred.patch_id for pred in self.parent_predictions[image_id]]
         patches = np.unique(all_patches).tolist()
 
         for patch_i, patch_j in combinations(patches, 2):
@@ -322,11 +367,14 @@ class Runner:
 
                 # get polygons that overlap with the patch intersection
                 polygons = []
-                for i, pred in enumerate(parent_preds):
-                    if pred[-1] in [patch_i, patch_j] and pred[0].intersects(
-                        intersection
-                    ):
-                        polygons.append([i, pred[0]])
+                for i, pred in enumerate(np.array(self.parent_predictions[image_id])):
+                    if pred is None:
+                        continue
+                    elif pred.patch_id in [
+                        patch_i,
+                        patch_j,
+                    ] and pred.geometry.intersects(intersection):
+                        polygons.append([i, pred.geometry])
 
                 def calc_ioa(polygons, i, j):
                     return (
@@ -389,12 +437,14 @@ class Runner:
             print("[INFO] Converting patch pixel bounds to parent pixel bounds.")
             _ = self.convert_to_parent_pixel_bounds()
 
+        self.geo_predictions = {}  # reset geo predictions
+
         for parent_id, prediction in self.parent_predictions.items():
             if parent_id not in self.geo_predictions.keys():
                 self.geo_predictions[parent_id] = []
 
                 for instance in prediction:
-                    polygon = instance[0]
+                    polygon = instance.geometry
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
                     xx = (
@@ -410,16 +460,23 @@ class Runner:
 
                     parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     self.geo_predictions[parent_id].append(
-                        [parent_polygon_geo, crs, *instance[1:]]
+                        Prediction(
+                            geometry=parent_polygon_geo,
+                            score=instance.score,
+                            text=instance.text,
+                            patch_id=instance.patch_id,
+                            crs=crs,
+                        )
                     )
 
         if return_dataframe:
-            return self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
+            return self._dict_to_dataframe(self.geo_predictions)
         return self.geo_predictions
 
     def save_to_geojson(
         self,
         save_path: str | pathlib.Path,
+        centroid: bool = False,
     ) -> None:
         """Save the georeferenced predictions to a GeoJSON file.
 
@@ -427,14 +484,25 @@ class Runner:
         ----------
         save_path : str | pathlib.Path, optional
             Path to save the GeoJSON file
+        centroid : bool, optional
+            Whether to save the centroid of the polygons as the geometry column, by default False.
+            Note: The original polygon will stil be saved as a separate column.
         """
         if self.geo_predictions == {}:
             raise ValueError(
                 "[ERROR] No georeferenced predictions found. Run `convert_to_coords` first."
             )
 
-        geo_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
+        geo_df = self._dict_to_dataframe(self.geo_predictions)
+
+        if centroid:
+            geo_df["polygon"] = geo_df["geometry"].to_wkt()
+            geo_df["geometry"] = geo_df["geometry"].apply(self._polygon_to_centroid)
+
         geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")
+
+    def _polygon_to_centroid(self, polygon):
+        return polygon.centroid
 
     def show_predictions(
         self,
@@ -488,17 +556,17 @@ class Runner:
         ax.set_title(image_id)
 
         for instance in preds[image_id]:
-            # Instance is:
-            # - [geometry, text, score] for det/rec
-            # - [geometry, score] for det only
-            polygon = np.array(instance[0].exterior.coords.xy)
-            center = instance[0].centroid.coords.xy
+            polygon = np.array(instance.geometry.exterior.coords.xy)
+            center = instance.geometry.centroid.coords.xy
             patch = patches.Polygon(polygon.T, edgecolor=border_color, facecolor="none")
             ax.add_patch(patch)
             ax.text(
-                center[0][0], center[1][0], instance[1], fontsize=8, color=text_color
+                x=center[0][0],
+                y=center[1][0],
+                s=instance.text if instance.text is not None else instance.score,
+                fontsize=8,
+                color=text_color,
             )
-
         fig.show()
 
     def explore_predictions(
@@ -526,9 +594,301 @@ class Runner:
         else:
             tiles = xyz.providers.OpenStreetMap.Mapnik
 
-        preds_df = self._dict_to_dataframe(self.geo_predictions, geo=True, parent=True)
+        preds_df = self._dict_to_dataframe(self.geo_predictions)
 
         return preds_df[preds_df["image_id"] == parent_id].explore(
             tiles=tiles,
             style_kwds=style_kwargs,
         )
+
+
+class DetRecRunner(DetRunner):
+    def _get_patch_predictions(
+        self,
+        outputs: dict,
+        return_dataframe: bool = False,
+        min_ioa: float = 0.7,
+    ) -> dict | pd.DataFrame:
+        """Post process the model outputs to get patch predictions.
+
+        Parameters
+        ----------
+        outputs : dict
+            The outputs from the model.
+        return_dataframe : bool, optional
+            Whether to return the predictions as a pandas DataFrame, by default False
+        min_ioa : float, optional
+            The minimum intersection over area to consider two polygons the same, by default 0.7
+
+        Returns
+        -------
+        dict or pd.DataFrame
+            A dictionary containing the patch predictions or a DataFrame if `as_dataframe` is True.
+        """
+        # key for predictions
+        image_id = outputs["image_id"]
+        self.patch_predictions[image_id] = []
+
+        # get instances
+        instances = outputs["instances"].to("cpu")
+        ctrl_pnts = instances.ctrl_points.numpy()
+        scores = instances.scores.tolist()
+        recs = instances.recs
+        bd_pts = np.asarray(instances.bd)
+
+        self._post_process(image_id, ctrl_pnts, scores, recs, bd_pts)
+        self._deduplicate(image_id, min_ioa=min_ioa)
+
+        if return_dataframe:
+            return self._dict_to_dataframe(self.patch_predictions)
+        return self.patch_predictions
+
+    def _process_ctrl_pnt(self, pnt):
+        points = pnt.reshape(-1, 2)
+        return points
+
+    def _post_process(self, image_id, ctrl_pnts, scores, recs, bd_pnts):
+        for ctrl_pnt, score, rec, bd in zip(ctrl_pnts, scores, recs, bd_pnts):
+            # draw polygons
+            if bd is not None:
+                bd = np.hsplit(bd, 2)
+                bd = np.vstack([bd[0], bd[1][::-1]])
+                polygon = Polygon(bd).buffer(0)
+
+                if isinstance(polygon, MultiPolygon):
+                    polygon = polygon.convex_hull
+
+            # draw center lines
+            line = self._process_ctrl_pnt(ctrl_pnt)
+            line = LineString(line)
+
+            # draw text
+            text = self._ctc_decode_recognition(rec)
+            if self.voc_size == 37:
+                text = text.upper()
+            # text = "{:.2f}: {}".format(score, text)
+            text = f"{text}"
+            score = f"{score:.2f}"
+
+            self.patch_predictions[image_id].append(
+                Prediction(geometry=polygon, score=score, text=text)
+            )
+
+    def search_preds(
+        self, search_text: str, ignore_case: bool = True, return_dataframe: bool = False
+    ) -> dict | pd.DataFrame:
+        """Search the predictions for specific text. Accepts regex.
+
+        Parameters
+        ----------
+        search_text : str
+            The text to search for. Can be a regex pattern.
+        ignore_case : bool, optional
+            Whether to ignore case when searching, by default True.
+        return_dataframe : bool, optional
+            Whether to return the results as a pandas DataFrame, by default False.
+
+        Returns
+        -------
+        dict | pd.DataFrame
+            A dictionary containing the search results or a DataFrame if `return_dataframe` is True.
+
+        Raises
+        ------
+        ValueError
+            If no parent predictions are found.
+        """
+        # reset the search results
+        self.search_results = {}
+
+        # whether to ignore case
+        kwargs = {"flags": re.IGNORECASE} if ignore_case else {}
+
+        if self.parent_predictions == {}:
+            raise ValueError(
+                "[ERROR] No parent predictions found. You may need to run `convert_to_parent_pixel_bounds()`."
+            )
+
+        for image_id, preds in self.parent_predictions.items():
+            for instance in preds:
+                if re.search(search_text, instance.text, **kwargs):
+                    if image_id in self.search_results:
+                        self.search_results[image_id].append(instance)
+                    else:
+                        self.search_results[image_id] = [instance]
+
+        if return_dataframe:
+            return self._dict_to_dataframe(self.search_results)
+        return self.search_results
+
+    def show_search_results(
+        self,
+        parent_id: str,
+        figsize: tuple | None = (10, 10),
+        border_color: str | None = "r",
+        text_color: str | None = "b",
+    ) -> None:
+        """Show the search results on an image.
+
+        Parameters
+        ----------
+        parent_id : str
+            The image ID to show the predictions on (must be parent level).
+        figsize : tuple | None, optional
+            The size of the figure, by default (10, 10)
+        border_color : str | None, optional
+            The color of the border of the polygons, by default "r"
+        text_color : str | None, optional
+            The color of the text, by default "b".
+
+        Raises
+        ------
+        ValueError
+            If the image ID is not found in the patch or parent predictions.
+        """
+        if parent_id in self.parent_predictions.keys():
+            image_path = self.parent_df.loc[parent_id, "image_path"]
+        else:
+            raise ValueError(f"[ERROR] {parent_id} not found in parent predictions.")
+
+        img = Image.open(image_path)
+
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.axis("off")
+
+        # check if grayscale
+        if len(img.getbands()) == 1:
+            ax.imshow(img, cmap="gray", vmin=0, vmax=255, zorder=1)
+        else:
+            ax.imshow(img, zorder=1)
+        ax.set_title(parent_id)
+
+        preds = self.search_results
+
+        for instance in preds[parent_id]:
+            # Instance is:
+            # - [geometry, text, score] for det/rec
+            polygon = np.array(instance.geometry.exterior.coords.xy)
+            center = instance.geometry.centroid.coords.xy
+            patch = patches.Polygon(polygon.T, edgecolor=border_color, facecolor="none")
+            ax.add_patch(patch)
+            ax.text(
+                x=center[0][0],
+                y=center[1][0],
+                s=instance.text,
+                fontsize=8,
+                color=text_color,
+            )
+
+        fig.show()
+
+    def _get_geo_search_results(self):
+        """Convert search results to georeferenced search results.
+
+        Returns
+        -------
+        dict
+            Dictionary containing georeferenced search results.
+        """
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] Cannot convert to coordinates as parent_df does not have 'coordinates' column."
+            )
+
+        geo_search_results = {}
+
+        for parent_id, prediction in self.search_results.items():
+            if parent_id not in geo_search_results.keys():
+                geo_search_results[parent_id] = []
+
+                for instance in prediction:
+                    polygon = instance.geometry
+
+                    xx, yy = (np.array(i) for i in polygon.exterior.xy)
+                    xx = (
+                        xx * self.parent_df.loc[parent_id, "dlon"]
+                        + self.parent_df.loc[parent_id, "coordinates"][0]
+                    )
+                    yy = (
+                        self.parent_df.loc[parent_id, "coordinates"][3]
+                        - yy * self.parent_df.loc[parent_id, "dlat"]
+                    )
+
+                    crs = self.parent_df.loc[parent_id, "crs"]
+
+                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
+                    geo_search_results[parent_id].append(
+                        Prediction(
+                            geometry=parent_polygon_geo,
+                            score=instance.score,
+                            text=instance.score,
+                            patch_id=instance.patch_id,
+                            crs=crs,
+                        )
+                    )
+
+        return geo_search_results
+
+    def explore_search_results(
+        self,
+        parent_id: str,
+        xyz_url: str | None = None,
+        style_kwargs: dict | None = None,
+    ):
+        self.check_georeferencing()
+        if not self.georeferenced:
+            raise ValueError(
+                "[ERROR] This method only works for georeferenced results. Please ensure parent_df has 'coordinates' column and run `convert_to_coords` first."
+            )
+
+        if parent_id not in self.geo_predictions.keys():
+            raise ValueError(f"[ERROR] {parent_id} not found in geo predictions.")
+
+        if style_kwargs is None:
+            style_kwargs = {"fillOpacity": 0.2}
+
+        if xyz_url:
+            tiles = xyz.TileProvider(name=xyz_url, url=xyz_url, attribution=xyz_url)
+        else:
+            tiles = xyz.providers.OpenStreetMap.Mapnik
+
+        geo_search_results = self._get_geo_search_results()
+        geo_df = self._dict_to_dataframe(geo_search_results)
+
+        return geo_df[geo_df["image_id"] == parent_id].explore(
+            tiles=tiles,
+            style_kwds=style_kwargs,
+        )
+
+    def save_search_results_to_geojson(
+        self,
+        save_path: str | pathlib.Path,
+        centroid: bool = False,
+    ) -> None:
+        """Convert the search results to georeferenced search results and save them to a GeoJSON file.
+
+        Parameters
+        ----------
+        save_path : str | pathlib.Path
+            The path to save the GeoJSON file.
+        centroid : bool, optional
+            Whether to save the centroid of the polygons as the geometry column, by default False.
+            Note: The original polygon will stil be saved as a separate column.
+
+        Raises
+        ------
+        ValueError
+            If no search results are found.
+        """
+        if self.search_results == {}:
+            raise ValueError("[ERROR] No results to save!")
+
+        geo_search_results = self._get_geo_search_results()
+        geo_df = self._dict_to_dataframe(geo_search_results)
+
+        if centroid:
+            geo_df["polygon"] = geo_df["geometry"].to_wkt()
+            geo_df["geometry"] = geo_df["geometry"].apply(self._polygon_to_centroid)
+
+        geo_df.to_file(save_path, driver="GeoJSON", engine="pyogrio")
