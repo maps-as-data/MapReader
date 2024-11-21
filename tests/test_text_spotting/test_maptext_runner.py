@@ -144,7 +144,7 @@ def test_maptext_run_all(init_runner, mock_response):
     assert "patch-0-0-800-40-#mapreader_text.png#.png" in out.keys()
     assert isinstance(out["patch-0-0-800-40-#mapreader_text.png#.png"], list)
     # dataframe
-    out = runner._dict_to_dataframe(runner.patch_predictions, geo=False, parent=False)
+    out = runner._dict_to_dataframe(runner.patch_predictions)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(["image_id", "geometry", "text", "score"])
     assert "patch-0-0-800-40-#mapreader_text.png#.png" in out["image_id"].values
@@ -158,7 +158,7 @@ def test_maptext_convert_to_parent(runner_run_all, mock_response):
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
     # dataframe
-    out = runner._dict_to_dataframe(runner.parent_predictions, geo=False, parent=True)
+    out = runner._dict_to_dataframe(runner.parent_predictions)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "geometry", "text", "score"]
@@ -174,7 +174,7 @@ def test_maptext_convert_to_parent_coords(runner_run_all, mock_response):
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
     # dataframe
-    out = runner._dict_to_dataframe(runner.geo_predictions, geo=True, parent=True)
+    out = runner._dict_to_dataframe(runner.geo_predictions)
     assert isinstance(out, gpd.GeoDataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "geometry", "crs", "text", "score"]
