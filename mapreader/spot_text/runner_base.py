@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 import xyzservices as xyz
 from PIL import Image
-from shapely import LineString, MultiPolygon, Polygon
+from shapely import LineString, MultiPolygon, Polygon, from_wkt
 from tqdm.auto import tqdm
 
 from mapreader import MapImages
 from mapreader.utils.load_frames import load_from_csv, load_from_geojson
 
-from .dataclasses import Prediction
+from .dataclasses import GeoPrediction, ParentPrediction, PatchPrediction
 
 
 class DetRunner:
@@ -260,7 +260,9 @@ class DetRunner:
         return patch_predictions
 
     def _deduplicate(self, image_id, min_ioa=0.7):
-        polygons = [instance.geometry for instance in self.patch_predictions[image_id]]
+        polygons = [
+            instance.pixel_geometry for instance in self.patch_predictions[image_id]
+        ]
 
         def calc_ioa(polygons, i, j):
             return polygons[i].intersection(polygons[j]).area / polygons[i].area
@@ -323,7 +325,7 @@ class DetRunner:
                 self.parent_predictions[parent_id] = []
 
             for instance in prediction:
-                polygon = instance.geometry
+                polygon = instance.pixel_geometry
 
                 xx, yy = (np.array(i) for i in polygon.exterior.xy)
                 xx = xx + self.patch_df.loc[image_id, "pixel_bounds"][0]  # add min_x
@@ -331,8 +333,8 @@ class DetRunner:
 
                 parent_polygon = Polygon(zip(xx, yy)).buffer(0)
                 self.parent_predictions[parent_id].append(
-                    Prediction(
-                        geometry=parent_polygon,
+                    ParentPrediction(
+                        pixel_geometry=parent_polygon,
                         score=instance.score,
                         text=instance.text,
                         patch_id=image_id,
@@ -373,8 +375,8 @@ class DetRunner:
                     elif pred.patch_id in [
                         patch_i,
                         patch_j,
-                    ] and pred.geometry.intersects(intersection):
-                        polygons.append([i, pred.geometry])
+                    ] and pred.pixel_geometry.intersects(intersection):
+                        polygons.append([i, pred.pixel_geometry])
 
                 def calc_ioa(polygons, i, j):
                     return (
@@ -444,7 +446,7 @@ class DetRunner:
                 self.geo_predictions[parent_id] = []
 
                 for instance in prediction:
-                    polygon = instance.geometry
+                    polygon = instance.pixel_geometry
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
                     xx = (
@@ -456,15 +458,16 @@ class DetRunner:
                         - yy * self.parent_df.loc[parent_id, "dlat"]
                     )
 
+                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     crs = self.parent_df.loc[parent_id, "crs"]
 
-                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     self.geo_predictions[parent_id].append(
-                        Prediction(
-                            geometry=parent_polygon_geo,
+                        GeoPrediction(
+                            pixel_geometry=instance.pixel_geometry,
                             score=instance.score,
                             text=instance.text,
                             patch_id=instance.patch_id,
+                            geometry=parent_polygon_geo,
                             crs=crs,
                         )
                     )
@@ -556,8 +559,8 @@ class DetRunner:
         ax.set_title(image_id)
 
         for instance in preds[image_id]:
-            polygon = np.array(instance.geometry.exterior.coords.xy)
-            center = instance.geometry.centroid.coords.xy
+            polygon = np.array(instance.pixel_geometry.exterior.coords.xy)
+            center = instance.pixel_geometry.centroid.coords.xy
             patch = patches.Polygon(polygon.T, edgecolor=border_color, facecolor="none")
             ax.add_patch(patch)
             ax.text(
@@ -600,6 +603,91 @@ class DetRunner:
             tiles=tiles,
             style_kwds=style_kwargs,
         )
+
+    def load_predictions(
+        self,
+        path_save: str | pathlib.Path,
+    ):
+        """Load georeferenced text predictions from a GeoJSON file.
+
+        Parameters
+        ----------
+        path_save : str | pathlib.Path
+            The path to the GeoJSON file.
+
+        Raises
+        ------
+        ValueError
+            If the path does not point to a GeoJSON file.
+
+        Note
+        ----
+        This will overwrite any existing predictions!
+        """
+        if re.search(r"\..*?json$", str(path_save)):
+            preds_df = load_from_geojson(path_save, engine="pyogrio")
+        else:
+            raise ValueError("[ERROR] ``path_save`` must be a path to a geojson file.")
+
+        # convert pixel_geometry to shapely geometry
+        preds_df["pixel_geometry"] = preds_df["pixel_geometry"].apply(
+            lambda x: from_wkt(x)
+        )
+
+        self.geo_predictions = {}
+        self.parent_predictions = {}
+
+        for image_id in preds_df.index.unique():
+            if image_id not in self.geo_predictions.keys():
+                self.geo_predictions[image_id] = []
+            if image_id not in self.parent_predictions.keys():
+                self.parent_predictions[image_id] = []
+
+            for _, v in preds_df[preds_df.index == image_id].iterrows():
+                self.geo_predictions[image_id].append(
+                    GeoPrediction(
+                        pixel_geometry=v.pixel_geometry,
+                        score=v.score,
+                        text=v.text,
+                        patch_id=v.patch_id,
+                        geometry=v.geometry,
+                        crs=v.crs,
+                    )
+                )
+                self.parent_predictions[image_id].append(
+                    ParentPrediction(
+                        pixel_geometry=v.pixel_geometry,
+                        score=v.score,
+                        text=v.text,
+                        patch_id=v.patch_id,
+                    )
+                )
+
+        self.patch_predictions = {}  # reset patch predictions
+
+        for _, prediction in self.parent_predictions.items():
+            for instance in prediction:
+                if instance.patch_id not in self.patch_predictions.keys():
+                    self.patch_predictions[instance.patch_id] = []
+
+                polygon = instance.pixel_geometry
+
+                xx, yy = (np.array(i) for i in polygon.exterior.xy)
+                xx = (
+                    xx - self.patch_df.loc[instance.patch_id, "pixel_bounds"][0]
+                )  # add min_x
+                yy = (
+                    yy - self.patch_df.loc[instance.patch_id, "pixel_bounds"][1]
+                )  # add min_y
+
+                patch_polygon = Polygon(zip(xx, yy)).buffer(0)
+                self.patch_predictions[instance.patch_id].append(
+                    PatchPrediction(
+                        pixel_geometry=patch_polygon,
+                        score=instance.score,
+                        text=instance.text,
+                    )
+                )
 
 
 class DetRecRunner(DetRunner):
@@ -671,7 +759,7 @@ class DetRecRunner(DetRunner):
             score = f"{score:.2f}"
 
             self.patch_predictions[image_id].append(
-                Prediction(geometry=polygon, score=score, text=text)
+                PatchPrediction(pixel_geometry=polygon, score=score, text=text)
             )
 
     def search_preds(
@@ -766,10 +854,8 @@ class DetRecRunner(DetRunner):
         preds = self.search_results
 
         for instance in preds[parent_id]:
-            # Instance is:
-            # - [geometry, text, score] for det/rec
-            polygon = np.array(instance.geometry.exterior.coords.xy)
-            center = instance.geometry.centroid.coords.xy
+            polygon = np.array(instance.pixel_geometry.exterior.coords.xy)
+            center = instance.pixel_geometry.centroid.coords.xy
             patch = patches.Polygon(polygon.T, edgecolor=border_color, facecolor="none")
             ax.add_patch(patch)
             ax.text(
@@ -803,7 +889,7 @@ class DetRecRunner(DetRunner):
                 geo_search_results[parent_id] = []
 
                 for instance in prediction:
-                    polygon = instance.geometry
+                    polygon = instance.pixel_geometry
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
                     xx = (
@@ -819,11 +905,12 @@ class DetRecRunner(DetRunner):
 
                     parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     geo_search_results[parent_id].append(
-                        Prediction(
-                            geometry=parent_polygon_geo,
+                        GeoPrediction(
+                            pixel_geometry=instance.pixel_geometry,
                             score=instance.score,
                             text=instance.score,
                             patch_id=instance.patch_id,
+                            geometry=parent_polygon_geo,
                             crs=crs,
                         )
                     )
