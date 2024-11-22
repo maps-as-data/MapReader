@@ -35,3 +35,9 @@ worked_examples/**/tmp_checkpoints/*
 /tmp_checkpoints/*
 /tests/sample_files/cropped_74488689.tif
 /tests/sample_files/cropped_L.tif
+
+# testing_noteooks dev
+testing_notebooks/*
+!testing_notebooks/*.ipynb
+testing_notebooks/.ipynb_checkpoints/
+
