@@ -13,6 +13,11 @@ from dptext_detr.config import get_cfg
 
 from mapreader import DPTextDETRRunner
 from mapreader.load import MapImages
+from mapreader.spot_text.dataclasses import (
+    GeoPrediction,
+    ParentPrediction,
+    PatchPrediction,
+)
 
 # use cloned DPText-DETR path if running in github actions
 DPTEXT_DETR_PATH = (
@@ -143,10 +148,13 @@ def test_dptext_run_all(init_runner, mock_response):
     assert isinstance(out, dict)
     assert "patch-0-0-800-40-#mapreader_text.png#.png" in out.keys()
     assert isinstance(out["patch-0-0-800-40-#mapreader_text.png#.png"], list)
+    assert isinstance(
+        out["patch-0-0-800-40-#mapreader_text.png#.png"][0], PatchPrediction
+    )
     # dataframe
     out = runner._dict_to_dataframe(runner.patch_predictions)
     assert isinstance(out, pd.DataFrame)
-    assert set(out.columns) == set(["image_id", "geometry", "score"])
+    assert set(out.columns) == set(["image_id", "pixel_geometry", "score"])
     assert "patch-0-0-800-40-#mapreader_text.png#.png" in out["image_id"].values
 
 
@@ -157,10 +165,11 @@ def test_dptext_convert_to_parent(runner_run_all, mock_response):
     assert isinstance(out, dict)
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
+    assert isinstance(out["mapreader_text.png"][0], ParentPrediction)
     # dataframe
     out = runner._dict_to_dataframe(runner.parent_predictions)
     assert isinstance(out, pd.DataFrame)
-    assert set(out.columns) == set(["image_id", "patch_id", "geometry", "score"])
+    assert set(out.columns) == set(["image_id", "patch_id", "pixel_geometry", "score"])
     assert "mapreader_text.png" in out["image_id"].values
 
 
@@ -171,10 +180,13 @@ def test_dptext_convert_to_parent_coords(runner_run_all, mock_response):
     assert isinstance(out, dict)
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
+    assert isinstance(out["mapreader_text.png"][0], GeoPrediction)
     # dataframe
     out = runner._dict_to_dataframe(runner.geo_predictions)
     assert isinstance(out, gpd.GeoDataFrame)
-    assert set(out.columns) == set(["image_id", "patch_id", "geometry", "crs", "score"])
+    assert set(out.columns) == set(
+        ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "score"]
+    )
     assert "mapreader_text.png" in out["image_id"].values
     assert out.crs == runner.parent_df.crs
 
@@ -223,4 +235,6 @@ def test_dptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
     assert os.path.exists(f"{tmp_path}/text.geojson")
     gdf = gpd.read_file(f"{tmp_path}/text.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
-    assert set(gdf.columns) == set(["image_id", "patch_id", "geometry", "crs", "score"])
+    assert set(gdf.columns) == set(
+        ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "score"]
+    )

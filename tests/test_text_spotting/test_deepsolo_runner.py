@@ -13,7 +13,11 @@ from detectron2.structures.instances import Instances
 
 from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
-from mapreader.spot_text.dataclasses import ParentPrediction, PatchPrediction
+from mapreader.spot_text.dataclasses import (
+    GeoPrediction,
+    ParentPrediction,
+    PatchPrediction,
+)
 
 # use cloned DeepSolo path if running in github actions
 DEEPSOLO_PATH = (
@@ -184,6 +188,7 @@ def test_deepsolo_convert_to_parent_coords(runner_run_all, mock_response):
     assert isinstance(out, dict)
     assert "mapreader_text.png" in out.keys()
     assert isinstance(out["mapreader_text.png"], list)
+    assert isinstance(out["mapreader_text.png"][0], GeoPrediction)
     # dataframe
     out = runner._dict_to_dataframe(runner.geo_predictions)
     assert isinstance(out, gpd.GeoDataFrame)
