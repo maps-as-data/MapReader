@@ -21,7 +21,7 @@ import torch
 from dptext_detr.config import get_cfg
 from shapely import MultiPolygon, Polygon
 
-from .dataclasses import Prediction
+from .dataclasses import PatchPrediction
 from .runner_base import DetRunner
 
 
@@ -124,5 +124,5 @@ class DPTextDETRRunner(DetRunner):
             score = f"{score:.2f}"
 
             self.patch_predictions[image_id].append(
-                Prediction(geometry=polygon, score=score)
+                PatchPrediction(geometry=polygon, score=score)
             )
