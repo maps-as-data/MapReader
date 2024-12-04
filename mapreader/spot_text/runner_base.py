@@ -500,7 +500,9 @@ class DetRunner:
 
         if centroid:
             geo_df["polygon"] = geo_df["geometry"].to_wkt()
-            geo_df["geometry"] = geo_df["geometry"].centroid
+            geo_df["geometry"] = (
+                geo_df["geometry"].to_crs("27700").centroid.to_crs(geo_df.crs)
+            )
 
         geo_df.to_file(path_save, driver="GeoJSON", engine="pyogrio")
 
@@ -553,7 +555,9 @@ class DetRunner:
             geo_df = self._dict_to_dataframe(self.geo_predictions)
             if centroid:
                 geo_df["polygon"] = geo_df["geometry"]
-                geo_df["geometry"] = geo_df["geometry"].centroid
+                geo_df["geometry"] = (
+                    geo_df["geometry"].to_crs("27700").centroid.to_crs(geo_df.crs)
+                )
             geo_df.to_csv(f"{path_save}/geo_predictions.csv")
 
     def show_predictions(
@@ -751,15 +755,15 @@ class DetRunner:
                     "[ERROR] ``patch_preds`` must be a pandas DataFrame or path to a CSV file."
                 )
 
-        # if we have a polygon column, this implies the pixel_geometry column is the centroid
-        if "polygon" in patch_preds.columns:
-            patch_preds["pixel_geometry"] = patch_preds["polygon"]
-            patch_preds.drop(columns=["polygon"], inplace=True)
+            # if we have a polygon column, this implies the pixel_geometry column is the centroid
+            if "polygon" in patch_preds.columns:
+                patch_preds["pixel_geometry"] = patch_preds["polygon"]
+                patch_preds.drop(columns=["polygon"], inplace=True)
 
-        # convert pixel_geometry to shapely geometry
-        patch_preds["pixel_geometry"] = patch_preds["pixel_geometry"].apply(
-            lambda x: from_wkt(x)
-        )
+            # convert pixel_geometry to shapely geometry
+            patch_preds["pixel_geometry"] = patch_preds["pixel_geometry"].apply(
+                lambda x: from_wkt(x)
+            )
 
         self.patch_predictions = {}  # reset patch predictions
 
@@ -1068,6 +1072,8 @@ class DetRecRunner(DetRunner):
 
         if centroid:
             geo_df["polygon"] = geo_df["geometry"].to_wkt()
-            geo_df["geometry"] = geo_df["geometry"].centroid
+            geo_df["geometry"] = (
+                geo_df["geometry"].to_crs("27700").centroid.to_crs(geo_df.crs)
+            )
 
         geo_df.to_file(path_save, driver="GeoJSON", engine="pyogrio")
