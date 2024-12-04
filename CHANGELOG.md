@@ -17,6 +17,11 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
+## Added
+
+- Added ablity to save and reload text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
+- Added minimal dataclasses for text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
+
 ## [v1.6.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.1) (2024-11-18)
 
 ### Added
