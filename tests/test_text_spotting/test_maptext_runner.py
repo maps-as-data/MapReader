@@ -5,11 +5,13 @@ import pathlib
 import pickle
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
 from maptextpipeline.config import get_cfg
+from shapely import Polygon
 
 from mapreader import MapTextRunner
 from mapreader.load import MapImages
@@ -139,6 +141,80 @@ def test_maptext_init_tsv(init_dataframes, tmp_path):
     assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
+
+
+def test_maptext_init_geojson(init_dataframes, tmp_path, mock_response):
+    parent_df, patch_df = init_dataframes
+    parent_df.to_file(f"{tmp_path}/parent_df.geojson", driver="GeoJSON")
+    patch_df.to_file(f"{tmp_path}/patch_df.geojson", driver="GeoJSON")
+    runner = MapTextRunner(
+        f"{tmp_path}/patch_df.geojson",
+        parent_df=f"{tmp_path}/parent_df.geojson",
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+    )
+    assert isinstance(runner, MapTextRunner)
+    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.parent_df.iloc[0]["geometry"], Polygon)
+    out = runner.run_all()
+    assert isinstance(out, dict)
+    assert "patch-0-0-800-40-#mapreader_text.png#.png" in out.keys()
+    assert isinstance(out["patch-0-0-800-40-#mapreader_text.png#.png"], list)
+    assert isinstance(
+        out["patch-0-0-800-40-#mapreader_text.png#.png"][0], PatchPrediction
+    )
+
+
+def test_maptext_init_errors(init_dataframes):
+    parent_df, patch_df = init_dataframes
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson"):
+        MapTextRunner(
+            patch_df="fake_file.txt",
+            parent_df=parent_df,
+            cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson"):
+        MapTextRunner(
+            patch_df=patch_df,
+            parent_df="fake_file.txt",
+            cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+        )
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson"):
+        MapTextRunner(
+            patch_df=np.array([1, 2, 3]),
+            parent_df=parent_df,
+        )
+    with pytest.raises(ValueError, match="path to a CSV/TSV/etc or geojson"):
+        MapTextRunner(
+            patch_df=patch_df,
+            parent_df=np.array([1, 2, 3]),
+        )
+
+
+def test_maptext_check_georeferencing(init_dataframes):
+    parent_df, patch_df = init_dataframes
+    runner = MapTextRunner(
+        patch_df,
+        parent_df=parent_df,
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+    )
+    runner.check_georeferencing()
+    assert runner.georeferenced
+
+    runner = MapTextRunner(
+        patch_df,
+        parent_df=parent_df.drop(columns=["dlat", "dlon"]),
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+    )
+    runner.check_georeferencing()
+    assert runner.georeferenced
+
+    runner = MapTextRunner(
+        patch_df,
+        parent_df=parent_df.drop(columns=["coordinates"]),
+        cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
+    )
+    runner.check_georeferencing()
+    assert not runner.georeferenced
 
 
 def test_maptext_run_all(init_runner, mock_response):
