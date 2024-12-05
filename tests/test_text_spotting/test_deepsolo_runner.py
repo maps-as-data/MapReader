@@ -323,6 +323,11 @@ def test_deepsolo_save_to_geojson(runner_run_all, tmp_path, mock_response):
     assert set(gdf.columns) == set(
         ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "text", "score"]
     )
+
+
+def test_deepsolo_save_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
+    runner = runner_run_all
+    _ = runner.convert_to_coords()
     runner.save_to_geojson(f"{tmp_path}/text_centroid.geojson", centroid=True)
     assert os.path.exists(f"{tmp_path}/text_centroid.geojson")
     gdf_centroid = gpd.read_file(f"{tmp_path}/text_centroid.geojson")
@@ -504,6 +509,32 @@ def test_deepsolo_save_search_results(runner_run_all, tmp_path, mock_response):
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert set(gdf.columns) == set(
         ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "text", "score"]
+    )
+    assert "mapreader_text.png" in gdf["image_id"].values
+
+
+def test_deepsolo_save_search_results_centroid(runner_run_all, tmp_path, mock_response):
+    runner = runner_run_all
+    _ = runner.convert_to_parent_pixel_bounds()
+    out = runner.search_preds("map", ignore_case=True)
+    assert isinstance(out, dict)
+    runner.save_search_results_to_geojson(
+        f"{tmp_path}/search_results_centroid.geojson", centroid=True
+    )
+    assert os.path.exists(f"{tmp_path}/search_results_centroid.geojson")
+    gdf = gpd.read_file(f"{tmp_path}/search_results_centroid.geojson")
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert set(gdf.columns) == set(
+        [
+            "image_id",
+            "patch_id",
+            "pixel_geometry",
+            "geometry",
+            "crs",
+            "text",
+            "score",
+            "polygon",
+        ]
     )
     assert "mapreader_text.png" in gdf["image_id"].values
 
