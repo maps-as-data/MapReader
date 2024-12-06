@@ -223,7 +223,7 @@ You can do this by setting the ``deduplicate`` argument and passing a ``min_ioa`
 
 This will help resolve any issues with predictions being cut-off at the edges of patches since the overlap should help find the full piece of text.
 
-Again, to view the predictions, you can use the ``show`` method.
+Again, to view the predictions, you can use the ``show_predictions`` method.
 You should pass a parent image ID as the ``image_id`` argument:
 
 .. code-block:: python
@@ -244,11 +244,6 @@ As above, use the ``border_color``, ``text_color`` and ``figsize`` arguments to 
         figsize = (20, 20),
     )
 
-You can save your predictions to a csv file using the pandas ``to_csv`` method:
-
-.. code-block:: python
-
-    parent_preds_df.to_csv("text_preds.csv")
 
 Geo-reference
 -------------
@@ -282,13 +277,69 @@ Or, if your maps are taken from a tilelayer, you can specify the URL of the tile
 You can also pass in a dictionary of ``style_kwargs`` to customize the appearance of the map.
 Refer to the `geopandas explore documentation <https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.explore.html>`__ for more information on the available options.
 
-Again, you can save your georeferenced predictions to a csv file (as shown above), or, you can save them to a geojson file for loading into GIS software:
+
+Saving
+------
+
+You can save your georeferenced predictions to a geojson file for loading into GIS software using the ``save_to_geojson`` method:
 
 .. code-block:: python
 
     my_runner.save_to_geojson("text_preds.geojson")
 
 This will save the predictions to a geojson file, with each text prediction as a separate feature.
+
+By default, the geometry column will contain the polygon representing the bounding box of your text.
+If instead you would like to save just the centroid of this polygon, you can set the ``centroid`` argument:
+
+.. code-block:: python
+
+    my_runner.save_to_geojson("text_preds.geojson", centroid=True)
+
+This will save the centroid of the bounding box as the geometry column and create a "polygon" column containing the original polygon.
+
+At any point, you can also save your patch, parent and georeferenced predictions to CSV files using the ``save_to_csv`` method:
+
+.. code-block:: python
+
+    my_runner.save_to_csv("my_preds/")
+
+This will create a folder called "my_preds" and save the patch, parent and georeferenced predictions to CSV files within it.
+
+As above, you can use the ``centroid`` argument to save the centroid of the bounding box instead of the full polygon.
+
+
+Loading
+-------
+
+If you have saved your predictions and want to reload them into a runner, you use either of the ``load_geo_predictions`` or ``load_patch_predictions`` methods.
+
+.. note:: These methods will overwrite any existing predictions in the runner. So if you want to keep your existing predictions, you should save them to a file first!
+
+The ``load_geo_predictions`` method is used to load georeferenced predictions from a geojson file:
+
+.. code-block:: python
+
+    my_runner.load_geo_predictions("text_preds.geojson")
+
+Loading this fill will populate the patch, parent and georeferenced predictions in the runner.
+
+The ``load_patch_predictions`` method is used to load patch predictions from a CSV file or pandas DataFrame.
+To load a CSV file, you can use:
+
+.. code-block:: python
+
+    my_runner.load_patch_predictions("my_preds/patch_preds.csv")
+
+Or, to load a pandas DataFrame, you can use:
+
+.. code-block:: python
+
+    my_runner.load_patch_predictions(patch_preds_df)
+
+This will populate the patch and parent predictions in the runner but not the georeferenced predictions (incase you do not have georefencing information).
+If you do want to convert these to georeferenced predictions, you can use the ``convert_to_coords`` method as shown above.
+
 
 Search predictions
 ------------------
@@ -364,8 +415,10 @@ If your maps are georeferenced, you can also save your search results using the 
 
     my_runner.save_search_results_to_geojson("search_results.geojson")
 
-This will save the search results to a geojson file, with each search result as a separate feature.
+This will save the search results to a geojson file, with each search result as a separate feature which can be loaded into GIS software for further analysis/exploration.
 
-These can then be loaded into GIS software for further analysis/exploration.
+If, however, your maps are not georeferenced, you will need to save the search results to a csv file using the pandas ``to_csv`` method:
 
-If your maps are not georeferenced, you can save the search results to a csv file using the pandas ``to_csv`` method (as shown above).
+.. code-block:: python
+
+    search_results_df.to_csv("search_results.csv")
