@@ -63,6 +63,20 @@ A: MapReader is not designed for full vectorization but can assist in creating t
 
 A: Yes, MapReader is an open-source project and is free to use under its license.
 
+**Q: Why do I need to patchify my maps?**
+
+A: Patchifying maps is a crucial step in MapReader because it breaks down large map sheets into smaller, manageable regions called patches.
+Without the step of patchifying, processing large, complex maps would be resource-intensive and less flexible for targeted analysis or model training.
+Overall, this step is important as it enables some crucial features for you:
+
+- *Efficient data analysis*:
+  Analyzing smaller patches reduces computational overhead, making tasks like classification, annotation, and visualization more scalable.
+- *Better machine learning models*:
+  Most machine learning models process data in fixed-size inputs.
+  Patchifying maps ensures that the data conforms to the required dimensions for training and inference.
+- *Adaptability to the patch's context*:
+  Patchifying enables the use of context-based models, where information from surrounding patches can be incorporated for better predictions.
+
 **Q: How large do my patches need to be? (i.e., standards? best patch sizes?)**
 
 A: Patch sizes depend on the resolution of your maps and your analysis goals.
@@ -76,7 +90,6 @@ Common examples include "railspace," "urban," or "water."
 Custom labels can be tailored to your specific study area.
 
 ..
-
     Katie/Rosie: Add more detail to the question here!
 
 **Q: How can I trust the output from MapReader?**
