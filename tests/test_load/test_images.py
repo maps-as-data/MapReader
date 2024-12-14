@@ -515,6 +515,26 @@ def test_patchify_pixels(sample_dir, image_id, tmp_path):
     assert os.path.isfile(f"{tmp_path}/patch-0-0-3-3-#{image_id}#.png")
 
 
+def test_patchify_pixels_skip_blank_rgb(sample_dir, tmp_path):
+    maps = MapImages(f"{sample_dir}/cropped_blank_corners_rgb.tif")
+    maps.patchify_all(patch_size=3, path_save=tmp_path, skip_blank_patches=True)
+    parent_list = maps.list_parents()
+    patch_list = maps.list_patches()
+    assert len(parent_list) == 1
+    assert len(patch_list) == 5
+    assert os.path.isfile(f"{tmp_path}/patch-0-3-3-6-#cropped_blank_corners_rgb.tif#.png")
+
+
+def test_patchify_pixels_skip_blank_rgba(sample_dir, tmp_path):
+    maps = MapImages(f"{sample_dir}/cropped_blank_corners_rgba.tif")
+    maps.patchify_all(patch_size=3, path_save=tmp_path, skip_blank_patches=True)
+    parent_list = maps.list_parents()
+    patch_list = maps.list_patches()
+    assert len(parent_list) == 1
+    assert len(patch_list) == 5
+    assert os.path.isfile(f"{tmp_path}/patch-0-3-3-6-#cropped_blank_corners_rgba.tif#.png")
+
+
 def test_patchify_pixels_square(sample_dir, image_id, tmp_path):
     maps = MapImages(f"{sample_dir}/{image_id}")
     maps.patchify_all(patch_size=5, path_save=f"{tmp_path}_square", square_cuts=True)
