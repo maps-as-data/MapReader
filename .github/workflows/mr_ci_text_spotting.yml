@@ -1,7 +1,10 @@
 ---
 name: Units Tests - Text Spotting
 
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
 
 # Run linter with github actions for quick feedbacks.
 jobs:
