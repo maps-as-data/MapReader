@@ -1235,6 +1235,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Directory to save the patches.
             If None, will be set as f"patches_{patch_size}_{method}" (e.g. "patches_100_pixel").
             By default None.
+        skip_blank_patches : bool
+            If True, any patch that only contains 0 values will be skipped, by default ``False``. Uses PIL.Image().get_bbox().
         add_to_parents : bool, optional
             If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
