@@ -305,10 +305,10 @@ def test_dptext_run_on_image(init_runner, mock_response):
     assert isinstance(out["instances"], Instances)
 
 
-def test_dptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
+def test_dptext_to_geojson(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    runner.to_geojson(f"{tmp_path}/text.geojson")
     assert os.path.exists(f"{tmp_path}/text.geojson")
     gdf = gpd.read_file(f"{tmp_path}/text.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -317,10 +317,10 @@ def test_dptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
     )
 
 
-def test_dptext_save_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
+def test_dptext_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text_centroid.geojson", centroid=True)
+    runner.to_geojson(f"{tmp_path}/text_centroid.geojson", centroid=True)
     assert os.path.exists(f"{tmp_path}/text_centroid.geojson")
     gdf_centroid = gpd.read_file(f"{tmp_path}/text_centroid.geojson")
     assert isinstance(gdf_centroid, gpd.GeoDataFrame)
@@ -340,7 +340,7 @@ def test_dptext_save_to_geojson_centroid(runner_run_all, tmp_path, mock_response
 def test_dptext_load_geo_predictions(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    runner.to_geojson(f"{tmp_path}/text.geojson")
     runner.geo_predictions = {}
     runner.load_geo_predictions(f"{tmp_path}/text.geojson")
     assert len(runner.geo_predictions)
@@ -355,54 +355,54 @@ def test_dptext_load_geo_predictions_errors(runner_run_all, tmp_path):
         runner.load_geo_predictions("fakefile.csv")
 
 
-def test_dptext_save_to_csv_polygon(runner_run_all, tmp_path, mock_response):
+def test_dptext_to_csv_polygon(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     # patch
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     # parent
     _ = runner.convert_to_parent_pixel_bounds()
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     # geo
     _ = runner.convert_to_coords()
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     assert os.path.exists(f"{tmp_path}/geo_predictions.csv")
 
 
-def test_dptext_save_to_csv_centroid(runner_run_all, tmp_path, mock_response):
+def test_dptext_to_csv_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     # patch
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     # parent
     _ = runner.convert_to_parent_pixel_bounds()
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     # geo
     _ = runner.convert_to_coords()
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     assert os.path.exists(f"{tmp_path}/geo_predictions.csv")
 
 
-def test_dptext_save_to_csv_errors(runner_run_all, tmp_path, mock_response):
+def test_dptext_to_csv_errors(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     runner.patch_predictions = {}
     with pytest.raises(ValueError, match="No patch predictions found"):
-        runner.save_to_csv(tmp_path)
+        runner.to_csv(tmp_path)
 
 
 def test_dptext_load_patch_predictions(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
     assert len(runner.geo_predictions)  # this will be empty after reloading
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
     assert len(runner.patch_predictions)
     assert len(runner.geo_predictions) == 0
@@ -442,7 +442,7 @@ def test_dptext_load_patch_predictions_centroid(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
     assert len(runner.geo_predictions)
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
     assert len(runner.patch_predictions)
     assert len(runner.geo_predictions) == 0

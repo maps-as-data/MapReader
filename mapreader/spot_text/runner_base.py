@@ -481,6 +481,27 @@ class DetRunner:
         path_save: str | pathlib.Path,
         centroid: bool = False,
     ) -> None:
+        """
+        Save the georeferenced predictions to a GeoJSON file.
+
+        Parameters
+        ----------
+        path_save : str | pathlib.Path, optional
+            Path to save the GeoJSON file
+        centroid : bool, optional
+            Whether to convert the polygons to centroids, by default False.
+            NOTE: The original polygon will still be saved as a separate column
+        """
+        print(
+            "[WARNING] This method is deprecated and will soon be removed. Use `to_geojson` instead."
+        )
+        self.to_geojson(path_save, centroid)
+
+    def to_geojson(
+        self,
+        path_save: str | pathlib.Path,
+        centroid: bool = False,
+    ) -> None:
         """Save the georeferenced predictions to a GeoJSON file.
 
         Parameters
@@ -506,7 +527,7 @@ class DetRunner:
 
         geo_df.to_file(path_save, driver="GeoJSON", engine="pyogrio")
 
-    def save_to_csv(
+    def to_csv(
         self,
         path_save: str | pathlib.Path,
         centroid: bool = False,
@@ -858,7 +879,7 @@ class DetRecRunner(DetRunner):
                 PatchPrediction(pixel_geometry=polygon, score=score, text=text)
             )
 
-    def search_preds(
+    def search_predictions(
         self, search_text: str, ignore_case: bool = True, return_dataframe: bool = False
     ) -> dict | pd.DataFrame:
         """Search the predictions for specific text. Accepts regex.
@@ -1044,36 +1065,63 @@ class DetRecRunner(DetRunner):
             style_kwds=style_kwargs,
         )
 
-    def save_search_results_to_geojson(
-        self,
-        path_save: str | pathlib.Path,
-        centroid: bool = False,
-    ) -> None:
-        """Convert the search results to georeferenced search results and save them to a GeoJSON file.
 
-        Parameters
-        ----------
-        path_save : str | pathlib.Path
-            The path to save the GeoJSON file.
-        centroid : bool, optional
-            Whether to save the centroid of the polygons as the geometry column, by default False.
-            Note: The original polygon will stil be saved as a separate column.
+def save_search_results_to_geojson(
+    self,
+    path_save: str | pathlib.Path,
+    centroid: bool = False,
+) -> None:
+    """Convert the search results to georeferenced search results and save them to a GeoJSON file.
 
-        Raises
-        ------
-        ValueError
-            If no search results are found.
-        """
-        if self.search_results == {}:
-            raise ValueError("[ERROR] No results to save!")
+    Parameters
+    ----------
+    path_save : str | pathlib.Path
+        The path to save the GeoJSON file.
+    centroid : bool, optional
+        Whether to save the centroid of the polygons as the geometry column, by default False.
+        Note: The original polygon will stil be saved as a separate column.
 
-        geo_search_results = self._get_geo_search_results()
-        geo_df = self._dict_to_dataframe(geo_search_results)
+    Raises
+    ------
+    ValueError
+        If no search results are found.
+    """
+    print(
+        "[WARNING] This method is deprecated and will soon be removed. Use `search_results_to_geojson` instead."
+    )
+    self.search_results_to_geojson(path_save, centroid)
 
-        if centroid:
-            geo_df["polygon"] = geo_df["geometry"].to_wkt()
-            geo_df["geometry"] = (
-                geo_df["geometry"].to_crs("27700").centroid.to_crs(geo_df.crs)
-            )
 
-        geo_df.to_file(path_save, driver="GeoJSON", engine="pyogrio")
+def search_results_to_geojson(
+    self,
+    path_save: str | pathlib.Path,
+    centroid: bool = False,
+) -> None:
+    """Convert the search results to georeferenced search results and save them to a GeoJSON file.
+
+    Parameters
+    ----------
+    path_save : str | pathlib.Path
+        The path to save the GeoJSON file.
+    centroid : bool, optional
+        Whether to save the centroid of the polygons as the geometry column, by default False.
+        Note: The original polygon will stil be saved as a separate column.
+
+    Raises
+    ------
+    ValueError
+        If no search results are found.
+    """
+    if self.search_results == {}:
+        raise ValueError("[ERROR] No results to save!")
+
+    geo_search_results = self._get_geo_search_results()
+    geo_df = self._dict_to_dataframe(geo_search_results)
+
+    if centroid:
+        geo_df["polygon"] = geo_df["geometry"].to_wkt()
+        geo_df["geometry"] = (
+            geo_df["geometry"].to_crs("27700").centroid.to_crs(geo_df.crs)
+        )
+
+    geo_df.to_file(path_save, driver="GeoJSON", engine="pyogrio")

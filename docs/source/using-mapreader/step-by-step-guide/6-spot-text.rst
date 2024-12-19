@@ -248,7 +248,7 @@ As above, use the ``border_color``, ``text_color`` and ``figsize`` arguments to 
 Geo-reference
 -------------
 
-If you maps are georeferenced in your ``parent_df``, you can also convert the pixel bounds to georeferenced coordinates using the ``convert_to_coords`` method:
+If you maps are georeferenced in your ``parent_df``, you can also convert the pixel coordinates to georeferenced coordinates using the ``convert_to_coords`` method:
 
 .. code-block:: python
 
@@ -281,11 +281,11 @@ Refer to the `geopandas explore documentation <https://geopandas.org/en/stable/d
 Saving
 ------
 
-You can save your georeferenced predictions to a geojson file for loading into GIS software using the ``save_to_geojson`` method:
+You can save your georeferenced predictions to a geojson file for loading into GIS software using the ``to_geojson`` method:
 
 .. code-block:: python
 
-    my_runner.save_to_geojson("text_preds.geojson")
+    my_runner.to_geojson("text_preds.geojson")
 
 This will save the predictions to a geojson file, with each text prediction as a separate feature.
 
@@ -294,19 +294,19 @@ If instead you would like to save just the centroid of this polygon, you can set
 
 .. code-block:: python
 
-    my_runner.save_to_geojson("text_preds.geojson", centroid=True)
+    my_runner.to_geojson("text_preds.geojson", centroid=True)
 
 This will save the centroid of the bounding box as the geometry column and create a "polygon" column containing the original polygon.
 
-At any point, you can also save your patch, parent and georeferenced predictions to CSV files using the ``save_to_csv`` method:
+At any point, you can also save your patch, parent and georeferenced predictions to CSV files using the ``to_csv`` method:
 
 .. code-block:: python
 
-    my_runner.save_to_csv("my_preds/")
+    my_runner.to_csv("my_preds/")
 
 This will create a folder called "my_preds" and save the patch, parent and georeferenced predictions to CSV files within it.
 
-As above, you can use the ``centroid`` argument to save the centroid of the bounding box instead of the full polygon.
+As above, you can use the ``centroid=True`` argument to save the centroid of the bounding box instead of the full polygon.
 
 
 Loading
@@ -322,7 +322,7 @@ The ``load_geo_predictions`` method is used to load georeferenced predictions fr
 
     my_runner.load_geo_predictions("text_preds.geojson")
 
-Loading this fill will populate the patch, parent and georeferenced predictions in the runner.
+Loading this will populate the patch, parent and georeferenced predictions in the runner.
 
 The ``load_patch_predictions`` method is used to load patch predictions from a CSV file or pandas DataFrame.
 To load a CSV file, you can use:
@@ -337,8 +337,8 @@ Or, to load a pandas DataFrame, you can use:
 
     my_runner.load_patch_predictions(patch_preds_df)
 
-This will populate the patch and parent predictions in the runner but not the georeferenced predictions (incase you do not have georefencing information).
-If you do want to convert these to georeferenced predictions, you can use the ``convert_to_coords`` method as shown above.
+This will populate the patch and parent predictions in the runner but not the georeferenced predictions (in case you do not have georefencing information).
+If you do want to convert your text predictions from pixel coordinates to geospatial coordinates, you can use the ``convert_to_coords`` method as shown above.
 
 
 Search predictions
@@ -409,11 +409,11 @@ You can also pass in a dictionary of ``style_kwargs`` to customize the appearanc
 Save search results
 ~~~~~~~~~~~~~~~~~~~
 
-If your maps are georeferenced, you can also save your search results using the ``save_search_results_to_geojson`` method:
+If your maps are georeferenced, you can also save your search results using the ``search_results_to_geojson`` method:
 
 .. code-block:: python
 
-    my_runner.save_search_results_to_geojson("search_results.geojson")
+    my_runner.search_results_to_geojson("search_results.geojson")
 
 This will save the search results to a geojson file, with each search result as a separate feature which can be loaded into GIS software for further analysis/exploration.
 

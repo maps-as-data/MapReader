@@ -306,10 +306,10 @@ def test_maptext_run_on_image(init_runner, mock_response):
     assert isinstance(out["instances"], Instances)
 
 
-def test_maptext_save_to_geojson(runner_run_all, tmp_path, mock_response):
+def test_maptext_to_geojson(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    runner.to_geojson(f"{tmp_path}/text.geojson")
     assert os.path.exists(f"{tmp_path}/text.geojson")
     gdf = gpd.read_file(f"{tmp_path}/text.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -341,12 +341,12 @@ def test_maptext_search_preds_errors(runner_run_all, mock_response):
         runner.search_preds("maps", ignore_case=True)
 
 
-def test_maptext_save_search_results(runner_run_all, tmp_path, mock_response):
+def test_maptext_search_results(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
     out = runner.search_preds("map", ignore_case=True)
     assert isinstance(out, dict)
-    runner.save_search_results_to_geojson(f"{tmp_path}/search_results.geojson")
+    runner.search_results_to_geojson(f"{tmp_path}/search_results.geojson")
     assert os.path.exists(f"{tmp_path}/search_results.geojson")
     gdf = gpd.read_file(f"{tmp_path}/search_results.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -356,7 +356,7 @@ def test_maptext_save_search_results(runner_run_all, tmp_path, mock_response):
     assert "mapreader_text.png" in gdf["image_id"].values
 
 
-def test_maptext_save_search_results_errors(runner_run_all, tmp_path, mock_response):
+def test_maptext_search_results_errors(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     with pytest.raises(ValueError, match="No results to save"):
-        runner.save_search_results_to_geojson(f"{tmp_path}/test.geojson")
+        runner.search_results_to_geojson(f"{tmp_path}/test.geojson")

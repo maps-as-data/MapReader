@@ -44,7 +44,7 @@ def init_dataframes(sample_dir, tmp_path):
     """
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
-    maps.patchify_all(patch_size=800, path_save=tmp_path)
+    maps.patchify_all(patch_size=800, path_=tmp_path)
     maps.check_georeferencing()
     assert maps.georeferenced
     parent_df, patch_df = maps.convert_images()
@@ -279,7 +279,7 @@ def test_deepsolo_convert_to_parent_coords(runner_run_all, mock_response):
 def test_deepsolo_deduplicate(sample_dir, tmp_path, mock_response):
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
-    maps.patchify_all(patch_size=800, path_save=tmp_path, overlap=0.5)
+    maps.patchify_all(patch_size=800, path_=tmp_path, overlap=0.5)
     maps.check_georeferencing()
     parent_df, patch_df = maps.convert_images()
     runner = DeepSoloRunner(
@@ -313,10 +313,10 @@ def test_deepsolo_run_on_image(init_runner, mock_response):
     assert isinstance(out["instances"], Instances)
 
 
-def test_deepsolo_save_to_geojson(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_to_geojson(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    runner.to_geojson(f"{tmp_path}/text.geojson")
     assert os.path.exists(f"{tmp_path}/text.geojson")
     gdf = gpd.read_file(f"{tmp_path}/text.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -325,10 +325,10 @@ def test_deepsolo_save_to_geojson(runner_run_all, tmp_path, mock_response):
     )
 
 
-def test_deepsolo_save_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text_centroid.geojson", centroid=True)
+    runner.to_geojson(f"{tmp_path}/text_centroid.geojson", centroid=True)
     assert os.path.exists(f"{tmp_path}/text_centroid.geojson")
     gdf_centroid = gpd.read_file(f"{tmp_path}/text_centroid.geojson")
     assert isinstance(gdf_centroid, gpd.GeoDataFrame)
@@ -349,7 +349,7 @@ def test_deepsolo_save_to_geojson_centroid(runner_run_all, tmp_path, mock_respon
 def test_deepsolo_load_geo_predictions(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
-    runner.save_to_geojson(f"{tmp_path}/text.geojson")
+    runner.to_geojson(f"{tmp_path}/text.geojson")
     runner.geo_predictions = {}
     runner.load_geo_predictions(f"{tmp_path}/text.geojson")
     assert len(runner.geo_predictions)
@@ -364,54 +364,54 @@ def test_deepsolo_load_geo_predictions_errors(runner_run_all, tmp_path):
         runner.load_geo_predictions("fakefile.csv")
 
 
-def test_deepsolo_save_to_csv_polygon(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_to_csv_polygon(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     # patch
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     # parent
     _ = runner.convert_to_parent_pixel_bounds()
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     # geo
     _ = runner.convert_to_coords()
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     assert os.path.exists(f"{tmp_path}/geo_predictions.csv")
 
 
-def test_deepsolo_save_to_csv_centroid(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_to_csv_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     # patch
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     # parent
     _ = runner.convert_to_parent_pixel_bounds()
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     # geo
     _ = runner.convert_to_coords()
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     assert os.path.exists(f"{tmp_path}/patch_predictions.csv")
     assert os.path.exists(f"{tmp_path}/parent_predictions.csv")
     assert os.path.exists(f"{tmp_path}/geo_predictions.csv")
 
 
-def test_deepsolo_save_to_csv_errors(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_to_csv_errors(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     runner.patch_predictions = {}
     with pytest.raises(ValueError, match="No patch predictions found"):
-        runner.save_to_csv(tmp_path)
+        runner.to_csv(tmp_path)
 
 
 def test_deepsolo_load_patch_predictions(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
     assert len(runner.geo_predictions)  # this will be empty after reloading
-    runner.save_to_csv(tmp_path)
+    runner.to_csv(tmp_path)
     runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
     assert len(runner.patch_predictions)
     assert len(runner.geo_predictions) == 0
@@ -451,7 +451,7 @@ def test_deepsolo_load_patch_predictions_centroid(runner_run_all, tmp_path):
     runner = runner_run_all
     _ = runner.convert_to_coords()
     assert len(runner.geo_predictions)
-    runner.save_to_csv(tmp_path, centroid=True)
+    runner.to_csv(tmp_path, centroid=True)
     runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
     assert len(runner.patch_predictions)
     assert len(runner.geo_predictions) == 0
@@ -498,12 +498,12 @@ def test_deepsolo_search_preds_errors(runner_run_all, mock_response):
         runner.search_preds("maps", ignore_case=True)
 
 
-def test_deepsolo_save_search_results(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_search_results(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
     out = runner.search_preds("map", ignore_case=True)
     assert isinstance(out, dict)
-    runner.save_search_results_to_geojson(f"{tmp_path}/search_results.geojson")
+    runner.search_results_to_geojson(f"{tmp_path}/search_results.geojson")
     assert os.path.exists(f"{tmp_path}/search_results.geojson")
     gdf = gpd.read_file(f"{tmp_path}/search_results.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -513,12 +513,12 @@ def test_deepsolo_save_search_results(runner_run_all, tmp_path, mock_response):
     assert "mapreader_text.png" in gdf["image_id"].values
 
 
-def test_deepsolo_save_search_results_centroid(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_search_results_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
     out = runner.search_preds("map", ignore_case=True)
     assert isinstance(out, dict)
-    runner.save_search_results_to_geojson(
+    runner.search_results_to_geojson(
         f"{tmp_path}/search_results_centroid.geojson", centroid=True
     )
     assert os.path.exists(f"{tmp_path}/search_results_centroid.geojson")
@@ -539,7 +539,7 @@ def test_deepsolo_save_search_results_centroid(runner_run_all, tmp_path, mock_re
     assert "mapreader_text.png" in gdf["image_id"].values
 
 
-def test_deepsolo_save_search_results_errors(runner_run_all, tmp_path, mock_response):
+def test_deepsolo_search_results_errors(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     with pytest.raises(ValueError, match="No results to save"):
-        runner.save_search_results_to_geojson(f"{tmp_path}/test.geojson")
+        runner.search_results_to_geojson(f"{tmp_path}/test.geojson")
