@@ -211,6 +211,7 @@ This will create 1024 x 1024 pixel patches with 10% overlap between each patch.
     - ``square_cuts`` - This is a deprecated method and no longer recommended for use. By default, this is set to ``False`` and padding is added to patches at the edges of the parent image to ensure square patches. If you set ``square_cuts=True``, instead of padding, there will be some overlap between edge patches.
     - ``add_to_parent`` - By default, this is set to ``True`` so that each time you run ``patchify_all`` your patches are added to your ``MapImages`` object. Setting it to ``False`` (by specifying ``add_to_parent=False``) will mean your patches are created, but not added to your ``MapImages`` object. This can be useful for testing out different patch sizes.
     - ``rewrite`` - By default, this is set to ``False`` so that if your patches already exist they are not overwritten. Setting it to ``True`` (by specifying ``rewrite=True``) will mean already existing patches are recreated and overwritten.
+    - ``skip_blank_patches`` - By default, this is set to ``False``. Setting to ``True`` will omit any patches that only contain ``0`` values, which can speed up processing on irregularly shaped map images that have empty regions. The `Image.getbbox() <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.getbbox>`_ method is used to determine if a patch is blank.
 
 If you would like to save your patches as geo-referenced tiffs (i.e. geotiffs), use:
 
