@@ -318,33 +318,35 @@ def test_maptext_to_geojson(runner_run_all, tmp_path, mock_response):
     )
 
 
-def test_maptext_search_preds(runner_run_all, mock_response):
+def test_maptext_search_predictions(runner_run_all, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.search_preds("map", ignore_case=True)
+    out = runner.search_predictions("map", ignore_case=True)
     assert isinstance(out, dict)
     assert "mapreader_text.png" in out.keys()
     # test dataframe
-    out = runner.search_preds("map", ignore_case=True, return_dataframe=True)
+    out = runner.search_predictions("map", ignore_case=True, return_dataframe=True)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "pixel_geometry", "text", "score"]
     )
     assert "mapreader_text.png" in out["image_id"].values
-    out = runner.search_preds("somethingelse", ignore_case=True, return_dataframe=True)
+    out = runner.search_predictions(
+        "somethingelse", ignore_case=True, return_dataframe=True
+    )
     assert len(out) == 0
 
 
-def test_maptext_search_preds_errors(runner_run_all, mock_response):
+def test_maptext_search_predictions_errors(runner_run_all, mock_response):
     runner = runner_run_all
     with pytest.raises(ValueError, match="No parent predictions found"):
-        runner.search_preds("maps", ignore_case=True)
+        runner.search_predictions("maps", ignore_case=True)
 
 
 def test_maptext_search_results(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.search_preds("map", ignore_case=True)
+    out = runner.search_predictions("map", ignore_case=True)
     assert isinstance(out, dict)
     runner.search_results_to_geojson(f"{tmp_path}/search_results.geojson")
     assert os.path.exists(f"{tmp_path}/search_results.geojson")

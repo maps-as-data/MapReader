@@ -44,7 +44,7 @@ def init_dataframes(sample_dir, tmp_path):
     """
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
-    maps.patchify_all(patch_size=800, path_=tmp_path)
+    maps.patchify_all(patch_size=800, path_save=tmp_path)
     maps.check_georeferencing()
     assert maps.georeferenced
     parent_df, patch_df = maps.convert_images()
@@ -279,7 +279,7 @@ def test_deepsolo_convert_to_parent_coords(runner_run_all, mock_response):
 def test_deepsolo_deduplicate(sample_dir, tmp_path, mock_response):
     maps = MapImages(f"{sample_dir}/mapreader_text.png")
     maps.add_metadata(f"{sample_dir}/mapreader_text_metadata.csv")
-    maps.patchify_all(patch_size=800, path_=tmp_path, overlap=0.5)
+    maps.patchify_all(patch_size=800, path_save=tmp_path, overlap=0.5)
     maps.check_georeferencing()
     parent_df, patch_df = maps.convert_images()
     runner = DeepSoloRunner(
@@ -475,33 +475,35 @@ def test_deepsolo_load_patch_predictions_errors(runner_run_all, tmp_path):
         runner.load_patch_predictions("fake_file.geojson")
 
 
-def test_deepsolo_search_preds(runner_run_all, mock_response):
+def test_deepsolo_search_predictions(runner_run_all, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.search_preds("map", ignore_case=True)
+    out = runner.search_predictions("map", ignore_case=True)
     assert isinstance(out, dict)
     assert "mapreader_text.png" in out.keys()
     # test dataframe
-    out = runner.search_preds("map", ignore_case=True, return_dataframe=True)
+    out = runner.search_predictions("map", ignore_case=True, return_dataframe=True)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
         ["image_id", "patch_id", "pixel_geometry", "text", "score"]
     )
     assert "mapreader_text.png" in out["image_id"].values
-    out = runner.search_preds("somethingelse", ignore_case=True, return_dataframe=True)
+    out = runner.search_predictions(
+        "somethingelse", ignore_case=True, return_dataframe=True
+    )
     assert len(out) == 0
 
 
-def test_deepsolo_search_preds_errors(runner_run_all, mock_response):
+def test_deepsolo_search_predictions_errors(runner_run_all, mock_response):
     runner = runner_run_all
     with pytest.raises(ValueError, match="No parent predictions found"):
-        runner.search_preds("maps", ignore_case=True)
+        runner.search_predictions("maps", ignore_case=True)
 
 
 def test_deepsolo_search_results(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.search_preds("map", ignore_case=True)
+    out = runner.search_predictions("map", ignore_case=True)
     assert isinstance(out, dict)
     runner.search_results_to_geojson(f"{tmp_path}/search_results.geojson")
     assert os.path.exists(f"{tmp_path}/search_results.geojson")
@@ -516,7 +518,7 @@ def test_deepsolo_search_results(runner_run_all, tmp_path, mock_response):
 def test_deepsolo_search_results_centroid(runner_run_all, tmp_path, mock_response):
     runner = runner_run_all
     _ = runner.convert_to_parent_pixel_bounds()
-    out = runner.search_preds("map", ignore_case=True)
+    out = runner.search_predictions("map", ignore_case=True)
     assert isinstance(out, dict)
     runner.search_results_to_geojson(
         f"{tmp_path}/search_results_centroid.geojson", centroid=True
