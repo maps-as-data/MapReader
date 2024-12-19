@@ -20,10 +20,10 @@ import pandas as pd
 import torch
 from deepsolo.config import get_cfg
 
-from .rec_runner_base import RecRunner
+from .runner_base import DetRecRunner
 
 
-class DeepSoloRunner(RecRunner):
+class DeepSoloRunner(DetRecRunner):
     def __init__(
         self,
         patch_df: pd.DataFrame | gpd.GeoDataFrame | str | pathlib.Path,
