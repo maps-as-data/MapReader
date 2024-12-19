@@ -4,6 +4,8 @@ name: Publish Tagged Python 🐍 distributions 📦 to PyPI
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - v*
 

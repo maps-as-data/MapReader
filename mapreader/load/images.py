@@ -1208,6 +1208,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         patch_size: int | None = 100,
         tree_level: str | None = "parent",
         path_save: str | None = None,
+        skip_blank_patches: bool = False,
         add_to_parents: bool | None = True,
         square_cuts: bool | None = False,
         resize_factor: bool | None = False,
@@ -1234,6 +1235,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             Directory to save the patches.
             If None, will be set as f"patches_{patch_size}_{method}" (e.g. "patches_100_pixel").
             By default None.
+        skip_blank_patches : bool
+            If True, any patch that only contains 0 values will be skipped, by default ``False``. Uses PIL.Image().get_bbox().
         add_to_parents : bool, optional
             If True, patches will be added to the MapImages instance's
             ``images`` dictionary, by default ``True``.
@@ -1313,6 +1316,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     add_to_parents=add_to_parents,
                     resize_factor=resize_factor,
                     output_format=output_format,
+                    skip_blank_patches=skip_blank_patches,
                     rewrite=rewrite,
                     verbose=verbose,
                     overlap=overlap,
@@ -1326,6 +1330,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
         add_to_parents: bool | None = True,
         resize_factor: bool | None = False,
         output_format: str | None = "png",
+        skip_blank_patches: bool = False,
         rewrite: bool | None = False,
         verbose: bool | None = False,
         overlap: int | None = 0,
@@ -1347,6 +1352,8 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             If True, resize the images before patchifying, by default ``False``.
         output_format : str, optional
             Format to use when writing image files, by default ``"png"``.
+        skip_blank_patches : bool
+            If True, any patch that only contains 0 values will be skipped, by default ``False``. Uses PIL.Image().get_bbox().
         rewrite : bool, optional
             If True, existing patches will be rewritten, by default ``False``.
         verbose : bool, optional
@@ -1370,6 +1377,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
             )
 
         height, width = img.height, img.width
+        overlap_pixels = int(patch_size * overlap)
 
         x = 0
         while x < width:
@@ -1389,6 +1397,15 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
 
                 else:
                     patch = img.crop((x, y, max_x, max_y))
+
+                    # skip if blank and don't add to parents
+                    if skip_blank_patches and patch.getbbox() is None:
+                        self._print_if_verbose(
+                            f"[INFO] Skipping empty patch: {patch_id}.", verbose
+                        )
+                        y = y + patch_size - overlap_pixels
+                        continue
+
                     if max_x == width:
                         patch = ImageOps.pad(
                             patch, (patch_size, patch.height), centering=(0, 0)
@@ -1416,7 +1433,6 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                     self._add_patch_coords_id(patch_id)
                     self._add_patch_polygons_id(patch_id)
 
-                overlap_pixels = int(patch_size * overlap)
                 y = y + patch_size - overlap_pixels
             x = x + patch_size - overlap_pixels
 
