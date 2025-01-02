@@ -4,12 +4,10 @@
 
 The following table shows which versions of MapReader are compatible with which versions of python:
 
-+----------+------------+
-| Python   | MapReader  |
-+==========+============+
-| 3.9+     | v1.2.0     |
-| 3.8-3.11 | <= v.1.1.5 |
-+----------+------------+
+| Python    | MapReader  |
+|-----------|------------|
+| 3.9+      | v1.2.0     |
+| 3.8-3.11  | <= v.1.1.5 |
 
 ---
 
@@ -17,7 +15,9 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
-## Added
+## [v1.6.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.2) (2025-01-02)
+
+### Added
 
 - Added ability to save and reload text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
 - Added minimal dataclasses for text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
