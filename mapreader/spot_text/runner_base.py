@@ -672,6 +672,9 @@ class DetRunner:
             tiles = xyz.providers.OpenStreetMap.Mapnik
 
         preds_df = self._dict_to_dataframe(self.geo_predictions)
+        preds_df.drop(
+            columns=["pixel_geometry"], inplace=True
+        )  # drop pixel_geometry since we can't have two polygon columns
 
         return preds_df[preds_df["image_id"] == parent_id].explore(
             tiles=tiles,
@@ -1059,6 +1062,9 @@ class DetRecRunner(DetRunner):
 
         geo_search_results = self._get_geo_search_results()
         geo_df = self._dict_to_dataframe(geo_search_results)
+        geo_df.drop(
+            columns=["pixel_geometry"], inplace=True
+        )  # drop pixel_geometry since we can't have two polygon columns
 
         return geo_df[geo_df["image_id"] == parent_id].explore(
             tiles=tiles,
