@@ -15,6 +15,9 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
+### Fixed
+- Fixes the `explore_predictions` and `explore_search_results` methods in the `DeepSoloRunner` and `MapTextRunner` classes ([#544](https://github.com/maps-as-data/MapReader/pull/544))
+
 ## [v1.6.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.2) (2025-01-02)
 
 ### Added
