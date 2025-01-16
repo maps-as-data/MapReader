@@ -1,0 +1,135 @@
+=== Running Container: mapreader ===
+✅ Container 'mapreader' is running with ID: 6cb720e2b1780e17cdbb89c0a3a77ac82c28da6b0cd8ed2de7bd46620aabf702
+
+=== Executing Dependency Tests Inside Container 'mapreader' ===
+
+🔍 Running Test: PyTorch
+📦 Library: PyTorch
+✅ PyTorch Version: 2.4.0a0+f70bd71a48.nv24.06
+
+🔍 Running Test: Torchvision
+📦 Library: Torchvision
+✅ Torchvision Version: 0.19.0a0
+
+🔍 Running Test: Geopandas
+📦 Library: Geopandas
+✅ Geopandas Version: 0.14.4
+
+🔍 Running Test: Geopy
+📦 Library: Geopy
+✅ Geopy Version: 2.1.0
+
+🔍 Running Test: Cython
+📦 Library: Cython
+✅ Cython Version: 
+
+🔍 Running Test: Torchinfo
+📦 Library: Torchinfo
+✅ Torchinfo Version: 1.8.0
+
+🔍 Running Test: Parhugin
+📦 Library: Parhugin
+✅ Parhugin Version: 
+
+🔍 Running Test: MapReader
+📦 Library: MapReader
+✅ MapReader Version: 1.6.2.post0.dev4
+
+🔍 Running Test: GDAL
+📦 Library: GDAL
+✅ GDAL Version: GDAL 3.5.3, released 2022/10/21
+
+🔍 Running Test: Fiona
+📦 Library: Fiona
+✅ Fiona Version: 1.10.1
+
+🔍 Running Test: Shapely
+📦 Library: Shapely
+✅ Shapely Version: 2.0.6
+
+🔍 Running Test: Scikit-learn
+📦 Library: Scikit-learn
+✅ Scikit-learn Version: 1.5.0
+
+🔍 Running Test: Scikit-image
+📦 Library: Scikit-image
+✅ Scikit-image Version: 0.25.0
+
+🔍 Running Test: Tensorboard
+📦 Library: Tensorboard
+✅ Tensorboard Version: 2.9.0
+
+🔍 Running Test: Jupyter
+📦 Library: Jupyter
+✅ Jupyter Version: Selected Jupyter core packages...
+IPython          : 8.21.0
+ipykernel        : 6.29.4
+ipywidgets       : 8.1.5
+jupyter_client   : 8.6.2
+jupyter_core     : 5.7.2
+jupyter_server   : not installed
+jupyterlab       : 2.3.2
+nbclient         : 0.10.0
+nbconvert        : 7.16.4
+nbformat         : 5.10.4
+notebook         : 6.4.10
+qtconsole        : not installed
+traitlets        : 5.9.0
+
+🔍 Running Test: IPython Kernel
+📦 Library: IPython Kernel
+✅ IPython Kernel Version: 6.29.4
+
+🔍 Running Test: IPyWidgets
+📦 Library: IPyWidgets
+✅ IPyWidgets Version: 8.1.5
+
+🔍 Running Test: OpenCV
+📦 Library: OpenCV
+✅ OpenCV Version: 4.5.5
+
+🔍 Running Test: Rasterio
+📦 Library: Rasterio
+✅ Rasterio Version: 1.4.3
+
+=== Analyzing Test Results ===
+
+✅ PyTorch: 2.4.0a0+f70bd71a48.nv24.06
+✅ Torchvision: 0.19.0a0
+✅ Geopandas: 0.14.4
+✅ Geopy: 2.1.0
+✅ Cython: 
+✅ Torchinfo: 1.8.0
+✅ Parhugin: 
+✅ MapReader: 1.6.2.post0.dev4
+✅ GDAL: GDAL 3.5.3, released 2022/10/21
+✅ Fiona: 1.10.1
+✅ Shapely: 2.0.6
+✅ Scikit-learn: 1.5.0
+✅ Scikit-image: 0.25.0
+✅ Tensorboard: 2.9.0
+✅ Jupyter: Selected Jupyter core packages...
+IPython          : 8.21.0
+ipykernel        : 6.29.4
+ipywidgets       : 8.1.5
+jupyter_client   : 8.6.2
+jupyter_core     : 5.7.2
+jupyter_server   : not installed
+jupyterlab       : 2.3.2
+nbclient         : 0.10.0
+nbconvert        : 7.16.4
+nbformat         : 5.10.4
+notebook         : 6.4.10
+qtconsole        : not installed
+traitlets        : 5.9.0
+✅ IPython Kernel: 6.29.4
+✅ IPyWidgets: 8.1.5
+✅ OpenCV: 4.5.5
+✅ Rasterio: 1.4.3
+
+=== Test Analysis Complete ===
+
+🎉 All dependency tests passed successfully!
+=== Cleaning Up: Removing Container 'mapreader' ===
+✅ Container 'mapreader' has been removed.
+
