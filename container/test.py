@@ -29,12 +29,13 @@ WORKDIR = "/workspace"
 # Each dependency has two commands: one to print the library name and another to print its version
 DEPENDENCY_TESTS: List[Tuple[str, str]] = [
     ("PyTorch", "python3 -c 'import torch; print(torch.__version__)'"),
+    ("PyTorch GPU", "python3 -c 'import torch; print(torch.cuda.is_available())'"),
     ("Torchvision", "python3 -c 'import torchvision; print(torchvision.__version__)'"),
     ("Geopandas", "python3 -c 'import geopandas; print(geopandas.__version__)'"),
     ("Geopy", "python3 -c 'import geopy; print(geopy.__version__)'"),
-    ("Cython", "cython --version"),
+    ("Cython Python", "python3 -c 'import Cython; print(Cython.__version__)'"),
     ("Torchinfo", "python3 -c 'import torchinfo; print(torchinfo.__version__)'"),
-    ("Parhugin", "python3 -c 'import parhugin;'"),
+    ("Parhugin MultiFun", "python3 -c 'from parhugin import multiFunc; myproc = multiFunc(num_req_p=10)'"),
     ("MapReader", "python3 -c 'import mapreader; print(mapreader.__version__)'"),
     ("GDAL", "gdalinfo --version"),
     ("Fiona", "python3 -c 'import fiona; print(fiona.__version__)'"),
@@ -94,7 +95,7 @@ def run_container() -> str:
     """
     print(f"=== Running Container: {CONTAINER_NAME} ===")
     run_command(
-        f"podman-hpc run -d --name {CONTAINER_NAME} "
+        f"podman-hpc run -d --gpu --name {CONTAINER_NAME} "
         f"{IMAGE_NAME} sleep infinity"
     )
     # Get container ID
@@ -131,10 +132,10 @@ def execute_tests(container_id: str) -> List[Tuple[str, bool, str]]:
         try:
             version_result = run_command(f"podman-hpc exec {container_id} bash -c \"{version_cmd}\"")
             version_output = version_result.stdout.strip()
-            print(f"✅ {library_name} Version: {version_output}\n")
+            print(f"✅ {library_name} Output: {version_output}\n")
             results.append((library_name, True, version_output))
         except subprocess.CalledProcessError:
-            print(f"❌ {library_name} Version: Failed to execute.\n")
+            print(f"❌ {library_name} Output: Failed to execute.\n")
             results.append((library_name, False, "Failed to execute."))
     
     return results

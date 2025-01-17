@@ -1,67 +1,71 @@
 === Running Container: mapreader ===
-✅ Container 'mapreader' is running with ID: 6cb720e2b1780e17cdbb89c0a3a77ac82c28da6b0cd8ed2de7bd46620aabf702
+✅ Container 'mapreader' is running with ID: 85c4da8d8d7b131499ec37d83822efa0cb8f21f8a5450add23ab0e9a4529d0f3
 
 === Executing Dependency Tests Inside Container 'mapreader' ===
 
 🔍 Running Test: PyTorch
 📦 Library: PyTorch
-✅ PyTorch Version: 2.4.0a0+f70bd71a48.nv24.06
+✅ PyTorch Output: 2.4.0a0+f70bd71a48.nv24.06
+
+🔍 Running Test: PyTorch GPU
+📦 Library: PyTorch GPU
+✅ PyTorch GPU Output: True
 
 🔍 Running Test: Torchvision
 📦 Library: Torchvision
-✅ Torchvision Version: 0.19.0a0
+✅ Torchvision Output: 0.19.0a0
 
 🔍 Running Test: Geopandas
 📦 Library: Geopandas
-✅ Geopandas Version: 0.14.4
+✅ Geopandas Output: 0.14.4
 
 🔍 Running Test: Geopy
 📦 Library: Geopy
-✅ Geopy Version: 2.1.0
+✅ Geopy Output: 2.1.0
 
-🔍 Running Test: Cython
-📦 Library: Cython
-✅ Cython Version: 
+🔍 Running Test: Cython Python
+📦 Library: Cython Python
+✅ Cython Python Output: 0.29.37
 
 🔍 Running Test: Torchinfo
 📦 Library: Torchinfo
-✅ Torchinfo Version: 1.8.0
+✅ Torchinfo Output: 1.8.0
 
-🔍 Running Test: Parhugin
-📦 Library: Parhugin
-✅ Parhugin Version: 
+🔍 Running Test: Parhugin MultiFun
+📦 Library: Parhugin MultiFun
+✅ Parhugin MultiFun Output: [INFO] #requested processes: 10
 
 🔍 Running Test: MapReader
 📦 Library: MapReader
-✅ MapReader Version: 1.6.2.post0.dev4
+✅ MapReader Output: 1.6.2.post0.dev4
 
 🔍 Running Test: GDAL
 📦 Library: GDAL
-✅ GDAL Version: GDAL 3.5.3, released 2022/10/21
+✅ GDAL Output: GDAL 3.5.3, released 2022/10/21
 
 🔍 Running Test: Fiona
 📦 Library: Fiona
-✅ Fiona Version: 1.10.1
+✅ Fiona Output: 1.10.1
 
 🔍 Running Test: Shapely
 📦 Library: Shapely
-✅ Shapely Version: 2.0.6
+✅ Shapely Output: 2.0.6
 
 🔍 Running Test: Scikit-learn
 📦 Library: Scikit-learn
-✅ Scikit-learn Version: 1.5.0
+✅ Scikit-learn Output: 1.5.0
 
 🔍 Running Test: Scikit-image
 📦 Library: Scikit-image
-✅ Scikit-image Version: 0.25.0
+✅ Scikit-image Output: 0.25.0
 
 🔍 Running Test: Tensorboard
 📦 Library: Tensorboard
-✅ Tensorboard Version: 2.9.0
+✅ Tensorboard Output: 2.9.0
 
 🔍 Running Test: Jupyter
 📦 Library: Jupyter
-✅ Jupyter Version: Selected Jupyter core packages...
+✅ Jupyter Output: Selected Jupyter core packages...
 IPython          : 8.21.0
 ipykernel        : 6.29.4
 ipywidgets       : 8.1.5
@@ -78,29 +82,30 @@ traitlets        : 5.9.0
 
 🔍 Running Test: IPython Kernel
 📦 Library: IPython Kernel
-✅ IPython Kernel Version: 6.29.4
+✅ IPython Kernel Output: 6.29.4
 
 🔍 Running Test: IPyWidgets
 📦 Library: IPyWidgets
-✅ IPyWidgets Version: 8.1.5
+✅ IPyWidgets Output: 8.1.5
 
 🔍 Running Test: OpenCV
 📦 Library: OpenCV
-✅ OpenCV Version: 4.5.5
+✅ OpenCV Output: 4.5.5
 
 🔍 Running Test: Rasterio
 📦 Library: Rasterio
-✅ Rasterio Version: 1.4.3
+✅ Rasterio Output: 1.4.3
 
 === Analyzing Test Results ===
 
 ✅ PyTorch: 2.4.0a0+f70bd71a48.nv24.06
+✅ PyTorch GPU: True
 ✅ Torchvision: 0.19.0a0
 ✅ Geopandas: 0.14.4
 ✅ Geopy: 2.1.0
-✅ Cython: 
+✅ Cython Python: 0.29.37
 ✅ Torchinfo: 1.8.0
-✅ Parhugin: 
+✅ Parhugin MultiFun: [INFO] #requested processes: 10
 ✅ MapReader: 1.6.2.post0.dev4
 ✅ GDAL: GDAL 3.5.3, released 2022/10/21
 ✅ Fiona: 1.10.1
