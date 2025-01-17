@@ -11,7 +11,7 @@ This document helps you to run MapReader on [Isambard-AI](https://docs.isambard.
 ```bash
 git clone https://github.com/owhere/MapReader.git
 git checkout isambard
-cd container
+cd MapReader/container
 ```
 ## Build and Run the image
 
@@ -32,3 +32,10 @@ podman-hpc run -it --gpu --rm --name mapreader \
 python test.py
 ```
 
+## Pulll the image
+
+If you have issues to build the image, please to pull it from the [docker hub](https://hub.docker.com/repository/docker/oxfordfun/mapreader/tags)
+
+```bash
+docker pull oxfordfun/mapreader:3.5.3
+```
