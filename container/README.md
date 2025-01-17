@@ -37,5 +37,5 @@ python test.py
 If you have issues to build the image, please to pull it from the [docker hub](https://hub.docker.com/repository/docker/oxfordfun/mapreader/tags)
 
 ```bash
-docker pull oxfordfun/mapreader:3.5.3
+podman-hpc pull oxfordfun/mapreader:3.5.3-full
 ```
