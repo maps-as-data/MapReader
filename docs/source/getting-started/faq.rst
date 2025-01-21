@@ -19,13 +19,38 @@ We're always here to help and welcome contributions to expand this section.
 **Q: Do I need georeferenced maps?**
 
 A: MapReader is at its most useful when operating on georeferenced maps, as these allow for geospatial analysis and visualization.
-However, it is possible to use non-georeferenced maps; in this case, analysis will be restricted to patch-based studies without spatial metadata.
+However, it is possible to use non-georeferenced maps as input.
+Output from non-georeferenced maps will provide details about patches or text bounding boxes based only on pixel coordinates, not geospatial coordinates.
+In practice, this means that you can analyze information about patches within 1 map, or across maps based on quantiative measures (for example, how many of each label? where in the image do these labeled patches occur? what text occurs most frequently across my corpus).
+But you are not able to plot this output on a map and perform spatial analysis.
+
+Note that you can work with non-georeferenced maps in MapReader, georeference the maps separately (for example, in QGIS or with Allmaps), and then transform the MapReader output coordinates from pixels into geospatial locations after the fact.
 
 **Q: Do you have good examples of maps that I can start working with?**
 
-A: Yes, we recommend starting with historical Ordnance Survey maps, which are well-suited for geospatial analysis.
-You can also use maps from The National Archives (TNA) collections.
-Both are readily accessible and provide varied challenges for map exploration.
+A: Yes.
+MapReader takes different kinds of input formats for maps.
+Details are available in the `File/Map Options </using-mapreader/input-guidance/file-map-options.html>`_ section.
+Map collections that are available as tiles, IIIF resources, and direct image downloads include:
+
+- **Tiles**
+
+  - National Library of Scotland maps as web map tiles: https://www.maptiler.com/nls/
+
+- **IIIF Map Collections**
+
+  - National Library of Scotland maps as IIIF resources (when viewing 1 map, click on "Show IIIF" tab at bottom of frame)
+  - David Rumsey Map Collection: https://www.davidrumsey.com/ (via the "Share" menu)
+  - Library of Congress: https://www.loc.gov/maps/?fa=partof:geography+and+map+division (scroll down to "IIIF Presentation Manifest")
+  - John Carter Brown Library Map Collection: https://jcb.lunaimaging.com/luna/servlet/JCBMAPS~1~1 (same infrastructure as Rumsey collection for finding IIIF manifests)
+  - `Bibliotheque nationale de France/Gallica digital map collection <https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=false&collapsing=true&version=1.2&query=(dc.type%20all%20%22carte%22)&suggest=10&keywords=>`_
+
+- **Direct Downloads**
+
+  - David Rumsey Map Collection: https://www.davidrumsey.com/ (scroll down, to 'download' options in metadata field, or use 'export' option in top right)
+  - Library of Congress: https://www.loc.gov/maps/?fa=partof:geography+and+map+division
+  - John Carter Brown Library Map Collection: https://jcb.lunaimaging.com/luna/servlet/JCBMAPS~1~1 (export option in top right)
+  - `Bibliotheque nationale de France/Gallica digital map collection <https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=false&collapsing=true&version=1.2&query=(dc.type%20all%20%22carte%22)&suggest=10&keywords=>`_
 
 **Q: Can the tool download/patchify IIIF maps?**
 
@@ -46,7 +71,7 @@ We have provided some `coding basics </in-depth-resources/coding-basics/>`_ in t
 
 **Q: What does the output of MapReader look like?**
 
-A: MapReader produces patch data, annotations, and model predictions.
+A: MapReader produces patch data, annotations, text spotting outputs, as well as model predictions.
 Outputs can include CSV files for metadata and labels, annotated patches in image formats, and trained models for further inference.
 
 **Q: How can I contribute to the codebase?**
@@ -85,12 +110,11 @@ You can read more in the `"Patchify" section </using-mapreader/step-by-step-guid
 
 **Q: What should I use for labels? What is a good label?**
 
-A: Labels should correspond to the features you want to identify in the maps.
-Common examples include "railspace," "urban," or "water."
-Custom labels can be tailored to your specific study area.
-
-..
-    Katie/Rosie: Add more detail to the question here!
+A: Labels should correspond to a visual signal you know is present in the maps you are working with.
+This visual signal can have some variety, but too much variety will lead to poor results.
+Developing the name of a label and the guidelines for assigning a label to a patch is usually an iterative process that is refined as you start to annotate patches.
+Labels do not need to conform to typical map features, but they can.
+Previous examples of patch labels include "railspace", "building", "trees", "rocks", "water", "gardens", and "heath".
 
 **Q: How can I trust the output from MapReader?**
 
