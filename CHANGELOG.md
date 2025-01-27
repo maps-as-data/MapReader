@@ -1,5 +1,9 @@
 # Change & Version Information
 
+## 0.6.1
+
+* Add explicit support for and testing against python 3.13 (thanks to @rettinghaus)
+
 ## 0.6.0
 
 * HTTP request method `get_iiif_url` is now a class method on
