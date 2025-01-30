@@ -867,10 +867,10 @@ class PatchFromImageDataset(PatchDataset):
     # overwrite the __getitem__ method to return the image patch 
     def __init__(self, args*, **kwargs):
         super().__init__(args*, **kwargs)
-        if "method" in kwargs:
-            self.method = kwargs["method"]
-        else:
-            self.method = "pixels"
+        #if "method" in kwargs:
+        #    self.method = kwargs["method"]
+        #else:
+        #   self.method = "pixels"
     def get_patch(self, idx):
         # load original image
         img= self.return_orig_image(idx)
