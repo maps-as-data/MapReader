@@ -29,7 +29,7 @@ in the Google notes doc for each call.
      - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
      - `Notes and Zoom link <https://docs.google.com/document/d/1Xe8ZxTb0_AhuTDsrOsPMzUF1xV6FfzBmvvvlhRQ6NK8/edit>`_
    * - February 6, 2025, 4-5pm UK time
-     - `Sign up <https://forms.office.com/e/x9zGL0yQyp>`_
+     - POSTPONED
      - `Notes and Zoom link <https://docs.google.com/document/d/1RkOO-E6EtekXZC0Y3ZGF1w4ztx2PpPfcZzvEsiIdgDk/edit>`_
 
 .. ----- Past community calls -------------------------------------------------
