@@ -15,6 +15,10 @@ The following table shows which versions of MapReader are compatible with which 
 
 _Add new changes here_
 
+### Added
+
+- Adds option to skip missing maps when downloading from a tileserver by setting `error_on_missing_map` argument to `False` ([#551](https://github.com/maps-as-data/MapReader/pull/551))
+
 ### Fixed
 - Fixes the `explore_predictions` and `explore_search_results` methods in the `DeepSoloRunner` and `MapTextRunner` classes ([#544](https://github.com/maps-as-data/MapReader/pull/544))
 
