@@ -25,6 +25,7 @@ _Add new changes here_
 - Added ability to save and reload text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
 - Added minimal dataclasses for text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
 - Added `skip_blank_patches` argument to `MapImages.patchify_all()` ([#540](https://github.com/maps-as-data/MapReader/pull/540))
+- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
 
 ## [v1.6.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.1) (2024-11-18)
 
