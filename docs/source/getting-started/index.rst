@@ -10,3 +10,4 @@ Getting Started
 
    installation-instructions/index
    troubleshooting-problems
+   faq
