@@ -59,7 +59,7 @@ setuptools.setup(
         "pyogrio>=0.7.2",
         "cartopy>=0.22.0",
         "joblib>=1.4.0",
-        "opencv-python<5.0.0.0",
+        "opencv-python>=4.8.1.78,<5.0.0.0",
         "folium>=0.12,<1.0.0",
         "mapclassify>=2.0.0,<3.0.0",
         "xyzservices==2024.9.0",
