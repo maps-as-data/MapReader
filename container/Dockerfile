@@ -64,11 +64,13 @@ ENV CPLUS_INCLUDE_PATH=/usr/local/include
 ENV C_INCLUDE_PATH=/usr/local/include
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-# Copy requirements.txt into the container
+# Copy requirements into the container
 COPY requirements.txt /tmp/
+COPY text-requirements.txt /tmp/
 
 # Install Python dependencies from requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/text-requirements.txt
 
 # Install MapReader from GitHub without dependencies to prevent altering existing packages
 RUN pip3 install git+https://github.com/Living-with-machines/MapReader.git --no-deps
