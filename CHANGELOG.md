@@ -14,6 +14,9 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 
 _Add new changes here_
+
+## [v1.6.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.3) (2025-02-11)
+
 ### Added
 
 - Adds option to skip missing maps when downloading from a tileserver by setting `error_on_missing_map` argument to `False` ([#551](https://github.com/maps-as-data/MapReader/pull/551))
