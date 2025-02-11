@@ -14,12 +14,16 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 
 _Add new changes here_
+### Added
+
+- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
 
 ### Added
 
 - Adds option to skip missing maps when downloading from a tileserver by setting `error_on_missing_map` argument to `False` ([#551](https://github.com/maps-as-data/MapReader/pull/551))
 
 ### Fixed
+
 - Fixes the `explore_predictions` and `explore_search_results` methods in the `DeepSoloRunner` and `MapTextRunner` classes ([#544](https://github.com/maps-as-data/MapReader/pull/544))
 
 ## [v1.6.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.2) (2025-01-02)
