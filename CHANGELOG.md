@@ -16,11 +16,8 @@ The following table shows which versions of MapReader are compatible with which 
 _Add new changes here_
 ### Added
 
-- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
-
-### Added
-
 - Adds option to skip missing maps when downloading from a tileserver by setting `error_on_missing_map` argument to `False` ([#551](https://github.com/maps-as-data/MapReader/pull/551))
+- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
 
 ### Fixed
 
