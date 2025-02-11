@@ -148,6 +148,7 @@ class TileMerger:
         grid_bb: GridBoundingBox,
         file_name: str | None = None,
         overwrite: bool = False,
+        error_on_missing_map: bool = True,
     ) -> str | bool:
         """Merges cells contained within GridBoundingBox.
 
@@ -167,7 +168,12 @@ class TileMerger:
         """
         os.makedirs(self.output_folder, exist_ok=True)
 
-        tile_size = self._load_tile_size(grid_bb)
+        try:
+            tile_size = self._load_tile_size(grid_bb)
+        except FileNotFoundError as err:
+            if error_on_missing_map:
+                raise err
+            return False, False
 
         merged_image = Image.new(
             "RGBA", (len(grid_bb.x_range) * tile_size, len(grid_bb.y_range) * tile_size)

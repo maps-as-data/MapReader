@@ -14,8 +14,13 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 
 _Add new changes here_
+### Added
+
+- Adds option to skip missing maps when downloading from a tileserver by setting `error_on_missing_map` argument to `False` ([#551](https://github.com/maps-as-data/MapReader/pull/551))
+- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
 
 ### Fixed
+
 - Fixes the `explore_predictions` and `explore_search_results` methods in the `DeepSoloRunner` and `MapTextRunner` classes ([#544](https://github.com/maps-as-data/MapReader/pull/544))
 
 ## [v1.6.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.2) (2025-01-02)
@@ -25,7 +30,6 @@ _Add new changes here_
 - Added ability to save and reload text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
 - Added minimal dataclasses for text predictions ([#536](https://github.com/maps-as-data/MapReader/pull/536)
 - Added `skip_blank_patches` argument to `MapImages.patchify_all()` ([#540](https://github.com/maps-as-data/MapReader/pull/540))
-- Added `container` directory with everything needed for running MapReader with podman-hpc ([#552](https://github.com/maps-as-data/MapReader/pull/552))
 
 ## [v1.6.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.1) (2024-11-18)
 

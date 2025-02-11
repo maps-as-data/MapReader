@@ -530,7 +530,7 @@ class SheetDownloader:
         existing_id: str | bool,
         download_in_parallel: bool = True,
         overwrite: bool = False,
-        force: bool = False,
+        error_on_missing_map=True,
     ) -> str | bool:
         """
         Downloads a single map sheet and saves as png file.
@@ -545,8 +545,8 @@ class SheetDownloader:
             Whether to download tiles in parallel, by default ``True``.
         overwrite : bool, optional
             Whether to overwrite existing maps, by default ``False``.
-        force : bool, optional
-            Whether to force the download or ask for confirmation, by default ``False``.
+        error_on_missing_map : bool, optional
+            Whether to raise an error if a map sheet is missing, by default True.
 
         Returns
         -------
@@ -563,13 +563,16 @@ class SheetDownloader:
             map_name = existing_id[:-4]  # remove file extension (assuming .png)
 
         img_path, success = self.merger.merge(
-            feature["grid_bb"], file_name=map_name, overwrite=overwrite
+            feature["grid_bb"],
+            file_name=map_name,
+            overwrite=overwrite,
+            error_on_missing_map=error_on_missing_map,
         )
 
         if success:
             print(f'[INFO] Downloaded "{img_path}"')
         else:
-            print(f'[WARNING] Download of "{img_path}" was unsuccessful.')
+            print("[WARNING] Download unsuccessful.")
 
         # Try to remove the temporary folder
         try:
@@ -686,6 +689,7 @@ class SheetDownloader:
         overwrite: bool | None = False,
         download_in_parallel: bool = True,
         force: bool = False,
+        error_on_missing_map: bool = True,
         **kwargs: dict | None,
     ):
         """Download map sheets from features.
@@ -704,6 +708,8 @@ class SheetDownloader:
             Whether to download tiles in parallel, by default ``True``.
         force : bool, optional
             Whether to force the download or ask for confirmation, by default ``False``.
+        error_on_missing_map : bool, optional
+            Whether to raise an error if a map sheet is missing, by default True.
         **kwargs : dict, optional
             Keyword arguments to pass to the
             :meth:`~.download.sheet_downloader.SheetDownloader._save_metadata`
@@ -759,6 +765,7 @@ class SheetDownloader:
                 existing_id,
                 download_in_parallel=download_in_parallel,
                 overwrite=overwrite,
+                error_on_missing_map=error_on_missing_map,
             )
             if img_path is not False:
                 metadata_path = f"{path_save}/{metadata_fname}"

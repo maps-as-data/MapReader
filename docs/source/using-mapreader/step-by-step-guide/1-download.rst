@@ -198,6 +198,7 @@ For all download methods, you should also be aware of the following arguments:
 - ``date_col`` - The key(s) to use when extracting the publication dates from your ``metadata.json``.
 - ``metadata_to_save`` - A dictionary containing information about the metadata you'd like to transfer from your ``metadata.json`` to your ``metadata.csv``. See below for further details.
 - ``force`` - If you are downloading more than 100MB of data, you will need to confirm that you would like to download this data by setting ``force=True``.
+- ``error_on_missing_map`` - By default, this is set to ``True`` and so will raise an error if any of your maps are missing. If you'd like to skip missing maps instead, set ``error_on_missing_map=False``.
 
 Using the default ``path_save`` and ``metadata_fname`` will result in the following directory structure:
 

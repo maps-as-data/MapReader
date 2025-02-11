@@ -281,6 +281,24 @@ def mock_response(monkeypatch):
     monkeypatch.setattr(TileMerger, "merge", mock_merge)
 
 
+@pytest.fixture(scope="function")
+def mock_response_missing_map(monkeypatch):
+    def mock_download_tiles(self, *args, **kwargs):
+        os.makedirs(self.temp_folder, exist_ok=True)
+        return
+
+    monkeypatch.setattr(TileDownloader, "download_tiles", mock_download_tiles)
+
+    def mock_merge_missing_map(self, *args, **kwargs):
+        os.makedirs(self.output_folder, exist_ok=True)
+        if kwargs.pop("error_on_missing_map", True):
+            raise FileNotFoundError
+        else:
+            return False, False
+
+    monkeypatch.setattr(TileMerger, "merge", mock_merge_missing_map)
+
+
 def test_download_all(sheet_downloader, tmp_path, mock_response):
     sd = sheet_downloader
     # zoom level 14
@@ -722,6 +740,37 @@ def test_data_warning_error(sheet_downloader, tmp_path, mock_response):
         Warning, match="Please confirm download by setting ``force=True``"
     ):
         sd.download_all_map_sheets(maps_path, metadata_fname)
+
+
+def test_download_skip_missing_map(
+    sheet_downloader, tmp_path, mock_response_missing_map
+):
+    sd = sheet_downloader
+    sd.get_grid_bb(14)
+    maps_path = tmp_path / "test_maps/"
+    metadata_fname = "test_metadata.csv"
+    sd.download_map_sheets_by_wfs_ids(
+        16320,
+        maps_path,
+        metadata_fname,
+        force=True,
+        error_on_missing_map=False,
+    )  # test single wfs_id
+    assert not os.path.exists(f"{maps_path}/map_101602026.png")
+    assert not os.path.exists(f"{maps_path}/{metadata_fname}")
+
+    sd = sheet_downloader
+    sd.get_grid_bb(14)
+    maps_path = tmp_path / "test_maps/"
+    metadata_fname = "test_metadata.csv"
+    with pytest.raises(FileNotFoundError):
+        sd.download_map_sheets_by_wfs_ids(
+            16320,
+            maps_path,
+            metadata_fname,
+            force=True,
+            error_on_missing_map=True,
+        )  # test single wfs_id
 
 
 def test_download_grid_bb_errors(sheet_downloader):
