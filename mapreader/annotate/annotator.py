@@ -215,9 +215,8 @@ class Annotator:
             )
         if not task_name:
             task_name = "task"
-        id = hashlib.md5(image_list.encode("utf-8")).hexdigest()
 
-        annotations_file = task_name.replace(" ", "_") + f"_#{username}#-{id}.csv"
+        annotations_file = task_name.replace(" ", "_") + f"_#{username}#.csv"
         annotations_file = os.path.join(annotations_dir, annotations_file)
 
         # Ensure labels are of type list
