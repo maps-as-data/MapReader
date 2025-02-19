@@ -12,4 +12,5 @@ def test_import():
         PatchContextDataset,
         Downloader,
         SheetDownloader,
+        IIIFDownloader,
     )

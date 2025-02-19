@@ -28,10 +28,34 @@ class IIIFDownloader:
         | IIIFPresentation3
         | IIIFPresentation2
         | list[str | IIIFPresentation3 | IIIFPresentation2],
+        iiif_uri: str | list[str] | None = None,
     ):
-        if not isinstance(self.iiif, list):
-            self.iiif = [iiif]
+        """A class to download images from IIIF presentation jsons.
+
+        Parameters
+        ----------
+        iiif : str | IIIFPresentation3 | IIIFPresentation2 | list[str  |  IIIFPresentation3  |  IIIFPresentation2]
+            The IIIF url or IIIF presentation API object(s) containing the maps to download
+        iiif_uri : str | list[str] | None
+            The URI(s) of the IIIF object(s), needed if the IIIF object is missing an 'id' field. Default is None.
+
+            If only one IIIF object is missing an `id`, create a list with None values for the other objects.
+            e.g. iiif_uri=[None, "https://example.com/iiif/manifest.json", None]
+        """
+        if not isinstance(iiif, list):
+            iiif = [iiif]
         self.iiif = iiif
+
+        if iiif_uri is None:
+            self.iiif_uri = [None] * len(self.iiif)
+        else:
+            if not isinstance(iiif_uri, list):
+                iiif_uri = [iiif_uri]
+            if len(iiif_uri) != len(self.iiif):
+                raise ValueError(
+                    "[ERROR] Length of `iiif_uri` must match length of `iiif`."
+                )
+            self.iiif_uri = iiif_uri
 
     def save_georeferenced_maps(
         self,
@@ -43,9 +67,13 @@ class IIIFDownloader:
         ----------
         path_save : str | pathlib.Path
             Path to save the images
+
+        Notes
+        -----
+        Calls the `save_georeferenced_map` method for each IIIF object.
         """
-        for iiif in self.iiif:
-            self.save_georeferenced_map(iiif, path_save)
+        for iiif, iiif_uri in zip(self.iiif, self.iiif_uri):
+            self.save_georeferenced_map(iiif, path_save=path_save, iiif_uri=iiif_uri)
 
     def save_georeferenced_map(
         self,
@@ -204,6 +232,10 @@ class IIIFDownloader:
         ----------
         path_save : str | pathlib.Path
             Path to save the images
+
+        Notes
+        -----
+        Calls the `save_map` method for each IIIF object.
         """
         for iiif in self.iiif:
             self.save_map(iiif, path_save)
