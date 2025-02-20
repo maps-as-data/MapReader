@@ -28,7 +28,8 @@ class IIIFDownloader:
         | IIIFPresentation3
         | IIIFPresentation2
         | list[str | IIIFPresentation3 | IIIFPresentation2],
-        iiif_uri: str | list[str] | None = None,
+        iiif_versions: int | float | str | list[int | float | str] | None = None,
+        iiif_uris: str | list[str] | None = None,
     ):
         """A class to download images from IIIF presentation jsons.
 
@@ -36,7 +37,9 @@ class IIIFDownloader:
         ----------
         iiif : str | IIIFPresentation3 | IIIFPresentation2 | list[str  |  IIIFPresentation3  |  IIIFPresentation2]
             The IIIF url or IIIF presentation API object(s) containing the maps to download
-        iiif_uri : str | list[str] | None
+        iiif_versions : int | float | str | list[int | float | str] | None
+            The IIIF version(s) of the IIIF object(s). Can only be None if `iiif` is/are already IIIF object(s). Default is None.
+        iiif_uris : str | list[str] | None
             The URI(s) of the IIIF object(s), needed if the IIIF object is missing an 'id' field. Default is None.
 
             If only one IIIF object is missing an `id`, create a list with None values for the other objects.
@@ -44,18 +47,43 @@ class IIIFDownloader:
         """
         if not isinstance(iiif, list):
             iiif = [iiif]
-        self.iiif = iiif
+        if iiif_versions is None:
+            iiif_versions = [None] * len(iiif)
+        if not isinstance(iiif_versions, list):
+            iiif_versions = [iiif_versions]
+        if len(iiif) != len(iiif_versions):
+            raise ValueError(
+                "[ERROR] Length of `iiif` must match length of `iiif_versions`."
+            )
 
-        if iiif_uri is None:
-            self.iiif_uri = [None] * len(self.iiif)
-        else:
-            if not isinstance(iiif_uri, list):
-                iiif_uri = [iiif_uri]
-            if len(iiif_uri) != len(self.iiif):
-                raise ValueError(
-                    "[ERROR] Length of `iiif_uri` must match length of `iiif`."
-                )
-            self.iiif_uri = iiif_uri
+        iiif_objs = []
+        for iiif_obj, iiif_version in zip(iiif, iiif_versions):
+            if isinstance(iiif_obj, str):
+                iiif_obj = load_iiif_presentation(iiif_obj, iiif_version)
+            if isinstance(iiif_obj, (IIIFPresentation3, IIIFPresentation2)):
+                iiif_objs.append(iiif_obj)
+            else:
+                raise ValueError("Each `iiif` must be a string or IIIF object.")
+
+        if iiif_uris is None:
+            iiif_uris = [None] * len(iiif_objs)
+        if not isinstance(iiif_uris, list):
+            iiif_uris = [iiif_uris]
+        if len(iiif_uris) != len(iiif_objs):
+            raise ValueError(
+                "[ERROR] Length of `iiif_uris` must match length of `iiif`."
+            )
+
+        for iiif_obj, iiif_uri in zip(iiif_objs, iiif_uris):
+            if iiif_obj.id is None:
+                if iiif_uri is not None:
+                    iiif_obj.id = iiif_uri
+                else:
+                    raise ValueError(
+                        "[ERROR] One of your IIIF objects is missing an 'id' field so we cannot identify it's URL. Please pass the `iiif_uris` argument."
+                    )
+
+        self.iiif = iiif_objs
 
     def save_georeferenced_maps(
         self,
@@ -72,8 +100,8 @@ class IIIFDownloader:
         -----
         Calls the `save_georeferenced_map` method for each IIIF object.
         """
-        for iiif, iiif_uri in zip(self.iiif, self.iiif_uri):
-            self.save_georeferenced_map(iiif, path_save=path_save, iiif_uri=iiif_uri)
+        for iiif in self.iiif:
+            self.save_georeferenced_map(iiif, path_save=path_save)
 
     def save_georeferenced_map(
         self,
@@ -105,7 +133,7 @@ class IIIFDownloader:
             raise ValueError("`iiif` must be a string or IIIF3 object.")
 
         if iiif_obj.id is None:
-            if iiif_uri:
+            if iiif_uri is not None:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
@@ -238,7 +266,7 @@ class IIIFDownloader:
         Calls the `save_map` method for each IIIF object.
         """
         for iiif in self.iiif:
-            self.save_map(iiif, path_save)
+            self.save_map(iiif, path_save=path_save)
 
     def save_map(
         self,
@@ -254,7 +282,7 @@ class IIIFDownloader:
         iiif : str | dict | IIIFPresentation3 | IIIFPresentation2
             the IIIF url or IIIF presentation API object containing the map(s)
         iiif_version : int | float | str
-            The IIIF version, ignored if iiif is a IIIF object
+            The IIIF version, ignored if iiif is already a IIIF object
         path_save : str | pathlib.Path
             Path to save the images
         iiif_uri : str
@@ -268,7 +296,7 @@ class IIIFDownloader:
             raise ValueError("`iiif` must be a string or IIIF object.")
 
         if iiif_obj.id is None:
-            if iiif_uri:
+            if iiif_uri is not None:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
@@ -280,7 +308,7 @@ class IIIFDownloader:
         for annot in tqdm(iiif_obj.collect_annotations()):
             # Get filename
             # host, prefix, identifier
-            fname = (".").join(annot.id.remove_prefix("https://").split("/")[2:])
+            fname = ".".join(annot.id.removeprefix("https://").split("/")[2:])
 
             if not os.path.exists(path_save):
                 os.makedirs(path_save, exist_ok=True)
