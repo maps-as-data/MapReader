@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import geopandas as gpd
 import numpy as np
 import rasterio
 from geopy.distance import geodesic, great_circle
 from pyproj import Transformer
+from rasterio.features import geometry_mask
+from shapely.geometry import box
 
 
 def extractGeoInfo(image_path):
@@ -102,3 +105,68 @@ def reproject_geo_info(image_path, target_crs="EPSG:4326", calc_size_in_m=False)
         size_in_m = None
 
     return tiff_shape, tiff_proj, target_crs, coord, size_in_m
+
+
+def apply_mask_to_raster(
+    input_tif: str,
+    gdf: gpd.GeoDataFrame,
+    output_tif: str,
+    mask_color: str = "white",
+    buffer_distance: float = 0,
+):
+    """
+    Apply a geospatial mask to a GeoTIFF file based on a GeoDataFrame, clipping geometries to the raster bounds.
+
+    Parameters:
+    - input_tif (str): Path to the input GeoTIFF file.
+    - gdf (geopandas.GeoDataFrame): GeoDataFrame containing geometries to mask.
+    - output_tif (str): Path to save the masked GeoTIFF.
+    - mask_color (str): Color of the mask, either "white" or "black". Defaults to "white".
+    - buffer_distance (float): Buffer distance in meters for polylines. Defaults to 0 (no buffering).
+
+    Returns:
+    - None
+    """
+    if mask_color not in ["white", "black"]:
+        raise ValueError("mask_color must be either 'white' or 'black'")
+
+    with rasterio.open(input_tif) as src:
+        gdf = gdf.to_crs(src.crs)
+
+        # Clip geometries to raster bounds
+        raster_bounds = box(*src.bounds)
+        raster_bbox = gpd.GeoDataFrame({"geometry": [raster_bounds]}, crs=src.crs)
+        gdf = gpd.clip(gdf, raster_bbox)
+
+        # Buffer polylines if applicable
+        if buffer_distance > 0:
+            gdf["geometry"] = gdf.geometry.apply(
+                lambda geom: geom.buffer(buffer_distance)
+                if geom.geom_type in ["LineString", "MultiLineString"]
+                else geom
+            )
+
+        # Read raster data
+        raster_data = src.read()
+        transform = src.transform
+        out_meta = src.meta.copy()
+
+        # Create the mask
+        mask = geometry_mask(
+            [geom for geom in gdf.geometry if geom.is_valid],
+            transform=transform,
+            invert=True,
+            out_shape=(src.height, src.width),
+        )
+
+        # Apply the mask
+        masked_raster = np.copy(raster_data)
+        fill_value = 255 if mask_color == "white" else 0
+        for band in range(masked_raster.shape[0]):
+            masked_raster[band][mask] = fill_value
+
+        # Save the masked raster
+        with rasterio.open(output_tif, "w", **out_meta) as dst:
+            dst.write(masked_raster)
+
+    print(f"Masked GeoTIFF saved to {output_tif}")
