@@ -12,7 +12,10 @@ import rasterio.mask
 import requests
 from bs4 import BeautifulSoup
 from piffle.iiif_dataclasses.presentation2 import IIIFPresentation2
-from piffle.iiif_dataclasses.presentation3 import IIIFPresentation3
+from piffle.iiif_dataclasses.presentation3 import (
+    GeoreferenceAnnotation3,
+    IIIFPresentation3,
+)
 from piffle.load_iiif import load_iiif_image, load_iiif_presentation
 from PIL import Image, ImageDraw
 from rasterio import transform
@@ -63,7 +66,7 @@ class IIIFDownloader:
             if isinstance(iiif_obj, (IIIFPresentation3, IIIFPresentation2)):
                 iiif_objs.append(iiif_obj)
             else:
-                raise ValueError("Each `iiif` must be a string or IIIF object.")
+                raise ValueError("[ERROR] Each `iiif` must be a string or IIIF object.")
 
         if iiif_uris is None:
             iiif_uris = [None] * len(iiif_objs)
@@ -130,25 +133,31 @@ class IIIFDownloader:
         elif isinstance(iiif, IIIFPresentation3):
             iiif_obj = iiif
         else:
-            raise ValueError("`iiif` must be a string or IIIF3 object.")
+            raise ValueError("[ERROR] `iiif` must be a string or IIIF3 object.")
 
         if iiif_obj.id is None:
             if iiif_uri is not None:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "IIIF object is missing 'id' field so we cannot identify it's URI. Please manually pass the `iiif_uri` argument."
+                    "[ERROR] IIIF object is missing 'id' field so we cannot identify it's URI. Please manually pass the `iiif_uri` argument."
                 )
         iiif_uri = iiif_obj.id
 
         metadata = pd.DataFrame(columns=["filename", "iiif_uri"])
         for annot in tqdm(iiif_obj.collect_annotations()):
+            if not isinstance(annot, GeoreferenceAnnotation3):
+                print(
+                    f"[WARNING] Skipping annotation '{annot.id}' as it is not a georeference annotation."
+                )
+                continue
+
             # Check we are working with first order polynomial transformation (i.e. affine)
             if (annot.body["transformation"]["type"] != "polynomial") or (
                 annot.body["transformation"]["options"]["order"] != 1
             ):
                 raise ValueError(
-                    "Only first order polynomial transformations are currently supported"
+                    "[ERROR] Only first order polynomial transformations are currently supported"
                 )
 
             # Get filename
@@ -300,7 +309,7 @@ class IIIFDownloader:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "IIIF object is missing 'id' field so we cannot identify it's URL. Please manually pass the `iiif_url` argument."
+                    "[ERROR] IIIF object is missing 'id' field so we cannot identify it's URL. Please manually pass the `iiif_url` argument."
                 )
         iiif_uri = iiif_obj.id
 
