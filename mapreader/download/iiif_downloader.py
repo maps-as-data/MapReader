@@ -198,7 +198,7 @@ class IIIFDownloader:
             )
 
             # Idenfity annotation bounds
-            svg = BeautifulSoup(annot.target["selector"]["value"], "xml").find("svg")
+            svg = BeautifulSoup(annot.target["selector"]["value"], "lxml").find("svg")
             points = svg.find("polygon")["points"]
             points = np.array(
                 [
