@@ -78,7 +78,7 @@ class IIIFDownloader:
             )
 
         for iiif_obj, iiif_uri in zip(iiif_objs, iiif_uris):
-            if iiif_obj.id is None:
+            if not hasattr(iiif_obj, "id"):
                 if iiif_uri is not None:
                     iiif_obj.id = iiif_uri
                 else:
@@ -135,7 +135,7 @@ class IIIFDownloader:
         else:
             raise ValueError("[ERROR] `iiif` must be a string or IIIF3 object.")
 
-        if iiif_obj.id is None:
+        if not hasattr(iiif_obj, "id"):
             if iiif_uri is not None:
                 iiif_obj.id = iiif_uri
             else:
