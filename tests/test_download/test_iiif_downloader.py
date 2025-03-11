@@ -36,7 +36,7 @@ def mock_download_image(monkeypatch):
 
 @pytest.fixture
 def sample_dir():
-    return Path(__file__).resolve().parent.parent / "sample_files" / "IIIF_sample_files"
+    return Path(__file__).resolve().parent.parent / "sample_files" / "iiif_sample_files"
 
 
 @pytest.fixture
