@@ -12,19 +12,19 @@ Classification of plant phenotypes
 
 .. image:: /_static/tutorial_classification_plant_phenotype.png
    :width: 400px
-   :target: https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb
+   :target: https://github.com/maps-as-data/mapreader-examples/tree/main/notebooks/non-geospatial/classification_plant_phenotype
 
 In our ``classification_plant_phenotype`` example, we demonstrate how to use MapReader to classify plant phenotypes in images of plants.
 Importantly, this worked example demonstrates how to use MapReader with non-georeferenced images (e.g. non-georeferenced map images).
-It can be found `here <https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
+It can be found `here <https://github.com/maps-as-data/mapreader-examples/blob/main/notebooks/non-geospatial/classification_plant_phenotype/Pipeline.ipynb>`__.
 
 Classification of MNIST digits
 ------------------------------
 
 .. image:: /_static/tutorial_classification_mnist.png
    :width: 400px
-   :target: https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_mnist/Pipeline.ipynb
+   :target: https://github.com/maps-as-data/mapreader-examples/tree/main/notebooks/non-geospatial/classification_mnist
 
 In our ``classification_mnist`` example, we demonstrate how to use MapReader to classify MNIST digits.
 Importantly, this example demonstrates how to use MapReader to classify whole images instead of patches and therefore how MapReader can generalize to much broader use cases.
-It can be found `here <https://github.com/Living-with-machines/MapReader/blob/main/worked_examples/non-geospatial/classification_mnist/Pipeline.ipynb>`__.
+It can be found `here <https://github.com/maps-as-data/mapreader-examples/blob/main/notebooks/non-geospatial/classification_mnist/Pipeline.ipynb>`__.
