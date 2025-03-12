@@ -20,6 +20,7 @@
     - [MapReader text spotting pipeline](#mapreader-classification-pipeline)
   - [Documentation](#documentation)
   - [What is included in this repo?](#what-is-included-in-this-repo)
+    - [What is not included in this repo?](#what-is-not-included-in-this-repo)
   - [How to cite MapReader](#how-to-cite-mapreader)
   - [Acknowledgements](#acknowledgements)
   - [Contributors](#contributors)
@@ -88,7 +89,12 @@ The repository is structured as follows:
 - `mapreader/`: Contains the source code for the MapReader library.
 - `docs/`: Contains the documentation for the MapReader library.
 - `tests/` and `test_text_spotting/`: Contains the tests for the MapReader library.
-- `worked_examples/`: Contains worked examples of how to use the MapReader library.
+
+### What is not included in this repo?
+
+Our worked examples can be found in the [mapreader-examples](https://github.com/maps-as-data/MapReader-examples) repository.
+
+We also have a number of other MapReader and map related repositories which can be found on the [maps-as-data](https://github.com/maps-as-data) GitHub organisation page.
 
 ## How to cite MapReader
 

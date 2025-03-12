@@ -13,6 +13,10 @@ The following table shows which versions of MapReader are compatible with which 
 
 ## Pre-release
 
+### Removed
+
+- Worked examples removed from MapReader code repo - see instead https://github.com/maps-as-data/mapreader-examples for worked examples ([#555](https://github.com/maps-as-data/MapReader/pull/555))
+
 _Add new changes here_
 
 ## [v1.6.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.3) (2025-02-11)

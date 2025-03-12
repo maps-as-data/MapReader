@@ -1,9 +1,0 @@
-tasks:
-  coastline:
-    labels: ["coast", "inland", "water"]
-
-paths:
-  set_001:
-        patch_paths: "./patches_200_pixel/*png"
-        parent_paths: "./maps/*png"
-        annot_dir: "./annotations"
