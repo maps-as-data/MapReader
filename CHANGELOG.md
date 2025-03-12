@@ -13,6 +13,11 @@ The following table shows which versions of MapReader are compatible with which 
 
 ## Pre-release
 
+### Added
+
+- Added ability to use IIIF manifests for downloading maps ([#554](https://github.com/maps-as-data/MapReader/pull/554))
+- Added docs for using IIIF as input to MapReader ([#554](https://github.com/maps-as-data/MapReader/pull/554))
+
 ### Removed
 
 - Worked examples removed from MapReader code repo - see instead https://github.com/maps-as-data/mapreader-examples for worked examples ([#555](https://github.com/maps-as-data/MapReader/pull/555))
