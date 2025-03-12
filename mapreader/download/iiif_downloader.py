@@ -140,7 +140,7 @@ class IIIFDownloader:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "[ERROR] IIIF object is missing 'id' field so we cannot identify it's URI. Please manually pass the `iiif_uri` argument."
+                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify it's URI. Please manually pass the `iiif_uri` argument."
                 )
         iiif_uri = iiif_obj.id
 
@@ -304,12 +304,12 @@ class IIIFDownloader:
         else:
             raise ValueError("`iiif` must be a string or IIIF object.")
 
-        if iiif_obj.id is None:
+        if not hasattr(iiif_obj, "id"):
             if iiif_uri is not None:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "[ERROR] IIIF object is missing 'id' field so we cannot identify it's URL. Please manually pass the `iiif_url` argument."
+                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify it's URL. Please manually pass the `iiif_url` argument."
                 )
         iiif_uri = iiif_obj.id
 
@@ -325,13 +325,13 @@ class IIIFDownloader:
                 print(f"[INFO] '{fname}' already exists. Skipping download.")
                 continue
 
-            metadata.loc[len(metadata)] = [fname, iiif.id]
+            metadata.loc[len(metadata)] = [fname, iiif_obj.id]
 
             # Download image
             image = self.download_image(iiif_version, annot)
             image.save(f"{path_save}/{fname}.png")
 
-            if isinstance(iiif, IIIFPresentation3):
+            if isinstance(iiif_obj, IIIFPresentation3):
                 if "selector" in annot.target.keys():
                     # Idenfity annotation bounds
                     svg = BeautifulSoup(annot.target["selector"]["value"], "xml").find(
