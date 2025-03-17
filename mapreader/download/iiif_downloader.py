@@ -144,7 +144,7 @@ class IIIFDownloader:
                 )
         iiif_uri = iiif_obj.id
 
-        metadata = pd.DataFrame(columns=["filename", "iiif_uri"])
+        metadata = pd.DataFrame(columns=["name", "id", "iiif_uri"])
         for annot in tqdm(iiif_obj.collect_annotations()):
             if not isinstance(annot, GeoreferenceAnnotation3):
                 print(
@@ -169,8 +169,6 @@ class IIIFDownloader:
             if os.path.exists(f"{path_save}/{fname}.tif"):
                 print(f"[INFO] '{fname}' already exists. Skipping download.")
                 continue
-
-            metadata.loc[len(metadata)] = [fname, iiif_obj.id]
 
             # Download image
             image = self.download_image(3, annot)
@@ -257,6 +255,7 @@ class IIIFDownloader:
             ) as dst:
                 dst.write(masked_image)
 
+            metadata.loc[len(metadata)] = [f"{fname}_masked.tif", fname, iiif_obj.id]
             metadata.to_csv(f"{path_save}/metadata.csv")
 
     def save_maps(
