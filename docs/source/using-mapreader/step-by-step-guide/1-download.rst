@@ -574,6 +574,29 @@ Or, to load multiple IIIF manifests from URLs:
 
 MapReader will also allow you to mix and match, loading some manifests from files and some from URLs.
 
+If any of your manifests are missing an `id` field, you can specify the `id` field using the `iiif_uris` argument.
+
+When passing the `iiif_uris` argument, your list of URIs should always be the same length as the number of input IIIF manifests.
+For example, if you are loading two manifest and both are missing the `id` field, pass the two URIs as a list in the `iiif_uris` argument:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["https://example.com/manifest1.json", "https://example.com/manifest2.json"],
+          iiif_versions=[2, 3],
+          iiif_uris=["https://example.com/manifest1.json", "https://example.com/manifest2.json"]
+     )
+
+Or, if just one of your manifests is missing an `id` field, pass `None` for any complete manifests and then pass the URI for the missing manifest:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["https://example.com/manifest1.json", "https://example.com/manifest2.json"],
+          iiif_versions=[2, 3],
+          iiif_uris=[None, "https://example.com/manifest2.json"]
+     )
+
 Once you have created your ``IIIFDownloader`` instance, you can use the `save_georeferenced_maps` or `save_maps` methods to download your maps.
 
 Save georeferenced maps
@@ -589,7 +612,7 @@ E.g.:
      downloader.save_georeferenced_maps()
 
 By default, this will save your maps in a ``maps`` directory and create a ``metadata.csv`` file containing information about your maps.
-Each map will be saved using the unique ID from its IIIF image server as its filename - this will be saved in the ``filename`` column of your metadata.csv.
+Each map will be saved using the unique ID from its IIIF image server as its filename - this will be saved in the ``id`` column of your metadata.csv.
 
 For each map, a unmasked and a masked version will be saved, this corresponds to the whole image and the image masked to show only the polygon created when annotating.
 
