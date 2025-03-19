@@ -3,7 +3,7 @@ Step 1: Set up a virtual Python environment
 
 .. todo:: Add comments about how to get to conda in Windows
 
-The most recent version of MapReader supports Python versions 3.9+.
+The most recent version of MapReader supports Python versions 3.9-3.12.
 
 Method 1: Using conda (recommended)
 ------------------------------------
@@ -17,7 +17,7 @@ Once you have installed either Ananconda or miniconda, open your terminal and us
 
    .. code-block:: bash
 
-      conda create -n mapreader python=3.10
+      conda create -n mapreader python=3.12
 
    This will create a conda enviroment for you to install MapReader and its dependencies into.
 
