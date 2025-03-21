@@ -12,6 +12,9 @@ The following table shows which versions of MapReader are compatible with which 
 ---
 
 ## Pre-release
+### Added
+
+- Center lines are now stored for each text instance as a LineString ([#559](https://github.com/maps-as-data/MapReader/pull/559))
 
 ### Removed
 
