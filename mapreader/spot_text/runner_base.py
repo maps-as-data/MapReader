@@ -325,6 +325,7 @@ class DetRunner:
                 self.parent_predictions[parent_id] = []
 
             for instance in prediction:
+                # convert polygon
                 polygon = instance.pixel_geometry
 
                 xx, yy = (np.array(i) for i in polygon.exterior.xy)
@@ -332,9 +333,26 @@ class DetRunner:
                 yy = yy + self.patch_df.loc[image_id, "pixel_bounds"][1]  # add min_y
 
                 parent_polygon = Polygon(zip(xx, yy)).buffer(0)
+
+                # convert line
+                if instance.pixel_line is not None:
+                    line = instance.pixel_line
+                    xx, yy = (np.array(i) for i in line.xy)
+                    xx = (
+                        xx + self.patch_df.loc[image_id, "pixel_bounds"][0]
+                    )  # add min_x
+                    yy = (
+                        yy + self.patch_df.loc[image_id, "pixel_bounds"][1]
+                    )  # add min_y
+
+                    parent_line = LineString(zip(xx, yy))
+                else:
+                    parent_line = None
+
                 self.parent_predictions[parent_id].append(
                     ParentPrediction(
                         pixel_geometry=parent_polygon,
+                        pixel_line=parent_line,
                         score=instance.score,
                         text=instance.text,
                         patch_id=image_id,
@@ -446,6 +464,7 @@ class DetRunner:
                 self.geo_predictions[parent_id] = []
 
                 for instance in prediction:
+                    # convert polygon
                     polygon = instance.pixel_geometry
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
@@ -461,13 +480,32 @@ class DetRunner:
                     parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     crs = self.parent_df.loc[parent_id, "crs"]
 
+                    # convert line
+                    if instance.pixel_line is not None:
+                        line = instance.pixel_line
+
+                        xx, yy = (np.array(i) for i in line.xy)
+                        xx = (
+                            xx * self.parent_df.loc[parent_id, "dlon"]
+                            + self.parent_df.loc[parent_id, "coordinates"][0]
+                        )
+                        yy = (
+                            self.parent_df.loc[parent_id, "coordinates"][3]
+                            - yy * self.parent_df.loc[parent_id, "dlat"]
+                        )
+                        parent_line_geo = LineString(zip(xx, yy))
+                    else:
+                        parent_line_geo = None
+
                     self.geo_predictions[parent_id].append(
                         GeoPrediction(
                             pixel_geometry=instance.pixel_geometry,
+                            pixel_line=instance.pixel_line,
                             score=instance.score,
                             text=instance.text,
                             patch_id=instance.patch_id,
                             geometry=parent_polygon_geo,
+                            line=parent_line_geo,
                             crs=crs,
                         )
                     )
@@ -711,6 +749,17 @@ class DetRunner:
             lambda x: from_wkt(x)
         )
 
+        # convert lines to shapely geometry
+        # if line and pixel_line are not in the columns, add them as None values
+        if "line" in preds_df.columns:
+            preds_df["line"] = preds_df["line"].apply(lambda x: from_wkt(x))
+        else:
+            preds_df["line"] = None
+        if "pixel_line" in preds_df.columns:
+            preds_df["pixel_line"] = preds_df["pixel_line"].apply(lambda x: from_wkt(x))
+        else:
+            preds_df["pixel_line"] = None
+
         self.geo_predictions = {}
         self.parent_predictions = {}
 
@@ -724,16 +773,19 @@ class DetRunner:
                 self.geo_predictions[image_id].append(
                     GeoPrediction(
                         pixel_geometry=v.pixel_geometry,
+                        pixel_line=v.pixel_line,
                         score=v.score,
                         text=v.text if "text" in v.index else None,
                         patch_id=v.patch_id,
                         geometry=v.geometry,
+                        line=v.line,
                         crs=v.crs,
                     )
                 )
                 self.parent_predictions[image_id].append(
                     ParentPrediction(
                         pixel_geometry=v.pixel_geometry,
+                        pixel_line=v.pixel_line,
                         score=v.score,
                         text=v.text if "text" in v.index else None,
                         patch_id=v.patch_id,
@@ -747,6 +799,7 @@ class DetRunner:
                 if instance.patch_id not in self.patch_predictions.keys():
                     self.patch_predictions[instance.patch_id] = []
 
+                # convert polygon
                 polygon = instance.pixel_geometry
 
                 xx, yy = (np.array(i) for i in polygon.exterior.xy)
@@ -756,11 +809,27 @@ class DetRunner:
                 yy = (
                     yy - self.patch_df.loc[instance.patch_id, "pixel_bounds"][1]
                 )  # add min_y
-
                 patch_polygon = Polygon(zip(xx, yy)).buffer(0)
+
+                # convert line
+                if instance.pixel_line is not None:
+                    line = instance.pixel_line
+
+                    xx, yy = (np.array(i) for i in line.xy)
+                    xx = (
+                        xx - self.patch_df.loc[instance.patch_id, "pixel_bounds"][0]
+                    )  # add min_x
+                    yy = (
+                        yy - self.patch_df.loc[instance.patch_id, "pixel_bounds"][1]
+                    )  # add min_y
+                    patch_line = LineString(zip(xx, yy))
+                else:
+                    patch_line = None
+
                 self.patch_predictions[instance.patch_id].append(
                     PatchPrediction(
                         pixel_geometry=patch_polygon,
+                        pixel_line=patch_line,
                         score=instance.score,
                         text=instance.text,
                     )
@@ -789,6 +858,15 @@ class DetRunner:
                 lambda x: from_wkt(x)
             )
 
+            # convert lines to shapely geometry
+            # if line and pixel_line are not in the columns, add them as None values
+            if "pixel_line" in patch_preds.columns:
+                patch_preds["pixel_line"] = patch_preds["pixel_line"].apply(
+                    lambda x: from_wkt(x)
+                )
+            else:
+                patch_preds["pixel_line"] = None
+
         self.patch_predictions = {}  # reset patch predictions
 
         for image_id in patch_preds["image_id"].unique():
@@ -796,9 +874,12 @@ class DetRunner:
                 self.patch_predictions[image_id] = []
 
             for _, v in patch_preds[patch_preds["image_id"] == image_id].iterrows():
+                if not hasattr(v, "pixel_line"):
+                    v.pixel_line = None
                 self.patch_predictions[image_id].append(
                     PatchPrediction(
                         pixel_geometry=v.pixel_geometry,
+                        pixel_line=v.pixel_line,
                         score=v.score,
                         text=v.text if "text" in v.index else None,
                     )
@@ -879,7 +960,9 @@ class DetRecRunner(DetRunner):
             score = f"{score:.2f}"
 
             self.patch_predictions[image_id].append(
-                PatchPrediction(pixel_geometry=polygon, score=score, text=text)
+                PatchPrediction(
+                    pixel_geometry=polygon, pixel_line=line, score=score, text=text
+                )
             )
 
     def search_predictions(
@@ -1009,6 +1092,7 @@ class DetRecRunner(DetRunner):
                 geo_search_results[parent_id] = []
 
                 for instance in prediction:
+                    # convert polygon
                     polygon = instance.pixel_geometry
 
                     xx, yy = (np.array(i) for i in polygon.exterior.xy)
@@ -1021,16 +1105,32 @@ class DetRecRunner(DetRunner):
                         - yy * self.parent_df.loc[parent_id, "dlat"]
                     )
 
+                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
                     crs = self.parent_df.loc[parent_id, "crs"]
 
-                    parent_polygon_geo = Polygon(zip(xx, yy)).buffer(0)
+                    # convert line
+                    line = instance.pixel_line
+
+                    xx, yy = (np.array(i) for i in line.xy)
+                    xx = (
+                        xx * self.parent_df.loc[parent_id, "dlon"]
+                        + self.parent_df.loc[parent_id, "coordinates"][0]
+                    )
+                    yy = (
+                        self.parent_df.loc[parent_id, "coordinates"][3]
+                        - yy * self.parent_df.loc[parent_id, "dlat"]
+                    )
+                    parent_line_geo = LineString(zip(xx, yy))
+
                     geo_search_results[parent_id].append(
                         GeoPrediction(
                             pixel_geometry=instance.pixel_geometry,
+                            pixel_line=instance.pixel_line,
                             score=instance.score,
                             text=instance.score,
                             patch_id=instance.patch_id,
                             geometry=parent_polygon_geo,
+                            line=parent_line_geo,
                             crs=crs,
                         )
                     )

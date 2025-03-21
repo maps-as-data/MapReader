@@ -11,7 +11,7 @@ import pytest
 from deepsolo.config import get_cfg
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
-from shapely import Polygon
+from shapely import LineString, Polygon
 
 from mapreader import DeepSoloRunner
 from mapreader.load import MapImages
@@ -20,6 +20,7 @@ from mapreader.spot_text.dataclasses import (
     ParentPrediction,
     PatchPrediction,
 )
+from mapreader.utils.load_frames import load_from_geojson
 
 # use cloned DeepSolo path if running in github actions
 DEEPSOLO_PATH = (
@@ -234,6 +235,7 @@ def test_deepsolo_run_all(init_runner, mock_response):
         [
             "image_id",
             "pixel_geometry",
+            "pixel_line",
             "text",
             "score",
         ]
@@ -253,7 +255,7 @@ def test_deepsolo_convert_to_parent(runner_run_all, mock_response):
     out = runner._dict_to_dataframe(runner.parent_predictions)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
-        ["image_id", "patch_id", "pixel_geometry", "text", "score"]
+        ["image_id", "patch_id", "pixel_geometry", "pixel_line", "text", "score"]
     )
     assert "mapreader_text.png" in out["image_id"].values
 
@@ -270,7 +272,17 @@ def test_deepsolo_convert_to_parent_coords(runner_run_all, mock_response):
     out = runner._dict_to_dataframe(runner.geo_predictions)
     assert isinstance(out, gpd.GeoDataFrame)
     assert set(out.columns) == set(
-        ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "text", "score"]
+        [
+            "image_id",
+            "patch_id",
+            "pixel_geometry",
+            "pixel_line",
+            "geometry",
+            "line",
+            "crs",
+            "text",
+            "score",
+        ]
     )
     assert "mapreader_text.png" in out["image_id"].values
     assert out.crs == runner.parent_df.crs
@@ -321,7 +333,17 @@ def test_deepsolo_to_geojson(runner_run_all, tmp_path, mock_response):
     gdf = gpd.read_file(f"{tmp_path}/text.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert set(gdf.columns) == set(
-        ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "text", "score"]
+        [
+            "image_id",
+            "patch_id",
+            "pixel_geometry",
+            "pixel_line",
+            "geometry",
+            "line",
+            "crs",
+            "text",
+            "score",
+        ]
     )
 
 
@@ -337,7 +359,9 @@ def test_deepsolo_to_geojson_centroid(runner_run_all, tmp_path, mock_response):
             "image_id",
             "patch_id",
             "pixel_geometry",
+            "pixel_line",
             "geometry",
+            "line",
             "crs",
             "text",
             "score",
@@ -356,6 +380,29 @@ def test_deepsolo_load_geo_predictions(runner_run_all, tmp_path):
     assert "mapreader_text.png" in runner.geo_predictions.keys()
     assert isinstance(runner.geo_predictions["mapreader_text.png"], list)
     assert isinstance(runner.geo_predictions["mapreader_text.png"][0], GeoPrediction)
+    assert isinstance(runner.geo_predictions["mapreader_text.png"][0].geometry, Polygon)
+    assert isinstance(runner.geo_predictions["mapreader_text.png"][0].line, LineString)
+
+
+def test_deepsolo_load_geo_predictions_noline(runner_run_all, tmp_path):
+    runner = runner_run_all
+    _ = runner.convert_to_coords()
+    runner.to_geojson(f"{tmp_path}/text.geojson")
+    preds = load_from_geojson(f"{tmp_path}/text.geojson")
+    preds.drop(columns=["line", "pixel_line"], inplace=True)
+    preds.to_file(
+        f"{tmp_path}/text_new.geojson",
+        driver="GeoJson",
+        engine="pyogrio",
+    )
+    runner.geo_predictions = {}
+    runner.load_geo_predictions(f"{tmp_path}/text_new.geojson")
+    assert len(runner.geo_predictions)
+    assert "mapreader_text.png" in runner.geo_predictions.keys()
+    assert isinstance(runner.geo_predictions["mapreader_text.png"], list)
+    assert isinstance(runner.geo_predictions["mapreader_text.png"][0], GeoPrediction)
+    assert isinstance(runner.geo_predictions["mapreader_text.png"][0].geometry, Polygon)
+    assert runner.geo_predictions["mapreader_text.png"][0].line is None
 
 
 def test_deepsolo_load_geo_predictions_errors(runner_run_all, tmp_path):
@@ -412,6 +459,29 @@ def test_deepsolo_load_patch_predictions(runner_run_all, tmp_path):
     _ = runner.convert_to_coords()
     assert len(runner.geo_predictions)  # this will be empty after reloading
     runner.to_csv(tmp_path)
+    runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
+    assert len(runner.patch_predictions)
+    assert len(runner.geo_predictions) == 0
+    assert (
+        "patch-0-0-800-40-#mapreader_text.png#.png" in runner.patch_predictions.keys()
+    )
+    assert isinstance(
+        runner.patch_predictions["patch-0-0-800-40-#mapreader_text.png#.png"], list
+    )
+    assert isinstance(
+        runner.patch_predictions["patch-0-0-800-40-#mapreader_text.png#.png"][0],
+        PatchPrediction,
+    )
+
+
+def test_deepsolo_load_patch_predictions_noline(runner_run_all, tmp_path):
+    runner = runner_run_all
+    _ = runner.convert_to_coords()
+    assert len(runner.geo_predictions)  # this will be empty after reloading
+    runner.to_csv(tmp_path)
+    patch_preds = pd.read_csv(f"{tmp_path}/patch_predictions.csv")
+    patch_preds.drop(columns=["pixel_line"], inplace=True)
+    patch_preds.to_csv(f"{tmp_path}/patch_predictions.csv")
     runner.load_patch_predictions(f"{tmp_path}/patch_predictions.csv")
     assert len(runner.patch_predictions)
     assert len(runner.geo_predictions) == 0
@@ -485,7 +555,7 @@ def test_deepsolo_search_predictions(runner_run_all, mock_response):
     out = runner.search_predictions("map", ignore_case=True, return_dataframe=True)
     assert isinstance(out, pd.DataFrame)
     assert set(out.columns) == set(
-        ["image_id", "patch_id", "pixel_geometry", "text", "score"]
+        ["image_id", "patch_id", "pixel_geometry", "pixel_line", "text", "score"]
     )
     assert "mapreader_text.png" in out["image_id"].values
     out = runner.search_predictions(
@@ -510,7 +580,17 @@ def test_deepsolo_search_results(runner_run_all, tmp_path, mock_response):
     gdf = gpd.read_file(f"{tmp_path}/search_results.geojson")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert set(gdf.columns) == set(
-        ["image_id", "patch_id", "pixel_geometry", "geometry", "crs", "text", "score"]
+        [
+            "image_id",
+            "patch_id",
+            "pixel_geometry",
+            "pixel_line",
+            "geometry",
+            "line",
+            "crs",
+            "text",
+            "score",
+        ]
     )
     assert "mapreader_text.png" in gdf["image_id"].values
 
@@ -531,7 +611,9 @@ def test_deepsolo_search_results_centroid(runner_run_all, tmp_path, mock_respons
             "image_id",
             "patch_id",
             "pixel_geometry",
+            "pixel_line",
             "geometry",
+            "line",
             "crs",
             "text",
             "score",
