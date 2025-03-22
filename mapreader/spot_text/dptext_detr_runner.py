@@ -124,5 +124,5 @@ class DPTextDETRRunner(DetRunner):
             score = f"{score:.2f}"
 
             self.patch_predictions[image_id].append(
-                PatchPrediction(pixel_geometry=polygon, score=score)
+                PatchPrediction(pixel_geometry=polygon, pixel_line=None, score=score)
             )
