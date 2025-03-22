@@ -69,7 +69,7 @@ setuptools.setup(
             "pytest<9.0.0",
             "pytest-cov>=4.1.0,<6.0.0",
             "timm<1.0.0",
-            "transformers<5.0.0",
+            "transformers<5.0.0, !=4.50.0",
             "black>=23.7.0,<25.0.0",
             "flake8>=6.0.0,<8.0.0",
         ],
