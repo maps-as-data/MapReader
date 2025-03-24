@@ -271,6 +271,7 @@ def test_maptext_convert_to_parent_coords(runner_run_all, mock_response):
             "pixel_geometry",
             "pixel_line",
             "geometry",
+            "line",
             "crs",
             "text",
             "score",
