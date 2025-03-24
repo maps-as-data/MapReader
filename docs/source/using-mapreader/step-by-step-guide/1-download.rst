@@ -23,7 +23,7 @@ Downloading maps from XYZ tilelayers
 
 MapReader uses XYZ tilelayers (also known as 'slippy map tilelayers') to download map tiles.
 
-In an XYZ tilelayer, each tile in is indexed by it's zoom level (Z) and grid coordinates (X and Y).
+In an XYZ tilelayer, each tile in is indexed by its zoom level (Z) and grid coordinates (X and Y).
 These tiles can be downloaded using an XYZ download url (this normally looks something like "https://mapseries-tilesets.your_URL_here/{z}/{x}/{y}.png").
 
 Regardless of which class you will use to download your maps, you must know the XYZ URL of your map tilelayer.
@@ -530,7 +530,7 @@ IIIFDownloader
 ~~~~~~~~~~~~~~~
 
 To set up your IIIF downloader, you should first create a ``IIIFDownloader`` instance.
-You will need to specify the paths or URLs of your IIIF manifest(s) and the version number(s) of the IIIF Presentation API it/they are compliant with.
+You will need to specify the paths or URLs of your IIIF manifest(s) and the version number(s) of the IIIF Presentation API it/they is/are compliant with.
 
 To load a single IIIF manifest from a file:
 
@@ -599,8 +599,8 @@ Or, if just one of your manifests is missing an `id` field, pass `None` for any 
 
 Once you have created your ``IIIFDownloader`` instance, you can use the `save_georeferenced_maps` or `save_maps` methods to download your maps.
 
-Save georeferenced maps
-^^^^^^^^^^^^^^^^^^^^^^^
+Save georeferenced IIIF maps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your maps are georeferenced (e.g. you have a manifest created by `Allmaps <https://allmaps.org/>`_), you can use the ``save_georeferenced_maps`` method to download your maps.
 This will download your maps as georeferenced GeoTIFFs.
@@ -614,7 +614,7 @@ E.g.:
 By default, this will save your maps in a ``maps`` directory and create a ``metadata.csv`` file containing information about your maps.
 Each map will be saved using the unique ID from its IIIF image server as its filename - this will be saved in the ``id`` column of your metadata.csv.
 
-For each map, a unmasked and a masked version will be saved, this corresponds to the whole image and the image masked to show only the polygon created when annotating.
+For each map, an unmasked and a masked version will be saved. This corresponds to the whole image and the image masked to show only the polygon created when annotating.
 
 After downloading, your directory will look like this:
 
@@ -640,8 +640,8 @@ If you'd like to save your maps somewhere else, you can specify the ``path_save`
 
 .. note:: Since georeferencing was only introduced in IIIF Presentation API version 3, you should ensure that your manifest is compliant with version 3 of the IIIF Presentation API to use the ``save_georeferenced_maps`` method. Otherwise, you should use the ``save_maps`` method.
 
-Save maps (non-georeferenced)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Save IIIF maps (non-georeferenced)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your maps are not georeferenced, you can use the ``save_maps`` method to download your maps.
 This will download your maps as png files.

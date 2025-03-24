@@ -123,6 +123,10 @@ class IIIFDownloader:
         iiif_uri : str
             The URI of the IIIF object, needed if the IIIF object is missing an 'id' field.
 
+        Notes
+        -----
+        Only first order polynomial transformations are currently supported, see the [allmaps documentation](https://allmaps.org/) for more information on the transformation options.
+
         Raises
         ------
         ValueError
@@ -140,7 +144,7 @@ class IIIFDownloader:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify it's URI. Please manually pass the `iiif_uri` argument."
+                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify its URI. Please manually pass the `iiif_uri` argument."
                 )
         iiif_uri = iiif_obj.id
 
@@ -308,7 +312,7 @@ class IIIFDownloader:
                 iiif_obj.id = iiif_uri
             else:
                 raise ValueError(
-                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify it's URL. Please manually pass the `iiif_url` argument."
+                    "[ERROR] IIIF object is missing an 'id' field so we cannot identify its URL. Please manually pass the `iiif_url` argument."
                 )
         iiif_uri = iiif_obj.id
 
