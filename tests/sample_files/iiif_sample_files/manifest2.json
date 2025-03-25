@@ -1,0 +1,163 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "https://www.loc.gov/item/sanborn00003_001/manifest.json",
+    "@type": "sc:Manifest",
+    "attribution": "Provided by the Library of Congress",
+    "description": "Feb 1927. 8 sheet(s).",
+    "label": "Sanborn Fire Insurance Map from Albertville, Marshall County, Alabama.",
+    "logo": "https://loc.gov/static/images/logo-loc-new-branding.svg",
+    "metadata": [
+        {
+            "label": "APA Citation Style",
+            "value": "(1927) \u003Ccite\u003ESanborn Fire Insurance Map from Albertville, Marshall County, Alabama\u003C/cite\u003E. Sanborn Map Company, Feb. [Map] Retrieved from the Library of Congress, https://www.loc.gov/item/sanborn00003_001/."
+        },
+        {
+            "label": "MLA Citation Style",
+            "value": "\u003Ccite\u003ESanborn Fire Insurance Map from Albertville, Marshall County, Alabama\u003C/cite\u003E. Sanborn Map Company, Feb, 1927. Map. Retrieved from the Library of Congress, &lt;www.loc.gov/item/sanborn00003_001/&gt;."
+        },
+        {
+            "label": "Chicago Citation Style",
+            "value": "\u003Ccite\u003ESanborn Fire Insurance Map from Albertville, Marshall County, Alabama\u003C/cite\u003E. Sanborn Map Company, Feb, 1927. Map. https://www.loc.gov/item/sanborn00003_001/."
+        },
+        {
+            "label": "Contributors",
+            "value": ""
+        },
+        {
+            "label": "Created Published",
+            "value": [
+                "Sanborn Map Company, Feb 1927"
+            ]
+        },
+        {
+            "label": "Original Format",
+            "value": [
+                "map"
+            ]
+        },
+        {
+            "label": "Subjects",
+            "value": []
+        },
+        {
+            "label": "Online Format",
+            "value": [
+                "image"
+            ]
+        },
+        {
+            "label": "Item Url",
+            "value": "https://www.loc.gov/item/sanborn00003_001/"
+        }
+    ],
+    "navDate": null,
+    "seeAlso": [],
+    "sequences": [
+        {
+            "@type": "sc:Sequence",
+            "canvases": [
+                {
+                    "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001",
+                    "@type": "sc:Canvas",
+                    "height": 2042,
+                    "images": [
+                        {
+                            "@id": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/seq-1/",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "on": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001",
+                            "resource": {
+                                "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001/full/pct:25/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "height": 2042,
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001",
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
+                                },
+                                "width": 1730
+                            }
+                        }
+                    ],
+                    "label": "Page 1",
+                    "metadata": [
+                        {
+                            "label": "Library of Congress Resource URL",
+                            "value": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/?sp=1"
+                        }
+                    ],
+                    "related": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/?sp=1",
+                    "service": {
+                        "@context": "http://iiif.io/api/image/2/context.json",
+                        "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001",
+                        "profile": "http://iiif.io/api/image/2/level2.json"
+                    },
+                    "thumbnail": {
+                        "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001/full/pct:12.5/0/default.jpg",
+                        "format": "image/jpeg",
+                        "height": 1021,
+                        "width": 865
+                    },
+                    "width": 1730
+                },
+                {
+                    "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002",
+                    "@type": "sc:Canvas",
+                    "height": 2036,
+                    "images": [
+                        {
+                            "@id": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/seq-2/",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "on": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002",
+                            "resource": {
+                                "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002/full/pct:25/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "height": 2036,
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002",
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
+                                },
+                                "width": 1736
+                            }
+                        }
+                    ],
+                    "label": "Page 2",
+                    "metadata": [
+                        {
+                            "label": "Library of Congress Resource URL",
+                            "value": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/?sp=2"
+                        }
+                    ],
+                    "related": "https://www.loc.gov/resource/g3974am.g3974am_g000031927/?sp=2",
+                    "service": {
+                        "@context": "http://iiif.io/api/image/2/context.json",
+                        "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002",
+                        "profile": "http://iiif.io/api/image/2/level2.json"
+                    },
+                    "thumbnail": {
+                        "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0002/full/pct:12.5/0/default.jpg",
+                        "format": "image/jpeg",
+                        "height": 1018,
+                        "width": 868
+                    },
+                    "width": 1736
+                }
+            ],
+            "label": "Order of the views"
+        }
+    ],
+    "thumbnail": {
+        "@id": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd397m:g3974m:g3974am:g3974am_g000031927:00003_1927-0001/full/pct:12.5/0/default.jpg",
+        "service": {
+            "@context": "http://iiif.io/api/image/2/context.json",
+            "@id": "http://www.loc.gov/item/sanborn00003_001/",
+            "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+    },
+    "viewingDirection": "left-to-right",
+    "viewingHint": "paged"
+}

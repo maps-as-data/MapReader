@@ -63,6 +63,8 @@ setuptools.setup(
         "folium>=0.12,<1.0.0",
         "mapclassify>=2.0.0,<3.0.0",
         "xyzservices==2024.9.0",
+        "piffle @ git+https://github.com/rwood-97/piffle.git@iiif_dataclasses",
+        "lxml",
     ],
     extras_require={
         "dev": [

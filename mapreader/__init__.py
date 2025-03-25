@@ -1,5 +1,6 @@
 # download
 from mapreader.download.sheet_downloader import SheetDownloader
+from mapreader.download.iiif_downloader import IIIFDownloader
 from mapreader.download.downloader import Downloader
 from mapreader.download.downloader_utils import create_polygon_from_latlons, create_line_from_latlons
 

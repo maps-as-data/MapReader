@@ -10,23 +10,26 @@ Download
 
 .. note:: If you already have your maps stored locally, you can skip this section and proceed on to the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` part of the User Guide.
 
-MapReader's ``Download`` subpackage is used to download maps stored on as XYZ tile layers on a tile server.
-It contains two classes for downloading maps:
+MapReader's ``Download`` subpackage is used to download maps stored on as XYZ tilelayers on a tile server or as IIIF images from a IIIF server.
+It contains three classes for downloading maps:
 
-- :ref:`SheetDownloader` - This can be used to download map sheets and relies on information provided in a metadata json file.
-- :ref:`Downloader` - This is used to download maps using polygons and can be used even if you don't have a metadata file.
+- :ref:`SheetDownloader` - This can be used to download map sheets from a tileserver and relies on information provided in a metadata json file.
+- :ref:`Downloader` - This is used to download maps from a tileserver using polygons and can be used even if you don't have a metadata file.
+- :ref:`IIIFDownloader` - This is used to download maps from a IIIF server, using a IIIF manifest file to specify the maps to download.
 
-MapReader uses XYZ tile layers (also known as 'slippy map tile layers') to download map tiles.
 
-In an XYZ tile layer, each tile in is indexed by it's zoom level (Z) and grid coordinates (X and Y).
+Downloading maps from XYZ tilelayers
+-------------------------------------
+
+MapReader uses XYZ tilelayers (also known as 'slippy map tilelayers') to download map tiles.
+
+In an XYZ tilelayer, each tile in is indexed by its zoom level (Z) and grid coordinates (X and Y).
 These tiles can be downloaded using an XYZ download url (this normally looks something like "https://mapseries-tilesets.your_URL_here/{z}/{x}/{y}.png").
 
-Regardless of which class you will use to download your maps, you must know the XYZ URL of your map tile layer.
-
-.. _SheetDownloader:
+Regardless of which class you will use to download your maps, you must know the XYZ URL of your map tilelayer.
 
 SheetDownloader
----------------
+~~~~~~~~~~~~~~~
 
 To download map sheets, you must provide MapReader with a metadata JSON/GeoJSON file, which contains information about your map sheets.
 Guidance on what this metadata file should contain can be found in our :doc:`Input Guidance </using-mapreader/input-guidance/index>`.
@@ -56,7 +59,7 @@ An example is shown below:
 
 .. todo:: explain what json file does (allows splitting layer into 'map sheets'), allows patches to retain attributes of parent maps to investigate at any point of pipeline (Katie)
 
-To set up your sheet downloader, you should first create a ``SheetDownloader`` instance, specifying a ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the URL for your XYZ tile layer):
+To set up your sheet downloader, you should first create a ``SheetDownloader`` instance, specifying a ``metadata_path`` (the path to your ``metadata.json`` file) and ``download_url`` (the URL for your XYZ tilelayer):
 
 .. code-block:: python
 
@@ -79,7 +82,7 @@ e.g. for the OS one-inch maps:
 
 
 Understanding your metadata
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 At any point, you can view your metadata dataframe using the ``.metadata`` attribute:
 
@@ -134,10 +137,8 @@ These dates can then be visualized, as a histogram, using:
      my_ts.metadata["published_date"].hist()
 
 
-.. _query_guidance:
-
 Query guidance
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 Your ``SheetDownloader`` instance (``my_ts``) can be used to query and download map sheets using a number of methods:
 
@@ -170,10 +171,8 @@ As with the ``plot_all_metadata_on_map``, you can specify ``add_id=True`` to add
 
      my_ts.plot_queries_on_map()
 
-.. _download_guidance:
-
 Download guidance
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 Before downloading any maps, you will first need to specify the zoom level to use when downloading your tiles.
 This is done using:
@@ -252,8 +251,7 @@ This would result in a metadata.csv with the following columns:
 - "grid_bb"
 - "wfs_title"
 
-1. Finding map sheets which overlap or intersect with a polygon.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. Finding map sheets which overlap or intersect with a polygon.
 
 The ``query_map_sheets_by_polygon`` and ``download_map_sheets_by_polygon`` methods can be used find and download map sheets which are within or intersect/overlap with a `shapely.Polygon <https://shapely.readthedocs.io/en/stable/reference/shapely.Polygon.html#shapely.Polygon>`_.
 These methods have two modes:
@@ -291,7 +289,7 @@ Or, to find map sheets which intersect with this polygon, use:
 
      my_ts.query_map_sheets_by_polygon(my_polygon, mode="intersects")
 
-.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in :ref:`query_guidance`.
 
 To download your query results, use:
 
@@ -299,9 +297,9 @@ To download your query results, use:
 
      my_ts.download_map_sheets_by_queries()
 
-By default, this will result in the directory structure shown in download_guidance_.
+By default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: Further information on the use of the download methods can be found in download_guidance_.
+.. note:: Further information on the use of the download methods can be found in :ref:`download_guidance`.
 
 Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_polygon`` method.
 
@@ -317,12 +315,11 @@ Or, to find map sheets which intersect with this polygon, use:
 
      my_ts.download_map_sheets_by_polygon(my_polygon, mode="intersects")
 
-Again, by default, this will result in the directory structure shown in download_guidance_.
+Again, by default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: As with the ``download_map_sheets_by_queries``, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries``, see :ref:`download_guidance` for further guidance.
 
 1. Finding map sheets which contain a set of coordinates.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``query_map_sheets_by_coordinates`` and ``download_map_sheets_by_coordinates`` methods can be used find and download map sheets which contain a set of coordinates.
 
@@ -339,7 +336,7 @@ e.g. :
      #EXAMPLE
      my_ts.query_map_sheets_by_coordinates((-2.2, 53.4))
 
-.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in :ref:`query_guidance`.
 
 To download your query results, use:
 
@@ -347,9 +344,9 @@ To download your query results, use:
 
      my_ts.download_map_sheets_by_queries()
 
-By default, this will result in the directory structure shown in download_guidance_.
+By default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: Further information on the use of the download methods can be found in download_guidance_.
+.. note:: Further information on the use of the download methods can be found in :ref:`download_guidance`.
 
 Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_coordinates`` method:
 
@@ -364,12 +361,11 @@ e.g. :
      #EXAMPLE
      my_ts.download_map_sheets_by_coordinates((-2.2, 53.4))
 
-Again, by default, these will result in the directory structure shown in download_guidance_.
+Again, by default, these will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see :ref:`download_guidance` for further guidance.
 
 3. Finding map sheets which intersect with a line.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``query_map_sheets_by_line`` and ``download_map_sheets_by_line`` methods can be used find and download map sheets which intersect with a line.
 
@@ -395,7 +391,7 @@ Then, to find maps sheets which intersect with your line, use:
 
      my_ts.query_map_sheets_by_coordinates(my_line)
 
-.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in :ref:`query_guidance`.
 
 To download your query results, use:
 
@@ -403,9 +399,9 @@ To download your query results, use:
 
      my_ts.download_map_sheets_by_queries()
 
-By default, this will result in the directory structure shown in download_guidance_.
+By default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: Further information on the use of the download methods can be found in download_guidance_.
+.. note:: Further information on the use of the download methods can be found in :ref:`download_guidance`.
 
 Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_line`` method:
 
@@ -413,12 +409,11 @@ Alternatively, you can bypass the querying step and download map sheets directly
 
      my_ts.download_map_sheets_by_polygon(my_line)
 
-Again, by default, this will result in the directory structure shown in download_guidance_.
+Again, by default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see :ref:`download_guidance` for further guidance.
 
 4. Finding map sheets using their WFS ID numbers.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``query_map_sheets_by_wfs_ids`` and ``download_map_sheets_by_wfs_ids`` methods can be used find and download map sheets using their WFS ID numbers.
 
@@ -436,7 +431,7 @@ or
      #EXAMPLE
      my_ts.query_map_sheets_by_wfs_ids([2,15,31])
 
-.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in :ref:`query_guidance`.
 
 To download your query results, use:
 
@@ -444,9 +439,9 @@ To download your query results, use:
 
      my_ts.download_map_sheets_by_queries()
 
-By default, this will result in the directory structure shown in download_guidance_.
+By default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: Further information on the use of the download methods can be found in download_guidance_.
+.. note:: Further information on the use of the download methods can be found in :ref:`download_guidance`.
 
 Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_wfs_ids`` method:
 
@@ -462,12 +457,11 @@ or
      #EXAMPLE
      my_ts.download_map_sheets_by_wfs_ids([2,15,31])
 
-Again, by default, these will result in the directory structure shown in download_guidance_.
+Again, by default, these will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see :ref:`download_guidance` for further guidance.
 
 5. Finding map sheets by searching for a string in their metadata.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``query_map_sheets_by_string`` and ``download_map_sheets_by_string`` methods can be used find and download map sheets by searching for a string in their metadata.
 
@@ -487,7 +481,7 @@ e.g. The following will find any maps which contain the string "shire" in their 
      #EXAMPLE
      my_ts.query_map_sheets_by_string("shire")
 
-.. note:: Guidance on how to view/visualize your query results can be found in query_guidance_.
+.. note:: Guidance on how to view/visualize your query results can be found in :ref:`query_guidance`.
 
 .. admonition:: Advanced usage
     :class: dropdown
@@ -503,9 +497,9 @@ To download your query results, use:
 
      my_ts.download_map_sheets_by_queries()
 
-By default, this will result in the directory structure shown in download_guidance_.
+By default, this will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: Further information on the use of the download methods can be found in download_guidance_.
+.. note:: Further information on the use of the download methods can be found in :ref:`download_guidance`.
 
 Alternatively, you can bypass the querying step and download map sheets directly using the ``download_map_sheets_by_string`` method:
 
@@ -520,6 +514,162 @@ e.g. to search for "shire" (e.g. Wiltshire, Lanarkshire, etc.):
      #EXAMPLE
      my_ts.download_map_sheets_by_string("shire")
 
-Again, by default, these will result in the directory structure shown in download_guidance_.
+Again, by default, these will result in the directory structure shown in :ref:`download_guidance`.
 
-.. note:: As with the ``download_map_sheets_by_queries`` method, see download_guidance_ for further guidance.
+.. note:: As with the ``download_map_sheets_by_queries`` method, see :ref:`download_guidance` for further guidance.
+
+Downloading maps from IIIF servers
+----------------------------------
+
+MapReader can also download maps from IIIF servers using the ``IIIFDownloader`` class.
+For more information on IIIF, see their documentation `here <https://iiif.io/>`_.
+
+MapReader accepts any IIIF manifest which is compliant with the IIIF Presentation API (version `2 <https://iiif.io/api/presentation/2.1/>`__ or `3 <https://iiif.io/api/presentation/3.0/>`__).
+
+IIIFDownloader
+~~~~~~~~~~~~~~~
+
+To set up your IIIF downloader, you should first create a ``IIIFDownloader`` instance.
+You will need to specify the paths or URLs of your IIIF manifest(s) and the version number(s) of the IIIF Presentation API it/they is/are compliant with.
+
+To load a single IIIF manifest from a file:
+
+.. code-block:: python
+
+     from mapreader import IIIFDownloader
+
+     downloader = IIIFDownloader(
+          "path/to/manifest.json",
+          iiif_versions=2,
+     )
+
+Or, to load multiple IIIF manifests from files:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["path/to/manifest1.json", "path/to/manifest2.json"],
+          iiif_versions=[2, 3],
+     )
+
+Alternatively, you can load your manifests from URLs.
+
+To load a single IIIF manifest from a URL:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          "https://example.com/manifest.json",
+          iiif_versions=2,
+     )
+
+Or, to load multiple IIIF manifests from URLs:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["https://example.com/manifest1.json", "https://example.com/manifest2.json"],
+          iiif_versions=[2, 3],
+     )
+
+MapReader will also allow you to mix and match, loading some manifests from files and some from URLs.
+
+If any of your manifests are missing an `id` field, you can specify the `id` field using the `iiif_uris` argument.
+
+When passing the `iiif_uris` argument, your list of URIs should always be the same length as the number of input IIIF manifests.
+For example, if you are loading two manifest and both are missing the `id` field, pass the two URIs as a list in the `iiif_uris` argument:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["https://example.com/manifest1.json", "https://example.com/manifest2.json"],
+          iiif_versions=[2, 3],
+          iiif_uris=["https://example.com/manifest1.json", "https://example.com/manifest2.json"]
+     )
+
+Or, if just one of your manifests is missing an `id` field, pass `None` for any complete manifests and then pass the URI for the missing manifest:
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["https://example.com/manifest1.json", "https://example.com/manifest2.json"],
+          iiif_versions=[2, 3],
+          iiif_uris=[None, "https://example.com/manifest2.json"]
+     )
+
+Once you have created your ``IIIFDownloader`` instance, you can use the `save_georeferenced_maps` or `save_maps` methods to download your maps.
+
+Save georeferenced IIIF maps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your maps are georeferenced (e.g. you have a manifest created by `Allmaps <https://allmaps.org/>`_), you can use the ``save_georeferenced_maps`` method to download your maps.
+This will download your maps as georeferenced GeoTIFFs.
+
+E.g.:
+
+.. code-block:: python
+
+     downloader.save_georeferenced_maps()
+
+By default, this will save your maps in a ``maps`` directory and create a ``metadata.csv`` file containing information about your maps.
+Each map will be saved using the unique ID from its IIIF image server as its filename - this will be saved in the ``id`` column of your metadata.csv.
+
+For each map, an unmasked and a masked version will be saved. This corresponds to the whole image and the image masked to show only the polygon created when annotating.
+
+After downloading, your directory will look like this:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps
+        ├── map1.tif
+        ├── map2.tif
+        ├── map3.tif
+        ├── map1_masked.tif
+        ├── map2_masked.tif
+        ├── map3_masked.tif
+        ├── ...
+        └── metadata.csv
+
+If you'd like to save your maps somewhere else, you can specify the ``path_save`` argument (as in the XYZ download methods):
+
+.. code-block:: python
+
+     downloader.save_georeferenced_maps(path_save="my_maps_directory")
+
+.. note:: Since georeferencing was only introduced in IIIF Presentation API version 3, you should ensure that your manifest is compliant with version 3 of the IIIF Presentation API to use the ``save_georeferenced_maps`` method. Otherwise, you should use the ``save_maps`` method.
+
+Save IIIF maps (non-georeferenced)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your maps are not georeferenced, you can use the ``save_maps`` method to download your maps.
+This will download your maps as png files.
+
+E.g.:
+
+.. code-block:: python
+
+     downloader.save_maps()
+
+By default, this will save your maps in a ``maps`` directory and create a ``metadata.csv`` file containing information about your maps.
+Again, each map will be saved using the unique ID from its IIIF image server as its filename - this will be saved in the ``filename`` column of your metadata.csv.
+
+After downloading, your directory will look like this:
+
+::
+
+    project
+    ├──your_notebook.ipynb
+    └──maps
+        ├── map1.png
+        ├── map2.png
+        ├── map3.png
+        ├── ...
+        └── metadata.csv
+
+As above, if you'd like to save your maps somewhere else, you can specify the ``path_save`` argument (as in the XYZ download methods):
+
+.. code-block:: python
+
+     downloader.save_maps(path_save="my_maps_directory")
