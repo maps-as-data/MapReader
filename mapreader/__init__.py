@@ -1,6 +1,10 @@
 # download
 from mapreader.download.sheet_downloader import SheetDownloader
-from mapreader.download.iiif_downloader import IIIFDownloader
+try:
+    from mapreader.download.iiif_downloader import IIIFDownloader
+except ImportError:
+    print("[WARNING] Piffle not installed, please install it from the `iiif_dataclasses` branch of https://github.com/rwood-97/piffle/tree/iiif_dataclasses")
+    pass
 from mapreader.download.downloader import Downloader
 from mapreader.download.downloader_utils import create_polygon_from_latlons, create_line_from_latlons
 
