@@ -166,7 +166,8 @@ class IIIFDownloader:
 
             # Get filename
             # host, prefix, identifier
-            fname = ".".join(annot.id.removeprefix("https://").split("/")[2:])
+            id = annot.resource["service"]["id"] if annot.id is None else annot.id
+            fname = ".".join(id.removeprefix("https://").split("/")[2:])
 
             if not os.path.exists(path_save):
                 os.makedirs(path_save, exist_ok=True)
