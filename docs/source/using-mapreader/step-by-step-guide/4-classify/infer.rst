@@ -26,6 +26,7 @@ There are a number of options for the ``model`` argument:
 
             #EXAMPLE
             import torch
+            from mapreader import ClassifierContainer
 
             my_model = torch.load("./models/model_checkpoint_6.pkl")
             labels_map = {0: "no_railspace", 1: "railspace"}
@@ -61,6 +62,7 @@ There are a number of options for the ``model`` argument:
             #EXAMPLE
             import torch
             from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+            from mapreader import ClassifierContainer
 
             extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
             my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
@@ -80,6 +82,7 @@ There are a number of options for the ``model`` argument:
             #EXAMPLE
             import timm
             import torch
+            from mapreader import ClassifierContainer
 
             my_model = timm.create_model("hf_hub:timm/resnest101e.in1k", pretrained=True, num_classes=len(annotated_images.labels_map))
             labels_map = {0: "no_railspace", 1: "railspace"}
