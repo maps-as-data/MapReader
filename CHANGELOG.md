@@ -12,6 +12,11 @@ The following table shows which versions of MapReader are compatible with which 
 ---
 
 ## Pre-release
+_Add new changes here_
+
+
+## [v1.7.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.7.0) (2025-04-02)
+
 ### Added
 
 - Center lines are now stored for each text instance as a LineString ([#559](https://github.com/maps-as-data/MapReader/pull/559))
@@ -25,7 +30,6 @@ The following table shows which versions of MapReader are compatible with which 
 
 - Worked examples removed from MapReader code repo - see instead https://github.com/maps-as-data/mapreader-examples for worked examples ([#555](https://github.com/maps-as-data/MapReader/pull/555))
 
-_Add new changes here_
 
 ## [v1.6.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.6.3) (2025-02-11)
 
