@@ -393,7 +393,7 @@ class IIIFDownloader:
                 if y + tile_height > height:
                     y = height - tile_height
                 response = requests.get(
-                    f"{image_url}/{x},{y},512,512/full/0/default.jpg"
+                    f"{image_url}/{x},{y},{tile_width},{tile_height}/full/0/default.jpg"
                 )
                 response.raise_for_status()
 
