@@ -143,12 +143,7 @@ You can finetune this model on your own dataset.
 -->
 
 ## Training Details
-{% set datasets = [("training", train_datasets), ("evaluation", eval_datasets)] %}
-{% for dataset_type, dataset_list in datasets %}
-  {% if dataset_list %}
-    {# Your content here #}
-  {% endif %}
-{% endfor %}
+{% for dataset_type, dataset_list in [("training", train_datasets), ("evaluation", eval_datasets)] %}{% if dataset_list %}
 ### {{ dataset_type.title() }} Dataset{{"s" if dataset_list | length > 1 else ""}}
 {% for dataset in dataset_list %}
 #### {{ dataset['name'] or 'Unnamed Dataset' }}
