@@ -5,7 +5,7 @@ Before you begin contributing to MapReader, we would love for you to join our co
 
 - Star the `MapReader GitHub repository <https://github.com/Living-with-machines/MapReader>`_.
 - Start creating Github issues and/or pull requests on our repository.
-- Join our `Slack workspace <https://forms.gle/dXjECHZQkwrZ3Xpt9>`_.
+- Join our `Slack workspace <https://join.slack.com/t/mapreader-workspace/shared_invite/zt-390jka9tt-yeQLfDbE6nP_8jiQb34iug>`_.
 
 You can also get in touch with the MapReader team personally by:
 
