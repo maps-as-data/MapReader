@@ -51,11 +51,10 @@ Then, to install ``mapreader`` without the text spotting dependencies:
 
 .. note:: To install the dev dependencies too, use ``pip install ".[dev]"``.
 
-Finally, to install the text spotting dependencies, you should run:
+Finally, to install the text spotting dependencies, from the `MapReader` directory, you should run:
 
 .. code-block:: bash
 
-   cd MapReader
    pip install -r text-requirements.txt
 
 ..
