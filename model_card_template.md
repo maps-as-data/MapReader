@@ -2,7 +2,7 @@
 
 The below template can be used to create a model card on Hugging Face for a model trained using MapReader.
 
-```markdown
+```
 ---
 # For reference on model card metadata, see the spec: https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1
 # Doc / guide: https://huggingface.co/docs/hub/model-cards
