@@ -1,3 +1,8 @@
+# MapReader Model Card Template
+
+The below template can be used to create a model card on Hugging Face for a model trained using MapReader.
+
+```markdown
 ---
 # For reference on model card metadata, see the spec: https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1
 # Doc / guide: https://huggingface.co/docs/hub/model-cards
@@ -232,3 +237,4 @@ Carbon emissions were measured using [CodeCarbon](https://github.com/mlco2/codec
 
 *Provides a way for people who have updates to the Model Card, suggestions, or questions, to contact the Model Card authors.*
 -->
+```
