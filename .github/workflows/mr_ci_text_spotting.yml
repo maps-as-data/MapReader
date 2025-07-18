@@ -48,6 +48,7 @@ jobs:
           python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git'
           python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git'
           python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git'
+          python -m pip install 'git+https://github.com/rwood-97/piffle.git@iiif_dataclasses'
 
 
       - name: Clone DPText-DETR
