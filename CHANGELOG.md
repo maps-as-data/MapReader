@@ -14,6 +14,8 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+### Added
+- Added tests for the `IIIFDownloader` class ([#568](https://github.com/maps-as-data/MapReader/pull/568))
 
 ## [v1.7.0](https://github.com/Living-with-machines/MapReader/releases/tag/v1.7.0) (2025-04-02)
 
