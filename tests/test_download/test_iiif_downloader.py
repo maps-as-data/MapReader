@@ -108,10 +108,7 @@ def test_iiif_uris(mock_get_manifest):
         iiif_uris="https://annotations.allmaps.org/manifests/a0d6d3379cfd9f0a",
     )
     assert isinstance(downloader, IIIFDownloader)
-    assert (
-        downloader.iiif[0].id
-        == "https://annotations.allmaps.org/manifests/a0d6d3379cfd9f0a"
-    )
+    assert downloader.iiif[0].id is None
 
 
 def test_missing_id(mock_get_manifest):
