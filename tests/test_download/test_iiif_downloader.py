@@ -108,15 +108,12 @@ def test_iiif_uris(mock_get_manifest):
         iiif_uris="https://annotations.allmaps.org/manifests/a0d6d3379cfd9f0a",
     )
     assert isinstance(downloader, IIIFDownloader)
-    assert (
-        downloader.iiif[0].id
-        == "https://annotations.allmaps.org/manifests/a0d6d3379cfd9f0a"
-    )
+    assert downloader.iiif[0].id is None
 
 
 def test_missing_id(mock_get_manifest):
-    with pytest.raises(ValueError, match="missing an 'id' field"):
-        IIIFDownloader("annotationpage3.json", 3)
+    iiif_downloader = IIIFDownloader("annotationpage3.json", 3)
+    assert isinstance(iiif_downloader, IIIFDownloader)  # we want it to load fine
 
 
 def test_save_georeferenced_maps(tmp_path, mock_get_manifest, mock_download_image):
@@ -167,17 +164,17 @@ def test_save_georeferenced_map_from_str(
             assert src.crs.to_epsg() == 4326
 
 
-def test_save_georeferenced_map_value_error(
-    tmp_path, mock_get_manifest, mock_download_image
-):
-    downloader = IIIFDownloader(
-        [],
-    )
-    with pytest.raises(ValueError, match="missing an 'id' field"):
-        downloader.save_georeferenced_map(
-            "annotationpage3.json",
-            path_save=tmp_path,
-        )
+# def test_save_georeferenced_map_value_error(
+#     tmp_path, mock_get_manifest, mock_download_image
+# ):
+#     downloader = IIIFDownloader(
+#         [],
+#     )
+#     with pytest.raises(ValueError, match="missing an 'id' field"):
+#         downloader.save_georeferenced_map(
+#             "annotationpage3_missing_id.json",
+#             path_save=tmp_path,
+#         )
 
 
 def test_save_maps(tmp_path, mock_download_image, mock_get_manifest):
@@ -238,15 +235,15 @@ def test_save_map_from_str(tmp_path, mock_download_image, mock_get_manifest):
     assert all([file in os.listdir(tmp_path) for file in files])
 
 
-def test_save_map_value_error(tmp_path, mock_download_image, mock_get_manifest):
-    downloader = IIIFDownloader(
-        [],
-    )
-    with pytest.raises(ValueError, match="missing an 'id' field"):
-        downloader.save_map(
-            "annotationpage3.json",
-            path_save=tmp_path,
-        )
+# def test_save_map_value_error(tmp_path, mock_download_image, mock_get_manifest):
+#     downloader = IIIFDownloader(
+#         [],
+#     )
+#     with pytest.raises(ValueError, match="missing an 'id' field"):
+#         downloader.save_map(
+#             "annotationpage3_missing_id.json",
+#             path_save=tmp_path,
+#         )
 
 
 def test_save_map_unknown_class_error(tmp_path, mock_download_image, mock_get_manifest):

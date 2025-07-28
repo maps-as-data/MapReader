@@ -16,6 +16,7 @@ jobs:
     env:
       # point datasets to ~/.torch so it's cached by CI
       DETECTRON2_DATASETS: ~/.torch/datasets
+      PYTHONIOENCODING: utf-8
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -48,6 +49,7 @@ jobs:
           python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git'
           python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git'
           python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git'
+          python -m pip install 'git+https://github.com/rwood-97/piffle.git@iiif_dataclasses'
 
 
       - name: Clone DPText-DETR

@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install mapreader[dev]
+          python -m pip install 'git+https://github.com/rwood-97/piffle.git@iiif_dataclasses'
 
       - name: Quality Assurance
         run: |
