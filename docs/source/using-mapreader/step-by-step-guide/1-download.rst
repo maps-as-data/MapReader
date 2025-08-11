@@ -539,6 +539,8 @@ IIIFDownloader
 To set up your IIIF downloader, you should first create a ``IIIFDownloader`` instance.
 You will need to specify the paths or URLs of your IIIF manifest(s) and the version number(s) of the IIIF Presentation API it/they is/are compliant with.
 
+If you are unsure of the version of your IIIF manifest, you can check the ``@context`` field in the manifest. Otherwise, you can set the ``iiif_versions`` argument to ``"infer"`` and MapReader will attempt to infer the version from the manifest.
+
 To load a single IIIF manifest from a file:
 
 .. code-block:: python
@@ -557,6 +559,15 @@ Or, to load multiple IIIF manifests from files:
      downloader = IIIFDownloader(
           ["path/to/manifest1.json", "path/to/manifest2.json"],
           iiif_versions=[2, 3],
+     )
+
+The above is a good example of when you might want to use the ``"infer"`` option for the ``iiif_versions`` argument. Setting this argument to ``"infer"`` will allow MapReader to automatically determine the version of each manifest based on its contents, rather than requiring you to specify the version for each manifest.
+
+.. code-block:: python
+
+     downloader = IIIFDownloader(
+          ["path/to/manifest1.json", "path/to/manifest2.json"],
+          iiif_versions="infer",
      )
 
 Alternatively, you can load your manifests from URLs.
@@ -579,9 +590,11 @@ Or, to load multiple IIIF manifests from URLs:
           iiif_versions=[2, 3],
      )
 
-MapReader will also allow you to mix and match, loading some manifests from files and some from URLs.
+Again, you can use the ``"infer"`` option for the ``iiif_versions`` argument to allow MapReader to automatically determine the version of each manifest based on its contents.
 
-If any of your manifests are missing an `id` field, you can specify the `id` field using the `iiif_uris` argument.
+MapReader will also allow you to mix and match, loading some manifests from files and some from URLs if you so desire.
+
+Manifests should contain an `id` field which uniquely identifies the manifest. However, if any of your manifests are missing this field, you will need to specify the `id` field using the `iiif_uris` argument.
 
 When passing the `iiif_uris` argument, your list of URIs should always be the same length as the number of input IIIF manifests.
 For example, if you are loading two manifest and both are missing the `id` field, pass the two URIs as a list in the `iiif_uris` argument:
