@@ -14,6 +14,8 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+## [v1.8.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.1) (2025-08-11)
+
 ### Added
 
 - Added `infer` version option when downloading from IIIF ([#569](https://github.com/maps-as-data/MapReader/pull/569))
