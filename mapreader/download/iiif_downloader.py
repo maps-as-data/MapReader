@@ -31,7 +31,7 @@ class IIIFDownloader:
         | IIIFPresentation3
         | IIIFPresentation2
         | list[str | IIIFPresentation3 | IIIFPresentation2],
-        iiif_versions: int | float | str | list[int | float | str] | None = None,
+        iiif_versions: int | float | str | list[int | float | str] = "infer",
         iiif_uris: str | list[str] | None = None,
     ):
         """A class to download images from IIIF presentation jsons.
@@ -41,7 +41,7 @@ class IIIFDownloader:
         iiif : str | IIIFPresentation3 | IIIFPresentation2 | list[str  |  IIIFPresentation3  |  IIIFPresentation2]
             The IIIF url or IIIF presentation API object(s) containing the maps to download
         iiif_versions : int | float | str | list[int | float | str] | None
-            The IIIF version(s) of the IIIF object(s). Can only be None if `iiif` is/are already IIIF object(s). Default is None.
+            The IIIF version(s) of the IIIF object(s). Set to "infer" to infer the IIIF version or if `iiif` is/are already IIIF object(s). Default is "infer".
         iiif_uris : str | list[str] | None
             The URI(s) of the IIIF object(s), needed if the IIIF object is missing an 'id' field. Default is None.
 
@@ -50,8 +50,8 @@ class IIIFDownloader:
         """
         if not isinstance(iiif, list):
             iiif = [iiif]
-        if iiif_versions is None:
-            iiif_versions = [None] * len(iiif)
+        if iiif_versions == "infer":
+            iiif_versions = ["infer"] * len(iiif)
         if not isinstance(iiif_versions, list):
             iiif_versions = [iiif_versions]
         if len(iiif) != len(iiif_versions):
