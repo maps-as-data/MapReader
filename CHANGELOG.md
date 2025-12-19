@@ -14,6 +14,8 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+## [v1.8.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.2) (2025-12-19)
+
 ### Added
 
 - Added `piffle` package as dependency ([#575](https://github.com/maps-as-data/MapReader/pull/575))
