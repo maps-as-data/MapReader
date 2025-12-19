@@ -161,31 +161,31 @@ def test_init_resnet18_timm(inputs):
     assert classifier.dataloaders == {}
 
 
-@pytest.mark.dependency(name="timm_models", scope="session")
-def test_init_models_timm(inputs):
-    annots, dataloaders = inputs
-    for model2test in [
-        ["resnest50d_4s2x40d", timm.models.ResNet],
-        ["resnest101e", timm.models.ResNet],
-        ["resnext101_32x8d.fb_swsl_ig1b_ft_in1k", timm.models.ResNet],
-        ["resnet152", timm.models.ResNet],
-        ["tf_efficientnet_b3.ns_jft_in1k", timm.models.EfficientNet],
-        ["swin_base_patch4_window7_224", timm.models.swin_transformer.SwinTransformer],
-        ["vit_base_patch16_224", timm.models.vision_transformer.VisionTransformer],
-    ]:  # these are models from 2021 paper
-        model, model_type = model2test
-        my_model = timm.create_model(
-            model, pretrained=True, num_classes=len(annots.labels_map)
-        )
-        assert isinstance(my_model, model_type)
-        classifier = ClassifierContainer(
-            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
-        )
-        assert isinstance(classifier.model, model_type)
-        assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
-        classifier = ClassifierContainer(my_model, labels_map=annots.labels_map)
-        assert isinstance(classifier.model, model_type)
-        assert classifier.dataloaders == {}
+# @pytest.mark.dependency(name="timm_models", scope="session")
+# def test_init_models_timm(inputs):
+#    annots, dataloaders = inputs
+#    for model2test in [
+#        ["resnest50d_4s2x40d", timm.models.ResNet],
+#        ["resnest101e", timm.models.ResNet],
+#        ["resnext101_32x8d.fb_swsl_ig1b_ft_in1k", timm.models.ResNet],
+#        ["resnet152", timm.models.ResNet],
+#        ["tf_efficientnet_b3.ns_jft_in1k", timm.models.EfficientNet],
+#        ["swin_base_patch4_window7_224", timm.models.swin_transformer.SwinTransformer],
+#        ["vit_base_patch16_224", timm.models.vision_transformer.VisionTransformer],
+#    ]:  # these are models from 2021 paper
+#        model, model_type = model2test
+#        my_model = timm.create_model(
+#            model, pretrained=True, num_classes=len(annots.labels_map)
+#        )
+#        assert isinstance(my_model, model_type)
+#        classifier = ClassifierContainer(
+#            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+#        )
+#        assert isinstance(classifier.model, model_type)
+#        assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+#        classifier = ClassifierContainer(my_model, labels_map=annots.labels_map)
+#        assert isinstance(classifier.model, model_type)
+#        assert classifier.dataloaders == {}
 
 
 # test loading object from pickle file

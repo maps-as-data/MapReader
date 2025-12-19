@@ -50,12 +50,10 @@ jobs:
           python -m pip install numpy==1.26.4 torch==2.2.2 torchvision==0.17.2 -f https://download.pytorch.org/whl/torch_stable.html
           python -m pip install ".[dev]"
           python -m pip install pytest-cov
-          python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
-          python -m pip install 'git+https://github.com/maps-as-data/DeepSolo.git'
-          python -m pip install 'git+https://github.com/maps-as-data/DPText-DETR.git'
-          python -m pip install 'git+https://github.com/maps-as-data/MapTextPipeline.git'
-          python -m pip install 'git+https://github.com/rwood-97/piffle.git@iiif_dataclasses'
-
+          python -m pip install --no-build-isolation 'git+https://github.com/facebookresearch/detectron2.git'
+          python -m pip install --no-build-isolation 'git+https://github.com/maps-as-data/DeepSolo.git'
+          python -m pip install --no-build-isolation 'git+https://github.com/maps-as-data/DPText-DETR.git'
+          python -m pip install --no-build-isolation 'git+https://github.com/maps-as-data/MapTextPipeline.git'
 
       - name: Clone DPText-DETR
         run: |
@@ -71,22 +69,11 @@ jobs:
 
       - name: Hugging Face CLI
         run: |
-          pip install -U "huggingface_hub[cli]"
+          pip install -U "huggingface-hub[cli]>=0.30.0,<0.34.0"
           huggingface-cli download rwood-97/DPText_DETR_ArT_R_50_poly art_final.pth --local-dir .
           huggingface-cli download rwood-97/DeepSolo_ic15_res50 ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth --local-dir .
           huggingface-cli download rwood-97/MapTextPipeline_rumsey rumsey-finetune.pth --local-dir .
 
       - name: Test with pytest
         run: |
-          python -m pytest --cov=./ --cov-report=xml ./tests
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/reports/
-          env_vars: OS,PYTHON
-          fail_ci_if_error: false
-          files: ./coverage.xml,!./cache
-          flags: unittests
-          name: codecov-umbrella
+          python -m pytest ./tests
