@@ -69,7 +69,7 @@ jobs:
 
       - name: Hugging Face CLI
         run: |
-          pip install -U "huggingface_hub[cli]"
+          pip install -U "huggingface-hub[cli]>=0.30.0,<0.34.0"
           huggingface-cli download rwood-97/DPText_DETR_ArT_R_50_poly art_final.pth --local-dir .
           huggingface-cli download rwood-97/DeepSolo_ic15_res50 ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth --local-dir .
           huggingface-cli download rwood-97/MapTextPipeline_rumsey rumsey-finetune.pth --local-dir .
