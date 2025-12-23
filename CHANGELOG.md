@@ -12,6 +12,7 @@ The following table shows which versions of MapReader are compatible with which 
 ---
 
 ## Pre-release
+_Add new changes here_
 
 ### Fixed
 
