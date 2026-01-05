@@ -565,7 +565,7 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             col_names = ["output_size", "output_size", "num_params"]
 
         model_summary = summary(
-            self.model, input_size=input_size, col_names=col_names, **kwargs
+            self.model, input_size=input_size, col_names=col_names, device=self.device, **kwargs
         )
         print(model_summary)
 
