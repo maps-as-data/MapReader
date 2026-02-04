@@ -159,7 +159,7 @@ class ClassifierContainer:
                             "Hugging Face models require the 'transformers' library: 'pip install transformers'."
                         )
                     print(f"[INFO] Initializing Hugging Face model: {model}")
-                    num_labels = len(self.labels.map)
+                    num_labels = len(self.labels_map)
                     self.model = AutoModelForImageClassification.from_pretrained(
                         model,
                         num_labels=num_labels,
