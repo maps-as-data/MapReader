@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import functools
-import hashlib
-import json
 import os
 import pathlib
 import random
@@ -204,10 +202,6 @@ class Annotator:
                 f"[ERROR] Your DataFrame does not have the image paths column: {patch_paths_col}."
             )
 
-        image_list = json.dumps(
-            sorted(patch_df[patch_paths_col].to_list()), sort_keys=True
-        )
-
         # Set up annotations file
         if not username:
             username = "".join(
@@ -349,13 +343,14 @@ class Annotator:
         # Add pixel stats
         maps.calc_pixel_stats()
 
-        try:
-            maps.add_metadata(metadata_path, delimiter=delimiter)
-            print(f"[INFO] Adding metadata from {metadata_path}.")
-        except ValueError:
-            raise FileNotFoundError(
-                f"[INFO] Metadata file at {metadata_path} not found. Please specify the correct file path using the ``metadata_path`` argument."
-            )
+        if metadata_path:
+            try:
+                maps.add_metadata(metadata_path, delimiter=delimiter)
+                print(f"[INFO] Adding metadata from {metadata_path}.")
+            except ValueError:
+                raise FileNotFoundError(
+                    f"[ERROR] Metadata file at {metadata_path} not found. Please specify the correct file path using the ``metadata_path`` argument."
+                )
 
         parent_df, patch_df = maps.convert_images()
 
@@ -405,7 +400,9 @@ class Annotator:
             existing_annotations[label_col], how="left", rsuffix="_existing"
         )
         if f"{label_col}_existing" in patch_df.columns:
-            patch_df[label_col].fillna(patch_df[f"{label_col}_existing"], inplace=True)
+            patch_df[label_col] = patch_df[label_col].fillna(
+                patch_df[f"{label_col}_existing"]
+            )
             patch_df.drop(columns=f"{label_col}_existing", inplace=True)
 
         return patch_df
@@ -477,7 +474,7 @@ class Annotator:
         """
 
         def check_eligibility(row):
-            if row.label not in [np.NaN, None]:
+            if row[self.label_col] not in [np.NaN, None]:
                 return False
 
             if self._filter_for is None:
@@ -799,7 +796,7 @@ class Annotator:
         Tuple[int, int, str]
             Previous index, current index, and path of the current image.
         """
-        if self.current_index == len(self._queue):
+        if self.current_index >= len(self._queue) - 1:
             self._render_complete()
             return
 
@@ -849,7 +846,7 @@ class Annotator:
         None
         """
         # Check whether we have reached the end
-        if self.current_index >= len(self) - 1:
+        if self.current_index >= len(self._queue) - 1:
             self._render_complete()
             return
 
