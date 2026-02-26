@@ -145,8 +145,10 @@ def test_maptext_init_tsv(init_dataframes, tmp_path):
 
 def test_maptext_init_geojson(init_dataframes, tmp_path, mock_response):
     parent_df, patch_df = init_dataframes
-    parent_df.to_file(f"{tmp_path}/parent_df.geojson", driver="GeoJSON")
-    patch_df.to_file(f"{tmp_path}/patch_df.geojson", driver="GeoJSON")
+    parent_df.to_file(
+        f"{tmp_path}/parent_df.geojson", driver="GeoJSON", engine="pyogrio"
+    )
+    patch_df.to_file(f"{tmp_path}/patch_df.geojson", driver="GeoJSON", engine="pyogrio")
     runner = MapTextRunner(
         f"{tmp_path}/patch_df.geojson",
         parent_df=f"{tmp_path}/parent_df.geojson",
