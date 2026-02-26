@@ -80,7 +80,7 @@ class PatchDataset(Dataset):
         Retrieves the image, its label and the index of that label at the given index in the dataset.
     return_orig_image(idx)
         Retrieves the original image at the given index in the dataset.
-    _default_transform(t_type, resize2)
+    _default_transform(t_type, resize)
         Returns a transforms.Compose containing the default image transformations for the train and validation sets.
 
     Raises
@@ -278,7 +278,7 @@ Please check the image exists, your file paths are correct and that ``.patch_pat
         t_type : str, optional
             The type of transformation to return. Either "train", "test" or "val".
             Default is "train".
-        resize2 : int or Tuple[int, int], optional
+        resize : int or Tuple[int, int], optional
             The size in pixels to resize the image to. Default is (224, 224).
 
         Returns

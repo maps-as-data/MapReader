@@ -257,7 +257,7 @@ class AnnotationsLoader:
 
             print(
                 f"[WARNING] {len(broken_paths)} files cannot be found.\n\
-Check '{os.path.abspath('broken_paths.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument."
+Check '{os.path.abspath('broken_files.txt')}' for more details and, if possible, update your file paths using the 'images_dir' argument."
             )
 
             if remove_broken:
@@ -443,10 +443,7 @@ Please check your image paths and update them if necessary.'
                 self.reviewed = pd.concat(
                     [self.reviewed, annots2review.iloc[image_idx : image_idx + 1]]
                 )
-                try:
-                    self.reviewed.drop_duplicates(subset=[deduplicate_col])
-                except Exception:
-                    pass
+                self.reviewed = self.reviewed.drop_duplicates(subset=[deduplicate_col])
                 counter += 1
                 image_idx += 1
             plt.show()

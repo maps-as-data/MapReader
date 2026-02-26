@@ -264,7 +264,7 @@ class ClassifierContainer:
             num_ftrs = model_dw.fc.in_features
             model_dw.fc = nn.Linear(num_ftrs, last_layer_num_classes)
             is_inception = True
-            input_size = 299
+            input_size = (299, 299)
 
         else:
             raise NotImplementedError(
@@ -562,10 +562,14 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         if trainable_col:
             col_names = ["num_params", "output_size", "trainable"]
         else:
-            col_names = ["output_size", "output_size", "num_params"]
+            col_names = ["input_size", "output_size", "num_params"]
 
         model_summary = summary(
-            self.model, input_size=input_size, col_names=col_names, device=self.device, **kwargs
+            self.model,
+            input_size=input_size,
+            col_names=col_names,
+            device=self.device,
+            **kwargs,
         )
         print(model_summary)
 
@@ -817,11 +821,11 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         self,
         phases: list[str] | None = None,
         num_epochs: int | None = 25,
-        save_model_dir: str | None | None = "models",
+        save_model_dir: str | None = "models",
         verbose: bool = False,
-        tensorboard_path: str | None | None = None,
-        tmp_file_save_freq: int | None | None = 2,
-        print_info_batch_freq: int | None | None = 5,
+        tensorboard_path: str | None = None,
+        tmp_file_save_freq: int | None = 2,
+        print_info_batch_freq: int | None = 5,
     ) -> None:
         """
         Trains/fine-tunes a classifier for the specified number of epochs on
@@ -1123,8 +1127,8 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
     def _get_logits(out):
         try:
             out = out.logits
-        except AttributeError as err:
-            raise AttributeError(err.message)
+        except AttributeError:
+            raise
         return out
 
     def _gen_epoch_msg(self, phase: str, epoch_msg: str) -> str:
@@ -1282,14 +1286,14 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
                         roc_auc = roc_auc_score(
                             y_true, y_score, average=average, multi_class="ovr"
                         )
-                    except:
+                    except ValueError:
                         continue
                 else:
                     continue
                 self._add_metrics(phase, f"rocauc_{average}", roc_auc)
 
     def _add_metrics(
-        self, phase: str, metric: str, value: int | (float | (complex | np.number))
+        self, phase: str, metric: str, value: int | float | complex | np.number
     ) -> None:
         """
         Adds a metric value to a dictionary of metrics tracked during training.
@@ -1657,7 +1661,7 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         dataset: PatchDataset,
         set_name: str,
         batch_size: int | None = 16,
-        sampler: Sampler | None | None = None,
+        sampler: Sampler | None = None,
         shuffle: bool | None = False,
         num_workers: int | None = 0,
         **kwargs,
@@ -1747,11 +1751,8 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         path2model = os.path.join(par_name, f"model_{base_name}")
         self.model = torch.load(path2model, map_location=mydevice)
 
-        try:
-            self.device = mydevice
-            self.model = self.model.to(mydevice)
-        except:
-            pass
+        self.device = mydevice
+        self.model = self.model.to(mydevice)
 
     def _set_up_print_colors(self):
         """Private function, setting color attributes on the object."""
