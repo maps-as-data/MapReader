@@ -344,25 +344,24 @@ There are a number of options for the ``model`` argument:
 
             If you use this option, your optimizer, scheduler and loss function will be loaded from last time.
 
-    **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, choose your model, follow the "Use in Transformers" or "Use in timm" instructions to load it and then pass this as the ``model`` argument.**
+    **4.  To load a** `hugging face model <https://huggingface.co/models>`__\ **, pass the model's repository ID as a string and set ``huggingface=True``.**
+
+        MapReader will automatically download the model and its corresponding image processor from the Hugging Face Hub using the `transformers <https://github.com/huggingface/transformers>`__ library.
 
         e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__.
-        It can be loaded using the `transformers <https://github.com/huggingface/transformers>`__ library:
-
+        It can be loaded directly like this: 
+        
         .. code-block:: python
 
             #EXAMPLE
             import torch
-            from transformers import AutoFeatureExtractor, AutoModelForImageClassification
-
             from mapreader import ClassifierContainer
 
-            extractor = AutoFeatureExtractor.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
-            my_model = AutoModelForImageClassification.from_pretrained("davanstrien/autotrain-mapreader-5000-40830105612")
+            my_model = "davanstrien/autotrain-mapreader-5000-40830105612"
 
             device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
-            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device)
+            my_classifier = ClassifierContainer(my_model, annotated_images.labels_map, dataloaders, device=device, huggingface=True)
 
         .. note:: You will need to install the `transformers <https://github.com/huggingface/transformers>`__ library to do this (``pip install transformers``).
 

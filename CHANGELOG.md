@@ -14,6 +14,10 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+### Added
+
+- Added Hugging Face model support to ClassifierContainer
+
 ## [v1.8.1](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.1) (2025-08-11)
 
 ### Added
