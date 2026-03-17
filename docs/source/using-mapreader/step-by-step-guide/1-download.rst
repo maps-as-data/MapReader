@@ -526,12 +526,6 @@ For more information on IIIF, see their documentation `here <https://iiif.io/>`_
 
 MapReader accepts any IIIF manifest which is compliant with the IIIF Presentation API (version `2 <https://iiif.io/api/presentation/2.1/>`__ or `3 <https://iiif.io/api/presentation/3.0/>`__).
 
-First, install piffle using the command below:
-
-.. code-block:: python
-
-    pip install piffle@git+https://github.com/rwood-97/piffle.git@iiif_dataclasses
-
 
 IIIFDownloader
 ~~~~~~~~~~~~~~~
