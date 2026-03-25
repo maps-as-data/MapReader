@@ -108,6 +108,7 @@ class ClassifierContainer:
         is_inception: bool = False,
         load_path: str | None = None,
         force_device: bool = False,
+        huggingface: bool = False,
         **kwargs,
     ):
         # set up device
@@ -149,7 +150,31 @@ class ClassifierContainer:
                 self.input_size = input_size
                 self.is_inception = is_inception
             elif isinstance(model, str):
-                self._initialize_model(model, **kwargs)
+                if huggingface:
+                    try:
+                        from transformers import AutoModelForImageClassification, AutoImageProcessor
+                    except ImportError:
+                        raise ImportError(
+                            "Hugging Face models require the 'transformers' library: 'pip install transformers'."
+                        )
+                    print(f"[INFO] Initializing Hugging Face model: {model}")
+                    num_labels = len(self.labels_map)
+                    self.model = AutoModelForImageClassification.from_pretrained(
+                        model,
+                        num_labels=num_labels,
+                        ignore_mismatched_sizes=True
+                    ).to(self.device)
+                    hf_processor = AutoImageProcessor.from_pretrained(model)
+                    size = getattr(hf_processor, "size", {})
+                    if "height" in size and "width" in size:
+                        size = (size["height"], size["width"])
+                    elif "shortest_edge" in size:
+                        size = (size["shortest_edge"], size["shortest_edge"])
+                    else:
+                        size = input_size
+                    self.is_inception = False
+                else:
+                    self._initialize_model(model, **kwargs)
 
             self.optimizer = None
             self.scheduler = None
