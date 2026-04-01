@@ -67,6 +67,9 @@ setuptools.setup(
         "lxml",
     ],
     extras_require={
+        "lightning": [
+            "lightning>=2.0",
+        ],
         "dev": [
             "pytest<9.0.0",
             "pytest-cov>=4.1.0,<6.0.0",

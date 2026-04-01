@@ -3,12 +3,7 @@ from __future__ import annotations
 
 import copy
 import os
-import random
-import socket
-import sys
-import time
 from collections.abc import Iterable
-from datetime import datetime
 from typing import Any
 
 import joblib
@@ -16,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+from lightning.pytorch import LightningModule
 from matplotlib.ticker import MaxNLocator
 from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
 from torch import optim
@@ -26,9 +22,25 @@ from torchvision import models
 from .datasets import PatchDataset
 
 
-class ClassifierContainer:
+class LightningClassifierContainer(LightningModule):
     """
-    A class to store and train a PyTorch model.
+    A class to store and train a PyTorch model using PyTorch Lightning.
+
+    Mirrors the API of ``ClassifierContainer``. Set up the model exactly as
+    you would with ``ClassifierContainer``, then pass it to a
+    ``lightning.pytorch.Trainer``::
+
+        classifier = LightningClassifierContainer(model="resnet18", labels_map={0: "no", 1: "yes"})
+        classifier.add_loss_fn("cross entropy")
+        classifier.initialize_optimizer("adam")
+        classifier.initialize_scheduler("steplr")
+
+        trainer = Trainer(max_epochs=25)
+        trainer.fit(classifier, train_dataloaders=dataloaders["train"],
+                                val_dataloaders=dataloaders["val"])
+
+    For inference without a Trainer use ``classifier.inference(set_name)``.
+    For distributed / GPU inference use ``trainer.predict()``.
 
     Parameters
     ----------
@@ -43,29 +55,24 @@ class ClassifierContainer:
         Can only be ``None`` if ``load_path`` is specified as labels_map will be loaded from file.
     dataloaders: Dict or None
         A dictionary containing set names as keys and dataloaders as values (i.e. set_name: dataloader).
-    device : str, optional
-        The device to be used for training and storing models.
-        Can be set to "default", "cpu", "cuda:0", etc. By default, "default".
     input_size : int, optional
         The expected input size of the model. Default is ``(224,224)``.
     is_inception : bool, optional
         Whether the model is an Inception-style model.
         Default is ``False``.
     load_path : str, optional
-        The path to an ``.obj`` file containing a
+        The path to an ``.obj`` file containing a previously saved ``LightningClassifierContainer``.
     force_device : bool, optional
         Whether to force the use of a specific device.
         If set to ``True``, the default device is used.
         Defaults to ``False``.
     kwargs : Dict
         Keyword arguments to pass to the
-        :meth:`~.classify.classifier.ClassifierContainer._initialize_model`
+        :meth:`~.classify.lightning_classifier.LightningClassifierContainer._initialize_model`
         method (if passing ``model`` as a string).
 
     Attributes
     ----------
-    device : torch.device
-        The device being used for training and storing models.
     dataloaders : dict
         A dictionary to store dataloaders for the model.
     labels_map : dict
@@ -86,14 +93,11 @@ class ClassifierContainer:
         A dictionary to store the metrics computed during training.
     last_epoch : int
         The last epoch number completed during training.
-    best_loss : torch.Tensor
+    best_loss : float
         The best validation loss achieved during training.
     best_epoch : int
         The epoch in which the best validation loss was achieved during
         training.
-    tmp_save_filename : str
-        A temporary file name to save checkpoints during training and
-        validation.
     """
 
     def __init__(
@@ -101,7 +105,6 @@ class ClassifierContainer:
         model: str | nn.Module | None = None,
         labels_map: dict[int, str] | None = None,
         dataloaders: dict[str, DataLoader] | None = None,
-        device: str = "default",
         input_size: int = (224, 224),
         is_inception: bool = False,
         load_path: str | None = None,
@@ -109,12 +112,7 @@ class ClassifierContainer:
         huggingface: bool = False,
         **kwargs,
     ):
-        # set up device
-        if device == "default":
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = device
-        print(f"[INFO] Device is set to {self.device}")
+        super().__init__()
 
         # check if loading an pre-existing object
         if load_path:
@@ -141,10 +139,10 @@ class ClassifierContainer:
 
             self.labels_map = labels_map
 
-            # set up model and move to device
+            # set up model (Lightning manages device placement)
             print("[INFO] Initializing model.")
             if isinstance(model, nn.Module):
-                self.model = model.to(self.device)
+                self.model = model
                 self.input_size = input_size
                 self.is_inception = is_inception
             elif isinstance(model, str):
@@ -162,15 +160,15 @@ class ClassifierContainer:
                     num_labels = len(self.labels_map)
                     self.model = AutoModelForImageClassification.from_pretrained(
                         model, num_labels=num_labels, ignore_mismatched_sizes=True
-                    ).to(self.device)
+                    )
                     hf_processor = AutoImageProcessor.from_pretrained(model)
                     size = getattr(hf_processor, "size", {})
                     if "height" in size and "width" in size:
-                        size = (size["height"], size["width"])
+                        self.input_size = (size["height"], size["width"])
                     elif "shortest_edge" in size:
-                        size = (size["shortest_edge"], size["shortest_edge"])
+                        self.input_size = (size["shortest_edge"], size["shortest_edge"])
                     else:
-                        size = input_size
+                        self.input_size = input_size
                     self.is_inception = False
                 else:
                     self._initialize_model(model, **kwargs)
@@ -181,18 +179,13 @@ class ClassifierContainer:
 
             self.metrics = {}
             self.last_epoch = 0
-            self.best_loss = torch.tensor(np.inf)
+            self.best_loss = np.inf
             self.best_epoch = 0
 
-            # temp file to save checkpoints during training/validation
-            if not os.path.exists("./tmp_checkpoints"):
-                os.makedirs("./tmp_checkpoints")
-            self.tmp_save_filename = (
-                f"./tmp_checkpoints/tmp_{random.randint(0, int(1e10))}_checkpoint.pkl"
-            )
-
-            # add colors for printing/logging
-            self._set_up_print_colors()
+            self.pred_conf = []
+            self.pred_label_indices = []
+            self.pred_label = []
+            self.gt_label_indices = []
 
             # add dataloaders and labels_map
             self.dataloaders = dataloaders if dataloaders else {}
@@ -295,7 +288,8 @@ class ClassifierContainer:
                 "[ERROR] Invalid model name. Try loading your model directly and this as the `model` argument instead."
             )
 
-        self.model = model_dw.to(self.device)
+        # Lightning manages device placement; do not call .to(self.device) here.
+        self.model = model_dw
         self.input_size = input_size
         self.is_inception = is_inception
 
@@ -534,6 +528,27 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
 
         self.loss_fn = loss_fn
 
+    def configure_optimizers(self):
+        """
+        Lightning hook — returns the stored optimizer and (optionally) scheduler.
+
+        Call ``initialize_optimizer`` / ``add_optimizer`` and optionally
+        ``initialize_scheduler`` / ``add_scheduler`` before ``trainer.fit()``.
+        """
+        if self.optimizer is None:
+            raise ValueError(
+                "[ERROR] An optimizer should be defined for training the model."
+            )
+        if self.scheduler is None:
+            return self.optimizer
+        return {
+            "optimizer": self.optimizer,
+            "lr_scheduler": {
+                "scheduler": self.scheduler,
+                "interval": "epoch",
+            },
+        }
+
     def model_summary(
         self,
         input_size: tuple | list | None = None,
@@ -589,11 +604,7 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             col_names = ["input_size", "output_size", "num_params"]
 
         model_summary = summary(
-            self.model,
-            input_size=input_size,
-            col_names=col_names,
-            device=self.device,
-            **kwargs,
+            self.model, input_size=input_size, col_names=col_names, **kwargs
         )
         print(model_summary)
 
@@ -707,6 +718,10 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         """
         Run inference on a specified dataset (``set_name``).
 
+        Populates ``self.pred_conf``, ``self.pred_label_indices`` and
+        ``self.pred_label``. For distributed or GPU inference, prefer
+        ``trainer.predict(model, dataloaders=...)``.
+
         Parameters
         ----------
         set_name : str, optional
@@ -720,24 +735,46 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         Returns
         -------
         None
-
-        Notes
-        -----
-        This method calls the
-        :meth:`~.train.classifier.classifier.train` method with the
-        ``num_epochs`` set to ``1`` and all the other parameters specified in
-        the function arguments.
         """
-        self.train(
-            phases=[set_name],
-            num_epochs=1,
-            save_model_dir=None,
-            verbose=verbose,
-            tensorboard_path=None,
-            tmp_file_save_freq=2,
-            remove_after_load=False,
-            print_info_batch_freq=print_info_batch_freq,
-        )
+        if set_name not in self.dataloaders.keys():
+            raise KeyError(
+                f'[ERROR] "{set_name}" dataloader cannot be found in dataloaders.\n\
+    Valid options are: {list(self.dataloaders.keys())}'  # noqa
+            )
+
+        self.eval()
+        self.pred_conf = []
+        self.pred_label_indices = []
+
+        total_input_counts = len(self.dataloaders[set_name].dataset)
+        phase_batch_size = self.dataloaders[set_name].batch_size
+
+        with torch.no_grad():
+            for batch_idx, (inputs, _, _) in enumerate(self.dataloaders[set_name]):
+                inputs = tuple(inp.to(self.device) for inp in inputs)
+
+                outputs = self.model(*inputs)
+                if not isinstance(outputs, torch.Tensor):
+                    outputs = self._get_logits(outputs)
+
+                _, pred_label_indices = torch.max(outputs, dim=1)
+                self.pred_conf.extend(
+                    torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
+                )
+                self.pred_label_indices.extend(pred_label_indices.cpu().tolist())
+
+                if print_info_batch_freq and batch_idx % print_info_batch_freq == 0:
+                    current_input_counts = min(
+                        total_input_counts,
+                        (batch_idx + 1) * phase_batch_size,
+                    )
+                    progress = current_input_counts / total_input_counts * 100.0
+                    progress_msg = f"{current_input_counts}/{total_input_counts} ({progress:5.1f}% )"  # noqa
+                    print(f"[INFO] {progress_msg}")
+
+        self.pred_label = [
+            self.labels_map.get(i, None) for i in self.pred_label_indices
+        ]
 
     def train_component_summary(self) -> None:
         """
@@ -759,430 +796,183 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         print("* Model:")
         self.model_summary(trainable_col=True)
 
-    def train(
-        self,
-        phases: list[str] | None = None,
-        num_epochs: int = 25,
-        save_model_dir: str | None = "models",
-        verbose: bool = False,
-        tensorboard_path: str | None = None,
-        tmp_file_save_freq: int | None = 2,
-        remove_after_load: bool = True,
-        print_info_batch_freq: int | None = 5,
-    ) -> None:
-        """
-        Train the model on the specified phases for a given number of epochs.
+    # Lightning training hooks
 
-        Wrapper function for
-        :meth:`~.train.classifier.classifier.train_core` method to
-        capture exceptions (``KeyboardInterrupt`` is the only supported
-        exception currently).
-
-        Parameters
-        ----------
-        phases : list of str, optional
-            The phases to run through during each training iteration. Default is
-            ``["train", "val"]``.
-        num_epochs : int, optional
-            The number of epochs to train the model for. Default is ``25``.
-        save_model_dir : str or None, optional
-            The directory to save the model in. Default is ``"models"``. If
-            set to ``None``, the model is not saved.
-        verbose : int, optional
-            Whether to print verbose outputs, by default ``False``.
-        tensorboard_path : str or None, optional
-            The path to the directory to save TensorBoard logs in. If set to
-            ``None``, no TensorBoard logs are saved. Default is ``None``.
-        tmp_file_save_freq : int, optional
-            The frequency (in epochs) to save a temporary file of the model.
-            Default is ``2``. If set to ``0`` or ``None``, no temporary file
-            is saved.
-        remove_after_load : bool, optional
-            Whether to remove the temporary file after loading it. Default is
-            ``True``.
-        print_info_batch_freq : int, optional
-            The frequency (in batches) to print training information. Default
-            is ``5``. If set to ``0`` or ``None``, no training information is
-            printed.
-
-        Returns
-        -------
-        None
-            The function saves the model to the ``save_model_dir`` directory,
-            and optionally to a temporary file. If interrupted with a
-            ``KeyboardInterrupt``, the function tries to load the temporary
-            file. If no temporary file is found, it continues without loading.
-
-        Notes
-        -----
-        Refer to the documentation of
-        :meth:`~.train.classifier.classifier.train_core` for more
-        information.
-        """
-
-        if phases is None:
-            phases = ["train", "val"]
-
-        try:
-            self.train_core(
-                phases,
-                num_epochs,
-                save_model_dir,
-                verbose,
-                tensorboard_path,
-                tmp_file_save_freq,
-                print_info_batch_freq=print_info_batch_freq,
-            )
-        except KeyboardInterrupt:
-            print("[INFO] Exiting...")
-            if os.path.isfile(self.tmp_save_filename):
-                print(f'[INFO] Loading "{self.tmp_save_filename}" as model.')
-                self.load(self.tmp_save_filename, remove_after_load=remove_after_load)
-            else:
-                print("[INFO] No checkpoint file found - model has not been updated.")
-
-    def train_core(
-        self,
-        phases: list[str] | None = None,
-        num_epochs: int | None = 25,
-        save_model_dir: str | None | None = "models",
-        verbose: bool = False,
-        tensorboard_path: str | None | None = None,
-        tmp_file_save_freq: int | None | None = 2,
-        print_info_batch_freq: int | None | None = 5,
-    ) -> None:
-        """
-        Trains/fine-tunes a classifier for the specified number of epochs on
-        the given phases using the specified hyperparameters.
-
-        Parameters
-        ----------
-        phases : list of str, optional
-            The phases to run through during each training iteration. Default is
-            ``["train", "val"]``.
-        num_epochs : int, optional
-            The number of epochs to train the model for. Default is ``25``.
-        save_model_dir : str or None, optional
-            The directory to save the model in. Default is ``"models"``. If
-            set to ``None``, the model is not saved.
-        verbose : bool, optional
-            Whether to print verbose outputs, by default ``False``.
-        tensorboard_path : str or None, optional
-            The path to the directory to save TensorBoard logs in. If set to
-            ``None``, no TensorBoard logs are saved. Default is ``None``.
-        tmp_file_save_freq : int, optional
-            The frequency (in epochs) to save a temporary file of the model.
-            Default is ``2``. If set to ``0`` or ``None``, no temporary file
-            is saved.
-        print_info_batch_freq : int, optional
-            The frequency (in batches) to print training information. Default
-            is ``5``. If set to ``0`` or ``None``, no training information is
-            printed.
-
-        Raises
-        ------
-        ValueError
-            If the loss function is not set. Use the
-            :meth:`~.classify.classifier.ClassifierContainer.add_loss_fn`
-            method to set the loss function.
-
-            If the optimizer is not set and the phase is "train". Use the
-            :meth:`~.classify.classifier.ClassifierContainer.initialize_optimizer`
-            or :meth:`~.classify.classifier.ClassifierContainer.add_optimizer`
-            method to set the optimizer.
-
-        KeyError
-            If the specified phase cannot be found in the keys of the object's
-            :attr:`~.classify.classifier.ClassifierContainer.dataloaders`
-            dictionary property.
-
-        Returns
-        -------
-        None
-        """
-
-        if phases is None:
-            phases = ["train", "val"]
-        print(f"[INFO] Each step will pass: {phases}.")
-
-        for phase in phases:
-            if phase not in self.dataloaders.keys():
-                raise KeyError(
-                    f'[ERROR] "{phase}" dataloader cannot be found in dataloaders.\n\
-    Valid options for ``phases`` argument are: {self.dataloaders.keys()}'  # noqa
-                )
-
-        if verbose:
-            self.train_component_summary()
-
-        since = time.time()
-
-        # initialize variables
-        train_phase_names = ["train", "training"]
-        valid_phase_names = ["val", "validation", "eval", "evaluation"]
-        best_model_wts = copy.deepcopy(self.model.state_dict())
+    def on_train_start(self) -> None:
         self.pred_conf = []
         self.pred_label_indices = []
         self.gt_label_indices = []
-        if save_model_dir is not None:
-            save_model_dir = os.path.abspath(save_model_dir)
 
-        # Check if SummaryWriter (for tensorboard) can be imported
-        tboard_writer = None
-        if tensorboard_path is not None:
-            try:
-                from torch.utils.tensorboard import SummaryWriter
+    def on_train_epoch_start(self) -> None:
+        self._train_running_pred_conf = []
+        self._train_running_pred_label_indices = []
+        self._train_running_gt_label_indices = []
 
-                tboard_writer = SummaryWriter(tensorboard_path)
-            except ImportError:
-                print(
-                    "[WARNING] Could not import ``SummaryWriter`` from torch.utils.tensorboard"  # noqa
-                )
-                print("[WARNING] Continuing without tensorboard.")
-                tensorboard_path = None
+    def training_step(self, batch, batch_idx: int) -> torch.Tensor:
+        if self.loss_fn is None:
+            raise ValueError(
+                "[ERROR] A loss function should be defined for training the model."
+            )
 
-        start_epoch = self.last_epoch + 1
-        end_epoch = self.last_epoch + num_epochs
+        inputs, _, gt_label_indices = batch
+        inputs = tuple(inputs)
 
-        # --- Main train loop
-        for epoch in range(start_epoch, end_epoch + 1):
-            # --- loop, phases
-            for phase in phases:
-                if phase.lower() in train_phase_names:
-                    self.model.train()
+        if self.is_inception:
+            outputs, aux_outputs = self.model(*inputs)
+            if not isinstance(outputs, torch.Tensor):
+                outputs = self._get_logits(outputs)
+            if not isinstance(aux_outputs, torch.Tensor):
+                aux_outputs = self._get_logits(aux_outputs)
+            loss1 = self.loss_fn(outputs, gt_label_indices)
+            loss2 = self.loss_fn(aux_outputs, gt_label_indices)
+            # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
+            loss = loss1 + 0.4 * loss2  # calculate loss
+        else:
+            outputs = self.model(*inputs)
+            if not isinstance(outputs, torch.Tensor):
+                outputs = self._get_logits(outputs)
+            loss = self.loss_fn(outputs, gt_label_indices)  # calculate loss
 
-                    # check if optimizer, scheduler and loss_fn are defined
-                    if self.optimizer is None:
-                        raise ValueError(
-                            "[ERROR] An optimizer should be defined for training the model."
-                        )
-                    if self.scheduler is None:
-                        raise ValueError(
-                            "[ERROR] A scheduler should be defined for training the model."
-                        )
-                    if self.loss_fn is None:
-                        raise ValueError(
-                            "[ERROR] A loss function should be defined for training the model."
-                        )
-                else:
-                    self.model.eval()
+        _, pred_label_indices = torch.max(outputs, dim=1)
 
-                # initialize vars with one epoch lifetime
-                running_loss = 0.0
-                running_pred_conf = []
-                running_pred_label_indices = []
-                running_gt_label_indices = []
+        self._train_running_pred_conf.extend(
+            torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
+        )
+        self._train_running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
+        self._train_running_gt_label_indices.extend(gt_label_indices.cpu().tolist())
 
-                phase_batch_size = self.dataloaders[phase].batch_size
-                total_input_counts = len(self.dataloaders[phase].dataset)
+        self.log(
+            "train_loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+        return loss
 
-                # --- loop, batches
-                for batch_idx, (inputs, _, gt_label_indices) in enumerate(
-                    self.dataloaders[phase]
-                ):
-                    inputs = tuple(input.to(self.device) for input in inputs)
-                    gt_label_indices = gt_label_indices.to(self.device)
+    def on_train_epoch_end(self) -> None:
+        if not self._train_running_pred_label_indices:
+            return
 
-                    if self.optimizer:  # only if optimizer is defined
-                        self.optimizer.zero_grad()
+        epoch = self.current_epoch
+        self.last_epoch = epoch
 
-                    if phase.lower() in train_phase_names + valid_phase_names:
-                        # forward, track history if only in train
-                        with torch.set_grad_enabled(phase.lower() in train_phase_names):
-                            # Get model outputs and calculate loss
-                            # Special case for inception because in training,
-                            # it has an auxiliary output.
-                            #     In train mode we calculate the loss by
-                            #     summing the final output and the auxiliary
-                            #     output but in testing we only consider the
-                            #     final output.
-                            if self.is_inception and (
-                                phase.lower() in train_phase_names
-                            ):
-                                outputs, aux_outputs = self.model(*inputs)
+        # Epoch loss is already aggregated (and synced across ranks) by self.log()
+        cb = self.trainer.callback_metrics
+        epoch_loss = float(
+            cb.get("train_loss_epoch", cb.get("train_loss", float("nan")))
+        )
+        self._add_metrics("train", "loss", epoch_loss)
 
-                                if not isinstance(outputs, torch.Tensor):
-                                    outputs = self._get_logits(outputs)
-                                if not isinstance(aux_outputs, torch.Tensor):
-                                    aux_outputs = self._get_logits(aux_outputs)
+        # Per-class metrics: computed per-rank (correct for single GPU/CPU).
+        # In multi-GPU each rank only sees its own shard — metrics are approximate.
+        if self.global_rank == 0:
+            self.calculate_add_metrics(
+                self._train_running_gt_label_indices,
+                self._train_running_pred_label_indices,
+                self._train_running_pred_conf,
+                "train",
+                epoch,
+            )
 
-                                loss1 = self.loss_fn(outputs, gt_label_indices)
-                                loss2 = self.loss_fn(aux_outputs, gt_label_indices)
-                                # https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
-                                loss = loss1 + 0.4 * loss2  # calculate loss
+        self.pred_conf.extend(self._train_running_pred_conf)
+        self.pred_label_indices.extend(self._train_running_pred_label_indices)
+        self.gt_label_indices.extend(self._train_running_gt_label_indices)
 
-                            else:
-                                outputs = self.model(*inputs)
+    # Lightning validation hooks
 
-                                if not isinstance(outputs, torch.Tensor):
-                                    outputs = self._get_logits(outputs)
+    def on_validation_epoch_start(self) -> None:
+        self._val_running_pred_conf = []
+        self._val_running_pred_label_indices = []
+        self._val_running_gt_label_indices = []
 
-                                loss = self.loss_fn(
-                                    outputs, gt_label_indices
-                                )  # calculate loss
+    def validation_step(self, batch, batch_idx: int) -> torch.Tensor:
+        if self.loss_fn is None:
+            raise ValueError(
+                "[ERROR] A loss function should be defined for training the model."
+            )
 
-                            _, pred_label_indices = torch.max(outputs, dim=1)
+        inputs, _, gt_label_indices = batch
+        inputs = tuple(inputs)
 
-                            # backward + optimize only if in training phase
-                            if phase.lower() in train_phase_names:
-                                loss.backward()
-                                self.optimizer.step()
+        outputs = self.model(*inputs)
+        if not isinstance(outputs, torch.Tensor):
+            outputs = self._get_logits(outputs)
+        loss = self.loss_fn(outputs, gt_label_indices)
 
-                        # XXX (why multiply?)
-                        running_loss += loss.item() * inputs[0].size(0)
+        _, pred_label_indices = torch.max(outputs, dim=1)
 
-                    else:  # if not in train or valid phase
-                        outputs = self.model(*inputs)
+        self._val_running_pred_conf.extend(
+            torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
+        )
+        self._val_running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
+        self._val_running_gt_label_indices.extend(gt_label_indices.cpu().tolist())
 
-                        if not isinstance(outputs, torch.Tensor):
-                            outputs = self._get_logits(outputs)
+        self.log(
+            "val_loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+        return loss
 
-                        _, pred_label_indices = torch.max(outputs, dim=1)
+    def on_validation_epoch_end(self) -> None:
+        if not self._val_running_pred_label_indices:
+            return
 
-                    running_pred_conf.extend(
-                        torch.nn.functional.softmax(outputs, dim=1).cpu().tolist()
-                    )
-                    running_pred_label_indices.extend(pred_label_indices.cpu().tolist())
-                    running_gt_label_indices.extend(gt_label_indices.cpu().tolist())
+        epoch = self.current_epoch
 
-                    if batch_idx % print_info_batch_freq == 0:
-                        current_input_counts = min(
-                            total_input_counts,
-                            (batch_idx + 1) * phase_batch_size,
-                        )
-                        progress = current_input_counts / total_input_counts * 100.0
-                        progress_msg = f"{current_input_counts}/{total_input_counts} ({progress:5.1f}% )"  # noqa
+        cb = self.trainer.callback_metrics
+        epoch_loss = float(cb.get("val_loss", float("nan")))
+        self._add_metrics("val", "loss", epoch_loss)
 
-                        epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
-                        epoch_msg += f"{progress_msg: >20} -- "
+        if self.global_rank == 0:
+            self.calculate_add_metrics(
+                self._val_running_gt_label_indices,
+                self._val_running_pred_label_indices,
+                self._val_running_pred_conf,
+                "val",
+                epoch,
+            )
 
-                        if phase.lower() in valid_phase_names:
-                            epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", "dred", epoch_msg)
-                        elif phase.lower() in train_phase_names:
-                            epoch_msg += f"Loss: {loss.data:.3f}"
-                            self.cprint("[INFO]", "dgreen", epoch_msg)
-                        else:
-                            self.cprint("[INFO]", "dgreen", epoch_msg)
-                    # --- END: one batch
+        if epoch_loss < self.best_loss:
+            self.best_loss = epoch_loss
+            self.best_epoch = epoch
 
-                # scheduler, step after each epoch
-                if phase.lower() in train_phase_names and (self.scheduler is not None):
-                    self.scheduler.step()
+    # Lightning predict hooks
 
-                if phase.lower() in train_phase_names + valid_phase_names:
-                    # --- collect statistics
-                    epoch_loss = running_loss / len(self.dataloaders[phase].dataset)
-                    self._add_metrics(phase, "loss", epoch_loss)
+    def on_predict_start(self) -> None:
+        self.pred_conf = []
+        self.pred_label_indices = []
 
-                    if tboard_writer is not None:
-                        tboard_writer.add_scalar(
-                            f"loss/{phase}",
-                            epoch_loss,
-                            epoch,
-                        )
+    def predict_step(self, batch, batch_idx: int) -> dict:
+        inputs, _, _ = batch
+        inputs = tuple(inputs)
 
-                    # other metrics (precision/recall/F1)
-                    self.calculate_add_metrics(
-                        running_gt_label_indices,
-                        running_pred_label_indices,
-                        running_pred_conf,
-                        phase,
-                        epoch,
-                        tboard_writer,
-                    )
+        outputs = self.model(*inputs)
+        if not isinstance(outputs, torch.Tensor):
+            outputs = self._get_logits(outputs)
 
-                    epoch_msg = f"{phase: <8} -- {epoch}/{end_epoch} -- "
-                    epoch_msg = self._gen_epoch_msg(phase, epoch_msg)
+        pred_conf = torch.nn.functional.softmax(outputs, dim=1)
+        _, pred_label_indices = torch.max(outputs, dim=1)
 
-                    if phase.lower() in valid_phase_names:
-                        self.cprint("[INFO]", "dred", epoch_msg + "\n")
-                    else:
-                        self.cprint("[INFO]", "dgreen", epoch_msg)
+        # Accumulate on the object (works for CPU / single GPU).
+        # For multi-GPU, trainer.predict() gathers the returned dicts across ranks.
+        self.pred_conf.extend(pred_conf.cpu().tolist())
+        self.pred_label_indices.extend(pred_label_indices.cpu().tolist())
 
-                # labels/confidence
-                self.pred_conf.extend(running_pred_conf)
-                self.pred_label_indices.extend(running_pred_label_indices)
-                self.gt_label_indices.extend(running_gt_label_indices)
+        return {
+            "pred_conf": pred_conf.cpu(),
+            "pred_label_indices": pred_label_indices.cpu(),
+        }
 
-                # Update best_loss and _epoch?
-                if phase.lower() in valid_phase_names and epoch_loss < self.best_loss:
-                    self.best_loss = epoch_loss
-                    self.best_epoch = epoch
-                    best_model_wts = copy.deepcopy(self.model.state_dict())
-
-                if phase.lower() in valid_phase_names:
-                    if tmp_file_save_freq and epoch % tmp_file_save_freq == 0:
-                        tmp_str = f'[INFO] Checkpoint file saved to "{self.tmp_save_filename}".'  # noqa
-                        print(
-                            self._print_colors["lgrey"]
-                            + tmp_str
-                            + self._print_colors["reset"]
-                        )
-                        self.last_epoch = epoch
-                        self.save(self.tmp_save_filename, force=True)
-
+    def on_predict_end(self) -> None:
         self.pred_label = [
             self.labels_map.get(i, None) for i in self.pred_label_indices
         ]
-
-        time_elapsed = time.time() - since
-        print(f"[INFO] Total time: {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
-
-        # load best model weights
-        self.model.load_state_dict(best_model_wts)
-
-        # --- SAVE model/object
-        if phase.lower() in train_phase_names + valid_phase_names:
-            self.last_epoch = epoch
-            if save_model_dir is not None:
-                save_filename = f"checkpoint_{self.best_epoch}.pkl"
-                save_model_path = os.path.join(save_model_dir, save_filename)
-                self.save(save_model_path, force=True)
-                with open(os.path.join(save_model_dir, "info.txt"), "a+") as fio:
-                    fio.writelines(f"{save_filename},{self.best_loss:.5f}\n")
-
-                print(
-                    f"[INFO] Model at epoch {self.best_epoch} has least valid loss ({self.best_loss:.4f}) so will be saved.\n\
-[INFO] Path: {save_model_path}"
-                )
-
-    @staticmethod
-    def _get_logits(out):
-        try:
-            out = out.logits
-        except AttributeError as err:
-            raise AttributeError(str(err))
-        return out
-
-    def _gen_epoch_msg(self, phase: str, epoch_msg: str) -> str:
-        """
-        Generates a log message for an epoch during training or validation.
-        The message includes information about the loss, F-score, and recall
-        for a given phase (training or validation).
-
-        Parameters
-        ----------
-        phase : str
-            The training phase, either ``"train"`` or ``"val"``.
-        epoch_msg : str
-            The message string to be modified with the epoch metrics.
-
-        Returns
-        -------
-        epoch_msg : str
-            The updated message string with the epoch metrics.
-        """
-        loss = self.metrics[phase]["loss"][-1]
-        epoch_msg += f"Loss: {loss:.3f}; "
-
-        fscore = self.metrics[phase]["fscore_macro"][-1]
-        epoch_msg += f"F_macro: {fscore:.2f}; "
-
-        recall = self.metrics[phase]["recall_macro"][-1]
-        epoch_msg += f"R_macro: {recall:.2f}"
-
-        return epoch_msg
 
     def calculate_add_metrics(
         self,
@@ -1644,18 +1434,23 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         base_name = os.path.basename(os.path.abspath(save_path))
 
         # Extract model, write it separately using torch.save
-        obj2write = copy.deepcopy(self.__dict__)
-        mymodel = obj2write["model"]
-        del obj2write["model"]
+        # Exclude Lightning/PyTorch Module internals (stored in _modules etc.)
+        # and optimizer/scheduler (not portable across runs).
+        _skip_prefixes = ("_",)
+        obj2write = {
+            k: copy.deepcopy(v)
+            for k, v in self.__dict__.items()
+            if not any(k.startswith(p) for p in _skip_prefixes)
+            and k not in ("optimizer", "scheduler")
+        }
 
         os.makedirs(par_name, exist_ok=True)
         with open(save_path, "wb") as myfile:
-            # pickle.dump(self.__dict__, myfile)
             joblib.dump(obj2write, myfile)
 
-        torch.save(mymodel, os.path.join(par_name, f"model_{base_name}"))
+        torch.save(self.model, os.path.join(par_name, f"model_{base_name}"))
         torch.save(
-            mymodel.state_dict(),
+            self.model.state_dict(),
             os.path.join(par_name, f"model_state_dict_{base_name}"),
         )
 
@@ -1763,7 +1558,8 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             # objPickle = pickle.load(myfile)
             objPickle = joblib.load(myfile)
 
-        self.__dict__ = objPickle
+        for k, v in objPickle.items():
+            setattr(self, k, v)
 
         if force_device:
             if not isinstance(force_device, str):
@@ -1773,7 +1569,7 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         par_name = os.path.dirname(load_path)
         base_name = os.path.basename(load_path)
         path2model = os.path.join(par_name, f"model_{base_name}")
-        self.model = torch.load(path2model, map_location=mydevice)
+        self.model = torch.load(path2model, map_location=mydevice, weights_only=False)
 
         try:
             self.device = mydevice
@@ -1781,129 +1577,10 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         except:
             pass
 
-    def _set_up_print_colors(self):
-        """Private function, setting color attributes on the object."""
-        self._print_colors = {}
-
-        # color
-        self._print_colors["lgrey"] = "\033[1;90m"
-        self._print_colors["grey"] = "\033[90m"  # boring information
-        self._print_colors["yellow"] = "\033[93m"  # FYI
-        self._print_colors["orange"] = "\033[0;33m"  # Warning
-
-        self._print_colors["lred"] = "\033[1;31m"  # there is smoke
-        self._print_colors["red"] = "\033[91m"  # fire!
-        self._print_colors["dred"] = "\033[2;31m"  # Everything is on fire
-
-        self._print_colors["lblue"] = "\033[1;34m"
-        self._print_colors["blue"] = "\033[94m"
-        self._print_colors["dblue"] = "\033[2;34m"
-
-        self._print_colors["lgreen"] = "\033[1;32m"  # all is normal
-        self._print_colors["green"] = "\033[92m"  # something else
-        self._print_colors["dgreen"] = "\033[2;32m"  # even more interesting
-
-        self._print_colors["lmagenta"] = "\033[1;35m"
-        self._print_colors["magenta"] = "\033[95m"  # for title
-        self._print_colors["dmagenta"] = "\033[2;35m"
-
-        self._print_colors["cyan"] = "\033[96m"  # system time
-        self._print_colors["white"] = "\033[97m"  # final time
-        self._print_colors["black"] = "\033[0;30m"
-
-        self._print_colors["reset"] = "\033[0m"
-        self._print_colors["bold"] = "\033[1m"
-        self._print_colors["under"] = "\033[4m"
-
-    def _get_dtime(self) -> str:
-        """
-        Get the current date and time as a formatted string.
-
-        Returns
-        -------
-        str
-            A string representing the current date and time.
-        """
-        dtime = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
-        return dtime
-
-    def cprint(self, type_info: str, bc_color: str, text: str) -> None:
-        """
-        Print colored text with additional information.
-
-        Parameters
-        ----------
-        type_info : str
-            The type of message to display.
-        bc_color : str
-            The color to use for the message text.
-        text : str
-            The text to display.
-
-        Returns
-        -------
-        None
-            The colored message is displayed on the standard output stream.
-        """
-        host_name = socket.gethostname().split(".")[0][:10]
-
-        print(
-            self._print_colors["green"]
-            + self._get_dtime()
-            + self._print_colors["reset"],
-            self._print_colors["magenta"] + host_name + self._print_colors["reset"],
-            self._print_colors["bold"]
-            + self._print_colors["grey"]
-            + type_info
-            + self._print_colors["reset"],
-            self._print_colors[bc_color] + text + self._print_colors["reset"],
-        )
-
-    def update_progress(
-        self,
-        progress: float | int,
-        text: str | None = "",
-        barLength: int | None = 30,
-    ) -> None:
-        """Update the progress bar.
-
-        Parameters
-        ----------
-        progress : float or int
-            The progress value to display, between ``0`` and ``1``.
-            If an integer is provided, it will be converted to a float.
-            If a value outside the range ``[0, 1]`` is provided, it will be
-            clamped to the nearest valid value.
-        text : str, optional
-            Additional text to display after the progress bar, defaults to
-            ``""``.
-        barLength : int, optional
-            The length of the progress bar in characters, defaults to ``30``.
-
-        Raises
-        ------
-        TypeError
-            If progress is not a floating point value or an integer.
-
-        Returns
-        -------
-        None
-            The progress bar is displayed on the standard output stream.
-        """
-
-        status = ""
-        if isinstance(progress, int):
-            progress = float(progress)
-        if not isinstance(progress, float):
-            progress = 0
-            status = "error: progress provided must be float or integer\r\n"
-        if progress < 0:
-            progress = 0
-            status = "Halt...\r\n"
-        if progress >= 1:
-            progress = 1
-            status = "Done...\r\n"
-        block = int(round(barLength * progress))
-        text = f"\r[{'#'*block + '-'*(barLength-block)}] {progress*100:.1f}% {status} {text}"  # noqa
-        sys.stdout.write(text)
-        sys.stdout.flush()
+    @staticmethod
+    def _get_logits(out):
+        try:
+            out = out.logits
+        except AttributeError as err:
+            raise AttributeError(str(err))
+        return out

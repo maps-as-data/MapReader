@@ -22,6 +22,10 @@ from mapreader.classify.load_annotations import AnnotationsLoader
 from mapreader.classify.datasets import PatchDataset
 from mapreader.classify.datasets import PatchContextDataset
 from mapreader.classify.classifier import ClassifierContainer
+try:
+    from mapreader.classify.lightning_classifier import LightningClassifierContainer
+except ImportError:
+    pass
 from mapreader.classify import custom_models
 
 # spot_text
