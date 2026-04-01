@@ -86,6 +86,14 @@ def test_init_models_string_errors(inputs):
         )
 
 
+def test_init_inception_input_size(inputs):
+    """Regression: inception_v3 must set input_size to (299, 299)."""
+    annots, _ = inputs
+    classifier = ClassifierContainer("inception_v3", labels_map=annots.labels_map)
+    assert classifier.input_size == (299, 299)
+    assert classifier.is_inception is True
+
+
 # test loading model (e.g. resnet18) using torch load
 
 
@@ -254,6 +262,15 @@ def test_initialize_optimizer(load_classifier):
     assert isinstance(classifier.optimizer, torch.optim.Adam)
 
 
+def test_generate_layerwise_lrs_uses_lr_key(load_classifier):
+    """Regression: param groups must use 'lr' not 'learning rate'."""
+    classifier = load_classifier
+    params2optimize = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
+    for group in params2optimize:
+        assert "lr" in group, "param group missing 'lr' key"
+        assert "learning rate" not in group, "param group has wrong key 'learning rate'"
+
+
 def test_initialize_scheduler(load_classifier):
     classifier = load_classifier
     classifier.initialize_optimizer()
@@ -286,10 +303,21 @@ def test_save(load_classifier, tmp_path):
     assert os.path.isfile(f"{tmp_path}/model_out.obj")
 
 
+def test_save_load_roundtrip(inputs, tmp_path):
+    """Save a fresh classifier and load it back; check model and labels_map survive."""
+    annots, _ = inputs
+    classifier = ClassifierContainer("resnet18", labels_map=annots.labels_map)
+    classifier.save(save_path=f"{tmp_path}/rt.obj")
+    loaded = ClassifierContainer(None, None, load_path=f"{tmp_path}/rt.obj")
+    assert isinstance(loaded.model, models.ResNet)
+    assert loaded.labels_map == annots.labels_map
+
+
 def test_load_dataset(load_classifier, sample_dir):
     classifier = load_classifier
     dataset = PatchDataset(f"{sample_dir}/test_annots_append.csv", "test")
     classifier.load_dataset(dataset, "pytest_set", batch_size=8, shuffle=True)
+    assert "pytest_set" in classifier.dataloaders
 
 
 # errors

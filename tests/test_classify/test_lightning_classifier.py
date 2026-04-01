@@ -6,9 +6,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+import timm
 import torch
+import transformers
 from lightning.pytorch import Trainer
 from torchvision import models
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 
 from mapreader import AnnotationsLoader
 from mapreader.classify.datasets import PatchDataset
@@ -105,6 +108,7 @@ def test_init_inception_input_size(inputs):
 def test_init_resnet18_torch(inputs):
     annots, dataloaders = inputs
     my_model = models.resnet18(weights="DEFAULT")
+    assert isinstance(my_model, models.ResNet)  # sanity check
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
     classifier = LightningClassifierContainer(
@@ -115,6 +119,53 @@ def test_init_resnet18_torch(inputs):
 
     classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
     assert isinstance(classifier.model, models.ResNet)
+    assert classifier.dataloaders == {}
+
+
+def test_init_resnet18_pickle(inputs, sample_dir):
+    annots, dataloaders = inputs
+    my_model = torch.load(f"{sample_dir}/model_test.pkl")
+    assert isinstance(my_model, models.ResNet)  # sanity check
+    classifier = LightningClassifierContainer(
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+    )
+    assert isinstance(classifier.model, models.ResNet)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
+    assert isinstance(classifier.model, models.ResNet)
+    assert classifier.dataloaders == {}
+
+
+@pytest.mark.dependency(name="lc_hf_models", scope="session")
+def test_init_resnet18_hf(inputs):
+    annots, dataloaders = inputs
+    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
+    model_type = transformers.models.resnet.ResNetForImageClassification
+    assert isinstance(my_model, model_type)  # sanity check
+    classifier = LightningClassifierContainer(
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+    )
+    assert isinstance(classifier.model, model_type)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
+    assert isinstance(classifier.model, model_type)
+    assert classifier.dataloaders == {}
+
+
+def test_init_resnet18_timm(inputs):
+    annots, dataloaders = inputs
+    my_model = timm.create_model(
+        "resnet18", pretrained=True, num_classes=len(annots.labels_map)
+    )
+    assert isinstance(my_model, timm.models.ResNet)  # sanity check
+    classifier = LightningClassifierContainer(
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+    )
+    assert isinstance(classifier.model, timm.models.ResNet)
+    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
+    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
+    assert isinstance(classifier.model, timm.models.ResNet)
     assert classifier.dataloaders == {}
 
 
@@ -347,16 +398,63 @@ def test_load_dataset(load_classifier, sample_dir):
 
 
 @pytest.mark.dependency(depends=["lc_models_by_string"], scope="session")
-def test_inference(inputs, infer_inputs):
+def test_infer_models_by_string(inputs, infer_inputs):
     annots, dataloaders = inputs
+    for model in [
+        "resnet18",
+        "alexnet",
+        "vgg11",
+        "squeezenet1_0",
+        "densenet121",
+        "inception_v3",
+    ]:
+        classifier = LightningClassifierContainer(
+            model, labels_map=annots.labels_map, dataloaders=dataloaders
+        )
+        classifier.add_loss_fn()
+        classifier.initialize_optimizer()
+        classifier.initialize_scheduler()
+        classifier.load_dataset(infer_inputs, set_name="infer")
+        classifier.inference("infer")
+
+
+@pytest.mark.dependency(depends=["lc_hf_models"], scope="session")
+def test_infer_hf_models(inputs, infer_inputs):
+    annots, dataloaders = inputs
+    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
     classifier = LightningClassifierContainer(
-        "resnet18", labels_map=annots.labels_map, dataloaders=dataloaders
+        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
     )
     classifier.add_loss_fn()
     classifier.initialize_optimizer()
     classifier.initialize_scheduler()
     classifier.load_dataset(infer_inputs, set_name="infer")
     classifier.inference("infer")
+
+
+def test_infer_timm_models(inputs, infer_inputs):
+    annots, dataloaders = inputs
+    for model in [
+        "resnest50d_4s2x40d",
+        "resnest101e",
+        "resnext101_32x8d.fb_swsl_ig1b_ft_in1k",
+        "resnet152",
+        "tf_efficientnet_b3.ns_jft_in1k",
+        "swin_base_patch4_window7_224",
+        "vit_base_patch16_224",
+    ]:
+        my_model = timm.create_model(
+            model, pretrained=True, num_classes=len(annots.labels_map)
+        )
+        classifier = LightningClassifierContainer(
+            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+        )
+        classifier.add_loss_fn()
+        classifier.initialize_optimizer()
+        classifier.initialize_scheduler()
+        classifier.load_dataset(infer_inputs, set_name="infer")
+        classifier.inference("infer")
 
 
 # ---------------------------------------------------------------------------
