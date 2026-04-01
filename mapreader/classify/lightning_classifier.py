@@ -1029,8 +1029,9 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             y_score = np.array(y_score)
 
         for average in [None, "micro", "macro", "weighted"]:
+            labels = list(range(y_score.shape[1])) if average is None else None
             precision, recall, fscore, support = precision_recall_fscore_support(
-                y_true, y_pred, average=average
+                y_true, y_pred, average=average, labels=labels
             )
 
             if average is None:
@@ -1558,8 +1559,12 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             # objPickle = pickle.load(myfile)
             objPickle = joblib.load(myfile)
 
+        # Skip read-only properties inherited from nn.Module/LightningModule
+        # (e.g. 'device', 'dtype') — Lightning manages these itself.
+        _readonly = {"device", "dtype"}
         for k, v in objPickle.items():
-            setattr(self, k, v)
+            if k not in _readonly:
+                setattr(self, k, v)
 
         if force_device:
             if not isinstance(force_device, str):

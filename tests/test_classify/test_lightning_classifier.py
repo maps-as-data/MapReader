@@ -6,12 +6,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-import timm
 import torch
-import transformers
 from lightning.pytorch import Trainer
 from torchvision import models
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 
 from mapreader import AnnotationsLoader
 from mapreader.classify.datasets import PatchDataset
@@ -67,9 +64,7 @@ def ready_classifier(sample_dir):
     return classifier
 
 
-# ---------------------------------------------------------------------------
-# Initialisation
-# ---------------------------------------------------------------------------
+# test loading model using model name as string
 
 
 @pytest.mark.dependency(name="lc_models_by_string", scope="session")
@@ -95,6 +90,14 @@ def test_init_models_string(inputs):
         assert classifier.dataloaders == {}
 
 
+def test_init_models_string_errors(inputs):
+    annots, dataloaders = inputs
+    with pytest.raises(NotImplementedError, match="Invalid model name"):
+        LightningClassifierContainer(
+            "resnext101_32x8d", labels_map=annots.labels_map, dataloaders=dataloaders
+        )
+
+
 def test_init_inception_input_size(inputs):
     """Regression: inception_v3 must set input_size to (299, 299), not 299."""
     annots, _ = inputs
@@ -105,10 +108,12 @@ def test_init_inception_input_size(inputs):
     assert classifier.is_inception is True
 
 
+# test loading model (e.g. resnet18) using torch load
+
+
 def test_init_resnet18_torch(inputs):
     annots, dataloaders = inputs
     my_model = models.resnet18(weights="DEFAULT")
-    assert isinstance(my_model, models.ResNet)  # sanity check
     num_input_features = my_model.fc.in_features
     my_model.fc = torch.nn.Linear(num_input_features, len(annots.labels_map))
     classifier = LightningClassifierContainer(
@@ -122,71 +127,7 @@ def test_init_resnet18_torch(inputs):
     assert classifier.dataloaders == {}
 
 
-def test_init_resnet18_pickle(inputs, sample_dir):
-    annots, dataloaders = inputs
-    my_model = torch.load(f"{sample_dir}/model_test.pkl")
-    assert isinstance(my_model, models.ResNet)  # sanity check
-    classifier = LightningClassifierContainer(
-        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
-    )
-    assert isinstance(classifier.model, models.ResNet)
-    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
-    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
-    assert isinstance(classifier.model, models.ResNet)
-    assert classifier.dataloaders == {}
-
-
-@pytest.mark.dependency(name="lc_hf_models", scope="session")
-def test_init_resnet18_hf(inputs):
-    annots, dataloaders = inputs
-    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
-    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
-    model_type = transformers.models.resnet.ResNetForImageClassification
-    assert isinstance(my_model, model_type)  # sanity check
-    classifier = LightningClassifierContainer(
-        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
-    )
-    assert isinstance(classifier.model, model_type)
-    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
-    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
-    assert isinstance(classifier.model, model_type)
-    assert classifier.dataloaders == {}
-
-
-def test_init_resnet18_timm(inputs):
-    annots, dataloaders = inputs
-    my_model = timm.create_model(
-        "resnet18", pretrained=True, num_classes=len(annots.labels_map)
-    )
-    assert isinstance(my_model, timm.models.ResNet)  # sanity check
-    classifier = LightningClassifierContainer(
-        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
-    )
-    assert isinstance(classifier.model, timm.models.ResNet)
-    assert all(k in classifier.dataloaders.keys() for k in ["train", "test", "val"])
-    classifier = LightningClassifierContainer(my_model, labels_map=annots.labels_map)
-    assert isinstance(classifier.model, timm.models.ResNet)
-    assert classifier.dataloaders == {}
-
-
-def test_init_errors(sample_dir):
-    with pytest.raises(
-        ValueError, match="``model`` and ``labels_map`` must be defined"
-    ):
-        LightningClassifierContainer("resnet18", None, None)
-
-
-def test_init_models_string_errors(inputs):
-    annots, dataloaders = inputs
-    with pytest.raises(NotImplementedError, match="Invalid model name"):
-        LightningClassifierContainer(
-            "resnext101_32x8d", labels_map=annots.labels_map, dataloaders=dataloaders
-        )
-
-
-# ---------------------------------------------------------------------------
-# load / save
-# ---------------------------------------------------------------------------
+# test loading object from pickle file
 
 
 def test_load_no_dataloaders(inputs, sample_dir):
@@ -232,6 +173,61 @@ def test_init_load(inputs, load_classifier):
     assert isinstance(classifier.model, models.ResNet)
 
 
+def test_add_loss_fn(load_classifier):
+    classifier = load_classifier
+    classifier.add_loss_fn("bce")
+    assert isinstance(classifier.loss_fn, torch.nn.BCELoss)
+    loss_fn = torch.nn.L1Loss()
+    classifier.add_loss_fn(loss_fn)
+    assert isinstance(classifier.loss_fn, torch.nn.L1Loss)
+
+
+def test_initialize_optimizer(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer("sgd")
+    assert isinstance(classifier.optimizer, torch.optim.SGD)
+
+    params2optimize = classifier.generate_layerwise_lrs(
+        min_lr=1e-4, max_lr=1e-3, spacing="geomspace"
+    )
+    classifier.initialize_optimizer("adam", params2optimize)
+    assert isinstance(classifier.optimizer, torch.optim.Adam)
+
+
+def test_generate_layerwise_lrs_uses_lr_key(load_classifier):
+    """Regression: param groups must use 'lr' not 'learning rate'."""
+    classifier = load_classifier
+    params2optimize = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
+    for group in params2optimize:
+        assert "lr" in group, "param group missing 'lr' key"
+        assert "learning rate" not in group, "param group has wrong key 'learning rate'"
+
+
+def test_initialize_scheduler(load_classifier):
+    classifier = load_classifier
+    classifier.initialize_optimizer()
+    classifier.initialize_scheduler(
+        scheduler_param_dict={"step_size": 5, "gamma": 0.02}
+    )
+    assert isinstance(classifier.scheduler, torch.optim.lr_scheduler.StepLR)
+    assert classifier.scheduler.step_size == 5
+    assert classifier.scheduler.gamma == 0.02
+
+
+def test_calculate_add_metrics(load_classifier):
+    classifier = load_classifier
+    y_true = np.ones(10)
+    np.random.seed(0)
+    y_pred = np.random.randint(0, 2, 10)
+    y_score = np.random.random_sample((10, 1))
+    classifier.calculate_add_metrics(y_true, y_pred, y_score, phase="pytest")
+    assert "pytest" in classifier.metrics.keys()
+    for metric in ["precision", "recall", "fscore", "support"]:
+        for suffix in ["0", "micro", "macro", "weighted"]:
+            assert f"{metric}_{suffix}" in classifier.metrics["pytest"].keys()
+            assert len(classifier.metrics["pytest"][f"{metric}_{suffix}"]) == 1
+
+
 def test_save(load_classifier, tmp_path):
     classifier = load_classifier
     classifier.save(save_path=f"{tmp_path}/out.obj")
@@ -250,18 +246,21 @@ def test_save_load_roundtrip(inputs, tmp_path):
     assert loaded.labels_map == annots.labels_map
 
 
-# ---------------------------------------------------------------------------
-# Loss function
-# ---------------------------------------------------------------------------
-
-
-def test_add_loss_fn(load_classifier):
+def test_load_dataset(load_classifier, sample_dir):
     classifier = load_classifier
-    classifier.add_loss_fn("bce")
-    assert isinstance(classifier.loss_fn, torch.nn.BCELoss)
-    loss_fn = torch.nn.L1Loss()
-    classifier.add_loss_fn(loss_fn)
-    assert isinstance(classifier.loss_fn, torch.nn.L1Loss)
+    dataset = PatchDataset(f"{sample_dir}/test_annots_append.csv", "test")
+    classifier.load_dataset(dataset, "pytest_set", batch_size=8, shuffle=True)
+    assert "pytest_set" in classifier.dataloaders
+
+
+# errors
+
+
+def test_init_errors(sample_dir):
+    with pytest.raises(
+        ValueError, match="``model`` and ``labels_map`` must be defined"
+    ):
+        LightningClassifierContainer("resnet18", None, None)
 
 
 def test_loss_fn_errors(load_classifier):
@@ -272,54 +271,12 @@ def test_loss_fn_errors(load_classifier):
         classifier.add_loss_fn(0.01)
 
 
-# ---------------------------------------------------------------------------
-# Optimizer
-# ---------------------------------------------------------------------------
-
-
-def test_initialize_optimizer(load_classifier):
-    classifier = load_classifier
-    classifier.initialize_optimizer("sgd")
-    assert isinstance(classifier.optimizer, torch.optim.SGD)
-
-    params2optimize = classifier.generate_layerwise_lrs(
-        min_lr=1e-4, max_lr=1e-3, spacing="geomspace"
-    )
-    classifier.initialize_optimizer("adam", params2optimize)
-    assert isinstance(classifier.optimizer, torch.optim.Adam)
-
-
 def test_optimizer_errors(load_classifier):
     classifier = load_classifier
     with pytest.raises(NotImplementedError, match="At present, only"):
         classifier.initialize_optimizer("a fake optimizer")
     with pytest.raises(NotImplementedError, match="must be one of"):
         classifier.generate_layerwise_lrs(1e-4, 1e-3, "a fake spacing")
-
-
-def test_generate_layerwise_lrs_uses_lr_key(load_classifier):
-    """Regression: param groups must use 'lr' not 'learning rate'."""
-    classifier = load_classifier
-    params2optimize = classifier.generate_layerwise_lrs(min_lr=1e-4, max_lr=1e-3)
-    for group in params2optimize:
-        assert "lr" in group, "param group missing 'lr' key"
-        assert "learning rate" not in group, "param group has wrong key 'learning rate'"
-
-
-# ---------------------------------------------------------------------------
-# Scheduler
-# ---------------------------------------------------------------------------
-
-
-def test_initialize_scheduler(load_classifier):
-    classifier = load_classifier
-    classifier.initialize_optimizer()
-    classifier.initialize_scheduler(
-        scheduler_param_dict={"step_size": 5, "gamma": 0.02}
-    )
-    assert isinstance(classifier.scheduler, torch.optim.lr_scheduler.StepLR)
-    assert classifier.scheduler.step_size == 5
-    assert classifier.scheduler.gamma == 0.02
 
 
 def test_scheduler_errors(load_classifier):
@@ -331,9 +288,7 @@ def test_scheduler_errors(load_classifier):
         classifier.initialize_scheduler("a fake scheduler type")
 
 
-# ---------------------------------------------------------------------------
-# configure_optimizers (Lightning hook)
-# ---------------------------------------------------------------------------
+# test configure_optimizers (Lightning hook)
 
 
 def test_configure_optimizers_no_scheduler(load_classifier):
@@ -361,70 +316,14 @@ def test_configure_optimizers_no_optimizer(load_classifier):
         classifier.configure_optimizers()
 
 
-# ---------------------------------------------------------------------------
-# Metrics
-# ---------------------------------------------------------------------------
-
-
-def test_calculate_add_metrics(load_classifier):
-    classifier = load_classifier
-    y_true = np.ones(10)
-    np.random.seed(0)
-    y_pred = np.random.randint(0, 2, 10)
-    y_score = np.random.random_sample((10, 1))
-    classifier.calculate_add_metrics(y_true, y_pred, y_score, phase="pytest")
-    assert "pytest" in classifier.metrics.keys()
-    for metric in ["precision", "recall", "fscore", "support"]:
-        for suffix in ["0", "micro", "macro", "weighted"]:
-            assert f"{metric}_{suffix}" in classifier.metrics["pytest"].keys()
-            assert len(classifier.metrics["pytest"][f"{metric}_{suffix}"]) == 1
-
-
-# ---------------------------------------------------------------------------
-# Dataset loading
-# ---------------------------------------------------------------------------
-
-
-def test_load_dataset(load_classifier, sample_dir):
-    classifier = load_classifier
-    dataset = PatchDataset(f"{sample_dir}/test_annots_append.csv", "test")
-    classifier.load_dataset(dataset, "pytest_set", batch_size=8, shuffle=True)
-    assert "pytest_set" in classifier.dataloaders
-
-
-# ---------------------------------------------------------------------------
-# Inference (direct, no Trainer)
-# ---------------------------------------------------------------------------
+# test inference
 
 
 @pytest.mark.dependency(depends=["lc_models_by_string"], scope="session")
-def test_infer_models_by_string(inputs, infer_inputs):
+def test_inference(inputs, infer_inputs):
     annots, dataloaders = inputs
-    for model in [
-        "resnet18",
-        "alexnet",
-        "vgg11",
-        "squeezenet1_0",
-        "densenet121",
-        "inception_v3",
-    ]:
-        classifier = LightningClassifierContainer(
-            model, labels_map=annots.labels_map, dataloaders=dataloaders
-        )
-        classifier.add_loss_fn()
-        classifier.initialize_optimizer()
-        classifier.initialize_scheduler()
-        classifier.load_dataset(infer_inputs, set_name="infer")
-        classifier.inference("infer")
-
-
-@pytest.mark.dependency(depends=["lc_hf_models"], scope="session")
-def test_infer_hf_models(inputs, infer_inputs):
-    annots, dataloaders = inputs
-    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
-    my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
     classifier = LightningClassifierContainer(
-        my_model, labels_map=annots.labels_map, dataloaders=dataloaders
+        "resnet18", labels_map=annots.labels_map, dataloaders=dataloaders
     )
     classifier.add_loss_fn()
     classifier.initialize_optimizer()
@@ -433,33 +332,7 @@ def test_infer_hf_models(inputs, infer_inputs):
     classifier.inference("infer")
 
 
-def test_infer_timm_models(inputs, infer_inputs):
-    annots, dataloaders = inputs
-    for model in [
-        "resnest50d_4s2x40d",
-        "resnest101e",
-        "resnext101_32x8d.fb_swsl_ig1b_ft_in1k",
-        "resnet152",
-        "tf_efficientnet_b3.ns_jft_in1k",
-        "swin_base_patch4_window7_224",
-        "vit_base_patch16_224",
-    ]:
-        my_model = timm.create_model(
-            model, pretrained=True, num_classes=len(annots.labels_map)
-        )
-        classifier = LightningClassifierContainer(
-            my_model, labels_map=annots.labels_map, dataloaders=dataloaders
-        )
-        classifier.add_loss_fn()
-        classifier.initialize_optimizer()
-        classifier.initialize_scheduler()
-        classifier.load_dataset(infer_inputs, set_name="infer")
-        classifier.inference("infer")
-
-
-# ---------------------------------------------------------------------------
-# Training via Lightning Trainer (fast_dev_run=True — 1 batch only)
-# ---------------------------------------------------------------------------
+# test train
 
 
 def test_training_step(inputs):

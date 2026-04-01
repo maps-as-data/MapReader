@@ -1239,8 +1239,9 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             y_score = np.array(y_score)
 
         for average in [None, "micro", "macro", "weighted"]:
+            labels = list(range(y_score.shape[1])) if average is None else None
             precision, recall, fscore, support = precision_recall_fscore_support(
-                y_true, y_pred, average=average
+                y_true, y_pred, average=average, labels=labels
             )
 
             if average is None:

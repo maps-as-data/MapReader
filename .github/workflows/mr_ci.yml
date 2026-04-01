@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install ".[dev]"
+          python -m pip install ".[dev, lightning]"
           python -m pip install pytest-cov
 
       - name: Quality Assurance
