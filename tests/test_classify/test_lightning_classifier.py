@@ -335,9 +335,30 @@ def test_inference(inputs, infer_inputs):
 # test train
 
 
-def test_training_step(inputs):
+def test_training_step(inputs, sample_dir):
     """Smoke-test: Trainer.fit() with fast_dev_run=True runs one batch without error."""
-    annots, dataloaders = inputs
+    from torch.utils.data import DataLoader
+
+    annots, _ = inputs
+
+    # Build a labelled dataset from the images known to exist in sample_files.
+    # The inputs fixture dataloaders have absolute paths that are only valid locally.
+    train_df = pd.DataFrame(
+        {
+            "image_id": ["cropped_74488689.png", "cropped_74488689.png"],
+            "image_path": [
+                f"{sample_dir}/cropped_74488689.png",
+                f"{sample_dir}/cropped_74488689.png",
+            ],
+            "label": ["no", "railspace"],
+            "label_index": [0, 1],
+        }
+    )
+    train_dataset = PatchDataset(
+        train_df, transform="train", label_col="label", label_index_col="label_index"
+    )
+    train_loader = DataLoader(train_dataset, batch_size=2)
+
     classifier = LightningClassifierContainer("resnet18", labels_map=annots.labels_map)
     classifier.add_loss_fn("cross entropy")
     classifier.initialize_optimizer("adam")
@@ -353,8 +374,8 @@ def test_training_step(inputs):
     )
     trainer.fit(
         classifier,
-        train_dataloaders=dataloaders["train"],
-        val_dataloaders=dataloaders["val"],
+        train_dataloaders=train_loader,
+        val_dataloaders=train_loader,
     )
 
 
