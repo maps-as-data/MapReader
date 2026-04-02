@@ -349,8 +349,8 @@ There are a number of options for the ``model`` argument:
         MapReader will automatically download the model and its corresponding image processor from the Hugging Face Hub using the `transformers <https://github.com/huggingface/transformers>`__ library.
 
         e.g. `This model <https://huggingface.co/davanstrien/autotrain-mapreader-5000-40830105612>`__ is based on our `*gold standard* dataset <https://huggingface.co/datasets/Livingwithmachines/MapReader_Data_SIGSPATIAL_2022>`__.
-        It can be loaded directly like this: 
-        
+        It can be loaded directly like this:
+
         .. code-block:: python
 
             #EXAMPLE
@@ -772,3 +772,99 @@ Or, if your maps are georeferenced, you can use the ``explore_patches`` method i
     )
 
 Refer to the :doc:`Load </using-mapreader/step-by-step-guide/2-load>` user guidance for further details on how these methods work.
+
+----
+
+Using multiple GPUs - ``LightningClassifierContainer``
+--------------------------------------------------------
+
+.. note:: This is a new feature and so is currently in beta. Please let us know if you have any issues using this or if you have any suggestions for improvement!
+
+If you have access to multiple GPUs for training your classification model, you can use the ``LightningClassifierContainer`` class to take advantage of these.
+
+The ``LightningClassifierContainer`` mirrors the ``ClassifierContainer`` but delegates the training to `PyTorch Lightning <https://lightning.ai/docs/pytorch/stable/>`__.
+This makes it straightforward to train on multiple GPUs.
+
+.. note::
+
+    You will need to install the ``lightning`` dependency group to use this class with ``pip install -e .[lightning]``
+
+Initialize ``LightningClassifierContainer``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Set up the classifier exactly as you would with ``ClassifierContainer``:
+
+.. code-block:: python
+
+    from mapreader import LightningClassifierContainer
+
+    my_classifier = LightningClassifierContainer(
+        "resnet18",
+        labels_map=annotated_images.labels_map,
+        dataloaders=dataloaders,
+    )
+
+The same model options available for ``ClassifierContainer`` (torchvision model names, custom ``nn.Module``, ``load_path``, etc.) are supported.
+
+
+Define loss function, optimizer and scheduler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Again, you can define your loss function, optimizer and scheduler using the same methods as for ``ClassifierContainer``:
+
+.. code-block:: python
+
+    my_classifier.add_loss_fn("cross entropy")
+    my_classifier.initialize_optimizer("adam")
+    my_classifier.initialize_scheduler()
+
+
+Train with a Lightning Trainer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You will then need to pass your classifier to a ``lightning.pytorch.Trainer`` and call ``fit``:
+
+.. code-block:: python
+
+    from lightning.pytorch import Trainer
+
+    trainer = Trainer(max_epochs=25)
+    trainer.fit(
+        my_classifier,
+        train_dataloaders=dataloaders["train"],
+        val_dataloaders=dataloaders["val"],
+    )
+
+The Trainer handles device placement (i.e. will distribute your training across multiple GPUs), logging, and checkpointing.
+Metrics are computed each epoch (loss, precision, recall, f-score, ROC AUC) and stored in ``my_classifier.metrics`` and can be plotted with ``my_classifier.plot_metric()``.
+
+You can also explicitly specify the device to train on by passing the ``devices`` and ``accelerator`` arguments to the Trainer:
+
+.. code-block:: python
+
+    trainer = Trainer(
+        max_epochs=25,
+        devices=2, # number of GPUs to use
+        accelerator="cuda", # type of device to use (e.g. "cuda", "mps" or "cpu")
+    )
+    trainer.fit(
+        my_classifier,
+        train_dataloaders=dataloaders["train"],
+        val_dataloaders=dataloaders["val"],
+    )
+
+
+Save and load
+~~~~~~~~~~~~~~
+
+As with the ``ClassifierContainer`` you can save your trained model and classifier container using the ``save`` method:
+
+.. code-block:: python
+
+    my_classifier.save("my_lightning_classifier.pkl")
+
+And you can load this file back in using the ``load_path`` argument when initializing a new ``LightningClassifierContainer``:
+
+.. code-block:: python
+
+    loaded = LightningClassifierContainer(None, None, None, load_path="my_lightning_classifier.pkl")

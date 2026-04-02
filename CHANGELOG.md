@@ -14,6 +14,10 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+### Added
+
+- Added `LightningClassifierContainer` to support multi-GPU training via `lightning.pytorch.Trainer`
+
 ### Fixed
 
 - Fixes the `model_summary` method in the `ClassifierContainer` class ([#574](https://github.com/maps-as-data/MapReader/pull/574))
