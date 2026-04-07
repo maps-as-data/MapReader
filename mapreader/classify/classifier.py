@@ -166,11 +166,11 @@ class ClassifierContainer:
                     hf_processor = AutoImageProcessor.from_pretrained(model)
                     size = getattr(hf_processor, "size", {})
                     if "height" in size and "width" in size:
-                        size = (size["height"], size["width"])
+                        self.input_size = (size["height"], size["width"])
                     elif "shortest_edge" in size:
-                        size = (size["shortest_edge"], size["shortest_edge"])
+                        self.input_size = (size["shortest_edge"], size["shortest_edge"])
                     else:
-                        size = input_size
+                        self.input_size = input_size
                     self.is_inception = False
                 else:
                     self._initialize_model(model, **kwargs)
