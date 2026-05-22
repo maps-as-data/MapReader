@@ -869,7 +869,7 @@ Please check your image paths and update them if necessary.'
             value_counts = (
                 datasets["train"].patch_df[self.label_col].value_counts().to_list()
             )
-            weights = np.reciprocal(Tensor(value_counts))
+            weights = Tensor(value_counts).reciprocal()
             weights = weights.double()
             sampler = WeightedRandomSampler(
                 weights[datasets["train"].patch_df["label_index"].tolist()],

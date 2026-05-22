@@ -10,7 +10,7 @@ import timm
 import torch
 import transformers
 from torchvision import models
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 from mapreader import AnnotationsLoader, ClassifierContainer
 from mapreader.classify.datasets import PatchDataset
@@ -110,7 +110,7 @@ def test_init_resnet18_torch(inputs):
 
 def test_init_resnet18_pickle(inputs, sample_dir):
     annots, dataloaders = inputs
-    my_model = torch.load(f"{sample_dir}/model_test.pkl")
+    my_model = torch.load(f"{sample_dir}/model_test.pkl", weights_only=False)
     assert isinstance(my_model, models.ResNet)  # sanity check
     classifier = ClassifierContainer(
         my_model, labels_map=annots.labels_map, dataloaders=dataloaders
@@ -128,7 +128,7 @@ def test_init_resnet18_pickle(inputs, sample_dir):
 @pytest.mark.dependency(name="hf_models", scope="session")
 def test_init_resnet18_hf(inputs):
     annots, dataloaders = inputs
-    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    AutoImageProcessor.from_pretrained("microsoft/resnet-18")
     my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
     model_type = transformers.models.resnet.ResNetForImageClassification
     assert isinstance(my_model, model_type)  # sanity check
@@ -387,7 +387,7 @@ def test_infer_models_by_string(inputs, infer_inputs):
 @pytest.mark.dependency(depends=["hf_models"], scope="session")
 def test_infer_hf_models(inputs, infer_inputs):
     annots, dataloaders = inputs
-    AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+    AutoImageProcessor.from_pretrained("microsoft/resnet-18")
     my_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-18")
     classifier = ClassifierContainer(
         my_model, labels_map=annots.labels_map, dataloaders=dataloaders

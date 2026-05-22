@@ -110,7 +110,7 @@ class OcclusionAnalyzer:
         return len(self.patch_df)
 
     def _load_model(self, model_path: str) -> nn.Module:
-        model = torch.load(model_path, map_location=self.device)
+        model = torch.load(model_path, map_location=self.device, weights_only=False)
         return model
 
     def add_loss_fn(
@@ -284,7 +284,7 @@ class OcclusionAnalyzer:
                 # preprocess the occluded image and get the prediction
                 image_tensor = self._preprocess_image(occluded_image)
                 prediction = self.model(image_tensor)
-                loss = round(float(self.loss_fn(prediction, gt_prediction)), 4)
+                loss = round(float(self.loss_fn(prediction, gt_prediction).detach()), 4)
 
                 # store the loss in the heatmap
                 heatmap[row, column] = loss
