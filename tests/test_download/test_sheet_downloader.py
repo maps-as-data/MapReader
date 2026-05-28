@@ -10,7 +10,7 @@ from pytest import approx
 from shapely.geometry import LineString, MultiPolygon, Polygon
 
 from mapreader import SheetDownloader
-from mapreader.download.data_structures import GridBoundingBox
+from mapreader.download.data_structures import GridBoundingBox, GridIndex
 from mapreader.download.tile_loading import TileDownloader
 from mapreader.download.tile_merging import TileMerger
 from mapreader.utils.load_frames import load_from_csv
@@ -244,6 +244,60 @@ def test_query_by_string_key_errors(sheet_downloader):
     sd = sheet_downloader
     with pytest.raises(KeyError):
         sd.query_map_sheets_by_string("Nottinghamshire", ["fake_key"])
+
+
+# TileDownloader.generate_tile_url
+
+
+def test_generate_tile_url_xyz():
+    downloader = TileDownloader(
+        tile_servers=[
+            "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/{z}/{x}/{y}.png"
+        ]
+    )
+    index = GridIndex(x=3, y=5, z=4)
+    url = downloader.generate_tile_url(index, 0)
+    assert url == "https://mapseries-tilesets.s3.amazonaws.com/1inch_2nd_ed/4/3/5.png"
+
+
+def test_generate_tile_url_tms_no_keyerror():
+    """Regression: {-y} TMS URLs must not raise KeyError."""
+    downloader = TileDownloader(
+        tile_servers=[
+            "https://mapseries-tilesets.s3.amazonaws.com/towns/aberdeen/{z}/{x}/{-y}.png"
+        ]
+    )
+    index = GridIndex(x=1, y=2, z=3)
+    url = downloader.generate_tile_url(index, 0)  # must not raise
+    assert url is not None
+
+
+def test_generate_tile_url_tms_y_flip():
+    downloader = TileDownloader(
+        tile_servers=[
+            "https://mapseries-tilesets.s3.amazonaws.com/towns/aberdeen/{z}/{x}/{-y}.png"
+        ]
+    )
+    # z=3 → 2**3 - 1 = 7; tms_y = 7 - 3 = 4
+    index = GridIndex(x=2, y=3, z=3)
+    url = downloader.generate_tile_url(index, 0)
+    assert url == "https://mapseries-tilesets.s3.amazonaws.com/towns/aberdeen/3/2/4.png"
+
+
+def test_generate_tile_url_tms_y_zero():
+    """y=0 should map to tms_y = 2**z - 1 (maximum tile index)."""
+    downloader = TileDownloader(tile_servers=["https://example.com/{z}/{x}/{-y}.png"])
+    index = GridIndex(x=0, y=0, z=2)
+    url = downloader.generate_tile_url(index, 0)
+    assert url == "https://example.com/2/0/3.png"
+
+
+def test_generate_tile_url_tms_y_max():
+    """y at the maximum tile index should map to tms_y = 0."""
+    downloader = TileDownloader(tile_servers=["https://example.com/{z}/{x}/{-y}.png"])
+    index = GridIndex(x=0, y=3, z=2)
+    url = downloader.generate_tile_url(index, 0)
+    assert url == "https://example.com/2/0/0.png"
 
 
 # download
