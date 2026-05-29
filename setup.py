@@ -71,6 +71,7 @@ setuptools.setup(
             "lightning>=2.0",
         ],
         "dev": [
+            "lightning>=2.0",
             "pytest<9.0.0",
             "pytest-cov>=4.1.0,<6.0.0",
             "timm<1.0.0",
