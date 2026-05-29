@@ -854,6 +854,8 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
     def on_train_epoch_end(self) -> None:
         if not self._train_running_pred_label_indices:
             return
+        if self.trainer.sanity_checking:
+            return
 
         epoch = self.current_epoch
         self.last_epoch = epoch
@@ -1504,7 +1506,10 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             The number of worker threads to use for loading data, by default 0.
         """
         if sampler and shuffle:
-            print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
+            print(
+                "[INFO] ``sampler`` is defined so train dataset will be unshuffled. Setting ``shuffle`` to False."
+            )
+            shuffle = False
 
         dataloader = DataLoader(
             dataset,
@@ -1565,6 +1570,12 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         for k, v in objPickle.items():
             if k not in _readonly:
                 setattr(self, k, v)
+
+        # optimizer/scheduler are excluded from save() because they hold stale
+        # references to the old model's parameters. Reset to None so callers
+        # (initialize_scheduler, configure_optimizers) don't get AttributeError.
+        self.optimizer = None
+        self.scheduler = None
 
         if force_device:
             if not isinstance(force_device, str):

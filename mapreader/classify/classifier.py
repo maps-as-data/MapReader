@@ -1709,7 +1709,10 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
             The number of worker threads to use for loading data, by default 0.
         """
         if sampler and shuffle:
-            print("[INFO] ``sampler`` is defined so train dataset will be unshuffled.")
+            print(
+                "[INFO] ``sampler`` is defined so train dataset will be unshuffled. Setting ``shuffle`` to False."
+            )
+            shuffle = False
 
         dataloader = DataLoader(
             dataset,
