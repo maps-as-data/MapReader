@@ -17,6 +17,8 @@ _Add new changes here_
 ### Fixed
 
 - Fixes the `model_summary` method in the `ClassifierContainer` class ([#574](https://github.com/maps-as-data/MapReader/pull/574))
+- Update `AutoFeaturExtractor` to `AutoImageProcessor` to match updated transformers library ([#581](https://github.com/maps-as-data/MapReader/pull/581))
+- Update dependencies ([#581](https://github.com/maps-as-data/MapReader/pull/581))
 
 ## [v1.8.2](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.2) (2025-12-19)
 

@@ -477,7 +477,7 @@ class Annotator:
         """
 
         def check_eligibility(row):
-            if row.label not in [np.NaN, None]:
+            if row.label not in [np.nan, None]:
                 return False
 
             if self._filter_for is None:
@@ -546,7 +546,7 @@ class Annotator:
 
             # Dim the image
             if dim in ["True", True]:
-                im_array = np.array(im)
+                im_array = np.array(im, dtype=np.float32)
                 im_array = 256 - (256 - im_array) * 0.4  # lighten image
                 im = Image.fromarray(im_array.astype(np.uint8))
 

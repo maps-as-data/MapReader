@@ -897,7 +897,7 @@ See https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes for mor
                 self._add_patch_coords_id(patch_id, verbose)
 
         if isinstance(patch_df, gpd.GeoDataFrame):
-            parent_polygon = patch_df.unary_union
+            parent_polygon = patch_df.union_all()
             parent_coords = parent_polygon.bounds
 
             self.parents[image_id]["coordinates"] = parent_coords

@@ -170,7 +170,7 @@ class SheetDownloader:
         """
         Creates a multipolygon representing all maps in metadata.
         """
-        self.merged_polygon = self.metadata["geometry"].unary_union
+        self.merged_polygon = self.metadata["geometry"].union_all()
 
     def get_minmax_latlon(self) -> None:
         """

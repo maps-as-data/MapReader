@@ -1770,7 +1770,7 @@ Use ``torch.optim.lr_scheduler`` directly and then the ``add_scheduler`` method 
         par_name = os.path.dirname(load_path)
         base_name = os.path.basename(load_path)
         path2model = os.path.join(par_name, f"model_{base_name}")
-        self.model = torch.load(path2model, map_location=mydevice)
+        self.model = torch.load(path2model, map_location=mydevice, weights_only=False)
 
         try:
             self.device = mydevice
