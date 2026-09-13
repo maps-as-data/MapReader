@@ -22,7 +22,6 @@ def sample_dir():
 
 
 @pytest.fixture
-@pytest.mark.dependency(depends=["load_annots_csv", "dataloaders"], scope="session")
 def inputs(sample_dir):
     annots = AnnotationsLoader()
     annots.load(
