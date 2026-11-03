@@ -14,6 +14,10 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
+### Fixed
+
+- Improve efficiency of the `deduplicate_parent_level` function ([#583](https://github.com/maps-as-data/MapReader/pull/583))
+
 ### Added
 
 - Add compatibility with TMS tilelayers ([#582](https://github.com/maps-as-data/MapReader/pull/582))
