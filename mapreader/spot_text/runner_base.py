@@ -13,6 +13,7 @@ import pandas as pd
 import xyzservices as xyz
 from PIL import Image
 from shapely import LineString, MultiPolygon, Polygon, from_wkt
+from shapely.strtree import STRtree
 from tqdm.auto import tqdm
 
 from mapreader import MapImages
@@ -372,57 +373,69 @@ class DetRunner:
         all_patches = [pred.patch_id for pred in self.parent_predictions[image_id]]
         patches = np.unique(all_patches).tolist()
 
-        for patch_i, patch_j in combinations(patches, 2):
-            # get patch bounds
-            patch_bounds_i = Polygon.from_bounds(
-                *self.patch_df.loc[patch_i, "pixel_bounds"]
-            )
-            patch_bounds_j = Polygon.from_bounds(
-                *self.patch_df.loc[patch_j, "pixel_bounds"]
-            )
+        # index predictions by patch_id
+        patch_to_indices = {patch_id: [] for patch_id in patches}
+        for i, pred in enumerate(self.parent_predictions[image_id]):
+            patch_to_indices[pred.patch_id].append(i)
 
-            if patch_bounds_i.intersects(patch_bounds_j):
-                # get patch intersection
-                intersection = patch_bounds_i.intersection(patch_bounds_j)
+        # create patch polygons and build a spatial index over them
+        patch_bounds = [
+            Polygon.from_bounds(*self.patch_df.loc[patch_id, "pixel_bounds"])
+            for patch_id in patches
+        ]
+        tree = STRtree(patch_bounds)
 
-                # get polygons that overlap with the patch intersection
-                polygons = []
-                for i, pred in enumerate(np.array(self.parent_predictions[image_id])):
-                    if pred is None:
-                        continue
-                    elif pred.patch_id in [
-                        patch_i,
-                        patch_j,
-                    ] and pred.pixel_geometry.intersects(intersection):
-                        polygons.append([i, pred.pixel_geometry])
+        seen_pairs = set()
+        for idx_i, patch_bounds_i in enumerate(patch_bounds):
+            # tree.query returns indicies of patches with intersect
+            for idx_j in tree.query(patch_bounds_i):
+                if idx_j <= idx_i or (idx_i, idx_j) in seen_pairs:
+                    continue
+                seen_pairs.add((idx_i, idx_j))
 
-                def calc_ioa(polygons, i, j):
-                    return (
-                        polygons[i][1].intersection(polygons[j][1]).area
-                        / polygons[i][1].area
-                    )
+                patch_i, patch_j = patches[idx_i], patches[idx_j]
+                patch_bounds_j = patch_bounds[idx_j]
 
-                # create an intersection matrix
-                i_matrix = np.zeros((len(polygons), len(polygons)))
+                if patch_bounds_i.intersects(patch_bounds_j):
+                    # get patch intersection
+                    intersection = patch_bounds_i.intersection(patch_bounds_j)
 
-                # calculate intersection over area for these polygons
-                for i, j in combinations(range(len(polygons)), 2):
-                    if polygons[i][1].intersects(polygons[j][1]):
-                        ioa_i = calc_ioa(polygons, i, j)
-                        ioa_j = calc_ioa(polygons, j, i)
-                        # bigger ioa means more overlap, so keep the one with the bigger ioa (only if more than min_ioa)
-                        if ioa_i > ioa_j and ioa_i > min_ioa:
-                            i_matrix[i, j] = ioa_i
-                        elif ioa_j > ioa_i and ioa_j > min_ioa:
-                            i_matrix[j, i] = ioa_j
+                    # get polygons that overlap with the patch intersection
+                    polygons = []
+                    for i in patch_to_indices[patch_i] + patch_to_indices[patch_j]:
+                        pred = self.parent_predictions[image_id][i]
+                        if pred is None:
+                            continue
+                        elif pred.pixel_geometry.intersects(intersection):
+                            polygons.append([i, pred.pixel_geometry])
 
-                # if there is an intersection with another polygon then remove this polygon
-                for i, row in enumerate(i_matrix):
-                    # index of the polygon in the parent_preds array
-                    index = polygons[i][0]
-                    if any([ioa != 0 for ioa in row]):
-                        self.parent_predictions[image_id][index] = None
-                        i_matrix[:, i] = 0
+                    def calc_ioa(polygons, i, j):
+                        return (
+                            polygons[i][1].intersection(polygons[j][1]).area
+                            / polygons[i][1].area
+                        )
+
+                    # create an intersection matrix
+                    i_matrix = np.zeros((len(polygons), len(polygons)))
+
+                    # calculate intersection over area for these polygons
+                    for i, j in combinations(range(len(polygons)), 2):
+                        if polygons[i][1].intersects(polygons[j][1]):
+                            ioa_i = calc_ioa(polygons, i, j)
+                            ioa_j = calc_ioa(polygons, j, i)
+                            # bigger ioa means more overlap, so keep the one with the bigger ioa (only if more than min_ioa)
+                            if ioa_i > ioa_j and ioa_i > min_ioa:
+                                i_matrix[i, j] = ioa_i
+                            elif ioa_j > ioa_i and ioa_j > min_ioa:
+                                i_matrix[j, i] = ioa_j
+
+                    # if there is an intersection with another polygon then remove this polygon
+                    for i, row in enumerate(i_matrix):
+                        # index of the polygon in the parent_preds array
+                        index = polygons[i][0]
+                        if any([ioa != 0 for ioa in row]):
+                            self.parent_predictions[image_id][index] = None
+                            i_matrix[:, i] = 0
 
         # remove the None values
         self.parent_predictions[image_id] = [
