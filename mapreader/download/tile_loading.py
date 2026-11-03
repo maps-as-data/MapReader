@@ -75,9 +75,11 @@ class TileDownloader:
         str
             Tile download url
         """
-        return self.tile_servers[subserver_index].format(
-            x=index.x, y=index.y, z=index.z
-        )
+        url_template = self.tile_servers[subserver_index]
+        if "{-y}" in url_template:
+            tms_y = (2**index.z - 1) - index.y
+            url_template = url_template.replace("{-y}", str(tms_y))
+        return url_template.format(x=index.x, y=index.y, z=index.z)
 
     def download_tiles(
         self, grid_bb: GridBoundingBox, download_in_parallel: bool = True

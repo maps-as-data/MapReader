@@ -14,7 +14,11 @@ The following table shows which versions of MapReader are compatible with which 
 ## Pre-release
 _Add new changes here_
 
-## [v1.8.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.3) (20256-09-13)
+### Added
+
+- Add compatibility with TMS tilelayers ([#582](https://github.com/maps-as-data/MapReader/pull/582))
+
+## [v1.8.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.3) (2026-09-13)
 
 ### Fixed
 
