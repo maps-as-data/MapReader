@@ -370,7 +370,8 @@ class MapTextRunner(DetRecRunner):
             from maptextpipeline.utils.vitae_predictor import ViTAEPredictor
 
             self.predictor = ViTAEPredictor(cfg)
-        self.predictor = DefaultPredictor(cfg)
+        else:
+            self.predictor = DefaultPredictor(cfg)
 
     def _ctc_decode_recognition(self, rec):
         last_char = "###"

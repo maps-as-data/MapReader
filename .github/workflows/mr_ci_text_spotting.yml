@@ -64,6 +64,7 @@ jobs:
           python -m pip install --no-cache-dir --no-build-isolation 'git+https://github.com/maps-as-data/DeepSolo.git'
           python -m pip install --no-cache-dir --no-build-isolation 'git+https://github.com/maps-as-data/DPText-DETR.git'
           python -m pip install --no-cache-dir --no-build-isolation 'git+https://github.com/maps-as-data/MapTextPipeline.git'
+          python -m pip install --no-cache-dir --no-build-isolation 'git+https://github.com/maps-as-data/ToponymExtractor.git#subdirectory=WordSpotter' # install the wordspotter package
 
       - name: Clone DPText-DETR
         run: |
@@ -83,6 +84,8 @@ jobs:
           hf download rwood-97/DPText_DETR_ArT_R_50_poly art_final.pth --local-dir .
           hf download rwood-97/DeepSolo_ic15_res50 ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth --local-dir .
           hf download rwood-97/MapTextPipeline_rumsey rumsey-finetune.pth --local-dir .
+          hf download rwood-97/WordSpotter_finetune_v2 config_96voc.yaml --local-dir wordspotter_finetune_v2
+          hf download rwood-97/WordSpotter_finetune_v2 model.pth --local-dir wordspotter_finetune_v2/finetune_v2
 
       - name: Test with pytest
         run: |
