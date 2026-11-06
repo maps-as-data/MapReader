@@ -12,7 +12,6 @@ from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
 from shapely import Polygon
 from wordspotter.config import get_cfg
-from wordspotter.utils.vitae_predictor import ViTAEPredictor
 
 from mapreader import WordSpotterRunner
 from mapreader.load import MapImages
@@ -95,7 +94,7 @@ def test_wordspotter_init(init_dataframes):
         weights_file=f"{WORDSPOTTER_PATH}/finetune_v2/model.pth",
     )
     assert isinstance(runner, WordSpotterRunner)
-    assert isinstance(runner.predictor, ViTAEPredictor)
+    assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -111,7 +110,7 @@ def test_wordspotter_init_str(init_dataframes, tmp_path):
         weights_file=f"{WORDSPOTTER_PATH}/finetune_v2/model.pth",
     )
     assert isinstance(runner, WordSpotterRunner)
-    assert isinstance(runner.predictor, ViTAEPredictor)
+    assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -127,7 +126,7 @@ def test_wordspotter_init_pathlib(init_dataframes, tmp_path):
         weights_file=f"{WORDSPOTTER_PATH}/finetune_v2/model.pth",
     )
     assert isinstance(runner, WordSpotterRunner)
-    assert isinstance(runner.predictor, ViTAEPredictor)
+    assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -144,7 +143,7 @@ def test_wordspotter_init_tsv(init_dataframes, tmp_path):
         weights_file=f"{WORDSPOTTER_PATH}/finetune_v2/model.pth",
     )
     assert isinstance(runner, WordSpotterRunner)
-    assert isinstance(runner.predictor, ViTAEPredictor)
+    assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -162,7 +161,7 @@ def test_wordspotter_init_geojson(init_dataframes, tmp_path, mock_response):
         weights_file=f"{WORDSPOTTER_PATH}/finetune_v2/model.pth",
     )
     assert isinstance(runner, WordSpotterRunner)
-    assert isinstance(runner.predictor, ViTAEPredictor)
+    assert isinstance(runner.predictor, DefaultPredictor)
     assert isinstance(runner.parent_df.iloc[0]["geometry"], Polygon)
     out = runner.run_all()
     assert isinstance(out, dict)
