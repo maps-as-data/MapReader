@@ -11,6 +11,7 @@ import pytest
 from detectron2.engine import DefaultPredictor
 from detectron2.structures.instances import Instances
 from maptextpipeline.config import get_cfg
+from maptextpipeline.utils.vitae_predictor import ViTAEPredictor
 from shapely import Polygon
 
 from mapreader import MapTextRunner
@@ -92,7 +93,7 @@ def test_maptext_init(init_dataframes):
         cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
-    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.predictor, ViTAEPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -107,7 +108,7 @@ def test_maptext_init_str(init_dataframes, tmp_path):
         cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
-    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.predictor, ViTAEPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -122,7 +123,7 @@ def test_maptext_init_pathlib(init_dataframes, tmp_path):
         cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
-    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.predictor, ViTAEPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -138,7 +139,7 @@ def test_maptext_init_tsv(init_dataframes, tmp_path):
         cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
-    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.predictor, ViTAEPredictor)
     assert isinstance(runner.parent_df.iloc[0]["coordinates"], tuple)
     assert isinstance(runner.patch_df.iloc[0]["coordinates"], tuple)
 
@@ -155,7 +156,7 @@ def test_maptext_init_geojson(init_dataframes, tmp_path, mock_response):
         cfg_file=f"{MAPTEXTPIPELINE_PATH}/configs/ViTAEv2_S/rumsey/test.yaml",
     )
     assert isinstance(runner, MapTextRunner)
-    assert isinstance(runner.predictor, DefaultPredictor)
+    assert isinstance(runner.predictor, ViTAEPredictor)
     assert isinstance(runner.parent_df.iloc[0]["geometry"], Polygon)
     out = runner.run_all()
     assert isinstance(out, dict)
