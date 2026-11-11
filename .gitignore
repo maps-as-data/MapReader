@@ -13,6 +13,7 @@ dist/
 .coverage
 .coverage.*
 build/
+.env
 
 # workshop files
 worked_examples/**/workshops_*/**/*.png
