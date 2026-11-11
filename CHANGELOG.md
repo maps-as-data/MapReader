@@ -21,6 +21,7 @@ _Add new changes here_
 ### Added
 
 - Add compatibility with TMS tilelayers ([#582](https://github.com/maps-as-data/MapReader/pull/582))
+- Add new `WordSpotterRunner` for use with https://github.com/maps-as-data/ToponymExtractor ([#584](https://github.com/maps-as-data/MapReader/pull/584))
 
 ## [v1.8.3](https://github.com/Living-with-machines/MapReader/releases/tag/v1.8.3) (2026-09-13)
 
