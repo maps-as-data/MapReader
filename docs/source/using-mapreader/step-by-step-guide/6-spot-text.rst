@@ -1,11 +1,12 @@
 Spot text
 =========
 
-MapReader implements three frameworks for spotting text on maps:
+MapReader implements four frameworks for spotting text on maps:
 
 - ``DPTextDETRRunner`` - This is used to detect text on maps using `DPTextDETR <https://github.com/ymy-k/DPText-DETR/tree/main>`__ and outputs bounding boxes and scores.
-- ``DeepSoloRunner`` - This is used to detect and recognize text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, text and scores.
-- ``MapTextPipeline`` - This is used to detect and recognize text on maps using `MapTextPipeline <https://github.com/yyyyyxie/MapTextPipeline>`__ and outputs bounding boxes, text and scores.
+- ``DeepSoloRunner`` - This is used to detect and recognize text on maps using `DeepSolo <https://github.com/ViTAE-Transformer/DeepSolo/tree/main>`__ and outputs bounding boxes, center lines, text and scores.
+- ``MapTextPipeline`` - This is used to detect and recognize text on maps using `MapTextPipeline <https://github.com/yyyyyxie/MapTextPipeline>`__ and outputs bounding boxes, center lines, text and scores.
+- ``WordSpotterRunner`` - This is used to detect and recognize text on maps using `WordSpotter <https://github.com/maps-as-data/ToponymExtractor>`__ (part of the ToponymExtractor pipeline) and outputs bounding boxes, center lines, text and scores.
 
 We recommend using the ``MapTextPipeline`` for most use cases as it has been used to train a model on a sample of David Rumsey maps and so should work best for map text spotting.
 
@@ -21,6 +22,7 @@ Assuming your installation is successful, you will have installed the following:
 - DPTextDETR - Our fork for DPText-DETR is available `here <https://github.com/rwood-97/DPText-DETR>`__.
 - DeepSolo - Our fork for DeepSolo is available `here <https://github.com/rwood-97/DeepSolo>`__
 - MapTextPipeline - Our fork for MapTextPipeline is available `here <https://github.com/rwood-97/MapTextPipeline>`__
+- WordSpotter - This is available through the ToponymExtractor pipeline. Our fork for ToponymExtractor is available `here <https://github.com/maps-as-data/ToponymExtractor>`__
 
 Advice for patch size
 ---------------------
@@ -43,6 +45,8 @@ Once you have installed the dependencies, you can set up your chosen "runner".
 
 You will need to choose a model configuration and download the corresponding model weights.
 
+For ``DPTextDETRRunner``, ``DeepSoloRunner`` and ``MapTextRunner``:
+
 - Config files can be found in the ``DPText-DETR``, ``DeepSolo`` and ``MapTextPipeline`` repositories under the ``configs`` directory.
 - Weights files should be downloaded from the github repositories (links to the downloads are in the README).
 
@@ -53,6 +57,12 @@ e.g. for the ``DeepSoloRunner``, if you choose the "R_50/IC15/finetune_150k_tt_m
 e.g. for the ``MapTextRunner``, if you choose the "ViTAEv2_S/rumsey/final_rumsey.yaml", you should download the "rumsey-finetune.pth" model weights file from the MapTextPipeline repo.
 
 .. note:: We recommend using the "ViTAEv2_S/rumsey/final_rumsey.yaml" configuration and "rumsey-finetune.pth" weights from the ``MapTextPipeline``. But you should choose based on your own use case.
+
+For ``WordSpotterRunner``:
+
+- Both the config file and weights file should be downloaded from the `ToponymExtractor repo <https://github.com/maps-as-data/ToponymExtractor>`__ (links to the download are in the README).
+
+e.g. for the ``WordSpotterRunner``, you will need the config file ("config_96voc.yaml") and corresponding weights file ("model.pth") from the `Models` download linked on the ToponymExtractor repo.
 
 For the DPTextDETRRunner, use:
 
@@ -94,8 +104,6 @@ For the DeepSoloRunner, use:
         weights_file = "./ic15_res50_finetune_synth-tt-mlt-13-15-textocr.pth"
     )
 
-or, you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
-
 For the MapTextRunner, use:
 
 .. code-block:: python
@@ -110,7 +118,22 @@ For the MapTextRunner, use:
         weights_file = "./rumsey-finetune.pth"
     )
 
-or, you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
+For the WordSpotterRunner, use:
+
+.. code-block:: python
+
+    from mapreader import WordSpotterRunner
+
+    #EXAMPLE
+    my_runner = WordSpotterRunner(
+        patch_df,
+        parent_df,
+        cfg_file = "config_96voc.yaml",
+        weights_file = "./model.pth"
+    )
+
+
+or, for any of these you can load your patch/parent dataframes from CSV/GeoJSON files as shown for the DPTextRunner (above).
 
 .. note:: You'll need to adjust the paths to the config and weights files to match your own set-up!
 
@@ -164,7 +187,7 @@ You can adjust the minimum IoA by setting the ``min_ioa`` argument:
 
     patch_preds_df = my_runner.run_all(return_dataframe=True, min_ioa=0.9)
 
-Higher ``min_ioa``values will mean a tighter threshold for identifying two polygons as duplicates.
+Higher ``min_ioa`` values will mean a tighter threshold for identifying two polygons as duplicates.
 
 If you'd like to run the runner on a single patch, you can also just run on one image:
 
@@ -344,7 +367,7 @@ If you do want to convert your text predictions from pixel coordinates to geospa
 Search predictions
 ------------------
 
-If you are using the DeepSoloRunner or the MapTextRunner, you will have recognized text outputs.
+If you are using the DeepSoloRunner, the MapTextRunner or the WordSpotterRunner, you will have recognized text outputs.
 You can search these predictions using the ``search_preds`` method:
 
 .. code-block:: python
