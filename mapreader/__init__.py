@@ -40,6 +40,11 @@ try:
 except ImportError:
     pass
 
+try:
+    from mapreader.spot_text.wordspotter_runner import WordSpotterRunner
+except ImportError:
+    pass
+
 
 # post process
 from mapreader.process.context_post_process import ContextPostProcessor
